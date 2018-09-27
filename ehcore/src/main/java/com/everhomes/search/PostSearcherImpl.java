@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.launchpadbase.AppContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -659,43 +660,47 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     public SearchResponse searchByScene(SearchTopicBySceneCommand cmd) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        
+        //TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+
+        AppContext appContext = UserContext.current().getAppContext();
         SearchResponse response = null;
-        
-        Integer namespaceId = sceneToken.getNamespaceId();
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        switch(sceneType) {
-        case DEFAULT:
-        case PARK_TOURIST:
-            response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, sceneToken.getEntityId());
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-            if(family != null) {
-                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, family.getCommunityId());
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-                }
-            }
-            break;
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
-            if(organization != null) {
-                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, communityId);
-            }
-            break;
-        case PM_ADMIN:
-        	SearchByMultiForumAndCmntyCommand orgTopicCmd = getGlobalPostByOrganizationIdQuery(cmd, sceneToken, sceneToken.getEntityId());
-        	response = getQueryByMultiForumAndCmnty(orgTopicCmd);
-            break;
-        default:
-            break;
-        }
-        
+
+
+        //Integer namespaceId = sceneToken.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//                SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//        switch(sceneType) {
+//        case DEFAULT:
+//        case PARK_TOURIST:
+            response = searchGlobalPostByCommunityId(namespaceId, cmd, null, appContext.getCommunityId());
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, family.getCommunityId());
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            break;
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
+//            if(organization != null) {
+//                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+//                response = searchGlobalPostByCommunityId(namespaceId, cmd, sceneToken, communityId);
+//            }
+//            break;
+//        case PM_ADMIN:
+//        	SearchByMultiForumAndCmntyCommand orgTopicCmd = getGlobalPostByOrganizationIdQuery(cmd, sceneToken, sceneToken.getEntityId());
+//        	response = getQueryByMultiForumAndCmnty(orgTopicCmd);
+//            break;
+//        default:
+//            break;
+//        }
+//
         return response;
     }
     
@@ -733,7 +738,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 return searchResponse;
             } else {
                 if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + communityId);
+                    AppContext appContext = UserContext.current().getAppContext();
+                    LOGGER.warn("Community not found, appContext=" + appContext + ", communityId=" + communityId);
                 }
             }
             

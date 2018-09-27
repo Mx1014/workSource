@@ -14,12 +14,13 @@ import com.everhomes.util.StringHelper;
 public class VerifyApprovalFormNameCommand {
 
     private Long moduleId;
-
     private String moduleType;
 
     private Long ownerId;
-
     private String ownerType;
+
+    private Long projectId;
+    private String projectType;
 
     private String formName;
 
@@ -64,6 +65,22 @@ public class VerifyApprovalFormNameCommand {
 
     public void setFormName(String formName) {
         this.formName = formName;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(String projectType) {
+        this.projectType = projectType;
     }
 
     @Override

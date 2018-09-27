@@ -102,6 +102,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
     @Override
     public PaymentApplicationDTO getPaymentApplication(GetPaymentApplicationCommand cmd) {
         PaymentApplication application = paymentApplicationProvider.findPaymentApplication(cmd.getId());
+        application.setOrgId(cmd.getOrgId());
         return toPaymentApplicationDTO(application);
     }
 
@@ -143,7 +144,7 @@ public class PaymentApplicationServiceImpl implements PaymentApplicationService 
             dto.setContractNumber(contract.getContractNumber());
             dto.setContractAmount(contract.getRent());
             if(contract.getCategoryItemId() != null) {
-                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), Long.valueOf(contract.getCategoryItemId()));
+                ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),application.getOrgId(), contract.getCommunityId(), Long.valueOf(contract.getCategoryItemId()));
                 if(item != null) {
                     dto.setCategoryItemName(item.getItemDisplayName());
                 }

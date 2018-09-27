@@ -4,7 +4,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.util.List;
 
 /**

@@ -2481,8 +2481,10 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
-		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
+		//SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		//Integer namespaceId = sceneTokenDto.getNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		SearchTypes searchType =  userService.getSearchTypes(namespaceId, SearchContentType.SHOP.getCode());
 
 		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");

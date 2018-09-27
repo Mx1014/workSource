@@ -148,7 +148,8 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        // adapt to zuolin base remove searching with ownerId and ownerType by jiarui
+//fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
         //增加园区id的筛选 by wentian
         fb = FilterBuilders.andFilter(fb,FilterBuilders.termFilter("communityId", cmd.getCommunityId()));

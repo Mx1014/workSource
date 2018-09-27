@@ -640,7 +640,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
     }
 
     @Override
-    public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
+        public ListGeneralApprovalResponse listAvailableGeneralApprovals(ListGeneralApprovalCommand cmd) {
         Long userId = UserContext.currentUserId();
         ListGeneralApprovalResponse res = new ListGeneralApprovalResponse();
         List<GeneralApprovalDTO> results = new ArrayList<>();

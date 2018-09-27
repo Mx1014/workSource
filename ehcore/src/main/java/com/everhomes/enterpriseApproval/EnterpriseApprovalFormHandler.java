@@ -17,12 +17,20 @@ import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.*;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
@@ -184,7 +192,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
             //added by wh 建立了审批单之后
 
-            EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+            EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
             LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
             handler.onApprovalCreated(flowCase);
 
@@ -260,7 +268,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         //  extra process
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+        EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
         handler.processFormFields(fieldDTOs, cmd);
 
 
@@ -283,18 +291,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+        EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
         return handler.getGeneralFormReminder(cmd);
     }
 
-    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(GeneralApproval ga) {
-        if (ga != null) {
-            EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
-                    + ga.getApprovalAttribute());
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
-    }
 }

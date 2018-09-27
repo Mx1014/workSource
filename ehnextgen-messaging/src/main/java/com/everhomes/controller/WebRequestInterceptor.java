@@ -17,24 +17,19 @@ import com.everhomes.portal.PortalVersionUser;
 import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.domain.DomainDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import net.sf.cglib.beans.BeanMap;
-import org.apache.poi.util.StringUtil;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -157,6 +152,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
+
+            //设置上下文信息
+            setAppContext(request.getParameterMap());
+
             //加上频率控制
             frequencyControlHandler(request,handler);
             if (isProtected(handler)) {
@@ -481,7 +480,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
      * 优先从 Header 的 userAgents 判断 namespaceId，若没有，则从请求信息确认
      * 请求内容如果有 namespaceId 这个值，则设置域空间 ID;
      * 如果已经从 userAgent 知道域空间 ID，则忽略
-     * @param requestMap
+     * @param
      */
     private void setupNamespaceIdContext(Map<String, String> userAgents, Map<String, String[]> paramMap) {
         UserContext context = UserContext.current();
@@ -507,6 +506,24 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         }
 
 
+    }
+
+
+    /**
+     * 标准版之后去除sceneToken设置上下文信息
+     * @param
+     */
+    private void setAppContext(Map<String, String[]> paramMap) {
+
+        UserContext context = UserContext.current();
+
+        String[] sceneTokens = paramMap.get("sceneToken");
+
+        if(sceneTokens != null && sceneTokens.length > 0){
+            String sceneToken = sceneTokens[0];
+            AppContext appContext = AppContextGenerator.fromWebToken(sceneToken);
+            context.setAppContext(appContext);
+        }
     }
 
     private void setupUserContext(LoginToken loginToken) {

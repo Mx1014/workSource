@@ -12,6 +12,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -20,6 +21,7 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -79,14 +81,14 @@ public class UserUiController extends ControllerBase {
         //add by liangming.huang 20180816
         //添加用户活跃记录,为微信端作的,由于时间紧急,先加在这里吧.本来写好接口让微信端调用的/admin/registerWXLogin
         this.userService.registerWXLoginConnection(request);
-        
+
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     } 
-    
-   
+
+
 
     /**
      * <p>根据指定的场景查询通讯录列表。</p>
@@ -96,16 +98,21 @@ public class UserUiController extends ControllerBase {
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd){
-    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 // 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+//		Long organizationId = UserContext.current().getAppContext().getOrganizationId();
+		//SceneTokenDTO sceneToken = SceneTokenGenerator.fromWebToken(cmd.getSceneToken());
 
  	    List<SceneContactDTO> dtos = null;
-//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
-			//	去除场景 by ryan 14/08/2018
-//			if(null == cmd.getOrganizationId()){
-//				cmd.setOrganizationId(sceneToken.getEntityId());
-//			}
+		//if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+			//	兼容老版本的app by sf.yan 20161020
+			if(null == cmd.getOrganizationId()){
+				AppContext appContext = UserContext.current().getAppContext();
+				if(appContext != null){
+					cmd.setOrganizationId(appContext.getOrganizationId());
+				}
+			}
 			command.setOrganizationId(cmd.getOrganizationId());
 			command.setPageSize(Integer.MAX_VALUE - 1);
 			command.setIsSignedup(cmd.getIsSignedup());
@@ -131,6 +138,7 @@ public class UserUiController extends ControllerBase {
 					return dto;
 				}).collect(Collectors.toList());
 			}
+		//}
 
 //		}
 

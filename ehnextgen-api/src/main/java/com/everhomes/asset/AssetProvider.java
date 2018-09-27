@@ -15,6 +15,67 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
+import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.ConfigChargingItems;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateBillGroupCommand;
+import com.everhomes.rest.asset.DeleteBillGroupReponse;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ModifyBillGroupCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
+import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
+import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
+
 /**
  * Created by Wentian on 2017/2/20.
  */
@@ -59,7 +120,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId);
+    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId,Long orgId,Boolean allScope);
 
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
@@ -78,7 +139,7 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
+    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId,Long orgId,Boolean allScope);
 
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
 
@@ -153,8 +214,10 @@ public interface AssetProvider {
     Long saveAnOrderCopy(String payerType, String payerId, String amountOwed,  String clientAppName, Long communityId, String contactNum, String openid, String payerName, Long expireTimePeriod,Integer namespaceId,String orderType);
 
     Long findAssetOrderByBillIds(List<String> billIds);
-
+    
     void saveOrderBills(List<BillIdAndAmount> bills, Long orderId);
+
+    void createBillOrderMaps(List<PaymentBillOrder> billOrderList);
 
     AssetPaymentOrder findAssetPaymentById(Long orderId);
 
@@ -398,7 +461,7 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
-    
+        
     ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 	
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -406,6 +469,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
 	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
@@ -418,6 +482,11 @@ public interface AssetProvider {
     
 	GetPayBillsForEntResultResp getPayBillsResultByOrderId(Long orderId);
 	
+	public List<PaymentBills> findBillsByIds(List<String> billIds);
+	
+	List<PaymentBillOrder> findPaymentBillOrderRecordByOrderNum(String bizOrderNum);
+	
+	void updatePaymentBillOrder(String bizOrderNum, Integer paymentStatus, Integer paymentType, Timestamp payDatetime, Integer paymentChannel);
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void updateBillDueDayCount(Long billId, Long dueDayCount);

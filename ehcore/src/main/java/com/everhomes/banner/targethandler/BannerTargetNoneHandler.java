@@ -3,6 +3,7 @@ package com.everhomes.banner.targethandler;
 import com.everhomes.banner.BannerTargetHandleResult;
 import com.everhomes.banner.BannerTargetHandler;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.module.RouterInfo;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,5 +17,15 @@ public class BannerTargetNoneHandler implements BannerTargetHandler {
         BannerTargetHandleResult res = new BannerTargetHandleResult();
         res.setActionType(ActionType.NONE.getCode());
         return res;
+    }
+
+    @Override
+    public RouterInfo getRouterInfo(String targetData) {
+        return null;
+    }
+
+    @Override
+    public Byte getClientHandlerType(String targetData) {
+        return null;
     }
 }

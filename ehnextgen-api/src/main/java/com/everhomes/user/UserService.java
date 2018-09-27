@@ -11,18 +11,17 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
-
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.List;
 import java.util.Map;
 
@@ -341,7 +340,34 @@ public interface UserService {
             Map<String, String[]> paramMap);
   
     Byte isUserAuth();
-    
+
+    UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
+
+    void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
+
+    PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
+
     void registerWXLoginConnection(HttpServletRequest request);
 
+    ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd);
+    GetUserConfigAfterStartupResponse getUserConfigAfterStartup(
+            GetUserConfigAfterStartupCommand cmd);
+    SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd);
+    GenerateSmartCardCodeResponse generateSmartCardCode(
+            GenerateSmartCardCodeCommand cmd);
+
+    /**
+     * 根据userId来查询用户信息的方法
+     * @param cmd
+     * @return
+     */
+    UserDTO findUserInfoByUserId(UserCouponsCommand cmd);
+
+
+    /**
+     * 查询超级管理员
+     * @param cmd
+     * @return
+     */
+    UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 }

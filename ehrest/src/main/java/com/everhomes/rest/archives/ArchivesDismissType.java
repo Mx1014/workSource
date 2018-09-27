@@ -1,7 +1,5 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>QUIT((byte) 0): 辞职</li>

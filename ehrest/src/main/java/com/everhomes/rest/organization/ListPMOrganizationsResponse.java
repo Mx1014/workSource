@@ -15,12 +15,22 @@ public class ListPMOrganizationsResponse {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> dtos;
 
+    private Long nextPageAnchor;
+
     public List<OrganizationDTO> getDtos() {
         return dtos;
     }
 
     public void setDtos(List<OrganizationDTO> dtos) {
         this.dtos = dtos;
+    }
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
     }
 
     @Override

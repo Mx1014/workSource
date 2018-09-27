@@ -9,10 +9,14 @@ import com.everhomes.util.StringHelper;
  *     <li>margin: 外边距</li>
  *     <li>padding: 内边距</li>
  *     <li>backgroundColor: 底色</li>
- *     <li>titleFlag: 是否有标题</li>
+ *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
  *     <li>title: 标题</li>
  *     <li>titleUri: 标题uri</li>
  *     <li>titleUrl: titleUrl</li>
+ *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
+ *     <li>subTitle: 副标题</li>
+ *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
+ *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>newsSize: 最大显示条目</li>
  *     <li>timeWidgetStyle: 时间样式</li>
  *     <li>moduleAppId: 入口id</li>
@@ -47,6 +51,14 @@ public class ItemGroupInstanceConfig {
 	private String titleUri;
 
 	private String titleUrl;
+
+	private Byte titleStyle;
+
+	private String subTitle;
+
+	private Byte titleSize;
+
+	private Byte titleMoreFlag;
 
 	private Integer newsSize;
 
@@ -260,6 +272,38 @@ public class ItemGroupInstanceConfig {
 
 	public void setAllOrMoreIconUrl(String allOrMoreIconUrl) {
 		this.allOrMoreIconUrl = allOrMoreIconUrl;
+	}
+
+	public Byte getTitleStyle() {
+		return titleStyle;
+	}
+
+	public void setTitleStyle(Byte titleStyle) {
+		this.titleStyle = titleStyle;
+	}
+
+	public String getSubTitle() {
+		return subTitle;
+	}
+
+	public void setSubTitle(String subTitle) {
+		this.subTitle = subTitle;
+	}
+
+	public Byte getTitleSize() {
+		return titleSize;
+	}
+
+	public void setTitleSize(Byte titleSize) {
+		this.titleSize = titleSize;
+	}
+
+	public Byte getTitleMoreFlag() {
+		return titleMoreFlag;
+	}
+
+	public void setTitleMoreFlag(Byte titleMoreFlag) {
+		this.titleMoreFlag = titleMoreFlag;
 	}
 
 	@Override

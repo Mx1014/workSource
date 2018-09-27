@@ -13,7 +13,7 @@ public class FindRentalSiteByIdCommand {
     private String resourceType;
     private Long id;
 
-    private String sceneToken;
+    private String sceneType;
 
     public String getResourceType() {
         return resourceType;
@@ -23,12 +23,12 @@ public class FindRentalSiteByIdCommand {
         this.resourceType = resourceType;
     }
 
-    public String getSceneToken() {
-        return sceneToken;
+    public String getSceneType() {
+        return sceneType;
     }
 
-    public void setSceneToken(String sceneToken) {
-        this.sceneToken = sceneToken;
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 
     public Long getId() {

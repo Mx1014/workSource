@@ -8,6 +8,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -51,6 +52,7 @@ import com.everhomes.util.StringHelper;
  * <li>postUrl: 标题图url</li>
  * <li>emailDomain: 邮箱域名</li>
  * <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ * <li>appDtos: 授权应用，参考{@link ServiceModuleAppDTO}</li>
  * </ul>
  * @author janson
  *
@@ -104,6 +106,7 @@ public class EnterpriseDTO {
     private Byte communityType;
     private Long defaultForumId;
     private Long feedbackForumId;
+    private List<ServiceModuleAppDTO> appDtos;
 
     private String emailDomain;
 
@@ -440,5 +443,13 @@ public class EnterpriseDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public List<ServiceModuleAppDTO> getAppDtos() {
+        return appDtos;
+    }
+
+    public void setAppDtos(List<ServiceModuleAppDTO> appDtos) {
+        this.appDtos = appDtos;
     }
 }

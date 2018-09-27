@@ -3,6 +3,7 @@ package com.everhomes.rest.ui.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -27,6 +28,11 @@ public class ListContactBySceneRespose {
 
     public void setContacts(List<SceneContactDTO> contacts) {
         this.contacts = contacts;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 
 }

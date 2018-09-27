@@ -12,11 +12,21 @@ import com.everhomes.util.StringHelper;
  */
 public class BannerAppTargetData {
 
+    private Long moduleId;
     private Long originId;
     private String name;
 
     private Byte actionType;
     private String actionData;
+
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
 
     public Byte getActionType() {
         return actionType;

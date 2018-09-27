@@ -19,4 +19,6 @@ public interface ExpressOrderProvider {
 
 	ExpressOrder findExpressOrderByOrderNo(String txLogisticID);
 
+	ExpressOrder findExpressOrderByBizOrderNum(String bizOrderNum);
+
 }

@@ -36,10 +36,10 @@ public class ArchivesContactsExportTaskHandler implements FileDownloadTaskHandle
     public void execute(Map<String, Object> params) {
 
         Long organizationId = null;
-        if (params.get("organizationId") != null)
+        if(params.get("organizationId") != null)
             organizationId = (Long) params.get("organizationId");
         String keywords = null;
-        if (params.get("keywords") != null)
+        if(params.get("keywords") != null)
             keywords = (String) params.get("keywords");
         List<String> filterScopeTypes = null;
         if (params.get("filterScopeTypes") != null)

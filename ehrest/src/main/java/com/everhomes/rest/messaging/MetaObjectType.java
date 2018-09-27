@@ -32,7 +32,9 @@ public enum MetaObjectType {
     ENTERPRISE_LEAVE_THE_JOB("enterprise.leaveTheJob"),
     FAMILY_AGREE_TO_JOIN("family.agreeToJoin"),
     GROUP_MEMBER_DELETE("group.member.delete"),
-    GROUP_INVITE_TO_JOIN_FREE("group.inviteToJoin.free");
+    GROUP_INVITE_TO_JOIN_FREE("group.inviteToJoin.free"),
+    WORK_BENCH_FLAG_OPEN("workBenchFlag.open"),
+    WORK_BENCH_FLAG_CLOSE("workBenchFlag.close");
     
     private String code;
     private MetaObjectType(String code) {

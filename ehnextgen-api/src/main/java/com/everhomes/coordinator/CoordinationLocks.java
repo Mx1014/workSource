@@ -81,6 +81,8 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
+    FILE_CONTENT_CHECK("file.content.check"),
+
     FLOW_CASE_UPDATE("flowCase.update"),
     FLOW_NODE_UPDATE("flowNode.update"),
     PUNCH_DAY_SCHEDULE("punch.day.schedule"),
@@ -92,8 +94,8 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-    SALARY_GROUP_LOCK("salary.group"),
-    SALARY_NEWMONTH_LOCK("salary.newmonth"),
+	SALARY_GROUP_LOCK("salary.group"),
+	SALARY_NEWMONTH_LOCK("salary.newmonth"),
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
@@ -150,15 +152,15 @@ public enum CoordinationLocks {
     WORK_REPORT_RX_MSG("work_report_rx_msg"),
     WORK_REPORT_AU_BASIC_MSG("work_report_au_basic_msg"),
     WORK_REPORT_AU_MSG("work_report_au_msg"),
-	
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
 
     PUNCH_DAY_LOG_INIT_OPERATION("punchDayLogInitializeByMonth"),
     PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
-    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement");
+    EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
 
 
     private String code;

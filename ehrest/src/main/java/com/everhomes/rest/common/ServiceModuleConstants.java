@@ -31,4 +31,6 @@ public interface ServiceModuleConstants {
 
     long REQUISITION_MODULE = 25000L; // 请示单模块
 
+    long OFFICE_CUBICLE = 40200L; //工位预订
+
 }

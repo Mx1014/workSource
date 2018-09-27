@@ -9,16 +9,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: id</li>
+ * <li>id: 广场id</li>
  * </ul>
  */
 public class GetLaunchPadLayoutCommand {
     @NotNull
-    private Long     id;
+    private Long id;
 
-    public GetLaunchPadLayoutCommand() {
-    }
-    
     public Long getId() {
         return id;
     }

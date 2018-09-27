@@ -24,6 +24,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -1031,5 +1032,47 @@ public class GroupProviderImpl implements GroupProvider {
         }
 
         return query.fetch().map(r->ConvertHelper.convert(r, GuildApply.class));
+    }
+
+    /**
+     * 根据门牌地址Id集合addressIds查询对应的家庭信息
+     * @param addressIds
+     * @return
+     */
+    @Override
+    public List<Group> findGroupsByAddressIds(List<Long> addressIds){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhGroupsRecord> query = context.selectQuery(Tables.EH_GROUPS);
+        //进行非空校验
+        if(CollectionUtils.isNotEmpty(addressIds)){
+            //说明参数不为空，那么就进行查询
+            query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG1.in(addressIds));
+            query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
+            return query.fetch().map( r -> ConvertHelper.convert(r,Group.class));
+        }
+        return null;
+    }
+
+    /**
+     * 根据eh_groups表中的id集合来进行批量的删除家庭信息
+     * @param groupIds
+     */
+    @Override
+    public void deleteGroupByGroupIds(List<Long> groupIds){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_GROUPS).where(Tables.EH_GROUPS.ID.in(groupIds)).execute();
+    }
+
+    /**
+     * 根据group_id的集合来进行批量的删除家庭成员信息
+     * @param groupIds
+     */
+    @Override
+    public void deleteGroupMembersByGroupIds(List<Long> groupIds){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.delete(Tables.EH_GROUP_MEMBERS).where(Tables.EH_GROUP_MEMBERS.GROUP_ID.in(groupIds)).execute();
     }
 }

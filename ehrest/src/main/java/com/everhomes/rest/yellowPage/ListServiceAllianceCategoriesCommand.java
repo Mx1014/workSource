@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li> namespaceId: 域空间id</li>
- *  <li> parentId: 父id</li>
+ *  <li> parentId: 传服务联盟类型id </li>
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
  *  <li> destination: 输出终端 1：客户端 2：浏览器</li>
@@ -24,9 +24,9 @@ public class ListServiceAllianceCategoriesCommand {
 	private Long ownerId;
 
 	private Byte destination;
-	
+
 	private Long pageAnchor;
-	
+
 	private Integer pageSize;
 
 	public Integer getNamespaceId() {

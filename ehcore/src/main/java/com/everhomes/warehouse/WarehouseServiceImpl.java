@@ -13,7 +13,13 @@ import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.*;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -23,7 +29,6 @@ import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -33,8 +38,68 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.warehouse.*;
-import com.everhomes.search.*;
+import com.everhomes.rest.warehouse.CreateOrUpdateWarehouseEntryOrderCommand;
+import com.everhomes.rest.warehouse.CreateRequestCommand;
+import com.everhomes.rest.warehouse.CreateWarehouseEntryOrderDTO;
+import com.everhomes.rest.warehouse.DeleteRequestCommand;
+import com.everhomes.rest.warehouse.DeleteWarehouseCommand;
+import com.everhomes.rest.warehouse.DeleteWarehouseMaterialCategoryCommand;
+import com.everhomes.rest.warehouse.DeleteWarehouseMaterialCommand;
+import com.everhomes.rest.warehouse.DeleteWarehouseMaterialUnitCommand;
+import com.everhomes.rest.warehouse.DeliveryFlag;
+import com.everhomes.rest.warehouse.FindRequestCommand;
+import com.everhomes.rest.warehouse.ImportOwnerCommand;
+import com.everhomes.rest.warehouse.ImportStocksCommand;
+import com.everhomes.rest.warehouse.ImportStocksDataDTO;
+import com.everhomes.rest.warehouse.ImportWarehouseMaterialCategoryDataDTO;
+import com.everhomes.rest.warehouse.ImportWarehouseMaterialDataDTO;
+import com.everhomes.rest.warehouse.ListMaterialLogsBySupplierCommand;
+import com.everhomes.rest.warehouse.ListMaterialLogsBySupplierResponse;
+import com.everhomes.rest.warehouse.ListWarehouseMaterialUnitsCommand;
+import com.everhomes.rest.warehouse.ListWarehouseStockOrdersCommand;
+import com.everhomes.rest.warehouse.ListWarehouseStockOrdersResponse;
+import com.everhomes.rest.warehouse.QueryRequestCommand;
+import com.everhomes.rest.warehouse.ReviewResult;
+import com.everhomes.rest.warehouse.SearchOneselfRequestsCommand;
+import com.everhomes.rest.warehouse.SearchRequestsCommand;
+import com.everhomes.rest.warehouse.SearchRequestsResponse;
+import com.everhomes.rest.warehouse.SearchWarehouseMaterialsCommand;
+import com.everhomes.rest.warehouse.SearchWarehouseMaterialsResponse;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsCommand;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
+import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
+import com.everhomes.rest.warehouse.SearchWarehouseStocksResponse;
+import com.everhomes.rest.warehouse.SearchWarehousesCommand;
+import com.everhomes.rest.warehouse.SearchWarehousesResponse;
+import com.everhomes.rest.warehouse.Status;
+import com.everhomes.rest.warehouse.UpdateWarehouseCommand;
+import com.everhomes.rest.warehouse.UpdateWarehouseMaterialCategoryCommand;
+import com.everhomes.rest.warehouse.UpdateWarehouseMaterialCommand;
+import com.everhomes.rest.warehouse.UpdateWarehouseMaterialUnitCommand;
+import com.everhomes.rest.warehouse.UpdateWarehouseStockCommand;
+import com.everhomes.rest.warehouse.WarehouseDTO;
+import com.everhomes.rest.warehouse.WarehouseLogDTO;
+import com.everhomes.rest.warehouse.WarehouseMaterialCategoryDTO;
+import com.everhomes.rest.warehouse.WarehouseMaterialDTO;
+import com.everhomes.rest.warehouse.WarehouseMaterialStock;
+import com.everhomes.rest.warehouse.WarehouseMaterialUnitDTO;
+import com.everhomes.rest.warehouse.WarehouseRequestDetailsDTO;
+import com.everhomes.rest.warehouse.WarehouseRequestMaterialDTO;
+import com.everhomes.rest.warehouse.WarehouseRequestMaterialDetailDTO;
+import com.everhomes.rest.warehouse.WarehouseServiceErrorCode;
+import com.everhomes.rest.warehouse.WarehouseStatus;
+import com.everhomes.rest.warehouse.WarehouseStockDTO;
+import com.everhomes.rest.warehouse.WarehouseStockExportDetailDTO;
+import com.everhomes.rest.warehouse.WarehouseStockLogDTO;
+import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
+import com.everhomes.rest.warehouse.WarehouseStockRequestSource;
+import com.everhomes.rest.warehouse.WarehouseStockRequestType;
+import com.everhomes.search.WarehouseMaterialCategorySearcher;
+import com.everhomes.search.WarehouseMaterialSearcher;
+import com.everhomes.search.WarehouseRequestMaterialSearcher;
+import com.everhomes.search.WarehouseSearcher;
+import com.everhomes.search.WarehouseStockLogSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhWarehouseOrders;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
@@ -58,7 +123,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +131,14 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -85,6 +153,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * Created by ying.xiong on 2017/5/12.
@@ -155,16 +225,16 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private FlowCaseProvider flowCaseProvider;
-    
+
     @Autowired
 	private CommunityProvider communityProvider;
-    
+
     @Autowired
 	private OrganizationService organizationService;
-    
+
     @Autowired
     private WarehouseService warehouseService;
-    
+
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.WAREHOUSE_REPO_OPERATION, cmd.getOwnerId());
@@ -173,13 +243,13 @@ public class WarehouseServiceImpl implements WarehouseService {
                 CoordinationLocks.UPDATE_WAREHOUSE.getCode().lastIndexOf(".") + 1
         )
                 + cmd.getOwnerType() + cmd.getOwnerId() + cmd.getCommunityId()).enter(() -> {
-            checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId(), warehouse.getCommunityId());
+            checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), null,null, warehouse.getCommunityId());
             if (cmd.getId() == null) {
                 warehouse.setNamespaceId(cmd.getNamespaceId());
                 warehouse.setCreatorUid(UserContext.current().getUser().getId());
                 warehouseProvider.creatWarehouse(warehouse);
             } else {
-                Warehouses exist = verifyWarehouses(warehouse.getId(), warehouse.getOwnerType(), warehouse.getOwnerId(), warehouse.getCommunityId());
+                Warehouses exist = verifyWarehouses(warehouse.getId(),null,null, warehouse.getCommunityId());
                 warehouse.setNamespaceId(exist.getNamespaceId());
                 warehouse.setCreatorUid(exist.getCreatorUid());
                 warehouse.setCreateTime(exist.getCreateTime());
@@ -189,12 +259,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseSearcher.feedDoc(warehouse);
             return null;
         });
-        WarehouseDTO dto = ConvertHelper.convert(warehouse, WarehouseDTO.class);
-        return dto;
+        return ConvertHelper.convert(warehouse, WarehouseDTO.class);
     }
 
     private void checkWarehouseNumber(Long warehouseId, String warehouseNumber, String ownerType, Long ownerId, Long communityId) {
-        Warehouses warehouse = warehouseProvider.findWarehouseByNumber(warehouseNumber, ownerType, ownerId, communityId);
+        Warehouses warehouse = warehouseProvider.findWarehouseByNumber(warehouseNumber, null, null, communityId);
         if (warehouseId == null) {
             if (warehouse != null) {
                 LOGGER.error("warehouseNumber already exist, warehouseNumber = " + warehouseNumber
@@ -218,7 +287,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private Warehouses verifyWarehouses(Long warehouseId, String ownerType, Long ownerId, Long communityId) {
-        Warehouses warehouse = warehouseProvider.findWarehouse(warehouseId, ownerType, ownerId, communityId);
+        Warehouses warehouse = warehouseProvider.findWarehouse(warehouseId, null,null,communityId);
         if (warehouse == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST,
@@ -336,7 +405,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private void checkCategoryNumber(Long categoryId, String categoryNumber, String ownerType, Long ownerId) {
-        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategoriesByNumber(categoryNumber, ownerType, ownerId);
+        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategoriesByNumber(categoryNumber, null, null);
         if (categoryId == null) {
             if (category != null) {
                 LOGGER.error("categoryNumber already exist, categoryNumber = " + categoryNumber
@@ -359,7 +428,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private WarehouseMaterialCategories verifyWarehouseMaterialCategories(Long categoryId, String ownerType, Long ownerId) {
-        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(categoryId, ownerType, ownerId);
+        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(categoryId, null, null);
         if (category == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST,
@@ -421,12 +490,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         WarehouseMaterialCategoryDTO dto = ConvertHelper.convert(category, WarehouseMaterialCategoryDTO.class);
 
-        List<WarehouseMaterialCategories> children = warehouseProvider.listAllChildWarehouseMaterialCategories(category.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId());
+        List<WarehouseMaterialCategories> children = warehouseProvider.listAllChildWarehouseMaterialCategories(category.getPath() + "/%", null, null);
         if (children != null && children.size() > 0) {
-            List<WarehouseMaterialCategoryDTO> childrenDto = children.stream().map(child -> {
-                WarehouseMaterialCategoryDTO childDto = ConvertHelper.convert(child, WarehouseMaterialCategoryDTO.class);
-                return childDto;
-            }).collect(Collectors.toList());
+            List<WarehouseMaterialCategoryDTO> childrenDto = children.stream().map(child -> ConvertHelper.convert(child, WarehouseMaterialCategoryDTO.class)).collect(Collectors.toList());
             dto = this.processWarehouseMaterialCategoryTree(childrenDto, dto);
         }
         return dto;
@@ -502,7 +568,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private void checkMaterialNumber(Long materialId, String materialNumber, String ownerType, Long ownerId, Long communityId) {
-        WarehouseMaterials material = warehouseProvider.findWarehouseMaterialsByNumber(materialNumber, ownerType, ownerId, communityId);
+        WarehouseMaterials material = warehouseProvider.findWarehouseMaterialsByNumber(materialNumber, null, null, communityId);
         if (materialId == null) {
             if (material != null) {
                 LOGGER.error("materialNumber already exist, materialNumber = " + materialNumber
@@ -525,7 +591,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private WarehouseMaterials verifyWarehouseMaterials(Long matetial, String ownerType, Long ownerId, Long communityId) {
-        WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(matetial, ownerType, ownerId, communityId);
+        WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(matetial, null, null, communityId);
         if (material == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST,
@@ -572,15 +638,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialDTO findWarehouseMaterial(DeleteWarehouseMaterialCommand cmd) {
-        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getCommunityId());
+        WarehouseMaterials material = verifyWarehouseMaterials(cmd.getMaterialId(), null, null, cmd.getCommunityId());
         WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
 
-        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
+        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), null, null);
         if (category != null) {
             dto.setCategoryName(category.getName());
         }
 
-        WarehouseUnits unit = warehouseProvider.findWarehouseUnits(dto.getUnitId(), dto.getOwnerType(), dto.getOwnerId());
+        WarehouseUnits unit = warehouseProvider.findWarehouseUnits(dto.getUnitId(), null,null);
         if (unit != null) {
             dto.setUnitName(unit.getName());
         }
@@ -1528,8 +1594,10 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(cmd.getStartFlow().byteValue() == (byte)1){
 
                 //新建flowcase
-                Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.WAREHOUSE_REQUEST,
-                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.WAREHOUSE_REQUEST.getCode());
+//                Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.WAREHOUSE_REQUEST,
+//                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.WAREHOUSE_REQUEST.getCode());
+                Flow flow = flowService.getEnabledFlow(namespaceId,EntityType.COMMUNITY.getCode(),request.getCommunityId(), FlowConstants.WAREHOUSE_REQUEST,
+                        FlowModuleType.NO_MODULE.getCode(), null, null);
                 if (null == flow) {
                     LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
                     throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_ENABLE_FLOW,
@@ -1663,7 +1731,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
 //        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
         //改成找一个request,同样的request去重
-        SearchRequestsResponse response = getWarehouseRequests(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor, cmd.getCommunityId());
+        SearchRequestsResponse response = getWarehouseRequests(ids, null, null, pageSize, anchor, cmd.getCommunityId());
 
         return response;
     }
@@ -1967,10 +2035,10 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
                     "Community is not exist.");
         }
-        
+
         SearchWarehouseStocksResponse stocks = warehouseStockSearcher.query(cmd);
         List<WarehouseStockDTO> stockDTOs = stocks.getStockDTOs();
-        
+
         if (stockDTOs != null && stockDTOs.size() > 0) {
 			String fileName = String.format("库存信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "库存信息");
@@ -1996,7 +2064,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 					"no data");
 		}
 	}
-	
+
 	private WarehouseStockExportDetailDTO convertToExportDetail(WarehouseStockDTO dto) {
 		WarehouseStockExportDetailDTO exportDetailDTO = ConvertHelper.convert(dto, WarehouseStockExportDetailDTO.class);
 		return exportDetailDTO;
@@ -2039,7 +2107,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 		}
 		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
-	
+
 	private List<ImportFileResultLog<ImportStocksDataDTO>> importStocksData(List<ImportStocksDataDTO> datas,
 			Long userId, ImportStocksCommand cmd) {
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
@@ -2069,7 +2137,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 				updateWarehouseStock.setStocks(stocksList);
 				updateWarehouseStock.setRequestType((byte) 0);
 				updateWarehouseStock.setServiceType((byte) 4);
-				
+
 				warehouseService.updateWarehouseStock(updateWarehouseStock);
 			} catch (NumberFormatException e) {
 				LOGGER.error("ImportStocks error...");
@@ -2078,24 +2146,24 @@ public class WarehouseServiceImpl implements WarehouseService {
 		}
 		return list;
 	}
-	
+
 	private ImportFileResultLog<ImportStocksDataDTO> checkData(ImportStocksDataDTO data, ImportStocksCommand cmd) {
 		ImportFileResultLog<ImportStocksDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
-		
+
 		if (StringUtils.isEmpty(data.getMaterialNumber())) {
 			log.setCode(WarehouseServiceErrorCode.ERROR_MATERIALNUMBE_EMPTY);
 			log.setData(data);
 			log.setErrorLog("MaterialNumbe cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isEmpty(data.getAmount())) {
 			log.setCode(WarehouseServiceErrorCode.ERROR_AMOUNT_EMPTY);
 			log.setData(data);
 			log.setErrorLog("Amount cannot be empty");
 			return log;
 		}
-		
+
 		if (StringUtils.isEmpty(data.getWarehouseName())) {
 			log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSENAME_EMPTY);
 			log.setData(data);
@@ -2142,7 +2210,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 					return log;
 				}
 			}
-			
+
 			data.setMaterial(materials.get(0));
 		}
 		//校验仓库是否存在
@@ -2161,15 +2229,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 			}
 			data.setWarehouse(warehouses.get(0));
 		}
-		
+
 		return null;
 	}
-	
+
 	private List<ImportStocksDataDTO> handleImportStocksData(List resultList) {
 		List<ImportStocksDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
-			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) ||
 					StringUtils.isNotBlank(r.getE())) {
 				ImportStocksDataDTO data = new ImportStocksDataDTO();
 				data.setMaterialNumber(trim(r.getA()));
@@ -2183,7 +2251,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 		}
 		return list;
 	}
-	
+
 	private String trim(String string) {
 		if (string != null) {
 			return string.trim();

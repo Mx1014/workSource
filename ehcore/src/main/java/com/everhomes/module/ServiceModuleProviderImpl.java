@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.acl.ServiceModuleCategory;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.module.ServiceModuleStatus;
@@ -328,6 +329,27 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
             return null;
         });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModule> listServiceModules(Byte appType, String keyword) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        query.addConditions(Tables.EH_SERVICE_MODULES.CATEGORY.eq(ServiceModuleCategory.MODULE.getCode()));
+
+        if(appType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULES.APP_TYPE.eq(appType));
+        }
+
+        if(!org.springframework.util.StringUtils.isEmpty(keyword)){
+            Condition condition = Tables.EH_SERVICE_MODULES.NAME.like("%" + keyword.trim() + "%");
+            condition = condition.or(Tables.EH_SERVICE_MODULES.ID.like("%" + keyword.trim() + "%"));
+
+            query.addConditions(condition);
+        }
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.ID.asc());
+        List<ServiceModule> results = query.fetch().map((r) -> ConvertHelper.convert(r, ServiceModule.class));
         return results;
     }
 

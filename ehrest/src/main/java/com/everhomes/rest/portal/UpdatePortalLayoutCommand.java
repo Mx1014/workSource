@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>label: 门户layout名称</li>
  *     <li>description: 门户layout描述</li>
  *     <li>indexFlag: 主页签激活标志0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>bgColor: 背景颜色</li>
  * </ul>
  */
 public class UpdatePortalLayoutCommand {
@@ -20,6 +21,8 @@ public class UpdatePortalLayoutCommand {
 	private String description;
 
 	private Byte indexFlag;
+
+    private Long bgColor;
 
 	public Long getId() {
 		return id;
@@ -51,6 +54,14 @@ public class UpdatePortalLayoutCommand {
 
 	public void setIndexFlag(Byte indexFlag) {
 		this.indexFlag = indexFlag;
+	}
+
+	public Long getBgColor() {
+		return bgColor;
+	}
+
+	public void setBgColor(Long bgColor) {
+		this.bgColor = bgColor;
 	}
 
 	@Override

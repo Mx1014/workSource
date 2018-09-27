@@ -3,6 +3,7 @@ package com.everhomes.officecubicle;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.server.schema.tables.pojos.EhOfficeCubicleConfigs;
 
 public interface OfficeCubicleProvider {
  
@@ -52,4 +53,10 @@ public interface OfficeCubicleProvider {
 			CrossShardListingLocator locator, int i, Integer namespaceId);
 
 	void updateSpaceByProvinceAndCity(Integer currentNamespaceId, String provinceName, String cityName);
+
+	void createConfig(OfficeCubicleConfig bean);
+
+	void updateConfig(OfficeCubicleConfig bean);
+
+	OfficeCubicleConfig findConfigByOwnerId(String ownerType,Long ownerId);
 }

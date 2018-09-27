@@ -3,6 +3,9 @@ package com.everhomes.forum;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.launchpadbase.AppContext;
+import com.everhomes.user.AppContextGenerator;
+import com.everhomes.user.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,17 +65,25 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
     public List<TopicFilterDTO> getTopicQueryFilters(User user, SceneTokenDTO sceneToken) {
         List<TopicFilterDTO> filterList = null;
         
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        if(sceneType != SceneType.PARK_TOURIST) {
-            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
+//        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//        if(sceneType != SceneType.PARK_TOURIST) {
+//            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
+//            return filterList;
+//        }
+
+        //标准版
+        AppContext appContext = UserContext.current().getAppContext();
+        if(appContext == null || appContext.getCommunityId() == null){
+            LOGGER.error("Unsupported scene for simple user, appContext={}", appContext);
             return filterList;
         }
 
-        Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+
+        Community community = communityProvider.findCommunityById(appContext.getCommunityId());
         if(community != null) {
-            filterList = getTopicQueryFilters(user, sceneToken, community);
+            filterList = getTopicQueryFilters(user, null, community);
         } else {
-            LOGGER.error("Community not found, communityId={}, sceneToken={}", sceneToken.getEntityId(), sceneToken);
+            LOGGER.error("Community not found, communityId={}, appContext={}", appContext.getCommunityId(), appContext);
         }
         
         return filterList;
@@ -84,7 +95,9 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         String code = "";
         String actionUrl = null;
         String avatarUri = null;
-        Integer namespaceId = sceneToken.getNamespaceId();
+        //Integer namespaceId = sceneToken.getNamespaceId();
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         if(community != null) {
             long menuId = 1;
@@ -205,17 +218,19 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
     public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneToken) {
         List<TopicScopeDTO> filterList = new ArrayList<TopicScopeDTO>();
         
-        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        if(sceneType == SceneType.PARK_TOURIST) {
-            Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+        //SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        //if(sceneType == SceneType.PARK_TOURIST) {
+
+        AppContext appContext = UserContext.current().getAppContext();
+        Community community = communityProvider.findCommunityById(appContext.getCommunityId());
             if(community != null) {
-                filterList = getDiscoveryTopicSentScopes(user, sceneToken, community);
+                filterList = getDiscoveryTopicSentScopes(user, null, community);
             } else {
-                LOGGER.error("Community not found, communityId={}, sceneToken={}", sceneToken.getEntityId(), sceneToken);
+                LOGGER.error("Community not found, communityId={}, appContext={}", appContext.getCommunityId(), appContext);
             }
-        } else {
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-        }
+//        } else {
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//        }
         
         return filterList;
     }
@@ -226,9 +241,10 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         String scope = ForumLocalStringCode.SCOPE;
         String code = "";
         String avatarUri = null;
-        Integer namespaceId = sceneTokenDto.getNamespaceId();
+        //Integer namespaceId = sceneTokenDto.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         if(community != null) {
-            String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+            //String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
             long menuId = 1;
             // 菜单：园区圈
             long group1Id = menuId++;
@@ -266,7 +282,10 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             sentScopeDto.setName(menuName);
             sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             sentScopeDto.setForumId(community.getDefaultForumId());
-            sentScopeDto.setSceneToken(sceneToken);
+            AppContext appContext = UserContext.current().getAppContext();
+
+            String appcontextToken = AppContextGenerator.toBase64WebToken(appContext);
+            sentScopeDto.setSceneToken(appcontextToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             sentScopeDto.setAvatar(avatarUri);

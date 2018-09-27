@@ -15,6 +15,7 @@ import java.util.List;
  * <li>ownerType:所属者类型</li>
  * <li>chargingItemConfigs:收费id和新名字的集合</li>
  * <li>categoryId: genus crist</li>
+ * <li>organizationId: 管理公司id</li>
  *</ul>
  */
 public class ConfigChargingItemsCommand {
@@ -24,6 +25,7 @@ public class ConfigChargingItemsCommand {
     @ItemType(ConfigChargingItems.class)
     private List<ConfigChargingItems> chargingItemConfigs;
     private Long categoryId;
+    private Long organizationId;
 
     public Long getCategoryId() {
         return categoryId;
@@ -64,5 +66,13 @@ public class ConfigChargingItemsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

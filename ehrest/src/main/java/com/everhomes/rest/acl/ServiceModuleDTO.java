@@ -25,8 +25,12 @@ import java.util.List;
  *     <li>instanceConfig: 参数，比如第三方链接值就是{"url":"http......."}</li>
  *     <li>multipleFlag: multipleFlag</li>
  *     <li>moduleControlType: moduleControlType</li>
+ *     <li>systemAppFlag: 是否为系统应用，例如“系统管理员”是系统应用。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>appType: 应用类型0-OA，1-园区，2-服务应用 {@link com.everhomes.rest.module.ServiceModuleAppType}</li>
  *     <li>category: 模块分类，参考{@link com.everhomes.rest.acl.ServiceModuleCategory}</li>
  *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
+ *     <li>iconUri: iconUri</li>
+ *     <li>iconUrl: iconUrl</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {
@@ -66,9 +70,17 @@ public class ServiceModuleDTO implements Serializable {
 
 	private String moduleControlType;
 
+	private String systemAppFlag;
+
+	private Byte appType;
+
 	private String category;
-	
+
 	private Byte accessControlType;
+
+	private String iconUri;
+
+	private String iconUrl;
 
 	public Long getId() {
 		return id;
@@ -206,6 +218,22 @@ public class ServiceModuleDTO implements Serializable {
 		this.moduleControlType = moduleControlType;
 	}
 
+	public String getSystemAppFlag() {
+		return systemAppFlag;
+	}
+
+	public void setSystemAppFlag(String systemAppFlag) {
+		this.systemAppFlag = systemAppFlag;
+	}
+
+	public Byte getAppType() {
+		return appType;
+	}
+
+	public void setAppType(Byte appType) {
+		this.appType = appType;
+	}
+
 	public String getCategory() {
 		return category;
 	}
@@ -213,12 +241,28 @@ public class ServiceModuleDTO implements Serializable {
 	public void setCategory(String category) {
 		this.category = category;
 	}
-	
+
 	public Byte getAccessControlType() {
 		return accessControlType;
 	}
 
 	public void setAccessControlType(Byte accessControlType) {
 		this.accessControlType = accessControlType;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 }
