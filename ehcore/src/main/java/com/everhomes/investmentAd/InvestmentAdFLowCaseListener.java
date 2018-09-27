@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.address.AddressProvider;
 import com.everhomes.customer.CustomerService;
@@ -48,6 +49,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Component
 public class InvestmentAdFLowCaseListener implements FlowModuleListener{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentAdFLowCaseListener.class);
@@ -88,9 +90,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         if (ctx.getStepType() == FlowStepType.REJECT_STEP && FlowNodeType.START.getCode().equals(ctx.getCurrentNode().getFlowNode().getNodeType())) {
             generalFormProvider.updateGeneralFormValRequestStatus(flowCase.getReferId(), RequisitionStatus.WAIT.getCode());
-            List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),
-            									FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-            generalFormSearcher.feedDoc(requestVals);           
         }
     }
     /**
@@ -100,11 +99,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
     public void onFlowCaseEnd(FlowCaseState ctx) {
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
-        Integer namespaceId = flowCase.getNamespaceId();
-        Long ownerId = flowCase.getProjectId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.FINISH.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(namespaceId,referId,FlowConstants.INVESTMENT_AD_MODULE, ownerId);
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override
@@ -112,8 +107,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.CANCELED.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override
@@ -121,8 +114,6 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
         FlowCase flowCase = ctx.getFlowCase();
         Long referId = flowCase.getReferId();
         generalFormProvider.updateGeneralFormApprovalStatusById(referId,RequisitionStatus.HANDLING.getCode());
-        List<GeneralFormVal> requestVals = generalFormProvider.getGeneralFormVal(flowCase.getNamespaceId(),flowCase.getReferId(),FlowConstants.INVESTMENT_AD_MODULE, flowCase.getProjectId());
-        generalFormSearcher.feedDoc(requestVals);
     }
 
     @Override

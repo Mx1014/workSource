@@ -553,8 +553,6 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 		obj.setApprovalStatus(status);
 		dao.update(obj);
-
-
 	}
 
 
