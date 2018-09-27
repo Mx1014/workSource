@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.address.AddressProvider;
-import com.everhomes.customer.CustomerService;
-import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
@@ -23,10 +20,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormSearcher;
 import com.everhomes.general_form.GeneralFormVal;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.requisition.RequisitionStatus;
-import com.everhomes.requisition.RequistionFLowCaseListener;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
@@ -37,7 +31,6 @@ import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
@@ -163,6 +156,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
             }
             GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
             String fieldValue = dto.getFieldValue();
+            String fieldName = dto.getFieldName();
             ObjectMapper mapper = new ObjectMapper();
             JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
             Map<String,String> urMap;
@@ -181,7 +175,13 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
                         }
                     }
                 }
-                e.setValue(fieldValue);
+                //设置显示的值
+                if ("APARTMENT".equals(fieldName)) {
+					
+				}else {
+					e.setValue(fieldValue);
+				}
+                
             } catch (IOException ex) {
                 JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
                 FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
@@ -193,7 +193,17 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
                 }
                 e.setValue(fieldValue);
             }
-            e.setKey(val.getFieldName());
+            if ("USER_NAME".equals(val.getFieldName())) {
+            	e.setKey("用户姓名");
+			}else if ("USER_PHONE".equals(val.getFieldName())) {
+				e.setKey("手机号码");
+			}else if ("ENTERPRISE_NAME".equals(val.getFieldName())) {
+				e.setKey("承租方");
+			}else if ("APARTMENT".equals(val.getFieldName())) {
+				e.setKey("意向房源");
+			}else {
+				e.setKey(val.getFieldName());
+			}
             entities.add(e);
         }
         return entities;
