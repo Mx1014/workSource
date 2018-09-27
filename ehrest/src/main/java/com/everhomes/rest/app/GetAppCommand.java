@@ -2,18 +2,18 @@ package com.everhomes.rest.app;
 
 /**
  * <ul>
- *     <li>appKey: 兼容原来的客户端，保留</li>
+ *     <li>realAppKey: 兼容原来的客户端，保留</li>
  * </ul>
  */
 public class GetAppCommand {
 
-    private String appKey;
+    private String realAppKey;
 
-    public String getAppKey() {
-        return appKey;
+    public String getRealAppKey() {
+        return realAppKey;
     }
 
-    public void setAppKey(String appKey) {
-        this.appKey = appKey;
+    public void setRealAppKey(String realAppKey) {
+        this.realAppKey = realAppKey;
     }
 }

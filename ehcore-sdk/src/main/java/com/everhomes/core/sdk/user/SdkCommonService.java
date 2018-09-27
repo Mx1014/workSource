@@ -104,7 +104,7 @@ public class SdkCommonService {
 
     public AppDTO getApp(String appKey) {
         GetAppCommand cmd = new GetAppCommand();
-        cmd.setAppKey(appKey);
+        cmd.setRealAppKey(appKey);
         RestResponse response = sdkClient.restCall("post", "/evh/appkey/findApp", cmd, RestResponse.class);
         return (AppDTO) response.getResponseObject();
     }

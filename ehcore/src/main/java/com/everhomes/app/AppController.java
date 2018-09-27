@@ -60,7 +60,7 @@ public class AppController extends ControllerBase {
     @RestReturn(value=AppDTO.class)
     public RestResponse findApp(@Valid GetAppCommand cmd) {
 
-        App app = appService.find(cmd.getAppKey());
+        App app = appService.find(cmd.getRealAppKey());
 
         return new RestResponse(ConvertHelper.convert(app, AppDTO.class));
     }
