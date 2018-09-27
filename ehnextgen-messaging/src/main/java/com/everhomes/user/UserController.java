@@ -1787,7 +1787,9 @@ public class UserController extends ControllerBase {
      * <p>获取登录信息</p>
      */
     @RequestMapping("sendVerificationCodeSms")
-    public void sendVerificationCodeSms(@Valid SendVerificationCodeCommand cmd) {
+    @RestReturn(String.class)
+    public RestResponse sendVerificationCodeSms(@Valid SendVerificationCodeCommand cmd) {
         this.userService.sendVerificationCodeSms(cmd.getNamespaceId(), cmd.getPhoneNumber(), cmd.getCode());
+		return new RestResponse("OK");
     }
 }
