@@ -12,6 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -21,6 +22,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
@@ -37,6 +39,7 @@ import com.everhomes.util.excel.ExcelUtils;
 
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
+@Component
 public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(InvestmentAdsExportHandler.class);
@@ -71,7 +74,9 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
         Long taskId = (Long) params.get("taskId");
         OutputStream outputStream ;
     	
-    	ListInvestmentAdCommand cmd = (ListInvestmentAdCommand) params.get("ListInvestmentAdCommand");
+        String cmdStr = String.valueOf( params.get("ListInvestmentAdCommand"));
+         
+    	ListInvestmentAdCommand cmd = (ListInvestmentAdCommand)StringHelper.fromJsonString(cmdStr, ListInvestmentAdCommand.class);
 		cmd.setPageAnchor(0L);
 		cmd.setPageSize(10000);
     	user.setNamespaceId(cmd.getNamespaceId());
