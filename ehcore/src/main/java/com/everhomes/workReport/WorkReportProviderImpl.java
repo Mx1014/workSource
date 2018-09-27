@@ -251,7 +251,7 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public void deleteWorkReportScopeMsg() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
         query.execute();
     }
 
@@ -259,8 +259,8 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public void deleteWorkReportScopeMsgByReportId(Long reportId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_ID.eq(reportId));
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
         query.execute();
     }
 
