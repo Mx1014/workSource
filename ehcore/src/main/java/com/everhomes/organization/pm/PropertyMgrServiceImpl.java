@@ -471,6 +471,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	@Autowired
 	private AssetService assetService;
 
+   	@Autowired
    	private ActivityService activityService;
 
     private String queueName = "property-mgr-push";
