@@ -718,6 +718,23 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         return null;
     }
 
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = null;
+        if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
+            res = customerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+            res = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            customerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
+    }
+
 }
 
 

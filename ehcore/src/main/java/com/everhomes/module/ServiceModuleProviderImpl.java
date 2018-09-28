@@ -813,6 +813,23 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+    @Override
+    public List<Long> listExcludeCauseWhiteList(){
+        List<Long> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
+        SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
+
+        context.select(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .from(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS)
+                .groupBy(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .fetch().map(r -> {
+            results.add(r.getValue(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID));
+            return null;
+        });
+        return results;
+
+    }
+
 
     @Override
     public List<ServiceModuleIncludeFunction> listIncludeFunctions(Integer namespaceId, Long communityId, Long moduleId) {
