@@ -29,6 +29,7 @@ public class TemplateMessageTest {
     private static String DETAILID = "http://music.163.com/song/1299594413/?userid=267983715";
 
     public void sendTemplateMessage(String openId, String templateId, HashMap<String, Item> params){
+
         openId = OPENID;
         templateId = TEMPLATEID;
 
@@ -45,7 +46,7 @@ public class TemplateMessageTest {
         tm.setUrl(DETAILID);
         tm.add("nickname","萌萌", "#008000");
         tm.add("location1","武汉理工大学", "#008000");
-        tm.add("location2","第二师范", "#008000");
+        tm.add("location2","湖北第二师范", "#008000");
 
         String json = tm.build();
 
