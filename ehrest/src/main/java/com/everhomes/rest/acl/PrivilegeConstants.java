@@ -409,6 +409,7 @@ public interface PrivilegeConstants {
     long INVITED_CUSTOMER_CONTINUE = 150007L;
     long INVITED_CUSTOMER_IMPORT = 150008L;
     long INVITED_CUSTOMER_EXPORT = 150009L;
+    long INVITED_CUSTOMER_CHANGE_APTITUDE = 150010L;
 
 
     //------- 房源招商 --------

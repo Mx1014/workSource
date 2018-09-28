@@ -185,4 +185,18 @@ public class InvitedCustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /invitedCustomer/changeCustomerAptitude</b>
+     * <p>一键转为资质客户</p>
+     */
+    @RequestMapping("changeCustomerAptitude")
+    @RestReturn(value = String.class)
+    public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
+        invitedCustomerService.changeCustomerAptitude(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

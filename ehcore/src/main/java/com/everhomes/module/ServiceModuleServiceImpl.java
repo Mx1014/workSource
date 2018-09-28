@@ -1224,12 +1224,20 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+        List<Long> withoutWhiteList = serviceModuleProvider.listExcludeCauseWhiteList();
         List<ServiceModuleIncludeFunction> includeFunctions = serviceModuleProvider.listIncludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
-        if (includeFunctions != null && includeFunctions.size() > 0) {
-            includeFunctions.forEach(includeFunction -> {
-                functionIds.remove(includeFunction.getFunctionId());
-            });
+        if(withoutWhiteList != null && withoutWhiteList.size() > 0){
+            if (includeFunctions != null && includeFunctions.size() > 0) {
+                includeFunctions.forEach(r -> withoutWhiteList.remove(r.getFunctionId()));
+
+                withoutWhiteList.forEach(functionIds::remove);
+                /*
+                includeFunctions.forEach(includeFunction -> {
+                    functionIds.remove(includeFunction.getFunctionId());
+                });*/
+            }
         }
+
 
         return functionIds;
     }

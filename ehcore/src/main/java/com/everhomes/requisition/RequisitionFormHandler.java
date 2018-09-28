@@ -48,7 +48,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
-        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getOwnerId());
+        userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getOwnerId());
         PostGeneralFormDTO result = this.dbProvider.execute((TransactionStatus status) -> {
             Long referId;
             if(cmd.getRequisitionId() == null) {

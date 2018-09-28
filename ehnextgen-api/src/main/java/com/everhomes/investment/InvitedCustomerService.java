@@ -39,5 +39,7 @@ public interface InvitedCustomerService {
 
     DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile);
 
+    void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
+
 
 }

@@ -66,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -471,21 +472,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 RangeFilterBuilder rf1 = new RangeFilterBuilder("requirementMinArea");
                 RangeFilterBuilder rf2 = new RangeFilterBuilder("requirementMaxArea");
 
-                Long startArea = cmd.getMinTrackingPeriod();
-                Long endArea = cmd.getMinTrackingPeriod();
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                BigDecimal endArea = cmd.getRequirementMaxArea();
                 rf1.gte(startArea);
                 rf2.lte(endArea);
                 fb = FilterBuilders.andFilter(fb, rf1);
                 fb = FilterBuilders.andFilter(fb, rf2);
-            }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long startTime = cmd.getMinTrackingPeriod();
-                rf.gte(startTime);
+            }else if(null != cmd.getRequirementMinArea() && null == cmd.getRequirementMaxArea()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMinArea");
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                rf.gte(startArea);
                 fb = FilterBuilders.andFilter(fb, rf);
             }else{
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long endTime = cmd.getMinTrackingPeriod();
-                rf.lte(endTime);
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMaxArea");
+                BigDecimal endArea = cmd.getRequirementMaxArea();
+                rf.lte(endArea);
                 fb = FilterBuilders.andFilter(fb, rf);
             }
         }
