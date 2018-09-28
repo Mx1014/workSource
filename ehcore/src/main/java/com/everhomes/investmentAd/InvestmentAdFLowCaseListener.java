@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
@@ -31,6 +32,8 @@ import com.everhomes.rest.flow.FlowServiceTypeDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.investmentAd.AssetTemplateForFlow;
+import com.everhomes.rest.investmentAd.GeneralFormValTemplate;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
@@ -157,42 +160,49 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
             GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
             String fieldValue = dto.getFieldValue();
             String fieldName = dto.getFieldName();
-            ObjectMapper mapper = new ObjectMapper();
-            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
-            Map<String,String> urMap;
-            try {
-                urMap = mapper.readValue(fieldValue, jvt);
-                for (Map.Entry<String, String> entry : urMap.entrySet()) {
-                    fieldValue  = entry.getValue();
-                    if(entry.getKey().equals("text")) {
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            break;
-                        }
-                    }
-                    if(entry.getKey().equals("urls")){
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            break;
-                        }
-                    }
-                }
-                //设置显示的值
-                if ("APARTMENT".equals(fieldName)) {
-					
-				}else {
-					e.setValue(fieldValue);
+            
+           //设置显示的值
+            if ("APARTMENT".equals(fieldName)) {
+				GeneralFormValTemplate parseObject = JSON.parseObject(val.getFieldValue(), GeneralFormValTemplate.class);
+				String jsonStr = parseObject.getText();
+				AssetTemplateForFlow assetTemplate = JSON.parseObject(jsonStr, AssetTemplateForFlow.class);
+				fieldValue = assetTemplate.getBuildingName();
+				if (assetTemplate.getApartmentName()!=null) {
+					fieldValue = fieldValue + "-" + assetTemplate.getApartmentName();
 				}
-                
-            } catch (IOException ex) {
-                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                JsonArray urlJsons = jo.getAsJsonArray("urls");
-                if(urlJsons != null && urlJsons.size() > 0){
-                    fieldValue = urlJsons.get(0).getAsString();
-                }else{
-                    caseFileDTO.setUrl("");
-                }
-                e.setValue(fieldValue);
-            }
+				e.setValue(fieldValue);
+			}else {
+				ObjectMapper mapper = new ObjectMapper();
+	            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+	            Map<String,String> urMap;
+	            try {
+	                urMap = mapper.readValue(fieldValue, jvt);
+	                for (Map.Entry<String, String> entry : urMap.entrySet()) {
+	                    fieldValue  = entry.getValue();
+	                    if(entry.getKey().equals("text")) {
+	                        if (StringUtils.isNotBlank(fieldValue)) {
+	                            break;
+	                        }
+	                    }
+	                    if(entry.getKey().equals("urls")){
+	                        if (StringUtils.isNotBlank(fieldValue)) {
+	                            break;
+	                        }
+	                    }
+	                }
+	                e.setValue(fieldValue);
+	            } catch (IOException ex) {
+	                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+	                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+	                JsonArray urlJsons = jo.getAsJsonArray("urls");
+	                if(urlJsons != null && urlJsons.size() > 0){
+	                    fieldValue = urlJsons.get(0).getAsString();
+	                }else{
+	                    caseFileDTO.setUrl("");
+	                }
+	                e.setValue(fieldValue);
+	            }
+			}
             if ("USER_NAME".equals(val.getFieldName())) {
             	e.setKey("用户姓名");
 			}else if ("USER_PHONE".equals(val.getFieldName())) {

@@ -1,5 +1,6 @@
 package com.everhomes.general_form;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -14,6 +15,8 @@ import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.investmentAd.AssetTemplateForFlow;
+import com.everhomes.rest.investmentAd.GeneralFormValTemplate;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -164,9 +167,11 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
         }
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+
         if(cmd.getModuleId() != null){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("moduleId", cmd.getModuleId()));
         }
+
         if(cmd.getApprovalId() != null && cmd.getApprovalId() != 0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("approvalId", cmd.getApprovalId()));
         }
@@ -267,37 +272,45 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 for (GeneralFormVal val : vals) {
                     GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);     
                     String fieldValue = dto.getFieldValue();
-                    ObjectMapper mapper = new ObjectMapper(); 
-                    JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
-                    Map<String,String> urMap;
-                    try {
-                        urMap = mapper.readValue(fieldValue, jvt);
-                        for (Entry<String, String> entry : urMap.entrySet()) {
-                            fieldValue  = entry.getValue();
+                    String fieldName = dto.getFieldName();
+                   //设置显示的值
+                    if ("APARTMENT".equals(fieldName)) {
+        				GeneralFormValTemplate parseObject = JSON.parseObject(val.getFieldValue(), GeneralFormValTemplate.class);
+        				String jsonStr = parseObject.getText();
+        				returnMap.put(fieldName, jsonStr);
+                    }else {
+                    	ObjectMapper mapper = new ObjectMapper(); 
+                        JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
+                        Map<String,String> urMap;
+                        try {
+                            urMap = mapper.readValue(fieldValue, jvt);
+                            for (Entry<String, String> entry : urMap.entrySet()) {
+                                fieldValue  = entry.getValue();
 
-                            if(entry.getKey().equals("addressId")){
-                                if(StringUtils.isNotBlank(entry.getValue())) {
-                                    fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
-                                }
-                                break;
-                            }
-                            if(entry.getKey().equals("customerName")){
-                                if(StringUtils.isNotBlank(entry.getValue())) {
-                                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
-                                    fieldValue = customer.getName();
-                                }
-                                break;
-                            }
-                            if(entry.getKey().equals("text")) {
-                                if (StringUtils.isNotBlank(fieldValue)) {
+                                if(entry.getKey().equals("addressId")){
+                                    if(StringUtils.isNotBlank(entry.getValue())) {
+                                        fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+                                    }
                                     break;
                                 }
+                                if(entry.getKey().equals("customerName")){
+                                    if(StringUtils.isNotBlank(entry.getValue())) {
+                                        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
+                                        fieldValue = customer.getName();
+                                    }
+                                    break;
+                                }
+                                if(entry.getKey().equals("text")) {
+                                    if (StringUtils.isNotBlank(fieldValue)) {
+                                        break;
+                                    }
+                                }
                             }
+                            returnMap.put(fieldName, fieldValue);
+                        } catch (IOException e) {
+                            returnMap.put(fieldName, dto.getFieldValue());
                         }
-                        returnMap.put(dto.getFieldName(), fieldValue);
-                    } catch (IOException e) {
-                        returnMap.put(dto.getFieldName(), dto.getFieldValue());
-                    }
+					}
                 }
                 GeneralFormValRequest request = generalFormProvider.getGeneralFormValRequest(sourceId);
                 if(request != null){

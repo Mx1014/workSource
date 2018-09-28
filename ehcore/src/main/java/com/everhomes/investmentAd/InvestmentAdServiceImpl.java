@@ -26,6 +26,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investment.InvitedCustomerService;
@@ -116,6 +117,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
 	
 	@Autowired
 	private InvitedCustomerService invitedCustomerService;
@@ -351,7 +355,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}else {
 				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
 				//企业客户
@@ -386,7 +390,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				
 				finalCommandMap.put(dto.getCustomerName(), cmd2);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}
 		}
 		
