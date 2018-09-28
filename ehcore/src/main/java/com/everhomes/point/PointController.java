@@ -14,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 积分
  * Created by xq.tian on 2017/11/23.
@@ -43,7 +47,19 @@ public class PointController extends ControllerBase {
     @RestReturn(PointScoreDTO.class)
     @RequestMapping("getUserPoint")
     public RestResponse getUserPoint(GetUserPointCommand cmd) {
-        PointScoreDTO dto = pointService.getUserPoint(cmd);
+        //PointScoreDTO dto = pointService.getUserPoint(cmd);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        cmd.setNamespaceId(namespaceId);
+        Long uid = cmd.getUid() != null ? cmd.getUid() : UserContext.currentUserId();
+        cmd.setUid(uid);
+        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        if(dto == null){
+            dto = new PointScoreDTO();
+            dto.setScore(0L);
+        }else if(dto.getScore() == null){
+            dto.setScore(0L);
+        }
+
         return success(dto);
     }
 
@@ -70,6 +86,26 @@ public class PointController extends ControllerBase {
         }
         //ListPointLogsResponse response = pointService.listPointLogs(cmd);
         ListPointLogsResponse response = pointServiceRPCRest.getUserPointLogs(cmd);
+        if(response == null){
+            List<PointLogDTO> logDTOS = new ArrayList<PointLogDTO>();
+
+            response = new ListPointLogsResponse();
+            response.setLogs(logDTOS);
+        }else if(response.getLogs() == null){
+            List<PointLogDTO> logDTOS = new ArrayList<PointLogDTO>();
+            response.setLogs(logDTOS);
+        }else{
+            //页面上会自动帮抵扣的积分加负号,所以这里要把负号去掉
+            List<PointLogDTO> logDTOS = response.getLogs() ;
+            for(PointLogDTO logs :logDTOS){
+                if(logs.getPoints()<0 && logs.getPoints() != null){
+                    logs.setPoints(Math.abs(logs.getPoints()));
+
+                }
+                logs.setCategoryName(logs.getAppName());
+                logs.setDescription(logs.getRuleName());
+            }
+        }
         return success(response);
     }
 

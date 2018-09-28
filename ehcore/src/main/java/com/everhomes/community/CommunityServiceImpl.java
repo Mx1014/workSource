@@ -5270,10 +5270,22 @@ public class CommunityServiceImpl implements CommunityService {
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
 
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
-					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);			
+					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
 					dto.setDescription(parseHtml(dto.getDescription()));
 					dto.setTrafficDescription(parseHtml(dto.getTrafficDescription()));
+					if (dto.getAreaSize()!=null) {
+						dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
+					}
+					if(dto.getRentArea()!=null){
+						dto.setRentArea(doubleRoundHalfUp(dto.getRentArea(),2));
+					}
+					if(dto.getFreeArea()!=null){
+						dto.setFreeArea(doubleRoundHalfUp(dto.getFreeArea(),2));
+					}
+					if(dto.getChargeArea()!=null){
+						dto.setChargeArea(doubleRoundHalfUp(dto.getChargeArea(),2));
+					}
 					return dto;
 				}
 			).collect(Collectors.toList());
@@ -5585,7 +5597,7 @@ public class CommunityServiceImpl implements CommunityService {
 				continue;
 			}	
 			//获取在租实时均价
-			double areaAveragePrice = 0;
+			//double areaAveragePrice = 0;
 			double totalRent = 0;
 			List<Contract> contracts = contractProvider.findContractByAddressId(address.getId());
 			if (contracts != null && contracts.size() > 0){
@@ -5594,25 +5606,25 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				totalRent = doubleRoundHalfUp(totalRent,2);
 			}
-			if (address.getRentArea() != null && address.getRentArea() > 0) {
-				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
-	    	}
-			//按在租实时均价筛选
-			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
-				continue;
-			}
-			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
-				continue;
-			}
-			ApartmentExportDataDTO dto = convertToApartmentExportDataDTO(address,livingStatus,areaAveragePrice,totalRent);
+//			if (address.getRentArea() != null && address.getRentArea() > 0) {
+//				areaAveragePrice = doubleRoundHalfUp(totalRent/address.getRentArea(),2);
+//	    	}
+//			//按在租实时均价筛选
+//			if (cmd.getAreaAveragePriceFrom() != null && areaAveragePrice < cmd.getAreaAveragePriceFrom().doubleValue()) {
+//				continue;
+//			}
+//			if (cmd.getAreaAveragePriceTo() != null && areaAveragePrice > cmd.getAreaAveragePriceTo().doubleValue()) {
+//				continue;
+//			}
+			ApartmentExportDataDTO dto = convertToApartmentExportDataDTO(address,livingStatus,totalRent);
 			data.add(dto);
 		}
 		if (data != null && data.size() > 0) {
 			String fileName = String.format("房源信息导出");
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "房源信息");
-			String[] propertyNames = {"communityName","buildingName","apartmentFloor","apartmentName","livingStatus","areaSize","rentArea","freeArea","chargeArea","areaAveragePrice","orientation","namespaceAddressType","namespaceAddressToken"};
-			String[] titleNames = {"项目名称", "楼宇名称", "楼层名称", "房源", "状态", "建筑面积(㎡)","在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "在租实时均价(元/平方米)","朝向","第三方来源","第三方标识"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			String[] propertyNames = {"communityName","buildingName","apartmentFloor","apartmentName","livingStatus","areaSize","rentArea","freeArea","chargeArea","orientation","namespaceAddressType","namespaceAddressToken"};
+			String[] titleNames = {"项目名称", "楼宇名称", "楼层名称", "房源", "状态", "建筑面积(㎡)","在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)","朝向","第三方来源","第三方标识"};
+			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
@@ -5620,7 +5632,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 	}
 
-	private ApartmentExportDataDTO convertToApartmentExportDataDTO(Address address, byte livingStatus,double areaAveragePrice, double totalRent) {
+	private ApartmentExportDataDTO convertToApartmentExportDataDTO(Address address, byte livingStatus, double totalRent) {
 		ApartmentExportDataDTO dto = new ApartmentExportDataDTO();
 		Community community = communityProvider.findCommunityById(address.getCommunityId());
 		dto.setCommunityName(community.getName());
@@ -5632,7 +5644,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());
 		dto.setChargeArea(address.getChargeArea());
-		dto.setAreaAveragePrice(areaAveragePrice);
+//		dto.setAreaAveragePrice(areaAveragePrice);
 		dto.setOrientation(address.getOrientation());
 		dto.setNamespaceAddressType(address.getNamespaceAddressType());
 		dto.setNamespaceAddressToken(address.getNamespaceAddressToken());

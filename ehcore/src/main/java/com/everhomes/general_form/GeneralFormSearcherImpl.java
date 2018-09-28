@@ -165,7 +165,10 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
-        //fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("moduleId", cmd.getModuleId()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        if(StringUtils.isNotBlank(cmd.getModuleName())){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("moduleType", cmd.getModuleName()));
+        }
         if(cmd.getApprovalId() != null && cmd.getApprovalId() != 0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("approvalId", cmd.getApprovalId()));
         }

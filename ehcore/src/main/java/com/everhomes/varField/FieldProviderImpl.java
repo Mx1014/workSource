@@ -41,6 +41,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -771,11 +772,13 @@ public class FieldProviderImpl implements FieldProvider {
         Map<Long, ScopeFieldItem> items = new HashMap<>();
         SelectQuery<EhVarFieldItemScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_ITEM_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.FIELD_ID.in(fieldIds));
         query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
 
 
+        if(StringUtils.isNotBlank(moduleName)){
+            query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.MODULE_NAME.eq(moduleName));
+        }
         if(categoryId != null) {
             query.addConditions(Tables.EH_VAR_FIELD_ITEM_SCOPES.CATEGORY_ID.eq(categoryId));
         }

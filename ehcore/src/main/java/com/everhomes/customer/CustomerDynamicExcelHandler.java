@@ -226,7 +226,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     if (!fieldDTO.getFieldParam().contains("image")&&!fieldDTO.getFieldParam().contains("file")) {//导出时 非图片字段可导出 fix 26791
                         if (withData && fieldDTO.getFieldParam().contains("richText")) {
                             LOGGER.info("remove richText cell whern export data!");
-                        } else {
+                        }else {
                             DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                             df.setDisplayName(fieldDTO.getFieldDisplayName());
                             if ("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {

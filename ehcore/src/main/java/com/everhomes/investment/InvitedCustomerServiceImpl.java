@@ -353,6 +353,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
             // this field id menus investment enterprise levelItemId private key
             fieldItemCommand.setFieldId(5L);
+            fieldItemCommand.setModuleName("investment_promotion");
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
@@ -457,16 +458,24 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 List<CustomerRequirementAddress> addresses = invitedCustomerProvider.findRequirementAddressByRequirementId(requirement.getId());
                 if(addresses != null){
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
-                    dtos.forEach(r ->{
-                        Address address = addressProvider.findAddressById(r.getAddressId());
-                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
-                        }else{
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                            r.setAddressArea(address.getBuildArea());
+                    if(dtos != null && dtos.size() > 0){
+                        dtos.forEach(r ->{
+                            Address address = addressProvider.findAddressById(r.getAddressId());
+                            if(address != null){
+                                if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                                }else{
+                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressArea(address.getBuildArea());
+                                }
+                            }else{
+                                dtos.remove(r);
+                            }
+                        });
+                        if(dtos.size() > 0) {
+                            requirementDTO.setAddresses(dtos);
                         }
-                    });
-                    requirementDTO.setAddresses(dtos);
+                    }
                 }
 
 
@@ -500,15 +509,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                    if(address != null){
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
 
-                    }else{
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                        addressDTO.setAddressArea(address.getRentArea());
+                        }else{
+                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                            addressDTO.setAddressArea(address.getRentArea());
+                        }
                     }
-
-
                     addressesDTO.add(addressDTO);
 
                 });
