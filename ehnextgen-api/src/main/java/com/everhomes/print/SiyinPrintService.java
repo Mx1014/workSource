@@ -15,6 +15,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SiyinPrintService {
@@ -79,4 +80,6 @@ public interface SiyinPrintService {
     void initPayeeAccount(MultipartFile[] files);
 
 	String getSiyinServerUrl();
+
+	void updatePrintOrder(SiyinPrintOrder order, String payOrderNo);
 }

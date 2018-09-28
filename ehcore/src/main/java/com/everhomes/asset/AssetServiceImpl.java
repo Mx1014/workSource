@@ -5915,18 +5915,17 @@ public class AssetServiceImpl implements AssetService {
 	/**
 	 * 物业缴费V6.6 统一账单：账单状态改变回调各个业务系统接口
 	 * @param sourceType
-	 * @param sourceId
 	 * @return
 	 */
-	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId) {
+	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType){
 		AssetGeneralBillHandler handler = null;
 
-        if(sourceType != null && sourceId != null) {
+        if(sourceType != null) {
         	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
             try {
-            	handler = PlatformContext.getComponent(handlerPrefix + sourceType + sourceId);
+            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
 			}catch (Exception ex){
-				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}, sourceId = {}", sourceType, sourceId);
+				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
 			}
         }
 

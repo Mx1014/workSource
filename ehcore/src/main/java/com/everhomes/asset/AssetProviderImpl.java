@@ -20,6 +20,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.records.*;
+import org.apache.commons.collections.CollectionUtils;
+
+//import scala.languageFeature.reflectiveCalls;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
@@ -1675,7 +1679,9 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
-            newBill.setNoticetel(noticeTelListStr);
+            if (!CollectionUtils.isEmpty(noticeTelList)) {
+            	 newBill.setNoticetel(String.join(",", noticeTelList));
+            }
             newBill.setOwnerId(ownerId);
             newBill.setTargetName(targetName);
             newBill.setOwnerType(ownerType);
@@ -1753,7 +1759,7 @@ public class AssetProviderImpl implements AssetProvider {
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM
-                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.CAN_DELETE, r.CAN_MODIFY, r.PAYMENT_TYPE)
+                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.THIRD_BILL_ID, r.CAN_DELETE, r.CAN_MODIFY, r.PAYMENT_TYPE)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
@@ -1788,6 +1794,7 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setSourceType(f.getValue(r.SOURCE_TYPE));
                     vo.setSourceName(f.getValue(r.SOURCE_NAME));
                     vo.setConsumeUserId(f.getValue(r.CONSUME_USER_ID));
+                    vo.setThirdBillId(f.getValue(r.THIRD_BILL_ID));
                     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
                     vo.setCanDelete(f.getValue(r.CAN_DELETE));
                     vo.setCanModify(f.getValue(r.CAN_MODIFY));

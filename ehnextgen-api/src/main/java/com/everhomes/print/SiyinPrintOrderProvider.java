@@ -34,4 +34,6 @@ public interface SiyinPrintOrderProvider {
 			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
 
     ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String s, String sNamespaceId, String userIdentifier, Object o, Object o1, Object o2);
+
+	SiyinPrintOrder findSiyinPrintOrderByGeneralBillId(String generalBillId);
 }

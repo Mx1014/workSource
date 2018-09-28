@@ -3,6 +3,7 @@ package com.everhomes.print;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,8 @@ import javax.validation.Valid;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.print.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +26,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import com.everhomes.asset.AssetService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
@@ -41,6 +48,7 @@ import sun.misc.BASE64Decoder;
 public class SiYinPrintController extends ControllerBase {
 	@Autowired
 	private SiyinPrintService siyinPrintService;
+	
 	
 	 /**
 	  * <b>URL: /siyinprint/getPrintSetting</b>
