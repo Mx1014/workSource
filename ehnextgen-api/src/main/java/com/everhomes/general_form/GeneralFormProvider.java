@@ -103,4 +103,8 @@ public interface GeneralFormProvider {
 
 	GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id);
 	GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType);
+
+	void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus);
+
+	void setInvestmentAdId(Long id, Long investmentAdId);
 }

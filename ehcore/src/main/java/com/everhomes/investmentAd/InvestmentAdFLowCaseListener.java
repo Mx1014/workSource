@@ -161,7 +161,7 @@ public class InvestmentAdFLowCaseListener implements FlowModuleListener{
             String fieldValue = dto.getFieldValue();
             String fieldName = dto.getFieldName();
             
-          //设置显示的值
+           //设置显示的值
             if ("APARTMENT".equals(fieldName)) {
 				GeneralFormValTemplate parseObject = JSON.parseObject(val.getFieldValue(), GeneralFormValTemplate.class);
 				String jsonStr = parseObject.getText();
