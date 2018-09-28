@@ -92,20 +92,6 @@ public class TestAssetController extends ControllerBase {
 	}
 	
 	/**
-	 * <p>创建统一账单接口</p>
-	 * <b>URL: /test/createGeneralBill</b>
-	 */
-	@RequestMapping("createGeneralBill")
-	@RestReturn(value = ListBillsDTO.class, collection = true)
-	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
-		List<ListBillsDTO> dto = assetService.createGeneralBill(cmd);
-	    RestResponse response = new RestResponse(dto);
-	    response.setErrorDescription("OK");
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    return response;
-	}
-	
-	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
 	 * <b>URL: /test/testLateFine</b>
 	 * @throws ParseException

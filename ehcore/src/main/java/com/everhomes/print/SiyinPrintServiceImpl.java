@@ -2020,25 +2020,26 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
     
     private String createGeneralBill(SiyinPrintOrder siyinPrintOrder, Long organizationId) {
-    	CreateGeneralBillCommand cmd = new CreateGeneralBillCommand();
-    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-    	cmd.setOwnerId(siyinPrintOrder.getOwnerId()); 
-    	cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
-    	cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
-    	cmd.setThirdBillId(siyinPrintOrder.getId()+"");
-    	cmd.setSourceName("云打印订单");
-    	cmd.setConsumeUserId(UserContext.currentUserId());
-    	cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
-    	cmd.setTargetId(organizationId);
-    	cmd.setAmountReceivable(siyinPrintOrder.getOrderTotalFee());
-    	
-    	List<ListBillsDTO> dtos = assetService.createGeneralBill(cmd);
-    	if (CollectionUtils.isEmpty(dtos)) {
-    		throwError(PrintErrorCode.ERROR_CREATE_GENERAL_BILL, "error creating general bill");
-    	}
-    	
-		return dtos.get(0).getBillId();
+//    	CreateGeneralBillCommand cmd = new CreateGeneralBillCommand();
+//    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+//    	cmd.setOwnerId(siyinPrintOrder.getOwnerId()); 
+//    	cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
+//    	cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
+//    	cmd.setThirdBillId(siyinPrintOrder.getId()+"");
+//    	cmd.setSourceName("云打印订单");
+//    	cmd.setConsumeUserId(UserContext.currentUserId());
+//    	cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
+//    	cmd.setTargetId(organizationId);
+//    	cmd.setAmountReceivable(siyinPrintOrder.getOrderTotalFee());
+//    	
+//    	List<ListBillsDTO> dtos = assetService.createGeneralBill(cmd);
+//    	if (CollectionUtils.isEmpty(dtos)) {
+//    		throwError(PrintErrorCode.ERROR_CREATE_GENERAL_BILL, "error creating general bill");
+//    	}
+//    	
+//		return dtos.get(0).getBillId();
+    	return null;
 	}
 
 	private void throwError(int errorCode, String errorMsg) {

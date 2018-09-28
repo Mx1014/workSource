@@ -1524,4 +1524,19 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
     }
+    
+    /**
+	 * <p>创建统一账单接口</p>
+	 * <b>URL: /asset/createGeneralBill</b>
+	 */
+	@RequestMapping("createGeneralBill")
+	@RestReturn(value = ListGeneralBillsDTO.class, collection = true)
+	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListGeneralBillsDTO> dto = assetService.createGeneralBill(cmd);
+	    RestResponse response = new RestResponse(dto);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
 }
