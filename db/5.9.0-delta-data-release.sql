@@ -539,6 +539,7 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 
 
 
+
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150001, 0, '招商管理 查看客户权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150002, 0, '招商管理 创建客户权限', '招商管理 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150003, 0, '招商管理 编辑客户权限', '招商管理 业务模块权限', NULL);
@@ -771,6 +772,13 @@ UPDATE eh_var_field_scopes SET `status` = 0 WHERE module_name = 'enterprise_cust
 -- REMARK : 删除数据库中的脏数据
 UPDATE eh_var_field_item_scopes SET `status` = 0 WHERE item_id = 3 AND field_id != 5 ;
 
+
+-- REMARK : 删除租客中的资质客户权限
+DELETE FROM eh_acl_privileges WHERE id = 21116;
+DELETE FROM eh_service_module_privileges WHERE privilege_id = 21116;
+
+
+-- END
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
