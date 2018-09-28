@@ -3,6 +3,7 @@ package com.everhomes.aclink;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.aclink.*;
 
@@ -34,5 +35,5 @@ public interface DoorAccessProvider {
 	//add by liqingyan
     List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespace(DoorStatisticEhCommand cmd);
 
-    List<DoorAccessDTO> listDoorAccessEh(ListDoorAccessEhCommand cmd);
+    List<DoorAccessDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
 }

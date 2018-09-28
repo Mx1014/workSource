@@ -337,14 +337,25 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         return dtos;
     }
     @Override
-    public List<DoorAccessDTO> listDoorAccessEh(ListDoorAccessEhCommand cmd){
+    public List<DoorAccessDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_DOOR_ACCESS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+        if (count > 0){
+            query.addLimit(count + 1);
+        }
         List<DoorAccessDTO> objs = query.fetch().map((r) -> {
             DoorAccessDTO dto = ConvertHelper.convert(r, DoorAccessDTO.class);
             return dto;
         });
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+            objs.remove(objs.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
         return objs;
     }
 

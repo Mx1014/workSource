@@ -121,6 +121,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Security;
+import java.sql.Timestamp;
 import java.text.Format;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -5278,9 +5279,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd) {
         ListDoorAccessEhResponse resp = new ListDoorAccessEhResponse();
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAccessDTO> dtos = doorAccessProvider.listDoorAccessEh(cmd);
+        List<DoorAccessDTO> dtos = doorAccessProvider.listDoorAccessEh(locator, count, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                SelectQuery<? extends Record> query) {
+                if(cmd.getOwnerType() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                }
+                if(cmd.getOwnerId() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+                if(cmd.getDoor() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like(cmd.getDoor() + "%")
+                            .or(Tables.EH_DOOR_ACCESS.UUID.like(cmd.getDoor()+"%")));
+                }
+                return query;
+            }
+
+        });
         resp.setDoors(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
