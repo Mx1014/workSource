@@ -254,6 +254,10 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
                 Long parkingTime = now.getTime() - intime.getTime();
                 dto.setParkingTime(String.valueOf(parkingTime / (60 * 1000)));
             }
+        }else{
+            LOGGER.error("get car location error, msg={}", entity.getMessage());
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.CAR_ENTRY_INFO_NOT_FOUND,
+                    "get car location error");
         }
         return dto;
     }
