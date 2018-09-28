@@ -18,6 +18,7 @@ public interface UserProvider {
     //统一用户同步数据使用
     void createUserFromUnite(User user);
     void updateUser(User user);
+    void updateUserFromUnite(User user);
     void deleteUser(User user);
     void deleteUser(long id);
     void deleteUserAndUserIdentifiers(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
@@ -33,6 +34,7 @@ public interface UserProvider {
     //统一用户同步数据使用
     void createIdentifierFromUnite(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
+    void updateIdentifierFromUnite(UserIdentifier userIdentifier);
     void updateIdentifierByUid(UserIdentifier userIdentifier);
     void deleteIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(long id);

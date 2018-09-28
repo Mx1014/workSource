@@ -5,6 +5,7 @@ import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.user.sdk.SdkQRCodeService;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,14 @@ public class QRCodeServiceImpl implements QRCodeService {
 
     @Override
     public QRCodeDTO createQRCode(NewQRCodeCommand cmd) {
-        return sdkDelegate.createQRCode(cmd);
+        com.everhomes.rest.user.qrcode.NewQRCodeCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.user.qrcode.NewQRCodeCommand.class);
+        return ConvertHelper.convert(sdkDelegate.createQRCode(command), QRCodeDTO.class);
     }
 
     @Override
     public QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd) {
-        return sdkDelegate.getQRCodeInfo(cmd);
+        com.everhomes.rest.user.qrcode.GetQRCodeInfoCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.user.qrcode.GetQRCodeInfoCommand.class);
+        return ConvertHelper.convert(sdkDelegate.getQRCodeInfo(command), QRCodeDTO.class);
     }
 
     @Override
