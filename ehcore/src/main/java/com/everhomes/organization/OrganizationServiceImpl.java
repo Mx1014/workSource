@@ -7906,9 +7906,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
-        UserIdentifier uIdentifier = userProvider.findClaimedIdentifierByTokenAndNotUserId(namespaceId, identifierToken, ownerId);
-        this.propertyMgrService.processUserForOwner(uIdentifier);
-        return processUserForMember(uIdentifier, true);
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        this.propertyMgrService.processUserForOwner(identifier);
+        return processUserForMember(identifier, true);
     }
 
 
