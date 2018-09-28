@@ -10,6 +10,6 @@ public interface PaymentAuthsProvider {
 
 	EnterprisePaymentAuths findPaymentAuthByAppIdOrgId(Long appId, Long orgId);
 
-	List<EnterprisePaymentAuths> getPaymentAuths(Integer namespaceId);
+	List<EnterprisePaymentAuths> getPaymentAuths(Integer namespaceId, Long orgId);
 
 }

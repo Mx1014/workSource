@@ -44,9 +44,11 @@ public class PaymentAuthsProviderImpl implements PaymentAuthsProvider {
 	}
 	
 	@Override
-	public List<EnterprisePaymentAuths> getPaymentAuths (Integer namespaceId) {
+	public List<EnterprisePaymentAuths> getPaymentAuths (Integer namespaceId, Long orgId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEnterprisePaymentAuths.class));
 		SelectQuery<EhEnterprisePaymentAuthsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_PAYMENT_AUTHS);
+		query.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.ENTERPRISE_ID.eq(orgId));
 		return query.fetch().map(r -> ConvertHelper.convert(r, EnterprisePaymentAuths.class));
 	}
 }

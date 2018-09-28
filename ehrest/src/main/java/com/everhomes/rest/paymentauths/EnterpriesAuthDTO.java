@@ -8,7 +8,7 @@ package com.everhomes.rest.paymentauths;
  * </ul>
  */
 
-public class EnterpiresAuthDTO {
+public class EnterpriesAuthDTO {
 
 	private String flowUserSelectType;
 	private String selectionName;

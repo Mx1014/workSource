@@ -33,8 +33,10 @@ import com.everhomes.rest.launchpad.LaunchPadCategoryDTO;
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
 import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
+import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
@@ -42,8 +44,10 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.paymentauths.CheckUserAuthsCommand;
 import com.everhomes.rest.paymentauths.CheckUserAuthsResponse;
+import com.everhomes.rest.paymentauths.EnterpriesAuthDTO;
+import com.everhomes.rest.paymentauths.EnterprisePaymentAuthsDTO;
 import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsCommand;
-import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsResponse;
+import com.everhomes.rest.paymentauths.PaymentAuthsAPPType;
 import com.everhomes.rest.portal.AllOrMoreType;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
@@ -106,13 +110,34 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	}
 	
 	@Override
-	public ListEnterprisePaymentAuthsResponse listEnterprisePaymentAuths (ListEnterprisePaymentAuthsCommand cmd) {
-		ListEnterprisePaymentAuthsResponse reponse = new ListEnterprisePaymentAuthsResponse();
-		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(UserContext.getCurrentNamespaceId());
-		
-		for(EnterprisePaymentAuths enterprisePaymentAuths : authsList){
-			
+	public List<EnterprisePaymentAuthsDTO> listEnterprisePaymentAuths (ListEnterprisePaymentAuthsCommand cmd) {
+
+		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(UserContext.getCurrentNamespaceId(), cmd.getOrgnazitionId());
+		List<EnterprisePaymentAuthsDTO> results = new ArrayList<EnterprisePaymentAuthsDTO>();
+		List<EnterpriesAuthDTO> printAuth = new ArrayList<EnterpriesAuthDTO>();
+		Long printAppId = null;
+		for(EnterprisePaymentAuths enterprisePaymentAuth : authsList){
+			EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
+			if (enterprisePaymentAuth.getAppName().equals(PaymentAuthsAPPType.CLOUD_PRINT.getCode())){
+				printAppId = enterprisePaymentAuth.getAppId();
+				if (enterprisePaymentAuth.getSourceType().equals("person")){
+					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+				} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
+					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
+				}
+				authDTO.setSelectionName(enterprisePaymentAuth.getSourceId());
+				authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
+				printAuth.add(authDTO);
+			}
 		}
-		return null;
+		if (printAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setAppId(printAppId);
+			e.setAppName(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
+			results.add(e);
+		}
+		return results;
 	}
 }

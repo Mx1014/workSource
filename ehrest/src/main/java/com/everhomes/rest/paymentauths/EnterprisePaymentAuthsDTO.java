@@ -11,10 +11,10 @@ import com.everhomes.util.StringHelper;
  *     <li>EnterpiresAuthDTO: 授权用户信息</li>
  * </ul>
  */
-public class ListEnterprisePaymentAuthsResponse {
+public class EnterprisePaymentAuthsDTO {
 	private Long appId;
 	private String appName;
-	private List<EnterpiresAuthDTO> enterpriseAuth;
+	private List<EnterpriesAuthDTO> enterpriseAuth;
 
 
 	public Long getAppId() {
@@ -33,11 +33,11 @@ public class ListEnterprisePaymentAuthsResponse {
 		this.appName = appName;
 	}
 
-	public List<EnterpiresAuthDTO> getEnterpriseAuth() {
+	public List<EnterpriesAuthDTO> getEnterpriseAuth() {
 		return enterpriseAuth;
 	}
 
-	public void setEnterpriseAuth(List<EnterpiresAuthDTO> enterpriseAuth) {
+	public void setEnterpriseAuth(List<EnterpriesAuthDTO> enterpriseAuth) {
 		this.enterpriseAuth = enterpriseAuth;
 	}
 

@@ -6,6 +6,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.paymentauths.PaymentAuthsService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.paymentauths.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -13,6 +14,9 @@ import com.everhomes.rest.servicehotline.*;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +49,10 @@ public class PaymentAuthsController extends ControllerBase {
 	 * <b>URL: paymentAuths/listEnterpirsePaymentAuths</b>
 	 */
 	@RequestMapping("listEnterprisePaymentAuths")
-	@RestReturn(value=ListEnterprisePaymentAuthsResponse.class)
+	@RestReturn(value=EnterprisePaymentAuthsDTO.class, collection = true)
 	public RestResponse listEnterpirsePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
-		ListEnterprisePaymentAuthsResponse res = paymentAuthsService.listEnterprisePaymentAuths(cmd);
-		RestResponse response =  new RestResponse(res);
+		List<EnterprisePaymentAuthsDTO> dto = paymentAuthsService.listEnterprisePaymentAuths(cmd);
+		RestResponse response =  new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
