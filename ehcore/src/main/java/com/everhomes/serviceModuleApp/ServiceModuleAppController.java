@@ -46,7 +46,6 @@ public class ServiceModuleAppController extends ControllerBase {
 
 
 	/**
-<<<<<<< HEAD
 	 * <p>给公司安装应用</p>
 	 * <b>URL: /servicemoduleapp/installApp</b>
 	 */
