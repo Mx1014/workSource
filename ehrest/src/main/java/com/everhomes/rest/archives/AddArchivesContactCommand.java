@@ -22,6 +22,7 @@ import java.util.List;
  * <li>updateDetailId: 编辑人员的id</li>
  * <li>namespaceId: 域空间ID</li>
  * <li>account: 账号(唯一标识)</li>
+ * <li>operateType: 审核类型</li>
  * </ul>
  */
 public class AddArchivesContactCommand {
@@ -65,6 +66,16 @@ public class AddArchivesContactCommand {
 
     //  组织架构4.6需要添加唯一标识
     private String account;
+
+    private Byte operateType;
+
+    public Byte getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(Byte operateType) {
+        this.operateType = operateType;
+    }
 
     public AddArchivesContactCommand() {
     }

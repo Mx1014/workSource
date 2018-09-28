@@ -111,11 +111,11 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
 
-        //  校验权限 by lei.lv
-        if (cmd.getDetailId() != null) {
+        //  校验权限 by lei.lv  update by huanglm
+        /*if (cmd.getDetailId() != null) {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
             organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
-        }
+        }*/
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
@@ -131,6 +131,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             addCommand.setJobLevelIds(new ArrayList<>(cmd.getJobLevelIds()));
         addCommand.setVisibleFlag(cmd.getVisibleFlag());
         addCommand.setNamespaceId(cmd.getNamespaceId());
+        addCommand.setOperateType(cmd.getOperateType());
         //  1.进行校验(例如: 邮箱)
         if (!StringUtils.isEmpty(cmd.getWorkEmail()))
             if (!organizationService.verifyPersonnelByWorkEmail(cmd.getOrganizationId(), cmd.getUpdateDetailId(), cmd.getWorkEmail()))

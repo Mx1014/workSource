@@ -7,6 +7,7 @@ import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.community.admin.OperateType;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
@@ -253,6 +254,8 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             ids.add(organizationService.getOrganizationNameByNameAndType(data.getJobPosition(), OrganizationGroupType.JOB_POSITION.getCode()));
             addCommand.setJobPositionIds(ids);
         }
+        //增加通讯录导入审核类型 add by yanlong.liang20180830
+        addCommand.setOperateType(OperateType.IMPORT.getCode());
         addCommand.setVisibleFlag(VisibleFlag.SHOW.getCode());
         //  2.先校验是否已存在手机号，否则的话添加完后再校验，结果肯定是覆盖导入
         boolean flag = verifyPersonnelByPhone(organizationId, addCommand.getContactToken());
