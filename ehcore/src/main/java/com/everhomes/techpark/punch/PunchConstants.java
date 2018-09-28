@@ -102,6 +102,7 @@ public class PunchConstants {
 	public static final int PUNCH_NOTIFICATION_TITLE = 1;
 	public static final int PUNCH_NOTIFICATION_ON_DUTY_CONTENT = 2;
 	public static final int PUNCH_NOTIFICATION_OFF_DUTY_CONTENT = 3;
+	public static final int PUNCH_NOTIFICATION_DISPLAY_NAME = 4;
 
 	public static final String NEXT_DAY ="nextDay";
 }
