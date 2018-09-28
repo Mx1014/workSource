@@ -667,8 +667,8 @@ UPDATE eh_general_forms SET template_text='[{"dataSourceType":"USER_NAME","dynam
 
 -- AUTHOR: 黄良铭
 -- REMARK: 脚本管理菜单
-INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) 
-VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module');
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid)
+VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module',1,1);
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(79000000 ,'脚本管理',21000000,NULL,'script-management',1,2,'/11000000/21000000/79000000','zuolin',30,60300,3,'system','module',NULL);
 
@@ -794,6 +794,85 @@ UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_i
 
 
 -- END
+
+
+
+-- AUTHOR: 严军
+-- REMARK: 增加默认主题色
+
+DELETE from eh_configurations WHERE NAME = 'theme.color';
+
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '1000000', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999999', '#1E274E', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999996', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999993', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999992', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999991', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999990', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999989', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999988', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999986', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999985', '#719B87', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999984', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999983', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999982', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999981', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999980', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999979', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999978', '#253754', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999977', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999976', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999975', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999974', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999973', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999972', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999971', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999970', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999969', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999968', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999967', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999966', '#3781E6', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999965', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999964', '#3781E6', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999962', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999961', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999960', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999959', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999958', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999957', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999956', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999955', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999954', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999953', '#C33333', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999952', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999951', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999950', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999949', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999948', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999947', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999946', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999945', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999944', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999942', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999941', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999940', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999939', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999938', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999936', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999935', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999932', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999930', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999929', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999927', '#F06416', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '11', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '1', '#10A1F1', '主题色', '主题色');
+
+-- end
+
+
+
+
+
 
 
 -- --------------------- SECTION END ---------------------------------------------------------

@@ -133,11 +133,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-
         if (report == null)
             return null;
-        ReportValiditySettingDTO validity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime time = LocalDateTime.now();
+
         //  update it.
         if (cmd.getReportType() != null)
             report.setReportType(cmd.getReportType());
