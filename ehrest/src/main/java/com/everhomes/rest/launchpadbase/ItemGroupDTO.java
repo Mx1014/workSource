@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  *     <li>separatorFlag: separatorFlag</li>
  *     <li>separatorHeight: separatorHeight</li>
  *     <li>columnCount: columnCount</li>
+ *     <li>title: 标题名称</li>
+ *     <li>titleUrl: 标题图标</li>
  *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link com.everhomes.rest.portal.TitleFlag}</li>
  *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link com.everhomes.rest.portal.TitleStyle}</li>
  *     <li>subTitle: subTitle</li>
@@ -33,6 +35,10 @@ public class ItemGroupDTO {
     private Integer separatorHeight;
     private Integer columnCount;
 
+    private String title;
+
+    private String titleUrl;
+
     private Byte titleFlag;
 
     private Byte titleStyle;
@@ -42,7 +48,6 @@ public class ItemGroupDTO {
     private Byte titleSize;
 
     private Byte titleMoreFlag;
-
 
 
     public Long getGroupId() {
@@ -115,6 +120,62 @@ public class ItemGroupDTO {
 
     public void setColumnCount(Integer columnCount) {
         this.columnCount = columnCount;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitleUrl() {
+        return titleUrl;
+    }
+
+    public void setTitleUrl(String titleUrl) {
+        this.titleUrl = titleUrl;
+    }
+
+    public Byte getTitleFlag() {
+        return titleFlag;
+    }
+
+    public void setTitleFlag(Byte titleFlag) {
+        this.titleFlag = titleFlag;
+    }
+
+    public Byte getTitleStyle() {
+        return titleStyle;
+    }
+
+    public void setTitleStyle(Byte titleStyle) {
+        this.titleStyle = titleStyle;
+    }
+
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
+    public Byte getTitleSize() {
+        return titleSize;
+    }
+
+    public void setTitleSize(Byte titleSize) {
+        this.titleSize = titleSize;
+    }
+
+    public Byte getTitleMoreFlag() {
+        return titleMoreFlag;
+    }
+
+    public void setTitleMoreFlag(Byte titleMoreFlag) {
+        this.titleMoreFlag = titleMoreFlag;
     }
 
     @Override

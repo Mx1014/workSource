@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
  *     <li>title: 标题</li>
  *     <li>titleUri: 标题uri</li>
- *     <li>titleUrl: titleUrl</li>
+ *     <li>titleUrl: 标题url</li>
  *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
  *     <li>subTitle: 副标题</li>
  *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
