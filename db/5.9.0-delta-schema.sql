@@ -96,8 +96,15 @@ ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT 
 
 -- AUTHOR: 黄明波
 -- REMARK: #33683服务联盟样式列表添加排序 #37669修复
-ALTER TABLE `eh_service_alliance_categories`	CHANGE COLUMN `default_order` `default_order` BIGINT NOT NULL DEFAULT '0' ;
+ALTER TABLE eh_service_alliance_categories MODIFY default_order BIGINT(11) NOT NULL DEFAULT 0;
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `address` `address` VARCHAR(255) NULL DEFAULT NULL ;
+
+-- 性能优化
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_parent_id` (`parent_id`);
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_default_order` (`default_order`);
+ALTER TABLE `eh_service_alliances` ADD INDEX `i_eh_type` (`type`);
+ALTER TABLE `eh_service_alliance_skip_rule` ADD INDEX `i_eh_category_index` (`service_alliance_category_id`, `namespace_id`);
+
 -- END
 
 
