@@ -2475,12 +2475,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+		boolean ifCreateNewOrder = false;
 		//续费 欠费订单重新生成订单号
 		if (order.getStatus() != SiteBillStatus.PAYINGFINAL.getCode() &&
-				order.getStatus() != SiteBillStatus.APPROVING.getCode()) {
-			order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
-			rentalv2Provider.updateRentalBill(order);//更新新的订单号
-		}
+				order.getStatus() != SiteBillStatus.APPROVING.getCode())
+		    ifCreateNewOrder = true;
 		preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
 		BigDecimal amount = order.getPayTotalMoney().subtract(order.getPaidMoney());
 		preOrderCommand.setAmount(amount);
@@ -2502,8 +2501,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			preOrderCommand.setPaymentParams(paymentParamsDTO);
 			preOrderCommand.setCommitFlag(1);
 		}
-
 		preOrderCommand.setClientAppName(clientAppName);
+		if (ifCreateNewOrder){
+            order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
+            rentalv2Provider.updateRentalBill(order);//更新新的订单号
+        }
 
 		return rentalv2PayService.createPreOrder(preOrderCommand,order);
 	}
