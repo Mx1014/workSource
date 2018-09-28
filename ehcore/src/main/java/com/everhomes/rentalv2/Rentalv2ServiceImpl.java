@@ -2521,8 +2521,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
 		}
-		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
-				order.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
+		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0){
 			changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
 			return null;
 		}
