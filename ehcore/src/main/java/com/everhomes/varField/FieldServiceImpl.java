@@ -494,7 +494,6 @@ public class FieldServiceImpl implements FieldService {
             code =  DynamicExcelStrings.CUSTOEMR;
         }
         if (3 == cmd.getPrivilegeCode()) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, ServiceModuleConstants.BUSINESS_INVITATION, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
             code =  DynamicExcelStrings.INVITED_CUSTOMER;
         }
         return dynamicExcelService.importMultiSheet(file, code, null, cmd);
