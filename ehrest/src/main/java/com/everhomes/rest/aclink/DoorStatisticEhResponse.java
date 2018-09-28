@@ -15,6 +15,7 @@ import java.util.List;
  * <li>AclinkUseByNamespaceDTO: 功能使用（按域空间统计）参考{@link com.everhomes.rest.aclink.AclinkUseByNamespaceDTO}</li>
  * </ul>
  */
+
 public class DoorStatisticEhResponse {
     private Long useTotal;
     @ItemType(ActiveDoorByPlaceDTO.class)

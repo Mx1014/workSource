@@ -61,6 +61,7 @@ import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -5276,7 +5277,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add by liqingyan
     @Override
     public ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd) {
+        ListDoorAccessEhResponse resp = new ListDoorAccessEhResponse();
+        resp.setDoors(new ArrayList<DoorAccessDTO>());
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAccessDTO> dtos = null;
 
+        resp.setNextPageAnchor(locator.getAnchor());
         return null;
     }
     @Override
@@ -5290,17 +5297,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
         DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
-//        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryActiveDoorByPlace(cmd);
+//        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlace(cmd);
 //        resp.setDto1(dto1);
-//        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryActiveDoorByFirmware(cmd);
+//        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
 //        resp.setDto2(dto2);
+//        List<ActiveDoorByEquipmentDTO> dto3 = doorAccessProvider.queryDoorAccessByEquipment(cmd);
+//        resp.setDto3(dto3);
         List<ActiveDoorByEquipmentDTO> dto3 = null;
         resp.setDto3(dto3);
-        List<ActiveDoorByNamespaceDTO> dto4 = null;
+        List<ActiveDoorByNamespaceDTO> dto4 = doorAccessProvider.queryDoorAccessByNamespace(cmd);
         resp.setDto4(dto4);
+//        List<ActiveDoorByNamespaceDTO> dto4 = null;
+//        resp.setDto4(dto4);
         List<AclinkUseByNamespaceDTO> dto5 = null;
         resp.setDto5(dto5);
         return resp;
+
     }
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){

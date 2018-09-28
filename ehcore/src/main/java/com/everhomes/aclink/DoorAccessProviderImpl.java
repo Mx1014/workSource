@@ -7,16 +7,18 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.aclink.ActiveDoorByNamespaceDTO;
+import com.everhomes.rest.aclink.DoorStatisticEhCommand;
 import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -307,6 +309,35 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         
         return das;
 	}
-
+	//add by liqingyan
+    @Override
+	public List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespace(DoorStatisticEhCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        com.everhomes.server.schema.tables.EhCommunities t1 = Tables.EH_COMMUNITIES.as("t1");
+        com.everhomes.server.schema.tables.EhOrganizations t2 = Tables.EH_ORGANIZATIONS.as("t2");
+        com.everhomes.schema.tables.EhNamespaces t3 = com.everhomes.schema.Tables.EH_NAMESPACES.as("t3");
+        List<ActiveDoorByNamespaceDTO> dtos = new ArrayList<ActiveDoorByNamespaceDTO>();
+        SelectHavingStep<Record3<Integer,String,Byte>> groupBy1 = context.select(t.ID.count().as("num"),
+                (t3.NAME).as("namespace"), (t.OWNER_TYPE).as("type"))
+                .from(t)
+                .leftOuterJoin(t1)
+                .on(t.OWNER_ID.eq(t1.ID))
+                .leftOuterJoin(t2)
+                .on(t.OWNER_ID.eq(t2.ID))
+                .leftOuterJoin(t3)
+                .on(t3.ID.eq(t1.NAMESPACE_ID)).or(t3.ID.eq(t2.NAMESPACE_ID))
+                .groupBy(t.OWNER_TYPE,t3.NAME);
+        groupBy1.fetch().map((r) -> {
+            ActiveDoorByNamespaceDTO dto = new ActiveDoorByNamespaceDTO();
+            dto.setActiveDoorNumber(r.value1());
+//            dto.setActivePublicDoorNumber(Long.parseLong(r.getValue("num").toString()));
+            dto.setNamespaceName(r.value2());
+            dto.setOwnerType(r.value3());
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
+    }
 
 }

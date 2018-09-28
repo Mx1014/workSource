@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.ActiveDoorByNamespaceDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorStatisticEhCommand;
 
 public interface DoorAccessProvider {
 
@@ -31,5 +33,7 @@ public interface DoorAccessProvider {
     List<DoorAccess> listAllDoorAccessLingling(Long ownerId, Byte ownerType, int count);
 
 	List<DoorAccess> listDoorAccessByServerId(Long id, Integer count);
+	//add by liqingyan
+    List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespace(DoorStatisticEhCommand cmd);
 	
 }
