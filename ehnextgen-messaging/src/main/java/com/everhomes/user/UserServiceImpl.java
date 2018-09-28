@@ -123,7 +123,9 @@ import com.everhomes.server.schema.tables.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListCreateType;
 import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsBlackListStatus;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
@@ -1716,7 +1718,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         } else {
             // 去统一用户那边检查登录状态
             String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
-            UserInfo userInfo = null;
+            com.everhomes.rest.user.user.UserInfo userInfo = null;
             try {
                 userInfo = sdkUserService.validateToken(tokenString);
             } catch (Exception e) {
@@ -6858,11 +6860,23 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.createUserFromUnite(user);
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
             }
         }else {
             if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.createUserFromUnite(user);
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
             }
         }
     }
@@ -6873,11 +6887,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.updateUser(user);
+                this.userProvider.updateUserFromUnite(user);
             }
         }else {
             if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.updateUser(user);
+                this.userProvider.updateUserFromUnite(user);
             }
         }
     }
@@ -6904,11 +6918,21 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.createIdentifierFromUnite(userIdentifier);
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
             }
         }else {
             if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.createIdentifierFromUnite(userIdentifier);
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
             }
         }
 
@@ -6920,11 +6944,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifier(userIdentifier);
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
             }
         }else {
             if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.updateIdentifier(userIdentifier);
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
             }
         }
 
