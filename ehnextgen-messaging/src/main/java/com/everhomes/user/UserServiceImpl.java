@@ -6858,11 +6858,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(user.getNamespaceId())) {
-                this.userProvider.createUser(user);
+                this.userProvider.createUserFromUnite(user);
             }
         }else {
             if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
-                this.userProvider.createUser(user);
+                this.userProvider.createUserFromUnite(user);
             }
         }
     }
@@ -6904,11 +6904,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
             if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.createIdentifier(userIdentifier);
+                this.userProvider.createIdentifierFromUnite(userIdentifier);
             }
         }else {
             if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
-                this.userProvider.createIdentifier(userIdentifier);
+                this.userProvider.createIdentifierFromUnite(userIdentifier);
             }
         }
 

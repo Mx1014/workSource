@@ -136,7 +136,17 @@ public class UserProviderImpl implements UserProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
     }
-    
+
+    @Override
+    public void createUserFromUnite(User user) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId()));
+        EhUsersDao dao = new EhUsersDao(context.configuration());
+        dao.insert(user);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
+
+    }
+
     @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
             @CacheEvict(value="User-Acount", key="#user.accountName")})
     @Override
@@ -291,7 +301,21 @@ public class UserProviderImpl implements UserProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
     }
-    
+
+    @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
+    @Override
+    public void createIdentifierFromUnite(UserIdentifier userIdentifier) {
+        assert(userIdentifier.getOwnerUid() != null);
+
+        // identifier record will be saved in the same shard as its owner users
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
+
+        EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
+        dao.insert(userIdentifier);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserIdentifiers.class, null);
+    }
+
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
             @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
