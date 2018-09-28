@@ -127,7 +127,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
 					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
 				}
-				authDTO.setSelectionName(enterprisePaymentAuth.getSourceId());
+				authDTO.setSelectionName(enterprisePaymentAuth.getAppName());
 				authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
 				printAuth.add(authDTO);
 			}
