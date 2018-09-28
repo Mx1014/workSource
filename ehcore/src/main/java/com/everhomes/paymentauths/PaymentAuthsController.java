@@ -1,11 +1,12 @@
-package com.everhomes.paymentAuths;
+package com.everhomes.paymentauths;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.paymentauths.PaymentAuthsService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.paymentAuths.*;
+import com.everhomes.rest.paymentauths.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.rest.servicehotline.*;
@@ -30,8 +31,23 @@ public class PaymentAuthsController extends ControllerBase {
 	 */
 	@RequestMapping("checkUserAuths")
 	@RestReturn(value=CheckUserAuthsResponse.class)
-	public RestResponse listServiceModuleAppsForBanner(CheckUserAuthsCommand cmd) {
+	public RestResponse checkUserAuths(CheckUserAuthsCommand cmd) {
 		CheckUserAuthsResponse res = paymentAuthsService.checkUserAuths(cmd);
+		RestResponse response =  new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	/**
+	 * <p>列出授权用户</p>
+	 * <b>URL: paymentAuths/listEnterpirsePaymentAuths</b>
+	 */
+	@RequestMapping("listEnterprisePaymentAuths")
+	@RestReturn(value=ListEnterprisePaymentAuthsResponse.class)
+	public RestResponse listEnterpirsePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
+		ListEnterprisePaymentAuthsResponse res = paymentAuthsService.listEnterprisePaymentAuths(cmd);
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
