@@ -62,8 +62,6 @@ public interface SiyinPrintService {
 
 	void deleteQueueJobs(DeleteQueueJobsCommand cmd);
 
-	void mfpLogNotification(String jobData, HttpServletResponse response);
-
 	void getPrintQrcode(HttpServletRequest req, HttpServletResponse rps);
 
     List<ListBizPayeeAccountDTO> listPayeeAccount(ListPayeeAccountCommand cmd);
@@ -77,4 +75,6 @@ public interface SiyinPrintService {
     void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
 
     void initPayeeAccount(MultipartFile[] files);
+
+    void mfpLogNotification(MfpLogNotificationCommand cmd);
 }

@@ -1737,16 +1737,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return cmd;
 	}
 
-
-	public void mfpLogNotification(String jobData, HttpServletResponse response) {
-		try {
-			if(siyinJobValidateServiceImpl.mfpLogNotification(jobData)){
-				response.getOutputStream().write("OK".getBytes());
-				return ;
-			}
-			response.getOutputStream().write("FAIL".getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public void mfpLogNotification(MfpLogNotificationCommand cmd) {
+		boolean isOk = siyinJobValidateServiceImpl.mfpLogNotification(cmd.getJobData());
+		if (!isOk) {
+			LOGGER.error("jobData:"+cmd.getJobData());
 		}
 	}
 
@@ -1935,7 +1930,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
-		mfpLogNotification(StringHelper.toJsonString(cmd),response);
+		
+		try {
+			response.getOutputStream().write("OK".getBytes());
+		} catch (IOException e) {
+			LOGGER.info("return ok failed");
+		}
+		
+		MfpLogNotificationCommand cmd2 = new MfpLogNotificationCommand();
+		cmd2.setJobData(StringHelper.toJsonString(cmd));
+		mfpLogNotification(cmd2);
 	}
 
 
