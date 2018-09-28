@@ -16,5 +16,5 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
   `update_time` DATETIME NULL COMMENT '记录创建时间',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='企业支付授权表';
