@@ -36,6 +36,7 @@ public class CreateCustomerEntryInfoCommand {
     private String remark;
     private Long orgId;
     private Long communityId;
+    private Boolean checkAuth;
 
     public Long getCommunityId() {
         return communityId;
@@ -149,6 +150,14 @@ public class CreateCustomerEntryInfoCommand {
         this.remark = remark;
     }
 
+
+    public Boolean getCheckAuth() {
+        return checkAuth;
+    }
+
+    public void setCheckAuth(Boolean checkAuth) {
+        this.checkAuth = checkAuth;
+    }
 
     @Override
     public String toString() {

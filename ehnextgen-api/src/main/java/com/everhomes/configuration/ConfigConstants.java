@@ -213,6 +213,9 @@ public interface ConfigConstants {
     public static final String SENSITIVE_FILENAME = "sensitiveword.fileName";
     public static final String SENSITIVE_FILEPATH = "sensitiveword.filePath";
     public static final String SENSITIVE_SETTING = "sensitiveword.settings";
-
     public static final String SHOW_PRIVATE_FLAG = "personal.show.private.flag";
+    public static final String SHOW_USER_VIP_LEVEL = "user.show.vip.level";
+
+    //支付双向安全校验
+    public static final String SECURITY_PAY_SERVER = "security.pay.server";
 }

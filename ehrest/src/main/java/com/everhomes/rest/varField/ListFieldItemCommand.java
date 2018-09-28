@@ -23,7 +23,17 @@ public class ListFieldItemCommand {
 
     private Long ownerId;
 
-	public Long getCategoryId() {
+	private String moduleName;
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public Long getCategoryId() {
 		return categoryId;
 	}
 

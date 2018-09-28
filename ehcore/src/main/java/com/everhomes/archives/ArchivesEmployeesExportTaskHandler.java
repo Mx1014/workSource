@@ -41,7 +41,7 @@ public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandl
         if(params.get("keywords") != null)
             keywords = (String) params.get("keywords");
         Integer namespaceId = null;
-        if(params.get("keywords") != null)
+        if(params.get("namespaceId") != null)
             namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
         Long userId = (Long) params.get("userId");
 

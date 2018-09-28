@@ -153,6 +153,12 @@ public interface YellowPageProvider {
 	List<IdNameDTO> listServiceTypeNames(Long type);
 
 
+	Map<Long, Long> getServiceTypeOrders(List<Long> idList);
+
+
+	void updateServiceTypeOrders(Long id, Long order);
+
+
 
 	void deleteProjectMainConfig(Long projectId, Long type);
 

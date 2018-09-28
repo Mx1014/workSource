@@ -92,4 +92,13 @@ public interface GeneralFormService {
 
 	List<GeneralFormValDTO> getGeneralFormValWithPrivi(GetGeneralFormValCommand cmd);
 
+
+    /**
+     * 表单打印模板接口
+     */
+    GeneralFormPrintTemplateDTO createGeneralFormPrintTemplate(AddGeneralFormPrintTemplateCommand cmd);
+
+    GeneralFormPrintTemplateDTO updateGeneralFormPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd);
+
+    GeneralFormPrintTemplateDTO getGeneralFormPrintTemplate(GetGeneralFormPrintTemplateCommand cmd);
 }

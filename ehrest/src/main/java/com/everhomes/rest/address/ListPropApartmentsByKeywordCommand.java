@@ -30,12 +30,12 @@ public class ListPropApartmentsByKeywordCommand {
     private Long communityId;
 	@NotNull
     private String buildingName;
+	private Long buildingId;
 	private String apartmentFloor;
     private String keyword;
     private Integer namespaceId;
     private Byte livingStatus;
 
-	private Long buildingId;
     private Double areaSizeFrom;
     private Double areaSizeTo;
     private Double rentAreaFrom;

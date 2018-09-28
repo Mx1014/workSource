@@ -7,6 +7,7 @@ import com.everhomes.parking.ParkingProvider;
 import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.invoice.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
@@ -66,7 +67,7 @@ public class InvoiceServiceImpl implements InvoiceService{
             throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_SELF_DEFINE,
                     "not find orderno");
         }
-        rechargeOrder.setInvoiceStatus((byte)2);
+        rechargeOrder.setInvoiceStatus(cmd.getStatus());
         rechargeOrder.setInvoiceCreateTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingRechargeOrder(rechargeOrder);
     }
@@ -88,5 +89,10 @@ public class InvoiceServiceImpl implements InvoiceService{
         List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
         List<ParkingLotDTO> parkingLotList = list.stream().map(r -> ConvertHelper.convert(r, ParkingLotDTO.class)).collect(Collectors.toList());
         return parkingLotList;
+    }
+    
+    @Override
+    public ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo (long orderNo){
+		return parkingProvider.parkingRechargeOrdersByOrderNo(orderNo);
     }
 }

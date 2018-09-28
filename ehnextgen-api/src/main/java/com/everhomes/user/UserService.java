@@ -370,4 +370,6 @@ public interface UserService {
      * @return
      */
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
+
+    void updateUserVipLevel(Long userId, Integer vipLevel);
 }

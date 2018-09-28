@@ -120,6 +120,8 @@ public interface YellowPageService {
 
 	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
 
+	void updateServiceTypeOrders(UpdateServiceTypeOrdersCommand cmd);
+
 	void updateAllianceTag(Integer namespaceId, String ownerType, Long ownerId, Long type, AllianceTagDTO parentTagDto,
 			List<AllianceTagDTO> childTagDtos);
 
