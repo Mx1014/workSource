@@ -84,26 +84,28 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
             //创建工作流
             Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), FlowConstants.INVESTMENT_AD_MODULE
-                    , "businessInvitation",approval.getId(), "GENERAL_APPROVAL");
+                    , "investmentAd",approval.getId(), "GENERAL_APPROVAL");
             if (null == flow) {
                 LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.INVESTMENT_AD_MODULE);
                 throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
-                        "requistion flow case not found.");
+                        "investmentAd flow case not found.");
             }
             CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
             createFlowCaseCommand.setReferId(referId);
             createFlowCaseCommand.setReferType("requisitionId");
             createFlowCaseCommand.setCurrentOrganizationId(cmd.getCurrentOrganizationId());
-            createFlowCaseCommand.setTitle("招商租赁看房申请");
+            createFlowCaseCommand.setTitle("房源招商申请提交");
             createFlowCaseCommand.setApplyUserId(UserContext.current().getUser().getId());
             createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
             createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-            createFlowCaseCommand.setServiceType("招商租赁看房申请");
+            createFlowCaseCommand.setServiceType("房源招商申请提交");
             createFlowCaseCommand.setProjectId(cmd.getOwnerId());
             createFlowCaseCommand.setProjectType(cmd.getOwnerType());
 
             flowService.createFlowCase(createFlowCaseCommand);
             PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+            generalFormProvider.setInvestmentAdId(referId,cmd.getInvestmentAdId());
+            
             return dto;
         });
         return result;

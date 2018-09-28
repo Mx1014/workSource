@@ -26,6 +26,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investment.InvitedCustomerService;
@@ -116,6 +117,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
 	
 	@Autowired
 	private InvitedCustomerService invitedCustomerService;
@@ -332,9 +336,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				List<Long> addressIds = dto.getAddressIds();
 				if (addressIds!=null && addressIds.size()>0) {
 					for (Long addressId : addressIds) {
-						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-						addressDTO.setAddressId(addressId);
-						addresses.add(addressDTO);
+						//如果不存在addressId，有时addressId前端会传0
+						if (addressId != null && addressId != 0) {
+							CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+							addressDTO.setAddressId(addressId);
+							addresses.add(addressDTO);
+						}
 					}
 				}
 				requirement.setAddresses(addresses);
@@ -348,7 +355,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}else {
 				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
 				//企业客户
@@ -361,9 +368,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				List<Long> addressIds = dto.getAddressIds();
 				if (addressIds!=null && addressIds.size()>0) {
 					for (Long addressId : addressIds) {
-						CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-						addressDTO.setAddressId(addressId);
-						addressDTOs.add(addressDTO);
+						//如果不存在addressId，有时addressId前端会传0
+						if (addressId != null && addressId != 0) {
+							CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+							addressDTO.setAddressId(addressId);
+							addressDTOs.add(addressDTO);
+						}
 					}
 				}
 				requirementDTO.setAddresses(addressDTOs);
@@ -380,7 +390,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				
 				finalCommandMap.put(dto.getCustomerName(), cmd2);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}
 		}
 		

@@ -3,7 +3,6 @@ package com.everhomes.scheduler;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.NoParamActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -13,6 +12,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.techpark.punch.PunchNotificationActionData;
 import com.everhomes.rest.techpark.punch.PunchType;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchNotification;
@@ -82,12 +82,12 @@ public class PunchNotificationScheduleJob extends QuartzJobBean {
         String content = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_NOTIFICATION_SCOPE, contentCode, PunchConstants.locale, model, "");
 
         for (PunchNotification punchNotification : notifications) {
-            sendPunchRemindMessage(punchNotification.getUserId(), title, content);
+            sendPunchRemindMessage(punchNotification.getEnterpriseId(), punchNotification.getUserId(), title, content);
         }
         punchProvider.invalidPunchNotificationList(condition);
     }
 
-    private void sendPunchRemindMessage(Long receiveUserId, String subject, String content) {
+    private void sendPunchRemindMessage(Long organizationId,Long receiveUserId, String subject, String content) {
         MessageDTO message = new MessageDTO();
         message.setBodyType(MessageBodyType.TEXT.getCode());
         message.setBody(content.toString());
@@ -96,7 +96,8 @@ public class PunchNotificationScheduleJob extends QuartzJobBean {
 
         //  set the route
         RouterMetaObject metaObject = new RouterMetaObject();
-        metaObject.setUrl(RouterBuilder.build(Router.ATTENDANCE_PUNCH, new NoParamActionData()));
+        String displayName = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_NOTIFICATION_SCOPE, PunchConstants.PUNCH_NOTIFICATION_DISPLAY_NAME, PunchConstants.locale, new HashMap<>(), "打卡");
+        metaObject.setUrl(RouterBuilder.build(Router.ATTENDANCE_PUNCH, new PunchNotificationActionData(organizationId), displayName));
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
         meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);

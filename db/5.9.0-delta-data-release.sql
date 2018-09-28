@@ -12,12 +12,18 @@
 -- AUTHOR: 黄鹏宇 2018年9月5日
 -- REMARK: 1、调用接口/customer/syncEnterpriseCustomerIndex
 
+-- AUTHOR: ryan  20180827
+-- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息(以下接口需等待上一接口执行完毕,基线大约需要10分钟)
 
--- AUTHOR: ryan  20180918
--- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息
+-- AUTHOR: ryan  20180827
+-- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像(需等待上一接口执行完毕,基线大约需要10分钟)
 
--- AUTHOR: ryan  20180918
--- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像
+-- AUTHOR: ryan  20180926
+-- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像(需等待上一接口执行完毕,基线大约需要10分钟)
+
+-- AUTHOR: 黄良铭 20180927
+-- REMARK: core server 和 point server  的kafka配置 加上:client-id: ehcore   (client-id的名字建议根据各服务名来起比如积分的可叫point)# 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable(5.9.0 之后的代码将认为没有配置即不启用kafka)
+--                可参照:http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011                   
 
 -- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -142,11 +148,13 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10009, 'zh_CN', '假期余额变动提醒：请假审批提交','${categoryName}申请（${requestTime}） 已提交，假期已扣除。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType eq 0>上班打卡<#else>下班打卡</#if>', 0);
+VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType == 0>上班打卡<#else>下班打卡</#if>', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 2, 'zh_CN', '上班打卡提醒','最晚${onDutyTime}上班打卡，立即打卡', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 3, 'zh_CN', '下班打卡提醒','上班辛苦了，记得打下班卡', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 4, 'zh_CN', '打卡首页','打卡', 0);
 
 -- AUTHOR: 张智伟 20180822
 -- REMARK: issue-36367 打卡记录报表排序
@@ -706,7 +714,7 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VA
 -- AUTHOR: tangcen
 -- REMARK: 添加招商申请表单的默认字段
 SET @general_form_templates_id = (SELECT MAX(id) FROM `eh_general_form_templates`);
-INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `update_time`, `create_time`) VALUES (@general_form_templates_id:=@general_form_templates_id+1, '0', '0', '0', 'EhOrganizations', '150000', 'business_invitation', '招商租赁', '0', 'DEFAULT_JSON', '[{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"用户姓名\",\r\n	\"fieldDisplayName\": \"用户姓名\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"系统自动获取APP端登录用户的姓名；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"手机号码\",\r\n	\"fieldDisplayName\": \"手机号码\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_PHONE\",\r\n	\"fieldType\": \"NUMBER_TEXT\",\r\n	\"remark\": \"系统自动获取APP端登录用户的手机号码；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"承租方\",\r\n	\"fieldDisplayName\": \"承租方\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"ENTERPRISE_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动输入；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"楼栋门牌\",\r\n	\"fieldDisplayName\": \"楼栋门牌\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"楼栋门牌\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动选择；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n}]', '1', '1', NULL, '2018-09-12 11:52:26');
+INSERT INTO `eh_general_form_templates` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `version`, `template_type`, `template_text`, `modify_flag`, `delete_flag`, `update_time`, `create_time`) VALUES (@general_form_templates_id:=@general_form_templates_id+1, '0', '0', '0', 'EhOrganizations', '150010', 'investmentAd', '房源招商', '0', 'DEFAULT_JSON', '[{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"用户姓名\",\r\n	\"fieldDisplayName\": \"用户姓名\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"系统自动获取APP端登录用户的姓名；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"手机号码\",\r\n	\"fieldDisplayName\": \"手机号码\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_PHONE\",\r\n	\"fieldType\": \"NUMBER_TEXT\",\r\n	\"remark\": \"系统自动获取APP端登录用户的手机号码；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"承租方\",\r\n	\"fieldDisplayName\": \"承租方\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"ENTERPRISE_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动输入；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"意向房源\",\r\n	\"fieldDisplayName\": \"意向房源\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"APARTMENT\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动选择；\",\r\n	\"disabled\": true,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n}]', '1', '1', NULL, '2018-09-12 11:52:26');
 
 -- AUTHOR: tangcen
 -- REMARK: 添加房源招商的报错信息
@@ -735,8 +743,8 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79500000', '房源招商', '16210000', NULL, 'investment-ad', '1', '2', '/16000000/16210000/79500000', 'zuolin', '80', '150010', '3', 'system', 'module', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79600000', '房源招商', '16210000', NULL, 'investment-ad', '1', '2', '/16000000/16210000/79600000', 'park', '80', '150010', '3', 'system', 'module', NULL);
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79710000', '招商客户管理', '16210000', NULL, 'invited-customer', '1', '2', '/16000000/16210000/79710000', 'zuolin', '80', '150020', '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79720000', '招商客户管理', '16210000', NULL, 'invited-customer', '1', '2', '/16000000/16210000/79720000', 'park', '80', '150020', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79710000', '招商客户管理', '16210000', NULL, 'business-invitation', '1', '2', '/16000000/16210000/79710000', 'zuolin', '80', '150020', '3', 'system', 'module', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79720000', '招商客户管理', '16210000', NULL, 'business-invitation', '1', '2', '/16000000/16210000/79720000', 'park', '80', '150020', '3', 'system', 'module', NULL);
 
 -- AUTHOR: yanjun
 -- REMARK: #34097  域空间配置V1.9（支持唤起小程序）
