@@ -2,8 +2,10 @@ package com.everhomes.investment;
 
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +36,8 @@ public interface InvitedCustomerService {
     List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd);
     
     InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd);
+
+    DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile);
 
 
 }
