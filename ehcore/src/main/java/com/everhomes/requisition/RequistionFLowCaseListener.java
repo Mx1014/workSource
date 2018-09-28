@@ -284,7 +284,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         return entities;
     }
 
-    private List<FlowCaseEntity> getSubEntities(GeneralFormVal val){
+    private List<FlowCaseEntity> getSubEntities(GeneralFormVal val) {
         List<FlowCaseEntity> subEntities = new ArrayList<>();
         //Map map = (Map)JSONObject.parse(val.getFieldValue());
         //JsonArray subArray = (JsonArray) map.get("subForms");

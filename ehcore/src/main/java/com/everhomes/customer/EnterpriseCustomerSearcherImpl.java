@@ -422,6 +422,10 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
         }
+
+        if(cmd.getTrackingUids() != null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
+        }
         
         if(null != cmd.getPropertyType()){
         	fb = FilterBuilders.andFilter(fb ,FilterBuilders.inFilter("propertyType", cmd.getPropertyType().split(",")));
