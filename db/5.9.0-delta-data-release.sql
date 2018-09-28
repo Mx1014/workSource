@@ -20,7 +20,7 @@
 -- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像
 
 -- AUTHOR: 黄良铭 20180927
--- REMARK: core server 和 point server  的kafka配置 加上:client-id: ehcore # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable(5.9.0 之后的代码将认为没有配置即不启用kafka)
+-- REMARK: core server 和 point server  的kafka配置 加上:client-id: ehcore   (client-id的名字建议根据各服务名来起比如积分的可叫point)# 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable(5.9.0 之后的代码将认为没有配置即不启用kafka)
 --                可参照:http://serverdoc.lab.everhomes.com/docs/faq/baseline-21535076011                   
 
 -- --------------------- SECTION END ---------------------------------------------------------
