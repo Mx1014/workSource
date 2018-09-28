@@ -271,7 +271,9 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
                 //add by huangliangming 如果消息内容为空,或空字符串,不允许发送
                 if(message.getBody()==null|| StringUtils.isBlank(message.getBody())){
                     LOGGER.debug("message body is blank !");
-                    return ;
+                    throw RuntimeErrorException.errorWith(MessagingErrorCode.SCOPE, MessagingErrorCode.NULL_MESSAGE_CODE,
+                            "message body is blank  ");
+
                 }
 
                 //手动添加消息唯一索引
