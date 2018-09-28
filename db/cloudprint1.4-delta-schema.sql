@@ -7,7 +7,7 @@ ALTER TABLE `eh_service_module_apps` ADD COLUMN `enable_enterprise_pay_flag`  ti
 
 -- AUTHOR: 缪洲
 -- REMARK: issue-34780 企业支付授权表
-CREATE TABLE `eh_punch_notifications` (
+CREATE TABLE `eh_enterprise_payment_auths` (
   `id` BIGINT NOT NULL COMMENT '主键',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
   `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
