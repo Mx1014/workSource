@@ -536,16 +536,14 @@ DELETE FROM eh_var_field_ranges WHERE field_id = 5 AND module_name='enterprise_c
 -- REMARK 增加招商客户权限细化
 SET @id = (select max(id) from eh_service_module_privileges);
 
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150001, '查看客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150002, '创建客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150003, '编辑客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150004, '删除客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150005, '一键转为租客权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150008, '导入权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150009, '导出权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150010, '一键转为资质客户权限', 0, SYSDATE());
-
-
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150001, '查看客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150002, '创建客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150003, '编辑客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150004, '删除客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150005, '客户转换', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150008, '导入客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150009, '导出客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150010, '一键转为资质客户', 0, SYSDATE());
 
 
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150001, 0, '招商管理 查看客户权限', '招商管理 业务模块权限', NULL);
