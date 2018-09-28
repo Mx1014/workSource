@@ -122,7 +122,7 @@ public class RequisitionServiceImpl implements RequisitionService{
 
     @Override
     public ListRequisitionsResponse listRequisitions(ListRequisitionsCommand cmd) {
-        checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.REQUISITION_VIEW);
+        //checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(), PrivilegeConstants.REQUISITION_VIEW);
         ListRequisitionsResponse response = new ListRequisitionsResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
