@@ -68,6 +68,7 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setRegionCode(r.getValue(t2.REGION_CODE));
         member.setContractEndTime(r.getValue(t2.CONTRACT_END_TIME));
         member.setContactShortToken(r.getValue(t2.CONTACT_SHORT_TOKEN));
+        member.setAccount(r.getValue(t2.ACCOUNT));
 
         return member;
     }

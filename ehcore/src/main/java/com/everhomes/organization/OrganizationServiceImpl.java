@@ -7251,6 +7251,30 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(Long detailId, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(String contactToken, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
     public void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd) {
         OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
         member.setContactName(cmd.getContactName());
@@ -13139,5 +13163,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+    //	物业组所需获取企业员工的唯一标识符
+    @Override
+    public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(targetId, orgId);
+        if(employee == null)
+            return "";
+        return employee.getAccount();
+    }
 }
 
