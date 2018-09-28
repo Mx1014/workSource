@@ -633,7 +633,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 
-                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
+                        order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
                     //判断支付金额与订单金额是否相同
                     if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
                         onOrderRecordSuccess(order);
