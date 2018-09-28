@@ -14,7 +14,7 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `app_id` BIGINT NOT NULL COMMENT '授权应用id',
   `app_name` VARCHAR(32) NOT NULL  COMMENT '授权应用名称',
   `source_id` BIGINT NOT NULL COMMENT '授权用户id',
-  `source_name` VARCHAR(32) COMMENT '授权用户名称'
+  `source_name` VARCHAR(32) COMMENT '授权用户名称',
   `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
   `update_time` DATETIME NULL COMMENT '记录创建时间',
