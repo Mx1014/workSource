@@ -44,16 +44,13 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForBannerResponse;
-<<<<<<< HEAD
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.google.gson.reflect.TypeToken;
 import org.jooq.*;
-=======
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForEnterprisePayCommand;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForEnterprisePayResponse;
 import com.everhomes.sequence.SequenceProvider;
->>>>>>> b4db8304ad... issue-34780
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,7 +288,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	}
 
 	@Override
-<<<<<<< HEAD
 	public ServiceModuleAppDTO installApp(InstallAppCommand cmd) {
 
 		ServiceModuleApp serviceModuleApp = findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
@@ -401,26 +397,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			apps.remove(pageSize);
 			response.setNextPageAnchor(apps.get(pageSize - 1).getId());
 		}
-=======
-	public ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
-		ListServiceModuleAppsForEnterprisePayResponse response  = new ListServiceModuleAppsForEnterprisePayResponse();
-		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
-
-		if(releaseVersion == null){
-			return response;
-		}
-		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePay());
-
-		if(apps == null){
-			return response;
-		}
-
->>>>>>> b4db8304ad... issue-34780
-
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
 			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-<<<<<<< HEAD
 			OrganizationApp orgapp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(app.getOriginId(), cmd.getOrganizationId());
 			if (orgapp != null){
 				dto.setOrgAppId(orgapp.getId());
@@ -477,6 +456,32 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
+		
+		@Override
+		public ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
+			ListServiceModuleAppsForEnterprisePayResponse response  = new ListServiceModuleAppsForEnterprisePayResponse();
+			PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+
+			if(releaseVersion == null){
+				return response;
+			}
+			List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePayFlag());
+
+			if(apps == null){
+				return response;
+			}
+
+
+			List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+			for (ServiceModuleApp app: apps){
+				ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+				dtos.add(dto);
+			}
+
+			response.setApps(dtos);
+
+			return response;
+		}
 
 
 	@Override
@@ -1389,13 +1394,5 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			return null;
 		});
 	}
-=======
-			dtos.add(dto);
-		}
-
-		response.setApps(dtos);
-
-		return response;
-	}
->>>>>>> b4db8304ad... issue-34780
+	
 }
