@@ -83,6 +83,7 @@ import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.buttscript.TrueOrFalseCode;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CommunityInfoDTO;
@@ -7201,5 +7202,54 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             return org;
         }
 
+    /**
+     * 根据手机号查询某域空间中的用户
+     * @param cmd
+     * @return
+     */
+    @Override
+    public FindUsersByPhonesResponse findUsersByPhones(FindUsersByPhonesCommand cmd) {
+        LOGGER.info("findUsersByPhones  -->  cmd:[{}]",cmd);
+        Integer namespaceId = cmd.getNamespaceId();
+        List<String> phones = cmd.getPhones() ;
+        FindUsersByPhonesResponse res = new FindUsersByPhonesResponse();
+        List<FindUsersByPhonesDTO> list = new ArrayList<FindUsersByPhonesDTO>();
+        res.setDtos(list);
+        //如果
+        if(namespaceId ==null || phones ==null||phones.size()<1 ){
+            res.setErrorMsg("namespaceId is null");
+            return res ;
+        }
+        if( phones ==null||phones.size()<1 ){
+            res.setErrorMsg("phones is null");
+            return res ;
+        }
+        for(String phone : phones){
+            FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
+            dto.setPhone(phone);
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+            if (userIdentifier != null) {
+                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                if (user != null) {
+                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
+                    //查询有结果，保存
+                    dto.setUserDTO(userDTO);
+                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
+                }else  {
+                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+                }
+            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
+                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+            }
+
+            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
+                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
+                          && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
+                res.getDtos().add(dto);
+            }
+        }
+        return res;
+    }
 
 }

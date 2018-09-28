@@ -372,4 +372,11 @@ public interface UserService {
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 
     void updateUserVipLevel(Long userId, Integer vipLevel);
+
+    /**
+     * 批量通过手机号查询用户信息
+     * @param cmd
+     * @return
+     */
+    FindUsersByPhonesResponse findUsersByPhones(FindUsersByPhonesCommand cmd) ;
 }
