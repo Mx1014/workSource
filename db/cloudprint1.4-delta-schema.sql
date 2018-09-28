@@ -13,7 +13,7 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
   `app_id` BIGINT NOT NULL COMMENT '授权应用id',
   `source_id` BIGINT NOT NULL COMMENT '授权用户id',
-  `source_type`VARCHAR(32) NOT NULL COMMENT '用户类型',
+  `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
   `update_time` DATETIME NULL COMMENT '记录创建时间',
   PRIMARY KEY (`id`),
