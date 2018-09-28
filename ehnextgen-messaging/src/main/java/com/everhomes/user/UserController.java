@@ -1779,4 +1779,22 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+
+
+	/**
+	 * <b>URL: /user/findUsersByPhones</b>
+	 * <p>通过域空间和手机号查询用户信息</p>
+	 * @return
+	 */
+	@RequestMapping("findUsersByPhones")
+	@RestReturn(FindUsersByPhonesResponse.class)
+	public RestResponse findUsersByPhones(FindUsersByPhonesCommand cmd){
+
+		RestResponse resp = new RestResponse(userService.findUsersByPhones(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+	}
+
 }
