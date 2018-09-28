@@ -942,28 +942,37 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
         CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
-        dto.setRequirement(requirementDTO);
+        if(requirementDTO != null){
+            dto.setRequirement(requirementDTO);
+
+        }
 
 
 
         List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
         List<CustomerContactDTO> contactDTOS = new ArrayList<>();
-        customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
-        dto.setContacts(contactDTOS);
+        if(customerContacts != null && customerContacts.size() > 0){
+            customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+            dto.setContacts(contactDTOS);
+        }
+
 
 
         List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
-        List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
-        trackers.forEach(r-> {
-            CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
-            List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
-            if (oMembers != null && oMembers.size()>0) {
-                trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
-                trackerDTO.setTrackerName(oMembers.get(0).getContactName());
-            }
-            trackerDTOS.add(trackerDTO);
-        });
-        dto.setTrackers(trackerDTOS);
+        if(trackers != null && trackers.size() > 0){
+            List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+            trackers.forEach(r-> {
+                CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+                List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+                if (oMembers != null && oMembers.size()>0) {
+                    trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                    trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+                }
+                trackerDTOS.add(trackerDTO);
+            });
+            dto.setTrackers(trackerDTOS);
+        }
+
 
 
 

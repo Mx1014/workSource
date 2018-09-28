@@ -659,7 +659,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         sendMessageToAdmin(visitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         VisitorSysVisitor relatedVisitor = null;
         if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
-            //relatedVisitor.setVisitStatus();
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getEnterpriseFormValues());
         }else {
             relatedVisitor = generateRelatedVisitor(visitor,cmd.getCommunityFormValues());
@@ -696,6 +695,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 break;
             default:
                 return;
+        }
+//      自助登记状态置为已到访,活动记录为自助登记
+        VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+            if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+                actionFlag = ownerType==VisitorsysOwnerType.COMMUNITY?(byte)1:(byte)4;
+                action = visitorSysActionProvider.findVisitorSysActionByAction(visitor.getId(),actionFlag);
+            }
         }
         if(action == null){
             action = new VisitorSysAction();
@@ -2272,11 +2279,17 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 visitor.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
             }
 //          自助登记状态置为已到访
-            VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
-            if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
-                if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
-                    if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY)
+            if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+                if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),visitor.getOwnerId());
+                    if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
                         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
+                }else{
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+                    if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+                        visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
                 }
             }
             //清理临时访客不需要的属性
@@ -2450,6 +2463,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //创建企业临时访客，如果状态是等待确认，那么设置对应园区访客状态为隐藏
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+
         if(relatedVisitor == null
                 && visitorType == VisitorsysVisitorType.TEMPORARY){
             convert.setBookingStatus(null);
@@ -2477,6 +2491,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         else {
             convert.setBookingStatus(relatedVisitor == null ? visitor.getBookingStatus() : relatedVisitor.getBookingStatus());
             convert.setVisitStatus(relatedVisitor == null ? visitor.getVisitStatus() : relatedVisitor.getVisitStatus());
+        }
+//      企业是否需要到访确认
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            VisitorSysConfiguration entConfig = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+            if(TrueOrFalseFlag.FALSE.getCode().equals(entConfig.getBaseConfig().getVisitorConfirmFlag())){
+                convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+            }
         }
         convert.setEnterpriseName(visitor.getEnterpriseName());
         //门禁授权信息不需要拷贝，如果为空则为空
