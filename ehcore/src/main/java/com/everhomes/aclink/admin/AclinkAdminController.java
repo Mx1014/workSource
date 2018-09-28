@@ -176,7 +176,7 @@ public class AclinkAdminController extends ControllerBase {
     	//TODO 
         RestResponse response = new RestResponse(doorAccessService.listFormalAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+        response.setErrorDescription("OK"); 
         return response;
     }
     
@@ -207,7 +207,6 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("createFormalAuthBatch")
     @RestReturn(value=String.class)
     public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
-//        cmd.setIsOpenAuth((byte)0);
     	doorAccessService.createFormalAuthBatch(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -162,7 +162,9 @@ public class AclinkServerProviderImpl implements AclinkServerProvider{
 							.in(context.select(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID).from(Tables.EH_DOOR_ACCESS)
 									.where(Tables.EH_DOOR_ACCESS.ID
 											.in(context.select(Tables.EH_DOOR_AUTH.DOOR_ID).from(Tables.EH_DOOR_AUTH)
-													.where(Tables.EH_DOOR_AUTH.USER_ID.eq(userId)))
+													.where(Tables.EH_DOOR_AUTH.USER_ID.eq(userId)
+															//LICENSEE_TYPE
+															.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq((byte)0).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull()))))
 											.and(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode())))));
                 	
                 }

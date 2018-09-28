@@ -2,7 +2,6 @@ package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -13,9 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -31,17 +27,14 @@ import com.everhomes.rest.aclink.DoorAccessLiteDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.DoorAccessType;
-import com.everhomes.rest.aclink.DoorAuthLiteDTO;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.records.EhDoorAccessRecord;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -53,12 +46,6 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     @Autowired
     private DbProvider dbProvider;
 
-    @Autowired
-    private ShardingProvider shardingProvider;
-
-    @Autowired
-    private SequenceProvider sequenceProvider;
-    
     @Autowired
     private AclinkServerProvider aclinkServerProvider;
 
@@ -463,6 +450,5 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         });
 		return listDoorGroupRel;
 	}
-
 
 }

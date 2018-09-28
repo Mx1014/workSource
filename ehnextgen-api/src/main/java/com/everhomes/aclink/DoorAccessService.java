@@ -100,7 +100,7 @@ public interface DoorAccessService {
     //20180914 add by liqingyan
     CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd);
 
-    void test();
+//    void test();
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 
@@ -152,7 +152,7 @@ public interface DoorAccessService {
     
     void deleteDoorAuthLevel(Long id);
     
-    String faceTest();
+//    String faceTest();
 
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(

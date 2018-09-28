@@ -19,7 +19,6 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
@@ -33,17 +32,13 @@ import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAclinkCamerasDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthLogsDao;
-import com.everhomes.server.schema.tables.pojos.EhAclinkCameras;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuthLogs;
-import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
 import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -54,16 +49,12 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Component
@@ -73,9 +64,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     
     @Autowired
     private DbProvider dbProvider;
-
-    @Autowired
-    private ShardingProvider shardingProvider;
 
     @Autowired
     private SequenceProvider sequenceProvider;
@@ -146,14 +134,52 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             return null;
         }
     }
+    
+  //兼容LICENSEE_TYPE by liuyilin 20180921
+    private Condition fetchUserLicensee(Condition con){
+    	Condition rsp = Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull());
+    	return con == null? rsp: con.and(rsp);
+    }
 
+    /**
+     * 查用户授权,不包括用户所属组织的权限
+     */
     @Override
     public List<DoorAuth> queryDoorAuth(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
 
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         //兼容LICENSEE_TYPE by liuyilin 20180921
-        query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()));
+        query.addConditions(fetchUserLicensee(null));
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_DOOR_AUTH.ID.ge(locator.getAnchor()));
+            }
+
+        if(count > 0) query.addLimit(count + 1);
+        List<DoorAuth> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, DoorAuth.class);
+        });
+
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+    
+    /**
+     * 查用户及其所属组织的权限
+     */
+    @Override
+    public List<DoorAuth> queryDoorAuthAllLicensee(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
@@ -182,8 +208,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        //兼容LICENSEE_TYPE by liuyilin 20180921
-        query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()));
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
         if(locator.getAnchor() != null && locator.getAnchor() != 0) {
@@ -211,41 +235,41 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
     }
+//没被调用
+//    //Find by userId
+//    public List<DoorAuth> queryDoorAuthByUserId(ListingLocator locator, long userId, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+//        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+//
+//            @Override
+//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//                    SelectQuery<? extends Record> query) {
+//                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+//                return query;
+//            }
+//
+//        });
+//    }
+//
+//    public List<DoorAuth> queryDoorAuthByOwner(ListingLocator locator, long ownerId, byte ownerType, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+//        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+//            @Override
+//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//                    SelectQuery<? extends Record> query) {
+//                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(ownerId));
+//                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(ownerType));
+//                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+//                return query;
+//            }
+//
+//        });
+//    }
 
-    //Find by userId
-    public List<DoorAuth> queryDoorAuthByUserId(ListingLocator locator, long userId, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
-
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
-                return query;
-            }
-
-        });
-    }
-
-    public List<DoorAuth> queryDoorAuthByOwner(ListingLocator locator, long ownerId, byte ownerType, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(ownerId));
-                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(ownerType));
-                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
-                return query;
-            }
-
-        });
-    }
-
-    @Override
-    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count) {
+	@Override
+	public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, ListAuthsByLevelandLocationCommand qryCmd, int count) {
 
         long now = DateHelper.currentGMTTime().getTime();
 
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthAllLicensee(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -254,17 +278,18 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                         and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
                         and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
-                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(getLevelQryCondition(qryCmd));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
 
-                if(driver != null) {
-                    query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+                if(qryCmd.getDriver() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(qryCmd.getDriver()));
                 }else{
                 	//不传则过滤掉bus门禁 by liuyilin 20180614
                 	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.ne(DoorAccessDriverType.BUS.getCode()));
                 }
 
                 query.addConditions(c1.or(c2));
+                query.addGroupBy(Tables.EH_DOOR_AUTH.DOOR_ID);
                 return query;
             }
 
@@ -309,34 +334,37 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
 
-    @Override
-    public DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId) {
-        ListingLocator locator = new ListingLocator();
-        long now = DateHelper.currentGMTTime().getTime();
+//    @Override
+//    public DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId) {
+//        ListingLocator locator = new ListingLocator();
+//        long now = DateHelper.currentGMTTime().getTime();
+//
+//        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+//
+//            @Override
+//            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//                    SelectQuery<? extends Record> query) {
+//                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()).
+//                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+//                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+//                Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
+//                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+//                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+//                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+//                query.addConditions(c1.or(c2));
+//                return query;
+//            }
+//        });
+//
+//        if(auths == null || auths.size() == 0) {
+//            return null;
+//        }
+//        return auths.get(0);
+//    }
 
-        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
-
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()).
-                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
-                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
-                Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
-                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
-                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
-                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
-                query.addConditions(c1.or(c2));
-                return query;
-            }
-        });
-
-        if(auths == null || auths.size() == 0) {
-            return null;
-        }
-        return auths.get(0);
-    }
-
+    /**
+     * 查用户远程开门授权,不包括用户所属组织的权限
+     */
     @Override
     public DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId, Byte isRemote) {
         ListingLocator locator = new ListingLocator();
@@ -352,6 +380,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                         and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                //查用户远程开门授权,不包括用户所属组织的权限 TODO 远程开门完善
+                query.addConditions(fetchUserLicensee(null));
+                
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 if(isRemote != null) {
@@ -480,22 +511,23 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, String driver, int count) {
+    public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, ListAuthsByLevelandLocationCommand qryCmd, Byte rightRemote, int count) {
         return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(getLevelQryCondition(qryCmd));
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq((byte) 1));
-                if(rightRemote != null && rightRemote == (byte) 1){
-                	query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq((byte) 1));
+                query.addGroupBy(Tables.EH_DOOR_AUTH.DOOR_ID);
+                if(rightRemote != null ){
+                	query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(rightRemote));
                 }
 
-	            if(driver != null && !driver.isEmpty()){
-	            	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));
+	            if(qryCmd.getDriver() != null && !qryCmd.getDriver().isEmpty()){
+	            	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(qryCmd.getDriver()));
 	            }else{
                 	//不传则过滤掉bus门禁 by liuyilin 20180614
                 	query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.ne(DoorAccessDriverType.BUS.getCode()));
@@ -506,6 +538,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         });
     }
 
+    /**
+     * 令令授权,授权对象是用户本身,不包含用户所在组织的权限
+     */
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
 
@@ -584,8 +619,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> queryValidDoorAuths(ListingLocator locator, Long userId, Long ownerId, Byte ownerType, int count) {
 
-        long now = DateHelper.currentGMTTime().getTime();
-
         return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -646,7 +679,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                         )
                         //兼容licensee_type by liuyilin 20180921
                         .and(
-                                Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode())
+                        		fetchUserLicensee(null)
                         )
                 ).asTable(Tables.EH_DOOR_AUTH.getName())
             )
@@ -705,7 +738,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                                             Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())
                                             //兼容LICENSEE_TYPE by liuyilin 20180921
                                     .and(
-                                            Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()))
+                                    		fetchUserLicensee(null))
                                     .and(
                                             Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
                                     .asTable(Tables.EH_DOOR_AUTH.getName()))
@@ -1404,16 +1437,20 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 				//门禁3.0中没有开门权限等同于没有任何权限 by liuyilin 20180919
 				.and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(DoorAuthStatus.VALID.getCode()))
 				.and(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
-		Condition userCond = Tables.EH_USERS.ID.isNotNull();
 		Condition creatorCond = Tables.EH_USERS.ID.isNotNull();
+		if(cmd.getOwnerId() != null && cmd.getOwnerType() != null){
+			cond = cond.and(Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getOwnerId()).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(cmd.getOwnerType())));
+		}else{
+//			return dtos;
+		}
 		if(cmd.getDoorId() != null){
 			cond = cond.and(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
 		}
 		if(cmd.getCreateTimeStart() != null && cmd.getCreateTimeEnd() != null){
 			cond = cond.and(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getCreateTimeStart()), new Timestamp(cmd.getCreateTimeEnd())));
 		}
-		if(cmd.getCreatorName() != null){
-			creatorCond = creatorCond.and(Tables.EH_USERS.NICK_NAME.like("%"+cmd.getCreatorName()+"%"));
+		if(cmd.getCreator() != null){
+			creatorCond = creatorCond.and(Tables.EH_USERS.NICK_NAME.like("%"+cmd.getCreator()+"%"));
 		}
 		if(cmd.getKeyword() != null){
 			cond = cond.and(Tables.EH_DOOR_AUTH.NICKNAME.like("%"+ cmd.getKeyword() +"%").or(Tables.EH_DOOR_AUTH.PHONE.like("%"+ cmd.getKeyword() +"%")));
@@ -1423,10 +1460,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 		}
 		
 		com.everhomes.server.schema.tables.EhUsers tc = Tables.EH_USERS.as("tc");
-		com.everhomes.server.schema.tables.EhUsers tu = Tables.EH_USERS.as("tu");
 		
 		SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_AUTH)
-				.join(context.select(Tables.EH_USERS.ID,Tables.EH_USERS.NICK_NAME).from(Tables.EH_USERS).where(userCond).asTable("tu")).on(Tables.EH_DOOR_AUTH.USER_ID.eq(tu.ID))
 				.join(context.select(Tables.EH_USERS.ID,Tables.EH_USERS.NICK_NAME).from(Tables.EH_USERS).where(creatorCond).asTable("tc")).on(Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(tc.ID))
 				.join(Tables.EH_DOOR_ACCESS).on(Tables.EH_DOOR_AUTH.DOOR_ID.eq(Tables.EH_DOOR_ACCESS.ID))
 				.where(cond).orderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc()).limit(pageSize + 1);
@@ -1505,31 +1540,29 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 		
 	}
 
+	//单个对象
 	@Override
 	public DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte licenseeType) {
-		ListingLocator locator = new ListingLocator();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
 
-        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
 
-            @Override
-            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                    SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
-                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
-                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
-                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
-                if(licenseeType != null) {
-                    query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(licenseeType));
-                }
-
-                return query;
-            }
-        });
-
-        if(auths == null || auths.size() == 0) {
-            return null;
+        query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+        query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+        query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+        query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+        if(licenseeType != null) {
+            query.addConditions(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(licenseeType));
+        }else{
+        	query.addConditions(fetchUserLicensee(null));
         }
-        return auths.get(0);
+
+        query.addLimit(1);
+        
+        List<DoorAuth> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, DoorAuth.class);
+        });
+        return objs == null || objs.size() == 0? null :objs.get(0);
 	}
 
 	@Override
@@ -1553,6 +1586,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return list;
 	}
 
+	/**
+	 * 根据单个用户相关信息(用户id,组织架构节点id列表,地址等),列出有效授权,每个门禁最多有一条
+	 */
 	@Override
 	public List<DoorAuthLiteDTO> listAuthsByLevelandLocation(CrossShardListingLocator locator, Integer count, ListAuthsByLevelandLocationCommand qryCmd) {
 		List<DoorAuthLiteDTO> list = new ArrayList<DoorAuthLiteDTO>();
@@ -1564,55 +1600,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
         Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
         
-        Condition cu = Tables.EH_DOOR_AUTH.ID.isNotNull();
-        
-        if(qryCmd.getUserId() != null ){
-        	cu = cu.and(Tables.EH_DOOR_AUTH.USER_ID.eq(qryCmd.getUserId()).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.USER.getCode()).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull())));
-        }else{
-        	LOGGER.info("user id is null");
-        	return null;
-        }
-        
-        if(qryCmd.getOrgIds() != null && qryCmd.getOrgIds().size() > 0 ){
-        	cu = cu.or(Tables.EH_DOOR_AUTH.USER_ID.in(qryCmd.getOrgIds()).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ENTERPRISE.getCode())));
-        }else{
-        	LOGGER.info("user id is null");
-        	return null;
-        }
-        
-        if(qryCmd.getFamilyAddresses() != null && qryCmd.getFamilyAddresses().size() > 0){
-        	List<Long> faIds = new ArrayList<Long>();
-        	List<Long> fbIds = new ArrayList<Long>();
-        	List<Long> fcIds = new ArrayList<Long>();
-        	for(FamilyAddressDTO dto : qryCmd.getFamilyAddresses()){
-        		faIds.add(dto.getAdddress().getId());
-        		fbIds.add(dto.getAdddress().getBuildingId());
-        		fcIds.add(dto.getAdddress().getCommunityId());
-        	}
-        	Condition faCon = Tables.EH_DOOR_AUTH.USER_ID.in(faIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_ADDRESS.getCode()));
-        	Condition fbCon = Tables.EH_DOOR_AUTH.USER_ID.in(fbIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_BUILDING.getCode()));
-        	Condition fcCon = Tables.EH_DOOR_AUTH.USER_ID.in(fcIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_COMMUNITY.getCode()));
-        	cu = cu.or(faCon.or(fbCon).or(fcCon));
-        }
-        
-        if(qryCmd.getOrganizationAddresses() != null && qryCmd.getOrganizationAddresses().size() > 0){
-        	List<Long> oaIds = new ArrayList<Long>();
-        	List<Long> obIds = new ArrayList<Long>();
-        	List<Long> ocIds = new ArrayList<Long>();
-        	for(OrganizationAddressDTO dto : qryCmd.getOrganizationAddresses()){
-        		if(dto.getAdddresses() != null && dto.getAdddresses().size() > 0){
-        			for(AddressDTO item : dto.getAdddresses()){
-        				oaIds.add(item.getId());
-        				obIds.add(item.getBuildingId());
-        				ocIds.add(item.getCommunityId());
-        			}
-        		}
-        	}
-        	Condition oaCon = Tables.EH_DOOR_AUTH.USER_ID.in(oaIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_ADDRESS.getCode()));
-        	Condition obCon = Tables.EH_DOOR_AUTH.USER_ID.in(obIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_BUILDING.getCode()));
-        	Condition ocCon = Tables.EH_DOOR_AUTH.USER_ID.in(ocIds).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_COMMUNITY.getCode()));
-        	cu = cu.or(oaCon.or(obCon).or(ocCon));
-        }
+        Condition cu = getLevelQryCondition(qryCmd);
         
 		Condition cond = Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode())
 				//门禁3.0中没有开门权限等同于没有任何权限 by liuyilin 20180919
@@ -1629,14 +1617,17 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     	if(locator.getAnchor() != null) {
     		cond = cond.and(Tables.EH_DOOR_AUTH.ID.ge(locator.getAnchor()));
             }
-		
-		SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_AUTH)
+    	
+    	SelectQuery<Record> query = context.select().from(Tables.EH_DOOR_AUTH)
 				.leftOuterJoin(Tables.EH_DOOR_ACCESS).on(Tables.EH_DOOR_AUTH.DOOR_ID.eq(Tables.EH_DOOR_ACCESS.ID))
 				.leftOuterJoin(Tables.EH_ORGANIZATIONS).on(Tables.EH_DOOR_AUTH.OWNER_ID.eq(Tables.EH_ORGANIZATIONS.ID).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode())))
 				.leftOuterJoin(Tables.EH_COMMUNITIES).on(Tables.EH_DOOR_AUTH.OWNER_ID.eq(Tables.EH_COMMUNITIES.ID).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())))
-				.where(cond.and(cu).and(c1.or(c2))).orderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc()).limit(count + 1);
+				.where(cond.and(cu).and(c1.or(c2))).groupBy(Tables.EH_DOOR_AUTH.DOOR_ID).orderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc()).getQuery();
+    	if(count > 0){
+    		query.addLimit(count + 1);
+    	}
 		
-        step.fetch().map((r) -> {
+    	query.fetch().map((r) -> {
         	DoorAuthLiteDTO dto = ConvertHelper.convert(r, DoorAuthLiteDTO.class);
         	if(r.getValue(Tables.EH_DOOR_AUTH.OWNER_TYPE) == (DoorAccessOwnerType.ENTERPRISE.getCode())){
         		dto.setOwnerName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
@@ -1646,12 +1637,13 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         	dto.setDoorName(r.getValue(Tables.EH_DOOR_ACCESS.DISPLAY_NAME));
         	dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
         	dto.setId(r.getValue(Tables.EH_DOOR_AUTH.ID));
+        	dto.setDoorId(r.getValue(Tables.EH_DOOR_AUTH.DOOR_ID));
         	list.add(dto);
-        	//TODO 去重?userId,doorId,authType,licenseeType,groupType
+        	//TODO 去重?userId,doorId,authType,licenseeType,groupType,临时授权
             return null;
         });
 
-        if(list.size() > count) {
+        if(count > 0 && list.size() > count) {
             locator.setAnchor(list.get(list.size() - 1).getId());
         } else {
             locator.setAnchor(null);
@@ -1660,4 +1652,94 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return list;
 
 	}
+	
+	private Condition getLevelQryCondition(ListAuthsByLevelandLocationCommand qryCmd) {
+		Condition cu = Tables.EH_DOOR_AUTH.ID.isNotNull();
+
+		if (qryCmd.getUserId() != null) {
+			cu = cu.and(Tables.EH_DOOR_AUTH.USER_ID.eq(qryCmd.getUserId()).and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE
+					.eq(DoorLicenseType.USER.getCode()).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull())));
+		} else {
+			LOGGER.info("user id is null");
+			return cu;
+		}
+
+		if (qryCmd.getOrgIds() != null && qryCmd.getOrgIds().size() > 0) {
+			cu = cu.or(Tables.EH_DOOR_AUTH.USER_ID.in(qryCmd.getOrgIds())
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ENTERPRISE.getCode())));
+		} 
+
+		if (qryCmd.getFamilyAddresses() != null && qryCmd.getFamilyAddresses().size() > 0) {
+			List<Long> faIds = new ArrayList<Long>();
+			List<Long> fbIds = new ArrayList<Long>();
+			List<Long> fcIds = new ArrayList<Long>();
+			for (FamilyAddressDTO dto : qryCmd.getFamilyAddresses()) {
+				faIds.add(dto.getAdddress().getId());
+				fbIds.add(dto.getAdddress().getBuildingId());
+				fcIds.add(dto.getAdddress().getCommunityId());
+			}
+			Condition faCon = Tables.EH_DOOR_AUTH.USER_ID.in(faIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_ADDRESS.getCode()));
+			Condition fbCon = Tables.EH_DOOR_AUTH.USER_ID.in(fbIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_BUILDING.getCode()));
+			Condition fcCon = Tables.EH_DOOR_AUTH.USER_ID.in(fcIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.FAMILY_COMMUNITY.getCode()));
+			cu = cu.or(faCon.or(fbCon).or(fcCon));
+		}
+
+		if (qryCmd.getOrganizationAddresses() != null && qryCmd.getOrganizationAddresses().size() > 0) {
+			List<Long> oaIds = new ArrayList<Long>();
+			List<Long> obIds = new ArrayList<Long>();
+			List<Long> ocIds = new ArrayList<Long>();
+			for (OrganizationAddressDTO dto : qryCmd.getOrganizationAddresses()) {
+				if (dto.getAdddresses() != null && dto.getAdddresses().size() > 0) {
+					for (AddressDTO item : dto.getAdddresses()) {
+						oaIds.add(item.getId());
+						obIds.add(item.getBuildingId());
+						ocIds.add(item.getCommunityId());
+					}
+				}
+			}
+			Condition oaCon = Tables.EH_DOOR_AUTH.USER_ID.in(oaIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_ADDRESS.getCode()));
+			Condition obCon = Tables.EH_DOOR_AUTH.USER_ID.in(obIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_BUILDING.getCode()));
+			Condition ocCon = Tables.EH_DOOR_AUTH.USER_ID.in(ocIds)
+					.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq(DoorLicenseType.ORG_COMMUNITY.getCode()));
+			cu = cu.or(oaCon.or(obCon).or(ocCon));
+		}
+		return cu;
+	}
+
+	@Override
+	public DoorAuth queryValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd) {
+        ListingLocator locator = new ListingLocator();
+
+        List<DoorAuth> auths = queryDoorAuthAllLicensee(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(getLevelQryCondition(ConvertHelper.convert(qryCmd,ListAuthsByLevelandLocationCommand.class)));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(qryCmd.getDoorId()));
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(DoorAuthStatus.VALID.getCode()));
+                if(qryCmd.getRightVisitor() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(qryCmd.getRightVisitor().byteValue()));
+                }
+                if(qryCmd.getRightRemote() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(qryCmd.getRightRemote().byteValue()));
+                }
+
+                return query;
+            }
+        });
+
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        return auths.get(0);
+	}
+
 }

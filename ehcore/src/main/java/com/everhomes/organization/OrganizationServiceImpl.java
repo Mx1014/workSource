@@ -6009,19 +6009,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
 
-        // 用户通过认证事件
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(cmd.getUserId());
-            context.setNamespaceId(UserContext.getCurrentNamespaceId());
-            event.setContext(context);
-
-            event.setEntityType(EntityType.USER.getCode());
-            event.setEntityId(cmd.getUserId());
-            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
-            LOGGER.info("publish event :[{}]",event);
-        });
-
     }
 
     /**
@@ -11364,6 +11351,23 @@ public class OrganizationServiceImpl implements OrganizationService {
                 leaveOrganizationAfterOperation(user.getId(), leaveMembers);
             }
         }
+        
+        // 用户通过认证事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(organizationMember.getTargetId());
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(organizationMember.getTargetId());
+            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+            Map<String, Object> params = new HashMap<>();
+            params.put("orgId", organizationMember.getGroupPath().split("/")[1]);
+            event.setParams(params);
+            LOGGER.info("publish event :[{}]",event);
+        });
+        
         return dto;
     }
 

@@ -39,5 +39,5 @@ public interface DoorAccessProvider {
 	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd);
 
 	List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
-			ListDoorAccessGroupCommand cmd); 
+			ListDoorAccessGroupCommand cmd);
 }

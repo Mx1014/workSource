@@ -37,6 +37,11 @@ public interface UserProfileContstant {
     public static final String SHAKE_OPEN_DOOR = "shake_open_door";
     
     /**
+     * 摇一摇开门对应门禁蓝牙mac地址
+     */
+    public static final String SHAKE_OPEN_DOOR_HARDWARE_ID = "shake_open_door_hardware_id";
+    
+    /**
      * 储能门禁的令令 ID
      */
     public static final String LINGLING_ID = "lingling_id";

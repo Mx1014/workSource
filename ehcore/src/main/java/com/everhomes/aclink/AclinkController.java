@@ -145,7 +145,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * <b>URL: /aclink/listAesUserKey</b>
-     * <p>获取用户授权信息</p>
+     * <p>获取用户授权信息,蓝牙钥匙,查永久和临时权限,3.0以后不使用</p>
      * @return
      */
     @RequestMapping("listAesUserKey")
@@ -158,6 +158,11 @@ public class AclinkController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /aclink/listAdminAesUserKey</b>
+     * <p>我的钥匙,只查永久权限,3.0以后不使用</p>
+     * @return
+     */
     @RequestMapping("listAdminAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
     public RestResponse listAdminAesUserKey(@Valid ListAdminAesUserKeyCommand cmd) {
@@ -427,7 +432,7 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/listDoorAccessQRKey</b>
-     * <p>列出所有二维码门禁列表 </p>
+     * <p>列出所有二维码门禁列表 ,查永久和临时授权,3.0以后不使用</p>
      * @return
      */
     @RequestMapping("listDoorAccessQRKey")
@@ -638,19 +643,19 @@ public class AclinkController extends ControllerBase {
         return response;        
     }
     
-    /**
-     * 
-     */
-    @RequestMapping("aclinkMessageTest")
-    @RestReturn(value=ListDoorAccessResponse.class)
-    public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
-//        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
-        doorAccessService.test();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;        
-    }
+//    /**
+//     * 
+//     */
+//    @RequestMapping("aclinkMessageTest")
+//    @RestReturn(value=ListDoorAccessResponse.class)
+//    public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
+////        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+//        doorAccessService.test();
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;        
+//    }
     
     /**
      * 

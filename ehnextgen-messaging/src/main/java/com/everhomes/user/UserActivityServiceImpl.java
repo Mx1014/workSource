@@ -850,6 +850,8 @@ public class UserActivityServiceImpl implements UserActivityService {
         		UserProfileContstant.RECEIVED_ORDER_COUNT);
         UserProfile shakeOpenDoorUser = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
           		UserProfileContstant.SHAKE_OPEN_DOOR);
+        UserProfile shakeOpenDoorHarwareId = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+          		UserProfileContstant.SHAKE_OPEN_DOOR_HARDWARE_ID);
         
         if (item != null)
             rsp.setSharedCount(NumberUtils.toInt(item.getItemValue(), 0));
@@ -903,6 +905,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte(shakeOpenDoorNamespace));
         }else{
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
+        }
+        if(shakeOpenDoorHarwareId != null){
+        	rsp.setShakeOpenDoorHardwareId(shakeOpenDoorHarwareId.getItemValue());
         }
         return rsp;
     }
@@ -1846,12 +1851,15 @@ public class UserActivityServiceImpl implements UserActivityService {
 	}
 	
 	@Override
-	public void updateShakeOpenDoor(Byte shakeOpenDoor) {
+	public void updateShakeOpenDoor(UpdateShakeOpenDoorCommand cmd) {
 		String namespaceOpen = getShakeOpenDoor();
 		User user = UserContext.current().getUser();
 		
 		if("1".equals(namespaceOpen)){
-			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, shakeOpenDoor.toString());
+			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, cmd.getShakeOpenDoor().toString());
+			if(cmd.getHardwareId() != null){
+				updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR_HARDWARE_ID, cmd.getHardwareId().toString());
+			}
 		}else{
 			LOGGER.error("namespace configuration is false, then user configuration is prohibited");
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,

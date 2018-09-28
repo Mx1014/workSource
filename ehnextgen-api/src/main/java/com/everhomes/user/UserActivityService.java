@@ -84,7 +84,7 @@ public interface UserActivityService {
 
 	ListBusinessTreasureResponse getUserBusinessTreasure();
 	
-	void updateShakeOpenDoor(Byte shakeOpenDoor);
+	void updateShakeOpenDoor(UpdateShakeOpenDoorCommand cmd);
 
     GetUserTreasureResponse getUserTreasureV2();
 
