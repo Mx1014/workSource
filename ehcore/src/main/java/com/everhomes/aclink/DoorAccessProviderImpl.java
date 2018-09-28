@@ -14,16 +14,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.everhomes.rest.aclink.ActiveDoorByNamespaceDTO;
-import com.everhomes.rest.aclink.DoorStatisticEhCommand;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
@@ -338,6 +335,17 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             return null;
         });
         return dtos;
+    }
+    @Override
+    public List<DoorAccessDTO> listDoorAccessEh(ListDoorAccessEhCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_DOOR_ACCESS);
+        List<DoorAccessDTO> objs = query.fetch().map((r) -> {
+            DoorAccessDTO dto = ConvertHelper.convert(r, DoorAccessDTO.class);
+            return dto;
+        });
+        return objs;
     }
 
 }

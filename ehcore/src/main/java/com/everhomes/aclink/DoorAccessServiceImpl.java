@@ -5278,13 +5278,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd) {
         ListDoorAccessEhResponse resp = new ListDoorAccessEhResponse();
-        resp.setDoors(new ArrayList<DoorAccessDTO>());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAccessDTO> dtos = null;
-
+        List<DoorAccessDTO> dtos = doorAccessProvider.listDoorAccessEh(cmd);
+        resp.setDoors(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
-        return null;
+        return resp;
     }
     @Override
     public ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd){
@@ -5301,14 +5300,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //        resp.setDto1(dto1);
 //        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
 //        resp.setDto2(dto2);
-//        List<ActiveDoorByEquipmentDTO> dto3 = doorAccessProvider.queryDoorAccessByEquipment(cmd);
-//        resp.setDto3(dto3);
         List<ActiveDoorByEquipmentDTO> dto3 = null;
         resp.setDto3(dto3);
         List<ActiveDoorByNamespaceDTO> dto4 = doorAccessProvider.queryDoorAccessByNamespace(cmd);
         resp.setDto4(dto4);
-//        List<ActiveDoorByNamespaceDTO> dto4 = null;
-//        resp.setDto4(dto4);
         List<AclinkUseByNamespaceDTO> dto5 = null;
         resp.setDto5(dto5);
         return resp;
