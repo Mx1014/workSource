@@ -80,13 +80,6 @@ public interface SiyinPrintService {
     void initPayeeAccount(MultipartFile[] files);
 
 	String getSiyinServerUrl();
-	void enterprisePayPrintOrder(EnterprisePayPrintOrderCommand cmd);
-
-	List<ChargeModuleAppDTO> listChargeModuleApps(ListChargeModuleAppsCommand cmd);
-
-	List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd);
-
-	List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd);
 
 	void updatePrintOrder(SiyinPrintOrder order, String payOrderNo);
 }

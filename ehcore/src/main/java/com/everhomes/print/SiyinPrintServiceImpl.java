@@ -1518,40 +1518,38 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 
-	private List<ListQueueJobsDTO> getQueueJobs(String printerName, String siyinUrl, Long communityId) {
+	private List<ListQueueJobsDTO> getQueueJobs(List<String> printers, String siyinUrl, Long communityId) {
 		List<ListQueueJobsDTO> list = new ArrayList<>();
-		Map<String, String> params = new HashMap<>();
-		params.put("host_name", printerName);
-		params.put("mode", "USERLIST");
-		params.put("card_id", 
-				new StringBuffer().append(UserContext.current().getUser().getId())
-								.append(PRINT_LOGON_ACCOUNT_SPLIT)
-								.append(communityId).toString());
-		params.put("language", "zh-cn");
-		String result;
-		try {
-			result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
-			String siyinCode = getSiyinCode(result);
-			if (siyinCode != null && siyinCode.startsWith("INF")) {
-				if (siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")) {
-					return list;
-				} else {
-					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ", result);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"/console/cardListener return failed, result = " + result);
+		readerLoop:
+		for (String printer : printers) {
+			Map<String, String> params = new HashMap<>();
+	        params.put("host_name", printer);
+	        params.put("mode", "USERLIST");
+	        params.put("card_id", new StringBuffer().append(UserContext.current().getUser().getId()).append(PRINT_LOGON_ACCOUNT_SPLIT).append(communityId).toString());
+//	        params.put("card_id", "310183-240111044331058733");
+	        params.put("language", "zh-cn");
+	        String result;
+			try {
+				result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
+				String siyinCode = getSiyinCode(result);
+				if(siyinCode!=null && siyinCode.startsWith("INF")){
+					if(siyinCode.equals("INF0008") || siyinCode.equals("INF0009") || siyinCode.equals("INF0001")){
+						continue readerLoop;
+					}else{
+						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+					}
+				}else if(siyinCode!=null){
+					addjobs(list,result,printer);
+				}else{
+					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
 				}
-			} else if (siyinCode != null) {
-				addjobs(list, result, printerName);
-			} else {
-				LOGGER.error("siyin api:/console/cardListener request failed, result = {} ", result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"/console/cardListener return failed, result = " + result);
+			} catch (IOException e) {
+				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+				
 			}
-		} catch (IOException e) {
-			LOGGER.error("siyin api:/console/cardListener request exception : " + e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"/console/cardListener return exception, message = " + e.getMessage());
-
 		}
 		return list;
 	}
@@ -2043,14 +2041,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return dtos.get(0).getBillId();
 	}
 
-
 	private void throwError(int errorCode, String errorMsg) {
     	throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
     }
 
-
-	@Override
-	public List<ChargeModuleAppDTO> listChargeModuleApps(ListChargeModuleAppsCommand cmd) {
+	private List<ChargeModuleAppDTO> listChargeModuleApps(ListChargeModuleAppsCommand cmd) {
 		List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
 
 		return dtos.stream().map(r -> {
@@ -2061,9 +2056,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}).collect(Collectors.toList());
 	}
 
-
-	@Override
-	public List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
+	private List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
 		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
 		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
 		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
@@ -2078,8 +2071,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}).collect(Collectors.toList());
 	}
 
-	@Override
-	public List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd) {
+	private List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd) {
 		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
 		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
 		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
