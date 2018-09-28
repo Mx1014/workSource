@@ -603,4 +603,23 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			return results.get(0);
 		return null;
 	}
+
+	@Override
+	public void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG1,transformStatus)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+	}
+
+	@Override
+	public void setInvestmentAdId(Long id, Long investmentAdId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG2,investmentAdId)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+		
+	}
 }

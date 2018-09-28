@@ -3,6 +3,8 @@ package com.everhomes.app;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.oauth2.AccessToken;
+import com.everhomes.oauth2.OAuth2Provider;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.rest.app.*;
@@ -15,9 +17,14 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +44,9 @@ public class AppServiceImpl implements AppService {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private OAuth2Provider oAuth2Provider;
 
     @Override
     public AppDTO createApp(CreateAppCommand cmd) {
@@ -122,5 +132,11 @@ public class AppServiceImpl implements AppService {
     @Override
     public App find(String appKey) {
         return appProvider.findAppByKey(appKey);
+    }
+
+    @Override
+    public boolean isGrantedApp(App app, Long userId) {
+        AccessToken accessToken = oAuth2Provider.findAccessTokenByAppAndGrantorUid(app.getId(), userId);
+        return accessToken != null;
     }
 }
