@@ -1,4 +1,4 @@
-package com.everhomes.rest.paymentAuths;
+package com.everhomes.rest.paymentauths;
 
 import com.everhomes.util.StringHelper;
 
@@ -11,14 +11,15 @@ import com.everhomes.util.StringHelper;
  */
 public class CheckUserAuthsCommand {
 	private Long orgnazitionId;
-	private String appId;
+	private Long appId;
 	private Long userId;
 
-	public String getAppId() {
+
+	public Long getAppId() {
 		return appId;
 	}
 
-	public void setAppId(String appId) {
+	public void setAppId(Long appId) {
 		this.appId = appId;
 	}
 

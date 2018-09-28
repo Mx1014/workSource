@@ -7,9 +7,9 @@ import com.everhomes.util.StringHelper;
 
 public class ServiceModuleApp extends EhServiceModuleApps {
 
-    private static final long serialVersionUID = -4427568958167322339L;
-
-    private Long profileId;
+	private static final long serialVersionUID = -5356763594822567533L;
+	
+	private Long profileId;
     private Long menuId;
     private String displayVersion;
     private String appNo;

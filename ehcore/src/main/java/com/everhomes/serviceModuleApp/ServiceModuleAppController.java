@@ -128,8 +128,6 @@ public class ServiceModuleAppController extends ControllerBase {
 	}
 
 	/**
-=======
->>>>>>> b4db8304ad... issue-34780
 	 * 查询支持企业支付的应用，原来的接口参数太多已经快废了，新建一个专用接口。
 	 * @param cmd
 	 * @return
