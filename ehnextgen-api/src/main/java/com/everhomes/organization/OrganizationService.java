@@ -651,4 +651,7 @@ public interface OrganizationService {
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
+
+	//	物业组所需获取企业员工的唯一标识符
+	String getAccountByTargetIdAndOrgId(Long targetId, Long orgId);
 }
