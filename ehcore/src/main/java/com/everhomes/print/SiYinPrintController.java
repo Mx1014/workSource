@@ -490,4 +490,5 @@ public class SiYinPrintController extends ControllerBase {
 	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
 		siyinPrintService.mfpLogNotificationV2(cmd,response);
 	}
+	
 }
