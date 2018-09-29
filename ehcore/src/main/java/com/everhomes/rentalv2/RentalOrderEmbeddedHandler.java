@@ -138,18 +138,6 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 		} else {
 
-			if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
-				//支付成功之后创建工作流
-				order.setStatus(SiteBillStatus.SUCCESS.getCode());
-				rentalProvider.updateRentalBill(order);
-				rentalService.onOrderSuccess(order);
-				//发短信
-				RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
-
-				handler.sendRentalSuccessSms(order);
-
-			} else {
-
 //		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
 				rentalProvider.updateRentalBill(order);
 				//改变订单状态
@@ -178,7 +166,6 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
 							templateId, templateLocale, variables);
 				}
-			}
 		}
 	}
 }
