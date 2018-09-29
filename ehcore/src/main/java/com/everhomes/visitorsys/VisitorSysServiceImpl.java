@@ -2526,6 +2526,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 }else{
                     convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 }
+            } else {
+                if(relatedVisitor == null
+                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+                    convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+                }else{
+                    convert.setBookingStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+                }
             }
         } else {
             VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),convert.getOwnerId());
@@ -2535,6 +2542,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 }else{
                     convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
+            } else {
+                if(relatedVisitor == null
+                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+                    convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+                }else{
+                    convert.setBookingStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
                 }
             }
         }
