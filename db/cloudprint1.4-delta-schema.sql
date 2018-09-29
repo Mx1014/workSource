@@ -21,3 +21,35 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='企业支付授权表';
 
+-- AUTHOR: 杨崇鑫 20180930
+-- REMARK: 物业缴费V7.1（企业记账流程打通）
+-- REMARK：  增加业务对应的相关信息
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_remark1` VARCHAR(1024) COMMENT '服务提供方标识1';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_remark2` VARCHAR(1024) COMMENT '服务提供方标识2';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_remark3` VARCHAR(1024) COMMENT '服务提供方标识3';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_remark4` VARCHAR(1024) COMMENT '服务提供方标识4';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_remark5` VARCHAR(1024) COMMENT '服务提供方标识5';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `service_provider_name` VARCHAR(1024) COMMENT '服务提供方名称';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `goods_number` VARCHAR(1024) COMMENT '商品数量';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `goods_extend_info` VARCHAR(1024) COMMENT '商品说明';
+
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_remark1` VARCHAR(1024) COMMENT '服务提供方标识1';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_remark2` VARCHAR(1024) COMMENT '服务提供方标识2';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_remark3` VARCHAR(1024) COMMENT '服务提供方标识3';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_remark4` VARCHAR(1024) COMMENT '服务提供方标识4';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_remark5` VARCHAR(1024) COMMENT '服务提供方标识5';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `service_provider_name` VARCHAR(1024) COMMENT '服务提供方名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_number` VARCHAR(1024) COMMENT '商品数量';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_extend_info` VARCHAR(1024) COMMENT '商品说明';
+
+
+
+
+
+
+
+
+
+
