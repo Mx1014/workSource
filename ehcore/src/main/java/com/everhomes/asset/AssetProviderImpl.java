@@ -6287,8 +6287,13 @@ public class AssetProviderImpl implements AssetProvider {
 	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
 	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
 	                    .fetchInto(PaymentChargingStandardsScopes.class);
-	        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
-	        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        	if(scopes.size() > 0) {
+	        		//如果具体项目有配置，而默认配置为空，那么该具体项目做了新增操作，视为个性化
+	        		if(scopes.get(0).getBrotherStandardId() != null) {
+	        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        		}else {
+	        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        		}
 	        	}else {
 	        		scopes = context.selectFrom(t1)
 		            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
@@ -6324,8 +6329,13 @@ public class AssetProviderImpl implements AssetProvider {
                     .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                     .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                     .fetchInto(PaymentBillGroup.class);
-        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
-        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        	if(scopes.size() > 0) {
+        		//如果具体项目有配置，而默认配置为空，那么该具体项目做了新增操作，视为个性化
+        		if(scopes.get(0).getBrotherGroupId() != null) {
+        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}else {
+        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}
         	}else {
         		scopes = context.selectFrom(t1)
 	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作

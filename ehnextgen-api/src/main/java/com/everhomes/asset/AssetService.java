@@ -266,7 +266,7 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
 	 */
-	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
+	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
 
 	void tranferAssetMappings();
 	
@@ -277,4 +277,6 @@ public interface AssetService {
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
+
+	void cancelGeneralBill(CancelGeneralBillCommand cmd);
 }

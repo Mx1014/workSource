@@ -710,6 +710,8 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             cmd.setAllScope(true);
+        }else {
+        	cmd.setAllScope(false);
         }
         if(cmd.getOwnerType() == null) {
         	cmd.setOwnerType("community");
@@ -5839,8 +5841,8 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 
-	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
-		List<ListBillsDTO> dtos = new ArrayList<ListBillsDTO>();
+	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
@@ -5850,7 +5852,7 @@ public class AssetServiceImpl implements AssetService {
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
-			ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 			dtos.add(dto);
 		}else {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
@@ -5864,7 +5866,7 @@ public class AssetServiceImpl implements AssetService {
 				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
 						categoryId, brotherGroupId);
 				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
-				ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+				ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 				dtos.add(dto);
 			}else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -5874,7 +5876,7 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 
-	public ListBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
+	public ListGeneralBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
 		PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
 		String billItemName = assetProvider.findChargingItemNameById(charingItemId);
 		BigDecimal taxRate = assetProvider.getBillItemTaxRate(billGroupId, charingItemId);//后台直接查费项对应的税率
@@ -5904,8 +5906,12 @@ public class AssetServiceImpl implements AssetService {
 		createBillCommand.setBillGroupDTO(billGroupDTO);
 
 		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);
-
-		return dto;
+		//主要是把以前缴费这边为了兼容对接使用的String类型的billId全部换成Long类型的billId，因为创建统一账单都是在缴费这边的表，都是Long
+		ListGeneralBillsDTO convertDTO = ConvertHelper.convert(dto, ListGeneralBillsDTO.class);
+		Long billId = Long.parseLong(dto.getBillId());
+		convertDTO.setBillId(billId);
+		
+		return convertDTO;
 	}
 
 	public void tranferAssetMappings() {
@@ -6226,5 +6232,10 @@ public class AssetServiceImpl implements AssetService {
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
+	}
+
+	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		
+		
 	}
 }
