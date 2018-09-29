@@ -839,7 +839,7 @@ INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`,
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999956', '#1FBCD2', '主题色', '主题色');
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999955', '#00B9EF', '主题色', '主题色');
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999954', '#0B87D9', '主题色', '主题色');
-INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999953', '#C33333', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999953', '#333333', '主题色', '主题色');
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999952', '#D10000', '主题色', '主题色');
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999951', '#D10000', '主题色', '主题色');
 INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999950', '#D10000', '主题色', '主题色');
