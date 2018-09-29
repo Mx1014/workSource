@@ -2292,7 +2292,8 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 
 //      自助登记状态置为已到访
         if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
-            if(visitor.getId()==null && visitor.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
+//          企业预约访客
+            if(visitor.getId()==null && !visitor.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
                 if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
                     VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.COMMUNITY.getCode(), visitor.getOwnerId());
                     if (TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
@@ -2301,10 +2302,18 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     }
                 } else {
                     VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), visitor.getEnterpriseId());
-                    if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                    if (null == config.getBaseConfig() || TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
                             visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                             visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                     }
+                }
+            }
+//          企业自助登记
+            if(visitor.getId() != null && visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
+                VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), visitor.getEnterpriseId());
+                if (null == config.getBaseConfig() || TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                    visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 }
             }
         }
@@ -2548,7 +2557,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //            }
 //        }
 //        园区确认预约访客，企业的关联
-        if(convert.getId()==null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
+        if(convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
             if (ownerType == VisitorsysOwnerType.COMMUNITY) {
                 VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
                 if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
