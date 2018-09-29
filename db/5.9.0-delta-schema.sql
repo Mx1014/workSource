@@ -644,3 +644,5 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `creator_uid` BIGINT COMME
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_time` DATE COMMENT '操作时间';
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT COMMENT '操作人ID';
 
+ALTER TABLE `eh_customer_contacts` MODIFY `phone_number` VARCHAR(64) ;
+

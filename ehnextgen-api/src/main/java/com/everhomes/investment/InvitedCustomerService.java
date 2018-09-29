@@ -1,5 +1,6 @@
 package com.everhomes.investment;
 
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
@@ -38,6 +39,8 @@ public interface InvitedCustomerService {
     InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd);
 
     DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile);
+
+    void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd);
 
     void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
 

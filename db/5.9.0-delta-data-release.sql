@@ -759,7 +759,7 @@ UPDATE eh_var_field_scopes SET group_path = '/1/10/' WHERE group_path = '/1/10' 
 -- AUTHOR: 黄鹏宇
 -- REMARK: 去除有两个拜访人的问题
 DELETE FROM eh_var_field_scopes WHERE field_id = (SELECT id FROM eh_var_fields WHERE name = 'visitPersonName');
-UPDATE eh_var_fields SET status = 0 WHERE name = 'visitPersonName';
+DELETE FROM eh_var_fields WHERE name = 'visitPersonName';
 
 -- AUTHOR: 黄鹏宇
 -- REMAKE: 将module中的企业客户换成租客
@@ -780,16 +780,6 @@ UPDATE eh_var_field_item_scopes SET `status` = 0 WHERE item_id = 3 AND field_id 
 DELETE FROM eh_acl_privileges WHERE id = 21116;
 DELETE FROM eh_service_module_privileges WHERE privilege_id = 21116;
 
-
-
--- AUTHOR 黄鹏宇
--- REMARK 同步名称
-UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
-UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
-UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
-
-
--- END
 
 
 
@@ -872,10 +862,22 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'requisition', '507', 'zh_CN', '未启用审批管理');
 
 -- AUTHOR 黄鹏宇
--- REMARK 插入资质客户白名单
+-- REMARK 插入资质客户白名单和更新资质客户按钮
+UPDATE eh_service_module_functions SET module_id = 150020 WHERE id = 43980
+
+
 set @id=(SELECT max(id) FROM eh_service_module_include_functions);
 INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id+1, 999944, 150020, NULL, 43980);
 update eh_customer_trackings t1 set t1.customer_source = (select customer_source from eh_enterprise_customers t2 where t2.id = t1.customer_id);
+-- END
+
+
+
+-- AUTHOR 黄鹏宇
+-- REMARK 同步名称
+UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
+UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
+UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
 -- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
