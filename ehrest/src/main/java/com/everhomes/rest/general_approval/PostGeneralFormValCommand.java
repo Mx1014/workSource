@@ -41,6 +41,8 @@ public class PostGeneralFormValCommand {
 
     private Long orgId;
 
+    private Long moduleId;
+
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 
@@ -138,6 +140,14 @@ public class PostGeneralFormValCommand {
 
 	public void setApprovalId(Long approvalId) {
 		this.approvalId = approvalId;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

@@ -293,13 +293,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId){
+	public void deleteGeneralFormVal(Integer namespaceId, Long moduleId, Long sourceId){
 		try {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 			context.delete(Tables.EH_GENERAL_FORM_VALS)
-					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
-					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.where(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.and(Tables.EH_GENERAL_FORM_VALS.MODULE_ID.eq(moduleId))
+					.and(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
 					.execute();
 		} catch (Exception ex) {
 			ex.printStackTrace();
