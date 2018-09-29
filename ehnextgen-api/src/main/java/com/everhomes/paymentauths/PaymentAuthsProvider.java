@@ -3,13 +3,14 @@ package com.everhomes.paymentauths;
 
 import java.util.List;
 
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-
 
 public interface PaymentAuthsProvider {
 
-	EnterprisePaymentAuths findPaymentAuthByAppIdOrgId(Long appId, Long orgId);
+	EnterprisePaymentAuths findPaymentAuth (Long appId, Long orgId, Long sourceId);
 
 	List<EnterprisePaymentAuths> getPaymentAuths(Integer namespaceId, Long orgId);
 
+    public void deleteEnterprisePaymentAuths(Long appId, Long orgId);
+
+	void createEnterprisePaymentAuths(List<EnterprisePaymentAuths> enterpriesAuths);
 }

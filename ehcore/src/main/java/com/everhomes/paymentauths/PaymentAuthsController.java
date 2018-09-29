@@ -1,24 +1,13 @@
 package com.everhomes.paymentauths;
 
-import com.everhomes.bootstrap.PlatformContext;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.paymentauths.PaymentAuthsService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.paymentauths.*;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.rest.servicehotline.*;
-import com.everhomes.techpark.servicehotline.HotlineService;
-import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
-
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +42,20 @@ public class PaymentAuthsController extends ControllerBase {
 	public RestResponse listEnterpirsePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
 		List<EnterprisePaymentAuthsDTO> dto = paymentAuthsService.listEnterprisePaymentAuths(cmd);
 		RestResponse response =  new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>更新授权用户</p>
+	 * <b>URL: paymentAuths/updateEnterpirsePaymentAuths</b>
+	 */
+	@RequestMapping("updateEnterpirsePaymentAuths")
+	@RestReturn(value=EnterprisePaymentAuthsDTO.class, collection = true)
+	public RestResponse updateEnterpirsePaymentAuths(UpdateEnterpirsePaymentAuthsCommand cmd) {
+		paymentAuthsService.updateEnterpirsePaymentAuths(cmd);
+		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

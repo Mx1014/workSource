@@ -88,16 +88,16 @@ web.location: /resources/
 #
 # Redis configuration
 #
-redis.bus.host: redis-server
+redis.bus.host: 10.1.120.117
 redis.bus.port: 6380
-redis.store.master.host: redis-server
+redis.store.master.host: 10.1.120.117
 redis.store.master.port: 6380
 
 #
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://root:123456@10.1.10.27:13334/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -166,7 +166,7 @@ spring:
 
 # kafka
 spring.kafka:
-  client-id: ehcore # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable
+  client-id: disable # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable
   bootstrap-servers: localhost:9092
   properties:
     request.timeout.ms: 20000
