@@ -87,6 +87,25 @@ public class FlowProviderImpl implements FlowProvider {
     }
 
     @Override
+    public List<Flow> findFlowVersion(Long flowMainId , Integer namespaceId){
+        ListingLocator locator = new ListingLocator();
+        List<Flow> flows = this.queryFlows(locator, 0, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(
+                    ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowMainId));
+                return query;
+            }
+
+        });
+        if (flows != null && flows.size() > 0) {
+            return flows;
+        }
+        return null;
+    }
+
+    @Override
     public List<Flow> queryFlows(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlows.class));
         com.everhomes.server.schema.tables.EhFlows t = Tables.EH_FLOWS;
