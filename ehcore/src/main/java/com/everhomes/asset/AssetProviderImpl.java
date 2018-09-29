@@ -64,6 +64,7 @@ import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -123,7 +124,6 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
@@ -2615,7 +2615,7 @@ public class AssetProviderImpl implements AssetProvider {
                         item.setTaxAmount(dto.getTaxAmount());//增加税额
                         item.setTaxRate(dto.getTaxRate());//费项增加税率信息
                         //物业缴费V6.6（对接统一账单） 账单要增加来源
-                        item.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+                        item.setSourceType(AssetSourceType.ASSET_MODULE.getSourceType());
                         item.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -6815,7 +6815,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
                 .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                 .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
                 .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
         return records.size() > 0;
     }
@@ -6828,7 +6828,7 @@ public class AssetProviderImpl implements AssetProvider {
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
 	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
-	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
 	        .execute();
     }
 
@@ -6837,7 +6837,7 @@ public class AssetProviderImpl implements AssetProvider {
         List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
                 .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                 .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.ENERGY_MODULE.getSourceType()))
                 .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
         return records.size() > 0;
     }
@@ -6850,7 +6850,7 @@ public class AssetProviderImpl implements AssetProvider {
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
 	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
-	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.ENERGY_MODULE.getSourceType()))
 	        .execute();
     }
 
@@ -6920,7 +6920,7 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
             List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.ENERGY_MODULE.getSourceType()))
                     .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG.like("%" + "\"energyFlag\":1" + "%"))
                     .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
             if(records.size() > 0) return records.get(0);
@@ -6933,13 +6933,13 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
             ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(originId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
                     .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
         }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
             ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
                     .fetchOne(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID);
         }
         return ret;
@@ -6951,7 +6951,7 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 	    	List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.ENERGY_MODULE.getSourceType()))
                     .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG.like("%" + "\"energyFlag\":1" + "%"))
                     .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
             return records;
@@ -6963,13 +6963,13 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
             ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(originId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
                     .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID);
         }else if(targetModuleId == PrivilegeConstants.CONTRACT_MODULE && moduleId == PrivilegeConstants.ASSET_MODULE_ID){
             ret = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID)
                     .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
                     .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(originId))
-                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+                    .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceType.CONTRACT_MODULE.getSourceType()))
                     .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID);
         }
         return ret;

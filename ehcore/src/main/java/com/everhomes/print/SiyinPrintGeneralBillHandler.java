@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetGeneralBillHandler;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.print.PrintOrderStatusType;
 
-@Component(AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX + AssetModuleNotifyConstants.PRINT_MODULE)
+//@Component(AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX + AssetSourceType.PRINT_MODULE.getSourceType())
 public class SiyinPrintGeneralBillHandler implements AssetGeneralBillHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintGeneralBillHandler.class);
 	@Autowired
