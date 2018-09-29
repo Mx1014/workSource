@@ -674,7 +674,7 @@ VALUES(79000000 ,'脚本管理',21000000,NULL,'script-management',1,2,'/11000000
 
 -- AUTHOR: 马世亨
 -- REMARK: 更新访客表单
-update eh_general_forms set template_text = '[{"dynamicFlag":0,"fieldDesc":"输入车牌号码","fieldDisplayName":"车牌号码","fieldExtra":"{\"limitWord\":512}","fieldName":"plateNo","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入证件号码","fieldDisplayName":"证件号码","fieldExtra":"{\"limitWord\":512}","fieldName":"idNumber","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访楼层","fieldDisplayName":"到访楼层","fieldExtra":"{\"limitWord\":512}","fieldName":"visitFloor","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访门牌","fieldDisplayName":"到访门牌","fieldExtra":"{\"limitWord\":512}","fieldName":"visitAddresses","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"}]' where module_id = 41800;
+update eh_general_forms set template_text = '[{"dynamicFlag":0,"fieldDesc":"输入车牌号码","fieldDisplayName":"车牌号码","fieldExtra":"{\\"limitWord\\":512}","fieldName":"plateNo","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入证件号码","fieldDisplayName":"证件号码","fieldExtra":"{\\"limitWord\\":512}","fieldName":"idNumber","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访楼层","fieldDisplayName":"到访楼层","fieldExtra":"{\\"limitWord\\":512}","fieldName":"visitFloor","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访门牌","fieldDisplayName":"到访门牌","fieldExtra":"{\\"limitWord\\":512}","fieldName":"visitAddresses","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"}]' where module_id = 41800;
 
 
 -- AUTHOR: tangcen
@@ -879,6 +879,15 @@ UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET
 UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
 -- END
 
+-- AUTHOR 黄鹏宇
+-- REMARK 修改客户的名称
+UPDATE eh_var_fields set display_name = '客户状态' where id = 5;
+UPDATE eh_var_field_items set  display_name ='初次接触' where id  = 3;
+UPDATE eh_var_field_items set  display_name ='潜在客户' where id  = 4;
+
+update eh_var_field_item_scopes set item_display_name ='初次接触' where item_id = 3 and field_id =5 and `status` = 2;
+update eh_var_field_item_scopes set item_display_name ='潜在客户' where item_id = 4 and field_id =5 and `status` = 2;
+-- END
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
