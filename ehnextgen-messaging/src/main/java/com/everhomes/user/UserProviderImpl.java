@@ -44,6 +44,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.MapReduceCallback;
 import com.everhomes.util.RecordHelper;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -330,7 +331,10 @@ public class UserProviderImpl implements UserProvider {
         userIdentifier.setId(id);
         Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
         userIdentifier.setCreateTime(ts);
-        
+        //去除手机号首尾空格 add by yanlong.liang 20180929
+        if (!StringUtils.isEmpty(userIdentifier.getIdentifierToken())) {
+            userIdentifier.setIdentifierToken(userIdentifier.getIdentifierToken().trim());
+        }
         EhUserIdentifiersDao dao = new EhUserIdentifiersDao(context.configuration());
         dao.insert(userIdentifier);
         
