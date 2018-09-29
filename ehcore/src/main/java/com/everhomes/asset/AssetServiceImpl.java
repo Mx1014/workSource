@@ -5944,6 +5944,28 @@ public class AssetServiceImpl implements AssetService {
 		
 		return convertDTO;
 	}
+	
+	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		PaymentBills paymentBill = assetProvider.findPaymentBillById(cmd.getBillId());
+		if(null != paymentBill) {
+			if(null != cmd.getThirdBillId()) {
+				if(cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
+					//取消统一账单
+					assetProvider.deleteBill(cmd.getBillId());
+				}else {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
+		                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+				}
+			}else {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "thirdBillId can not be null");
+			}
+		}else {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find bill by billId={" + cmd.getBillId() + "}");
+		}
+	}
 
 	public void tranferAssetMappings() {
 		assetProvider.tranferAssetMappings();
@@ -6263,10 +6285,5 @@ public class AssetServiceImpl implements AssetService {
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
-	}
-
-	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
-		
-		
 	}
 }
