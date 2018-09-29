@@ -352,8 +352,8 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("36");
                 sheetNames.remove("37");
                 sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
-                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
-                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("活动记录"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户账单"));
 
             }
 
