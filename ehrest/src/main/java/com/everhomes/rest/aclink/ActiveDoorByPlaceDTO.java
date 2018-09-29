@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ActiveDoorByPlaceDTO {
     private String province;
-    private Long activeDoorNumber;
+    private Integer activeDoorNumber;
 
     public String getProvince() {
         return province;
@@ -20,11 +20,11 @@ public class ActiveDoorByPlaceDTO {
         this.province = province;
     }
 
-    public Long getActiveDoorNumber() {
+    public Integer getActiveDoorNumber() {
         return activeDoorNumber;
     }
 
-    public void setActiveDoorNumber(Long activeDoorNumber) {
+    public void setActiveDoorNumber(Integer activeDoorNumber) {
         this.activeDoorNumber = activeDoorNumber;
     }
 

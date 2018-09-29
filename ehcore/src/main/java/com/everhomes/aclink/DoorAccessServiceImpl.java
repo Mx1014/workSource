@@ -5315,8 +5315,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
         DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
-//        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlace(cmd);
-//        resp.setDto1(dto1);
+        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlace(cmd);
+        resp.setDto1(dto1);
         List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
         resp.setDto2(dto2);
         List<ActiveDoorByEquipmentDTO> dto3 = doorAccessProvider.queryDoorAccessByEquipment(cmd);

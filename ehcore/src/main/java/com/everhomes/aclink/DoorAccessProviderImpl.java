@@ -366,7 +366,37 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 //                .groupBy(t.DOOR_TYPE);
 
         return null;
+    }
 
+    @Override
+    public List<ActiveDoorByPlaceDTO> queryDoorAccessByPlace(DoorStatisticEhCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        com.everhomes.server.schema.tables.EhCommunities t1 = Tables.EH_COMMUNITIES.as("t1");
+        com.everhomes.server.schema.tables.EhOrganizationCommunityRequests t2 = Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.as("t2");
+        com.everhomes.server.schema.tables.EhRegions t3 = Tables.EH_REGIONS.as("t3");
+        com.everhomes.server.schema.tables.EhRegions t4 = Tables.EH_REGIONS.as("t4");
+        List<ActiveDoorByPlaceDTO> dtos = new ArrayList<ActiveDoorByPlaceDTO>();
+        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
+                ,t4.NAME.as("province"))
+                .from(t)
+                .leftOuterJoin(t2)
+                .on(t.OWNER_ID.eq(t2.MEMBER_ID))
+                .leftOuterJoin(t1)
+                .on(t1.ID.eq(t.OWNER_ID)).or(t1.ID.eq(t2.COMMUNITY_ID))
+                .leftOuterJoin(t3)
+                .on(t3.ID.eq(t1.CITY_ID))
+                .leftOuterJoin(t4)
+                .on(t4.ID.eq(t3.PARENT_ID))
+                .groupBy(t4.NAME);
+        groupBy.fetch().map((r) -> {
+            ActiveDoorByPlaceDTO dto = new ActiveDoorByPlaceDTO();
+            dto.setProvince(r.value2());
+            dto.setActiveDoorNumber(r.value1());
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
     }
 
 
