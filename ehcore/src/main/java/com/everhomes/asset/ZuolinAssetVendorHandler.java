@@ -620,12 +620,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         ListBillDetailCommand ncmd = new ListBillDetailCommand();
         ncmd.setBillId(Long.valueOf(cmd.getBillId()));
         ListBillDetailResponse billDetail = listBillDetail(ncmd);
-        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType());
-        if(null != handler){
-        	//TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
-        	
-        	
-        }
+        //TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+        
+        
+        
     }
 
     @Override

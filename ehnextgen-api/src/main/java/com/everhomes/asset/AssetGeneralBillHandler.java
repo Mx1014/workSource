@@ -12,7 +12,7 @@ public interface AssetGeneralBillHandler {
     static final String ASSET_GENERALBILL_PREFIX = "AssetGeneralBill-";
     
     /**
-     * 账单状态改变回调接口
+     * 获取统一账单的映射关系
      * @param billDetail
      */
     List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail);

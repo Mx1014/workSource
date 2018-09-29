@@ -5979,14 +5979,14 @@ public class AssetServiceImpl implements AssetService {
 	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType){
 		AssetGeneralBillHandler handler = null;
 
-        if(sourceType != null) {
-        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
-            try {
-            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
-			}catch (Exception ex){
-				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
-			}
-        }
+//        if(sourceType != null) {
+//        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
+//            try {
+//            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
+//			}catch (Exception ex){
+//				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
+//			}
+//        }
 
         return handler;
     }
