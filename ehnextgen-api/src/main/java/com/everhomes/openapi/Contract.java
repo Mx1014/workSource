@@ -9,6 +9,15 @@ public class Contract extends EhContracts {
 	private static final long serialVersionUID = 7451788240342013832L;
 
 	private Long orgId;
+	private Byte depositStatus;
+
+	public Byte getDepositStatus() {
+		return depositStatus;
+	}
+
+	public void setDepositStatus(Byte depositStatus) {
+		this.depositStatus = depositStatus;
+	}
 
 	public Long getOrgId() {
 		return orgId;
