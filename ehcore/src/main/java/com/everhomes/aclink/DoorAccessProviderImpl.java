@@ -337,6 +337,40 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         return dtos;
     }
     @Override
+    public List<ActiveDoorByEquipmentDTO> queryDoorAccessByEquipment(DoorStatisticEhCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        List<ActiveDoorByEquipmentDTO> dtos = new ArrayList<ActiveDoorByEquipmentDTO>();
+        SelectHavingStep<Record2<Integer,Byte>> groupBy = context.select(t.ID.count().as("num")
+                ,t.DOOR_TYPE.as("type"))
+                .from(t)
+                .groupBy(t.DOOR_TYPE);
+        groupBy.fetch().map((r) -> {
+            ActiveDoorByEquipmentDTO dto = new ActiveDoorByEquipmentDTO();
+            dto.setActiveDoorNumber(r.value1());
+            dto.setEquipment(r.value2());
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
+    }
+
+    @Override
+    public List<ActiveDoorByFirmwareDTO> queryDoorAccessByFirmware(DoorStatisticEhCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        List<ActiveDoorByFirmwareDTO> dtos = new ArrayList<ActiveDoorByFirmwareDTO>();
+//        SelectHavingStep<Record2<Integer,Byte>> groupBy = context.select(t.ID.count().as("num")
+//                ,t.FIRMWARE.as("firmware"))
+//                .from(t)
+//                .groupBy(t.DOOR_TYPE);
+
+        return null;
+
+    }
+
+
+    @Override
     public List<DoorAccessDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<Record> query = context.selectQuery();

@@ -5317,9 +5317,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
 //        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlace(cmd);
 //        resp.setDto1(dto1);
-//        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
-//        resp.setDto2(dto2);
-        List<ActiveDoorByEquipmentDTO> dto3 = null;
+        List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
+        resp.setDto2(dto2);
+        List<ActiveDoorByEquipmentDTO> dto3 = doorAccessProvider.queryDoorAccessByEquipment(cmd);
         resp.setDto3(dto3);
         List<ActiveDoorByNamespaceDTO> dto4 = doorAccessProvider.queryDoorAccessByNamespace(cmd);
         resp.setDto4(dto4);
@@ -5375,6 +5375,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add by liqingyan
     @Override
     public Long deleteDoorAccessEh(Long doorAccessId){
-        return null;
+        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
+            @Override
+            public DoorAccess doInTransaction(TransactionStatus arg0) {
+                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
+
+                if(doorAcc != null) {
+                    doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
+                    doorAccessProvider.updateDoorAccess(doorAcc);
+                    return doorAcc;
+                }
+
+                return null;
+            }
+        });
+
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+
+        return doorAccess.getId();
     }
 }

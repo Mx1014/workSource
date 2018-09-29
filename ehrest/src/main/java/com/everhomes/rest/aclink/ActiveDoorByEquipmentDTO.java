@@ -8,23 +8,23 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ActiveDoorByEquipmentDTO {
-    private String equipment;
+    private Byte equipment;
 
-    private Long activeDoorNumber;
+    private Integer activeDoorNumber;
 
-    public String getEquipment() {
+    public Byte getEquipment() {
         return equipment;
     }
 
-    public void setEquipment(String equipment) {
+    public void setEquipment(Byte equipment) {
         this.equipment = equipment;
     }
 
-    public Long getActiveDoorNumber() {
+    public Integer getActiveDoorNumber() {
         return activeDoorNumber;
     }
 
-    public void setActiveDoorNumber(Long activeDoorNumber) {
+    public void setActiveDoorNumber(Integer activeDoorNumber) {
         this.activeDoorNumber = activeDoorNumber;
     }
 
