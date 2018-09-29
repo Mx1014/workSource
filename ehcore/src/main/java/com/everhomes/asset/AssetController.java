@@ -1539,4 +1539,18 @@ public class AssetController extends ControllerBase {
 	    return response;
 	}
 	
+	/**
+	 * <p>取消统一账单接口</p>
+	 * <b>URL: /asset/cancelGeneralBill</b>
+	 */
+	@RequestMapping("cancelGeneralBill")
+	@RestReturn(value = String.class)
+	public RestResponse cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		assetService.cancelGeneralBill(cmd);
+	    RestResponse response = new RestResponse();
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
 }

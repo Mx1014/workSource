@@ -6233,4 +6233,9 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
+
+	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		
+		
+	}
 }
