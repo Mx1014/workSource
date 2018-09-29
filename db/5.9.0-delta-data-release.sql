@@ -866,15 +866,13 @@ INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`,
 -- end
 
 
-
-
-
-
-
+-- AUTHOR: tangcen
+-- REMARK: 添加申请单的报错信息
+SET @id = (select max(id) from eh_locale_strings);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'requisition', '506', 'zh_CN', '未配置审批管理');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'requisition', '507', 'zh_CN', '未启用审批管理');
 -- --------------------- SECTION END ---------------------------------------------------------
 
-
--- --------------------- SECTION END ---------------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本

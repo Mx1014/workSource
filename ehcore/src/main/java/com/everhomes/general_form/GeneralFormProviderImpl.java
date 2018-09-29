@@ -622,4 +622,12 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 			   .execute();
 		
 	}
+
+	@Override
+	public List<GeneralFormVal> getGeneralFormValBySourceId(Long sourceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
+		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
+	}
 }
