@@ -54,12 +54,14 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.uniongroup.UniongroupVersion;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.OutputStream;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -355,4 +357,6 @@ public interface PunchService {
 	GoOutPunchLogDTO goOutPunchClock(GoOutPunchClockCommand cmd);
 
 	GoOutPunchLogDTO updateGoOutPunchLog(UpdateGoOutPunchLogCommand cmd);
+
+	GoOutPunchLogDTO getGoOutPunchLog(GetGoOutPunchLogCommand cmd);
 }

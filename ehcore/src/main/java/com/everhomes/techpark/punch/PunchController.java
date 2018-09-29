@@ -689,7 +689,7 @@ public class PunchController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/punch/updateGoOutPunchLog</b>
 	 * <p>
-	 * 外出打卡
+	 * 更新外出打卡备注
 	 * </p>
 	 */
 	@RequestMapping("updateGoOutPunchLog")
@@ -698,6 +698,23 @@ public class PunchController extends ControllerBase {
 		// 打卡返回打卡时间
 		RestResponse response = new RestResponse(
 				punchService.updateGoOutPunchLog(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/punch/getGoOutPunchLog</b>
+	 * <p>
+	 * 查看外出打卡详情
+	 * </p>
+	 */
+	@RequestMapping("getGoOutPunchLog")
+	@RestReturn(GoOutPunchLogDTO.class)
+	public RestResponse getGoOutPunchLog(@Valid GetGoOutPunchLogCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(
+				punchService.getGoOutPunchLog(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

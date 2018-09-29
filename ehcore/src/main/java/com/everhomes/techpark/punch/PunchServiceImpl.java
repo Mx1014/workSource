@@ -11571,4 +11571,13 @@ public class PunchServiceImpl implements PunchService {
         return convertGoOutLogDTO(log);
     }
 
+	@Override
+	public GoOutPunchLogDTO getGoOutPunchLog(GetGoOutPunchLogCommand cmd) {
+		PunchGoOutLog log = punchProvider.findPunchGoOutLogById(cmd.getId());
+		if (null == log) {
+			return null;
+		} 
+		return convertGoOutLogDTO(log);
+	}
+
 }
