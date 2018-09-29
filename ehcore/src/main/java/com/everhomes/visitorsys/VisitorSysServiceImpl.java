@@ -2296,12 +2296,20 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
             VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),visitor.getOwnerId());
             if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
-                visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                if(visitorType==VisitorsysVisitorType.BE_INVITED){
+                    visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }else{
+                    visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
             }
         }else{
             VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
             if(null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
-                visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                if(visitorType==VisitorsysVisitorType.BE_INVITED){
+                    visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }else{
+                    visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
             }
         }
 //            }
@@ -2495,13 +2503,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             convert.setBookingStatus(relatedVisitor == null ? visitor.getBookingStatus() : relatedVisitor.getBookingStatus());
             convert.setVisitStatus(relatedVisitor == null ? visitor.getVisitStatus() : relatedVisitor.getVisitStatus());
         }
-//      企业是否需要到访确认
-        if(ownerType == VisitorsysOwnerType.COMMUNITY){
-            VisitorSysConfiguration entConfig = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
-            if(null != entConfig.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(entConfig.getBaseConfig().getVisitorConfirmFlag())){
-                convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
-            }
-        }
         convert.setEnterpriseName(visitor.getEnterpriseName());
         //门禁授权信息不需要拷贝，如果为空则为空
         convert.setDoorGuardId(relatedVisitor ==null?null:relatedVisitor.getDoorGuardId());
@@ -2513,6 +2514,31 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             convert.setVisitTime(relatedVisitor == null ? null : relatedVisitor.getVisitTime());
         }
+
+        //      是否需要到访确认
+
+        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+            VisitorSysConfiguration entConfig = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+            if(null != entConfig.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(entConfig.getBaseConfig().getVisitorConfirmFlag())){
+                if(relatedVisitor == null
+                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }else{
+                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
+            }
+        } else {
+            VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),convert.getOwnerId());
+            if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+                if(relatedVisitor == null
+                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }else{
+                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
+            }
+        }
+
         convert.setSendMessageInviterFlag(relatedVisitor ==null?visitor.getSendMessageInviterFlag():relatedVisitor.getSendMessageInviterFlag());
         convert.setSendSmsFlag(relatedVisitor ==null?visitor.getSendSmsFlag():relatedVisitor.getSendSmsFlag());
         return convert;
