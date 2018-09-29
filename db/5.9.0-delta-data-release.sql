@@ -873,17 +873,6 @@ update eh_customer_trackings t1 set t1.customer_source = (select customer_source
 
 
 -- AUTHOR 黄鹏宇
--- REMARK 修改客户的名称
-UPDATE eh_var_fields set display_name = '客户状态' where id = 5;
-UPDATE eh_var_field_items set  display_name ='初次接触' where id  = 3;
-UPDATE eh_var_field_items set  display_name ='潜在客户' where id  = 4;
-
-update eh_var_field_item_scopes set item_display_name ='初次接触' where item_id = 3 and field_id =5 and `status` = 2;
-update eh_var_field_item_scopes set item_display_name ='潜在客户' where item_id = 4 and field_id =5 and `status` = 2;
--- END
-
-
--- AUTHOR 黄鹏宇
 -- REMARK 同步名称
 UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
 UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
