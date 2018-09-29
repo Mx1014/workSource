@@ -2298,7 +2298,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.COMMUNITY.getCode(), visitor.getOwnerId());
                 if (TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
                     if (visitorType == VisitorsysVisitorType.BE_INVITED) {
-                        visitor.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+                        visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                     } else {
                         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                     }
@@ -2307,7 +2307,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), visitor.getEnterpriseId());
                 if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
                     if (visitorType == VisitorsysVisitorType.BE_INVITED) {
-                        visitor.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+                        visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
                     } else {
                         visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                     }
