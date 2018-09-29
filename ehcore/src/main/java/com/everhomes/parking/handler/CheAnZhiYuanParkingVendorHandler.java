@@ -300,6 +300,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
                 dto.setOwnerType(cmd.getOwnerType());
                 dto.setParkingLotId(parkingLot.getId());
                 dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+                dto.setRateName(dto.getMonthCount() + "个月");
                 dto.setPrice(price.multiply(dto.getMonthCount()));
                 dto.setStartPeriod(expireTime);
                 dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
