@@ -5840,8 +5840,43 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 
-	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
-		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
+//	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
+//		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
+//		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+//		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
+//		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
+//		if(records.size() > 0) {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
+//			mapping = records.get(0);
+//			Long categoryId = mapping.getAssetCategoryId();
+//			Long billGroupId = mapping.getBillGroupId();
+//			Long charingItemId = mapping.getChargingItemId();
+//			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+//			dtos.add(dto);
+//		}else {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
+//			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
+//			if(records.size() > 0) {
+//				mapping = records.get(0);
+//				Long categoryId = mapping.getAssetCategoryId();
+//				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
+//				Long charingItemId = mapping.getChargingItemId();
+//				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
+//				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+//						categoryId, brotherGroupId);
+//				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
+//				ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+//				dtos.add(dto);
+//			}else {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//	                    "can not find asset mapping");
+//			}
+//		}
+//		return dtos;
+//	}
+	
+	public ListGeneralBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
+		ListGeneralBillsDTO dto = new ListGeneralBillsDTO();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
@@ -5851,28 +5886,12 @@ public class AssetServiceImpl implements AssetService {
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
-			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
-			dtos.add(dto);
+			dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 		}else {
-			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
-			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
-			if(records.size() > 0) {
-				mapping = records.get(0);
-				Long categoryId = mapping.getAssetCategoryId();
-				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
-				Long charingItemId = mapping.getChargingItemId();
-				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
-				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
-						categoryId, brotherGroupId);
-				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
-				ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
-				dtos.add(dto);
-			}else {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "can not find asset mapping");
-			}
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find asset mapping");
 		}
-		return dtos;
+		return dto;
 	}
 
 	public ListGeneralBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
@@ -5887,6 +5906,7 @@ public class AssetServiceImpl implements AssetService {
 		billGroupDTO.setBillGroupId(billGroupId);
 		billGroupDTO.setBillGroupName(group.getName());
 
+		//1、新增费项
 		List<BillItemDTO> billItemDTOList = new ArrayList<>();
 		BillItemDTO billItemDTO = new BillItemDTO();
 		billItemDTO.setBillItemId(charingItemId);
@@ -5900,8 +5920,20 @@ public class AssetServiceImpl implements AssetService {
 		billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
 		billItemDTO.setTaxAmount(taxAmount);
 		billItemDTOList.add(billItemDTO);
+		
+		//2、新增优惠/减免金额
+		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
+		ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
+		BigDecimal exemptionAmount = cmd.getExemptionAmount();
+		if(exemptionAmount != null) {
+			exemptionAmount = exemptionAmount.multiply(new BigDecimal(-1));//优惠减免金额需要转换成相应的负数
+		}
+		exemptionItemDTO.setAmount(exemptionAmount);
+		exemptionItemDTO.setRemark(cmd.getExemptionRemark());
+		exemptionItemDTOList.add(exemptionItemDTO);
+		
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
-
+		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
 		createBillCommand.setBillGroupDTO(billGroupDTO);
 
 		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);

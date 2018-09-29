@@ -1,8 +1,6 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
-import java.util.List;
-
 /**
  * @author created by yangcx
  * @date 2018年5月23日----下午5:56:48
@@ -13,14 +11,14 @@ import java.util.List;
  *</ul>
  */
 public class ListGeneralBillsResponse {
-	private List<ListGeneralBillsDTO> listGeneralBillsDTOs;
+	private ListGeneralBillsDTO listGeneralBillsDTO;
 
-	public List<ListGeneralBillsDTO> getListGeneralBillsDTOs() {
-		return listGeneralBillsDTOs;
+	public ListGeneralBillsDTO getListGeneralBillsDTO() {
+		return listGeneralBillsDTO;
 	}
 
-	public void setListGeneralBillsDTOs(List<ListGeneralBillsDTO> listGeneralBillsDTOs) {
-		this.listGeneralBillsDTOs = listGeneralBillsDTOs;
+	public void setListGeneralBillsDTO(ListGeneralBillsDTO listGeneralBillsDTO) {
+		this.listGeneralBillsDTO = listGeneralBillsDTO;
 	}
 
 }

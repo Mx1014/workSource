@@ -1,5 +1,7 @@
 package com.everhomes.asset;
 
+import java.util.List;
+
 import com.everhomes.rest.asset.ListBillDetailResponse;
 
 /**
@@ -13,6 +15,8 @@ public interface AssetGeneralBillHandler {
      * 账单状态改变回调接口
      * @param billDetail
      */
-     void payNotifyBillSourceModule(ListBillDetailResponse billDetail);
+    List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail);
+    
+    
     
 }

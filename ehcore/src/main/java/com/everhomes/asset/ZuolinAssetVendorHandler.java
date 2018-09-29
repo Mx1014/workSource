@@ -261,10 +261,8 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
                                     break;
                                 } catch (IllegalArgumentException e) {
-                                    // TODO Auto-generated catch block
                                     e.printStackTrace();
                                 } catch (IllegalAccessException e) {
-                                    // TODO Auto-generated catch block
                                     e.printStackTrace();
                                 }
                             }
@@ -624,7 +622,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         ListBillDetailResponse billDetail = listBillDetail(ncmd);
         AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType());
         if(null != handler){
-        	handler.payNotifyBillSourceModule(billDetail);
+        	//TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+        	
+        	
         }
     }
 

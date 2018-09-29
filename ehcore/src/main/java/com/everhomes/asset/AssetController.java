@@ -1530,11 +1530,11 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/createGeneralBill</b>
 	 */
 	@RequestMapping("createGeneralBill")
-	@RestReturn(value = ListGeneralBillsDTO.class, collection = true)
+	@RestReturn(value = ListGeneralBillsDTO.class, collection = false)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
-		List<ListGeneralBillsDTO> dto = assetService.createGeneralBill(cmd);
+		ListGeneralBillsDTO dto = assetService.createGeneralBill(cmd);
 		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
-		listGeneralBillsResponse.setListGeneralBillsDTOs(dto);
+		listGeneralBillsResponse.setListGeneralBillsDTO(dto);
 	    RestResponse response = new RestResponse(listGeneralBillsResponse);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
