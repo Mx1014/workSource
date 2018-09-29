@@ -81,7 +81,8 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 //				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
-				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())||
+						order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 					//判断支付金额与订单金额是否相同
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 						onOrderRecordSuccess(order);
