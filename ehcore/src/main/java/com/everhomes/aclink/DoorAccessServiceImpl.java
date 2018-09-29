@@ -29,6 +29,8 @@ import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalEvent;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
@@ -305,6 +307,47 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+        String subcribeKey2 = SystemEvent.ACCOUNT_AUTH_SUCCESS.getCode();
+        localBus.subscribe(subcribeKey2, new LocalBusSubscriber() {
+
+			@Override
+			public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
+				// Must be
+				try {
+					ExecutorUtil.submit(new Runnable() {
+						
+						@Override
+						public void run() {
+							LOGGER.info("start run.....");
+							LocalEvent localEvent = (LocalEvent) arg2;
+							Long uId = localEvent.getContext().getUid();
+							Long orgId = Long.valueOf((String) localEvent.getParams().get("orgId"));
+							Integer namespaceId = localEvent.getContext().getNamespaceId();
+							if (null == uId) {
+								LOGGER.error("None of UserIdentifier");
+							} else {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("newUserAutoAuth id= " + uId);
+								}
+
+								try {
+									joinCompanyAutoAuth(namespaceId, orgId, uId);
+								} catch (Exception exx) {
+									LOGGER.error("execute promotion error promotionId=" + uId, exx);
+								}
+
+							}
+						}
+					});
+				} catch (Exception e) {
+					LOGGER.error("onLocalBusMessage error ", e);
+				} finally {
+
+				}
+
+				return Action.none;
+			}
+		});
     }
     
     @Override
@@ -3565,7 +3608,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+        if(auth.getValidFromMs() > System.currentTimeMillis() || auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
             resp.setIsValid((byte)0);    
         } else {
             resp.setIsValid((byte)1);
