@@ -324,7 +324,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         customerSearcher.deleteById(cmd.getId());
         DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
-        customerService.deleteEnterpriseCustomer(cmd2, true);
+        customerService.deleteEnterpriseCustomer(cmd2, false);
         invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 

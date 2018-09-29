@@ -1236,12 +1236,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 includeFunctions.forEach(r -> withoutWhiteList.remove(r.getFunctionId()));
 
                 //将剩下的去除列表中的id从全部生效的按钮id中去除
-                withoutWhiteList.forEach(functionIds::remove);
                 /*
                 includeFunctions.forEach(includeFunction -> {
                     functionIds.remove(includeFunction.getFunctionId());
                 });*/
             }
+            withoutWhiteList.forEach(functionIds::remove);
+
         }
 
 
