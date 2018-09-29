@@ -865,12 +865,18 @@ INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`,
 
 -- end
 
-
 -- AUTHOR: tangcen
 -- REMARK: 添加申请单的报错信息
 SET @id = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'requisition', '506', 'zh_CN', '未配置审批管理');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'requisition', '507', 'zh_CN', '未启用审批管理');
+
+-- AUTHOR 黄鹏宇
+-- REMARK 插入资质客户白名单
+set @id=(SELECT max(id) FROM eh_service_module_include_functions);
+INSERT INTO `eh_service_module_include_functions`(`id`, `namespace_id`, `module_id`, `community_id`, `function_id`) VALUES (@id:= @id+1, 999944, 150020, NULL, 43980);
+update eh_customer_trackings t1 set t1.customer_source = (select customer_source from eh_enterprise_customers t2 where t2.id = t1.customer_id);
+-- END
 -- --------------------- SECTION END ---------------------------------------------------------
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
