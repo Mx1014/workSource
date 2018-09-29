@@ -19,7 +19,7 @@ public class NewIntentionCustomerDTO {
 	private String customerName;
 	private List<Long> addressIds;
 	private String applyUserName;
-	private Long applyContact;
+	private String applyContact;
 	
 	public Long getApplyEntryId() {
 		return applyEntryId;
@@ -45,10 +45,10 @@ public class NewIntentionCustomerDTO {
 	public void setApplyUserName(String applyUserName) {
 		this.applyUserName = applyUserName;
 	}
-	public Long getApplyContact() {
+	public String getApplyContact() {
 		return applyContact;
 	}
-	public void setApplyContact(Long applyContact) {
+	public void setApplyContact(String applyContact) {
 		this.applyContact = applyContact;
 	}
 	@Override
