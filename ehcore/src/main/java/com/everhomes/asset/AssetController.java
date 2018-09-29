@@ -1533,7 +1533,9 @@ public class AssetController extends ControllerBase {
 	@RestReturn(value = ListGeneralBillsDTO.class, collection = true)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
 		List<ListGeneralBillsDTO> dto = assetService.createGeneralBill(cmd);
-	    RestResponse response = new RestResponse(dto);
+		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
+		listGeneralBillsResponse.setListGeneralBillsDTOs(dto);
+	    RestResponse response = new RestResponse(listGeneralBillsResponse);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
 	    return response;
