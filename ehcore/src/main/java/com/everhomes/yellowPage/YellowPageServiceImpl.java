@@ -832,6 +832,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		processServiceUrl(dto);
 		processCommentCount(dto);
+		processCommentToken(dto);
 		return dto;
 	}
 
