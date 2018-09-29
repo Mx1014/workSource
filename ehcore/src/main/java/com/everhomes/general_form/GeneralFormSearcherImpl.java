@@ -119,7 +119,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             Long sourceId = request.getId();
             List<GeneralFormVal> createBulUpdate = new ArrayList<>();
             for(GeneralFormVal temp :generalFormVal){
-                if(temp.getSourceId() == sourceId){
+                if(temp.getSourceId().equals(sourceId)){
                     createBulUpdate.add(temp);
                 }
             }
