@@ -448,9 +448,9 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         
         //issue-38519 【中天】【缴费管理】完成缴费后，在支付后台的订单中，订单描述为空，无法区分费用来源，财务完全无法对账
         //issue-38519 暂时为中天加上客户名称作为来源说明，临时方案
-        //if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999944)) {
         try {
-        	if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999951)) {
+        	if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999944)) {
+        	//if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999951)) {
             	String targetNames = "";
             	List<BillIdAndAmount> bills = cmd.getBills();
                 List<String> billIds = new ArrayList<>();
