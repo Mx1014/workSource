@@ -2547,22 +2547,13 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //                }
 //            }
 //        }
-
-        //      自助登记状态置为已到访
-        if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
-            if(convert.getId()==null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
-                if (ownerType == VisitorsysOwnerType.COMMUNITY) {
-                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.COMMUNITY.getCode(), convert.getOwnerId());
-                    if (TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
-                        convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                        convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                    }
-                } else {
-                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
-                    if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
-                        convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                        convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
-                    }
+//        园区确认预约访客，企业的关联
+        if(convert.getId()==null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
+            if (ownerType == VisitorsysOwnerType.COMMUNITY) {
+                VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
+                if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
                 }
             }
         }
