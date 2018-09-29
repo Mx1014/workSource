@@ -6907,7 +6907,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
-        resp.setSmartCardDescLink("https://www.zuolin.com");
+        SmartCardInfo smartCardInfo = new SmartCardInfo();
+        resp.setSmartCardInfo(smartCardInfo);
+        smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;
 
         try {
@@ -6933,8 +6935,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 obj = cards.get(0);
             }
 
-            resp.setSmartCardId(obj.getId());
-            resp.setSmartCardKey(obj.getCardkey());
+            smartCardInfo.setSmartCardId(obj.getId());
+            smartCardInfo.setSmartCardKey(obj.getCardkey());
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("generate totp failed", e);
         }
