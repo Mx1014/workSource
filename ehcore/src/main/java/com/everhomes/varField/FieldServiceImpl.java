@@ -577,7 +577,7 @@ public class FieldServiceImpl implements FieldService {
         Boolean globalFlag = true;
         if (cmd.getCommunityId() != null) {
             // only namespace scope ,using organization id as search condition
-            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
             //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
             /*if (scopeFields != null && scopeFields.size() < 1) {
             	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), null);
@@ -643,7 +643,8 @@ public class FieldServiceImpl implements FieldService {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
                         //                if (scopeItems != null && scopeItems.size() < 1) {
 //                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), cmd.getCommunityId(), null);
-//    			}}
+//    			}
+                        }
                     }
                     //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
                 /*if (scopeItems != null && scopeItems.size() < 1) {
@@ -701,7 +702,6 @@ public class FieldServiceImpl implements FieldService {
                     dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
                     return dtos;
                 }
-            }
         }
         return null;
     }

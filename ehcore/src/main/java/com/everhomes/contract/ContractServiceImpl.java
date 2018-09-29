@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -24,8 +25,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.investment.CustomerLevelType;
@@ -48,7 +47,6 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.asset.AssetExportHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
@@ -136,7 +134,6 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
@@ -170,45 +167,8 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.parser.Entity;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -1228,13 +1188,36 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 
 	protected void addToFlowCase(Contract contract, String flowcaseOwnerType) {
-//		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
-//				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+
 		Flow flow = null;
+		String contractType="";
 		
 		if ("CONTRACT".equals(flowcaseOwnerType)) {
-			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
-					FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			//多工作流
+			if(contract.getContractType() == 0){
+				contractType ="新签";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.REVIEW_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			
+			} else if(contract.getContractType() == 1){
+				contractType ="续约";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.RENEW_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			
+			}else if (contract.getContractType() == 2){
+				contractType ="变更";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.CHANGE_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
+			else if(contract.getContractType() == 3){
+				contractType ="退约";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.DENUNCIATION_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
+			if (flow == null) {
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
 		}else if ("PAYMENT_CONTRACT".equals(flowcaseOwnerType)) {
 			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
 					FlowConstants.PAYMENT_CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
@@ -1252,14 +1235,14 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setCurrentOrganizationId(contract.getPartyAId());
-		createFlowCaseCommand.setTitle(contract.getCustomerName() + "的合同申请");
+		createFlowCaseCommand.setTitle(contract.getCustomerName() + contractType + "的合同申请");
 		createFlowCaseCommand.setApplyUserId(contract.getCreateUid());
 		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-		createFlowCaseCommand.setServiceType("合同管理");
+		createFlowCaseCommand.setServiceType("合同管理-"+contractType);
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
@@ -2166,7 +2149,7 @@ long assetCategoryId = 0l;
 		 * 我们此处获得参数设置也是不需要进行权限校验的，所以在这里以及设置参数那边，我们把权限的校验规则给放开，不做权限校验。
 		 */
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), null,cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getOrgId(), cmd.getCategoryId());
 		//查询在某一个入口，某一个小区，某个收付款合同类型，最低规则
 		if(communityExist != null) {
 			return toContractParamDTO(communityExist);
@@ -3148,7 +3131,6 @@ long assetCategoryId = 0l;
 	}
 
 	//导出合同列表对接下载中心
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId) {
 		// 公用字段
@@ -3163,39 +3145,22 @@ long assetCategoryId = 0l;
 		command.setModuleName("contract");
 		command.setGroupPath(null);
 		// 页面上所有的动态字段
-		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName" };
 		List<FieldDTO> dtos = fieldService.listFields(command);
 		taskService.updateTaskProcess(taskId, 30);
-		// 属性字段
-		String[] fieldpropertyNames = new String[dtos.size() + 2];
+		
+		//下载列表的所有字段
+		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName", "deposit", "depositStatus" };
 
-		for (int i = 0; i < dtos.size(); i++) {
-			fieldpropertyNames[i] = dtos.get(i).getFieldName();
-		}
-		fieldpropertyNames[fieldpropertyNames.length - 2] = "rent";
-		fieldpropertyNames[fieldpropertyNames.length - 1] = "sponsorName";
-
-		List propertyNamesListAll = Arrays.asList(propertyNamesAll); // 将数组转化为list
-		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
-
-		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
-		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
-		// 标题
-		String[] titleNames = new String[ExcelPropertyNames.length];
-		for (int i = 0; i < ExcelPropertyNames.length; i++) {
-			for (int j = 0; j < dtos.size(); j++) {
-				if (ExcelPropertyNames[i].equals(dtos.get(j).getFieldName())) {
-					titleNames[i] = dtos.get(j).getFieldDisplayName();
-				}
-			}
-		}
-		taskService.updateTaskProcess(taskId, 50);
-		titleNames[titleNames.length - 2] = "租赁总额";
-		titleNames[titleNames.length - 1] = "发起人";
-		int[] titleSizes = new int[ExcelPropertyNames.length + 2];
-		for (int i = 0; i < ExcelPropertyNames.length; i++) {
-			titleSizes[i] = 30;
-		}
+		//用户自定义字段
+		Map<String,String>  customFields = new HashMap<String,String>();
+		customFields.put("rent", "租赁总额");
+		customFields.put("sponsorName", "发起人");
+		customFields.put("depositStatus", "押金支付状态");
+		//设置自定义字段的长度
+		int[] titleSizes = { 20,20,10};
+		
+		ExcelPropertyInfo excelPropertyInfo = exportPropertyInfo(customFields, dtos , propertyNamesAll, titleSizes);
+				
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if (community == null) {
 			LOGGER.error("Community is not exist.");
@@ -3208,10 +3173,65 @@ long assetCategoryId = 0l;
 
 			List<ContractExportDetailDTO> data = contractListDTO.stream().map(this::convertToExportDetail).collect(Collectors.toList());
 			taskService.updateTaskProcess(taskId, 90);
-			return excelUtils.getOutputStream(ExcelPropertyNames, titleNames, titleSizes, data);
+			return excelUtils.getOutputStream(excelPropertyInfo.getPropertyNames(), excelPropertyInfo.getTitleName(), excelPropertyInfo.getTitleSize(), data);
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes) {
+		ExcelPropertyInfo excelPropertyInfo = new ExcelPropertyInfo();
+		String[] fieldpropertyNames = new String[dynamicField.size() + customFields.size()];
+
+		List customFieldsList = new ArrayList<>();
+		Iterator iter = customFields.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			customFieldsList.add(entry.getKey());
+		}
+
+		for (int i = 0; i < dynamicField.size(); i++) {
+			fieldpropertyNames[i] = dynamicField.get(i).getFieldName();
+		}
+
+		for (int i = 0; i < customFieldsList.size(); i++) {
+			fieldpropertyNames[dynamicField.size() + i] = (String) customFieldsList.get(i);
+		}
+
+		List propertyNamesListAll = Arrays.asList(exportfield); // 将数组转化为list
+		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
+
+		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
+		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
+		// 标题
+		String[] titleNames = new String[ExcelPropertyNames.length];
+		for (int i = 0; i < titleNames.length; i++) {
+			for (int j = 0; j < dynamicField.size(); j++) {
+				if (ExcelPropertyNames[i].equals(dynamicField.get(j).getFieldName())) {
+					titleNames[i] = dynamicField.get(j).getFieldDisplayName();
+				}
+			}
+			if (titleNames[i] == null) {
+				titleNames[i] = customFields.get(ExcelPropertyNames[i]);
+			}
+		}
+
+		int dynamicFieldsize = ExcelPropertyNames.length - customFields.size();
+		int[] titleSizes = new int[ExcelPropertyNames.length];
+		for (int i = 0; i < dynamicFieldsize ; i++) {
+			titleSizes[i] = 30;
+		}
+		for (int i = 0; i < customFieldtitleSizes.length; i++) {
+			titleSizes[dynamicFieldsize + i] = customFieldtitleSizes[i];
+		}
+
+		excelPropertyInfo.setTitleName(titleNames);
+		excelPropertyInfo.setPropertyNames(ExcelPropertyNames);
+		excelPropertyInfo.setTitleSize(titleSizes);
+
+		return excelPropertyInfo;
 	}
 
 	protected ContractExportDetailDTO convertToExportDetail(ContractDTO dto) {

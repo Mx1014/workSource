@@ -3,9 +3,11 @@ package com.everhomes.contract;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
+import com.everhomes.rest.varField.FieldDTO;
 
 public interface ContractService {
 	String CONTRACT_PREFIX = "contract-";
@@ -70,5 +72,6 @@ public interface ContractService {
 	//导出对接下载中心
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
+	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
    
 }

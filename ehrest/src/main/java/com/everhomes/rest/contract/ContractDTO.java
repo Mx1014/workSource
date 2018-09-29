@@ -78,9 +78,25 @@ public class ContractDTO {
     private ContractTemplateDTO contractTemplate;
 	
 	private String sponsorName;
-	
 	private Long sponsorUid;
+	private BigDecimal deposit;
+	private Byte depositStatus;
 	
+	public BigDecimal getDeposit() {
+		return deposit;
+	}
+
+	public void setDeposit(BigDecimal deposit) {
+		this.deposit = deposit;
+	}
+
+	public Byte getDepositStatus() {
+		return depositStatus;
+	}
+
+	public void setDepositStatus(Byte depositStatus) {
+		this.depositStatus = depositStatus;
+	}
 
 	public Long getSponsorUid() {
 		return sponsorUid;

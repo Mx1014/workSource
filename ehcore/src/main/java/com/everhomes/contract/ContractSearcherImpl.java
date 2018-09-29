@@ -153,6 +153,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
+            builder.field("partyAId", contract.getPartyAId());
             if(contract.getPaymentFlag() == null){
                 builder.field("paymentFlag", 0);
             }else{
@@ -320,6 +321,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getCategoryId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
+        
+        if(cmd.getOrgId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("partyAId", cmd.getOrgId()));
+        }
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
