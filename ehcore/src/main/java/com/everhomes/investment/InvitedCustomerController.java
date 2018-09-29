@@ -9,6 +9,7 @@ import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -145,7 +146,7 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("importInvestmentEnterpriseData")
     @RestReturn(value=ImportFileTaskDTO.class)
-    public RestResponse importInvestmentEnterpriseData(@Valid ImportInvitedCustomerDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    public RestResponse importInvestmentEnterpriseData(ImportFieldExcelCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
         if (null == files || null == files[0]) {
@@ -154,7 +155,7 @@ public class InvitedCustomerController extends ControllerBase {
                     "files is null");
         }
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(invitedCustomerService.importEnterpriseCustomer(cmd, files[0]));
         response.setErrorCode(ErrorCodes. SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -180,6 +181,20 @@ public class InvitedCustomerController extends ControllerBase {
         invitedCustomerService.giveUpInvitedCustomer(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes. SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /invitedCustomer/changeCustomerAptitude</b>
+     * <p>一键转为资质客户</p>
+     */
+    @RequestMapping("changeCustomerAptitude")
+    @RestReturn(value = String.class)
+    public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
+        invitedCustomerService.changeCustomerAptitude(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

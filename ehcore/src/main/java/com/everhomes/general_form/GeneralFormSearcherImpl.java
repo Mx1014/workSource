@@ -1,35 +1,13 @@
 package com.everhomes.general_form;
 
-import com.alibaba.fastjson.JSON;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.customer.EnterpriseCustomer;
-import com.everhomes.customer.EnterpriseCustomerProvider;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowServiceImpl;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.investmentAd.AssetTemplateForFlow;
-import com.everhomes.rest.investmentAd.GeneralFormValTemplate;
-import com.everhomes.search.AbstractElasticSearch;
-import com.everhomes.search.SearchUtils;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -42,8 +20,6 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -51,13 +27,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import com.alibaba.fastjson.JSON;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.customer.EnterpriseCustomerProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.flow.FlowCaseDetailDTOV2;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
+import com.everhomes.rest.general_approval.SearchFormValsCommand;
+import com.everhomes.rest.general_approval.SearchGeneralFormItem;
+import com.everhomes.rest.investmentAd.GeneralFormValTemplate;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class GeneralFormSearcherImpl extends AbstractElasticSearch implements GeneralFormSearcher{
@@ -90,7 +85,8 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         BulkRequestBuilder brb = getClient().prepareBulk();
         XContentBuilder source = createDoc(generalFormVals);
         if(null != source) {
-            LOGGER.info("id:" + generalFormVals.iterator().next().getSourceId());
+            LOGGER.info("Bulk update general form to es, id={}, size={}" 
+            		+ generalFormVals.iterator().next().getSourceId(), generalFormVals.size());
             brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVals.iterator().next().getSourceId().toString()).source(source));
         }
         if (brb.numberOfActions() > 0) {
@@ -108,6 +104,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
     @Override
     public void syncFromDb() {
+    	long startTime = System.currentTimeMillis();
         int pageSize = 200;
         this.deleteAll();
 
@@ -115,6 +112,15 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         List<GeneralFormVal> generalFormVal = generalFormProvider.listGeneralForm();
         List<GeneralFormValRequest> generalFormValRequests = generalFormProvider.listGeneralFormValRequest();
         List<List<GeneralFormVal>> vals = new ArrayList<>();
+        if(LOGGER.isDebugEnabled()) {
+        	int valueSize = (generalFormVal == null) ? 0 : generalFormVal.size();
+        	int requestSize = (generalFormValRequests == null) ? 0 : generalFormValRequests.size();
+        	LOGGER.debug("Start to sync general form data, valueSize={}, requestSize={}", valueSize, requestSize);
+        }
+        
+        int round = 0;
+        long roundStartTime = System.currentTimeMillis();
+        long roundEndTime = roundStartTime;
         for(GeneralFormValRequest request: generalFormValRequests){
             Long sourceId = request.getId();
             List<GeneralFormVal> createBulUpdate = new ArrayList<>();
@@ -124,6 +130,12 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                 }
             }
             vals.add(createBulUpdate);
+        	round++;
+        	if(LOGGER.isDebugEnabled() && (round % 10000) == 0) {
+        		roundEndTime = System.currentTimeMillis();
+        		LOGGER.debug("Start to sync general form data, round={}, elapse={}", round, (roundEndTime - roundStartTime));
+        		roundStartTime = roundEndTime;
+        	}
         }
 
         for(List<GeneralFormVal> temp : vals){
@@ -145,7 +157,8 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
         this.optimize(1);
         this.refresh();
-        LOGGER.info("sync for contracts ok");
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("End to sync general form data, elapse={}", (endTime - startTime));
     }
 
     @Override
@@ -412,6 +425,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
                     }
                     builder.field(val.getFieldName(), fieldValue);
                 } catch (IOException e) {
+                	
                 }
 
             }

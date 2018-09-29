@@ -336,7 +336,7 @@ public class FieldServiceImpl implements FieldService {
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
-            String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
+            String excelTemplateName = "租户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
                 // for equipment inspection custom design
                 sheetNames.removeIf((s) -> !(Long.parseLong(s)==cmd.getInspectionCategoryId()));
@@ -352,6 +352,9 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("36");
                 sheetNames.remove("37");
                 sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -491,7 +494,6 @@ public class FieldServiceImpl implements FieldService {
             code =  DynamicExcelStrings.CUSTOEMR;
         }
         if (3 == cmd.getPrivilegeCode()) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, ServiceModuleConstants.BUSINESS_INVITATION, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
             code =  DynamicExcelStrings.INVITED_CUSTOMER;
         }
         return dynamicExcelService.importMultiSheet(file, code, null, cmd);

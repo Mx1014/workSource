@@ -246,8 +246,8 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('par
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10006', 'zh_CN', '未获取到费率信息');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking.jieshun', '10007', 'zh_CN', '未获取到月卡对应的费率信息');
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.loginUrl', 'http://syxtest.zuolin.com/jsaims/login', '捷顺登录地址', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.funcUrl', 'http://syxtest.zuolin.com/jsaims/as', '捷顺接口请求地址', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.loginUrl', 'http://www.jslife.com.cn/jsaims/login', '捷顺登录地址', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.funcUrl', 'http://www.jslife.com.cn/jsaims/as', '捷顺接口请求地址', 0, NULL, 1);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.version', '2', '捷顺接口版本', 0, NULL, 1);
 
 
@@ -536,16 +536,14 @@ DELETE FROM eh_var_field_ranges WHERE field_id = 5 AND module_name='enterprise_c
 -- REMARK 增加招商客户权限细化
 SET @id = (select max(id) from eh_service_module_privileges);
 
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150001, '查看客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150002, '创建客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150003, '编辑客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150004, '删除客户权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150005, '一键转为租客权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150008, '导入权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150009, '导出权限', 0, SYSDATE());
-INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150010, '一键转为资质客户权限', 0, SYSDATE());
-
-
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150001, '查看客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150002, '创建客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150003, '编辑客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150004, '删除客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150005, '客户转换', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150008, '导入客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150009, '导出客户', 0, SYSDATE());
+INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES (@id:=@id+1 , 150020, 0, 150010, '一键转为资质客户', 0, SYSDATE());
 
 
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) VALUES (150001, 0, '招商管理 查看客户权限', '招商管理 业务模块权限', NULL);
@@ -606,10 +604,6 @@ INSERT INTO `eh_locale_strings`(`id`, `scope`, `code`, `locale`, `text`) VALUES 
 
 UPDATE eh_var_fields SET display_name = '行业领域' WHERE id = 24;
 
--- AUTHOR 黄鹏宇
--- REMARK 同步名称
-UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
-UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
 
 
 -- AUTHOR 黄鹏宇
@@ -623,17 +617,17 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 
 DELETE FROM `eh_var_field_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
 set @item_id = (select max(id) from `eh_var_field_scopes`);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 2, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', 1, 1, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 5, '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}', '客户状态', 1, 2, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12115, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户联系人', 1, 3, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 24, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '行业领域', 0, 4, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12118, '{\"fieldParamType\": \"text\", \"length\": 32}', '成交几率', 0, 5, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12119, '{\"fieldParamType\": \"datetime\", \"length\": 32}', '预计签约时间', 0, 6, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12116, '{\"fieldParamType\": \"text\", \"length\": 32}', '渠道联系人', 0, 7, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 48, '{\"fieldParamType\": \"multiText\", \"length\": 2048}', '备注', 0, 8, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12077, '{\"fieldParamType\": \"file\", \"length\": 9}', '附件', 0, 9, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 6, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '客户来源', 0, 10, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
-INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12117, '{\"fieldParamType\": \"text\", \"length\": 32}', '招商跟进人', 0, 11, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 2, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', 1, 1, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 5, '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}', '客户状态', 1, 2, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12115, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户联系人', 1, 3, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 24, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '行业领域', 0, 4, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12118, '{\"fieldParamType\": \"text\", \"length\": 32}', '成交几率', 0, 5, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12119, '{\"fieldParamType\": \"datetime\", \"length\": 32}', '预计签约时间', 0, 6, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12116, '{\"fieldParamType\": \"text\", \"length\": 32}', '渠道联系人', 0, 7, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 48, '{\"fieldParamType\": \"multiText\", \"length\": 2048}', '备注', 0, 8, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12077, '{\"fieldParamType\": \"file\", \"length\": 9}', '附件', 0, 9, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 6, '{\"fieldParamType\": \"customizationSelect\", \"length\": 32}', '客户来源', 0, 10, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
+INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12117, '{\"fieldParamType\": \"text\", \"length\": 32}', '招商跟进人', 0, 11, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
 
 
 DELETE FROM `eh_var_field_item_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
@@ -673,8 +667,8 @@ UPDATE eh_general_forms SET template_text='[{"dataSourceType":"USER_NAME","dynam
 
 -- AUTHOR: 黄良铭
 -- REMARK: 脚本管理菜单
-INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category) 
-VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module');
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid)
+VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module',1,1);
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(79000000 ,'脚本管理',21000000,NULL,'script-management',1,2,'/11000000/21000000/79000000','zuolin',30,60300,3,'system','module',NULL);
 
@@ -682,10 +676,6 @@ VALUES(79000000 ,'脚本管理',21000000,NULL,'script-management',1,2,'/11000000
 -- REMARK: 更新访客表单
 update eh_general_forms set template_text = '[{"dynamicFlag":0,"fieldDesc":"输入车牌号码","fieldDisplayName":"车牌号码","fieldExtra":"{\"limitWord\":512}","fieldName":"plateNo","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入证件号码","fieldDisplayName":"证件号码","fieldExtra":"{\"limitWord\":512}","fieldName":"idNumber","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访楼层","fieldDisplayName":"到访楼层","fieldExtra":"{\"limitWord\":512}","fieldName":"visitFloor","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"},{"dynamicFlag":0,"fieldDesc":"输入到访门牌","fieldDisplayName":"到访门牌","fieldExtra":"{\"limitWord\":512}","fieldName":"visitAddresses","fieldType":"SINGLE_LINE_TEXT","renderType":"DEFAULT","requiredFlag":0,"validatorType":"TEXT_LIMIT","visibleType":"HIDDEN"}]' where module_id = 41800;
 
--- AUTHOR: tangcen
--- REMARK: 添加权限web子菜单
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150010', '房源招商', '150000', '/200/110000/150000/150010', '1', '4', '2', '0', NOW(), '{"url":"${home.url}/park-entry-web/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 14, NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'subModule');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150020', '客户管理', '150000', '/200/110000/150000/150020', '1', '4', '2', '0', NOW(), '{"url":"${home.url}/rentCustomer/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 14, NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'subModule');
 
 -- AUTHOR: tangcen
 -- REMARK: 添加房源招商的权限
@@ -763,30 +753,123 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 UPDATE eh_var_fields SET group_path = '/1/10/' WHERE group_path = '/1/10';
 UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6;
 UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6;
+UPDATE eh_var_field_scopes SET group_path = '/1/10/' WHERE group_path = '/1/10' and status = 2;
 
 
+-- AUTHOR: 黄鹏宇
 -- REMARK: 去除有两个拜访人的问题
 DELETE FROM eh_var_field_scopes WHERE field_id = (SELECT id FROM eh_var_fields WHERE name = 'visitPersonName');
 UPDATE eh_var_fields SET status = 0 WHERE name = 'visitPersonName';
 
+-- AUTHOR: 黄鹏宇
 -- REMAKE: 将module中的企业客户换成租客
 UPDATE eh_service_module_apps SET name = '租客管理' WHERE module_id = 21100;
 UPDATE eh_service_modules SET name = '租客管理' WHERE id = 21100;
 
+
+-- AUTHOR: 黄鹏宇
 -- REMARK: 将系统中租客scope的客户类型去除
 UPDATE eh_var_field_scopes SET `status` = 0 WHERE module_name = 'enterprise_customer' AND field_id = 5;
 
-
+-- AUTHOR 黄鹏宇
 -- REMARK : 删除数据库中的脏数据
 UPDATE eh_var_field_item_scopes SET `status` = 0 WHERE item_id = 3 AND field_id != 5 ;
 
-
+-- AUTHOR 黄鹏宇
 -- REMARK : 删除租客中的资质客户权限
 DELETE FROM eh_acl_privileges WHERE id = 21116;
 DELETE FROM eh_service_module_privileges WHERE privilege_id = 21116;
 
 
+
+-- AUTHOR 黄鹏宇
+-- REMARK 同步名称
+UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
+UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
+UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
+
+
 -- END
+
+
+
+-- AUTHOR: 严军
+-- REMARK: 增加默认主题色
+
+DELETE from eh_configurations WHERE NAME = 'theme.color';
+
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '1000000', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999999', '#1E274E', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999996', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999993', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999992', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999991', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999990', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999989', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999988', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999986', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999985', '#719B87', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999984', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999983', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999982', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999981', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999980', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999979', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999978', '#253754', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999977', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999976', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999975', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999974', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999973', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999972', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999971', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999970', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999969', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999968', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999967', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999966', '#3781E6', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999965', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999964', '#3781E6', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999962', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999961', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999960', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999959', '#673AB7', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999958', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999957', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999956', '#1FBCD2', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999955', '#00B9EF', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999954', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999953', '#C33333', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999952', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999951', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999950', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999949', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999948', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999947', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999946', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999945', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999944', '#10A1F1', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999942', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999941', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999940', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999939', '#0B87D9', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999938', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999936', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999935', '#DBA561', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999932', '#1A538F', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999930', '#F2C500', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999929', '#D10000', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '999927', '#F06416', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '11', '#1FA24D', '主题色', '主题色');
+INSERT INTO `eh_configurations` (`name`, `namespace_id`, `value`, `description`, `display_name`) VALUES ('theme.color', '1', '#10A1F1', '主题色', '主题色');
+
+-- end
+
+
+
+
+
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 
@@ -800,11 +883,11 @@ DELETE FROM eh_service_module_privileges WHERE privilege_id = 21116;
 -- REMARK:。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
 
 -- 大沙河创新大厦停车场
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.cid', '880075500000001', '客户号', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.usr', '880075500000001', '捷顺登录账户名', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.psw', '888888', '捷顺登录密码', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.signKey', '7ac3e2ee1075bf4bb6b816c1e80126c0', 'signKey', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.parkCode', '0010028888', '小区编号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.cid', '880075501000675', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.usr', '880075501000675', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.psw', '880075501000675', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.signKey', 'a07b3c136b683440b5b80ab5e492fed6', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_DSHCXMall.parkCode', '0000000749', '小区编号', 0, NULL, 1);
 
 set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`) VALUES ((@max_lots_id := @max_lots_id + 1), 'community', 240111044332059932, '创新大厦停车场', 'JIESHUN_DSHCXMall', '', 2, 1, now(), 999967, '{"expiredRechargeFlag":1,"expiredRechargeMonthCount":1,"expiredRechargeType":1,"maxExpiredDay":3,"monthlyDiscountFlag":0,"tempFeeDiscountFlag":0}', '{"tempfeeFlag": 1, "rateFlag": 0, "lockCarFlag": 0, "searchCarFlag": 0, "currentInfoType": 0,"identityCardFlag":0}', right(@max_lots_id, 3), @max_lots_id, NULL, '["tempfee","monthRecharge"]');
@@ -835,11 +918,11 @@ INSERT INTO xxxx() VALUES();
 -- REMARK: issue-36688 停车缴费V6.6.3 光企云二期停车场
 update eh_parking_lots set name = '光大we谷A区停车场' where vendor_name = 'GUANG_DA_WE_GU';
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.cid', '880075500000001', '客户号', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.usr', '880075500000001', '捷顺登录账户名', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.psw', '888888', '捷顺登录密码', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.signKey', '7ac3e2ee1075bf4bb6b816c1e80126c0', 'signKey', 0, NULL, 1);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.parkCode', '0010028888', '小区编号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.cid', '880076901009202', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.usr', '880076901009202', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.psw', '880076901009202', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.signKey', '4b86380928753347638b4b6f3db7eb22', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY2.parkCode', '0000009122', '小区编号', 0, NULL, 1);
 
 
 set @max_lots_id := (select ifnull(max(id),0)  from eh_parking_lots);

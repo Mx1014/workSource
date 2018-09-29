@@ -592,8 +592,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     cmd.getClientAppName());
             List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
             if (paymentMethods != null)
-                dto.setPayMethod(paymentMethods.stream().map(r -> {
+                dto.setPayMethod(paymentMethods.stream().map(r->{
                     PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                    String paymentLogo = contentServerService.parserUri(r.getPaymentLogo());
+                    convert.setPaymentLogo(paymentLogo);
                     if (r.getPaymentParams() != null) {
                         PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
                         paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());

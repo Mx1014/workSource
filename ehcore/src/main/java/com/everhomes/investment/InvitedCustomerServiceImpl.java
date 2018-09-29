@@ -15,8 +15,11 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
@@ -612,6 +616,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
 
+
+    @Override
+    public DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        return fieldService.importDynamicExcel(cmd,mfile);
+    }
+
+
     @Override
     public InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd) {
         InvitedCustomerDTO result;
@@ -704,6 +716,23 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         }
 
         return null;
+    }
+
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = null;
+        if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
+            res = customerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+            res = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            customerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
     }
 
 }

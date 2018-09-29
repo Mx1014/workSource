@@ -39,6 +39,8 @@ public class PostGeneralFormValCommand {
     
     private Long investmentAdId;
 
+    private Long orgId;
+
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 
@@ -80,6 +82,14 @@ public class PostGeneralFormValCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 
 	public Long getOwnerId() {
