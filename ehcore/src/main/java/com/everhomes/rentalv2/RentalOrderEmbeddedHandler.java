@@ -138,41 +138,46 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 		} else {
 
-//		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
-			rentalProvider.updateRentalBill(order);
-			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+			if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
+				//支付成功之后创建工作流
+				order.setStatus(SiteBillStatus.SUCCESS.getCode());
+				rentalProvider.updateRentalBill(order);
+				rentalService.onOrderSuccess(order);
+				//发短信
+				RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 
-			FlowAutoStepDTO dto = new FlowAutoStepDTO();
-			dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-			dto.setFlowCaseId(flowCase.getId());
-			dto.setFlowMainId(flowCase.getFlowMainId());
-			dto.setFlowNodeId(flowCase.getCurrentNodeId());
-			dto.setFlowVersion(flowCase.getFlowVersion());
-			dto.setStepCount(flowCase.getStepCount());
-			flowService.processAutoStep(dto);
+				handler.sendRentalSuccessSms(order);
 
-			//发消息和短信
-			//发给发起人
-			Map<String, String> map = new HashMap<>();
-			map.put("useTime", order.getUseDetail());
-			map.put("resourceName", order.getResourceName());
-			rentalCommonService.sendMessageCode(order.getRentalUid(), map,
-					RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
-
-			String templateScope = SmsTemplateCode.SCOPE;
-			String templateLocale = RentalNotificationTemplateCode.locale;
-			int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
-
-			List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
-
-			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
-					IdentifierType.MOBILE.getCode());
-			if (null == userIdentifier) {
-				LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
 			} else {
-				smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
-						templateId, templateLocale, variables);
+
+//		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
+				rentalProvider.updateRentalBill(order);
+				//改变订单状态
+				rentalService.changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+
+				//发消息和短信
+				//发给发起人
+				Map<String, String> map = new HashMap<>();
+				map.put("useTime", order.getUseDetail());
+				map.put("resourceName", order.getResourceName());
+				rentalCommonService.sendMessageCode(order.getRentalUid(), map,
+						RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+
+				String templateScope = SmsTemplateCode.SCOPE;
+				String templateLocale = RentalNotificationTemplateCode.locale;
+				int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+
+				List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+				smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+				UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+						IdentifierType.MOBILE.getCode());
+				if (null == userIdentifier) {
+					LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+				} else {
+					smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+							templateId, templateLocale, variables);
+				}
 			}
 		}
 	}
