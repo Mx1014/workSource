@@ -1314,7 +1314,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		List<SiyinPrintSetting> list = checkPrintPriceDTO(cmd.getPrintPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
 		
-		list.addAll(checkCopyPriceDTO(cmd.getPrintPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
+		list.addAll(checkCopyPriceDTO(cmd.getCopyPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline(),namespaceId));
 		return list;

@@ -379,4 +379,11 @@ public interface UserService {
      * @return
      */
     FindUsersByPhonesResponse findUsersByPhones(FindUsersByPhonesCommand cmd) ;
+    
+    /**
+     * 获取商户跳转URL
+     * @param cmd
+     * @return
+     */
+    GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) ;
 }
