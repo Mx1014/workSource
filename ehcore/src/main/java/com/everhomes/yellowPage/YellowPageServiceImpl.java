@@ -153,6 +153,7 @@ import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseDefaultOrderCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseDisplayFlagCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceProviderCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceTypeOrdersCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
@@ -830,6 +831,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 		processServiceUrl(dto);
+		processCommentCount(dto);
+		processCommentToken(dto);
 		return dto;
 	}
 
@@ -1143,6 +1146,25 @@ public class YellowPageServiceImpl implements YellowPageService {
 			} else {
 				dto.setCommentCount(0);
 			}
+		}
+	}
+	
+	private void processCommentCount(ServiceAllianceDTO dto) {
+		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null, null, dto.getParentId());
+		if (sa == null || null == sa.getEnableComment()
+				|| CommonStatus.INACTIVE == CommonStatus.fromCode(sa.getEnableComment())) { // 当enableComment>0时，都算作开启
+			dto.setCommentCount(null);
+			return;
+		}
+
+		List<Long> ownerIds = Arrays.asList(dto.getId());
+		Map<String, Integer> mapcounts = commentProvider.listServiceAllianceCommentCountByOwner(
+				UserContext.getCurrentNamespaceId(), ServiceAllianceOwnerType.SERVICE_ALLIANCE.getCode(), ownerIds);
+		String key = String.valueOf(dto.getId());
+		if (mapcounts.get(key) != null) {
+			dto.setCommentCount(mapcounts.get(key));
+		} else {
+			dto.setCommentCount(0);
 		}
 	}
 
@@ -3993,5 +4015,29 @@ public class YellowPageServiceImpl implements YellowPageService {
 		String timeMidStr = DateUtil.dateToStr(new Timestamp(timeMillis), "HHmmss");
 		return -Long.parseLong(timeHeadStr + timeMidStr + ms1 + ms2 + ms3);
 
+	}
+
+	@Override
+	public void updateServiceTypeOrders(UpdateServiceTypeOrdersCommand cmd) {
+
+		List<Long> idList = Arrays.asList(cmd.getUpId(), cmd.getLowId());
+		Map<Long, Long> ret = yellowPageProvider.getServiceTypeOrders(idList);
+		if (ret.isEmpty() || ret.size() < 2) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_SERVICE_TYPE_TO_UPDATE_NOT_FOUND,
+					"service type not found");
+		}
+
+		Long upIdCurrentOrder = ret.get(cmd.getUpId());
+		Long lowIdCurrentOrder = ret.get(cmd.getLowId());
+		// 如果本身已经符合更新后的顺序，有可能是重复点击，直接返回
+		if (upIdCurrentOrder < lowIdCurrentOrder) {
+			return;
+		}
+
+		dbProvider.execute(r -> {
+			yellowPageProvider.updateServiceTypeOrders(cmd.getUpId(), lowIdCurrentOrder);
+			yellowPageProvider.updateServiceTypeOrders(cmd.getLowId(), upIdCurrentOrder);
+			return null;
+		});
 	}
 }

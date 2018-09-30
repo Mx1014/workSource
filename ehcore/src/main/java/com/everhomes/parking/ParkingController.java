@@ -95,6 +95,22 @@ public class ParkingController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /parking/updateUserNotice</b>
+     * <p>编辑用户须知</p>
+     */
+    @RequestMapping("updateUserNotice")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserNotice(UpdateUserNoticeCommand cmd) {
+        parkingService.updateParkingUserNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
     /**
      * <b>URL: /parking/getParkingCards</b>
      * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>

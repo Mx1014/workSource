@@ -2,10 +2,25 @@ package com.everhomes.enterpriseApproval;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
-import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdCommand;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
+import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.CreateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowsCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalIdCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsResponse;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsCommand;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;
+import com.everhomes.rest.enterpriseApproval.UpdateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
 import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 import java.io.OutputStream;
@@ -24,6 +39,8 @@ public interface EnterpriseApprovalService {
     ListApprovalFlowRecordsResponse listActiveApprovalFlowRecords(ListApprovalFlowRecordsCommand cmd);
 
     void stopApprovalFlows(ApprovalFlowIdsCommand cmd);
+
+    void deleteApprovalFlow(ApprovalFlowIdCommand cmd);
 
     List<OrganizationMemberDTO> listApprovalProcessors(ApprovalFlowIdCommand cmd);
 

@@ -1,9 +1,8 @@
 package com.everhomes.workReport;
 
 import com.everhomes.rest.workReport.ListWorkReportsValCommand;
-import org.jooq.Record;
-import org.jooq.RecordMapper;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface WorkReportValProvider {
@@ -30,9 +29,9 @@ public interface WorkReportValProvider {
 
     List<WorkReportValReceiverMap> listReportValReceiversByValId(Long reportValId);
 
-    Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId);
+    Integer countUnReadWorkReportsVal(Integer namespaceId, Long organizationId, Long receiverId);
 
-    void markWorkReportsValReading(Integer namespaceId, Long receiverId);
+    void markWorkReportsValReading(Integer namespaceId, Long organizationId, Long receiverId);
 
     Long createWorkReportValComment(WorkReportValComment comment);
 
@@ -49,4 +48,20 @@ public interface WorkReportValProvider {
     void deleteCommentAttachmentsByCommentId(Integer namespaceId, Long commentId);
 
     List<WorkReportValCommentAttachment> listWorkReportValCommentAttachments(Integer namespaceId, List<Long> commentIds);
+
+    Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
+
+    void deleteReportValReceiverMsgByValId(Long reportValId);
+
+    void deleteReportValReceiverMsg();
+
+    void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg);
+
+    List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime);
+
+    List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime);
+
+    List<WorkReportValReceiverMap> listWorkReportReceivers();
+
+    List<WorkReportVal> listWorkReportVals();
 }

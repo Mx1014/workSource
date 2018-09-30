@@ -29,4 +29,16 @@ public class FileServiceImpl implements FileService {
         }
         return icons;
     }
+
+    @Override
+    public String findUrlByFileType(String fileSuffix) {
+        FileIcon icon = fileProvider.findFileIconByFileType(fileSuffix);
+        if (icon == null) {
+            icon = fileProvider.findFileIconByFileType("other");
+        }
+        if (icon == null) {
+            return null;
+        }
+        return contentServerService.parserUri(icon.getIconUri());
+    }
 }

@@ -19,6 +19,8 @@ import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
 import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.StickyEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UnStickyEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import com.everhomes.util.RequireAuthentication;
@@ -131,6 +133,38 @@ public class EnterpriseNoticeController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse cancelEnterpriseNotice(CancelEnterpriseNoticeCommand cmd) {
         enterpriseNoticeService.cancelEnterpriseNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/stickyEnterpriseNotice</b>
+     * <p>置顶公告</p>
+     *
+     * @param cmd，请查看{@link StickyEnterpriseNoticeCommand}
+     */
+    @RequestMapping("stickyEnterpriseNotice")
+    @RestReturn(value = String.class)
+    public RestResponse stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd) {
+        enterpriseNoticeService.stickyEnterpriseNotice(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL : /enterpriseNotice/unStickyEnterpriseNotice</b>
+     * <p>取消置顶公告</p>
+     *
+     * @param cmd，请查看{@link UnStickyEnterpriseNoticeCommand}
+     */
+    @RequestMapping("unStickyEnterpriseNotice")
+    @RestReturn(value = String.class)
+    public RestResponse unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd) {
+        enterpriseNoticeService.unStickyEnterpriseNotice(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

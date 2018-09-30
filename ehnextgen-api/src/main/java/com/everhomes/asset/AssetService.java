@@ -1,23 +1,27 @@
 
 package com.everhomes.asset;
 
-import com.everhomes.order.PaymentOrderRecord;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-import org.springframework.web.multipart.MultipartFile;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+
+import java.io.OutputStream;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -80,7 +84,7 @@ public interface AssetService {
 
 	void modifyBillStatus(BillIdCommand cmd);
 
-	void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response);
+	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
 
 	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
@@ -202,8 +206,6 @@ public interface AssetService {
     
 	IsProjectNavigateDefaultResp isProjectNavigateDefault(IsProjectNavigateDefaultCmd cmd);
 	
-	void transferOrderPaymentType();
-
     long getNextCategoryId(Integer namespaceId, Long aLong, String instanceConfig);
 
 	void saveInstanceConfig(long categoryId, String ret);
@@ -215,15 +217,11 @@ public interface AssetService {
 
 	Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
 
-	void createAnAppMapping(CreateAnAppMappingCommand cmd);
-
-	void updateAnAppMapping(UpdateAnAppMappingCommand cmd);
-    
     IsUserExistInAddressResponse isUserExistInAddress(IsUserExistInAddressCmd cmd);
     
     ListBillsResponse listBillsForEnt(ListBillsCommandForEnt cmd);
     
-    void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response);
+    //void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response); -- by djm 对接下载中心
     
     void exportOrdersForEnt(ListPaymentBillCmd cmd,HttpServletResponse response);
     
@@ -254,4 +252,29 @@ public interface AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
 	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+
+	/**
+	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
+	 */
+	public List<AssetServiceModuleAppDTO> listAssetModuleApps(Integer namespaceId);
+
+	/**
+	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
+	 */
+	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	
+	/**
+	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
+	 */
+	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
+
+	void tranferAssetMappings();
+	
+	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
+
+	void createChargingItem(CreateChargingItemCommand cmd);
+	
+	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
+	
+	default void exportAssetListByParams(Object cmd){}
 }

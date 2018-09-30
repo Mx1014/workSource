@@ -197,6 +197,14 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         cardRate.setMonthCount(new BigDecimal(1));
         ratedtos.add(cardRate);
 
+//      测试用配置费用
+        String debugfee = configProvider.getValue("parking.test.monthfee","0");
+        if(!debugfee.equals("0")){
+            ratedtos.forEach(dto ->{
+                dto.setPrice(new BigDecimal(debugfee));
+            });
+        }
+
         return ratedtos;
     }
 
@@ -220,7 +228,7 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
             dto.setParkingName(parkingLot.getName());
 
             dto.setSpaceNo(location.getParkLotName());
-//            dto.setLocation(location.getParkLotName());
+            dto.setLocation(location.getFloorName() + location.getParkLotName());
             dto.setFloorName(location.getFloorName());
             dto.setCarImageUrl(location.getImgUrl());
 
@@ -246,6 +254,10 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
                 Long parkingTime = now.getTime() - intime.getTime();
                 dto.setParkingTime(String.valueOf(parkingTime / (60 * 1000)));
             }
+        }else{
+            LOGGER.error("get car location error, msg={}", entity.getMessage());
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.CAR_ENTRY_INFO_NOT_FOUND,
+                    "get car location error");
         }
         return dto;
     }
@@ -264,6 +276,41 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 //        }
         LOGGER.info("unknown type = " + order.getRechargeType());
         return false;
+    }
+
+    @Override
+    public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+        ParkingExpiredRechargeInfoDTO dto = new ParkingExpiredRechargeInfoDTO();
+        List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(parkingLot,cmd.getPlateNumber(),null);
+
+        CheanCard card = getCardInfo(cmd.getPlateNumber(),null);
+        if(null != card) {
+            long now = System.currentTimeMillis();
+            long expireTime;
+            try {
+                expireTime = DATE_FORMAT.get().parse(card.getExpirydate()).getTime();
+            } catch (ParseException e) {
+                LOGGER.error("Parse time error,Expirydate={}",card.getExpirydate());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "Parse time error");
+            }
+            BigDecimal price = new BigDecimal(0);
+            for(ParkingRechargeRateDTO rate: rates) {
+                price = rate.getPrice();
+                break;
+            }
+            if(expireTime < now) {
+                dto.setOwnerId(cmd.getOwnerId());
+                dto.setOwnerType(cmd.getOwnerType());
+                dto.setParkingLotId(parkingLot.getId());
+                dto.setMonthCount(new BigDecimal(parkingLot.getExpiredRechargeMonthCount()));
+                dto.setRateName(dto.getMonthCount() + "个月");
+                dto.setPrice(price.multiply(dto.getMonthCount()));
+                dto.setStartPeriod(expireTime);
+                dto.setEndPeriod(Utils.getLongByAddNatureMonth(Utils.getLastDayOfMonth(now), parkingLot.getExpiredRechargeMonthCount() -1));
+            }
+        }
+        return dto;
     }
 
     boolean payTempCardFee(ParkingRechargeOrder order){
@@ -359,18 +406,17 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
 
     protected String post(JSONObject data, String type) {
 
-//        String url = configProvider.getValue("parking.chean.url","http://113.98.59.44:9022");
-        String url = "http://113.98.59.44:9022";
+        String url = configProvider.getValue("parking.cheanzhiyuan.url","");
+//        String url = "http://113.98.59.44:9022";
 
         url += CATEGORY_SEPARATOR + type;
 
-//        String accessKeyId = configProvider.getValue("parking.chean.accessKeyId","UT");
-//        String key = configProvider.getValue("parking.chean.privatekey","71cfa1c59773ddfa289994e6d505bba3");
-//        String branchno = configProvider.getValue("parking.chean.branchno","0");
-
-        String accessKeyId = "UT";
-        String key = "71cfa1c59773ddfa289994e6d505bba3";
-        String branchno = "0";
+        String accessKeyId = configProvider.getValue("parking.cheanzhiyuan.accessKeyId","");
+        String key = configProvider.getValue("parking.cheanzhiyuan.privatekey","");
+        String branchno = configProvider.getValue("parking.cheanzhiyuan.branchno","");
+//        String accessKeyId = "UT";
+//        String key = "71cfa1c59773ddfa289994e6d505bba3";
+//        String branchno = "0";
 
         String iv = DATE_FORMAT.get().format(new Date());
         int nonce = (int) (Math.random() * 100);
@@ -404,47 +450,4 @@ public class CheAnZhiYuanParkingVendorHandler extends DefaultParkingVendorHandle
         return result;
     }
 
-//    private String test(){
-//        JSONObject param = new JSONObject();
-//        post(param,"api.aspx/pls.parkLots.get");
-//
-//        for(int i = 1;i < 4;i++){
-//            JSONObject param1 = new JSONObject();
-//            param1.put("parkLotName","A" + i);
-//            post(param1,"api.aspx/pls.car.pos.getByNo");
-//        }
-//
-//        return "";
-//    }
-//
-//    public static void main(String[] args) {
-//        CheAnZhiYuanParkingVendorHandler bean = new CheAnZhiYuanParkingVendorHandler();
-//        bean.getParkingTempFee(null,"粤B571B5");
-//        bean.getCardInfo("粤BMP525",null);
-//      卡类型接口
-//        bean.getParkingRechargeRates(null,null,null);
-//      开卡
-//        bean.createMonthCard("粤B32345","2018-08-22 00:00:00","2018-09-22 00:00:00");
-//      下单
-//        bean.createOrder("粤BCC345",new BigDecimal(300),"2018-08-15 00:00:00","2018-10-15 00:00:00");
-//      支付
-//        ParkingRechargeOrder order = new ParkingRechargeOrder();
-//        order.setPlateNumber("粤B998LL");
-//        order.setMonthCount(new BigDecimal(1));
-//        order.setPaidType("10001");
-//        bean.addMonthCard(order,null);
-//        LOGGER.info("amount={}",new BigDecimal("24.00"))
-//        order.setOriginalPrice(new BigDecimal("0.01"));
-//        order.setOrderNo(32L);
-//        bean.payTempCardFee(order);
-//        GetCarLocationCommand cmd = new GetCarLocationCommand();
-//        cmd.setPlateNumber("粤B571B5");
-//        ParkingLot pl = new ParkingLot();
-//        pl.setOwnerType("1");
-//        pl.setOwnerId(1L);
-//        pl.setId(1L);
-//        pl.setName("1");
-//        bean.getCarLocation(pl,cmd);
-//        bean.test();
-//    }
 }

@@ -11,9 +11,9 @@ package com.everhomes.rest.aclink;
  *  <li>ACLINK_WANGLONG: 13, 旺龙梯控</li>
  *  <li>ACLINK_WANGLONG_GROUP: 14, 旺龙梯控组</li>
  *  <li>ACLINK_WANGLONG_DOOR: 15, 旺龙门禁</li>
- *  <li>ACLINK_WANGLONG_DOOR_GROUP: 16, 旺龙门禁组</li>
- *  <li>ACLINK_UCLBRT_DOOR: 18, 锁掌柜门禁 </li>
- * <li>ACLINK_BUS((byte) 17): 园区班车</li>
+ *  <li>ACLINK_WANGLONG_DOOR_GROUP: 16, 旺龙门禁组</li>  
+ * <li>ACLINK_BUS((byte) 17): 园区班车</li> 
+ *  <li>ACLINK_UCLBRT_DOOR: 18, 锁掌柜门禁 </li> 
  * </ul>
  * @author janson
  *

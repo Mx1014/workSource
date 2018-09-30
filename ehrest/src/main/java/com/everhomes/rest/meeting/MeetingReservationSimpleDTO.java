@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>sponsorName: 发起人姓名</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.meeting.MeetingReservationShowStatus}</li>
  * <li>showStatus: 状态的中文显示</li>
+ * <li>attachmentFlag: 是否有附件 1-是 0-否</li>
  * </ul>
  */
 public class MeetingReservationSimpleDTO {
@@ -32,6 +33,7 @@ public class MeetingReservationSimpleDTO {
     private String sponsorName;
     private Byte status;
     private String showStatus;
+    private Byte attachmentFlag;
 
     public Long getId() {
         return id;
@@ -133,4 +135,12 @@ public class MeetingReservationSimpleDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getAttachmentFlag() {
+		return attachmentFlag;
+	}
+
+	public void setAttachmentFlag(Byte attachmentFlag) {
+		this.attachmentFlag = attachmentFlag;
+	}
 }

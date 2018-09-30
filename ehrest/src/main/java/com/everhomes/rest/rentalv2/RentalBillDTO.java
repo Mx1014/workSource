@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactPhonenum: 电话号码</li>
  * <li>userName: userName</li>
  * <li>userPhone: userPhone</li>
+ * <li>accountName: 收款账户名称</li>
  * <li>introduction: introduction</li>
  * <li>notice: notice</li>
  * <li>startTime: 开始时间</li>
@@ -73,6 +74,7 @@ public class RentalBillDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String accountName;
 	private String userName;
 	private String userPhone;
 	private String introduction;
@@ -607,5 +609,13 @@ public class RentalBillDTO {
 
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
 	}
 }

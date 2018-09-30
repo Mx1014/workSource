@@ -50,8 +50,6 @@ public class ListArchivesEmployeesCommand {
 
     private Integer pageSize;
 
-    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
     public ListArchivesEmployeesCommand() {
     }
 

@@ -101,7 +101,7 @@ public class GeneralFormController extends ControllerBase {
 	}
 
 
-	
+
 	/**
      * <b>URL: /general_form/listDefaultFields</b>
      * <p>根據模块获取默认字段    </p>
@@ -114,7 +114,7 @@ public class GeneralFormController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
 
 	/**
 	 * <b>URL: /general_form/syncFromDb</b>
@@ -211,5 +211,65 @@ public class GeneralFormController extends ControllerBase {
 
 
 
+
+	/**
+	 * <b>URL: /general_form/createGeneralFromPrintTemplate</b>
+	 * <p> 新增表单打印模板 </p>
+	 */
+	@RequestMapping("createGeneralFromPrintTemplate")
+	@RestReturn(value=GeneralFormPrintTemplateDTO.class)
+	public RestResponse createGeneralFromPrintTemplate(AddGeneralFormPrintTemplateCommand cmd) {
+		GeneralFormPrintTemplateDTO dto = generalFormService.createGeneralFormPrintTemplate(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+    /**
+     * <b>URL: /general_form/updateGeneralFromPrintTemplate</b>
+     * <p> 更新表单打印模板 </p>
+     */
+    @RequestMapping("updateGeneralFromPrintTemplate")
+    @RestReturn(value=GeneralFormPrintTemplateDTO.class)
+    public RestResponse updateGeneralFromPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd) {
+        GeneralFormPrintTemplateDTO dto = generalFormService.updateGeneralFormPrintTemplate(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+
+    /**
+     * <b>URL: /general_form/getGeneralFromPrintTemplate</b>
+     * <p> 获取表单打印模板 </p>
+     */
+    @RequestMapping("getGeneralFromPrintTemplate")
+    @RestReturn(value=GeneralFormPrintTemplateDTO.class)
+    public RestResponse getGeneralFromPrintTemplate(GetGeneralFormPrintTemplateCommand cmd) {
+        GeneralFormPrintTemplateDTO dto = generalFormService.getGeneralFormPrintTemplate(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+
+        return response;
+    }
+    
+    
+    /**
+	 * <b>URL: /general_form/syncFromDbV2</b>
+	 * <p>同步数据库数据到es(同步接口版本V2)</p>
+	 */
+	@RequestMapping("syncFromDbV2")
+	@RestReturn(value=String.class)
+	public RestResponse syncFromDbV2(){
+		generalFormSearcher.syncFromDbV2();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

@@ -63,6 +63,20 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
     }
 
     @Override
+    public List<GroupMemberLog> listGroupMemberLogByUserId(Long userId, Byte status) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select().from(Tables.EH_GROUP_MEMBER_LOGS).getQuery();
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_ID.eq(userId));
+        if(status != null){
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_STATUS.eq(status));
+        }
+        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc());
+        List<GroupMemberLog> list = query.fetch().map(r -> ConvertHelper.convert(r, GroupMemberLog.class));
+
+        return  list;
+    }
+
+    @Override
     public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
         groupMemberLog.setId(id);

@@ -73,4 +73,15 @@ public class FormFieldOverTimeProcessor implements FormFieldProcessor {
         }
         return null;
     }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
+        if ("开始时间".equals(fieldName))
+            return "加班时段";
+        if ("结束时间".equals(fieldName))
+            return "加班时段";
+        if ("加班时长".equals(fieldName))
+            return "加班时段";
+        return fieldName;
+    }
 }

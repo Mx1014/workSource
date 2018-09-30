@@ -5,6 +5,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentService;
+import com.everhomes.investment.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
@@ -24,6 +25,7 @@ import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
+import com.everhomes.rest.investment.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -64,12 +66,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -111,6 +116,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Autowired
     private EquipmentService equipmentService;
+
+    @Autowired
+    private InvitedCustomerProvider invitedCustomerProvider;
+
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
 
     @Override
     public String getIndexType() {
@@ -157,7 +168,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("contactAddress", customer.getContactAddress());
             builder.field("categoryItemId", customer.getCategoryItemId());
             builder.field("corpIndustryItemId", customer.getCorpIndustryItemId());
-            builder.field("levelItemId", customer.getLevelItemId());
+            // for statistics filter
+            builder.field("levelItemId", customer.getLevelItemId() == null ? 0 : customer.getLevelItemId());
             builder.field("status", customer.getStatus());
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
@@ -170,6 +182,31 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("sourceId" , customer.getSourceId());
             builder.field("sourceType" , customer.getSourceType());
             builder.field("aptitudeFlagItemId" , customer.getAptitudeFlagItemId());
+            builder.field("customerSource" , customer.getCustomerSource());
+            builder.field("entryStatusItemId", customer.getEntryStatusItemId());
+            List<CustomerTracker> tracker;
+            tracker = invitedCustomerProvider.findTrackerByCustomerId(customer.getId());
+            if(tracker != null && tracker.size() > 0){
+                List<String> trackerNames = new ArrayList<>();
+                List<Long> trackerIds = new ArrayList<>();
+
+                tracker.forEach(r -> {
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(r.getTrackerUid());
+                    if (members != null && members.size()>0) {
+                        trackerNames.add(members.get(0).getContactName());
+                        trackerIds.add(r.getTrackerUid());
+                    }
+                });
+                builder.field("trackerName", StringUtils.join(trackerNames, "|"));
+                builder.field("trackerUid", StringUtils.join(trackerIds, "|"));
+
+            }
+            CustomerRequirement requirement = invitedCustomerProvider.findNewestRequirementByCustoemrId(customer.getId());
+            if(requirement != null){
+                builder.field("requirementMinArea", requirement.getMinArea() == null ? "" : requirement.getMinArea());
+                builder.field("requirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
+
+            }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -185,6 +222,8 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 //                builder.array("buildings", buildings);
 //                builder.array("addressId", addressIds);
             }
+
+
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -233,27 +272,67 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
     }
 
     @Override
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomersById(SearchEnterpriseCustomerCommand cmd){
+        SearchEnterpriseCustomerResponse response = new SearchEnterpriseCustomerResponse();
+
+        List<Long> ids = cmd.getCustomerIds();
+        List<EnterpriseCustomerDTO> dtos = new ArrayList<>();
+        Map<Long, EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomersByIds(ids);
+        if(customers != null && customers.size() > 0) {
+            //一把取出来的列表顺序和搜索引擎中得到的ids的顺序不一定一样 以搜索引擎的为准 by xiongying 20170907
+            ids.forEach(id -> {
+                EnterpriseCustomer customer = customers.get(id);
+                if(customer != null) {
+                    EnterpriseCustomerDTO dto = convertToDTO(customer);
+                    dtos.add(dto);
+                }
+            });
+        }
+//        Collections.sort(dtos);
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+        if((cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) && (cmd.getCustomerName() == null || cmd.getCustomerName().isEmpty())) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackingName");
-            }else {
+                qb = QueryBuilders.queryString("*" + cmd.getTrackingName() + "*")
+                .field("trackingName", 4.0f);
+            }else if(StringUtils.isNotEmpty(cmd.getTrackerName())){
+                qb = QueryBuilders.queryString("*" + cmd.getTrackerName() + "*")
+                        .field("trackerName", 4.0f);
+            }else{
                 qb = QueryBuilders.matchAllQuery();
             }
         } else {
-            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("name")
-                    .field("contactName",5.0f)
-                    .field("contactAddress",4.0f)
-                    .field("contactPhone",3.0f)
-                    .field("trackingName",4.0f);
+            if(StringUtils.isNotBlank(cmd.getKeyword())) {
+                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName",5.0f)
+                        .field("contactName", 5.0f)
+                        .field("contactAddress", 4.0f)
+                        .field("contactPhone", 3.0f)
+                        .field("name", 5.0f)
+                        .field("trackingName", 3.0f);
+            }
+
+            if (StringUtils.isNotBlank(cmd.getCustomerName() )) {
+                if(qb != null) {
+                    qb = QueryBuilders.boolQuery().must(qb).must(QueryBuilders.queryString("*" + cmd.getCustomerName() + "*").field("name"));
+                }else{
+                    qb = QueryBuilders.queryString("*" + cmd.getCustomerName() + "*").field("name");
+                }
+            }
 
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
             builder.addHighlightedField("name").addHighlightedField("contactName").addHighlightedField("contactAddress").addHighlightedField("contactPhone")
             		.addHighlightedField("trackingName");
+
+
+
         }
 
         FilterBuilder fb = null;
@@ -302,7 +381,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getCorpIndustryItemId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("corpIndustryItemId", cmd.getCorpIndustryItemId()));
 
-        if(cmd.getLevelId() != null)
+        if(cmd.getLevelId() != null )
             fb = FilterBuilders.andFilter(fb, FilterBuilders.inFilter("levelItemId", cmd.getLevelId().split(",")));
 
         /*//查询全部客户、我的客户、公共客户
@@ -315,7 +394,11 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         }*/
         //增加如果不是admin只能看自己为跟进人
         if (!isAdmin) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+            if(cmd.getCustomerSource() == null || cmd.getCustomerSource() == InvitedCustomerType.INVITED_CUSTOMER.getCode()){
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackerUid", UserContext.currentUserId()));
+            }else{
+                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("trackingUid", UserContext.currentUserId()));
+            }
         }
         //有无跟进人
         if(null != cmd.getType()){
@@ -327,15 +410,25 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
-        if(cmd.getTrackingUids()!=null && cmd.getTrackingUids().size()>0){
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
-        }
+
+
+
+
+
         //跟进时间、资产类型、资产面积、资产单价增加筛选
         if(null != cmd.getLastTrackingTime() && cmd.getLastTrackingTime() > 0){
         	RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
         	Long startTime = getTomorrowLastTimestamp(cmd.getLastTrackingTime());
         	rf.gte(startTime);
         	fb = FilterBuilders.andFilter(fb, rf); 
+        }
+
+        if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
+        }
+
+        if(cmd.getTrackingUids() != null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
         }
         
         if(null != cmd.getPropertyType()){
@@ -355,6 +448,52 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         	}
         	
         }
+
+        if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
+            if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                Long startTime = cmd.getMinTrackingPeriod();
+                Long endTime = cmd.getMaxTrackingPeriod();
+                rf.gte(new Timestamp(startTime));
+                rf.lte(new Timestamp(endTime));
+                fb = FilterBuilders.andFilter(fb, rf);
+            }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                Long startTime = cmd.getMinTrackingPeriod();
+                rf.gte(startTime);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }else{
+                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                Long endTime = cmd.getMaxTrackingPeriod();
+                rf.lte(endTime);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }
+        }
+
+        if(null != cmd.getRequirementMinArea() || null != cmd.getRequirementMaxArea()){
+            if(null != cmd.getRequirementMinArea() && null != cmd.getRequirementMaxArea()){
+                RangeFilterBuilder rf1 = new RangeFilterBuilder("requirementMinArea");
+                RangeFilterBuilder rf2 = new RangeFilterBuilder("requirementMaxArea");
+
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                BigDecimal endArea = cmd.getRequirementMaxArea();
+                rf1.gte(startArea);
+                rf2.lte(endArea);
+                fb = FilterBuilders.andFilter(fb, rf1);
+                fb = FilterBuilders.andFilter(fb, rf2);
+            }else if(null != cmd.getRequirementMinArea() && null == cmd.getRequirementMaxArea()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMinArea");
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                rf.gte(startArea);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }else{
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMaxArea");
+                BigDecimal endArea = cmd.getRequirementMaxArea();
+                rf.lte(endArea);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }
+        }
+
         if(null != cmd.getPropertyUnitPrice()){
         	RangeFilterBuilder rf = new RangeFilterBuilder("propertyUnitPrice");
         	if(cmd.getPropertyUnitPrice().contains(",") && cmd.getPropertyUnitPrice().split(",").length == 2){
@@ -377,12 +516,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("sourceItemId", cmd.getSourceItemId()));
             fb = FilterBuilders.andFilter(fb, FilterBuilders.notFilter(FilterBuilders.existsFilter("sourceId")));
         }
+
+        if(cmd.getEntryStatusItemId()!=null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("entryStatusItemId", cmd.getEntryStatusItemId()));
+        }
+
+        if(cmd.getCustomerSource() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerSource", cmd.getCustomerSource()));
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
         }
+
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
@@ -729,14 +877,16 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             }
         }
 
-        if (null != dto.getDropBox9ItemId()) {
-            ScopeFieldItem dropBoxItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getDropBox9ItemId());
-            if (null != dropBoxItem) {
-                dto.setDropBox9ItemName(dropBoxItem.getItemDisplayName());
+        if (null != dto.getEntryStatusItemId()) {
+            ScopeFieldItem entryStatusItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCommunityId(), dto.getEntryStatusItemId());
+            if (null != entryStatusItem) {
+                dto.setEntryStatusItemName(entryStatusItem.getItemDisplayName());
             } else {
-                dto.setDropBox9ItemName(null);
+                dto.setEntryStatusItemName(null);
             }
         }
+
+
 
         if (null != dto.getAptitudeFlagItemId()) {
             findScopeFieldItemCommand cmd = new findScopeFieldItemCommand();
@@ -796,6 +946,45 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             entryInfos = entryInfos.stream().peek((e) -> e.setAddressName(e.getBuilding() + "/" + e.getApartment())).collect(Collectors.toList());
             dto.setEntryInfos(entryInfos);
         }
+
+
+
+        CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
+        if(requirementDTO != null){
+            dto.setRequirement(requirementDTO);
+
+        }
+
+
+
+        List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
+        List<CustomerContactDTO> contactDTOS = new ArrayList<>();
+        if(customerContacts != null && customerContacts.size() > 0){
+            customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+            dto.setContacts(contactDTOS);
+        }
+
+
+
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
+        if(trackers != null && trackers.size() > 0){
+            List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+            trackers.forEach(r-> {
+                CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+                List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+                if (oMembers != null && oMembers.size()>0) {
+                    trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                    trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+                }
+                trackerDTOS.add(trackerDTO);
+            });
+            dto.setTrackers(trackerDTOS);
+        }
+
+
+
+
+
         LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
         return dto;
     }

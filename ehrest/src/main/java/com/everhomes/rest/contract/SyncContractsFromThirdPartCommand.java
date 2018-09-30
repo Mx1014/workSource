@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>namespaceId: 域空间id</li>
  *     <li>communityId: 项目id</li>
- *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  *     <li>categoryId: 合同类型多入口</li>
  *     <li>allSyncFlag: 是否全量同步：0-增量同步，1-全量同步</li>
  * </ul>
@@ -22,20 +21,11 @@ public class SyncContractsFromThirdPartCommand {
     @NotNull
     private Long orgId;
     
-    private Byte contractApplicationScene;
     @NotNull
     private Long categoryId;
 
     private Byte allSyncFlag;
     
-    public Byte getContractApplicationScene() {
-		return contractApplicationScene;
-	}
-
-	public void setContractApplicationScene(Byte contractApplicationScene) {
-		this.contractApplicationScene = contractApplicationScene;
-	}
-
 	public Long getCategoryId() {
 		return categoryId;
 	}

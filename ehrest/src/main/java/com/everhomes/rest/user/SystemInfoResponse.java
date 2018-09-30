@@ -15,6 +15,7 @@ import java.util.List;
  *     <li>myPublishFlag: "我"-"我的发布"是否显示，参考{@link MyPublishFlag}</li>
  *     <li>scanForLogonServer: 扫码登录服务器地址</li>
  *     <li>contentCacheConfig: 资源缓存配置 {@link com.everhomes.rest.contentserver.ContentCacheConfigDTO}</li>
+ *     <li>securityPayServer: 支付双向安全校验</li>
  * </ul>
  */
 public class SystemInfoResponse {
@@ -31,7 +32,18 @@ public class SystemInfoResponse {
 
     private Byte myPublishFlag;
 
+    //default: https://secpay.zuolin.com
+    private String securityPayServer;
+
     private ContentCacheConfigDTO contentCacheConfig;
+
+    public String getSecurityPayServer() {
+        return securityPayServer;
+    }
+
+    public void setSecurityPayServer(String securityPayServer) {
+        this.securityPayServer = securityPayServer;
+    }
 
     public ContentCacheConfigDTO getContentCacheConfig() {
         return contentCacheConfig;

@@ -4,16 +4,22 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.workReport.ReportAuthorMsgType;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMapDao;
+import com.everhomes.server.schema.tables.daos.EhWorkReportScopeMsgDao;
 import com.everhomes.server.schema.tables.daos.EhWorkReportsDao;
 import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMap;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportScopeMsg;
 import com.everhomes.server.schema.tables.pojos.EhWorkReports;
 import com.everhomes.server.schema.tables.records.EhWorkReportScopeMapRecord;
+import com.everhomes.server.schema.tables.records.EhWorkReportScopeMsgRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhWorkReportsRecord;
 import com.everhomes.user.UserContext;
@@ -126,6 +132,17 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
+    public List<WorkReport> queryWorkReports(ListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportsRecord> query = context.selectQuery(Tables.EH_WORK_REPORTS);
+        queryBuilderCallback.buildCondition(locator, query);
+        List<WorkReport> results = query.fetchInto(WorkReport.class);
+        if (null == results || results.size() == 0)
+            return null;
+        return results;
+    }
+
+    @Override
     public void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportsRecord> query = context.updateQuery(Tables.EH_WORK_REPORTS);
@@ -174,7 +191,6 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public WorkReportScopeMap getWorkReportScopeMapBySourceId(Long reportId, Long sourceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.SOURCE_ID.eq(sourceId));
         return query.fetchOneInto(WorkReportScopeMap.class);
@@ -194,7 +210,6 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     public List<WorkReportScopeMap> listWorkReportScopesMap(Long reportId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportScopeMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MAP);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
         query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MAP.REPORT_ID.eq(reportId));
         query.addOrderBy(Tables.EH_WORK_REPORT_SCOPE_MAP.CREATE_TIME.asc());
         List<WorkReportScopeMap> results = new ArrayList<>();
@@ -218,6 +233,57 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         if (null != results && results.size() > 0)
             return results;
         return null;
+    }
+
+    @Override
+    public Long createWorkReportScopeMsg(WorkReportScopeMsg msg){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportScopeMsg.class));
+        msg.setId(id);
+        msg.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());
+        dao.insert(msg);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportScopeMsg.class, null);
+        return msg.getId();
+    }
+
+    @Override
+    public void deleteWorkReportScopeMsg() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.execute();
+    }
+
+    @Override
+    public void deleteWorkReportScopeMsgByReportId(Long reportId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.execute();
+    }
+
+    @Override
+    public void updateWorkReportScopeMsg(WorkReportScopeMsg msg){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());
+        dao.update(msg);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMsg.class, msg.getId());
+    }
+
+    @Override
+    public List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime){
+        List<WorkReportScopeMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportScopeMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.ge(startTime));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.le(endTime));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportScopeMsg.class));
+            return null;
+        });
+        return results;
     }
 
 }

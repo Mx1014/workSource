@@ -15,6 +15,7 @@ public class CustomerTrackingTemplateCode {
 
     
     public static final String MODULE_NAME = "enterprise_customer";
+    public static final String MODULE_NAME_INVITED = "investment_promotion";
     public static final String GROUP_PATH = "/1";
     public static final Integer NAMESPACE = 999971;
     

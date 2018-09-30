@@ -1,8 +1,8 @@
 package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,6 +28,7 @@ import java.util.List;
  *     <li>propertyArea: 资产面积区间  String类型,eg: 0,10 或者  @,10  或者   0,@ </li>
  *     <li>searchFromCustomerPageFlag : 0-不是从企业客户管理进入搜索，1-从企业客户管理进入搜索</li>
  *     <li>aptitudeFlag : 是否筛选资质客户</li>
+ *     <li>admissionItemId : 是否入驻</li>
  *
  *     <li>abnormalFlag: 是否筛选异常数据，1-是，0-否</li>
  *     <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
@@ -76,6 +77,8 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long orgId;
 
+    private String customerName;
+
     @ItemType(Long.class)
     private List<Long> trackingUids;
 
@@ -97,7 +100,69 @@ public class SearchEnterpriseCustomerCommand {
 
     private Long taskId;
 
+
+    private Long admissionItemId;
+
+    private Byte customerSource;
+
+    private BigDecimal requirementMinArea;
+    private BigDecimal requirementMaxArea;
+
+
+    private Long entryStatusItemId;
+
+    private List<Long> trackerUids;
+
+    private List<Long> customerIds;
+
+    private Long minTrackingPeriod;
+
+    private Long maxTrackingPeriod;
+
     private Byte convertFlag;
+
+    private String trackerName;
+
+
+    public Long getMinTrackingPeriod() {
+        return minTrackingPeriod;
+    }
+
+    public void setMinTrackingPeriod(Long minTrackingPeriod) {
+        this.minTrackingPeriod = minTrackingPeriod;
+    }
+
+    public Long getMaxTrackingPeriod() {
+        return maxTrackingPeriod;
+    }
+
+    public void setMaxTrackingPeriod(Long maxTrackingPeriod) {
+        this.maxTrackingPeriod = maxTrackingPeriod;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public Long getAdmissionItemId() {
+        return admissionItemId;
+    }
+
+    public void setAdmissionItemId(Long admissionItemId) {
+        this.admissionItemId = admissionItemId;
+    }
 
     public Byte getConvertFlag() {
         return convertFlag;
@@ -347,5 +412,53 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setContractSearchCustomerFlag(Byte contractSearchCustomerFlag) {
         ContractSearchCustomerFlag = contractSearchCustomerFlag;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public BigDecimal getRequirementMinArea() {
+        return requirementMinArea;
+    }
+
+    public void setRequirementMinArea(BigDecimal requirementMinArea) {
+        this.requirementMinArea = requirementMinArea;
+    }
+
+    public BigDecimal getRequirementMaxArea() {
+        return requirementMaxArea;
+    }
+
+    public void setRequirementMaxArea(BigDecimal requirementMaxArea) {
+        this.requirementMaxArea = requirementMaxArea;
+    }
+
+    public List<Long> getTrackerUids() {
+        return trackerUids;
+    }
+
+    public void setTrackerUids(List<Long> trackerUids) {
+        this.trackerUids = trackerUids;
+    }
+
+    public List<Long> getCustomerIds() {
+        return customerIds;
+    }
+
+    public void setCustomerIds(List<Long> customerIds) {
+        this.customerIds = customerIds;
+    }
+
+    public String getTrackerName() {
+        return trackerName;
+    }
+
+    public void setTrackerName(String trackerName) {
+        this.trackerName = trackerName;
     }
 }
