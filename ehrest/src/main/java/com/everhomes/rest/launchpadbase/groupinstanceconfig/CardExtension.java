@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.launchpadbase.groupinstanceconfig;
 
 import com.everhomes.util.StringHelper;
@@ -5,6 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>itemGroup: itemGroup</li>
+ *     <li>name: name</li>
+ *     <li>iconUrl: iconUrl</li>
  *     <li>moduleId: moduleId</li>
  *     <li>appId: appId</li>
  *     <li>clientHandlerType: clientHandlerType</li>
@@ -16,6 +19,12 @@ public class CardExtension {
 
     private String itemGroup;
 
+    //显示
+    private String name;
+
+    private String iconUrl;
+
+
     //跳转
     private Long moduleId;
 
@@ -26,6 +35,22 @@ public class CardExtension {
     private String routerPath;
 
     private String routerQuery;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
 
     public String getItemGroup() {
         return itemGroup;
