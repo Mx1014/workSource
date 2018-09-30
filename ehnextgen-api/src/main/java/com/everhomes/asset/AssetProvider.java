@@ -435,8 +435,6 @@ public interface AssetProvider {
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
 	
-	void tranferAssetMappings();
-	
 	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
 	
 	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,

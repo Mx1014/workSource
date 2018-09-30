@@ -269,8 +269,6 @@ public interface AssetService {
 	//public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
 	public ListGeneralBillsDTO createGeneralBill(CreateGeneralBillCommand cmd);
 
-	void tranferAssetMappings();
-	
 	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType);
 
 	void createChargingItem(CreateChargingItemCommand cmd);

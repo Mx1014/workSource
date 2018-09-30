@@ -5974,10 +5974,6 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
-	public void tranferAssetMappings() {
-		assetProvider.tranferAssetMappings();
-	}
-
 	/**
 	 * 物业缴费V6.6 统一账单：账单状态改变回调各个业务系统接口
 	 * @param sourceType

@@ -9,8 +9,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.rest.gorder.http.RestClientSettings;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.rest.promotion.http.RestClientSettings;
 
 @Component
 public class    OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{

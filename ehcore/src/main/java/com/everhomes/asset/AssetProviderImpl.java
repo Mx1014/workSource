@@ -126,11 +126,11 @@ import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -6792,31 +6792,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .set(t.PAYMENT_CHANNEL, paymentChannel)
                 .where(t.ORDER_NUMBER.eq(bizOrderNum))
                 .execute();
-	}
-
-	public void tranferAssetMappings() {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		EhAssetModuleAppMappings tMappings = Tables.EH_ASSET_MODULE_APP_MAPPINGS.as("tMappings");
-		EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(context.configuration());
-		List<AssetModuleAppMapping> list = context.select()
-				.from(tMappings)
-				.where(tMappings.ENERGY_FLAG.eq((byte)1))//只查找出关联了能耗的数据
-				.fetchInto(AssetModuleAppMapping.class);
-		for(AssetModuleAppMapping assetModuleAppMapping : list) {
-			AssetModuleAppMapping newEnergyAssetMapping = new AssetModuleAppMapping();
-			long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings.class));
-			newEnergyAssetMapping.setId(id);
-			newEnergyAssetMapping.setNamespaceId(assetModuleAppMapping.getNamespaceId());
-			newEnergyAssetMapping.setAssetCategoryId(assetModuleAppMapping.getAssetCategoryId());
-			newEnergyAssetMapping.setSourceType("energy");
-			newEnergyAssetMapping.setConfig("{\"energyFlag\":\"1\"}");
-			newEnergyAssetMapping.setStatus((byte)2);
-			newEnergyAssetMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			newEnergyAssetMapping.setCreateUid(assetModuleAppMapping.getCreateUid());
-
-	        dao.insert(newEnergyAssetMapping);
-	        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetModuleAppMappings.class, null);
-		}
 	}
 
 	public AssetModuleAppMapping insertAppMapping(AssetModuleAppMapping mapping) {
