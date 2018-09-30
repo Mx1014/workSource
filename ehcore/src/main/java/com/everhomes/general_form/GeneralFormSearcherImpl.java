@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -15,8 +16,11 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -86,7 +90,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         XContentBuilder source = createDoc(generalFormVals);
         if(null != source) {
             LOGGER.info("Bulk update general form to es, id={}, size={}" 
-            		+ generalFormVals.iterator().next().getSourceId(), generalFormVals.size());
+            		, generalFormVals.iterator().next().getSourceId(), generalFormVals.size());
             brb.add(Requests.indexRequest(getIndexName()).type(getIndexType()).id(generalFormVals.iterator().next().getSourceId().toString()).source(source));
         }
         if (brb.numberOfActions() > 0) {
@@ -125,7 +129,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
             Long sourceId = request.getId();
             List<GeneralFormVal> createBulUpdate = new ArrayList<>();
             for(GeneralFormVal temp :generalFormVal){
-                if(temp.getSourceId() == sourceId){
+                if(temp.getSourceId().equals(sourceId)){
                     createBulUpdate.add(temp);
                 }
             }
@@ -359,7 +363,7 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
 
         return response;
     }
-
+    
     @Override
     public String getIndexType() {
         return SearchUtils.GENERAL_FORM_VALS;
@@ -437,5 +441,31 @@ public class GeneralFormSearcherImpl extends AbstractElasticSearch implements Ge
         }
         return null;
     }
+
+
+
+	@Override
+	public void syncFromDbV2() {
+		long startTime = System.currentTimeMillis();
+		LOGGER.info("start to sync general form data V2");
+        
+		this.deleteAll();
+        LOGGER.info("sync general form data V2,delete existed data ok!");
+        
+        List<GeneralFormValRequest> generalFormValRequests = generalFormProvider.listGeneralFormValRequest();
+        if (generalFormValRequests != null && generalFormValRequests.size() > 0) {
+        	for (GeneralFormValRequest request : generalFormValRequests) {
+        		LOGGER.info("sync general form data V2,save request, requestId : {}",request.getId());
+        		List<GeneralFormVal> generalFormVals = generalFormProvider.getGeneralFormValBySourceId(request.getId());
+            	if (generalFormVals != null && generalFormVals.size() > 0) {
+            		this.bulkUpdate(generalFormVals);
+    			}
+    		}
+		}
+        this.optimize(1);
+        this.refresh();
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("end to sync general form data V2, elapse={}", (endTime - startTime));
+	}
 
 }

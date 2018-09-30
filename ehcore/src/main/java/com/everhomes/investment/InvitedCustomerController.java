@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -169,6 +170,21 @@ public class InvitedCustomerController extends ControllerBase {
     @RequestMapping("exportEnterpriseCustomerTemplate")
     public void exportEnterpriseCustomerTemplate(ListFieldGroupCommand cmd, HttpServletResponse response) {
         invitedCustomerService.exportEnterpriseCustomerTemplate(cmd, response);
+    }
+
+
+    /**
+     * <b>URL: /invitedCustomer/exportInvitedCustomer</b>
+     * <p>导出企业客户excel</p>
+     */
+    @RequestMapping("exportInvitedCustomer")
+    @RestReturn(value = String.class)
+    public RestResponse exportInvitedCustomer(@Valid ExportEnterpriseCustomerCommand cmd) {
+        invitedCustomerService.exportContractListByContractList(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
     /**

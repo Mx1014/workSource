@@ -107,4 +107,6 @@ public interface GeneralFormProvider {
 	void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus);
 
 	void setInvestmentAdId(Long id, Long investmentAdId);
+
+	List<GeneralFormVal> getGeneralFormValBySourceId(Long sourceId);
 }

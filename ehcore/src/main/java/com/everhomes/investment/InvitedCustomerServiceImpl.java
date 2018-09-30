@@ -17,7 +17,6 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -324,7 +323,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         customerSearcher.deleteById(cmd.getId());
         DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
-        customerService.deleteEnterpriseCustomer(cmd2, true);
+        customerService.deleteEnterpriseCustomer(cmd2, false);
         invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 
@@ -535,6 +534,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd){
+
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_ENTERPRISE_CUSTOMER, cmd.getOrgId(), cmd.getCommunityId());
+
+
         List<Long> customerIds = cmd.getCustomerIds();
         List<EnterpriseCustomer> customers = new ArrayList<>();
 
@@ -621,6 +624,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     public DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile){
         checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
         return fieldService.importDynamicExcel(cmd,mfile);
+    }
+
+    @Override
+    public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        customerService.exportContractListByContractList(cmd);
     }
 
 
