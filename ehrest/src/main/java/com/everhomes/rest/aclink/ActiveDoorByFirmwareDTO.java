@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 public class ActiveDoorByFirmwareDTO {
     private String firmware;
 
-    private Long activeDoorNumber;
+    private Integer activeDoorNumber;
 
     public String getFirmware() {
         return firmware;
@@ -21,11 +21,11 @@ public class ActiveDoorByFirmwareDTO {
         this.firmware = firmware;
     }
 
-    public Long getActiveDoorNumber() {
+    public Integer getActiveDoorNumber() {
         return activeDoorNumber;
     }
 
-    public void setActiveDoorNumber(Long activeDoorNumber) {
+    public void setActiveDoorNumber(Integer activeDoorNumber) {
         this.activeDoorNumber = activeDoorNumber;
     }
 
