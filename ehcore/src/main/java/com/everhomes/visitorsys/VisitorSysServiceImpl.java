@@ -2556,8 +2556,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //                }
 //            }
 //        }
-//        园区确认预约访客，企业的关联
-        if(convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
+//        园区确认预约访客，企业的关联 和 园区登记临时访客，企业关联
+        if ((convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) ||
+                (convert.getId() == null && convert.getVisitorType().equals(VisitorsysVisitorType.TEMPORARY.getCode()))) {
             if (ownerType == VisitorsysOwnerType.COMMUNITY) {
                 VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
                 if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
