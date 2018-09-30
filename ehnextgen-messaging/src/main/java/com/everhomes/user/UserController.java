@@ -1796,5 +1796,18 @@ public class UserController extends ControllerBase {
 		return resp;
 
 	}
-
+	
+	/**
+	 * <b>URL: /user/getPrintMerchantUrl</b>
+	 * <p>提供商户界面跳转URL</p>
+	 * @return
+	 */
+	@RequestMapping("getPrintMerchantUrl")
+	@RestReturn(GetPrintMerchantUrlResponse.class)
+	public RestResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd){
+		RestResponse resp = new RestResponse(userService.getPrintMerchantUrl(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 }
