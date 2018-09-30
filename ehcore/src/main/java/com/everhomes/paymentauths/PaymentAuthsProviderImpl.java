@@ -8,12 +8,16 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.paymentauths.EnterprisePaymentAuths;
 import com.everhomes.paymentauths.PaymentAuthsProvider;
+import com.everhomes.print.SiyinPrintSetting;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterprisePaymentAuthsDao;
+import com.everhomes.server.schema.tables.daos.EhSiyinPrintSettingsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterprisePaymentAuths;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
+import com.everhomes.server.schema.tables.pojos.EhSiyinPrintSettings;
 import com.everhomes.server.schema.tables.records.EhEnterprisePaymentAuthsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -37,7 +41,14 @@ public class PaymentAuthsProviderImpl implements PaymentAuthsProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-
+	private EhEnterprisePaymentAuthsDao getReadWriteDao() {
+		return getDao(getReadWriteContext());
+	}
+	
+	private EhEnterprisePaymentAuthsDao getDao(DSLContext context) {
+		return new EhEnterprisePaymentAuthsDao(context.configuration());
+	}
+	
 	@Autowired
     private SequenceProvider sequenceProvider;
 	
@@ -61,39 +72,24 @@ public class PaymentAuthsProviderImpl implements PaymentAuthsProvider {
 		return query.fetch().map(r -> ConvertHelper.convert(r, EnterprisePaymentAuths.class));
 	}
 	
-    @Override
-    public void deleteEnterprisePaymentAuths(Long appId, Long orgId){
-		DeleteQuery query = getReadWriteContext().deleteQuery(Tables.EH_ENTERPRISE_PAYMENT_AUTHS);
-		query.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.APP_ID.eq(appId));
-		query.addConditions(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.ENTERPRISE_ID.eq(orgId));
-		query.execute();
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleApps.class, null);
-    }
-    
+
 	@Override
-	public void createEnterprisePaymentAuths(List<EnterprisePaymentAuths> enterpriesAuths) {
-		if(enterpriesAuths.size() == 0){
-			return;
-		}
-		/**
-		 * 有id使用原来的id，没有则生成新的
-		 */
-		Long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhEnterprisePaymentAuths.class), (long)enterpriesAuths.size() + 1);
-		List<EhEnterprisePaymentAuths> auths = new ArrayList<>();
-		for (EnterprisePaymentAuths enterpriesAuth: enterpriesAuths) {
-			if(enterpriesAuth.getId() == null){
-				id ++;
-				enterpriesAuth.setId(id);
-			}
-
-
-			enterpriesAuth.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			enterpriesAuth.setUpdateTime(enterpriesAuth.getCreateTime());
-			auths.add(ConvertHelper.convert(enterpriesAuth, EhEnterprisePaymentAuths.class));
-		}
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhEnterprisePaymentAuthsDao dao = new EhEnterprisePaymentAuthsDao(context.configuration());
-		dao.insert(auths);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterprisePaymentAuths.class, null);
+	public void createEnterprisePaymentAuths(List<EnterprisePaymentAuths> enterpriesAuths, Long appId, Long orgId) {
+	    dbProvider.execute(r -> {
+	    	//删除原来的设置
+	    	getReadWriteContext().delete(Tables.EH_ENTERPRISE_PAYMENT_AUTHS)
+			.where(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.APP_ID.eq(appId))
+			.and(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.ENTERPRISE_ID.eq(orgId)).execute();
+	    	//更新原来的设置
+		    for (EnterprisePaymentAuths enterprisePaymentAuth : enterpriesAuths) {
+		    	Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintSettings.class));
+		    	enterprisePaymentAuth.setId(id);
+		    	enterprisePaymentAuth.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		    	enterprisePaymentAuth.setUpdateTime(enterprisePaymentAuth.getCreateTime());
+				getReadWriteDao().insert(enterprisePaymentAuth);
+				DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintSettings.class, null);
+		    }
+		    return null;
+	    });
 	}
 }

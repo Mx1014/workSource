@@ -1171,23 +1171,41 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
 		response.getColorTypeDTO().setColorPrice(defaultdecimal);
 		
-		response.setPaperSizePriceDTO(new PrintSettingPaperSizePriceDTO());
+		response.setPrintPriceDTO(new PrintSettingPaperSizePriceDTO());
 		
-		response.getPaperSizePriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
+		
+		response.setCopyPriceDTO(new PrintSettingPaperSizePriceDTO());
+		
+		response.getCopyPriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
+		
+		response.getCopyPriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
+		
+		response.getCopyPriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
+		
+		response.getCopyPriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
 		
 		response.setPrintCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST).split("\\|")));
 		response.setScanCopyCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST).split("\\|")));
@@ -1218,6 +1236,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			setPrintPaperSizePrice(response,siyinPrintSetting);
 			break;
 		case COPY:
+			setCopyPaperSizePrice(response,siyinPrintSetting);
 			break;
 		case SCAN:
 			response.setColorTypeDTO(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
@@ -1229,35 +1248,64 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	/**
-	 * 根据纸张设置
+	 * 根据纸张设置打印价格
 	 */
 	private void setPrintPaperSizePrice(GetPrintSettingResponse response, SiyinPrintSetting siyinPrintSetting) {
 		PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(siyinPrintSetting.getPaperSize());
 		
-		PrintSettingPaperSizePriceDTO dto = response.getPaperSizePriceDTO();
+		PrintSettingPaperSizePriceDTO dto = response.getPrintPriceDTO();
 		if(dto == null){
-			response.setPaperSizePriceDTO(new PrintSettingPaperSizePriceDTO());
-			dto = response.getPaperSizePriceDTO();
+			response.setPrintPriceDTO(new PrintSettingPaperSizePriceDTO());
+			dto = response.getPrintPriceDTO();
 		}
 		
 		switch (paperSizeType) {
 		case A3:
-			response.getPaperSizePriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A4:
-			response.getPaperSizePriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A5:
-			response.getPaperSizePriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A6:
-			response.getPaperSizePriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		default:
 			break;
 		}
 	}
 	
+	/**
+	 * 根据纸张设置复印价格
+	 */
+	private void setCopyPaperSizePrice(GetPrintSettingResponse response, SiyinPrintSetting siyinPrintSetting) {
+		PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(siyinPrintSetting.getPaperSize());
+		
+		PrintSettingPaperSizePriceDTO dto = response.getCopyPriceDTO();
+		if(dto == null){
+			response.setCopyPriceDTO(new PrintSettingPaperSizePriceDTO());
+			dto = response.getCopyPriceDTO();
+		}
+		
+		switch (paperSizeType) {
+		case A3:
+			response.getCopyPriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A4:
+			response.getCopyPriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A5:
+			response.getCopyPriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A6:
+			response.getCopyPriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		default:
+			break;
+		}
+	}
 	private List<SiyinPrintSetting> checkUpdatePrintSettingCommand(UpdatePrintSettingCommand cmd) {
 		// TODO Auto-generated method stub
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
@@ -1265,7 +1313,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
+		List<SiyinPrintSetting> list = checkPrintPriceDTO(cmd.getPrintPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
+		
+		list.addAll(checkCopyPriceDTO(cmd.getPrintPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline(),namespaceId));
 		return list;
@@ -1291,23 +1341,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 
 	/**
-	 * 检查打印扫描价格的DTO，并生成实体
+	 * 检查复印打印价格的DTO，并生成实体
 	 */
-	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1,Integer namespaceId) {
+	private List<SiyinPrintSetting> checkPrintPriceDTO(PrintSettingPaperSizePriceDTO printPriceDTO, String string, Long long1,Integer namespaceId) {
 		// TODO Auto-generated method stub
-		if(paperSizePriceDTO == null){
-			paperSizePriceDTO = new PrintSettingPaperSizePriceDTO();
+		if(printPriceDTO == null){
+			printPriceDTO = new PrintSettingPaperSizePriceDTO();
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
 		}
-		paperSizePriceDTO.setAthreePrice(checkPrice(paperSizePriceDTO.getAthreePrice()));
-		paperSizePriceDTO.setAfourPrice(checkPrice(paperSizePriceDTO.getAfourPrice()));
-		paperSizePriceDTO.setAfivePrice(checkPrice(paperSizePriceDTO.getAfivePrice()));
-		paperSizePriceDTO.setAsixPrice(checkPrice(paperSizePriceDTO.getAsixPrice()));
+		printPriceDTO.setAthreePrice(checkPrice(printPriceDTO.getAthreePrice()));
+		printPriceDTO.setAfourPrice(checkPrice(printPriceDTO.getAfourPrice()));
+		printPriceDTO.setAfivePrice(checkPrice(printPriceDTO.getAfivePrice()));
+		printPriceDTO.setAsixPrice(checkPrice(printPriceDTO.getAsixPrice()));
 		
-		SiyinPrintSetting settinga3 = ConvertHelper.convert(paperSizePriceDTO.getAthreePrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga4 = ConvertHelper.convert(paperSizePriceDTO.getAfourPrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga5 = ConvertHelper.convert(paperSizePriceDTO.getAfivePrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga6 = ConvertHelper.convert(paperSizePriceDTO.getAsixPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga3 = ConvertHelper.convert(printPriceDTO.getAthreePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga4 = ConvertHelper.convert(printPriceDTO.getAfourPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga5 = ConvertHelper.convert(printPriceDTO.getAfivePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga6 = ConvertHelper.convert(printPriceDTO.getAsixPrice(), SiyinPrintSetting.class);
 		
 		settinga3.setOwnerType(string);
 		settinga3.setOwnerId(long1);
@@ -1339,8 +1389,58 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		settinga6.setNamespaceId(namespaceId);
 		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
 	}
+	
 
-
+	/**
+	 * 检查复印价格的DTO，并生成实体
+	 */
+	private List<SiyinPrintSetting> checkCopyPriceDTO(PrintSettingPaperSizePriceDTO copyPriceDTO, String string, Long long1,Integer namespaceId) {
+		// TODO Auto-generated method stub
+		if(copyPriceDTO == null){
+			copyPriceDTO = new PrintSettingPaperSizePriceDTO();
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
+		}
+		copyPriceDTO.setAthreePrice(checkPrice(copyPriceDTO.getAthreePrice()));
+		copyPriceDTO.setAfourPrice(checkPrice(copyPriceDTO.getAfourPrice()));
+		copyPriceDTO.setAfivePrice(checkPrice(copyPriceDTO.getAfivePrice()));
+		copyPriceDTO.setAsixPrice(checkPrice(copyPriceDTO.getAsixPrice()));
+		
+		SiyinPrintSetting settinga3 = ConvertHelper.convert(copyPriceDTO.getAthreePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga4 = ConvertHelper.convert(copyPriceDTO.getAfourPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga5 = ConvertHelper.convert(copyPriceDTO.getAfivePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga6 = ConvertHelper.convert(copyPriceDTO.getAsixPrice(), SiyinPrintSetting.class);
+		
+		settinga3.setOwnerType(string);
+		settinga3.setOwnerId(long1);
+		settinga4.setOwnerType(string);
+		settinga4.setOwnerId(long1);
+		settinga5.setOwnerType(string);
+		settinga5.setOwnerId(long1);
+		settinga6.setOwnerType(string);
+		settinga6.setOwnerId(long1);
+		
+		settinga3.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga4.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga5.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga6.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		
+		settinga3.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga4.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga5.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga6.setJobType(PrintJobTypeType.COPY.getCode());
+		
+		settinga3.setPaperSize(PrintPaperSizeType.A3.getCode());
+		settinga4.setPaperSize(PrintPaperSizeType.A4.getCode());
+		settinga5.setPaperSize(PrintPaperSizeType.A5.getCode());
+		settinga6.setPaperSize(PrintPaperSizeType.A6.getCode());
+		
+		settinga3.setNamespaceId(namespaceId);
+		settinga4.setNamespaceId(namespaceId);
+		settinga5.setNamespaceId(namespaceId);
+		settinga6.setNamespaceId(namespaceId);
+		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
+	}
+	
 	/**
 	 * 检查扫描价格，并生成实体
 	 */
