@@ -5294,7 +5294,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 if(cmd.getDoor() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like(cmd.getDoor() + "%")
-                            .or(Tables.EH_DOOR_ACCESS.UUID.like(cmd.getDoor()+"%")));
+                            .or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like(cmd.getDoor()+"%")));
                 }
                 return query;
             }
@@ -5330,6 +5330,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
 
     }
     @Override

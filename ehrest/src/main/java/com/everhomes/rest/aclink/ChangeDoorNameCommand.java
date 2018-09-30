@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ChangeDoorNameCommand {
     private Long doorId;
-    private String doorName;
+    private String name;
     private String doorAddress;
     private String doorExplain;
 
@@ -25,12 +25,12 @@ public class ChangeDoorNameCommand {
         this.doorId = doorId;
     }
 
-    public String getDoorName() {
-        return doorName;
+    public String getName() {
+        return name;
     }
 
-    public void setDoorName(String doorName) {
-        this.doorName = doorName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDoorAddress() {

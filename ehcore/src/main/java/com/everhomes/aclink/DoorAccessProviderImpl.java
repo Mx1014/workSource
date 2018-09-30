@@ -360,10 +360,10 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
         List<ActiveDoorByFirmwareDTO> dtos = new ArrayList<ActiveDoorByFirmwareDTO>();
-//        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
-//                ,t..as("firmware"))
-//                .from(t)
-//                .groupBy(t.DOOR_TYPE);
+        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
+                ,Tables.EH_DOOR_ACCESS.FLOOR_ID.as("firmware"))
+                .from(t)
+                .groupBy(t.DOOR_TYPE);
 
         return null;
     }

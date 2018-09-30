@@ -637,3 +637,7 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `creator_uid` BIGINT NULL 
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_time` DATE NULL DEFAULT 0 COMMENT '操作时间';
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL DEFAULT 0 COMMENT '操作人ID';
 
+-- AUTHOR: 李清岩
+-- REMARK: 20180930 issue-38336
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (64) NULL COMMENT '门禁设备固件版本';
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (64) NULL COMMENT '门禁设备固件名';
