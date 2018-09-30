@@ -15,11 +15,12 @@ import com.everhomes.util.StringHelper;
  *     <li>titleUrl: 标题url</li>
  *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
  *     <li>subTitle: 副标题</li>
- *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
+ *     <li>titleSize: 标题大小，0-小，1-中，2-大，参考{@link TitleSize}</li>
  *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>newsSize: 最大显示条目</li>
  *     <li>timeWidgetStyle: 时间样式</li>
  *     <li>moduleAppId: 入口id</li>
+ *     <li>appOriginId: 应用originId，跨版本不变的Id</li>
  *     <li>rowCount: 行高度</li>
  *     <li>bizUrl: 电商url</li>
  *     <li>noticeCount: noticeCount</li>
@@ -65,6 +66,8 @@ public class ItemGroupInstanceConfig {
 	private String timeWidgetStyle;
 
 	private Long moduleAppId;
+
+	private Long appOriginId;
 
 	private Integer rowCount;
 
@@ -304,6 +307,14 @@ public class ItemGroupInstanceConfig {
 
 	public void setTitleMoreFlag(Byte titleMoreFlag) {
 		this.titleMoreFlag = titleMoreFlag;
+	}
+
+	public Long getAppOriginId() {
+		return appOriginId;
+	}
+
+	public void setAppOriginId(Long appOriginId) {
+		this.appOriginId = appOriginId;
 	}
 
 	@Override

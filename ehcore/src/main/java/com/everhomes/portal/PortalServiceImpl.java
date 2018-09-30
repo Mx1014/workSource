@@ -2044,6 +2044,8 @@ public class PortalServiceImpl implements PortalService {
 				publishTabItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
+			}else if(Widget.fromCode(group.getWidget()) == Widget.CARDEXTENSION){
+
 			}
 			groups.add(group);
 
