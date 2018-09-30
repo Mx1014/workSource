@@ -615,7 +615,7 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 
 
 
-DELETE FROM `eh_var_field_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
+UPDATE `eh_var_field_scopes` SET STATUS = 0 WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
 set @item_id = (select max(id) from `eh_var_field_scopes`);
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 2, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', 1, 1, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 5, '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}', '客户状态', 1, 2, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
@@ -630,7 +630,7 @@ INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12117, '{\"fieldParamType\": \"text\", \"length\": 32}', '招商跟进人', 0, 11, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
 
 
-DELETE FROM `eh_var_field_item_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
+UPDATE `eh_var_field_item_scopes` SET STATUS = 0 WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
 set @item_id = (select max(id) from `eh_var_field_item_scopes`);
 INSERT INTO `eh_var_field_item_scopes`(`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 5, 3, '初次接触', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_item_scopes`(`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 5, 4, '潜在客户', 2, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
@@ -751,8 +751,8 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 -- AUTHOR: 黄鹏宇
 -- REMARK: 更改group_path编写不规范的问题
 UPDATE eh_var_fields SET group_path = '/1/10/' WHERE group_path = '/1/10';
-UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6;
-UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6;
+UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6
+UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6 AND field_display_name = '客户来源';
 UPDATE eh_var_field_scopes SET group_path = '/1/10/' WHERE group_path = '/1/10' and status = 2;
 
 
@@ -874,10 +874,11 @@ update eh_customer_trackings t1 set t1.customer_source = (select customer_source
 
 -- AUTHOR 黄鹏宇
 -- REMARK 同步名称
-UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
-UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
-UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
+-- UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
+-- UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
+-- UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
 -- END
+
 
 -- AUTHOR 黄鹏宇
 -- REMARK 修改客户的名称
