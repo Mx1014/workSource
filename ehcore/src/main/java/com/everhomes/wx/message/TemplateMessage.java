@@ -11,6 +11,7 @@ public class TemplateMessage {
     private String template_id;
     private String url;
     private String topcolor;
+    private String color;
 
     //{"xxxx", {"value": "xxx", "color": "xxxx"}}
     private HashMap<String, Item> data;
@@ -50,6 +51,14 @@ public class TemplateMessage {
 
     public void setTopcolor(String topcolor) {
         this.topcolor = topcolor;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public HashMap<String, Item> getData() {
