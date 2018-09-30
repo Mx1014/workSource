@@ -94,6 +94,7 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 C
 -- REMARK: 账单表增加第三方账单唯一标识字段
 ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT '账单表增加第三方唯一标识字段';
 
+update eh_service_alliance_categories set default_order = 0 where default_order is null;
 -- AUTHOR: 黄明波
 -- REMARK: #33683服务联盟样式列表添加排序 #37669修复
 ALTER TABLE eh_service_alliance_categories MODIFY default_order BIGINT(11) NOT NULL DEFAULT 0;
