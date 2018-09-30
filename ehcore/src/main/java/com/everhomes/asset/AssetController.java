@@ -1518,9 +1518,9 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createGeneralBill")
 	@RestReturn(value = ListGeneralBillsDTO.class, collection = false)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
-		ListGeneralBillsDTO dto = assetService.createGeneralBill(cmd);
+		List<ListGeneralBillsDTO> dtos = assetService.createGeneralBill(cmd);
 		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
-		listGeneralBillsResponse.setListGeneralBillsDTO(dto);
+		listGeneralBillsResponse.setListGeneralBillsDTOs(dtos);
 	    RestResponse response = new RestResponse(listGeneralBillsResponse);
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);

@@ -5875,8 +5875,8 @@ public class AssetServiceImpl implements AssetService {
 //		return dtos;
 //	}
 	
-	public ListGeneralBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
-		ListGeneralBillsDTO dto = new ListGeneralBillsDTO();
+	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
@@ -5893,12 +5893,13 @@ public class AssetServiceImpl implements AssetService {
 	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
 	                    		+ "sourceId={" + cmd.getSourceId() + "}, thirdBillId={" + cmd.getThirdBillId() + "}");
 			}
-			dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+			dtos.add(dto);
 		}else {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "can not find asset mapping");
 		}
-		return dto;
+		return dtos;
 	}
 
 	public ListGeneralBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
@@ -5953,24 +5954,29 @@ public class AssetServiceImpl implements AssetService {
 	}
 	
 	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
-		PaymentBills paymentBill = assetProvider.findPaymentBillById(cmd.getBillId());
-		if(null != paymentBill) {
-			if(null != cmd.getThirdBillId()) {
-				if(cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
-					//取消统一账单
-					assetProvider.deleteBill(cmd.getBillId());
+		List<Long> billIdList = cmd.getBillIdList();
+		//1、先校验是否可以正常取消
+		for(Long billId : billIdList) {
+			PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
+			if(null != paymentBill) {
+				if(null != cmd.getThirdBillId()) {
+					if(!cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
+			                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+					}
 				}else {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-		                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
-		                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+		                    "thirdBillId can not be null");
 				}
 			}else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "thirdBillId can not be null");
+	                    "can not find bill by billId={" + billId + "}");
 			}
-		}else {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "can not find bill by billId={" + cmd.getBillId() + "}");
+		}
+		//2、校验通过，取消账单
+		for(Long billId : billIdList) {
+			assetProvider.deleteBill(billId);
 		}
 	}
 

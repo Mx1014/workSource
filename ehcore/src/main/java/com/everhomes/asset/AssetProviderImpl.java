@@ -3389,6 +3389,7 @@ public class AssetProviderImpl implements AssetProvider {
 		if(!org.springframework.util.StringUtils.isEmpty(thirdBillId)){
 			query.addConditions(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId));
 		}
+		query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
 		List<PaymentBills> list = query.fetchInto(PaymentBills.class);
         if(list.size()>0){
             return list.get(0);
