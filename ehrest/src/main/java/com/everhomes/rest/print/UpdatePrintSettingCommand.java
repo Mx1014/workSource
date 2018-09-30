@@ -11,8 +11,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType : 打印所属类型，此处为community, 参考{@link com.everhomes.rest.print.PrintOwnerType}</li>
  * <li>ownerId : 所属id</li>
- * <li>paperSizePriceDTO : 打印/复印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
+ * <li>printPriceDTO : 打印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
+ * <li>copyPriceDTO : 复印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
  * <li>colorTypeDTO : 扫描价格，参考 {@link com.everhomes.rest.print.PrintSettingColorTypeDTO}</li>
+ * <li>jobType : 任务类型，全部则为空, 参考 {@link com.everhomes.rest.print.PrintJobTypeType}</li>
  * <li>hotline : 咨询电话</li>
  * <li>printCourseList : 打印教程数组，四个步骤</li>
  * <li>scanCopyCourseList : 复印扫描教程数组，五个步骤</li>
@@ -23,7 +25,8 @@ import com.everhomes.util.StringHelper;
 public class UpdatePrintSettingCommand {
 	private String ownerType;
 	private Long ownerId;
-	private PrintSettingPaperSizePriceDTO paperSizePriceDTO;
+	private PrintSettingPaperSizePriceDTO printPriceDTO;
+	private PrintSettingPaperSizePriceDTO copyPriceDTO;
 	private PrintSettingColorTypeDTO colorTypeDTO;
 	private String hotline;
 	@ItemType(String.class)
@@ -31,7 +34,7 @@ public class UpdatePrintSettingCommand {
 	@ItemType(String.class)
 	private List<String> scanCopyCourseList;
 	private Integer namespaceId;
-
+	
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -51,12 +54,23 @@ public class UpdatePrintSettingCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public PrintSettingPaperSizePriceDTO getPaperSizePriceDTO() {
-		return paperSizePriceDTO;
+
+	public PrintSettingPaperSizePriceDTO getPrintPriceDTO() {
+		return printPriceDTO;
 	}
-	public void setPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO) {
-		this.paperSizePriceDTO = paperSizePriceDTO;
+
+	public void setPrintPriceDTO(PrintSettingPaperSizePriceDTO printPriceDTO) {
+		this.printPriceDTO = printPriceDTO;
 	}
+
+	public PrintSettingPaperSizePriceDTO getCopyPriceDTO() {
+		return copyPriceDTO;
+	}
+
+	public void setCopyPriceDTO(PrintSettingPaperSizePriceDTO copyPriceDTO) {
+		this.copyPriceDTO = copyPriceDTO;
+	}
+
 	public PrintSettingColorTypeDTO getColorTypeDTO() {
 		return colorTypeDTO;
 	}
@@ -81,7 +95,7 @@ public class UpdatePrintSettingCommand {
 	public void setScanCopyCourseList(List<String> scanCopyCourseList) {
 		this.scanCopyCourseList = scanCopyCourseList;
 	}
-	
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

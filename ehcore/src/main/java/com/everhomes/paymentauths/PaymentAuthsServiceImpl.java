@@ -85,7 +85,6 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	@Override
 	public void updateEnterpirsePaymentAuths (UpdateEnterpirsePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
-		paymentAuthsProvider.deleteEnterprisePaymentAuths(enterprisePaymentAuths.getAppId(), cmd.getOrgnazitionId());
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
 			if (enterpriesAuth.getSourceIdA() == null || enterpriesAuth.getSourceIdA().SIZE ==0) {
@@ -101,6 +100,6 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			enterprisePaymentAuth.setSourceName(enterpriesAuth.getSelectionName());
 			auths.add(enterprisePaymentAuth);
 		}
-		paymentAuthsProvider.createEnterprisePaymentAuths(auths);
+		paymentAuthsProvider.createEnterprisePaymentAuths(auths, enterprisePaymentAuths.getAppId(), cmd.getOrgnazitionId());
 	}
 }

@@ -21,6 +21,8 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='企业支付授权表';
 
+
+
 -- AUTHOR: 杨崇鑫 20180930
 -- REMARK: 物业缴费V7.1（企业记账流程打通）
 -- REMARK：  增加业务对应的相关信息
@@ -58,7 +60,6 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_extend_info` VARCHA
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
-
 
 
 
