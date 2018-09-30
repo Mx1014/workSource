@@ -3370,7 +3370,28 @@ public class AssetProviderImpl implements AssetProvider {
         }else{
             return null;
         }
-
+    }
+    
+    public PaymentBills findPaymentBill(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId) {
+    	SelectQuery<EhPaymentBillsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS).getQuery();
+		if(!org.springframework.util.StringUtils.isEmpty(namespaceId)){
+			query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
+		}
+		if(!org.springframework.util.StringUtils.isEmpty(sourceType)){
+			query.addConditions(Tables.EH_PAYMENT_BILLS.SOURCE_TYPE.eq(sourceType));
+		}
+		if(!org.springframework.util.StringUtils.isEmpty(sourceId)){
+			query.addConditions(Tables.EH_PAYMENT_BILLS.SOURCE_ID.eq(sourceId));
+		}
+		if(!org.springframework.util.StringUtils.isEmpty(thirdBillId)){
+			query.addConditions(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId));
+		}
+		List<PaymentBills> list = query.fetchInto(PaymentBills.class);
+        if(list.size()>0){
+            return list.get(0);
+        }else{
+            return null;
+        }
     }
 
     @Override
@@ -6893,7 +6914,7 @@ public class AssetProviderImpl implements AssetProvider {
 		if(ownerId != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
 		}else {
-query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 		}
 		if(ownerType != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));

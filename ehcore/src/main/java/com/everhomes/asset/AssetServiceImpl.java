@@ -5886,6 +5886,13 @@ public class AssetServiceImpl implements AssetService {
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
+			//统一账单不支持重复记账
+			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getThirdBillId());
+			if(paymentBill != null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
+	                    		+ "sourceId={" + cmd.getSourceId() + "}, thirdBillId={" + cmd.getThirdBillId() + "}");
+			}
 			dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 		}else {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
