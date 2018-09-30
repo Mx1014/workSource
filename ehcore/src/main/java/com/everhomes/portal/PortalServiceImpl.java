@@ -37,6 +37,7 @@ import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.AccessControlType;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -182,6 +183,13 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LocaleStringService localeStringService;
+
+
+	@Autowired
+	private RouterInfoService routerService;
+
+	@Autowired
+	private LaunchPadService launchPadService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -2046,9 +2054,32 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.CARDEXTENSION){
-				CardExtensionInstanceConfig config = new CardExtensionInstanceConfig();
+				CardExtension config = new CardExtension();
 
+				if(instanceConfig.getAppOriginId() != null){
 
+					List<Long> appOriginIds = new ArrayList<>();
+					appOriginIds.add(instanceConfig.getAppOriginId());
+					List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(versionId, appOriginIds);
+
+					if(apps != null && apps.size() > 0){
+						ServiceModuleApp app = apps.get(0);
+						config.setModuleId(app.getModuleId());
+						config.setAppId(app.getOriginId());
+						config.setItemGroup(itemGroup.getName());
+
+						ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+						if(module != null){
+							config.setClientHandlerType(module.getClientHandlerType());
+						}
+
+						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
+						//填充路由信息
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null);
+						config.setRouterPath(routerInfo.getPath());
+						config.setRouterQuery(routerInfo.getQuery());
+					}
+				}
 
 			}
 			groups.add(group);
