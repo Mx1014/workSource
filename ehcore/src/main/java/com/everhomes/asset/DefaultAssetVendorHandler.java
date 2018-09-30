@@ -569,7 +569,9 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             ListBillDetailResponse billDetail = listBillDetail(ncmd);
             AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType());
             if(null != handler){
-            	handler.payNotifyBillSourceModule(billDetail);
+            	//TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+            	
+            	
             }
         }
     }

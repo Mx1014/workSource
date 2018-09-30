@@ -34,7 +34,6 @@ import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.gorder.order.BusinessPayerType;

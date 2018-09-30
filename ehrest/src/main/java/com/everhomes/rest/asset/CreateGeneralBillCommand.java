@@ -16,7 +16,9 @@ import java.math.BigDecimal;
  * <li>targetType:客户类别,参考{@link com.everhomes.rest.asset.AssetTargetType}</li>
  * <li>targetId:客户id</li>
  * <li>targetName:客户名称</li>
- * <li>amountReceivable:应收金额（含税）</li>
+ * <li>amountReceivable:应收金额（含税）（原始金额，不计算优惠的金额）</li>
+ * <li>exemptionAmount:优惠/减免金额</li>
+ * <li>exemptionRemark:优惠/减免的备注说明</li>
  * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单（如何不传该参数，接口会自动根据账单组的设置去判断是已出或未出）</li>
  * <li>invoiceNum:发票单号</li>
  * <li>dateStrBegin:计费开始（不传默认当前时间）</li>
@@ -36,6 +38,8 @@ public class CreateGeneralBillCommand {
     private Long targetId;
     private String targetName;
     private BigDecimal amountReceivable;
+    private BigDecimal exemptionAmount;
+    private String exemptionRemark;
     private String invoiceNum;
     private Byte isSettled;
     private String dateStrBegin;
@@ -136,6 +140,18 @@ public class CreateGeneralBillCommand {
 	}
 	public void setThirdBillId(String thirdBillId) {
 		this.thirdBillId = thirdBillId;
+	}
+	public BigDecimal getExemptionAmount() {
+		return exemptionAmount;
+	}
+	public void setExemptionAmount(BigDecimal exemptionAmount) {
+		this.exemptionAmount = exemptionAmount;
+	}
+	public String getExemptionRemark() {
+		return exemptionRemark;
+	}
+	public void setExemptionRemark(String exemptionRemark) {
+		this.exemptionRemark = exemptionRemark;
 	}
     
 }

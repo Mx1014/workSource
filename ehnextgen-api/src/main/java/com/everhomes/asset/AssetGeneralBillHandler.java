@@ -1,5 +1,7 @@
 package com.everhomes.asset;
 
+import java.util.List;
+
 import com.everhomes.rest.asset.ListBillDetailResponse;
 
 /**
@@ -10,9 +12,11 @@ public interface AssetGeneralBillHandler {
     static final String ASSET_GENERALBILL_PREFIX = "AssetGeneralBill-";
     
     /**
-     * 账单状态改变回调接口
+     * 获取统一账单的映射关系
      * @param billDetail
      */
-     void payNotifyBillSourceModule(ListBillDetailResponse billDetail);
+    List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail);
+    
+    
     
 }

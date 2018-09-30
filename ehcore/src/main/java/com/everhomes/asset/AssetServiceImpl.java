@@ -104,7 +104,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.AssetMapContractConfig;
 import com.everhomes.rest.common.AssetMapEnergyConfig;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
@@ -1292,7 +1291,7 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
                 		//物业缴费V6.0（UE优化) 账单区分数据来源
-                		item.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		item.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1300,7 +1299,7 @@ public class AssetServiceImpl implements AssetService {
                     	item.setCanDelete((byte)0);
                     	item.setCanModify((byte)0);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		item.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		item.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1421,7 +1420,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                     //物业缴费V6.0（UE优化) 账单区分数据来源
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
-                		newBill.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		newBill.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -1429,7 +1428,7 @@ public class AssetServiceImpl implements AssetService {
                     	newBill.setCanDelete((byte)1);
                     	newBill.setCanModify((byte)1);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		newBill.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		newBill.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -5765,7 +5764,7 @@ public class AssetServiceImpl implements AssetService {
 
 	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         //1、判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+        cmd.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
         AssetMapContractConfig config = new AssetMapContractConfig();
     	config.setContractOriginId(cmd.getContractOriginId());
     	config.setContractChangeFlag(cmd.getContractChangeFlag());
@@ -5784,7 +5783,7 @@ public class AssetServiceImpl implements AssetService {
         }
         //2、判断缴费是否已经存在关联能耗的记录
         cmd.setSourceId(null);
-        cmd.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+        cmd.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
         AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
         energyConfig.setEnergyFlag(cmd.getEnergyFlag());
     	cmd.setConfig(energyConfig.toString());
@@ -5841,8 +5840,43 @@ public class AssetServiceImpl implements AssetService {
 		return dtos;
 	}
 
-	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
-		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
+//	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
+//		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
+//		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+//		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
+//		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
+//		if(records.size() > 0) {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
+//			mapping = records.get(0);
+//			Long categoryId = mapping.getAssetCategoryId();
+//			Long billGroupId = mapping.getBillGroupId();
+//			Long charingItemId = mapping.getChargingItemId();
+//			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+//			dtos.add(dto);
+//		}else {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
+//			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
+//			if(records.size() > 0) {
+//				mapping = records.get(0);
+//				Long categoryId = mapping.getAssetCategoryId();
+//				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
+//				Long charingItemId = mapping.getChargingItemId();
+//				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
+//				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
+//						categoryId, brotherGroupId);
+//				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
+//				ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
+//				dtos.add(dto);
+//			}else {
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//	                    "can not find asset mapping");
+//			}
+//		}
+//		return dtos;
+//	}
+	
+	public ListGeneralBillsDTO createGeneralBill(CreateGeneralBillCommand cmd) {
+		ListGeneralBillsDTO dto = new ListGeneralBillsDTO();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
@@ -5852,28 +5886,12 @@ public class AssetServiceImpl implements AssetService {
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
-			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
-			dtos.add(dto);
+			dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 		}else {
-			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询不到相关配置，说明配置的是按默认配置走的，需要转译成园区
-			records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), null, null, cmd.getSourceId(), cmd.getSourceType());
-			if(records.size() > 0) {
-				mapping = records.get(0);
-				Long categoryId = mapping.getAssetCategoryId();
-				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
-				Long charingItemId = mapping.getChargingItemId();
-				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
-				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
-						categoryId, brotherGroupId);
-				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
-				ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
-				dtos.add(dto);
-			}else {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "can not find asset mapping");
-			}
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find asset mapping");
 		}
-		return dtos;
+		return dto;
 	}
 
 	public ListGeneralBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
@@ -5888,6 +5906,7 @@ public class AssetServiceImpl implements AssetService {
 		billGroupDTO.setBillGroupId(billGroupId);
 		billGroupDTO.setBillGroupName(group.getName());
 
+		//1、新增费项
 		List<BillItemDTO> billItemDTOList = new ArrayList<>();
 		BillItemDTO billItemDTO = new BillItemDTO();
 		billItemDTO.setBillItemId(charingItemId);
@@ -5901,8 +5920,20 @@ public class AssetServiceImpl implements AssetService {
 		billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
 		billItemDTO.setTaxAmount(taxAmount);
 		billItemDTOList.add(billItemDTO);
+		
+		//2、新增优惠/减免金额
+		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
+		ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
+		BigDecimal exemptionAmount = cmd.getExemptionAmount();
+		if(exemptionAmount != null) {
+			exemptionAmount = exemptionAmount.multiply(new BigDecimal(-1));//优惠减免金额需要转换成相应的负数
+		}
+		exemptionItemDTO.setAmount(exemptionAmount);
+		exemptionItemDTO.setRemark(cmd.getExemptionRemark());
+		exemptionItemDTOList.add(exemptionItemDTO);
+		
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
-
+		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
 		createBillCommand.setBillGroupDTO(billGroupDTO);
 
 		ListBillsDTO dto = assetProvider.creatPropertyBill(createBillCommand, null);
@@ -5912,6 +5943,28 @@ public class AssetServiceImpl implements AssetService {
 		convertDTO.setBillId(billId);
 		
 		return convertDTO;
+	}
+	
+	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		PaymentBills paymentBill = assetProvider.findPaymentBillById(cmd.getBillId());
+		if(null != paymentBill) {
+			if(null != cmd.getThirdBillId()) {
+				if(cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
+					//取消统一账单
+					assetProvider.deleteBill(cmd.getBillId());
+				}else {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
+		                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+				}
+			}else {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "thirdBillId can not be null");
+			}
+		}else {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find bill by billId={" + cmd.getBillId() + "}");
+		}
 	}
 
 	public void tranferAssetMappings() {
@@ -5926,14 +5979,14 @@ public class AssetServiceImpl implements AssetService {
 	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType){
 		AssetGeneralBillHandler handler = null;
 
-        if(sourceType != null) {
-        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
-            try {
-            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
-			}catch (Exception ex){
-				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
-			}
-        }
+//        if(sourceType != null) {
+//        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
+//            try {
+//            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
+//			}catch (Exception ex){
+//				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
+//			}
+//        }
 
         return handler;
     }
@@ -6232,10 +6285,5 @@ public class AssetServiceImpl implements AssetService {
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
-	}
-
-	public void cancelGeneralBill(CancelGeneralBillCommand cmd) {
-		
-		
 	}
 }

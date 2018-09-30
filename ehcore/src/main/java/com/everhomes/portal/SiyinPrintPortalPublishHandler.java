@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.SiyinPrintInstanceConfig;
@@ -50,7 +50,7 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 		AssetModuleAppMapping cmd = new AssetModuleAppMapping();
 		cmd.setNamespaceId(namespaceId);
-		cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
+		cmd.setSourceType(AssetSourceType.PRINT_MODULE.getSourceType());
 		cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
 		cmd.setAssetCategoryId(config.getChargeAppToken());
 		cmd.setBillGroupId(config.getBillGroupToken());
