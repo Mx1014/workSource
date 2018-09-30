@@ -5887,11 +5887,11 @@ public class AssetServiceImpl implements AssetService {
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
 			//统一账单不支持重复记账
-			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getThirdBillId());
+			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
 			if(paymentBill != null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
-	                    		+ "sourceId={" + cmd.getSourceId() + "}, thirdBillId={" + cmd.getThirdBillId() + "}");
+	                    		+ "sourceId={" + cmd.getSourceId() + "}, merchantOrderId={" + cmd.getMerchantOrderId() + "}");
 			}
 			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 			dtos.add(dto);
@@ -5959,15 +5959,15 @@ public class AssetServiceImpl implements AssetService {
 		for(Long billId : billIdList) {
 			PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
 			if(null != paymentBill) {
-				if(null != cmd.getThirdBillId()) {
-					if(!cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
+				if(null != cmd.getMerchantOrderId()) {
+					if(!cmd.getMerchantOrderId().equals(paymentBill.getMerchantOrderId())) {
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-			                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
-			                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+			                    "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
+			                    		+ "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}");
 					}
 				}else {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-		                    "thirdBillId can not be null");
+		                    "merchantOrderId can not be null");
 				}
 			}else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

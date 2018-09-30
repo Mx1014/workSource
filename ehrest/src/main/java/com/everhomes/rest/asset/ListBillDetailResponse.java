@@ -33,6 +33,7 @@ import java.util.List;
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  * <li>canDelete:0：不可删除；1：可删除</li>
  * <li>canModify:0：不可编辑；1：可编辑</li>
+ * <li>merchantOrderId:统一订单定义的唯一标识</li>
  *</ul>
  */
 public class ListBillDetailResponse {
@@ -74,6 +75,8 @@ public class ListBillDetailResponse {
     private Byte canModify;
     //对接统一账单业务线的需求
     private Integer paymentType;
+    //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
+    private String merchantOrderId;
     
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -307,5 +310,13 @@ public class ListBillDetailResponse {
 
 	public void setThirdBillId(String thirdBillId) {
 		this.thirdBillId = thirdBillId;
+	}
+
+	public String getMerchantOrderId() {
+		return merchantOrderId;
+	}
+
+	public void setMerchantOrderId(String merchantOrderId) {
+		this.merchantOrderId = merchantOrderId;
 	}
 }

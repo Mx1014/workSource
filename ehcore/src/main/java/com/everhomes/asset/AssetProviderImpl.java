@@ -1730,6 +1730,9 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCanModify(cmd.getCanModify());
             //物业缴费V6.0 账单、费项表增加是否删除状态字段
             newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+            //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
+            newBill.setMerchantOrderId(cmd.getMerchantOrderId());
+            
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
@@ -1762,7 +1765,7 @@ public class AssetProviderImpl implements AssetProvider {
 
         context.select(r.ID,r.TARGET_ID,r.NOTICETEL,r.CUSTOMER_TEL,r.DATE_STR,r.DATE_STR_BEGIN,r.DATE_STR_END,r.TARGET_NAME,r.TARGET_TYPE,r.BILL_GROUP_ID,r.CONTRACT_NUM
                 , r.INVOICE_NUMBER, r.BUILDING_NAME, r.APARTMENT_NAME, r.AMOUNT_EXEMPTION, r.AMOUNT_SUPPLEMENT, r.STATUS, r.CONTRACT_ID, r.CONTRACT_NUM
-                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.THIRD_BILL_ID, r.CAN_DELETE, r.CAN_MODIFY, r.PAYMENT_TYPE)
+                , r.SOURCE_ID, r.SOURCE_TYPE, r.SOURCE_NAME, r.CONSUME_USER_ID, r.THIRD_BILL_ID, r.CAN_DELETE, r.CAN_MODIFY, r.PAYMENT_TYPE, r.MERCHANT_ORDER_ID)
                 .from(r)
                 .where(r.ID.eq(billId))
                 .and(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
@@ -1803,6 +1806,8 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setCanModify(f.getValue(r.CAN_MODIFY));
                     //对接统一账单业务线的需求
                     vo.setPaymentType(f.getValue(r.PAYMENT_TYPE));
+                    //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
+                    vo.setMerchantOrderId(f.getValue(r.MERCHANT_ORDER_ID));
                     return null;
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
@@ -3375,7 +3380,7 @@ public class AssetProviderImpl implements AssetProvider {
         }
     }
     
-    public PaymentBills findPaymentBill(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId) {
+    public PaymentBills findPaymentBill(Integer namespaceId, String sourceType, Long sourceId, String merchantOrderId) {
     	SelectQuery<EhPaymentBillsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS).getQuery();
 		if(!org.springframework.util.StringUtils.isEmpty(namespaceId)){
 			query.addConditions(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId));
@@ -3386,8 +3391,8 @@ public class AssetProviderImpl implements AssetProvider {
 		if(!org.springframework.util.StringUtils.isEmpty(sourceId)){
 			query.addConditions(Tables.EH_PAYMENT_BILLS.SOURCE_ID.eq(sourceId));
 		}
-		if(!org.springframework.util.StringUtils.isEmpty(thirdBillId)){
-			query.addConditions(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId));
+		if(!org.springframework.util.StringUtils.isEmpty(merchantOrderId)){
+			query.addConditions(Tables.EH_PAYMENT_BILLS.MERCHANT_ORDER_ID.eq(merchantOrderId));
 		}
 		query.addConditions(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
 		List<PaymentBills> list = query.fetchInto(PaymentBills.class);
