@@ -37,6 +37,7 @@ import com.everhomes.rest.promotion.order.BusinessOrderType;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.promotion.order.PurchaseOrderDTO;
@@ -568,12 +569,10 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         	ListBillDetailCommand ncmd = new ListBillDetailCommand();
             ncmd.setBillId(Long.valueOf(billId));
             ListBillDetailResponse billDetail = listBillDetail(ncmd);
-            AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType());
-            if(null != handler){
-            	//TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
-            	
-            	
-            }
+            //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+            NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
+            notifyBillHasBeenPaidCommand.setOrderNum(billDetail.getThirdBillId());
+            orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
         }
     }
     
