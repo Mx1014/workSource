@@ -8160,7 +8160,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			for (int i = 0; i < lists.size(); i++) {
 				chargingItemName.append(lists.get(i).getChargingItemName() + ",");
 			}
-			if (chargingItemName != null && "".equals(chargingItemName)) {
+			if (chargingItemName != null && !"".equals(chargingItemName)) {
 				chargingItemNames = (chargingItemName.toString()).substring(0, (chargingItemName.toString()).length() - 1);
 			} else {
 				chargingItemNames = "暂无可选费项，请设置后再试";
