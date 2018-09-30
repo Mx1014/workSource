@@ -7,39 +7,35 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.goods.GetGoodListCommand;
-import com.everhomes.rest.goods.GetGoodListResponse;
-import com.everhomes.rest.goods.GoodDTO;
+import com.everhomes.rest.order.OrderType.OrderTypeEnum;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
-@Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PRINT_MODULE)
-public class PrintGoodsPromotionHandlerImpl implements GoodsPromotionHandler{
+@Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + "printOrder") //要与OrderTypeEnum一致
+public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
 	
 
-	@Override
-	public GetGoodListResponse getGoodList(GetGoodListCommand cmd, ServiceModuleApp app) {
-		
-		//根据商户id获取应用范围
-		List<GoodDTO> goods = getGoods(cmd, app);
-		List<GoodDTO> parents = getParents(goods);
-		GetGoodListResponse resp = new GetGoodListResponse();
-		resp.setParents(parents);
-		resp.setGoods(goods);
-		return resp;
-	}
-
-	private List<GoodDTO> getParents(List<GoodDTO> goods) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private List<GoodDTO> getGoods(GetGoodListCommand cmd, ServiceModuleApp app) {
-		
-		List<GoodDTO> goods = new ArrayList<>();
-//		goods
-		
-		
-		return null;
-	}
+//	@Override
+//	public List<GoodDTO> getGoodList(GetGoodListCommand cmd, ServiceModuleApp app) {
+//		
+//		//根据商户id获取应用范围
+//		List<GoodDTO> goods = getGoods(cmd, app);
+//		List<GoodDTO> parents = getParents(goods);
+//		return goods;
+//	}
+//
+//	private List<GoodDTO> getParents(List<GoodDTO> goods) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	private List<GoodDTO> getGoods(GetGoodListCommand cmd, ServiceModuleApp app) {
+//		
+//		List<GoodDTO> goods = new ArrayList<>();
+////		goods
+//		
+//		return null;
+//	}
 
 
 	

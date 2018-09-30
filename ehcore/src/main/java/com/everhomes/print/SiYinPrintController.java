@@ -431,8 +431,8 @@ public class SiYinPrintController extends ControllerBase {
 	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
 
 		RestResponse response = new RestResponse(siyinPrintService.listPayeeAccount(cmd));
-		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
 

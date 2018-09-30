@@ -1,5 +1,6 @@
 package com.everhomes.goods;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.rest.goods.GetGoodListCommand;
-import com.everhomes.rest.goods.GetGoodListResponse;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 
@@ -21,11 +22,11 @@ public class GoodsServiceImpl implements GoodsService{
 	ServiceModuleAppService serviceModuleAppService;
 
 	@Override
-	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
+	public List<GoodDTO> getGoodList(GetGoodListCommand cmd) {
 		
 		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppOriginId());
 		if (null == app) {
-			return new GetGoodListResponse();
+			return new ArrayList<>();
 		}
 		
 		GoodsPromotionHandler handler = getGoodsPromotionHandler(app.getModuleId());
