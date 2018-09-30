@@ -130,7 +130,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             data.setContactShortToken(r.getCells().get("F") != null ? r.getCells().get("F") : "");
             data.setWorkEmail(r.getCells().get("G") != null ? r.getCells().get("G") : "");
             data.setDepartment(r.getCells().get("H") != null ? r.getCells().get("H") : "");
-            data.setJobPosition(r.getCells().get("I") != null ? r.getCells().get("I") : "");
+//            data.setJobPosition(r.getCells().get("I") != null ? r.getCells().get("I") : "");
             datas.add(data);
         }
         return datas;
@@ -166,7 +166,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     //  模板校验
     private String checkContactsTitle(ImportArchivesContactsDTO title) {
 
-        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
+        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门" ));
         //  存储字段来进行校验
         List<String> temp = new ArrayList<>();
         temp.add(title.getContactName());
@@ -176,7 +176,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         temp.add(title.getContactShortToken());
         temp.add(title.getWorkEmail());
         temp.add(title.getDepartment());
-        temp.add(title.getJobPosition());
+//        temp.add(title.getJobPosition());
 
         for (int i = 0; i < module.size(); i++) {
             if (!module.get(i).equals(temp.get(i)))
@@ -221,9 +221,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         if (checkArchivesDepartment(log, data, data.getDepartment()))
             return log;
 
-        //  职务
-        if (checkArchivesJobPosition(log, data, data.getJobPosition()))
-            return log;
+//        //  职务 2018年9月30日临时去掉岗位
+//        if (checkArchivesJobPosition(log, data, data.getJobPosition()))
+//            return log;
 
         return null;
     }
@@ -285,8 +285,8 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     @Override
     public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId) {
-        //  title
-        List<String> title = new ArrayList<>(Arrays.asList("姓名", "账号", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
+        //  title 2018年9月30日 临时去掉岗位
+        List<String> title = new ArrayList<>(Arrays.asList("姓名", "账号", "英文名", "性别", "手机", "短号", "工作邮箱", "部门"));
         taskService.updateTaskProcess(taskId, 15);
         //  data
         ListArchivesContactsResponse response = archivesService.listArchivesContacts(cmd);
@@ -355,7 +355,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         Cell cellF = dataRow.createCell(5); // 短号
         Cell cellG = dataRow.createCell(6); // 工作邮箱
         Cell cellH = dataRow.createCell(7); // 部门
-        Cell cellI = dataRow.createCell(8); // 岗位
+//        Cell cellI = dataRow.createCell(8); // 岗位 2018年9月30日 临时去掉了岗位
         cellA.setCellStyle(style);
         cellB.setCellStyle(style);
         cellC.setCellStyle(style);
@@ -364,7 +364,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellF.setCellStyle(style);
         cellG.setCellStyle(style);
         cellH.setCellStyle(style);
-        cellI.setCellStyle(style);
+//        cellI.setCellStyle(style);
         cellA.setCellValue(contact.getContactName());
         cellB.setCellValue(contact.getAccount());
         cellC.setCellValue(contact.getContactEnName());
@@ -374,8 +374,8 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellG.setCellValue(contact.getWorkEmail());
         if (contact.getDepartments() != null)
             cellH.setCellValue(getFullPathOrgNames(contact.getDepartments(), fullPathMap));
-        if (contact.getJobPositions() != null)
-            cellI.setCellValue(getFullPathOrgNames(contact.getJobPositions(), fullPathMap));
+//        if (contact.getJobPositions() != null)
+//            cellI.setCellValue(getFullPathOrgNames(contact.getJobPositions(), fullPathMap));
     }
 
     private String getFullPathOrgNames(List<OrganizationDTO> dtos, Map<Long, String> fullPathMap) {
