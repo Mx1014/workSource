@@ -2,6 +2,9 @@
 package com.everhomes.rest.asset;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.everhomes.rest.promotion.order.GoodDTO;
 
 /**
  *<ul>
@@ -16,13 +19,14 @@ import java.math.BigDecimal;
  * <li>targetType:客户类别,参考{@link com.everhomes.rest.asset.AssetTargetType}</li>
  * <li>targetId:客户id</li>
  * <li>targetName:客户名称</li>
- * <li>amountReceivable:应收金额（含税）（原始金额，不计算优惠的金额）</li>
+ * <li>amountReceivable:应收金额（含税）（原始总金额，不计算优惠的金额）</li>
  * <li>exemptionAmount:优惠/减免金额</li>
  * <li>exemptionRemark:优惠/减免的备注说明</li>
  * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单（如何不传该参数，接口会自动根据账单组的设置去判断是已出或未出）</li>
  * <li>invoiceNum:发票单号</li>
  * <li>dateStrBegin:计费开始（不传默认当前时间）</li>
  * <li>dateStrEnd:计费结束（不传，默认按照当前时间+账单组的设置去计算得出）</li>
+ * <li>goodDTOList:商品信息列表,参考{@link com.everhomes.rest.promotion.order.GoodDTO}</li>
  *</ul>
  */
 public class CreateGeneralBillCommand {
@@ -44,6 +48,7 @@ public class CreateGeneralBillCommand {
     private Byte isSettled;
     private String dateStrBegin;
     private String dateStrEnd;
+    private List<GoodDTO> goodDTOList;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -152,6 +157,12 @@ public class CreateGeneralBillCommand {
 	}
 	public void setExemptionRemark(String exemptionRemark) {
 		this.exemptionRemark = exemptionRemark;
+	}
+	public List<GoodDTO> getGoodDTOList() {
+		return goodDTOList;
+	}
+	public void setGoodDTOList(List<GoodDTO> goodDTOList) {
+		this.goodDTOList = goodDTOList;
 	}
     
 }
