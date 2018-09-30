@@ -30,6 +30,10 @@ ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
 
+-- REMARK：  统一账单加入的：统一订单定义的唯一标识
+ALTER TABLE `eh_payment_bills` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+
 -- REMARK：  增加业务对应的相关信息
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
