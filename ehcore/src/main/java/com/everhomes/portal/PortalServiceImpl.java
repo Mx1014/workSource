@@ -33,6 +33,7 @@ import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.AccessControlType;
@@ -2045,6 +2046,9 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.CARDEXTENSION){
+				CardExtensionInstanceConfig config = new CardExtensionInstanceConfig();
+
+
 
 			}
 			groups.add(group);
