@@ -4,8 +4,6 @@
 -- AUTHOR:
 -- REMARK:
 
-UPDATE eh_customer_trackers set status = 0 where tracker_uid is null;
-UPDATE eh_customer_contacts set status = 0 where name is null and phone_number is null;
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -13,8 +11,12 @@ UPDATE eh_customer_contacts set status = 0 where name is null and phone_number i
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR:
--- REMARK:
+
+
+-- AUTHOR:黄鹏宇
+-- REMARK:修改无效的数据为失效状态
+UPDATE eh_customer_trackers set status = 0 where tracker_uid is null;
+UPDATE eh_customer_contacts set status = 0 where name is null and phone_number is null;
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
