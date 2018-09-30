@@ -4,6 +4,9 @@
 -- AUTHOR:
 -- REMARK:
 
+UPDATE eh_customer_trackers set status = 0 where tracker_uid is null;
+UPDATE eh_customer_contacts set status = 0 where name is null and phone_number is null;
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
