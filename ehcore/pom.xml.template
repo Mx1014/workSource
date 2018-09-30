@@ -393,9 +393,10 @@
 
         <dependency>
             <groupId>com.everhomes</groupId>
-            <artifactId>ehorder-sdk</artifactId>
-            <version>${ehorder-sdk.version}</version>
+            <artifactId>ehpromotion-sdk</artifactId>
+            <version>${ehpromotion-sdk.version}</version>
         </dependency>
+        
 	</dependencies>
 
 	<build>

@@ -41,6 +41,7 @@ import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
@@ -620,10 +621,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         ListBillDetailCommand ncmd = new ListBillDetailCommand();
         ncmd.setBillId(Long.valueOf(cmd.getBillId()));
         ListBillDetailResponse billDetail = listBillDetail(ncmd);
-        //TODO core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
-        
-        
-        
+        //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+        NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
+        notifyBillHasBeenPaidCommand.setOrderNum(billDetail.getThirdBillId());
+        orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
     }
 
     @Override
