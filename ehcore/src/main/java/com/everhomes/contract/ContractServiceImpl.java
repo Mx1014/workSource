@@ -134,6 +134,7 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.PaymentChargingItemType;
 import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
@@ -3264,6 +3265,11 @@ long assetCategoryId = 0l;
 			if (dto.getContractEndDate() != null) {
 				exportDetailDTO.setContractEndDate(new SimpleDateFormat("yyyy-MM-dd").format(dto.getContractEndDate()));
 			}
+			if (dto.getDepositStatus() != null) {
+				ContractDepositType depositStatus = ContractDepositType.fromCode(dto.getDepositStatus());
+				exportDetailDTO.setDepositStatus(depositStatus.getDesc());
+			}
+			
 		} catch (Exception e) {
 			LOGGER.error("dto : {}", dto);
 			throw e;

@@ -326,7 +326,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getOrgId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("partyAId", cmd.getOrgId()));
         }
-        if(cmd.getOrgId() != null) {
+        if(cmd.getDepositStatus() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("depositStatus", cmd.getDepositStatus()));
         }
         
@@ -405,6 +405,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		        if (contractCategory != null) {
 		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
+		        if (contract.getDepositStatus() != null) {
+					dto.setDepositStatus(contract.getDepositStatus());
+				}
+		        
                 dtos.add(dto);
             });
         }
