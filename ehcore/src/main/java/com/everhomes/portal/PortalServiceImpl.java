@@ -2114,6 +2114,8 @@ public class PortalServiceImpl implements PortalService {
 					}
 				}
 
+				group.setInstanceConfig(config);
+
 			}
 			groups.add(group);
 
