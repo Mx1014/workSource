@@ -1143,7 +1143,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(contactPhone);
+
+                    //TODO
+                    //merge conflict change "contactPhone"  to "Long.valueOf(contactPhone)", it may thrown exception.
+                    contact.setPhoneNumber(Long.valueOf(contactPhone));
                     contact.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());
@@ -1172,7 +1175,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(contactPhone);
+
+                    //TODO
+                    //merge conflict change "contactPhone"  to "Long.valueOf(contactPhone)", it may thrown exception.
+                    contact.setPhoneNumber(Long.valueOf(contactPhone));
                     contact.setContactType(CustomerContactType.CHANNEL_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());
