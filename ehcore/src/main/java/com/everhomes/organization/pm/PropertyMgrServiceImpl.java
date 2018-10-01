@@ -30,6 +30,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.Null;
 
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import org.apache.poi.ss.usermodel.Cell;
@@ -531,6 +532,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	@Autowired
 	private AssetService assetService;
 
+   	@Autowired
    	private ActivityService activityService;
 
     private String queueName = "property-mgr-push";
@@ -8210,24 +8212,20 @@ response.setBuildingId(building.getId());//房源的授权价
 			List<ExportApartmentsAuthorizePriceDTO> filterData = filterExportApartmentsInBuildingDTO(data, cmd);
 			taskService.updateTaskProcess(taskId, 80);
 			//动态获取费项名称
-			//1、获取categoryId 列表
-			List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
-			Set<String> chargingItemNameList = new HashSet<String>();
-			for (int i = 0; i < dtos.size(); i++) {
-				OwnerIdentityCommand ownerIdentityCommand = new OwnerIdentityCommand();
-				ownerIdentityCommand.setOwnerId(cmd.getCommunityId());
-				ownerIdentityCommand.setOwnerType("community");
-				ownerIdentityCommand.setCategoryId(dtos.get(i).getCategoryId());
-				List<ListChargingItemsDTO> listChargingItem = assetService.listChargingItems(ownerIdentityCommand);
-				for (int j = 0; j < listChargingItem.size(); j++) {
-					if (listChargingItem.get(j).getIsSelected() == 1) {
-						chargingItemNameList.add(listChargingItem.get(j).getChargingItemName());
-					}
-				}
+			StringBuffer chargingItemName = new StringBuffer();
+			String chargingItemNames = "";
+			AuthorizePriceCommand chargingItemcmd = new AuthorizePriceCommand();
+			chargingItemcmd.setNamespaceId(cmd.getNamespaceId());
+			chargingItemcmd.setCommunityId(cmd.getCommunityId());
+
+			List<ListChargingItemsDTO> lists = chargingItemNameList(chargingItemcmd);
+			for (int i = 0; i < lists.size(); i++) {
+				chargingItemName.append(lists.get(i).getChargingItemName() + ",");
 			}
-			String chargingItemName = "";
-			if (chargingItemNameList != null) {
-				chargingItemName = (chargingItemNameList.toString()).replace("[", "").replace("]", "");
+			if (chargingItemName != null && "".equals(chargingItemName)) {
+				chargingItemNames = (chargingItemName.toString()).substring(0, (chargingItemName.toString()).length() - 1);
+			} else {
+				chargingItemNames = "暂无可选费项，请设置后再试";
 			}
 
 			excelUtils.setNeedTitleRemark(true).setTitleRemark(
@@ -8238,7 +8236,7 @@ response.setBuildingId(building.getId());//房源的授权价
 							+ "4、带有星号（*）的红色字段为必填项。\n"
 							+ "5、楼栋名称相同的情况下，门牌不允许重复，重复只算一条。\n"
 							+ "6、状态可填项：待租、待售、出租、已售、自用、其他。\n"
-							+ "7、费项名称可选项为： "+chargingItemName+  "。\n"
+							+ "7、费项名称可选项为： "+chargingItemNames+  "。\n"
 							+ "8、周期可选项为：按月、按季、按年、按天。\n"
 							+ "9、面积只允许填写数字，非数字将导致对应行导入失败\n"
 							+ "10、导入系统已存在的门牌，将按照导入的门牌更新系统的门牌信息。\n"

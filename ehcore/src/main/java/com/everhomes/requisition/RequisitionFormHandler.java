@@ -96,7 +96,11 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
     public PostGeneralFormDTO updateGeneralFormVal(PostGeneralFormValCommand cmd) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getCurrentOrganizationId(), PrivilegeConstants.REQUISITION_CREATE, ServiceModuleConstants.REQUISITION_MODULE, null, null, null, cmd.getOwnerId());
 
-        generalFormService.deleteGeneralFormVal(cmd);
+        PostGeneralFormValCommand deleteCmd = new PostGeneralFormValCommand();
+        deleteCmd.setSourceId(cmd.getRequisitionId());
+        deleteCmd.setModuleId(cmd.getSourceId());
+        deleteCmd.setNamespaceId(cmd.getNamespaceId());
+        generalFormService.deleteGeneralFormVal(deleteCmd);
 
         addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
 

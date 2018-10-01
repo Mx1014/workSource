@@ -117,4 +117,6 @@ public interface ServiceModuleProvider {
 	Long getServiceModuleFromBlackId(Integer namespaceId, Long moduleId);
 
 	void createServiceModuleExcludeFunction(ServiceModuleExcludeFunction serviceModuleExcludeFunction);
+
+	List<Long> listExcludeCauseWhiteList();
 }

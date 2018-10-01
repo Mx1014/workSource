@@ -311,5 +311,20 @@ public class GeneralFormController extends ControllerBase {
 
         return response;
     }
+    
+    
+    /**
+	 * <b>URL: /general_form/syncFromDbV2</b>
+	 * <p>同步数据库数据到es(同步接口版本V2)</p>
+	 */
+	@RequestMapping("syncFromDbV2")
+	@RestReturn(value=String.class)
+	public RestResponse syncFromDbV2(){
+		generalFormSearcher.syncFromDbV2();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

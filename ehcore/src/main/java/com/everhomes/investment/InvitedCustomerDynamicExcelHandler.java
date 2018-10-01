@@ -1143,7 +1143,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(Long.valueOf(contactPhone));
+                    contact.setPhoneNumber(contactPhone);
                     contact.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());
@@ -1172,7 +1172,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(Long.valueOf(contactPhone));
+                    contact.setPhoneNumber(contactPhone);
                     contact.setContactType(CustomerContactType.CHANNEL_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());

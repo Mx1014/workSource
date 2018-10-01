@@ -698,8 +698,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
-        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
-            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getSourceId());
+        if(cmd.getSourceId() != null && cmd.getModuleId() != null){
+            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getSourceId());
             //generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
             generalFormSearcher.deleteById(cmd.getSourceId());
             return cmd.getSourceId();

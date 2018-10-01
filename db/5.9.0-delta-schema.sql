@@ -101,10 +101,18 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 C
 -- REMARK: 账单表增加第三方账单唯一标识字段
 ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT '账单表增加第三方唯一标识字段';
 
+update eh_service_alliance_categories set default_order = 0 where default_order is null;
 -- AUTHOR: 黄明波
 -- REMARK: #33683服务联盟样式列表添加排序 #37669修复
-ALTER TABLE `eh_service_alliance_categories`	CHANGE COLUMN `default_order` `default_order` BIGINT NOT NULL DEFAULT '0' ;
+ALTER TABLE eh_service_alliance_categories MODIFY default_order BIGINT(11) NOT NULL DEFAULT 0;
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `address` `address` VARCHAR(255) NULL DEFAULT NULL ;
+
+-- 性能优化
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_parent_id` (`parent_id`);
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_default_order` (`default_order`);
+ALTER TABLE `eh_service_alliances` ADD INDEX `i_eh_type` (`type`);
+ALTER TABLE `eh_service_alliance_skip_rule` ADD INDEX `i_eh_category_index` (`service_alliance_category_id`, `namespace_id`);
+
 -- END
 
 
@@ -648,4 +656,6 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `created_time` DATE COMMEN
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `creator_uid` BIGINT COMMENT '创建人ID';
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_time` DATE COMMENT '操作时间';
 ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT COMMENT '操作人ID';
+
+ALTER TABLE `eh_customer_contacts` MODIFY `phone_number` VARCHAR(64) ;
 

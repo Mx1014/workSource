@@ -239,7 +239,10 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		
 		// issue-32529 web化表单提交成功后，后台不显示表单已填写/自动加载的企业
 		PostApprovalFormItem companyVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
-		String companyName = JSON.parseObject(companyVal.getFieldValue(), PostApprovalFormTextValue.class).getText();
+		String companyName = "";
+		//5.9.0上线判断企业名称非空
+		if(companyVal != null)
+			companyName = JSON.parseObject(companyVal.getFieldValue(), PostApprovalFormTextValue.class).getText();
 		if (!StringUtils.isBlank(companyName)) {
 			record.setCreatorOrganization(companyName);
 			request.setCreatorOrganization(companyName);
