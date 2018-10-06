@@ -5879,14 +5879,13 @@ public class AssetServiceImpl implements AssetService {
 	
 	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd) {
 		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
-		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
-		AssetGeneralBillMappingCmd assetGeneralBillMappingCmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+		AssetGeneralBillMappingCmd assetGeneralBillMappingCmd = ConvertHelper.convert(cmd, AssetGeneralBillMappingCmd.class);
 		GeneralBillHandler generalBillHandler = getGeneralBillHandler(cmd.getSourceType());
 		List<AssetModuleAppMapping> records = generalBillHandler.findAssetModuleAppMapping(assetGeneralBillMappingCmd);
 		if(records.size() > 0) {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
-			mapping = records.get(0);
+			AssetModuleAppMapping mapping = records.get(0);
 			Long categoryId = mapping.getAssetCategoryId();
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();

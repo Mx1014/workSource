@@ -2,6 +2,7 @@ package com.everhomes.asset.generalbill;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetModuleAppMapping;
@@ -16,6 +17,7 @@ import com.everhomes.rest.asset.AssetSourceType;
  */
 @Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.PRINT_MODULE)
 public class PrintGeneralBillHandler implements GeneralBillHandler{
+	@Autowired
 	private AssetProvider assetProvider;
 	
 	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
