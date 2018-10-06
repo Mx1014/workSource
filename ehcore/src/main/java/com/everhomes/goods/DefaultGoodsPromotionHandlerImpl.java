@@ -15,16 +15,17 @@ public class DefaultGoodsPromotionHandlerImpl implements GoodsPromotionHandler{
 
 	@Override
 	public List<GoodDTO> getGoodList(GetGoodListCommand cmd, ServiceModuleApp app) {
-		GoodDTO dto = new GoodDTO();
-		dto.setCounts(1);
-		dto.setGoodDescription("testDescription");
-		dto.setGoodName("商品");
-		dto.setId(100L);
-		dto.setPrice(new BigDecimal("2.1"));
-		dto.setTotalPrice(new BigDecimal("2.2"));
-		dto.setTag1("print");
-		dto.setTag2("copy");
-		return Arrays.asList(dto);
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		good.setTag1("print");
+		good.setTag2("copy");
+		good.setServeApplyName("这里填写服务提供商名称"); //
+		good.setGoodTag("这里填写商品标志");// 商品标志
+		good.setGoodName("这里填写商品名称");// 商品名称
+		good.setGoodDescription("这里填写商品描述");// 商品描述
+//		good.setCounts(1);
+//		good.setPrice(trueDecimalAmount);
+		return Arrays.asList(good);
 	}
 
 	private Map<String, String> getProvider(GetGoodListCommand cmd, ServiceModuleApp app) {
