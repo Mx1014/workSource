@@ -5,9 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetModuleAppMapping;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.GeneralBillHandler;
+import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.AssetSourceType;
-import com.everhomes.rest.asset.ListBillDetailResponse;
 
 /**
  * @author created by ycx
@@ -15,11 +16,11 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
  */
 @Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.PRINT_MODULE)
 public class PrintGeneralBillHandler implements GeneralBillHandler{
-
-	public List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail) {
-		
-		
-		return null;
+	private AssetProvider assetProvider;
+	
+	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
+		List<AssetModuleAppMapping> dtos = assetProvider.findAssetModuleAppMapping(cmd);
+		return dtos;
 	}
 
 }

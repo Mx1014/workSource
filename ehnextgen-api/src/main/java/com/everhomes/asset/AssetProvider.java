@@ -437,8 +437,7 @@ public interface AssetProvider {
 	
 	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
 	
-	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,
-			String sourceType);
+	boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd);
 	
 	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
@@ -450,7 +449,7 @@ public interface AssetProvider {
 	 */
 	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
 	
-	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
+	List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 		

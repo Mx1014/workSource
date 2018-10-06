@@ -1517,6 +1517,7 @@ public class AssetController extends ControllerBase {
 	 */
 	@RequestMapping("createGeneralBill")
 	@RestReturn(value = ListGeneralBillsDTO.class, collection = true)
+	@RequireAuthentication(value = false)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
 		List<ListGeneralBillsDTO> dtos = assetService.createGeneralBill(cmd);
 		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
@@ -1533,6 +1534,7 @@ public class AssetController extends ControllerBase {
 	 */
 	@RequestMapping("cancelGeneralBill")
 	@RestReturn(value = String.class)
+	@RequireAuthentication(value = false)
 	public RestResponse cancelGeneralBill(CancelGeneralBillCommand cmd) {
 		assetService.cancelGeneralBill(cmd);
 	    RestResponse response = new RestResponse();

@@ -60,6 +60,7 @@ import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
+import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
@@ -6877,14 +6878,14 @@ public class AssetProviderImpl implements AssetProvider {
 	        .execute();
     }
 
-	public boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
-		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(namespaceId, ownerId, ownerType, sourceId, sourceType);
+	public boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd) {
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
         return records.size() > 0;
 	}
 
 	public AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping mapping) {
-		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(mapping.getNamespaceId(),
-				mapping.getOwnerId(), mapping.getOwnerType(), mapping.getSourceId(), mapping.getSourceType());
+		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
 		if(records.size() != 0 && records.get(0) != null) {
 			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
 			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
@@ -6910,24 +6911,20 @@ public class AssetProviderImpl implements AssetProvider {
         return records.size() > 0;
 	}
 
-	public List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType) {
+	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
 		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
-		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
-		if(ownerId != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(ownerId));
-		}else {
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
+		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+		if(cmd.getOwnerId() != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.eq(cmd.getOwnerId()));
 		}
-		if(ownerType != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(ownerType));
-		}else {
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.isNull());
+		if(cmd.getOwnerType() != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_TYPE.eq(cmd.getOwnerType()));
 		}
-		if(sourceId != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(sourceId));
+		if(cmd.getSourceId() != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID.eq(cmd.getSourceId()));
 		}
-		if(sourceType != null){
-			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(sourceType));
+		if(cmd.getSourceType() != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(cmd.getSourceType()));
 		}
 		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
 		return records;

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.GeneralBillHandler;
+import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 
@@ -16,10 +17,11 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
 @Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.ASSET_MODULE)
 public class AssetGeneralBillHandler implements GeneralBillHandler{
 
-	public List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail) {
-		
-		
+	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
 		return null;
 	}
+	
+	
+	
 
 }

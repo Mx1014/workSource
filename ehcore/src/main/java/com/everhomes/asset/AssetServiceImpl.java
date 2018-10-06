@@ -5806,9 +5806,8 @@ public class AssetServiceImpl implements AssetService {
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
 	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
-		boolean existGeneralBillAssetMapping = assetProvider.checkExistGeneralBillAssetMapping(assetModuleAppMapping.getNamespaceId(),
-				assetModuleAppMapping.getOwnerId(), assetModuleAppMapping.getOwnerType(),
-				assetModuleAppMapping.getSourceId(), assetModuleAppMapping.getSourceType());
+		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(assetModuleAppMapping, AssetGeneralBillMappingCmd.class);
+		boolean existGeneralBillAssetMapping = assetProvider.checkExistGeneralBillAssetMapping(cmd);
 		if(existGeneralBillAssetMapping) {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数能在映射表查到数据，那判断为更新
 			return assetProvider.updateGeneralBillAssetMapping(assetModuleAppMapping);
@@ -5882,7 +5881,9 @@ public class AssetServiceImpl implements AssetService {
 		List<ListGeneralBillsDTO> dtos = new ArrayList<ListGeneralBillsDTO>();
 		AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
-		List<AssetModuleAppMapping> records = assetProvider.findAssetModuleAppMapping(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceId(), cmd.getSourceType());
+		AssetGeneralBillMappingCmd assetGeneralBillMappingCmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+		GeneralBillHandler generalBillHandler = getGeneralBillHandler(cmd.getSourceType());
+		List<AssetModuleAppMapping> records = generalBillHandler.findAssetModuleAppMapping(assetGeneralBillMappingCmd);
 		if(records.size() > 0) {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
 			mapping = records.get(0);
@@ -6008,18 +6009,16 @@ public class AssetServiceImpl implements AssetService {
 	 * @param sourceType
 	 * @return
 	 */
-	public GeneralBillHandler getAssetGeneralBillHandler(String sourceType){
+	public GeneralBillHandler getGeneralBillHandler(String sourceType){
 		GeneralBillHandler handler = null;
-
-//        if(sourceType != null) {
-//        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
-//            try {
-//            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
-//			}catch (Exception ex){
-//				LOGGER.info("AssetGeneralBillHandler not exist sourceType = {}", sourceType);
-//			}
-//        }
-
+        if(sourceType != null) {
+        	String handlerPrefix = GeneralBillHandler.GENERALBILL_PREFIX;
+            try {
+            	handler = PlatformContext.getComponent(handlerPrefix + sourceType);
+			}catch (Exception ex){
+				LOGGER.info("GeneralBillHandler not exist sourceType = {}", sourceType);
+			}
+        }
         return handler;
     }
 
