@@ -276,7 +276,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum) {
+	public SiyinPrintOrder findSiyinPrintOrderByGeneralOrderId(String BizOrderNum) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 				.where(Tables.EH_SIYIN_PRINT_ORDERS.GENERAL_ORDER_ID.eq(BizOrderNum));
 		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));

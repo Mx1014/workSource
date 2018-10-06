@@ -5,6 +5,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,7 +76,7 @@ public interface SiyinPrintService {
 
 	void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response);
 
-    void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+    void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd);
 
     void initPayeeAccount(MultipartFile[] files);
 
