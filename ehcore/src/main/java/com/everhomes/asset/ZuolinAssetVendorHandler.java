@@ -538,8 +538,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @Override
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-        ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
-        ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        ListBillDetailResponse response = assetProvider.listBillDetail(cmd.getBillId());
         List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
         for(int i = 0; i< dtos.size(); i ++) {
             ExemptionItemDTO dto = dtos.get(i);

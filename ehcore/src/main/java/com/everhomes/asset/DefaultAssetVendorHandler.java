@@ -28,6 +28,7 @@ import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.asset.ListBillDetailCommand;
 import com.everhomes.rest.asset.ListBillDetailResponse;
@@ -429,24 +430,28 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @return 扩展信息
 	 */
 	protected String genPaymentExtendInfo(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
-	    // 通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
+		StringBuilder strBuilder = new StringBuilder();
         if(cmd.getBills() != null) {
-            Long billId = Long.parseLong(cmd.getBills().get(0).getBillId());
-            projectName = assetProvider.getProjectNameByBillID(billId);
+        	for(BillIdAndAmount billIdAndAmount : cmd.getBills()) {
+        		Long billId = Long.parseLong(billIdAndAmount.getBillId());
+                ListBillDetailCommand ncmd = new ListBillDetailCommand();
+                ncmd.setBillId(Long.valueOf(billId));
+                ListBillDetailResponse billDetail = listBillDetail(ncmd);
+                if(billDetail != null && billDetail.getBillGroupDTO() != null) {
+                	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
+                	for(BillItemDTO billItemDTO : billItemDTOList) {
+                		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
+                		String paymentExtendsInfo = generalBillHandler.getPaymentExtendInfo(billItemDTO);
+                		strBuilder.append(paymentExtendsInfo);
+                		strBuilder.append(",");
+                	}
+                }
+        	}
         }
-
-        String billGroupName = "";
-        if(billGroup.getName() != null) {
-            billGroupName = billGroup.getName();
+        //去掉最后一个逗号
+        if(strBuilder.length() != 0) {
+        	strBuilder = strBuilder.deleteCharAt(strBuilder.length() - 1);
         }
-        
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append("项目名称:");
-        strBuilder.append(projectName);
-        strBuilder.append(", ");
-        strBuilder.append("账单组名称:");
-        strBuilder.append(billGroupName);
         return strBuilder.toString();
 	}
 	

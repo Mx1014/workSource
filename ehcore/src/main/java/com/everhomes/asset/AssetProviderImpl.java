@@ -1769,7 +1769,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public ListBillDetailVO listBillDetail(Long billId) {
+    public ListBillDetailResponse listBillDetail(Long billId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         EhPaymentBillItems o = Tables.EH_PAYMENT_BILL_ITEMS.as("o");
@@ -1778,7 +1778,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentLateFine fine = Tables.EH_PAYMENT_LATE_FINE.as("fine");
         EhAddresses t1 = Tables.EH_ADDRESSES.as("t1");
         com.everhomes.server.schema.tables.EhPaymentSubtractionItems t2 = Tables.EH_PAYMENT_SUBTRACTION_ITEMS.as("t2");//增加减免费项
-        ListBillDetailVO vo = new ListBillDetailVO();
+        ListBillDetailResponse vo = new ListBillDetailResponse();
         BillGroupDTO dto = new BillGroupDTO();
         List<BillItemDTO> list1 = new ArrayList<>();
         List<ExemptionItemDTO> list2 = new ArrayList<>();
@@ -1833,7 +1833,8 @@ public class AssetProviderImpl implements AssetProvider {
                 });
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
         		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE
-        		, o.SOURCE_ID, o.SOURCE_TYPE, o.SOURCE_NAME, o.CONSUME_USER_ID, o.CAN_DELETE, o.CAN_MODIFY)
+        		, o.SOURCE_ID, o.SOURCE_TYPE, o.SOURCE_NAME, o.CONSUME_USER_ID, o.CAN_DELETE, o.CAN_MODIFY 
+        		, o.GOODS_SERVE_APPLY_NAME)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
@@ -1845,6 +1846,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetch()
                 .map(f -> {
                     BillItemDTO itemDTO = new BillItemDTO();
+                    itemDTO.setBillId(billId);
                     itemDTO.setBillItemName(f.getValue(o.CHARGING_ITEM_NAME));
                     itemDTO.setBillItemId(f.getValue(o.ID));
                     itemDTO.setAmountReceivable(f.getValue(o.AMOUNT_RECEIVABLE));
@@ -1872,6 +1874,8 @@ public class AssetProviderImpl implements AssetProvider {
                     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
                     itemDTO.setCanDelete(f.getValue(o.CAN_DELETE));
                     itemDTO.setCanModify(f.getValue(o.CAN_MODIFY));
+                    //物业缴费V7.1（企业记账流程打通）: 增加商品信息字段
+                    itemDTO.setGoodsServeApplyName(f.getValue(o.GOODS_SERVE_APPLY_NAME));
                     list1.add(itemDTO);
                     return null;
                 });

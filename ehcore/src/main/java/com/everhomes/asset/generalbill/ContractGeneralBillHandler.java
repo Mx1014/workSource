@@ -16,8 +16,8 @@ import com.everhomes.rest.asset.BillItemDTO;
  * @author created by ycx
  * @date 上午11:45:54
  */
-@Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.ASSET_MODULE)
-public class AssetGeneralBillHandler implements GeneralBillHandler{
+@Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.CONTRACT_MODULE)
+public class ContractGeneralBillHandler implements GeneralBillHandler{
 
 	@Autowired
 	private AssetProvider assetProvider;

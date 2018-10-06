@@ -5,6 +5,7 @@ package com.everhomes.rest.asset;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -62,6 +63,9 @@ public class ListBillDetailResponse {
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     //催缴手机号码列表
     private List<String> noticeTelList;
+    private BigDecimal amoutExemption;
+    private BigDecimal amountSupplement;
+    private Long contractId;//新增合同ID字段
 	
     //新增账单来源信息
     private String sourceType;
@@ -318,5 +322,29 @@ public class ListBillDetailResponse {
 
 	public void setMerchantOrderId(String merchantOrderId) {
 		this.merchantOrderId = merchantOrderId;
+	}
+
+	public BigDecimal getAmoutExemption() {
+		return amoutExemption;
+	}
+
+	public void setAmoutExemption(BigDecimal amoutExemption) {
+		this.amoutExemption = amoutExemption;
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
 	}
 }

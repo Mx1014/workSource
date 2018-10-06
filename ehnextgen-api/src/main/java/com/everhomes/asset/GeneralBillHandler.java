@@ -3,6 +3,7 @@ package com.everhomes.asset;
 import java.util.List;
 
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
+import com.everhomes.rest.asset.BillItemDTO;
 
 /**
  * @author created by ycx
@@ -19,5 +20,12 @@ public interface GeneralBillHandler {
     List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
     
     
+    /**
+	 * 支付下单的时候需要根据不同的账单类型组装不同的订单说明
+	 * @param cmd 下单请求信息
+	 * @param billGroup 帐单组
+	 * @return 扩展信息
+	 */
+    String getPaymentExtendInfo(BillItemDTO billItemDTO);
     
 }
