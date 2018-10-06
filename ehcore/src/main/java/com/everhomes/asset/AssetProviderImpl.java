@@ -1547,6 +1547,23 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setCanModify(cmd.getCanModify());
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                    //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
+                    item.setMerchantOrderId(cmd.getMerchantOrderId());
+                    //物业缴费V7.1（企业记账流程打通）: 增加商品信息字段
+                    item.setGoodsServeType(dto.getGoodsServeType());
+                    item.setGoodsNamespace(dto.getGoodsNamespace());
+                    item.setGoodsTag1(dto.getGoodsTag1());
+                    item.setGoodsTag2(dto.getGoodsTag2());
+                    item.setGoodsTag3(dto.getGoodsTag3());
+                    item.setGoodsTag4(dto.getGoodsTag4());
+                    item.setGoodsTag5(dto.getGoodsTag5());
+                    item.setGoodsServeApplyName(dto.getGoodsServeApplyName());
+                    item.setGoodsTag(dto.getGoodsTag());
+                    item.setGoodsName(dto.getGoodsName());
+                    item.setGoodsDescription(dto.getGoodsDescription());
+                    item.setGoodsCounts(dto.getGoodsCounts());
+                    item.setGoodsPrice(dto.getGoodsPrice());
+                    item.setGoodsTotalprice(dto.getGoodsTotalPrice());
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);

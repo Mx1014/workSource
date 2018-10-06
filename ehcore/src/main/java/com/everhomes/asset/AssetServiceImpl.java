@@ -127,6 +127,7 @@ import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
@@ -5909,6 +5910,9 @@ public class AssetServiceImpl implements AssetService {
 		//组装创建账单请求
 		CreateBillCommand createBillCommand = ConvertHelper.convert(cmd, CreateBillCommand.class);
 		createBillCommand.setCategoryId(categoryId);
+		//物业缴费V7.1： 统一账单默认没有删除和修改权限
+		createBillCommand.setCanDelete((byte)0);
+		createBillCommand.setCanModify((byte)0);
 
 		BillGroupDTO billGroupDTO = new BillGroupDTO();
 		billGroupDTO.setBillGroupId(billGroupId);
@@ -5916,18 +5920,35 @@ public class AssetServiceImpl implements AssetService {
 
 		//1、新增费项
 		List<BillItemDTO> billItemDTOList = new ArrayList<>();
-		BillItemDTO billItemDTO = new BillItemDTO();
-		billItemDTO.setBillItemId(charingItemId);
-		billItemDTO.setBillItemName(billItemName);
-		BigDecimal amountReceivable = cmd.getAmountReceivable();
-		BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
-		BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
-		//税额=含税金额-不含税金额       税额=1000-909.09=90.91
-		BigDecimal taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
-		billItemDTO.setAmountReceivable(amountReceivable);
-		billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-		billItemDTO.setTaxAmount(taxAmount);
-		billItemDTOList.add(billItemDTO);
+		for(GoodDTO goodDTO : cmd.getGoodDTOList()) {
+			BillItemDTO billItemDTO = new BillItemDTO();
+			billItemDTO.setBillItemId(charingItemId);
+			billItemDTO.setBillItemName(billItemName);
+			BigDecimal amountReceivable = goodDTO.getTotalPrice();
+			BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+			BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+			BigDecimal taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
+			billItemDTO.setAmountReceivable(amountReceivable);
+			billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+			billItemDTO.setTaxAmount(taxAmount);
+			//组装商品信息
+			billItemDTO.setGoodsServeType(goodDTO.getServeType());
+			billItemDTO.setGoodsNamespace(goodDTO.getNamespace());
+			billItemDTO.setGoodsTag1(goodDTO.getTag1());
+			billItemDTO.setGoodsTag2(goodDTO.getTag2());
+			billItemDTO.setGoodsTag3(goodDTO.getTag3());
+			billItemDTO.setGoodsTag4(goodDTO.getTag4());
+			billItemDTO.setGoodsTag5(goodDTO.getTag5());
+			billItemDTO.setGoodsServeApplyName(goodDTO.getServeApplyName());
+			billItemDTO.setGoodsTag(goodDTO.getGoodTag());
+			billItemDTO.setGoodsName(goodDTO.getGoodName());
+			billItemDTO.setGoodsDescription(goodDTO.getGoodDescription());
+			billItemDTO.setGoodsCounts(goodDTO.getCounts());
+			billItemDTO.setGoodsPrice(goodDTO.getPrice());
+			billItemDTO.setGoodsTotalPrice(goodDTO.getTotalPrice());
+			billItemDTOList.add(billItemDTO);
+		}
 		
 		//2、新增优惠/减免金额
 		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
