@@ -29,6 +29,9 @@ public class PaySDKProxyImpl implements ApplicationListener<ContextRefreshedEven
         	String payHomeUrl = configurationProvider.getValue(0,"pay.v2.payHomeUrl", "");
         	String localServerUrl = configurationProvider.getValue(0,"home.url", "") + "/evh";
         	PaySettings.init(appKey, secretKey, payHomeUrl, localServerUrl);
+        	if(LOGGER.isDebugEnabled()) {
+        	    LOGGER.debug("Init the http connection config in payserver, appKey={}, payHomeUrl={}, localServerUrl={}", appKey, payHomeUrl, localServerUrl);
+        	}
         }
     }
 }

@@ -25,6 +25,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -3866,7 +3867,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		preOrderCommand.setOrderRemark3(String.valueOf(task.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
 		return preOrderCommand;
@@ -3910,7 +3911,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		// 找不到手机号则默认一个
 		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -4027,7 +4028,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 		String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
 		getPurchaseOrderCommand.setAccountCode(accountCode);
