@@ -27,6 +27,8 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.CreateGeneralBillCommand;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
@@ -37,6 +39,7 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
@@ -76,6 +79,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general.order.GeneralOrderHandler;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
@@ -604,10 +608,22 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         order.setGeneralOrderId(orderCommandResponse.getPayResponse().getBizOrderNum());
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 		
-		//oldMethod();
 		return preOrderDTO;
 	}
 	
+	@Override
+	public PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
+		GeneralOrderHandler handler = getSiyinPrintGeneralOrderHandler();
+		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(null);
+		PayPrintGeneralOrderResponse resp = new PayPrintGeneralOrderResponse();
+		resp.setGeneralOrderPageUrl(generalOrderResp.getPayUrl());
+		return resp;
+	}
+	
+	private GeneralOrderHandler getSiyinPrintGeneralOrderHandler() {
+		return PlatformContextNoWarnning.getComponent(GeneralOrderHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE);
+	}
+
 	private Long getOrderPayeeAccount(PayPrintOrderCommandV2 cmd) {
 		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
 				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -734,9 +750,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
     private String getBusinessPayerParams(PayPrintOrderCommandV2 cmd) {
 
-
         Long businessPayerId = UserContext.currentUserId();
-
 
         UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
         String buyerPhone = null;

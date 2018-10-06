@@ -491,4 +491,16 @@ public class SiYinPrintController extends ControllerBase {
 		siyinPrintService.mfpLogNotificationV2(cmd,response);
 	}
 	
+	/**
+	 * <b>URL: /siyinprint/payPrintGeneralOrder</b>
+	 * <p>统一订单支付</p>
+	 */
+	@RequestMapping("payPrintGeneralOrder")
+	@RestReturn(value=PayPrintGeneralOrderResponse.class)
+	public RestResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
+		RestResponse response = new RestResponse(siyinPrintService.payPrintGeneralOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
