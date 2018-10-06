@@ -153,7 +153,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         
         return preOrderCommand;
@@ -414,7 +414,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         } 
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -508,7 +508,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         }
         
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
         getPurchaseOrderCommand.setAccountCode(accountCode);

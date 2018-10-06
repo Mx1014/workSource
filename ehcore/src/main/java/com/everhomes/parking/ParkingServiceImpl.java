@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
@@ -965,7 +966,7 @@ public class ParkingServiceImpl implements ParkingService {
 		preOrderCommand.setOrderRemark3(cmd.getOrderRemark3());
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
 		return preOrderCommand;
@@ -983,7 +984,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		// 找不到手机号则默认一个
 		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -2284,7 +2285,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 
 		CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
-		String systemId = configProvider.getValue(0, "gorder.system_id", "");
+		String systemId = configProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
 		createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();
 		createRefundOrderCommand.setAccountCode(sNamespaceId);

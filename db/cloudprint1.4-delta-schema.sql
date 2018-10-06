@@ -1,11 +1,11 @@
--- AUTHOR: 缪洲
+-- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 企业支付授权应用列表
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `general_bill_id` VARCHAR(64) NULL DEFAULT NULL COMMENT '统一账单id' ;
 
 ALTER TABLE `eh_service_modules` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
 ALTER TABLE `eh_service_module_apps` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
 
--- AUTHOR: 缪洲
+-- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 企业支付授权表
 CREATE TABLE `eh_enterprise_payment_auths` (
   `id` BIGINT NOT NULL COMMENT '主键',
@@ -46,7 +46,7 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_apply_name` VARCHAR(
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_counts` BIGINT COMMENT '商品数量';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
 
@@ -61,7 +61,7 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_apply_name` V
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_counts` BIGINT COMMENT '商品数量';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
 
