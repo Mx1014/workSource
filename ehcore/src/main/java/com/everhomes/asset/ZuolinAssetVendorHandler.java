@@ -25,6 +25,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -592,7 +593,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
     	//物业缴费V6.0（UE优化) 账单区分数据来源
-    	cmd.setSourceType(AssetSourceType.ASSET_MODULE.getSourceType());
+    	cmd.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	cmd.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());
@@ -604,7 +605,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     public ListBillsDTO createBillFromImport(CreateBillCommand cmd) {
     	//物业缴费V6.0（UE优化) 账单区分数据来源
-    	cmd.setSourceType(AssetSourceType.ASSET_MODULE.getSourceType());
+    	cmd.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	cmd.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());

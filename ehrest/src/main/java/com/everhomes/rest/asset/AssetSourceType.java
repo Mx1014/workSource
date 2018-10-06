@@ -1,5 +1,7 @@
 package com.everhomes.rest.asset;
 
+import com.everhomes.rest.common.ServiceModuleConstants;
+
 /**
  * @author created by ycx
  * @date 下午5:55:49
@@ -12,44 +14,52 @@ package com.everhomes.rest.asset;
  * <li>sourceType: 各个业务系统定义的唯一标识</li>
  * </ul>
  */
-public enum AssetSourceType {
-	ASSET_MODULE(20400L, "asset"), //物业缴费模块
-	CONTRACT_MODULE(21200L, "contract"), //合同管理模块
-	ENERGY_MODULE(49100L, "energy"), //能耗管理模块
-	PRINT_MODULE(41400L, "print");//云打印模块
+public class AssetSourceType {
+	public static final String ASSET_MODULE = "asset";
+	public static final String CONTRACT_MODULE = "contract";
+	public static final String ENERGY_MODULE = "energy";
+	public static final String PRINT_MODULE = "print";
 	
-	private Long moduleId;
-	private String sourceType;
-	
-	private AssetSourceType(Long moduleId, String sourceType) {
-		this.moduleId = moduleId;
-		this.sourceType = sourceType;
-	}
-	
-	public static AssetSourceType fromCode(Long moduleId) {
-		if (moduleId != null) {
-			for (AssetSourceType assetSourceType : AssetSourceType.values()) {
-				if (assetSourceType.getModuleId().equals(moduleId)) {
-					return assetSourceType;
+	public static enum AssetSourceTypeEnum{
+		ASSET_MODULE(ServiceModuleConstants.ASSET_MODULE, AssetSourceType.ASSET_MODULE), //物业缴费模块
+		CONTRACT_MODULE(ServiceModuleConstants.CONTRACT_MODULE, AssetSourceType.CONTRACT_MODULE), //合同管理模块
+		ENERGY_MODULE(ServiceModuleConstants.ENERGY_MODULE, AssetSourceType.ENERGY_MODULE), //能耗管理模块
+		PRINT_MODULE(ServiceModuleConstants.PRINT_MODULE, AssetSourceType.PRINT_MODULE);//云打印模块
+		
+		private Long moduleId;
+		private String sourceType;
+		
+		private AssetSourceTypeEnum(Long moduleId, String sourceType) {
+			this.moduleId = moduleId;
+			this.sourceType = sourceType;
+		}
+		
+		public static AssetSourceTypeEnum getSourceTypeByModuleId(Long moduleId) {
+			if (moduleId != null) {
+				for (AssetSourceTypeEnum assetSourceTypeEnum : AssetSourceTypeEnum.values()) {
+					if (assetSourceTypeEnum.getModuleId().equals(moduleId)) {
+						return assetSourceTypeEnum;
+					}
 				}
 			}
+			return null;
 		}
-		return null;
-	}
 
-	public Long getModuleId() {
-		return moduleId;
-	}
+		public Long getModuleId() {
+			return moduleId;
+		}
 
-	public void setModuleId(Long moduleId) {
-		this.moduleId = moduleId;
-	}
+		public void setModuleId(Long moduleId) {
+			this.moduleId = moduleId;
+		}
 
-	public String getSourceType() {
-		return sourceType;
-	}
+		public String getSourceType() {
+			return sourceType;
+		}
 
-	public void setSourceType(String sourceType) {
-		this.sourceType = sourceType;
+		public void setSourceType(String sourceType) {
+			this.sourceType = sourceType;
+		}
 	}
+	
 }

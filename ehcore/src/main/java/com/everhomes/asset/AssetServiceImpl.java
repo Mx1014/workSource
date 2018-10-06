@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1292,7 +1294,7 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
                 		//物业缴费V6.0（UE优化) 账单区分数据来源
-                		item.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+                		item.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1300,7 +1302,7 @@ public class AssetServiceImpl implements AssetService {
                     	item.setCanDelete((byte)0);
                     	item.setCanModify((byte)0);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		item.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+                		item.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1421,7 +1423,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                     //物业缴费V6.0（UE优化) 账单区分数据来源
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
-                		newBill.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+                		newBill.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -1429,7 +1431,7 @@ public class AssetServiceImpl implements AssetService {
                     	newBill.setCanDelete((byte)1);
                     	newBill.setCanModify((byte)1);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		newBill.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+                		newBill.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -5765,7 +5767,7 @@ public class AssetServiceImpl implements AssetService {
 
 	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         //1、判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
         AssetMapContractConfig config = new AssetMapContractConfig();
     	config.setContractOriginId(cmd.getContractOriginId());
     	config.setContractChangeFlag(cmd.getContractChangeFlag());
@@ -5784,7 +5786,7 @@ public class AssetServiceImpl implements AssetService {
         }
         //2、判断缴费是否已经存在关联能耗的记录
         cmd.setSourceId(null);
-        cmd.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
         AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
         energyConfig.setEnergyFlag(cmd.getEnergyFlag());
     	cmd.setConfig(energyConfig.toString());
@@ -6006,8 +6008,8 @@ public class AssetServiceImpl implements AssetService {
 	 * @param sourceType
 	 * @return
 	 */
-	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType){
-		AssetGeneralBillHandler handler = null;
+	public GeneralBillHandler getAssetGeneralBillHandler(String sourceType){
+		GeneralBillHandler handler = null;
 
 //        if(sourceType != null) {
 //        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
