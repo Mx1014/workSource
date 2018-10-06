@@ -7261,7 +7261,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
     	GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
-        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://biz-comtest.zuolin.com/prmt");
+        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
 		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
 		String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
