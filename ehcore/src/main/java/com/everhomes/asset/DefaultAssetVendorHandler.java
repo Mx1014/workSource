@@ -576,7 +576,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
             ListBillDetailResponse billDetail = listBillDetail(ncmd);
             //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
             NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
-            notifyBillHasBeenPaidCommand.setOrderNum(billDetail.getMerchantOrderId());
+            notifyBillHasBeenPaidCommand.setMerchantOrderId(billDetail.getMerchantOrderId());
             orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
         }
     }
