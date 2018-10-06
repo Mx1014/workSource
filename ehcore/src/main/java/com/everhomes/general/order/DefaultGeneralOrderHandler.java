@@ -13,7 +13,7 @@ import com.everhomes.rest.promotion.order.controller.CreateMerchantOrderRestResp
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
-public abstract class DefaultGeneralOrderHandler implements GeneralOrderHandler{
+public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGeneralOrderHandler.class);
 	
     @Autowired

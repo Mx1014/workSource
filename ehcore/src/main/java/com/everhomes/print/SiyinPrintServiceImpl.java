@@ -80,7 +80,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.general.order.GeneralOrderHandler;
+import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
@@ -632,7 +632,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //			return null;
 //		}
 		cmd.setClientAppName("Android");
-		GeneralOrderHandler handler = getSiyinPrintGeneralOrderHandler();
+		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
 		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(null);
 		
 		//保存参数
@@ -645,8 +645,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return resp;
 	}
 	
-	private GeneralOrderHandler getSiyinPrintGeneralOrderHandler() {
-		return PlatformContextNoWarnning.getComponent(GeneralOrderHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE);
+	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
+		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE);
 	}
 
 	private Long getOrderPayeeAccount(PayPrintOrderCommandV2 cmd) {

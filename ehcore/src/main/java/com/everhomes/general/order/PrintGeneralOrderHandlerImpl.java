@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.goods.GoodsService;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.print.SiyinPrintOrder;
@@ -36,7 +37,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 
-@Component(GeneralOrderHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) 
+@Component(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) 
 public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintGeneralOrderHandlerImpl.class);
@@ -90,6 +91,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		good.setGoodDescription("这里填写商品描述");// 商品描述
 		good.setCounts(goodCount);
 		good.setPrice(trueDecimalAmount);
+		good.setTotalPrice(trueDecimalAmount);
 		goods.add(good);
 		preOrderCommand.setGoods(goods);
 		preOrderCommand.setAmount(totalAmount);
