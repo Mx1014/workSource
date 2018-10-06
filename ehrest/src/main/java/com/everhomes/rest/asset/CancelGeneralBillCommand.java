@@ -11,7 +11,7 @@ import java.util.List;
  * <li>sourceType:各个业务系统定义的唯一标识</li>
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>billIdList:统一账单id列表</li>
- * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
+ * <li>merchantOrderId:统一订单定义的唯一标识</li>
  *</ul>
  */
 public class CancelGeneralBillCommand {
@@ -21,7 +21,7 @@ public class CancelGeneralBillCommand {
     private String sourceType;
     private Long sourceId;
     private List<Long> billIdList;
-    private String thirdBillId;
+    private String merchantOrderId;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -53,16 +53,16 @@ public class CancelGeneralBillCommand {
 	public void setSourceId(Long sourceId) {
 		this.sourceId = sourceId;
 	}
-	public String getThirdBillId() {
-		return thirdBillId;
-	}
-	public void setThirdBillId(String thirdBillId) {
-		this.thirdBillId = thirdBillId;
-	}
 	public List<Long> getBillIdList() {
 		return billIdList;
 	}
 	public void setBillIdList(List<Long> billIdList) {
 		this.billIdList = billIdList;
+	}
+	public String getMerchantOrderId() {
+		return merchantOrderId;
+	}
+	public void setMerchantOrderId(String merchantOrderId) {
+		this.merchantOrderId = merchantOrderId;
 	}
 }

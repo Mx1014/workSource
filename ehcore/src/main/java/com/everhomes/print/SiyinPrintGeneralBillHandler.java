@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetGeneralBillHandler;
+import com.everhomes.asset.GeneralBillHandler;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.print.PrintOrderStatusType;

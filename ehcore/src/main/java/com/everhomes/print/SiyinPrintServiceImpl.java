@@ -66,6 +66,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.BusBridgeProvider;
@@ -738,7 +739,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         
 //        preOrderCommand.
@@ -760,7 +761,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();

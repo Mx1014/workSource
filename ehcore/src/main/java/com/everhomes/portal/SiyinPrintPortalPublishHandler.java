@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
 import com.everhomes.rest.asset.AssetSourceType;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.SiyinPrintInstanceConfig;
@@ -50,7 +51,7 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 
 		AssetModuleAppMapping cmd = new AssetModuleAppMapping();
 		cmd.setNamespaceId(namespaceId);
-		cmd.setSourceType(AssetSourceType.PRINT_MODULE.getSourceType());
+		cmd.setSourceType(AssetSourceTypeEnum.PRINT_MODULE.getSourceType());
 		cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
 		cmd.setAssetCategoryId(config.getChargeAppToken());
 		cmd.setBillGroupId(config.getBillGroupToken());

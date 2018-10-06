@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -127,6 +129,7 @@ import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
@@ -1291,7 +1294,7 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
                 		//物业缴费V6.0（UE优化) 账单区分数据来源
-                		item.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+                		item.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1299,7 +1302,7 @@ public class AssetServiceImpl implements AssetService {
                     	item.setCanDelete((byte)0);
                     	item.setCanModify((byte)0);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		item.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+                		item.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
                 		item.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	item.setSourceName(localeString.getText());
@@ -1420,7 +1423,7 @@ public class AssetServiceImpl implements AssetService {
                     }
                     //物业缴费V6.0（UE优化) 账单区分数据来源
                 	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
-                		newBill.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+                		newBill.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -1428,7 +1431,7 @@ public class AssetServiceImpl implements AssetService {
                     	newBill.setCanDelete((byte)1);
                     	newBill.setCanModify((byte)1);
                 	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
-                		newBill.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+                		newBill.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
                 		newBill.setSourceId(cmd.getCategoryId());
                     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
                     	newBill.setSourceName(localeString.getText());
@@ -5764,7 +5767,7 @@ public class AssetServiceImpl implements AssetService {
 
 	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         //1、判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetSourceType.CONTRACT_MODULE.getSourceType());
+        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
         AssetMapContractConfig config = new AssetMapContractConfig();
     	config.setContractOriginId(cmd.getContractOriginId());
     	config.setContractChangeFlag(cmd.getContractChangeFlag());
@@ -5783,7 +5786,7 @@ public class AssetServiceImpl implements AssetService {
         }
         //2、判断缴费是否已经存在关联能耗的记录
         cmd.setSourceId(null);
-        cmd.setSourceType(AssetSourceType.ENERGY_MODULE.getSourceType());
+        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
         AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
         energyConfig.setEnergyFlag(cmd.getEnergyFlag());
     	cmd.setConfig(energyConfig.toString());
@@ -5887,11 +5890,11 @@ public class AssetServiceImpl implements AssetService {
 			Long billGroupId = mapping.getBillGroupId();
 			Long charingItemId = mapping.getChargingItemId();
 			//统一账单不支持重复记账
-			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getThirdBillId());
+			PaymentBills paymentBill = assetProvider.findPaymentBill(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getSourceId(), cmd.getMerchantOrderId());
 			if(paymentBill != null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 	                    "This bill is exist, namespaceId={" + cmd.getNamespaceId() + "}, sourceType={" + cmd.getSourceType() + "}, "
-	                    		+ "sourceId={" + cmd.getSourceId() + "}, thirdBillId={" + cmd.getThirdBillId() + "}");
+	                    		+ "sourceId={" + cmd.getSourceId() + "}, merchantOrderId={" + cmd.getMerchantOrderId() + "}");
 			}
 			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 			dtos.add(dto);
@@ -5909,6 +5912,9 @@ public class AssetServiceImpl implements AssetService {
 		//组装创建账单请求
 		CreateBillCommand createBillCommand = ConvertHelper.convert(cmd, CreateBillCommand.class);
 		createBillCommand.setCategoryId(categoryId);
+		//物业缴费V7.1： 统一账单默认没有删除和修改权限
+		createBillCommand.setCanDelete((byte)0);
+		createBillCommand.setCanModify((byte)0);
 
 		BillGroupDTO billGroupDTO = new BillGroupDTO();
 		billGroupDTO.setBillGroupId(billGroupId);
@@ -5916,18 +5922,35 @@ public class AssetServiceImpl implements AssetService {
 
 		//1、新增费项
 		List<BillItemDTO> billItemDTOList = new ArrayList<>();
-		BillItemDTO billItemDTO = new BillItemDTO();
-		billItemDTO.setBillItemId(charingItemId);
-		billItemDTO.setBillItemName(billItemName);
-		BigDecimal amountReceivable = cmd.getAmountReceivable();
-		BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
-		BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
-		//税额=含税金额-不含税金额       税额=1000-909.09=90.91
-		BigDecimal taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
-		billItemDTO.setAmountReceivable(amountReceivable);
-		billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
-		billItemDTO.setTaxAmount(taxAmount);
-		billItemDTOList.add(billItemDTO);
+		for(GoodDTO goodDTO : cmd.getGoodDTOList()) {
+			BillItemDTO billItemDTO = new BillItemDTO();
+			billItemDTO.setBillItemId(charingItemId);
+			billItemDTO.setBillItemName(billItemName);
+			BigDecimal amountReceivable = goodDTO.getTotalPrice();
+			BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
+			BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
+			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
+			BigDecimal taxAmount = amountReceivable.subtract(amountReceivableWithoutTax);
+			billItemDTO.setAmountReceivable(amountReceivable);
+			billItemDTO.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+			billItemDTO.setTaxAmount(taxAmount);
+			//组装商品信息
+			billItemDTO.setGoodsServeType(goodDTO.getServeType());
+			billItemDTO.setGoodsNamespace(goodDTO.getNamespace());
+			billItemDTO.setGoodsTag1(goodDTO.getTag1());
+			billItemDTO.setGoodsTag2(goodDTO.getTag2());
+			billItemDTO.setGoodsTag3(goodDTO.getTag3());
+			billItemDTO.setGoodsTag4(goodDTO.getTag4());
+			billItemDTO.setGoodsTag5(goodDTO.getTag5());
+			billItemDTO.setGoodsServeApplyName(goodDTO.getServeApplyName());
+			billItemDTO.setGoodsTag(goodDTO.getGoodTag());
+			billItemDTO.setGoodsName(goodDTO.getGoodName());
+			billItemDTO.setGoodsDescription(goodDTO.getGoodDescription());
+			billItemDTO.setGoodsCounts(goodDTO.getCounts());
+			billItemDTO.setGoodsPrice(goodDTO.getPrice());
+			billItemDTO.setGoodsTotalPrice(goodDTO.getTotalPrice());
+			billItemDTOList.add(billItemDTO);
+		}
 		
 		//2、新增优惠/减免金额
 		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
@@ -5959,15 +5982,15 @@ public class AssetServiceImpl implements AssetService {
 		for(Long billId : billIdList) {
 			PaymentBills paymentBill = assetProvider.findPaymentBillById(billId);
 			if(null != paymentBill) {
-				if(null != cmd.getThirdBillId()) {
-					if(!cmd.getThirdBillId().equals(paymentBill.getThirdBillId())) {
+				if(null != cmd.getMerchantOrderId()) {
+					if(!cmd.getMerchantOrderId().equals(paymentBill.getMerchantOrderId())) {
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-			                    "thirdBillId valid error, thirdBillId={" + cmd.getThirdBillId() + "}, "
-			                    		+ "thirdBillIdFindByBillId={" + paymentBill.getThirdBillId() + "}");
+			                    "merchantOrderId valid error, merchantOrderId={" + cmd.getMerchantOrderId() + "}, "
+			                    		+ "merchantOrderIdFindByBillId={" + paymentBill.getMerchantOrderId() + "}");
 					}
 				}else {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-		                    "thirdBillId can not be null");
+		                    "merchantOrderId can not be null");
 				}
 			}else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -5985,8 +6008,8 @@ public class AssetServiceImpl implements AssetService {
 	 * @param sourceType
 	 * @return
 	 */
-	public AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType){
-		AssetGeneralBillHandler handler = null;
+	public GeneralBillHandler getAssetGeneralBillHandler(String sourceType){
+		GeneralBillHandler handler = null;
 
 //        if(sourceType != null) {
 //        	String handlerPrefix = AssetGeneralBillHandler.ASSET_GENERALBILL_PREFIX;
