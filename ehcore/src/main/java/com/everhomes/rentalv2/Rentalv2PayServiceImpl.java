@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -363,7 +364,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
 
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode("NS"+record.getNamespaceId().toString());
         createRefundOrderCommand.setBusinessOrderNumber(record.getBizOrderNum());
@@ -502,7 +503,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
         return preOrderCommand;
@@ -520,7 +521,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();

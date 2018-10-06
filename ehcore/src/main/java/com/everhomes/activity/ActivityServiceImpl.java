@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community_form.CommunityFormProvider;
 import com.everhomes.community_form.CommunityFormType;
@@ -1361,7 +1362,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         createPurchaseOrderCommand.setOrderRemark3(null);
         createPurchaseOrderCommand.setOrderRemark4(null);
         createPurchaseOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         return createPurchaseOrderCommand;
     }
@@ -1417,7 +1418,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -3064,7 +3065,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 
     private CreateRefundOrderCommand prepareRefundCommand(ActivityRoster roster){
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode(generateAccountCode());
         createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
@@ -7316,7 +7317,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
         }
 
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         getPurchaseOrderCommand.setAccountCode(generateAccountCode());
         getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());

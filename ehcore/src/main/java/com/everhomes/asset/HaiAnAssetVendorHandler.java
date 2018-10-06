@@ -113,7 +113,7 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
         }
         
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
         getPurchaseOrderCommand.setAccountCode(accountCode);
