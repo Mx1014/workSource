@@ -30,11 +30,11 @@ ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
 ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
 
--- REMARK：  统一账单加入的：统一订单定义的唯一标识
+-- REMARK：物业缴费V7.1（企业记账流程打通）：统一订单定义的唯一标识
 ALTER TABLE `eh_payment_bills` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
 
--- REMARK：  增加业务对应的相关信息
+-- REMARK：  物业缴费V7.1（企业记账流程打通）:增加业务对应的相关信息
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
 ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
@@ -64,5 +64,14 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_description` VARCHA
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
+
+-- REMARK： 物业缴费V7.1（企业记账流程打通）: 增加下单人名称
+ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '下单人名称' after `consume_user_id`;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '下单人名称' after `consume_user_id`;
+
+
+
+
+
 
 
