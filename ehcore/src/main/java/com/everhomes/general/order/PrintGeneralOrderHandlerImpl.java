@@ -144,7 +144,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	    	createBillInfo.setOwnerId(cmd.getOwnerId()); 
 	    	createBillInfo.setSourceType(AssetSourceType.PRINT_MODULE);
 	    	createBillInfo.setSourceId(ServiceModuleConstants.PRINT_MODULE);
-	    	createBillInfo.setThirdBillId(cmd.getOrderId()+"");
+//	    	createBillInfo.setThirdBillId(cmd.getOrderId()+"");
 	    	createBillInfo.setSourceName("云打印订单");
 	    	createBillInfo.setConsumeUserId(UserContext.currentUserId());
 	    	createBillInfo.setTargetType(AssetTargetType.ORGANIZATION.getCode());
