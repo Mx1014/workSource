@@ -18,6 +18,7 @@ public class PayPrintGeneralOrderCommand {
 	private String ownerType;
 	private Long ownerId;
 	private Long organizationId;
+	private String clientAppName;
 	
 	@Override
 	public String toString() {
@@ -54,5 +55,13 @@ public class PayPrintGeneralOrderCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
 	}
 }

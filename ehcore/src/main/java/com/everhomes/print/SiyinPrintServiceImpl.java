@@ -750,9 +750,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
     private String getBusinessPayerParams(PayPrintOrderCommandV2 cmd) {
 
-
         Long businessPayerId = UserContext.currentUserId();
-
 
         UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
         String buyerPhone = null;
