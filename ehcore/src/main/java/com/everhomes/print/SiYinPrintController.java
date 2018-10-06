@@ -18,6 +18,8 @@ import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.print.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -303,7 +305,7 @@ public class SiYinPrintController extends ControllerBase {
 	@RequestMapping("notifySiyinprintOrderPaymentV2")
 	@RestReturn(value=String.class)
 	@RequireAuthentication(false)
-	public RestResponse notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+	public RestResponse notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 		siyinPrintService.notifySiyinprintOrderPaymentV2(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

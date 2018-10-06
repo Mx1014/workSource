@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType : 传community</li>
  * <li>ownerId : 项目id</li>
  * <li>organizationId : 用户公司id</li>
+ * <li>clientAppName : app名称</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月6日

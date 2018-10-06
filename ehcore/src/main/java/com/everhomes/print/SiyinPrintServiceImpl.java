@@ -41,6 +41,7 @@ import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResp
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
@@ -613,8 +614,32 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Override
 	public PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
+//		//检查订单id是否存在，是否已经是  已支付状态
+//		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+//
+//		//检查订单是否被锁定
+//		//没有被锁定的订单，锁定他
+//		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
+//		if(lockType == PrintOrderLockType.UNLOCKED){
+//			order = lockOrder(cmd.getOrderId());
+//		}
+//
+//		//锁定了，金额为0，设置为已支付
+//		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+//			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+//			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+//			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+//			return null;
+//		}
+		cmd.setClientAppName("Android");
 		GeneralOrderHandler handler = getSiyinPrintGeneralOrderHandler();
 		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(null);
+		
+		//保存参数
+//        order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+//		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		
+		//返回参数
 		PayPrintGeneralOrderResponse resp = new PayPrintGeneralOrderResponse();
 		resp.setGeneralOrderPageUrl(generalOrderResp.getPayUrl());
 		return resp;
@@ -2029,13 +2054,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 
 	@Override
-	public void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+	public void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 			//检查签名
 			if(!PayUtil.verifyCallbackSignature(cmd)){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"sign verify faild");
 			}
-
+			
 			// * RAW(0)：
 			// * SUCCESS(1)：支付成功
 			// * PENDING(2)：挂起
@@ -2057,15 +2082,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			if(cmd.getOrderType() == 3) {
 				
 				//根据统一订单生成的支付编号获得记录
-				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByBizOrderNum(cmd.getBizOrderNum());
+				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId()+"");
 				if(order == null){
-					LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
+					LOGGER.error("the order {} not found.",cmd.getMerchantOrderId());
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"the order not found.");
 				}
 				
 				BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
-				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount);
+				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
+				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
 					return;
@@ -2088,11 +2114,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 	}
 
-	public boolean checkNotifyPrintOrderAmount(SiyinPrintOrder order, BigDecimal payAmount) {
+	public boolean checkNotifyPrintOrderAmount(SiyinPrintOrder order, BigDecimal payAmount, BigDecimal couponAmount) {
 		//加一个开关，方便在beta环境测试
 		boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 		if (!flag) {
-			if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
+			if (0 != order.getOrderTotalFee().compareTo(payAmount.subtract(couponAmount))) {
 				return false;
 			}
 		}

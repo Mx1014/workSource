@@ -16,11 +16,17 @@ import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.goods.GoodsService;
 import com.everhomes.pay.order.SourceType;
+import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.print.SiyinPrintServiceImpl;
+import com.everhomes.rest.asset.AssetSourceType;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.print.PayPrintGeneralOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderCommand;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
@@ -30,7 +36,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 
-@Component(GeneralOrderHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) //要与OrderTypeEnum的co一致
+@Component(GeneralOrderHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) 
 public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintGeneralOrderHandlerImpl.class);
@@ -49,13 +55,20 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 
 	@Override
 	CreateMerchantOrderCommand buildOrderCommand(Object cmd) {
-		PayPrintGeneralOrderCommand cmd2 = (PayPrintGeneralOrderCommand) cmd;
+		PayPrintGeneralOrderCommand cmd2 = new PayPrintGeneralOrderCommand();
 		Long PaymentPayeeId = 100004L;
 		Long totalAmount = 1L;
+		BigDecimal trueDecimalAmount = new BigDecimal(totalAmount);
 		Integer goodCount = 1;
 		Long organizationId = 1023080L;
 		Long ownerId = 240111044331058733L;
-		String clientAppName = "当前clientName";
+		Long orderId = 1330L;
+		String clientAppName = "Android";
+		cmd2.setClientAppName(clientAppName);
+		cmd2.setOrderId(orderId);
+		cmd2.setOrganizationId(organizationId);
+		cmd2.setOwnerType("community");
+		cmd2.setOwnerId(ownerId);
 		
 		Long appId = 66348L;
 		CreateMerchantOrderCommand preOrderCommand = new CreateMerchantOrderCommand();
@@ -76,14 +89,14 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		good.setGoodName("这里填写商品名称");// 商品名称
 		good.setGoodDescription("这里填写商品描述");// 商品描述
 		good.setCounts(goodCount);
-		good.setPrice(new BigDecimal((totalAmount * 1.0) / 100));
+		good.setPrice(trueDecimalAmount);
 		goods.add(good);
 		preOrderCommand.setGoods(goods);
 		preOrderCommand.setAmount(totalAmount);
 		String accountCode = SiyinPrintServiceImpl.BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
 		preOrderCommand.setAccountCode(accountCode);
 		preOrderCommand.setClientAppName(clientAppName);
-		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getV2code());
+		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 		// 移到统一订单系统完成
 		// String BizOrderNum = getOrderNum(orderId,
 		// OrderType.OrderTypeEnum.WUYE_CODE.getPycode());
@@ -116,8 +129,28 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID,
 				"");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+		
+		//填写企业支付
+		CreateGeneralBillInfo createBillInfo = new CreateGeneralBillInfo();
+		createBillInfo.setAmountReceivable(trueDecimalAmount);
+		createGeneralBill(cmd2, createBillInfo);
+		preOrderCommand.setCreateBillInfo(createBillInfo);
 		return preOrderCommand;
 	}
+	
+	  private void createGeneralBill(PayPrintGeneralOrderCommand cmd, CreateGeneralBillInfo createBillInfo) {
+	    	createBillInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
+	    	createBillInfo.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+	    	createBillInfo.setOwnerId(cmd.getOwnerId()); 
+	    	createBillInfo.setSourceType(AssetSourceType.PRINT_MODULE);
+	    	createBillInfo.setSourceId(ServiceModuleConstants.PRINT_MODULE);
+	    	createBillInfo.setThirdBillId(cmd.getOrderId()+"");
+	    	createBillInfo.setSourceName("云打印订单");
+	    	createBillInfo.setConsumeUserId(UserContext.currentUserId());
+	    	createBillInfo.setTargetType(AssetTargetType.ORGANIZATION.getCode());
+	    	createBillInfo.setTargetId(cmd.getOrganizationId());
+//	    	createBillInfo.setAmountReceivable();
+		}
 
 	@Override
 	public String getHandlerName() {

@@ -25,7 +25,7 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
 	
-	SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum);
+	SiyinPrintOrder findSiyinPrintOrderByGeneralOrderId(String GeneralOrderId);
 
 	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 
