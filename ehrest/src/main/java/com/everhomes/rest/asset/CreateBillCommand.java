@@ -30,7 +30,8 @@ import com.everhomes.util.StringHelper;
  * <li>sourceType:各个业务系统定义的唯一标识</li>
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
- * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>consumeUserId:记账人ID</li>
+ * <li>consumeUserName:记账人名称</li>
  * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
  * <li>merchantOrderId:统一订单定义的唯一标识</li>
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
@@ -64,6 +65,7 @@ public class CreateBillCommand {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    private String consumeUserName;
     private String thirdBillId;
     //物业缴费V6.0 账单、费项表增加是否删除状态字段
     private Byte deleteFlag;
@@ -326,6 +328,14 @@ public class CreateBillCommand {
 
 	public void setMerchantOrderId(String merchantOrderId) {
 		this.merchantOrderId = merchantOrderId;
+	}
+
+	public String getConsumeUserName() {
+		return consumeUserName;
+	}
+
+	public void setConsumeUserName(String consumeUserName) {
+		this.consumeUserName = consumeUserName;
 	}
 
 }

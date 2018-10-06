@@ -268,7 +268,7 @@ public interface AssetService {
 	 */
 	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
 
-	GeneralBillHandler getAssetGeneralBillHandler(String sourceType);
+	GeneralBillHandler getGeneralBillHandler(String sourceType);
 
 	void createChargingItem(CreateChargingItemCommand cmd);
 	

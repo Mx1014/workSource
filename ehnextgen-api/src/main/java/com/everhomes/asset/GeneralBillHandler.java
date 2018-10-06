@@ -2,7 +2,7 @@ package com.everhomes.asset;
 
 import java.util.List;
 
-import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 
 /**
  * @author created by ycx
@@ -13,9 +13,10 @@ public interface GeneralBillHandler {
     
     /**
      * 获取统一账单的映射关系
-     * @param billDetail
+     * @param cmd
+     * @return
      */
-    List<AssetModuleAppMapping> findAssetModuleAppMapping(ListBillDetailResponse billDetail);
+    List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
     
     
     

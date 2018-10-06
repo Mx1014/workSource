@@ -58,17 +58,14 @@ ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag3` VARCHAR(1024)
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
 ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
 
--- REMARK： 物业缴费V7.1（企业记账流程打通）: 增加下单人名称
-ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '下单人名称' after `consume_user_id`;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '下单人名称' after `consume_user_id`;
+-- REMARK： 物业缴费V7.1（企业记账流程打通）: 增加记账人名称
+ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
 
+-- REMARK： 物业缴费V7.1（企业记账流程打通）: 修改consume_user_id注释为“记账人ID”
+ALTER TABLE `eh_payment_bills` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
 
 
 
