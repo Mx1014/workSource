@@ -277,4 +277,5 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
+
 }

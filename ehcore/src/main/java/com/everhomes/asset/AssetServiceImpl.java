@@ -6215,12 +6215,12 @@ public class AssetServiceImpl implements AssetService {
             //导出增加费项列
             List<BillItemDTO> billItemDTOs = new ArrayList<>();
             List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
-            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
+            ListBillDetailResponse listBillDetailResponse = new ListBillDetailResponse();
             if(dto.getBillId() != null) {
-    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
-    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
-    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
-    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
+            	listBillDetailResponse = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
+    			if(listBillDetailResponse != null && listBillDetailResponse.getBillGroupDTO() != null) {
+    				billItemDTOs = listBillDetailResponse.getBillGroupDTO().getBillItemDTOList();
+    				exemptionItemDTOs = listBillDetailResponse.getBillGroupDTO().getExemptionItemDTOList();
     			}
     		}
             for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
@@ -6278,9 +6278,9 @@ public class AssetServiceImpl implements AssetService {
             detail.put("addresses", dto.getAddresses());
             detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
             //导出增加减免（总和）、减免备注、增收（总和）、增收备注
-            if(listBillDetailVO != null) {
-            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
-            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
+            if(listBillDetailResponse != null) {
+            	detail.put("amountExemption", listBillDetailResponse.getAmoutExemption() != null ? listBillDetailResponse.getAmoutExemption().toString() : "");
+            	detail.put("amountSupplement", listBillDetailResponse.getAmountSupplement() != null ? listBillDetailResponse.getAmountSupplement().toString() : "");
             }
             StringBuffer remarkExemption = new StringBuffer();//减免备注
             StringBuffer remarkSupplement = new StringBuffer();//增收备注

@@ -49,6 +49,7 @@ import java.math.BigDecimal;
  *</ul>
  */
 public class BillItemDTO {
+	private Long billId;
     private Long billItemId;
     private String billItemName;
     private BigDecimal amountReceivable;
@@ -406,5 +407,13 @@ public class BillItemDTO {
 
 	public void setGoodsTotalPrice(BigDecimal goodsTotalPrice) {
 		this.goodsTotalPrice = goodsTotalPrice;
+	}
+
+	public Long getBillId() {
+		return billId;
+	}
+
+	public void setBillId(Long billId) {
+		this.billId = billId;
 	}
 }

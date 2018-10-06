@@ -10,6 +10,7 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.GeneralBillHandler;
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.AssetSourceType;
+import com.everhomes.rest.asset.BillItemDTO;
 
 /**
  * @author created by ycx
@@ -23,6 +24,10 @@ public class PrintGeneralBillHandler implements GeneralBillHandler{
 	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
 		List<AssetModuleAppMapping> dtos = assetProvider.findAssetModuleAppMapping(cmd);
 		return dtos;
+	}
+
+	public String getPaymentExtendInfo(BillItemDTO billItemDTO) {
+		return billItemDTO.getGoodsServeApplyName();
 	}
 
 }
