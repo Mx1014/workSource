@@ -1516,7 +1516,7 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/createGeneralBill</b>
 	 */
 	@RequestMapping("createGeneralBill")
-	@RestReturn(value = ListGeneralBillsDTO.class, collection = false)
+	@RestReturn(value = ListGeneralBillsDTO.class, collection = true)
 	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
 		List<ListGeneralBillsDTO> dtos = assetService.createGeneralBill(cmd);
 		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
