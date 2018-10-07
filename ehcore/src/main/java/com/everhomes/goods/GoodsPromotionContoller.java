@@ -10,7 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.goods.GetGoodListCommand;
+import com.everhomes.rest.goods.*;
 import com.everhomes.rest.promotion.order.GoodDTO;
 
 @RestController
@@ -24,6 +24,17 @@ public class GoodsPromotionContoller  extends ControllerBase {
 	 @RestReturn(value=GoodDTO.class,collection = true)
 	 public RestResponse getGoodList(GetGoodListCommand cmd) {
 		 List<GoodDTO> dtos = goodsServce.getGoodList(cmd);
+	     RestResponse response = new RestResponse(dtos);
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 
+	 @RequestMapping("getServiceGoods")
+	 @RestReturn(value=GetServiceGoodResponse.class)
+	 public RestResponse getServiceGoods(GetServiceGoodCommand cmd) {
+		 GetServiceGoodResponse dtos = goodsServce.getServiceGoodList(cmd);
 	     RestResponse response = new RestResponse(dtos);
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");

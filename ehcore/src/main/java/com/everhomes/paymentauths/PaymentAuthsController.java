@@ -7,6 +7,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.paymentauths.PaymentAuthsService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.paymentauths.*;
+import com.everhomes.util.RequireAuthentication;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ public class PaymentAuthsController extends ControllerBase {
 	 */
 	@RequestMapping("checkUserAuths")
 	@RestReturn(value=CheckUserAuthsResponse.class)
+	@RequireAuthentication(value=false)
 	public RestResponse checkUserAuths(CheckUserAuthsCommand cmd) {
 		CheckUserAuthsResponse res = paymentAuthsService.checkUserAuths(cmd);
 		RestResponse response =  new RestResponse(res);
