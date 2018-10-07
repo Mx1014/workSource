@@ -68,6 +68,9 @@ ALTER TABLE `eh_payment_bills` modify COLUMN `consume_user_id` BIGINT COMMENT '�
 ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
 
 
+-- AUTHOR: 黄明波 20181007
+-- REMARK： 云打印 添加发票标识 
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
 
 
 

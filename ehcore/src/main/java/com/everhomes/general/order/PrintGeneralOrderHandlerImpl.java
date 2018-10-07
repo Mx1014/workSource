@@ -18,13 +18,16 @@ import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.goods.GoodsService;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.print.SiyinPrintServiceImpl;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.print.PayPrintGeneralOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
@@ -35,6 +38,7 @@ import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
 @Component(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) 
@@ -49,6 +53,10 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	UserProvider userProvider;
 	
 	@Autowired
+	SiyinPrintOrderProvider siyinPrintOrderProvider;
+	
+	
+	@Autowired
 	private ConfigurationProvider configProvider;
 	
     @Value("${server.contextPath:}")
@@ -56,27 +64,18 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 
 	@Override
 	CreateMerchantOrderCommand buildOrderCommand(Object cmd) {
-		PayPrintGeneralOrderCommand cmd2 = new PayPrintGeneralOrderCommand();
+		PayPrintGeneralOrderCommand cmd2 = (PayPrintGeneralOrderCommand)cmd;
 		Long PaymentPayeeId = 100004L;
 		Long totalAmount = 1L;
 		BigDecimal trueDecimalAmount = new BigDecimal(totalAmount);
 		Integer goodCount = 1;
-		Long organizationId = 1023080L;
-		Long ownerId = 240111044331058733L;
-		Long orderId = 1330L;
-		String clientAppName = "Android";
-		cmd2.setClientAppName(clientAppName);
-		cmd2.setOrderId(orderId);
-		cmd2.setOrganizationId(organizationId);
-		cmd2.setOwnerType("community");
-		cmd2.setOwnerId(ownerId);
 		
 		Long appId = 66348L;
 		CreateMerchantOrderCommand preOrderCommand = new CreateMerchantOrderCommand();
 		preOrderCommand.setPaymentMerchantId(PaymentPayeeId);
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
-		payerInfo.setOrganizationId(organizationId); // 左邻公司
+		payerInfo.setOrganizationId(cmd2.getOrganizationId()); // 左邻公司
 		payerInfo.setUserId(UserContext.currentUserId());
 		payerInfo.setAppId(appId);
 		preOrderCommand.setPayerInfo(payerInfo);
@@ -97,7 +96,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		preOrderCommand.setAmount(totalAmount);
 		String accountCode = SiyinPrintServiceImpl.BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
 		preOrderCommand.setAccountCode(accountCode);
-		preOrderCommand.setClientAppName(clientAppName);
+		preOrderCommand.setClientAppName(cmd2.getClientAppName());
 		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 		// 移到统一订单系统完成
 		// String BizOrderNum = getOrderNum(orderId,
@@ -125,7 +124,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		preOrderCommand.setSourceType(SourceType.PC.getCode());
 		preOrderCommand.setOrderRemark1(configProvider.getValue("siyinprint.pay.OrderRemark1", "云打印"));
 		// preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
-		preOrderCommand.setOrderRemark3(String.valueOf(ownerId));
+		preOrderCommand.setOrderRemark3(String.valueOf(cmd2.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
 		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID,
@@ -177,6 +176,24 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
         map.put("businessPayerPhone", buyerPhone);
         return StringHelper.toJsonString(map);
     
+	}
+
+	@Override
+	void dealInvoiceCallBack(OrderCallBackCommand cmd) {
+		
+	}
+
+	@Override
+	void dealEnterprisePayCallBack(OrderCallBackCommand cmd) {
+		
+		SiyinPrintOrder order = siyinPrintOrderProvider
+				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
+		if (null == order) {
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+		}
+		
+		//TODO 更新支付状态
+		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	}
 
 }

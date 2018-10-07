@@ -614,30 +614,46 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Override
 	public PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
-//		//检查订单id是否存在，是否已经是  已支付状态
-//		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
-//
-//		//检查订单是否被锁定
-//		//没有被锁定的订单，锁定他
-//		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
-//		if(lockType == PrintOrderLockType.UNLOCKED){
-//			order = lockOrder(cmd.getOrderId());
-//		}
-//
-//		//锁定了，金额为0，设置为已支付
-//		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
-//			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-//			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-//			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
-//			return null;
-//		}
-		cmd.setClientAppName("Android");
+		//检查订单id是否存在，是否已经是  已支付状态
+		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+
+		//检查订单是否被锁定
+		//没有被锁定的订单，锁定他
+		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
+		if(lockType == PrintOrderLockType.UNLOCKED){
+			order = lockOrder(cmd.getOrderId());
+		}
+
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
+		}
+		
+		if (StringUtils.isEmpty(cmd.getClientAppName())) {
+			cmd.setClientAppName("Android");
+		}
+		
+		if (null == cmd.getOrganizationId()) {
+			cmd.setOrganizationId(1023080L);
+		}
+		
+		if (StringUtils.isEmpty(cmd.getOwnerType())) {
+			cmd.setOwnerType("community");
+		}
+		
+		if (null == cmd.getOwnerId()) {
+			cmd.setOwnerId(240111044331058733L);
+		}
+		
 		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
-		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(null);
+		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(cmd);
 		
 		//保存参数
-//        order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
-//		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+        order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 		
 		//返回参数
 		PayPrintGeneralOrderResponse resp = new PayPrintGeneralOrderResponse();
@@ -2055,6 +2071,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
+		
 			//检查签名
 			if(!PayUtil.verifyCallbackSignature(cmd)){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -2094,7 +2111,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-					return;
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Order amount is not equal to payAmount");
 				}
 				
 				updatePrintOrder(order, cmd.getOrderId()+"");
