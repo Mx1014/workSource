@@ -5926,7 +5926,10 @@ public class AssetServiceImpl implements AssetService {
 			BillItemDTO billItemDTO = new BillItemDTO();
 			billItemDTO.setBillItemId(charingItemId);
 			billItemDTO.setBillItemName(billItemName);
-			BigDecimal amountReceivable = goodDTO.getTotalPrice();
+			BigDecimal amountReceivable = BigDecimal.ZERO;
+			if(goodDTO.getTotalPrice() != null) {
+				amountReceivable = goodDTO.getTotalPrice();
+			}
 			BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
 			BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
 			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
@@ -5954,14 +5957,14 @@ public class AssetServiceImpl implements AssetService {
 		
 		//2、新增优惠/减免金额
 		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
-		ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
 		BigDecimal exemptionAmount = cmd.getExemptionAmount();
 		if(exemptionAmount != null) {
+			ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
 			exemptionAmount = exemptionAmount.multiply(new BigDecimal(-1));//优惠减免金额需要转换成相应的负数
+			exemptionItemDTO.setAmount(exemptionAmount);
+			exemptionItemDTO.setRemark(cmd.getExemptionRemark());
+			exemptionItemDTOList.add(exemptionItemDTO);
 		}
-		exemptionItemDTO.setAmount(exemptionAmount);
-		exemptionItemDTO.setRemark(cmd.getExemptionRemark());
-		exemptionItemDTOList.add(exemptionItemDTO);
 		
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
 		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
