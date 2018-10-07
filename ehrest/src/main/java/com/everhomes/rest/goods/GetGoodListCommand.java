@@ -1,5 +1,6 @@
 package com.everhomes.rest.goods;
 
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,6 +19,7 @@ public class GetGoodListCommand {
 	private Long communityId;
 	private Long appOriginId;
 	private Long merchantId;
+	private ServiceModuleAppDTO moduleAppDTO;
 	
 	@Override
 	public String toString() {
@@ -49,5 +51,13 @@ public class GetGoodListCommand {
 
 	public void setAppOriginId(Long appOriginId) {
 		this.appOriginId = appOriginId;
+	}
+
+	public ServiceModuleAppDTO getModuleAppDTO() {
+		return moduleAppDTO;
+	}
+
+	public void setModuleAppDTO(ServiceModuleAppDTO moduleAppDTO) {
+		this.moduleAppDTO = moduleAppDTO;
 	}
 }

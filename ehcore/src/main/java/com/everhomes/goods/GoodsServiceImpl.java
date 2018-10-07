@@ -10,15 +10,19 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.portal.PlatformContextNoWarnning;
 import com.everhomes.print.SiyinPrintPrinter;
 import com.everhomes.print.SiyinPrintPrinterProvider;
 import com.everhomes.rest.goods.*;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class GoodsServiceImpl implements GoodsService{
@@ -35,14 +39,17 @@ public class GoodsServiceImpl implements GoodsService{
 	
 	@Override
 	public List<GoodDTO> getGoodList(GetGoodListCommand cmd) {
-		
-		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppOriginId());
-		if (null == app) {
-			return new ArrayList<>();
+		ServiceModuleAppDTO appDto = getAppInfoByAppOriginId(cmd.getAppOriginId());
+		if(null == appDto) {
+			LOGGER.error("appDto not exist GetGoodListCommand = {}", cmd.toString());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "module app not exist");
 		}
 		
-		GoodsPromotionHandler handler = getGoodsPromotionHandler(app.getModuleId());
-		return handler.getGoodList(cmd, app);
+		GoodsPromotionHandler handler = getGoodsPromotionHandler(appDto.getModuleId());
+		
+		//传递应用信息
+		cmd.setModuleAppDTO(appDto);
+		return handler.getGoodList(cmd);
 	}
 	
 	@Override
@@ -127,5 +134,15 @@ public class GoodsServiceImpl implements GoodsService{
 			break;
 		}
 		return goodScopeDTO;
+	}
+	
+	private ServiceModuleAppDTO getAppInfoByAppOriginId(Long appOriginId) {
+
+		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appOriginId);
+		if (null == app) {
+			return null;
+		}
+
+		return ConvertHelper.convert(app, ServiceModuleAppDTO.class);
 	}
 }

@@ -10,6 +10,6 @@ public interface GoodsPromotionHandler {
 
 	String GOODS_PROMOTION_HANDLER_PREFIX = "GoodsPromotionHandler-";
 
-	List<GoodDTO> getGoodList(GetGoodListCommand cmd, ServiceModuleApp app);
-	
+	List<GoodDTO> getGoodList(GetGoodListCommand cmd);
+
 }
