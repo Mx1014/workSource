@@ -10,10 +10,10 @@ import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.SiyinPrintInstanceConfig;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.PRINT_MODULE)
 public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
@@ -56,7 +56,7 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
 		cmd.setAssetCategoryId(config.getChargeAppToken());
 		cmd.setBillGroupId(config.getBillGroupToken());
 		cmd.setChargingItemId(config.getChargeItemTorken());
-		assetService.createOrUpdateAssetMapping(cmd);
+		//assetService.createOrUpdateAssetMapping(cmd);
 		LOGGER.info("saveChargeConfig:"+cmd.toString());
 	}
 

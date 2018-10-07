@@ -12,12 +12,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 
@@ -247,7 +249,7 @@ public interface AssetService {
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
-    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+    //void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
@@ -261,7 +263,7 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	//public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
@@ -277,5 +279,10 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
+
+	void createContractMapping(CreateContractMappingCommand cmd);
+
+	void createEnergyMapping(CreateEnergyMappingCommand cmd);
+	
 
 }

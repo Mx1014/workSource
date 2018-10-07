@@ -1,4 +1,4 @@
-package com.everhomes.rest.asset;
+package com.everhomes.rest.asset.modulemapping;
 
 /**
  * @author created by ycx

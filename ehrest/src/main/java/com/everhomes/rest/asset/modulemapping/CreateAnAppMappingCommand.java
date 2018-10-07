@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.rest.servicemoduleapp;
+package com.everhomes.rest.asset.modulemapping;
 
 /**
  * Created by Wentian Wang on 2018/5/24.
