@@ -34,9 +34,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -67,7 +64,6 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -90,20 +86,22 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentOrderRecord;
-import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.common.AssetMapContractConfig;
 import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -125,16 +123,10 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
@@ -149,7 +141,6 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
@@ -183,48 +174,6 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 //import com.everhomes.contract.ContractService;
 
@@ -5765,42 +5714,42 @@ public class AssetServiceImpl implements AssetService {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
 
-	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
-        //1、判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
-        AssetMapContractConfig config = new AssetMapContractConfig();
-    	config.setContractOriginId(cmd.getContractOriginId());
-    	config.setContractChangeFlag(cmd.getContractChangeFlag());
-    	cmd.setConfig(config.toString());
-        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
-        if(existAssetMapContract){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	mapping.setSourceId(cmd.getContractCategoryId());
-        	assetProvider.updateAssetMapContract(mapping);
-        }else {
-        	//如果不存在就是新增
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
-        	mapping.setSourceId(cmd.getContractCategoryId());
-        	assetProvider.insertAppMapping(mapping);
-        }
-        //2、判断缴费是否已经存在关联能耗的记录
-        cmd.setSourceId(null);
-        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
-        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
-        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
-    	cmd.setConfig(energyConfig.toString());
-        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
-        if(existAssetMapEnergy){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	assetProvider.updateAssetMapEnergy(mapping);
-        }else {
-        	//如果不存在就是新增
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
-        	assetProvider.insertAppMapping(mapping);
-        }
-    }
+//	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
+//        //1、判断缴费是否已经存在关联合同的记录
+//        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
+//        AssetMapContractConfig config = new AssetMapContractConfig();
+//    	config.setContractOriginId(cmd.getContractOriginId());
+//    	config.setContractChangeFlag(cmd.getContractChangeFlag());
+//    	cmd.setConfig(config.toString());
+//        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
+//        if(existAssetMapContract){
+//        	//如果已经存在就是更新
+//        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+//        	mapping.setSourceId(cmd.getContractCategoryId());
+//        	assetProvider.updateAssetMapContract(mapping);
+//        }else {
+//        	//如果不存在就是新增
+//        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+//        	mapping.setSourceId(cmd.getContractCategoryId());
+//        	assetProvider.insertAppMapping(mapping);
+//        }
+//        //2、判断缴费是否已经存在关联能耗的记录
+//        cmd.setSourceId(null);
+//        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
+//        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
+//        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
+//    	cmd.setConfig(energyConfig.toString());
+//        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
+//        if(existAssetMapEnergy){
+//        	//如果已经存在就是更新
+//        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+//        	assetProvider.updateAssetMapEnergy(mapping);
+//        }else {
+//        	//如果不存在就是新增
+//        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+//        	assetProvider.insertAppMapping(mapping);
+//        }
+//    }
 
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
@@ -5926,7 +5875,10 @@ public class AssetServiceImpl implements AssetService {
 			BillItemDTO billItemDTO = new BillItemDTO();
 			billItemDTO.setBillItemId(charingItemId);
 			billItemDTO.setBillItemName(billItemName);
-			BigDecimal amountReceivable = goodDTO.getTotalPrice();
+			BigDecimal amountReceivable = BigDecimal.ZERO;
+			if(goodDTO.getTotalPrice() != null) {
+				amountReceivable = goodDTO.getTotalPrice();
+			}
 			BigDecimal taxRateDiv = taxRate.divide(new BigDecimal(100));
 			BigDecimal amountReceivableWithoutTax = amountReceivable.divide(BigDecimal.ONE.add(taxRateDiv), 2, BigDecimal.ROUND_HALF_UP);
 			//税额=含税金额-不含税金额       税额=1000-909.09=90.91
@@ -5954,14 +5906,14 @@ public class AssetServiceImpl implements AssetService {
 		
 		//2、新增优惠/减免金额
 		List<ExemptionItemDTO> exemptionItemDTOList = new ArrayList<>();
-		ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
 		BigDecimal exemptionAmount = cmd.getExemptionAmount();
 		if(exemptionAmount != null) {
+			ExemptionItemDTO exemptionItemDTO = new ExemptionItemDTO();
 			exemptionAmount = exemptionAmount.multiply(new BigDecimal(-1));//优惠减免金额需要转换成相应的负数
+			exemptionItemDTO.setAmount(exemptionAmount);
+			exemptionItemDTO.setRemark(cmd.getExemptionRemark());
+			exemptionItemDTOList.add(exemptionItemDTO);
 		}
-		exemptionItemDTO.setAmount(exemptionAmount);
-		exemptionItemDTO.setRemark(cmd.getExemptionRemark());
-		exemptionItemDTOList.add(exemptionItemDTO);
 		
 		billGroupDTO.setBillItemDTOList(billItemDTOList);
 		billGroupDTO.setExemptionItemDTOList(exemptionItemDTOList);
@@ -6316,4 +6268,44 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
+	
+	public void createContractMapping(CreateContractMappingCommand cmd) {
+        //判断缴费是否已经存在关联合同的记录
+        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
+        AssetMapContractConfig config = new AssetMapContractConfig();
+    	config.setContractOriginId(cmd.getContractOriginId());
+    	config.setContractChangeFlag(cmd.getContractChangeFlag());
+    	cmd.setConfig(config.toString());
+        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
+        if(existAssetMapContract){
+        	//如果已经存在就是更新
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	mapping.setSourceId(cmd.getContractCategoryId());
+        	assetProvider.updateAssetMapContract(mapping);
+        }else {
+        	//如果不存在就是新增
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+        	mapping.setSourceId(cmd.getContractCategoryId());
+        	assetProvider.insertAppMapping(mapping);
+        }
+	}	
+	
+	public void createEnergyMapping(CreateEnergyMappingCommand cmd) {
+        //判断缴费是否已经存在关联能耗的记录
+        cmd.setSourceId(null);
+        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
+        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
+        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
+    	cmd.setConfig(energyConfig.toString());
+        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
+        if(existAssetMapEnergy){
+        	//如果已经存在就是更新
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+        	assetProvider.updateAssetMapEnergy(mapping);
+        }else {
+        	//如果不存在就是新增
+        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
+        	assetProvider.insertAppMapping(mapping);
+        }
+	}	
 }

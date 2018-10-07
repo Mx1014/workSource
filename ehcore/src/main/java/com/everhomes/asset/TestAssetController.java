@@ -75,21 +75,21 @@ public class TestAssetController extends ControllerBase {
 	    return response;
 	}
 	
-	/**
-	 * <p>业务应用新增缴费映射关系</p>
-	 * <b>URL: /test/createOrUpdateAssetMapping</b>
-	 */
-	@RequestMapping("createOrUpdateAssetMapping")
-	@RestReturn(value = AssetModuleAppMappingDTO.class, collection = false)
-	public RestResponse createOrUpdateAssetMapping(CreateOrUpdateAssetMappingCmd cmd) {
-		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(assetModuleAppMapping);
-		AssetModuleAppMappingDTO assetModuleAppMappingDTO = ConvertHelper.convert(dto, AssetModuleAppMappingDTO.class);
-	    RestResponse response = new RestResponse(assetModuleAppMappingDTO);
-	    response.setErrorDescription("OK");
-	    response.setErrorCode(ErrorCodes.SUCCESS);
-	    return response;
-	}
+//	/**
+//	 * <p>业务应用新增缴费映射关系</p>
+//	 * <b>URL: /test/createOrUpdateAssetMapping</b>
+//	 */
+//	@RequestMapping("createOrUpdateAssetMapping")
+//	@RestReturn(value = AssetModuleAppMappingDTO.class, collection = false)
+//	public RestResponse createOrUpdateAssetMapping(CreateOrUpdateAssetMappingCmd cmd) {
+//		AssetModuleAppMapping assetModuleAppMapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
+//		AssetModuleAppMapping dto = assetService.createOrUpdateAssetMapping(assetModuleAppMapping);
+//		AssetModuleAppMappingDTO assetModuleAppMappingDTO = ConvertHelper.convert(dto, AssetModuleAppMappingDTO.class);
+//	    RestResponse response = new RestResponse(assetModuleAppMappingDTO);
+//	    response.setErrorDescription("OK");
+//	    response.setErrorCode(ErrorCodes.SUCCESS);
+//	    return response;
+//	}
 	
 	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>

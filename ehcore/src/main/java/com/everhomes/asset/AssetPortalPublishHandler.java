@@ -2,9 +2,11 @@
 package com.everhomes.asset;
 
 import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.asset.AssetInstanceConfigDTO;
+import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
+import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
@@ -111,27 +113,41 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     		if(instanceConfig != null && instanceConfig != "") {
     			//格式化instanceConfig的json成对象
     			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
-    			if(assetInstanceConfigDTO != null && assetInstanceConfigDTO.getContractOriginId() != null) {
-    				Long originId = assetInstanceConfigDTO.getContractOriginId();
-    				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
-    				if(contractApp != null) {
-    					AssetInstanceConfigDTO contractInstanceConfigDTO = 
-    							(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
-    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
+    			if(assetInstanceConfigDTO != null) {
+    				//配置缴费-合同的映射关系
+    				try {
+    					if(assetInstanceConfigDTO.getContractOriginId() != null) {
+    						Long originId = assetInstanceConfigDTO.getContractOriginId();
+            				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
+            				if(contractApp != null) {
+            					AssetInstanceConfigDTO contractInstanceConfigDTO = 
+            							(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
+            					CreateContractMappingCommand cmd = new CreateContractMappingCommand();
+            					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+            					cmd.setContractCategoryId(contractInstanceConfigDTO.getCategoryId());
+            					cmd.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
+            					cmd.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
+            					cmd.setNamespaceId(app.getNamespaceId());
+            					assetService.createContractMapping(cmd);
+            				}
+    					}
+    				}catch (Exception e) {
+    		            LOGGER.error("failed to save mapping of contract payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+    		            e.printStackTrace();
+    		        }
+    				
+    				//配置缴费-能耗的映射关系
+    				try {
+    					CreateEnergyMappingCommand cmd = new CreateEnergyMappingCommand();
     					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					cmd.setContractCategoryId(contractInstanceConfigDTO.getCategoryId());
-    					cmd.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
-    					cmd.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
     					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
     					cmd.setNamespaceId(app.getNamespaceId());
-    					assetService.createOrUpdateAnAppMapping(cmd);
-    				}else {
-    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
-    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
-    					cmd.setNamespaceId(app.getNamespaceId());
-    					assetService.createOrUpdateAnAppMapping(cmd);
-    				}
+    					assetService.createEnergyMapping(cmd);
+    				}catch (Exception e) {
+    		            LOGGER.error("failed to save mapping of energy payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+    		            e.printStackTrace();
+    		        }
+    				
     			}
     		}
     	}catch (Exception e) {
