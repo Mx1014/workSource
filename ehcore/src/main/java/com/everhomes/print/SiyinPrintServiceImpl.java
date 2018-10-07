@@ -631,9 +631,29 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 //			return null;
 //		}
-		cmd.setClientAppName("Android");
+		
+		if (StringUtils.isEmpty(cmd.getClientAppName())) {
+			cmd.setClientAppName("Android");
+		}
+		
+		if (null == cmd.getOrderId()) {
+			cmd.setOrderId(1330L);
+		}
+		
+		if (null == cmd.getOrganizationId()) {
+			cmd.setOrganizationId(1023080L);
+		}
+		
+		if (StringUtils.isEmpty(cmd.getOwnerType())) {
+			cmd.setOwnerType("community");
+		}
+		
+		if (null == cmd.getOwnerId()) {
+			cmd.setOwnerId(240111044331058733L);
+		}
+		
 		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
-		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(null);
+		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(cmd);
 		
 		//保存参数
 //        order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");

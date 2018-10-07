@@ -14,10 +14,10 @@ import com.everhomes.rest.print.GetPrintSettingCommand;
 import com.everhomes.rest.print.GetPrintSettingResponse;
 import com.everhomes.util.RequireAuthentication;
 
-@RestDoc(value="print controller", site="print")
+@RestDoc(value="orderCallBack controller", site="general_order")
 @RestController
 @RequestMapping("/general_order")
-public class OrderNotificationController extends ControllerBase {
+public class OrderCallBackController extends ControllerBase {
 	
 	@Autowired
 	GeneralOrderBizService generalOrderService;
