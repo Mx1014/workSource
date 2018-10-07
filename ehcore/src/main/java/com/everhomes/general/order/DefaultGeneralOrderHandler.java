@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.rest.general.order.OrderCallBackCommand;
+import com.everhomes.rest.general.order.OrderCallBackType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderCommand;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
@@ -21,10 +23,13 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
     
 	abstract CreateMerchantOrderCommand buildOrderCommand(Object cmd) ;
     abstract String getHandlerName();
+    
+    //处理回调
+	abstract void dealInvoiceCallBack(OrderCallBackCommand cmd);
+	abstract void dealEnterprisePayCallBack(OrderCallBackCommand cmd);
 	
 	@Override
 	public CreateMerchantOrderResponse createOrder(Object cmd) {
-
 		CreateMerchantOrderCommand createOrderCmd = buildOrderCommand(cmd);
 		LOGGER.info("createOrderCmd:"+StringHelper.toJsonString(createOrderCmd));
 		CreateMerchantOrderRestResponse createOrderResp = orderService.createMerchantOrder(createOrderCmd);
@@ -44,6 +49,17 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 
 		CreateMerchantOrderResponse orderCommandResponse = createOrderResp.getResponse();
 		return orderCommandResponse;
+	}
+	
+	@Override
+	public void dealCallBack(OrderCallBackCommand cmd) {
+		if (OrderCallBackType.ENTERPRISE_PAY.getCode().equals(cmd.getCallBackType())) {
+			
+			dealEnterprisePayCallBack(cmd);
+			return;
+		}
+		
+		dealInvoiceCallBack(cmd);
 	}
 
 	/*

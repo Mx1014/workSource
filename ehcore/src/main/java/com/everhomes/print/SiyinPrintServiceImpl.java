@@ -2111,7 +2111,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-					return;
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Order amount is not equal to payAmount");
 				}
 				
 				updatePrintOrder(order, cmd.getOrderId()+"");

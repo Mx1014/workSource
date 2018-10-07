@@ -20,7 +20,7 @@ public class GoodsPromotionContoller  extends ControllerBase {
 	@Autowired
 	GoodsService goodsServce;
 	
-	 @RequestMapping("/getGoodList")
+	 @RequestMapping("getGoodList")
 	 @RestReturn(value=GoodDTO.class,collection = true)
 	 public RestResponse getGoodList(GetGoodListCommand cmd) {
 		 List<GoodDTO> dtos = goodsServce.getGoodList(cmd);

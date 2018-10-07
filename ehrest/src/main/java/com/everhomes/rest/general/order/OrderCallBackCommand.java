@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>businessType : 业务类型标识 如OrderType.PRINT_ORDER_CODE 填{@link com.everhomes.rest.order.OrderType}</li>
  * <li>callBackInfo : 回调信息{@link com.everhomes.rest.general.order.OrderCallBackInfo}</li>
  * <li>extraInfo : 额外信息</li>
+ * <li>signature : signature</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月6日
@@ -17,6 +18,7 @@ public class OrderCallBackCommand {
 	private String businessType;
 	private OrderCallBackInfo callBackInfo;
 	private String extraInfo;
+	private String signature;
 	
 	@Override
 	public String toString() {
@@ -53,6 +55,14 @@ public class OrderCallBackCommand {
 
 	public void setCallBackInfo(OrderCallBackInfo callBackInfo) {
 		this.callBackInfo = callBackInfo;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
 
 }

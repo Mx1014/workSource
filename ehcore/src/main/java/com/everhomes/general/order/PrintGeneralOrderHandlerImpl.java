@@ -18,13 +18,16 @@ import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.goods.GoodsService;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.print.SiyinPrintServiceImpl;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.print.PayPrintGeneralOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
+import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
@@ -35,6 +38,7 @@ import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
 @Component(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE) 
@@ -47,6 +51,10 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	
 	@Autowired
 	UserProvider userProvider;
+	
+	@Autowired
+	SiyinPrintOrderProvider siyinPrintOrderProvider;
+	
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
@@ -168,6 +176,24 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
         map.put("businessPayerPhone", buyerPhone);
         return StringHelper.toJsonString(map);
     
+	}
+
+	@Override
+	void dealInvoiceCallBack(OrderCallBackCommand cmd) {
+		
+	}
+
+	@Override
+	void dealEnterprisePayCallBack(OrderCallBackCommand cmd) {
+		
+		SiyinPrintOrder order = siyinPrintOrderProvider
+				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
+		if (null == order) {
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+		}
+		
+		//TODO 更新支付状态
+		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	}
 
 }
