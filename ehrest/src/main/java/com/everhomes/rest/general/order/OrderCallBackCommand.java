@@ -1,13 +1,13 @@
 package com.everhomes.rest.general.order;
 
-import com.everhomes.rest.order.OrderType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>callBackType : 回调类型 0-企业支付成功 1-发票</li>
+ * <li>callBackType : 回调类型 0-企业支付成功 1-发票 {@link com.everhomes.rest.general.order.OrderCallBackType}</li>
  * <li>businessType : 业务类型标识 如OrderType.PRINT_ORDER_CODE 填{@link com.everhomes.rest.order.OrderType}</li>
- * <li>businessOrderId : 业务订单id</li>
+ * <li>callBackInfo : 回调信息{@link com.everhomes.rest.general.order.OrderCallBackInfo}</li>
+ * <li>extraInfo : 额外信息</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月6日
@@ -15,41 +15,44 @@ import com.everhomes.util.StringHelper;
 public class OrderCallBackCommand {
 	private Byte callBackType; 
 	private String businessType;
-	private String businessOrderId;
+	private OrderCallBackInfo callBackInfo;
+	private String extraInfo;
 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
-
 	public String getBusinessType() {
 		return businessType;
 	}
-
 
 	public void setBusinessType(String businessType) {
 		this.businessType = businessType;
 	}
 
-
-	public String getBusinessOrderId() {
-		return businessOrderId;
-	}
-
-
-	public void setBusinessOrderId(String businessOrderId) {
-		this.businessOrderId = businessOrderId;
-	}
-
-
 	public Byte getCallBackType() {
 		return callBackType;
 	}
 
-
 	public void setCallBackType(Byte callBackType) {
 		this.callBackType = callBackType;
+	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public void setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
+	}
+
+	public OrderCallBackInfo getCallBackInfo() {
+		return callBackInfo;
+	}
+
+	public void setCallBackInfo(OrderCallBackInfo callBackInfo) {
+		this.callBackInfo = callBackInfo;
 	}
 
 }

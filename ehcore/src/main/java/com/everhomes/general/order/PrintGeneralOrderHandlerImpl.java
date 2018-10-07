@@ -56,27 +56,18 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 
 	@Override
 	CreateMerchantOrderCommand buildOrderCommand(Object cmd) {
-		PayPrintGeneralOrderCommand cmd2 = new PayPrintGeneralOrderCommand();
+		PayPrintGeneralOrderCommand cmd2 = (PayPrintGeneralOrderCommand)cmd;
 		Long PaymentPayeeId = 100004L;
 		Long totalAmount = 1L;
 		BigDecimal trueDecimalAmount = new BigDecimal(totalAmount);
 		Integer goodCount = 1;
-		Long organizationId = 1023080L;
-		Long ownerId = 240111044331058733L;
-		Long orderId = 1330L;
-		String clientAppName = "Android";
-		cmd2.setClientAppName(clientAppName);
-		cmd2.setOrderId(orderId);
-		cmd2.setOrganizationId(organizationId);
-		cmd2.setOwnerType("community");
-		cmd2.setOwnerId(ownerId);
 		
 		Long appId = 66348L;
 		CreateMerchantOrderCommand preOrderCommand = new CreateMerchantOrderCommand();
 		preOrderCommand.setPaymentMerchantId(PaymentPayeeId);
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
-		payerInfo.setOrganizationId(organizationId); // 左邻公司
+		payerInfo.setOrganizationId(cmd2.getOrganizationId()); // 左邻公司
 		payerInfo.setUserId(UserContext.currentUserId());
 		payerInfo.setAppId(appId);
 		preOrderCommand.setPayerInfo(payerInfo);
@@ -97,7 +88,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		preOrderCommand.setAmount(totalAmount);
 		String accountCode = SiyinPrintServiceImpl.BIZ_ACCOUNT_PRE + UserContext.getCurrentNamespaceId();
 		preOrderCommand.setAccountCode(accountCode);
-		preOrderCommand.setClientAppName(clientAppName);
+		preOrderCommand.setClientAppName(cmd2.getClientAppName());
 		preOrderCommand.setBusinessOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 		// 移到统一订单系统完成
 		// String BizOrderNum = getOrderNum(orderId,
@@ -125,7 +116,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		preOrderCommand.setSourceType(SourceType.PC.getCode());
 		preOrderCommand.setOrderRemark1(configProvider.getValue("siyinprint.pay.OrderRemark1", "云打印"));
 		// preOrderCommand.setOrderRemark2(String.valueOf(cmd.getOrderId()));
-		preOrderCommand.setOrderRemark3(String.valueOf(ownerId));
+		preOrderCommand.setOrderRemark3(String.valueOf(cmd2.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
 		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID,

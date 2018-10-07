@@ -38,6 +38,7 @@ import javax.servlet.http.HttpSession;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -77,6 +78,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 		App app = this.appProvider.findAppByKey(clientId);
 		if(app == null) {
+		    if(LOGGER.isDebugEnabled()) {
+		        LOGGER.debug("Invalid request client_id and app not found, clientId={}, redirectJspPath={}", clientId, "oauth2-error-response");
+		    }
 			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
@@ -91,6 +95,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		}
 
 		if(!this.oAuth2Service.validateRedirectUri(app.getId(), redirectUri)) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Invalid redirect uri, appId={}, redirectUri={}, redirectJspPath={}", app.getId(), redirectUri, "oauth2-error-response");
+            }
 			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(
 					OAuth2ServiceErrorCode.SCOPE,
 					String.valueOf(OAuth2ServiceErrorCode.ERROR_INVALID_REQUEST),
@@ -110,6 +117,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		User user = UserContext.current().getUser();
 		if (user != null && user.getId() != User.ANNONYMOUS_UID) {
 			URI uri = oAuth2Service.confirmAuthorization(user, cmd);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("User has logon, will redirect to {}", uri);
+            }
 			if (uri != null) {
                 return redirectTo(uri, redirectType, model);
 			}
@@ -117,19 +127,13 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		//no logon
         model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
         oAuth2Service.addAttribute(model, cmd, app);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("User has not logon, will redirect to jsp path {}, headers={}", "oauth2-authorize2", getHeaders(httpRequest));
+        }
+        
 		return "oauth2-authorize2";
 	}
-
-    private Object redirectTo(URI uri, String redirectType, Model model) {
-	    // 有些浏览器不支持 302 重定向，所以采用 script 类型的跳转
-        if (Objects.equals(redirectType, "script")) {
-            model.addAttribute("redirectUrl", uri.toString());
-            return "oauth2-redirect";
-        }
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(uri);
-        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-    }
 
     @RequestMapping("confirm")
 	public Object confirmAuthorization(
@@ -378,4 +382,34 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			return null;
 		}
 	}
+
+    private Object redirectTo(URI uri, String redirectType, Model model) {
+        // 有些浏览器不支持 302 重定向，所以采用 script 类型的跳转
+        if (Objects.equals(redirectType, "script")) {
+            model.addAttribute("redirectUrl", uri.toString());
+            return "oauth2-redirect";
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(uri);
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+    
+    private String getHeaders(HttpServletRequest request) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("{");
+
+        Enumeration<String> headers = request.getHeaderNames();
+        int i = 0;
+        while (headers.hasMoreElements()) {
+            String header = headers.nextElement();
+
+            if (i > 0)
+                sb.append(", ");
+            sb.append(header + ": " + request.getHeader(header));
+            i++;
+        }
+        sb.append("}");
+        
+        return sb.toString();
+    }
 }
