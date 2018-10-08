@@ -7,17 +7,17 @@ package com.everhomes.rest.asset.modulemapping;
  */
 
 public class RentalInstanceConfigDTO {
-    private Long printOriginId;
+    private Long rentalOriginId;
     private String ownerType;
     private Long ownerId;
     private Long billGroupId;
-    private Long billItemId;
+    private Long chargingItemId;
     
-	public Long getPrintOriginId() {
-		return printOriginId;
+	public Long getRentalOriginId() {
+		return rentalOriginId;
 	}
-	public void setPrintOriginId(Long printOriginId) {
-		this.printOriginId = printOriginId;
+	public void setRentalOriginId(Long rentalOriginId) {
+		this.rentalOriginId = rentalOriginId;
 	}
 	public String getOwnerType() {
 		return ownerType;
@@ -37,10 +37,11 @@ public class RentalInstanceConfigDTO {
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
 	}
-	public Long getBillItemId() {
-		return billItemId;
+	public Long getChargingItemId() {
+		return chargingItemId;
 	}
-	public void setBillItemId(Long billItemId) {
-		this.billItemId = billItemId;
+	public void setChargingItemId(Long chargingItemId) {
+		this.chargingItemId = chargingItemId;
 	}
+    
 }

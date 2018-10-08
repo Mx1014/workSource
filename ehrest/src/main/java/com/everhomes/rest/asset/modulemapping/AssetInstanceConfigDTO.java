@@ -14,6 +14,7 @@ public class AssetInstanceConfigDTO {
 	private Byte contractChangeFlag;
 	private Byte energyFlag;
 	private List<PrintInstanceConfigDTO> printInstanceConfigDTOList;
+	private List<RentalInstanceConfigDTO> rentalInstanceConfigDTOList;
 	
 	public String getUrl() {
 		return url;
@@ -50,5 +51,11 @@ public class AssetInstanceConfigDTO {
 	}
 	public void setPrintInstanceConfigDTOList(List<PrintInstanceConfigDTO> printInstanceConfigDTOList) {
 		this.printInstanceConfigDTOList = printInstanceConfigDTOList;
+	}
+	public List<RentalInstanceConfigDTO> getRentalInstanceConfigDTOList() {
+		return rentalInstanceConfigDTOList;
+	}
+	public void setRentalInstanceConfigDTOList(List<RentalInstanceConfigDTO> rentalInstanceConfigDTOList) {
+		this.rentalInstanceConfigDTOList = rentalInstanceConfigDTOList;
 	}
 }

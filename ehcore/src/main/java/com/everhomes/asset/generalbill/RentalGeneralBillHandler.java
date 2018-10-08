@@ -16,6 +16,7 @@ import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.AssetMapContractConfig;
+import com.everhomes.rest.asset.modulemapping.RentalInstanceConfigDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.StringHelper;
@@ -41,31 +42,33 @@ public class RentalGeneralBillHandler implements GeneralBillHandler{
 	    		//格式化instanceConfig的json成对象
 				AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
 				if(assetInstanceConfigDTO != null) {
-	    			Long originId = assetInstanceConfigDTO.getContractOriginId();
-	    			ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
-	    			
-	    			contractApp.getCustomTag();
-	    			
-	    			if(contractApp != null) {
-	    				AssetInstanceConfigDTO contractInstanceConfigDTO = 
-	    						(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
-	    				AssetModuleAppMapping mapping = new AssetModuleAppMapping();
-	    				mapping.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-	    				mapping.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
-	    				mapping.setSourceId(contractInstanceConfigDTO.getCategoryId());
-	    				mapping.setNamespaceId(app.getNamespaceId());
-	    				//组装个性化的config配置
-	    		        AssetMapContractConfig config = new AssetMapContractConfig();
-	    		    	config.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
-	    		    	config.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
-	    		    	mapping.setConfig(config.toString());
-	    				
-	    		    	assetProvider.createOrUpdateAssetModuleAppMapping(mapping);
-	    			}
+					List<RentalInstanceConfigDTO> rentalInstanceConfigDTOList = assetInstanceConfigDTO.getRentalInstanceConfigDTOList();
+					for(RentalInstanceConfigDTO rentalInstanceConfigDTO : rentalInstanceConfigDTOList) {
+						Long originId = rentalInstanceConfigDTO.getRentalOriginId();
+		    			ServiceModuleApp rentalApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
+		    			if(rentalApp != null) {
+		    				AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+		    				mapping.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+		    				mapping.setSourceType(AssetSourceTypeEnum.RENTAL_MODULE.getSourceType());
+		    				try {
+		    					mapping.setSourceId(Long.parseLong(rentalApp.getCustomTag()));
+		    				}catch (Exception e) {
+		    		            LOGGER.error("rental customTag can not parse Long, rentalOriginId={}, rentalCustomTag={}", originId, rentalApp.getCustomTag());
+		    		            e.printStackTrace();
+		    		        }
+		    				mapping.setNamespaceId(app.getNamespaceId());
+		    				mapping.setOwnerType(rentalInstanceConfigDTO.getOwnerType());
+		    				mapping.setOwnerId(rentalInstanceConfigDTO.getOwnerId());
+		    				mapping.setBillGroupId(rentalInstanceConfigDTO.getBillGroupId());
+		    				mapping.setChargingItemId(rentalInstanceConfigDTO.getChargingItemId());
+		    				
+		    		    	assetProvider.createOrUpdateAssetModuleAppMapping(mapping);
+		    			}
+					}
 	    		}
 			}
     	}catch (Exception e) {
-            LOGGER.error("failed to save mapping of contract payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+            LOGGER.error("failed to save mapping of rental payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
             e.printStackTrace();
         }
 	}
