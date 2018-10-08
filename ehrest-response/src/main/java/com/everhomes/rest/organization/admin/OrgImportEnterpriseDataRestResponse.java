@@ -4,20 +4,20 @@ package com.everhomes.rest.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 
 public class OrgImportEnterpriseDataRestResponse extends RestResponseBase {
 
-    private ImportDataResponse response;
+    private ImportFileTaskDTO response;
 
     public OrgImportEnterpriseDataRestResponse () {
     }
 
-    public ImportDataResponse getResponse() {
+    public ImportFileTaskDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ImportDataResponse response) {
+    public void setResponse(ImportFileTaskDTO response) {
         this.response = response;
     }
 }

@@ -4,20 +4,20 @@ package com.everhomes.rest.banner.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.banner.admin.ListBannersAdminCommandResponse;
+import com.everhomes.rest.banner.admin.ListBannersResponse;
 
 public class BannerListBannersRestResponse extends RestResponseBase {
 
-    private ListBannersAdminCommandResponse response;
+    private ListBannersResponse response;
 
     public BannerListBannersRestResponse () {
     }
 
-    public ListBannersAdminCommandResponse getResponse() {
+    public ListBannersResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListBannersAdminCommandResponse response) {
+    public void setResponse(ListBannersResponse response) {
         this.response = response;
     }
 }

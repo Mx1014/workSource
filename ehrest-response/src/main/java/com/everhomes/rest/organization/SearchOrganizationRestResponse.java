@@ -5,20 +5,20 @@ package com.everhomes.rest.organization;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
 
 public class SearchOrganizationRestResponse extends RestResponseBase {
 
-    private List<OrganizationDTO> response;
+    private List<SearchOrganizationCommandResponse> response;
 
     public SearchOrganizationRestResponse () {
     }
 
-    public List<OrganizationDTO> getResponse() {
+    public List<SearchOrganizationCommandResponse> getResponse() {
         return response;
     }
 
-    public void setResponse(List<OrganizationDTO> response) {
+    public void setResponse(List<SearchOrganizationCommandResponse> response) {
         this.response = response;
     }
 }

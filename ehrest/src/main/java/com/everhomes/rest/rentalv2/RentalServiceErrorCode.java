@@ -35,4 +35,10 @@ public interface RentalServiceErrorCode {
 	int ERROR_ORDER_CANCEL_OVERTIME = 10052; //已经进入预约使用时间，无法取消订单
 	int ERROR_DOWN_PARKING_LOCK = 10053; //无法结束使用，车锁未升起
 	int ERROR_ORDER_RENEW_OVERTIME = 10054; //无法延长，已经超时
+
+	int ERROR_INVALID_PARAMETER = 506; //非法参数
+	int ERROR_LOST_PARAMETER = 507; //参数缺失
+	int ERRPR_LOST_RESOURCE_RULE = 508;//资源或资源规则缺失
+	int ERROR_CANNOT_FIND_ORDER = 509;//找不到订单或订单状态错误
+	int ERROR_CREATE_ORDER = 510;//下单失败
 }
