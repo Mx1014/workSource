@@ -94,10 +94,18 @@ ALTER TABLE `eh_payment_bill_items` ADD COLUMN `delete_flag` TINYINT DEFAULT 1 C
 -- REMARK: 账单表增加第三方账单唯一标识字段
 ALTER TABLE `eh_payment_bills` ADD COLUMN `third_bill_id` VARCHAR(1024) COMMENT '账单表增加第三方唯一标识字段';
 
+update eh_service_alliance_categories set default_order = 0 where default_order is null;
 -- AUTHOR: 黄明波
 -- REMARK: #33683服务联盟样式列表添加排序 #37669修复
-ALTER TABLE `eh_service_alliance_categories`	CHANGE COLUMN `default_order` `default_order` BIGINT NOT NULL DEFAULT '0' ;
+ALTER TABLE eh_service_alliance_categories MODIFY default_order BIGINT(11) NOT NULL DEFAULT 0;
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `address` `address` VARCHAR(255) NULL DEFAULT NULL ;
+
+-- 性能优化
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_parent_id` (`parent_id`);
+ALTER TABLE `eh_service_alliance_categories` ADD INDEX `i_eh_default_order` (`default_order`);
+ALTER TABLE `eh_service_alliances` ADD INDEX `i_eh_type` (`type`);
+ALTER TABLE `eh_service_alliance_skip_rule` ADD INDEX `i_eh_category_index` (`service_alliance_category_id`, `namespace_id`);
+
 -- END
 
 
@@ -201,5 +209,441 @@ CREATE TABLE `eh_work_report_scope_msg` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- END issue-34029
 
+-- AUTHOR: 丁建民 20180920
+-- REMARK: issue-37007 资产设置一房一价，租赁价格大于设定的价格，则合同不需要审批
+alter table eh_contracts add sponsor_uid BIGINT COMMENT '发起人id';
+alter table eh_contracts add sponsor_time DATETIME COMMENT '发起时间';
 
+CREATE TABLE `eh_address_properties` (
+	`id` BIGINT (20) NOT NULL COMMENT 'id of the record',
+	`namespace_id` INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	`building_id` BIGINT (20) DEFAULT NULL COMMENT '楼栋id',
+	`address_id` BIGINT (20) DEFAULT NULL COMMENT '房源id',
+	`charging_items_id` BIGINT (20) COMMENT '费项id',
+	`authorize_price` DECIMAL (10, 2) COMMENT '授权价',
+	`apartment_authorize_type` TINYINT (4) DEFAULT NULL COMMENT '房源授权价类型（1:每天; 2:每月; 3:每个季度; 4:每年;)',
+	`status` TINYINT (4) COMMENT '0-无效状态 ,2-有效状态',
+	`create_time` DATETIME COMMENT '创建日期',
+	`creator_uid` BIGINT COMMENT '创建人',
+	`operator_time` DATETIME COMMENT '最近修改时间',
+	`operator_uid` BIGINT COMMENT '最近修改人',
+	PRIMARY KEY (id)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT '楼宇属性信息表';
+
+alter table eh_payment_bills modify column noticeTel varchar(255) COMMENT '催缴手机号码';
+-- END issue-37007
+
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户联系人表
+
+CREATE TABLE `eh_customer_contacts`
+(
+	`id`                   BIGINT NOT NULL,
+	`namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
+	`name`             		VARCHAR(64)  COMMENT '联系人名称',
+	`phone_number`         BIGINT  COMMENT '联系人电话',
+	`email`           			VARCHAR(128)  COMMENT '联系人邮箱',
+	`position`         		VARCHAR(128)  COMMENT '联系人职务',
+	`address`							VARCHAR(256)  COMMENT '联系人通讯地址',
+	`contact_type`				   TINYINT  COMMENT '联系人类型，0-客户联系人、1-渠道联系人',
+	`customer_source`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`status`								TINYINT  COMMENT '联系人状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
+	primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户联系人表';
+ALTER TABLE `eh_customer_contacts` ADD INDEX idx_namespace_id(namespace_id);
+
+-- end
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户跟进人表
+
+CREATE TABLE `eh_customer_trackers`
+(
+	`id`                   BIGINT NOT NULL,
+	`namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	`community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	`customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
+	`tracker_uid`           BIGINT COMMENT '跟进人id',
+	`tracker_type`				   TINYINT COMMENT '跟进人类型，0-招商跟进人、1-租户拜访人',
+	`customer_source`					TINYINT  COMMENT '联系人来源，0-客户管理，1-租客管理',
+	`status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
+	primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户跟进人表';
+ALTER TABLE `eh_customer_trackers` ADD INDEX idx_namespace_id(namespace_id);
+
+-- end
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户需求信息表
+
+
+CREATE TABLE `eh_customer_requirements`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
+   `intention_location`    VARCHAR(256) COMMENT '期望地段',
+	 `min_area`			DECIMAL(10,2) COMMENT '期望最小面积',
+	 `max_area`			DECIMAL(10,2) COMMENT '期望最大面积',
+	 `min_rent_price`			DECIMAL(10,2) COMMENT '期望最小租金-单价',
+	 `max_rent_price`			DECIMAL(10,2) COMMENT '期望最大租金-单价',
+	 `rent_price_unit`		TINYINT COMMENT '期望租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
+	 `rent_type`					TINYINT COMMENT '租赁/购买：0-租赁，1-购买',
+	 `version`				      BIGINT COMMENT '记录版本',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
+   primary key (id)
+
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'eh_enterprise_investment_demand in dev mode';
+
+ALTER TABLE `eh_customer_requirements` ADD INDEX idx_namespace_id(namespace_id);
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户需求房源关系表
+
+CREATE TABLE `eh_customer_requirement_addresses`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `requirement_id` 			BIGINT NOT NULL DEFAULT '0' COMMENT '关联的需求ID',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
+	 `address_id`			      BIGINT COMMENT '意向房源',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
+   primary key (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户需求房源关系表';
+ALTER TABLE `eh_customer_requirement_addresses` ADD INDEX idx_namespace_id(namespace_id);
+
+-- END
+
+
+-- AUTHOR 黄鹏宇 2018-9-6
+-- REMARK 动态表单公用组件表
+
+CREATE TABLE `eh_var_field_ranges`
+(
+   `id`                   BIGINT NOT NULL,
+	 `group_path` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'refer to eh_var_fields',
+    `field_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_fields',
+    `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
+    `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    primary key (id)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用组件表';
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_name(module_name);
+ALTER TABLE `eh_var_field_ranges` ADD INDEX idx_module_type(module_type);
+
+-- AUTHOR 黄鹏宇 2018-9-6
+-- REMARK 动态表单公用组件表
+
+CREATE TABLE `eh_var_field_group_ranges`
+(
+   `id`                   BIGINT NOT NULL,
+	 `group_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refer to eh_var_field_groups',
+    `module_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the module which the field belong to',
+    `module_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '一组公用表单的类型',
+    primary key (id)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '动态表单公用分组表';
+ALTER TABLE `eh_var_field_group_ranges` ADD INDEX idx_module_name(module_name);
+ALTER TABLE `eh_var_field_group_ranges` ADD INDEX idx_module_type(module_type);
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 招商客户当前信息表
+
+CREATE TABLE `eh_customer_current_rents`
+(
+   `id`                   BIGINT NOT NULL,
+	 `namespace_id` 				INT NOT NULL DEFAULT '0' COMMENT 'namespaceId',
+	 `community_id`         BIGINT NOT NULL DEFAULT '0' COMMENT 'communityId',
+	 `customer_id` 					BIGINT NOT NULL DEFAULT '0' COMMENT '关联的客户ID',
+   `address`    			    VARCHAR(256) COMMENT '当前地址',
+	 `rent_price`						DECIMAL(10,2) COMMENT '当前租金',
+	 `rent_price_unit`		  TINYINT COMMENT '租金单位，0-元/㎡，1-元/㎡/月,2-元/天，3-元/月，4-元',
+	 `rent_area`							DECIMAL(10,2) COMMENT '当前租赁面积',
+	 `contract_intention_date` DATETIME COMMENT '当前合同到期日',
+	 `version`				      BIGINT COMMENT '记录版本',
+	 `status`								TINYINT  COMMENT '状态，0-invalid ,2-valid',
+	`create_time`          DATETIME  COMMENT '创建日期',
+	`creator_uid` 						BIGINT  COMMENT '创建人',
+	`operator_time` 				DATETIME  COMMENT '最近修改时间',
+	`operator_uid`					BIGINT  COMMENT '最近修改人',
+   primary key (id)
+
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '招商客户当前信息表';
+ALTER TABLE `eh_customer_current_rents` ADD INDEX idx_namespace_id(namespace_id);
+
+-- end
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 对客户表增加招商客户和成交租客的表示加以区分
+
+ALTER TABLE `eh_enterprise_customers` ADD `customer_source` TINYINT COMMENT '跟进信息类型，0-招商客户，1-成交租客';
+
+-- end
+
+
+-- AUTHOR 黄鹏宇 2018-8-31
+-- REMARK 对当前跟进表加上类型标识
+
+ALTER TABLE `eh_customer_trackings` ADD `customer_source` TINYINT COMMENT '跟进信息类型，0-客户跟进信息，1-租客跟进信息';
+
+-- end
+
+
+-- AUTHOR: jiarui 20180831
+-- REMARK: 客户表增加相关字段
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `transaction_ratio` VARCHAR(64);
+
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `expected_sign_date` DATETIME;
+-- end
+
+-- AUTHOR: jiarui  20180831
+-- REMARK: 园区入驻字段及数据迁移
+-- ALTER TABLE eh_lease_promotions MODIFY rent_amount VARCHAR(1024) ;
+-- end
+
+-- 黄鹏宇 2018-9-4
+-- 日志表增加操作对象类型
+ALTER TABLE `eh_customer_events` ADD COLUMN investment_type TINYINT COMMENT '操作客户类型，0-客户管理，1-租客管理';
+
+-- REMARK: 客户表增加是否入驻状态
+ALTER TABLE `eh_enterprise_customers` ADD COLUMN `entry_status_item_id` BIGINT COMMENT '该用户是否入驻，1-未入驻，2-入驻';
+
+-- end
+
+-- AUTHOR: 杨崇鑫  20180920
+-- REMARK: 账单表增加一个企业客户ID的字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `customer_id` BIGINT COMMENT '企业客户ID';
+
+-- END
+
+-- AUTHOR:梁燕龙
+-- REMARK: 通用表单打印表 issue-35063
+CREATE TABLE `eh_general_form_print_templates`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间ID',
+  `name` VARCHAR(64) NOT NULL COMMENT '表单打印模板名称',
+  `last_commit` VARCHAR(40) COMMENT '最近一次提交ID',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT '表单打印模板所属ID',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '表单打印所属类型',
+  `status` TINYINT DEFAULT 2 COMMENT '打印模板状态,0为失效，2为生效',
+  `creator_uid` BIGINT COMMENT 'record creator user id',
+  `create_time` DATETIME COMMENT '创建时间',
+  `delete_uid` BIGINT COMMENT 'record deleter user id',
+  `delete_time` DATETIME COMMENT '删除时间',
+  `update_uid` BIGINT COMMENT 'record update user id',
+  `update_time` DATETIME COMMENT '更新时间',
+
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '通用表单打印模板表';
+-- END ISSUE-35063
+
+-- AUTHOR: 郑思挺  20180920
+-- REMARK: 资源预约3.7
+ALTER TABLE `eh_rentalv2_order_records`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `account_id`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `account_name`  varchar(255) NULL AFTER `old_custom_object`;
+-- END
+
+-- AUTHOR: 缪洲
+-- REMARK: 停车缴费V6.7，增加用户须知
+
+ALTER TABLE `eh_parking_lots` ADD COLUMN `notice_contact` varchar(20) COMMENT '用户须知联系电话';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `summary` text COMMENT '用户须知';
+
+-- AUTHOR: tangcen 2018年9月20日21:38:22
+-- REMARK: 园区入驻，一键转为意向客户功能
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `transform_flag`  tinyint NULL DEFAULT 0 COMMENT '是否转化为意向客户：0-否，1-是';
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `customer_name`  varchar(255) NULL COMMENT '承租方';
+-- END
+-- AUTHOR:黄良铭
+-- REMARK:  20180903-huangliangming-用户对接脚本方案-#36568
+CREATE TABLE `eh_butt_script_config` (
+  `id`  bigint(20)  NOT NULL COMMENT '主键',
+  `info_type` varchar(64)  COMMENT '分类',
+  `info_describe` varchar(128) COMMENT '描述',
+  `namespace_id` int(11)  COMMENT '域空间ID',
+  `module_id`  bigint(20) COMMENT  '这个没啥意思,自己定义,因为建库入参需要,应该是作区分用',
+  `module_type` varchar(64)    COMMENT '这个没啥意思,自己定义,因为建库入参需要,应该是作区分用 ',
+  `owner_id`  bigint(20)   ,
+  `owner_type`  varchar(64)   ,
+  `remark`  varchar(240)   COMMENT '备注',
+  `status`  tinyint(4)    COMMENT '状态;0失效,1生效',
+
+  PRIMARY KEY(`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '存储创建GOGS仓库时所需的指定相关表';
+
+CREATE TABLE `eh_butt_script_publish_info` (
+  `id`  bigint(20)  NOT NULL COMMENT '主键',
+  `info_type` varchar(64)  COMMENT '分类 ,对应 eh_butt_script_config 表',
+  `namespace_id` int(11)  COMMENT '域空间ID',
+  `commit_version`  varchar(64)  COMMENT  '版本号',
+  `publish_time` datetime     COMMENT '版本发布 时间',
+
+  PRIMARY KEY(`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '版本信息及发布信息表';
+
+CREATE TABLE `eh_butt_info_type_event_mapping` (
+  `id`  bigint(20)  NOT NULL COMMENT '主键',
+  `info_type` varchar(64)  COMMENT '分类 ,对应 eh_butt_script_config 表',
+  `namespace_id` int(11)  COMMENT '域空间ID',
+  `event_name`  varchar(128)  COMMENT  '触发该脚本的事件',
+  `sync_flag`  tinyint(4)  COMMENT  '0 同步;1异步  同步执行还是异执行',
+  `describe`  varchar(256)  COMMENT  '描述',
+
+  PRIMARY KEY(`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '脚本与事件映射表';
+
+CREATE TABLE `eh_butt_script_last_commit` (
+  `id`  BIGINT(20)  NOT NULL COMMENT '主键',
+  `info_type` VARCHAR(64)  COMMENT '分类 ,对应 eh_butt_script_config 表',
+  `namespace_id` INT(11)  COMMENT '域空间ID',
+  `last_commit`  VARCHAR(128)  COMMENT  '最后一次提交版本号',
+  `commit_msg`  VARCHAR(256)  COMMENT  '提交相关信息',
+  `commit_time`  DATETIME    COMMENT  '提交时间',
+
+  PRIMARY KEY(`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT 'last_commit 存储表';
+-- END
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户增加会员等级
+ALTER TABLE `eh_users` ADD COLUMN `vip_level` INTEGER COMMENT '会员等级';
+
+-- AUTHOR: 马世亨
+-- REMARK: visitorsys1.2 访客门禁授权默认方案表
+CREATE TABLE `eh_visitor_sys_door_access` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0' COMMENT 'namespace id',
+  `owner_type` varchar(64) NOT NULL COMMENT 'community or organization',
+  `owner_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'ownerType为community时候，为园区id;ownerType为organization时候，为公司id',
+  `door_access_id` bigint(20) NOT NULL COMMENT '门禁组Id',
+  `door_access_name` varchar(256) DEFAULT NULL COMMENT '门禁组名称',
+	`default_auth_duration_type` TINYINT(4) DEFAULT 0 COMMENT '默认访客授权有效期种类,0 天数，1 小时数',
+  `default_auth_duration` int DEFAULT 0 COMMENT '默认访客授权有效期',
+	`default_enable_auth_count` TINYINT(4) DEFAULT 0 COMMENT '默认访客授权次数开关 0 关 1 开',
+  `default_auth_count` int DEFAULT 0 COMMENT '默认访客授权次数',
+  `default_door_access_flag` tinyint(4) DEFAULT 0 COMMENT '默认门禁组 0 非默认 1 默认',
+  `status` tinyint(4) DEFAULT '2' COMMENT '0:被删除状态,2:正常状态',
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `operate_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='访客门禁授权默认方案表';
+
+-- AUTHOR: 马世亨
+-- REMARK: visitorsys1.2 访客表修改
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_duration_type` tinyint(4) NULL COMMENT '访客授权有效期种类,0 天数，1 小时数';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_duration` int NULL COMMENT '访客授权有效期';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_enable_auth_count` TINYINT(4) DEFAULT 0 COMMENT '访客授权次数开关 0 关 1 开';
+ALTER TABLE `eh_visitor_sys_visitors` ADD COLUMN `door_access_auth_count` int NULL COMMENT '访客授权次数';
+
+-- AUTHOR:tangcen
+-- REMARK:招商广告表
+CREATE TABLE `eh_investment_advertisements` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `community_id` bigint(20) DEFAULT NULL,
+  `owner_type` varchar(64) DEFAULT NULL COMMENT '默认为EhOrganizations',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT '默认为organizationId',
+  `title` varchar(255) DEFAULT NULL COMMENT '广告主题',
+  `investment_type` tinyint(4) DEFAULT NULL COMMENT '广告类型 : 1-招租广告，2-招商广告',
+  `investment_status` tinyint(4) DEFAULT NULL COMMENT '招商状态 : 1-招商中，2-已下线，3-已出租',
+  `available_area_min` decimal(10,2) DEFAULT NULL COMMENT '招商面积起点',
+  `available_area_max` decimal(10,2) DEFAULT NULL COMMENT '招商面积终点',
+  `asset_price_min` decimal(10,2) DEFAULT NULL COMMENT '招商价格起点',
+  `asset_price_max` decimal(10,2) DEFAULT NULL COMMENT '招商价格终点',
+  `price_unit` tinyint(4) DEFAULT NULL COMMENT '价格单位：1-元/平*月',
+  `apartment_floor_min` int(11) DEFAULT NULL COMMENT '招商楼层起点',
+  `apartment_floor_max` int(11) DEFAULT NULL COMMENT '招商楼层终点',
+  `orientation` varchar(64) DEFAULT NULL COMMENT '朝向',
+  `address` varchar(255) DEFAULT NULL COMMENT '详细地址',
+  `longitude` double DEFAULT NULL COMMENT '经度',
+  `latitude` double DEFAULT NULL COMMENT '纬度',
+  `geohash` varchar(32) DEFAULT NULL COMMENT 'geohash值，用于GPS定位',
+  `contact_name` varchar(128) DEFAULT NULL COMMENT '联系人',
+  `contact_phone` varchar(128) DEFAULT NULL COMMENT '联系电话',
+  `description` text COMMENT '广告内容描述',
+  `poster_uri` varchar(256) DEFAULT NULL COMMENT '封面图uri',
+  `asset_dispaly_flag` tinyint(4) DEFAULT NULL COMMENT '是否显示楼宇房源：0-否，1-是',
+  `custom_form_flag` tinyint(4) DEFAULT NULL COMMENT '是否添加自定义表单：0-否，1-是',
+  `general_form_id` bigint(20) DEFAULT NULL COMMENT '关联的自定义表单id',
+  `default_order` bigint(20) DEFAULT NULL COMMENT '排序字段（初始值等于主键id）',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0: inactive, 1: confirming, 2: active',
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `operator_uid` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `operate_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招商广告表';
+
+-- AUTHOR:tangcen
+-- REMARK:招商广告轮播图表
+CREATE TABLE `eh_investment_advertisement_banners` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `advertisement_id` bigint(20) DEFAULT NULL COMMENT '关联的广告id',
+  `content_uri` varchar(256) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0: inactive, 1: confirming, 2: active',
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招商广告轮播图表';
+
+-- AUTHOR:tangcen
+-- REMARK:招商广告关联资产表
+CREATE TABLE `eh_investment_advertisement_assets` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `advertisement_id` bigint(20) DEFAULT NULL COMMENT '关联的广告id',
+  `asset_type` tinyint(4) DEFAULT NULL COMMENT '关联的资产类型 : 1-community,2-building,3-apartment',
+  `asset_id` bigint(20) DEFAULT NULL COMMENT '关联的资产id',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0- inactive, 1- confirming, 2- active',
+  `creator_uid` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招商广告关联资产表';
+
+-- AUTHOR:tangcen
+-- REMARK:自定义表单添加字段
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `integral_tag1` bigint(20) NULL DEFAULT 0 COMMENT '业务字段（用于表示招商租赁的预约申请记录状态）';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `integral_tag2` bigint(20) NULL DEFAULT NULL COMMENT '业务字段（用于表示招商租赁的预约记录的来源广告的id）';
+
+-- END
+
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 增加表单的创建时间
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `created_time` DATE COMMENT '创建时间';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `creator_uid` BIGINT COMMENT '创建人ID';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_time` DATE COMMENT '操作时间';
+ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT COMMENT '操作人ID';
+
+ALTER TABLE `eh_customer_contacts` MODIFY `phone_number` VARCHAR(64) ;
 

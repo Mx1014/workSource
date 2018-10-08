@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuzongPmTaskHandle.class);
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-    private static final String GET_ADDRESSES = "/phoneServer/QueryHouseByPhoneNumber";
+    private static final String GET_ADDRESSES = "/phoneServer/wxClientHouse";
     private static final String CREATE_TASK = "/phoneServer/ZLAddWorkBill";
     private static final String QUERY_TASKS = "/phoneServer/QueryBillList";
     private static final String GET_TASK_DETAIL = "/phoneServer/QueryBillDetail";

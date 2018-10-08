@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -791,7 +792,11 @@ public class AssetProviderImpl implements AssetProvider {
             }
             dto.setBillId(String.valueOf(r.getValue(t.ID)));
             dto.setBillStatus(r.getValue(t.STATUS));
-            dto.setNoticeTel(r.getValue(t.NOTICETEL));
+            //dto.setNoticeTelList(r.getValue(t.NOTICETEL));
+            if (r.getValue(t.NOTICETEL) != null) {
+            	dto.setNoticeTelList(Arrays.asList((r.getValue(t.NOTICETEL)).split(",")));
+			}
+            
             dto.setNoticeTimes(r.getValue(t.NOTICE_TIMES));
             dto.setDateStr(r.getValue(t.DATE_STR));
             dto.setTargetName(r.getValue(t.TARGET_NAME));
@@ -1369,7 +1374,12 @@ public class AssetProviderImpl implements AssetProvider {
             //获取所需要的cmd的数据
             BillGroupDTO billGroupDTO = cmd.getBillGroupDTO();
             Byte isSettled = cmd.getIsSettled();
-            String noticeTel = cmd.getNoticeTel();
+            //String noticeTel = cmd.getNoticeTel();
+            List<String> noticeTelList = cmd.getNoticeTelList();
+            String noticeTelListStr = "";
+            if (noticeTelList != null) {
+            	noticeTelListStr = String.join(",", noticeTelList);
+            }
             Long ownerId = cmd.getOwnerId();
             String ownerType = cmd.getOwnerType();
             String targetName = cmd.getTargetName();
@@ -1673,7 +1683,7 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCategoryId(categoryId);
             newBill.setId(nextBillId);
             newBill.setNamespaceId(UserContext.getCurrentNamespaceId());
-            newBill.setNoticetel(noticeTel);
+            newBill.setNoticetel(noticeTelListStr);
             newBill.setOwnerId(ownerId);
             newBill.setTargetName(targetName);
             newBill.setOwnerType(ownerType);
@@ -1726,7 +1736,7 @@ public class AssetProviderImpl implements AssetProvider {
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
             response[0].setBillGroupName(billGroupDTO.getBillGroupName());
             response[0].setBillId(String.valueOf(nextBillId));
-            response[0].setNoticeTel(noticeTel);
+            response[0].setNoticeTelList(noticeTelList);
             response[0].setBillStatus(billStatus);
             response[0].setTargetType(targetType);
             response[0].setTargetId(String.valueOf(targetId));
@@ -1762,7 +1772,10 @@ public class AssetProviderImpl implements AssetProvider {
                     vo.setBillId(f.getValue(r.ID));
                     vo.setBillGroupId(f.getValue(r.BILL_GROUP_ID));
                     vo.setTargetId(f.getValue(r.TARGET_ID));
-                    vo.setNoticeTel(f.getValue(r.NOTICETEL));//催缴联系号码
+                    //vo.setNoticeTel(f.getValue(r.NOTICETEL));//催缴联系号码
+                    if (f.getValue(r.NOTICETEL) != null) {
+                    	vo.setNoticeTelList(Arrays.asList((f.getValue(r.NOTICETEL)).split(",")));
+					}
                     vo.setCustomerTel(f.getValue(r.CUSTOMER_TEL));//客户手机号
                     vo.setDateStr(f.getValue(r.DATE_STR));
                     vo.setDateStrBegin(f.getValue(r.DATE_STR_BEGIN));//账单开始时间
@@ -2526,7 +2539,7 @@ public class AssetProviderImpl implements AssetProvider {
     	Long targetId = cmd.getTargetId();
     	String targetName = cmd.getTargetName();
     	String invoiceNum = cmd.getInvoiceNum();
-    	String noticeTel = cmd.getNoticeTel();
+    	List<String> noticeTelList = cmd.getNoticeTelList();
     	Long categoryId = cmd.getCategoryId();
     	String ownerType = cmd.getOwnerType();
         Long ownerId = cmd.getOwnerId();
@@ -2749,9 +2762,14 @@ public class AssetProviderImpl implements AssetProvider {
             
             reCalBillById(billId);//重新计算账单
             // 更新发票
+            String noticeTelListStr = "";
+            if (noticeTelList != null) {
+            	noticeTelListStr = String.join(",", noticeTelList);
+            }
             context.update(Tables.EH_PAYMENT_BILLS)
                     .set(Tables.EH_PAYMENT_BILLS.INVOICE_NUMBER, invoiceNum)
-                    .set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
+                    //.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTel)
+            		.set(Tables.EH_PAYMENT_BILLS.NOTICETEL, noticeTelListStr)
                     .where(Tables.EH_PAYMENT_BILLS.ID.eq(billId))
                     .execute();
             return null;
@@ -4054,14 +4072,16 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId) {
+    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         Long nullId = null;
+        if(nextGroupId == null) {
+        	nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
+        }
         if(deCouplingFlag == (byte) 1){
             //去解耦
             //添加
-            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
             InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
             //去解耦同伴
             context.update(t)
@@ -4073,21 +4093,7 @@ public class AssetProviderImpl implements AssetProvider {
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
         	//添加
-            Long nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
-            if(cmd.getNamespaceId().equals(cmd.getOwnerId().intValue())){//ownerId为-1代表选择的是全部
-            	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-            }else {
-            	//全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
-                }
-            }
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
             return nextGroupId;
         }
         return null;
@@ -6326,8 +6332,32 @@ public class AssetProviderImpl implements AssetProvider {
         	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
         		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
         	}else {
-        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		scopes = context.selectFrom(t1)
+	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                    .fetchInto(PaymentBillGroup.class);
+        		if(scopes.size() > 0) {
+        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}else {
+        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		}
         	}
+        	
+//        	scopes = context.selectFrom(t1)
+//            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                    .fetchInto(PaymentBillGroup.class);
+//        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
+//        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        	}else {
+//        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        	}
+        	
+        	
         }
        return response;
 	}

@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGeneralApprovalVals;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhInvestmentAdvertisements;
 import com.everhomes.server.schema.tables.pojos.EhLeaseBuildings;
 import com.everhomes.server.schema.tables.pojos.EhLeaseProjects;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
@@ -135,7 +136,8 @@ public enum EntityType {
     DOMAIN(EhDomains.class.getSimpleName()),
     PAYMENT_APPLICATION(EhPaymentApplications.class.getSimpleName()),
     GENERAL_APPROVAL_VAL(EhGeneralApprovalVals.class.getSimpleName()),
-    ACTIVITY_ROSTER(EhActivityRoster.class.getSimpleName());
+    ACTIVITY_ROSTER(EhActivityRoster.class.getSimpleName()),
+	INVESTMENT_ADVERTISEMENT(EhInvestmentAdvertisements.class.getSimpleName());
 
 
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 
 /**
@@ -27,6 +28,10 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
  *     <li>memberLogDTOs: 用户认证记录， 参考{@link com.everhomes.rest.community.admin.OrganizationMemberLogDTO}</li>
  *     <li>userSourceType: userSourceType</li>
  *     <li>recentlyActiveTime: 最近活跃时间</li>
+ *     <li>email: 邮箱</li>
+ *     <li>vipLevel: 会员等级</li>
+ *     <li>showVipLevelFlag: 是否展示会员等级，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>groupmemberLogDTOs: 小区用户认证记录</li>
  * </ul>
  */
 public class CommunityUserAddressDTO {
@@ -64,9 +69,50 @@ public class CommunityUserAddressDTO {
 	@ItemType(OrganizationMemberLogDTO.class)
 	private List<OrganizationMemberLogDTO> memberLogDTOs;
 
+	@ItemType(GroupMemberDTO.class)
+	private List<GroupMemberDTO> groupmemberLogDTOs;
+
 	private Byte userSourceType;
 
 	private Long recentlyActiveTime;
+
+	private String email;
+
+	private Integer vipLevel;
+
+	private Byte showVipLevelFlag;
+
+    public List<GroupMemberDTO> getGroupmemberLogDTOs() {
+        return groupmemberLogDTOs;
+    }
+
+    public void setGroupmemberLogDTOs(List<GroupMemberDTO> groupmemberLogDTOs) {
+        this.groupmemberLogDTOs = groupmemberLogDTOs;
+    }
+
+    public Byte getShowVipLevelFlag() {
+        return showVipLevelFlag;
+    }
+
+    public void setShowVipLevelFlag(Byte showVipLevelFlag) {
+        this.showVipLevelFlag = showVipLevelFlag;
+    }
+
+    public Integer getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(Integer vipLevel) {
+		this.vipLevel = vipLevel;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public Long getCreateTime() {
 		return createTime;

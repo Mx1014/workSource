@@ -158,7 +158,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 
 		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(namespaceId,
 				ContactType.EMAIL.getCode(), sa.getParentId(), new CrossShardListingLocator(), Integer.MAX_VALUE);
-		if (CollectionUtils.isEmpty(targets)) {
+		if (CollectionUtils.isEmpty(targets) && StringUtils.isBlank(sa.getEmail())) {
 			return;
 		}
 

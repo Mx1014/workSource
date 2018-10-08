@@ -21,6 +21,7 @@ import com.everhomes.rest.asset.CreateOrUpdateAssetMappingCmd;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.NoticeTriggerCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
 import com.everhomes.rest.asset.TestLateFineCommand;
@@ -155,6 +156,7 @@ public class TestAssetController extends ControllerBase {
 	}
 	
 	/**
+<<<<<<< HEAD
 	 * <p>仅用于测试瑞安CM对接</p>
 	 * <b>URL: /test/testSyncRuiAnCMBillToZuolin</b>
 	 */
@@ -340,6 +342,16 @@ public class TestAssetController extends ControllerBase {
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		return restResponse;
 	}
-	
-
+	/*
+	 * <b>URL: /test/noticeTrigger</b>
+	 * <p>启动自动催缴的定时任务</p>
+	 */
+	@RequestMapping("noticeTrigger")
+	public RestResponse noticeTrigger(NoticeTriggerCommand cmd) {
+		assetService.noticeTrigger(cmd.getNamespaceId());
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 }

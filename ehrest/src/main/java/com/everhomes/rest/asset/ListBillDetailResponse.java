@@ -43,7 +43,7 @@ public class ListBillDetailResponse {
     private String dateStrEnd;
     private String buildingName;
     private String apartmentName;
-    private String noticeTel;
+    //private String noticeTel;
     private String customerTel;
     private String targetName;
     private String targetType;
@@ -52,13 +52,14 @@ public class ListBillDetailResponse {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
-    //add by tangcen
     private String certificateNote;
     private Byte billStatus;
 	@ItemType(UploadCertificateDTO.class)
 	private List<UploadCertificateDTO> uploadCertificateDTOList;
 	//新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
+    //催缴手机号码列表
+    private List<String> noticeTelList;
 	
     //新增账单来源信息
     private String sourceType;
@@ -73,7 +74,15 @@ public class ListBillDetailResponse {
     //对接统一账单业务线的需求
     private Integer paymentType;
     
-    public Byte getBillStatus() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Byte getBillStatus() {
 		return billStatus;
 	}
 
@@ -173,14 +182,6 @@ public class ListBillDetailResponse {
 
     public void setApartmentName(String apartmentName) {
         this.apartmentName = apartmentName;
-    }
-
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
     }
 
     public String getTargetName() {

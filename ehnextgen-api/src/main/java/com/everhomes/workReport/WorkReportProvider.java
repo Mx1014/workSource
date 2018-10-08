@@ -41,11 +41,11 @@ public interface WorkReportProvider {
 
     Long createWorkReportScopeMsg(WorkReportScopeMsg msg);
 
-    void deleteWorkReportScopeMsg(Timestamp time);
+    void deleteWorkReportScopeMsg();
+
+    void deleteWorkReportScopeMsgByReportId(Long reportId);
 
     void updateWorkReportScopeMsg(WorkReportScopeMsg msg);
-
-    WorkReportScopeMsg findWorkReportScopeMsg(Long reportId, java.sql.Date reportTime);
 
     List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime);
 }

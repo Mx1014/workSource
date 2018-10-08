@@ -14,4 +14,6 @@ public interface AppService {
     void deleteApp(DeleteAppCommand cmd);
 
     App find(String appKey);
+
+    boolean isGrantedApp(App app, Long userId);
 }

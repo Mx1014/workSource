@@ -29,6 +29,8 @@ import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalEvent;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
@@ -305,6 +307,47 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Security.addProvider(new BouncyCastleProvider());
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
         localBus.subscribe(subcribeKey, this);
+        String subcribeKey2 = SystemEvent.ACCOUNT_AUTH_SUCCESS.getCode();
+        localBus.subscribe(subcribeKey2, new LocalBusSubscriber() {
+
+			@Override
+			public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
+				// Must be
+				try {
+					ExecutorUtil.submit(new Runnable() {
+						
+						@Override
+						public void run() {
+							LOGGER.info("start run.....");
+							LocalEvent localEvent = (LocalEvent) arg2;
+							Long uId = localEvent.getContext().getUid();
+							Long orgId = Long.valueOf((String) localEvent.getParams().get("orgId"));
+							Integer namespaceId = localEvent.getContext().getNamespaceId();
+							if (null == uId) {
+								LOGGER.error("None of UserIdentifier");
+							} else {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("newUserAutoAuth id= " + uId);
+								}
+
+								try {
+									joinCompanyAutoAuth(namespaceId, orgId, uId);
+								} catch (Exception exx) {
+									LOGGER.error("execute promotion error promotionId=" + uId, exx);
+								}
+
+							}
+						}
+					});
+				} catch (Exception e) {
+					LOGGER.error("onLocalBusMessage error ", e);
+				} finally {
+
+				}
+
+				return Action.none;
+			}
+		});
     }
     
     @Override
@@ -3565,7 +3608,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         
         resp.setPhone(auth.getPhone());
-        if(auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
+        if(auth.getValidFromMs() > System.currentTimeMillis() || auth.getValidEndMs() < System.currentTimeMillis() || (auth.getAuthRuleType() != null && (byte) 1 == auth.getAuthRuleType() && auth.getValidAuthAmount() <= 0)) {
             resp.setIsValid((byte)0);    
         } else {
             resp.setIsValid((byte)1);
@@ -3924,68 +3967,71 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
+    private void remoteOpenDoor(Long doorAuthId, String uuid){
+		User user = UserContext.current().getUser();
+
+		DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
+		if (doorAuth == null /* || !doorAuth.getUserId().equals(user.getId()) */ || !doorAuth.getRightRemote().equals((byte) 1)) {
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
+					AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+		}
+
+		DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
+		if (doorAccess == null) {
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
+					AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+		}
+
+		// DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId,
+		// user.getId(), null, null, (byte)1);
+		AesUserKey aesUserKey = generateAesUserKey(user, doorAuth);
+		if (aesUserKey == null) {
+			LOGGER.error("remote AesUserKey created error");
+			return;
+		}
+
+		byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
+		LOGGER.error(StringHelper.toHexString(secret));
+		byte[] bPayload = CmdUtil.openDoorCmd(secret);
+
+		byte[] bSeq = DataUtil.intToByteArray(0);
+		byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
+		byte[] mBuf = new byte[bPayload.length + 10];
+
+		System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
+		System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
+		System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
+
+		AclinkRemotePdu pdu = new AclinkRemotePdu();
+
+		// by liuyilin 20180420 判断门禁是否为内网门禁,消息拼装
+		if (doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0) {
+			Base64 base64 = new Base64();
+			try {
+				String str = "{\"remote_open\":\"" + String.valueOf(doorAccess.getUuid()) + "\",\"msg\":\""
+						+ Base64.encodeBase64String(mBuf) + "\"}";
+				byte[] textByte;
+				textByte = str.getBytes("UTF-8");
+				String encodedText = base64.encodeToString(textByte);
+				pdu.setBody(encodedText);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			pdu.setType(1);
+			pdu.setUuid(aclinkServerService.findLocalServerById(doorAccess.getLocalServerId()).getUuidNum());
+		} else {
+			pdu.setBody(Base64.encodeBase64String(mBuf));
+			pdu.setType(1);
+			pdu.setUuid(uuid == null ? doorAccess.getUuid() : uuid);
+		}
+
+		long requestId = LocalSequenceGenerator.getNextSequence();
+		borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
+    }
+    
     @Override
     public void remoteOpenDoor(Long doorAuthId) {
-        User user = UserContext.current().getUser();
-        
-//        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorId);
-//        if(doorAccess == null) {
-//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
-//        }
-        
-        DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
-        if(doorAuth == null /* || !doorAuth.getUserId().equals(user.getId()) */ || !doorAuth.getRightRemote().equals((byte)1) ) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
-        }
-        
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
-        if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
-            }        
-        
-        //DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId, user.getId(), null, null, (byte)1);
-        AesUserKey aesUserKey = generateAesUserKey(user, doorAuth);
-        if(aesUserKey == null) {
-            LOGGER.error("remote AesUserKey created error");
-            return;
-        }
-        
-        byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
-        LOGGER.error(StringHelper.toHexString(secret));
-        byte[] bPayload = CmdUtil.openDoorCmd(secret);
-        
-        byte[] bSeq = DataUtil.intToByteArray(0);
-        byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
-        byte[] mBuf = new byte[bPayload.length + 10];
-        
-        System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
-        System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
-        System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
-        
-        AclinkRemotePdu pdu = new AclinkRemotePdu();
-
-        //by liuyilin 20180420 判断门禁是否为内网门禁,消息拼装
-        if(doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0){
-        	Base64 base64 = new Base64();
-    		try {
-    			String str = "{\"remote_open\":\"" + String.valueOf(doorAccess.getUuid())+"\",\"msg\":\""+Base64.encodeBase64String(mBuf)+"\"}";
-    			byte[] textByte;
-    			textByte = str.getBytes("UTF-8");
-    			String encodedText = base64.encodeToString(textByte);
-    	        pdu.setBody(encodedText);
-    		} catch (UnsupportedEncodingException e) {
-    			e.printStackTrace();
-    		}
-    		pdu.setType(1);
-            pdu.setUuid(aclinkServerService.findLocalServerById(doorAccess.getLocalServerId()).getUuidNum());
-        }else{
-        	pdu.setBody(Base64.encodeBase64String(mBuf));
-        	pdu.setType(1);
-            pdu.setUuid(doorAccess.getUuid());
-        }
-
-        long requestId = LocalSequenceGenerator.getNextSequence();
-        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
+        remoteOpenDoor(doorAuthId, null);
     }
     
     @Override
@@ -4892,7 +4938,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
 			if(("true").equals(validResult)){
 				LOGGER.info("validate auth count successed");
-				remoteOpenDoor(authId);
+				remoteOpenDoor(authId,uuid);
 			}else{
 				LOGGER.info("validate auth count failed");
 			}

@@ -24,6 +24,10 @@ public interface ContractErrorCode {
 
     int ERROR_CONTRACT_BILL_NOT_EXIST = 10012;//合同关联的账单不存在
 
+    int ERROR_BILLINGCYCLE_IS_EMPTY = 10013;  //合同计价条款计费周期不存在
+    int ERROR_ADDRESS_PROPERTIES_IS_EXIST = 10014;  //该房源信息已经存在
+
     int ERROR_CONTRACT_SYNC_UNKNOW_ERROR = 20001;//同步数据失败
-    int ERROR_CONTRACT_SYNC_EMPTY = 20002;//同步数据数据为空
+
+
 }

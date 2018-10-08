@@ -1434,7 +1434,20 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                         cmd.setContractId(list.get(0));
                     }
                 }else if(headers[j].contains("催缴手机号")){
-                	if(data[j] != null && data[j] != "") {
+                	List<String> list = new ArrayList<>();
+                	list = Arrays.asList(data[j].split(","));
+                	for (int k = 0; k < list.size(); k++) {
+                		if(list.get(k) != null && list.get(k) != "") {
+    	                    if(!RegularExpressionUtils.isValidChinesePhone(list.get(k))){
+    	                        log.setErrorLog("催缴手机号码格式不正确");
+    	                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
+    	                        datas.add(log);
+    	                        continue bill;
+    	                    }
+                    	}
+					}
+                	cmd.setNoticeTelList(list);
+                	/*if(data[j] != null && data[j] != "") {
 	                    if(!RegularExpressionUtils.isValidChinesePhone(data[j])){
 	                        log.setErrorLog("催缴手机号码格式不正确");
 	                        log.setCode(AssetBillImportErrorCodes.USER_CUSTOMER_TEL_ERROR);
@@ -1442,7 +1455,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 	                        continue bill;
 	                    }
                 	}
-                    cmd.setNoticeTel(data[j]);
+                    cmd.setNoticeTel(data[j]);*/
                 }else if(j >= itemStartIndex && j <= itemEndIndex){// 收费项目
                     PaymentChargingItem itemPojo = getBillItemByName(namespaceId, ownerId, "community", billGroupId, handlerChargingItemName(headers[j]));
                 	if(itemPojo == null){

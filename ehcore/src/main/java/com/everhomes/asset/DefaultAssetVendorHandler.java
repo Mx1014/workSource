@@ -141,7 +141,6 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setPaymentParams(getPaymentParams(cmd, billGroup));
         preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
         preOrderCommand.setCallbackUrl(getPayCallbackUrl(cmd));
-        preOrderCommand.setExtendInfo(cmd.getExtendInfo());
         preOrderCommand.setGoodsName("物业缴费");
         preOrderCommand.setGoodsDescription(null);
         preOrderCommand.setIndustryName(null);
@@ -446,6 +445,40 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         strBuilder.append(", ");
         strBuilder.append("账单组名称:");
         strBuilder.append(billGroupName);
+        
+        //issue-38519 【中天】【缴费管理】完成缴费后，在支付后台的订单中，订单描述为空，无法区分费用来源，财务完全无法对账
+        //issue-38519 暂时为中天加上客户名称作为来源说明，临时方案
+        try {
+        	if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999944)) {
+        	//if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999951)) {
+            	String targetNames = "";
+            	List<BillIdAndAmount> bills = cmd.getBills();
+                List<String> billIds = new ArrayList<>();
+                for(int i = 0; i < bills.size(); i++){
+                    BillIdAndAmount billIdAndAmount = bills.get(i);
+                    if(billIdAndAmount.getBillId() == null || billIdAndAmount.getBillId().trim().length() == 0) {
+                        bills.remove(i);
+                        i--;
+                    } else {
+                        billIds.add(billIdAndAmount.getBillId());
+                    }
+                }
+                List<PaymentBills> paymentBillList = assetProvider.findBillsByIds(billIds);
+                for(PaymentBills paymentBill : paymentBillList) {
+                	//去重
+                	if(!targetNames.contains(paymentBill.getTargetName())) {
+                		targetNames += paymentBill.getTargetName() + "、";
+                	}
+                }
+                if(targetNames.length() != 0) {
+                	targetNames = targetNames.substring(0, targetNames.length() - 1);
+                }
+                strBuilder.append(", ");
+                strBuilder.append("客户名称：" + targetNames);
+            }
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
         return strBuilder.toString();
 	}
 	

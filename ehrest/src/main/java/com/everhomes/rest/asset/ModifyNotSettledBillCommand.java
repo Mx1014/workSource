@@ -38,7 +38,7 @@ public class ModifyNotSettledBillCommand {
     @ItemType(BillGroupDTO.class)
     private BillGroupDTO billGroupDTO;
     private String invoiceNum;
-    private String noticeTel;
+    //private String noticeTel;
     private String customerTel;
     private Long categoryId;
     private String ownerType;
@@ -51,8 +51,18 @@ public class ModifyNotSettledBillCommand {
     private String dateStrEnd;
     //物业缴费V6.0 新增权限
     private Long organizationId;
+    //催缴手机号码列表
+    private List<String> noticeTelList;
 
-    public String getInvoiceNum() {
+	public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public String getInvoiceNum() {
         return invoiceNum;
     }
 
@@ -116,14 +126,6 @@ public class ModifyNotSettledBillCommand {
 
     public ModifyNotSettledBillCommand() {
     }
-
-	public String getNoticeTel() {
-		return noticeTel;
-	}
-
-	public void setNoticeTel(String noticeTel) {
-		this.noticeTel = noticeTel;
-	}
 
 	public String getCustomerTel() {
 		return customerTel;

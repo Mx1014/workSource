@@ -543,6 +543,43 @@
     };
 
     /**
+     * @method hex32
+     * @memberof Md5
+     * @instance
+     * @description Output hash as hex string
+     * @returns {String} Hex string
+     * @see {@link md5.hex}
+     * @example
+     * hash.hex32();
+     */
+    Md5.prototype.hex32 = Md5.prototype.hex ;
+
+    /**
+     * @method hex16
+     * @memberof Md5
+     * @instance
+     * @description Output hash as hex string
+     * @returns {String} Hex string
+     * @see {@link md5.hex}
+     * @example
+     * hash.hex16();
+     */
+    Md5.prototype.hex16 = function () {
+        this.finalize();
+
+        var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3;
+
+        return HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
+            HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
+            HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
+            HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
+            HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
+            HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
+            HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
+            HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F];
+    };
+
+    /**
      * @method toString
      * @memberof Md5
      * @instance
