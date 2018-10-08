@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
 
 /**
  * @author created by ycx
@@ -13,11 +14,21 @@ public interface GeneralBillHandler {
     static final String GENERALBILL_PREFIX = "GeneralBill-";
     
     /**
+     * 创建或更新缴费模块与其他模块的映射关系
+     * @param assetInstanceConfigDTO
+     */
+    default void createOrUpdateAssetModuleAppMapping(ServiceModuleApp app) {
+    	
+    }
+    
+    /**
      * 获取统一账单的映射关系
      * @param cmd
      * @return
      */
-    List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
+    default List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd){
+    	return null;
+    }
     
     
     /**
@@ -26,6 +37,8 @@ public interface GeneralBillHandler {
 	 * @param billGroup 帐单组
 	 * @return 扩展信息
 	 */
-    String getPaymentExtendInfo(BillItemDTO billItemDTO);
+    default String getPaymentExtendInfo(BillItemDTO billItemDTO) {
+    	return null;
+    }
     
 }

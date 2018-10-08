@@ -385,11 +385,11 @@ public interface AssetProvider {
      * @param assetCategoryId
      * @return
      */
-    boolean checkExistAssetMapContract(Long assetCategoryId);
+//    boolean checkExistAssetMapContract(Long assetCategoryId);
     
     boolean checkExistAssetMapEnergy(Long assetCategoryId);
     
-    void updateAssetMapContract(AssetModuleAppMapping mapping);
+//    void updateAssetMapContract(AssetModuleAppMapping mapping);
     
     void updateAssetMapEnergy(AssetModuleAppMapping mapping);
 
@@ -437,9 +437,9 @@ public interface AssetProvider {
 	
 	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
 	
-	boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd);
-	
-	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+//	boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd);
+//	
+//	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
@@ -454,4 +454,6 @@ public interface AssetProvider {
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 		
 	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
+	
+	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
 }

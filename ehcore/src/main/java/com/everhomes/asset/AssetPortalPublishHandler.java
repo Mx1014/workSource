@@ -1,22 +1,21 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
-import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.StringHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
+import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.StringHelper;
 
 /**
  * Created by Wentian Wang on 2018/5/24.
@@ -27,9 +26,6 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private AssetService assetService;
-    
-    @Autowired
-    private ServiceModuleAppService serviceModuleAppService;
     
     // zhang jiang gao ke holds a different uri because in this namespace, the older asset UI is still in use
    @Override
@@ -108,51 +104,59 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     }
     
     public void afterAllAppPulish(ServiceModuleApp app){
-    	String instanceConfig = app.getInstanceConfig();
-    	try {
-    		if(instanceConfig != null && instanceConfig != "") {
-    			//格式化instanceConfig的json成对象
-    			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
-    			if(assetInstanceConfigDTO != null) {
-    				//配置缴费-合同的映射关系
-    				try {
-    					if(assetInstanceConfigDTO.getContractOriginId() != null) {
-    						Long originId = assetInstanceConfigDTO.getContractOriginId();
-            				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
-            				if(contractApp != null) {
-            					AssetInstanceConfigDTO contractInstanceConfigDTO = 
-            							(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
-            					CreateContractMappingCommand cmd = new CreateContractMappingCommand();
-            					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-            					cmd.setContractCategoryId(contractInstanceConfigDTO.getCategoryId());
-            					cmd.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
-            					cmd.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
-            					cmd.setNamespaceId(app.getNamespaceId());
-            					assetService.createContractMapping(cmd);
-            				}
-    					}
-    				}catch (Exception e) {
-    		            LOGGER.error("failed to save mapping of contract payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
-    		            e.printStackTrace();
-    		        }
-    				
-    				//配置缴费-能耗的映射关系
-    				try {
-    					CreateEnergyMappingCommand cmd = new CreateEnergyMappingCommand();
-    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
-    					cmd.setNamespaceId(app.getNamespaceId());
-    					assetService.createEnergyMapping(cmd);
-    				}catch (Exception e) {
-    		            LOGGER.error("failed to save mapping of energy payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
-    		            e.printStackTrace();
-    		        }
-    				
-    			}
-    		}
-    	}catch (Exception e) {
-            LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
-            e.printStackTrace();
-        }
+    	for (AssetSourceTypeEnum e : AssetSourceTypeEnum.values()) {
+    		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(e.getSourceType());
+			generalBillHandler.createOrUpdateAssetModuleAppMapping(app);
+    	}
+    	
+//    	String instanceConfig = app.getInstanceConfig();
+//    	try {
+//    		if(instanceConfig != null && instanceConfig != "") {
+//    			//格式化instanceConfig的json成对象
+//    			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
+//    			if(assetInstanceConfigDTO != null) {
+//    				//配置缴费-合同的映射关系
+//    				try {
+//    					if(assetInstanceConfigDTO.getContractOriginId() != null) {
+//    						GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
+//    						generalBillHandler.createAssetModuleAppMapping(assetInstanceConfigDTO);
+//    					}
+//    				}catch (Exception e) {
+//    		            LOGGER.error("failed to save mapping of contract payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+//    		            e.printStackTrace();
+//    		        }
+//    				
+//    				//配置缴费-能耗的映射关系
+//    				try {
+//    					CreateEnergyMappingCommand cmd = new CreateEnergyMappingCommand();
+//    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+//    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
+//    					cmd.setNamespaceId(app.getNamespaceId());
+//    					assetService.createEnergyMapping(cmd);
+//    				}catch (Exception e) {
+//    		            LOGGER.error("failed to save mapping of energy payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+//    		            e.printStackTrace();
+//    		        }
+//    				
+////    				//配置缴费-云打印的映射关系
+////    				try {
+////    					CreatePrintMappingCommand cmd = new CreatePrintMappingCommand();
+////    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+////    					cmd.setNamespaceId(app.getNamespaceId());
+////    					assetService.createPrintMapping(cmd);
+////    				}catch (Exception e) {
+////    		            LOGGER.error("failed to save mapping of print payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+////    		            e.printStackTrace();
+////    		        }
+////    				
+////    				//配置缴费-资源预约的映射关系
+//    				
+//    				
+//    			}
+//    		}
+//    	}catch (Exception e) {
+//            LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
+//            e.printStackTrace();
+//        }
     }
 }

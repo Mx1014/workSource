@@ -11,6 +11,7 @@ import com.everhomes.asset.GeneralBillHandler;
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.BillItemDTO;
+import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 
 /**
  * @author created by ycx
@@ -20,6 +21,10 @@ import com.everhomes.rest.asset.BillItemDTO;
 public class PrintGeneralBillHandler implements GeneralBillHandler{
 	@Autowired
 	private AssetProvider assetProvider;
+	
+	public void createAssetModuleAppMapping(AssetInstanceConfigDTO assetInstanceConfigDTO) {
+		
+	}
 	
 	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
 		List<AssetModuleAppMapping> dtos = assetProvider.findAssetModuleAppMapping(cmd);

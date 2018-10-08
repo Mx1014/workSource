@@ -6839,28 +6839,28 @@ public class AssetProviderImpl implements AssetProvider {
 		dao.insert(mapping);
 		return mapping;
 	}
-
-    public boolean checkExistAssetMapContract(Long assetCategoryId) {
-        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
-                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
-                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType()))
-                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
-        return records.size() > 0;
-    }
-
-    public void updateAssetMapContract(AssetModuleAppMapping mapping) {
-    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID, mapping.getSourceId())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG, mapping.getConfig())
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
-	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
-	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
-	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType()))
-	        .execute();
-    }
+	
+//    public boolean checkExistAssetMapContract(Long assetCategoryId) {
+//        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        List<Long> records = dslContext.select(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID)
+//                .from(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//                .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(assetCategoryId))
+//                .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType()))
+//                .fetch(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ID);
+//        return records.size() > 0;
+//    }
+//
+//    public void updateAssetMapContract(AssetModuleAppMapping mapping) {
+//    	DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//    	dslContext.update(Tables.EH_ASSET_MODULE_APP_MAPPINGS)
+//	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_ID, mapping.getSourceId())
+//	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.CONFIG, mapping.getConfig())
+//	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+//	        .set(Tables.EH_ASSET_MODULE_APP_MAPPINGS.UPDATE_UID, UserContext.currentUserId())
+//	        .where(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(mapping.getAssetCategoryId()))
+//	        .and(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType()))
+//	        .execute();
+//    }
 
     public boolean checkExistAssetMapEnergy(Long assetCategoryId) {
         DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -6884,26 +6884,26 @@ public class AssetProviderImpl implements AssetProvider {
 	        .execute();
     }
 
-	public boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd) {
-		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
-        return records.size() > 0;
-	}
-
-	public AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping mapping) {
-		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
-		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
-		if(records.size() != 0 && records.get(0) != null) {
-			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
-			Long id = records.get(0).getId();
-			mapping.setId(id);
-			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			mapping.setUpdateUid(UserContext.currentUserId());
-	        dao.update(mapping);
-	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
-		}
-		return mapping;
-	}
+//	public boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd) {
+//		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
+//        return records.size() > 0;
+//	}
+//
+//	public AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping mapping) {
+//		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+//		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
+//		if(records.size() != 0 && records.get(0) != null) {
+//			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
+//			Long id = records.get(0).getId();
+//			mapping.setId(id);
+//			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			mapping.setUpdateUid(UserContext.currentUserId());
+//	        dao.update(mapping);
+//	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
+//		}
+//		return mapping;
+//	}
 
 	public boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId) {
 		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
@@ -6916,7 +6916,7 @@ public class AssetProviderImpl implements AssetProvider {
 		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
         return records.size() > 0;
 	}
-
+	
 	public List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd) {
 		SelectQuery<EhAssetModuleAppMappingsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_ASSET_MODULE_APP_MAPPINGS).getQuery();
 		query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -6931,6 +6931,9 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 		if(cmd.getSourceType() != null){
 			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.SOURCE_TYPE.eq(cmd.getSourceType()));
+		}
+		if(cmd.getAssetCategoryId() != null){
+			query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.ASSET_CATEGORY_ID.eq(cmd.getAssetCategoryId()));
 		}
 		List<AssetModuleAppMapping> records = query.fetchInto(AssetModuleAppMapping.class);
 		return records;
@@ -7172,5 +7175,25 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return dto;
     }
+
+	public void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping) {
+		//判断缴费是否已经存在关联的记录
+		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
+		if(records.size() != 0 && records.get(0) != null) {
+			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
+			Long id = records.get(0).getId();
+			mapping.setId(id);
+			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			mapping.setUpdateUid(UserContext.currentUserId());
+	        dao.update(mapping);
+	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
+	        LOGGER.info("update eh_asset_module_app_mappings.id={} success!", id);
+		}else {
+			insertAppMapping(mapping);
+			LOGGER.info("insert eh_asset_module_app_mappings success!");
+		}
+	}
 
 }
