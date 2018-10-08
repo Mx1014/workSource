@@ -195,12 +195,18 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		if (null == service) {
 			return;
 		}
+		
+		//有可能categoryId为空
+		Long categoryId = service.getCategoryId();
+		if (null == categoryId) {
+			categoryId = service.getParentId();
+		}
 
 		ClickStatDetail detail = new ClickStatDetail();
 		detail.setNamespaceId(flowCase.getNamespaceId());
 		detail.setType(service.getParentId());
 		detail.setOwnerId(service.getOwnerId());
-		detail.setCategoryId(service.getCategoryId());
+		detail.setCategoryId(categoryId == null ? 0L : categoryId);
 		detail.setServiceId(service.getId());
 		detail.setClickType(StatClickOrSortType.CLICK_TYPE_COMMIT_TIMES.getCode());
 		detail.setClickTime(System.currentTimeMillis());

@@ -1121,7 +1121,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(enterpriseCustomer.getId());
                         tracker.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     }
                 }
             }
@@ -1153,7 +1155,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
                     contact.setCustomerId(enterpriseCustomer.getId());
                     contact.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                    invitedCustomerProvider.createContact(contact);
+                    if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                        invitedCustomerProvider.createContact(contact);
+
+                    }
 
                 }
             }
@@ -1185,7 +1190,10 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
                     contact.setCustomerId(enterpriseCustomer.getId());
                     contact.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                    invitedCustomerProvider.createContact(contact);
+                    if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                        invitedCustomerProvider.createContact(contact);
+
+                    }
 
                 }
             }
