@@ -1,7 +1,10 @@
 //@formatter:off
 package com.everhomes.requisition;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -13,6 +16,7 @@ import com.everhomes.general_form.GeneralFormValRequest;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.openapi.Contract;
+import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
@@ -20,6 +24,7 @@ import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
@@ -27,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +71,8 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
     private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private ContentServerService contentServerService;
 
 //    @Autowired
 //    private List<RequistionListener> reqListeners;
@@ -255,8 +263,23 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                             break;
                         }
                     }
-                    if(entry.getKey().equals("urls")){
+                    if(entry.getKey().equals("uris")){
                         if (StringUtils.isNotBlank(fieldValue)) {
+
+                            List<FlowCaseFileDTO> files = new ArrayList<>();
+
+                            FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                            String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                            ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                            fileDTO.setUrl(url);
+                            fileDTO.setFileName(dto.getFieldName());
+                            fileDTO.setFileSize(resource.getResourceSize());
+                            files.add(fileDTO);
+
+                            FlowCaseFileValue value = new FlowCaseFileValue();
+                            value.setFiles(files);
+                            fieldValue = JSON.toJSONString(value);
+
                             break;
                         }
                     }
@@ -264,18 +287,18 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                 }
                 e.setValue(fieldValue);
             } catch (IOException ex) {
-                JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                JsonArray urlJsons = jo.getAsJsonArray("urls");
-                if(urlJsons != null && urlJsons.size() > 0){
-                    fieldValue = urlJsons.get(0).getAsString();
-                }else{
-                    caseFileDTO.setUrl("");
+                if(StringUtils.isNotBlank(fieldValue) && !fieldValue.equals("\"\"")){
+                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
+                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                    JsonArray urlJsons = jo.getAsJsonArray("urls");
+                    if(urlJsons != null && urlJsons.size() > 0){
+                        fieldValue = urlJsons.get(0).getAsString();
+                    }else{
+                        caseFileDTO.setUrl("");
+                    }
+                    e.setValue(fieldValue);
                 }
 
-
-
-                e.setValue(fieldValue);
             }
             e.setKey(val.getFieldName());
             entities.add(e);
@@ -283,7 +306,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
         return entities;
     }
 
-    private List<FlowCaseEntity> getSubEntities(GeneralFormVal val){
+    private List<FlowCaseEntity> getSubEntities(GeneralFormVal val) {
         List<FlowCaseEntity> subEntities = new ArrayList<>();
         //Map map = (Map)JSONObject.parse(val.getFieldValue());
         //JsonArray subArray = (JsonArray) map.get("subForms");
@@ -339,11 +362,28 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                             break;
                         }
                     }
-                    if(entry.getKey().equals("urls")){
+                    if(entry.getKey().equals("uris")){
+
                         if (StringUtils.isNotBlank(fieldValue)) {
-                            FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
+                            /*FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
                             caseFileDTO.setUrl(fieldValue);
                             fieldValue = StringHelper.toJsonString(caseFileDTO);
+*/
+
+                            List<FlowCaseFileDTO> files = new ArrayList<>();
+
+                            FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                            String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                            ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                            fileDTO.setUrl(url);
+                            fileDTO.setFileName(arr.getAsJsonObject().get("fieldName").toString());
+                            fileDTO.setFileSize(resource.getResourceSize());
+                            files.add(fileDTO);
+
+                            FlowCaseFileValue value = new FlowCaseFileValue();
+                            value.setFiles(files);
+                            fieldValue = JSON.toJSONString(value);
+
                             break;
                         }
                     }

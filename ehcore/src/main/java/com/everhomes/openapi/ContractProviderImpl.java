@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -1521,6 +1522,17 @@ public class ContractProviderImpl implements ContractProvider {
 					  .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 					  .and(Tables.EH_CONTRACTS.STATUS.eq(statusCode))
 					  .fetchInto(Contract.class);
+	}
+	
+	@Override
+	public List<ContractCategory> listContractAppCategory(Integer namespaceId) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ContractCategory> list = dslContext.select()
+	        .from(Tables.EH_CONTRACT_CATEGORIES)
+	        .where(Tables.EH_CONTRACT_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_CONTRACT_CATEGORIES.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+	        .fetchInto(ContractCategory.class);
+		return list;
 	}
 
 }

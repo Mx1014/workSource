@@ -4748,6 +4748,15 @@ public class GroupServiceImpl implements GroupService {
         
         for(Long userId: members) {
             sendSystemMessageToUser(userId, notifyTextForApplicant, null);
+
+            //发一条消息通知客户端
+            /*Map<String, String> meta = meta = new HashMap<String, String>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.GROUP_TALK_DISSOLVED.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(null));
+            sendSystemMessageToUser(userId, notifyTextForApplicant, meta);*/
+
+            //发一条消息通知客户端
+            sendGroupNotificationToIncludeUser(group.getId(), userId, notifyTextForApplicant, MetaObjectType.GROUP_TALK_DISSOLVED, null);
         }
     }
     

@@ -10,10 +10,7 @@ import com.everhomes.rest.workReport.WorkReportReadStatus;
 import com.everhomes.rest.workReport.WorkReportStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValCommentsDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValReceiverMapDao;
-import com.everhomes.server.schema.tables.daos.EhWorkReportValsDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
@@ -34,6 +31,9 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
 
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private WorkReportTimeService workReportTimeService;
 
     @Autowired
     private SequenceProvider sequenceProvider;
@@ -120,8 +120,8 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         if(cmd.getApplierIds() != null && cmd.getApplierIds().size()>0)
             query.addConditions(Tables.EH_WORK_REPORT_VALS.APPLIER_USER_ID.in(cmd.getApplierIds()));
         if (cmd.getStartTime() != null && cmd.getEndTime() != null) {
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(new Timestamp(cmd.getStartTime())));
-            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(new Timestamp(cmd.getEndTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.ge(workReportTimeService.toSqlDate(cmd.getStartTime())));
+            query.addConditions(Tables.EH_WORK_REPORT_VALS.REPORT_TIME.le(workReportTimeService.toSqlDate(cmd.getEndTime())));
         }
 
         //  EH_WORK_REPORT_VAL_RECEIVER_MAP conditions.
@@ -140,6 +140,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
             reportVal.setReportType(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TYPE));
             reportVal.setReportTime(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TIME));
             reportVal.setApplierName(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME));
+            reportVal.setApplierAvatar(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_AVATAR));
             reportVal.setReadStatus(r.getValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS));
             reportVal.setUpdateTime(r.getValue(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME));
             results.add(reportVal);
@@ -206,22 +207,24 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long receiverId) {
+    public Integer countUnReadWorkReportsVal(Integer namespaceId, Long organizationId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS.eq(WorkReportReadStatus.UNREAD.getCode()));
         return query.fetchCount();
     }
 
     @Override
-    public void markWorkReportsValReading(Integer namespaceId, Long receiverId) {
+    public void markWorkReportsValReading(Integer namespaceId, Long organizationId, Long receiverId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         UpdateQuery<EhWorkReportValReceiverMapRecord> query = context.updateQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS, WorkReportReadStatus.READ.getCode());
         query.addValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.RECEIVER_USER_ID.eq(receiverId));
         query.execute();
     }
@@ -319,4 +322,81 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         return results;
     }
 
+    @Override
+    public Long createWorkReportValReceiverMsg(WorkReportValReceiverMsg msg){
+        Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWorkReportValReceiverMsg.class));
+        msg.setId(id);
+        msg.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMsgDao dao = new EhWorkReportValReceiverMsgDao(context.configuration());
+        dao.insert(msg);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWorkReportValReceiverMsg.class, null);
+        return msg.getId();
+    }
+
+    @Override
+    public void deleteReportValReceiverMsgByValId(Long reportValId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportValReceiverMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_VAL_ID.eq(reportValId));
+        query.execute();
+    }
+
+    @Override
+    public void deleteReportValReceiverMsg() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportValReceiverMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.execute();
+    }
+
+    @Override
+    public void updateWorkReportValReceiverMsg(WorkReportValReceiverMsg msg) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhWorkReportValReceiverMsgDao dao = new EhWorkReportValReceiverMsgDao(context.configuration());
+        dao.update(msg);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportValReceiverMsg.class, msg.getId());
+    }
+
+    @Override
+    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime){
+        List<WorkReportValReceiverMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.ge(startTime));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.le(endTime));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportValReceiverMsg.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<WorkReportValReceiverMsg> listReportValReceiverMsgByReportTime(Long reportId, java.sql.Date reportTime){
+        List<WorkReportValReceiverMsg> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REPORT_TIME.eq(reportTime));
+        query.fetch().map(r -> {
+            results.add(ConvertHelper.convert(r, WorkReportValReceiverMsg.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
+    public List<WorkReportValReceiverMap> listWorkReportReceivers() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValReceiverMapRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP);
+        return query.fetchInto(WorkReportValReceiverMap.class);
+    }
+
+    @Override
+    public List<WorkReportVal> listWorkReportVals(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
+        return query.fetchInto(WorkReportVal.class);
+    }
 }

@@ -10,6 +10,8 @@ import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
 import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.StickyEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UnStickyEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 
@@ -36,5 +38,9 @@ public interface EnterpriseNoticeService {
     boolean isNoticeSendToCurrentUser(Long organizationId, Long enterpriseNoticeId);
 
     EnterpriseNoticeDTO getSharedEnterpriseNoticeDetailInfo(String enterpriseNoticeToken);
+
+	void stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd);
+
+	void unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd);
 
 }

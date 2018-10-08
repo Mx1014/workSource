@@ -128,13 +128,13 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 					LOGGER.error("Notify parking recharge failed, cmd={}, order={}", cmd, order, e);
 				}finally {
 					ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
-
+					Long orderId = order.getId();
 					ExecutorUtil.submit(new Runnable() {
 						@Override
 						public void run() {
 
 							LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
-							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + cmd.getBizOrderNum(), JSONObject.toJSONString(dto), null);
+							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + orderId, JSONObject.toJSONString(dto), null);
 
 							localBus.publish(this, "Parking-Recharge" + cmd.getBizOrderNum(), JSONObject.toJSONString(dto));
 						}

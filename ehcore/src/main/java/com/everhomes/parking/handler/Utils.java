@@ -162,7 +162,7 @@ public class Utils {
      *              如果是最后一天,忽略，如source是5月31日，month是2个月，那么计算的结果是7月31日
      * @return
      */
-    static Long getLongByAddNatureMonth(Long source, int month) {
+    public static Long getLongByAddNatureMonth(Long source, int month) {
         return getLongByAddNatureMonth(source,month,false);
     }
 
@@ -300,7 +300,7 @@ public class Utils {
      * @param month
      * @return
      */
-    static Timestamp getTimestampByAddThirtyDays(long source, int month) {
+    public static Timestamp getTimestampByAddThirtyDays(long source, int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(source+1000);
         calendar.add(Calendar.DAY_OF_MONTH,30*month-1);

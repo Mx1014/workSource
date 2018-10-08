@@ -677,4 +677,11 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		TruncateIdentityStep query1 = context.truncate(Tables.EH_PM_TASK_ORDER_DETAILS);
 		query1.execute();
 	}
+
+	@Override
+	public void deletePmTaskOrder(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
+		dao.deleteById(id);
+	}
 }

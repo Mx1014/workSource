@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  *     <li>id: 合同id</li>
  *     <li>partyAId: 合同甲方id</li>
  *     <li>categoryId: 合同类型categoryId，用于多入口</li>
- *     <li>contractApplicationScene: 合同适用场景contractApplicationScene，0 租赁合同场景 1 物业合同场景 2 综合合同场景</li>
  * </ul>
  * Created by ying.xiong on 2017/8/21.
  */
@@ -24,16 +23,6 @@ public class DeleteContractCommand {
 
     private Byte paymentFlag = 0;
     
-    private Byte contractApplicationScene = 0;
-
-    public Byte getContractApplicationScene() {
-		return contractApplicationScene;
-	}
-
-	public void setContractApplicationScene(Byte contractApplicationScene) {
-		this.contractApplicationScene = contractApplicationScene;
-	}
-
 	public Byte getPaymentFlag() {
         return paymentFlag;
     }
