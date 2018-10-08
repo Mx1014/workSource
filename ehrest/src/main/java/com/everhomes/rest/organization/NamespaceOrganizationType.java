@@ -9,7 +9,7 @@ package com.everhomes.rest.organization;
  * </ul>
  */
 public enum NamespaceOrganizationType {
-	JINDIE("jindie"), SHENZHOU("shenzhou"), EBEI("ebei");
+	JINDIE("jindie"), SHENZHOU("shenzhou"), EBEI("ebei"), CM("cm");
     
     private String code;
     private NamespaceOrganizationType(String code) {

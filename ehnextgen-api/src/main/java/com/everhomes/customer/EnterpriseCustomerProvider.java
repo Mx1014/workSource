@@ -23,8 +23,8 @@ import java.util.Set;
  * Created by ying.xiong on 2017/8/11.
  */
 public interface EnterpriseCustomerProvider {
-    void createEnterpriseCustomer(EnterpriseCustomer customer);
-    void updateEnterpriseCustomer(EnterpriseCustomer customer);
+    Long createEnterpriseCustomer(EnterpriseCustomer customer);
+    Long updateEnterpriseCustomer(EnterpriseCustomer customer);
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);

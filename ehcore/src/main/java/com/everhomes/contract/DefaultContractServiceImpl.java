@@ -3763,6 +3763,11 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 	}
 
 	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+		return null;
+	}
+
+	@Override
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		List<Contract> contracts = contractProvider.listContractsByNamespaceIdAndStatus(cmd.getNamespaceId(),ContractStatus.DENUNCIATION.getCode());
 		
@@ -3782,6 +3787,16 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 				contractProvider.updateContract(contract);
 			}
 		}
+	}
+
+	@Override
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
+
+	}
+
+	@Override
+	public OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId) {
+		return null;
 	}
 
 
