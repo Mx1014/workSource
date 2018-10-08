@@ -12,7 +12,7 @@ import com.everhomes.rest.paymentauths.EnterpriesAuthDTO;
 import com.everhomes.rest.paymentauths.EnterprisePaymentAuthsDTO;
 import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsCommand;
 import com.everhomes.rest.paymentauths.PaymentAuthsAPPType;
-import com.everhomes.rest.paymentauths.UpdateEnterpirsePaymentAuthsCommand;
+import com.everhomes.rest.paymentauths.UpdateEnterprisePaymentAuthsCommand;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,7 +83,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	}
 	
 	@Override
-	public void updateEnterpirsePaymentAuths (UpdateEnterpirsePaymentAuthsCommand cmd){
+	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
