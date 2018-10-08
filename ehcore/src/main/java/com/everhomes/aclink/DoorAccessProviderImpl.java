@@ -361,9 +361,16 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
         List<ActiveDoorByFirmwareDTO> dtos = new ArrayList<ActiveDoorByFirmwareDTO>();
         SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
-                ,Tables.EH_DOOR_ACCESS.FLOOR_ID.as("firmware"))
+                ,Tables.EH_DOOR_ACCESS.FIRMWARE_NAME.as("firmware"))
                 .from(t)
                 .groupBy(t.DOOR_TYPE);
+        groupBy.fetch().map((r) -> {
+            ActiveDoorByFirmwareDTO dto = new ActiveDoorByFirmwareDTO();
+            dto.setFirmware(r.value2());
+            dto.setActiveDoorNumber(r.value1());
+            dtos.add(dto);
+            return null;
+        });
 
         return null;
     }

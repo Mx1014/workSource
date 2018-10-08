@@ -39,6 +39,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filemanagement.FileContent;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
@@ -62,6 +63,8 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.energy.util.EnumType;
+import com.everhomes.rest.filemanagement.FileContentType;
+import com.everhomes.rest.filemanagement.FileManagementErrorCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -5358,8 +5361,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void uploadBluetooth(UploadBluetoothCommand cmd){
+        FileContent content = new FileContent();
+        if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
+            if (cmd.getContentSuffix() == null)
+                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
+                        "the suffix can not be null.");
+            content.setContentSuffix(cmd.getContentSuffix().toLowerCase());
+            content.setSize(cmd.getContentSize());
+            content.setContentUri(cmd.getContentUri());
+        }
 
     }
+
     @Override
     public void uploadWifi(UploadBluetoothCommand cmd){
 

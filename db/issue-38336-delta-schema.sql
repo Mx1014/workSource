@@ -641,3 +641,11 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL
 -- REMARK: 20180930 issue-38336
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (64) NULL COMMENT '门禁设备固件版本';
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (64) NULL COMMENT '门禁设备固件名';
+CREATE TABLE `eh_aclink_firmware_package` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11) DEFAULT NULL,
+  `type` TINYINT(4) DEFAULT NULL COMMENT '程序类型 0：蓝牙 1：wifi',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT '存储地址' ,
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件程序表';
