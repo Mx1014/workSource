@@ -42,7 +42,7 @@ public class PaymentAuthsController extends ControllerBase {
 	 */
 	@RequestMapping("listEnterprisePaymentAuths")
 	@RestReturn(value=EnterprisePaymentAuthsDTO.class, collection = true)
-	public RestResponse listEnterpirsePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
+	public RestResponse listEnterprisePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
 		List<EnterprisePaymentAuthsDTO> dto = paymentAuthsService.listEnterprisePaymentAuths(cmd);
 		RestResponse response =  new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
