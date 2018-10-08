@@ -19,8 +19,10 @@ import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -34,6 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -148,10 +151,20 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 errorDataLogs.add(log);
                 continue;
             }
-            //  2.导入数据库
-            boolean flag = saveContactsInfo(data, organizationId, departmentId);
-            if (flag)
-                coverCount++;
+            try{
+	            //  2.导入数据库
+	            boolean flag = saveContactsInfo(data, organizationId, departmentId);
+	            if (flag)
+	                coverCount++;
+            }catch(RuntimeErrorException e){
+            	log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
+            	log.setData(data);
+                log.setErrorLog(e.getMessage());
+                log.setCode(e.getErrorCode());
+                errorDataLogs.add(log);
+                continue;
+            	
+            }
         }
         //  3.存储所有数据行数
         response.setTotalCount((long) datas.size());
