@@ -8,11 +8,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
-import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +50,14 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
             task.setLockKey(CoordinationLocks.SYNC_CONTRACT.getCode() + cmd.getNamespaceId() + cmd.getCommunityId());
             SyncDataTask dataTask = syncDataTaskService.executeTask(() -> {
                 SyncDataResponse response = new SyncDataResponse();
-                contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), cmd.getContractApplicationScene());
+                
+                ContractCategory contractCategory = contractProvider.findContractCategoryById(cmd.getCategoryId());
+                Byte contractApplicationScene = 0;
+                if (contractCategory.getContractApplicationScene() != null) {
+                	contractApplicationScene = contractCategory.getContractApplicationScene();
+				}
+        		
+                contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractApplicationScene);
                 return response;
             }, task);
 
