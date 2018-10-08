@@ -19,12 +19,14 @@ public class AssetSourceType {
 	public static final String CONTRACT_MODULE = "contract";
 	public static final String ENERGY_MODULE = "energy";
 	public static final String PRINT_MODULE = "print";
+	public static final String RENTAL_MODULE = "rental";
 	
 	public static enum AssetSourceTypeEnum{
 		ASSET_MODULE(ServiceModuleConstants.ASSET_MODULE, AssetSourceType.ASSET_MODULE), //物业缴费模块
 		CONTRACT_MODULE(ServiceModuleConstants.CONTRACT_MODULE, AssetSourceType.CONTRACT_MODULE), //合同管理模块
 		ENERGY_MODULE(ServiceModuleConstants.ENERGY_MODULE, AssetSourceType.ENERGY_MODULE), //能耗管理模块
-		PRINT_MODULE(ServiceModuleConstants.PRINT_MODULE, AssetSourceType.PRINT_MODULE);//云打印模块
+		PRINT_MODULE(ServiceModuleConstants.PRINT_MODULE, AssetSourceType.PRINT_MODULE), //云打印模块
+		RENTAL_MODULE(ServiceModuleConstants.RENTAL_MODULE, AssetSourceType.RENTAL_MODULE);//资源预订模块
 		
 		private Long moduleId;
 		private String sourceType;

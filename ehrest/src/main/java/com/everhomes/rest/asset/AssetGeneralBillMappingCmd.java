@@ -3,6 +3,7 @@ package com.everhomes.rest.asset;
 
 /**
  *<ul>
+ * <li>assetCategoryId:缴费多应用ID</li>
  * <li>namespaceId:域空间ID</li>
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
@@ -18,6 +19,7 @@ package com.everhomes.rest.asset;
  *</ul>
  */
 public class AssetGeneralBillMappingCmd {
+	private Long assetCategoryId; 
 	private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
@@ -102,5 +104,11 @@ public class AssetGeneralBillMappingCmd {
 	}
 	public void setGoodsTag5(String goodsTag5) {
 		this.goodsTag5 = goodsTag5;
+	}
+	public Long getAssetCategoryId() {
+		return assetCategoryId;
+	}
+	public void setAssetCategoryId(Long assetCategoryId) {
+		this.assetCategoryId = assetCategoryId;
 	}
 }

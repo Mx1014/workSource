@@ -99,11 +99,10 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
-import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
+import com.everhomes.rest.asset.modulemapping.AssetMapContractConfig;
+import com.everhomes.rest.asset.modulemapping.AssetMapEnergyConfig;
 import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
 import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
-import com.everhomes.rest.common.AssetMapContractConfig;
-import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
@@ -5754,17 +5753,17 @@ public class AssetServiceImpl implements AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
-		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(assetModuleAppMapping, AssetGeneralBillMappingCmd.class);
-		boolean existGeneralBillAssetMapping = assetProvider.checkExistGeneralBillAssetMapping(cmd);
-		if(existGeneralBillAssetMapping) {
-			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数能在映射表查到数据，那判断为更新
-			return assetProvider.updateGeneralBillAssetMapping(assetModuleAppMapping);
-		}else {
-			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查不到数据，那判断为新增
-			return assetProvider.insertAppMapping(assetModuleAppMapping);
-		}
-	}
+//	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping) {
+//		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(assetModuleAppMapping, AssetGeneralBillMappingCmd.class);
+//		boolean existGeneralBillAssetMapping = assetProvider.checkExistGeneralBillAssetMapping(cmd);
+//		if(existGeneralBillAssetMapping) {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数能在映射表查到数据，那判断为更新
+//			return assetProvider.updateGeneralBillAssetMapping(assetModuleAppMapping);
+//		}else {
+//			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查不到数据，那判断为新增
+//			return assetProvider.insertAppMapping(assetModuleAppMapping);
+//		}
+//	}
 
     public Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId) {
         return assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId);
@@ -6268,44 +6267,4 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-	
-	public void createContractMapping(CreateContractMappingCommand cmd) {
-        //判断缴费是否已经存在关联合同的记录
-        cmd.setSourceType(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
-        AssetMapContractConfig config = new AssetMapContractConfig();
-    	config.setContractOriginId(cmd.getContractOriginId());
-    	config.setContractChangeFlag(cmd.getContractChangeFlag());
-    	cmd.setConfig(config.toString());
-        boolean existAssetMapContract = assetProvider.checkExistAssetMapContract(cmd.getAssetCategoryId());
-        if(existAssetMapContract){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	mapping.setSourceId(cmd.getContractCategoryId());
-        	assetProvider.updateAssetMapContract(mapping);
-        }else {
-        	//如果不存在就是新增
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
-        	mapping.setSourceId(cmd.getContractCategoryId());
-        	assetProvider.insertAppMapping(mapping);
-        }
-	}	
-	
-	public void createEnergyMapping(CreateEnergyMappingCommand cmd) {
-        //判断缴费是否已经存在关联能耗的记录
-        cmd.setSourceId(null);
-        cmd.setSourceType(AssetSourceTypeEnum.ENERGY_MODULE.getSourceType());
-        AssetMapEnergyConfig energyConfig = new AssetMapEnergyConfig();
-        energyConfig.setEnergyFlag(cmd.getEnergyFlag());
-    	cmd.setConfig(energyConfig.toString());
-        boolean existAssetMapEnergy = assetProvider.checkExistAssetMapEnergy(cmd.getAssetCategoryId());
-        if(existAssetMapEnergy){
-        	//如果已经存在就是更新
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);
-        	assetProvider.updateAssetMapEnergy(mapping);
-        }else {
-        	//如果不存在就是新增
-        	AssetModuleAppMapping mapping = ConvertHelper.convert(cmd, AssetModuleAppMapping.class);;
-        	assetProvider.insertAppMapping(mapping);
-        }
-	}	
 }

@@ -7,7 +7,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
