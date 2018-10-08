@@ -201,5 +201,6 @@ CREATE TABLE `eh_work_report_scope_msg` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 -- END issue-34029
 
-
-
+-- AUTHOR: 荣楠
+-- REMARK: org-4.6 组织架构4.6
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;

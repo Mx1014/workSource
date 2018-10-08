@@ -289,7 +289,11 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
+	boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail);
+	boolean verifyPersonnelByAccount(Long detailId, String account);
+	boolean verifyPersonnelByAccount(String contactToken, String account);
+	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
@@ -647,4 +651,7 @@ public interface OrganizationService {
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
+
+	//	物业组所需获取企业员工的唯一标识符
+	String getAccountByTargetIdAndOrgId(Long targetId, Long orgId);
 }

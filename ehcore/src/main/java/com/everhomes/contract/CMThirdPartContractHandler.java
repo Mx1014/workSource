@@ -205,6 +205,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }else{
                 LOGGER.error("sync customer from RuiAnCM errorCode: {}", cmSyncObject.getErrordescription());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_EMPTY, "sync customer from RuiAnCM error");
+
             }
 
         }
