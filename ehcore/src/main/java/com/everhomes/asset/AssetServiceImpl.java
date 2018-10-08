@@ -57,6 +57,7 @@ import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -109,6 +110,8 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contract.CMBill;
+import com.everhomes.rest.contract.CMContractHeader;
+import com.everhomes.rest.contract.CMContractUnit;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.contract.NamespaceContractType;
@@ -5702,15 +5705,25 @@ public class AssetServiceImpl implements AssetService {
 				List<CMDataObject> data = cmSyncObject.getData();
 				if(data != null) {
 					for(CMDataObject cmDataObject : data) {
-						List<CMBill> cmBills = cmDataObject.getBill();
-						//TODO 1、根据propertyId获取左邻communityId
+						CMContractHeader contractHeader = cmDataObject.getContractHeader();
+						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
-						communityId = cmDataObject.getCommunityId();
-						//TODO 2、获取左邻客户ID
+						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
+						if(community != null) {
+							communityId = community.getId();
+						}
+						//2、获取左邻客户ID
 						Long targetId = null;
 						targetId = cmDataObject.getCustomerId();
-						//TODO 3、获取左邻楼栋单元地址ID
+						//3、获取左邻楼栋单元地址ID
 						Long addressId = null;
+						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
+							CMContractUnit cmContractUnit = cmDataObject.getContractUnit().get(0);
+							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+							if(address != null) {
+								addressId = address.getId();
+							}
+						}
 						
 						//获取左邻合同ID、合同编号
 						Long contractId = null;
@@ -5736,6 +5749,7 @@ public class AssetServiceImpl implements AssetService {
 						if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
 							categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
 						}
+						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
 							BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
 							BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
