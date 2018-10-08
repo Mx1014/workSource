@@ -14,6 +14,11 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_NOTIFY_EMAIL_EXIST = 10009;  //该类下推送邮箱已存在
     static final int ERROR_COMMUNITY_NOT_CHOSEN = 10010;  //未选中项目
     static final int ERROR_SERVICE_TYPE_TO_UPDATE_NOT_FOUND= 10011;  //未找到需要更新的服务类型
+    static final int ERROR_COMMENT_NOT_EXIST_OR_DELETED = 10012;  //评论不存在或已被删除
+    static final int ERROR_EXCEL_EXPORT_FAILED = 10013;  //文件导出失败
+    static final int ERROR_SKIP_URL_FORMAT_ERROR = 10014;  //跳转链接格式错误
+    static final int ERROR_INPUT_PARAM_NOT_VALID = 10015;  //接口参数异常
+    static final int ERROR_QUERY_BIZ_MODULE_FAILED = 10016;  //获取电商模块失败
     
     static final int ERROR_NEW_EVENT_APPLIER_NOT_EXIST = 11000;  //新事件申请用户不存在
     static final int ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST = 11001;  //未找到工作流信息
