@@ -5745,10 +5745,14 @@ public class AssetServiceImpl implements AssetService {
 						}
 						//获取左邻缴费应用categoryId
 						Long categoryId = null;
-						List<AssetServiceModuleAppDTO> assetServiceModuleAppDTOs = listAssetModuleApps(namespaceId);
-						if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
-							categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
-						}
+						try {
+							List<AssetServiceModuleAppDTO> assetServiceModuleAppDTOs = listAssetModuleApps(namespaceId);
+							if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
+								categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
+							}
+						}catch (Exception e){
+				            LOGGER.error(e.toString());
+				        }
 						List<CMBill> cmBills = cmDataObject.getBill();
 						for(CMBill cmBill : cmBills) {
 							BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
