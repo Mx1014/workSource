@@ -387,11 +387,11 @@ public interface AssetProvider {
      */
 //    boolean checkExistAssetMapContract(Long assetCategoryId);
     
-    boolean checkExistAssetMapEnergy(Long assetCategoryId);
+//    boolean checkExistAssetMapEnergy(Long assetCategoryId);
     
 //    void updateAssetMapContract(AssetModuleAppMapping mapping);
     
-    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
+//    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
 
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     

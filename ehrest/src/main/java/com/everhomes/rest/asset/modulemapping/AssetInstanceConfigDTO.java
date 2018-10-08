@@ -1,15 +1,19 @@
 package com.everhomes.rest.asset.modulemapping;
 
+import java.util.List;
+
 /**
  * @author created by ycx
  * @date 下午1:38:48
  */
+
 public class AssetInstanceConfigDTO {
 	private String url;
 	private Long categoryId;
 	private Long contractOriginId;
 	private Byte contractChangeFlag;
 	private Byte energyFlag;
+	private List<PrintInstanceConfigDTO> printInstanceConfigDTOList;
 	
 	public String getUrl() {
 		return url;
@@ -40,5 +44,11 @@ public class AssetInstanceConfigDTO {
 	}
 	public void setEnergyFlag(Byte energyFlag) {
 		this.energyFlag = energyFlag;
+	}
+	public List<PrintInstanceConfigDTO> getPrintInstanceConfigDTOList() {
+		return printInstanceConfigDTOList;
+	}
+	public void setPrintInstanceConfigDTOList(List<PrintInstanceConfigDTO> printInstanceConfigDTOList) {
+		this.printInstanceConfigDTOList = printInstanceConfigDTOList;
 	}
 }

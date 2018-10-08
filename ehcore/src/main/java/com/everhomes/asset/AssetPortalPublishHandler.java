@@ -108,55 +108,5 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(e.getSourceType());
 			generalBillHandler.createOrUpdateAssetModuleAppMapping(app);
     	}
-    	
-//    	String instanceConfig = app.getInstanceConfig();
-//    	try {
-//    		if(instanceConfig != null && instanceConfig != "") {
-//    			//格式化instanceConfig的json成对象
-//    			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
-//    			if(assetInstanceConfigDTO != null) {
-//    				//配置缴费-合同的映射关系
-//    				try {
-//    					if(assetInstanceConfigDTO.getContractOriginId() != null) {
-//    						GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(AssetSourceTypeEnum.CONTRACT_MODULE.getSourceType());
-//    						generalBillHandler.createAssetModuleAppMapping(assetInstanceConfigDTO);
-//    					}
-//    				}catch (Exception e) {
-//    		            LOGGER.error("failed to save mapping of contract payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
-//    		            e.printStackTrace();
-//    		        }
-//    				
-//    				//配置缴费-能耗的映射关系
-//    				try {
-//    					CreateEnergyMappingCommand cmd = new CreateEnergyMappingCommand();
-//    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-//    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
-//    					cmd.setNamespaceId(app.getNamespaceId());
-//    					assetService.createEnergyMapping(cmd);
-//    				}catch (Exception e) {
-//    		            LOGGER.error("failed to save mapping of energy payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
-//    		            e.printStackTrace();
-//    		        }
-//    				
-////    				//配置缴费-云打印的映射关系
-////    				try {
-////    					CreatePrintMappingCommand cmd = new CreatePrintMappingCommand();
-////    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-////    					cmd.setNamespaceId(app.getNamespaceId());
-////    					assetService.createPrintMapping(cmd);
-////    				}catch (Exception e) {
-////    		            LOGGER.error("failed to save mapping of print payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
-////    		            e.printStackTrace();
-////    		        }
-////    				
-////    				//配置缴费-资源预约的映射关系
-//    				
-//    				
-//    			}
-//    		}
-//    	}catch (Exception e) {
-//            LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
-//            e.printStackTrace();
-//        }
     }
 }
