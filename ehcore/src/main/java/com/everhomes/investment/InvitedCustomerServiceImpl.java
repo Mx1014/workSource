@@ -30,6 +30,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +126,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -169,7 +172,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
@@ -228,7 +233,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 contact.setNamespaceId(cmd.getNamespaceId());
                 contact.setStatus(CommonStatus.ACTIVE.getCode());
                 contact.setCustomerSource(cmd.getCustomerSource());
-                invitedCustomerProvider.createContact(contact);
+                if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                    invitedCustomerProvider.createContact(contact);
+                }
             });
         }
         // reflush requirement
@@ -273,7 +280,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 tracker.setNamespaceId(cmd.getNamespaceId());
                 tracker.setStatus(CommonStatus.ACTIVE.getCode());
                 tracker.setCustomerId(cmd.getId());
-                invitedCustomerProvider.createTracker(tracker);
+                if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                    invitedCustomerProvider.createTracker(tracker);
+                }
             });
         }
         EnterpriseCustomer customer = ConvertHelper.convert(customerDTO, EnterpriseCustomer.class);
@@ -592,7 +601,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     tracker.setStatus(CommonStatus.ACTIVE.getCode());
                     tracker.setCustomerId(invitedCustomerDTO.getId());
                     tracker.setCustomerSource(invitedCustomerDTO.getCustomerSource());
-                    invitedCustomerProvider.createTracker(tracker);
+                    if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                        invitedCustomerProvider.createTracker(tracker);
+                    }
                 });
             }
             invitedCustomerDTO.setTrackers(trackers);
@@ -663,7 +674,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -707,7 +720,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
