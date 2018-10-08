@@ -37,11 +37,14 @@ import com.everhomes.rest.notice.EnterpriseNoticeReceiverType;
 import com.everhomes.rest.notice.EnterpriseNoticeSecretFlag;
 import com.everhomes.rest.notice.EnterpriseNoticeShowType;
 import com.everhomes.rest.notice.EnterpriseNoticeStatus;
+import com.everhomes.rest.notice.EnterpriseNoticeStickFlag;
 import com.everhomes.rest.notice.GetCurrentUserContactInfoCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeAdminResponse;
 import com.everhomes.rest.notice.ListEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.ListEnterpriseNoticeResponse;
+import com.everhomes.rest.notice.StickyEnterpriseNoticeCommand;
+import com.everhomes.rest.notice.UnStickyEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UpdateEnterpriseNoticeCommand;
 import com.everhomes.rest.notice.UserContactSimpleInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -49,6 +52,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
@@ -62,6 +66,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -592,6 +597,7 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
         String noticeToken = WebTokenGenerator.getInstance().toWebToken(enterpriseNoticeId);
         String homeUrl = configurationProvider.getValue(0, ConfigConstants.HOME_URL, "");
         String webUri = configurationProvider.getValue(0, ConfigConstants.ENTERPRISE_NOTICE_WEB_SHARE_URL,
+
                 "/announcement/build/index.html?ns=%s&noticeToken=%s");
         if (!StringUtils.hasText(homeUrl) || !StringUtils.hasText(webUri)) {
             LOGGER.error("Invalid home url or share uri, homeUrl={}, shareUrl={}", homeUrl, webUri);
@@ -601,5 +607,26 @@ public class EnterpriseNoticeServiceImpl implements EnterpriseNoticeService {
 
         return homeUrl + String.format(webUri, UserContext.getCurrentNamespaceId(), noticeToken);
     }
+
+	@Override
+	public void stickyEnterpriseNotice(StickyEnterpriseNoticeCommand cmd) {
+		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
+        enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.STICK.getCode());
+        enterpriseNotice.setStickTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
+        enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
+	}
+
+	@Override
+	public void unStickyEnterpriseNotice(UnStickyEnterpriseNoticeCommand cmd) {
+
+		EnterpriseNotice enterpriseNotice = enterpriseNoticeProvider.findById(cmd.getId());
+        enterpriseNotice.setStickFlag(EnterpriseNoticeStickFlag.UN_STICK.getCode());
+        //最晚取消置顶的也要排序在前面所以更新createTime并且取消stickTime
+        enterpriseNotice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterpriseNotice.setStickTime(null);
+        enterpriseNotice.setOperatorName(getUserContactNameByUserId(UserContext.currentUserId()));
+        enterpriseNoticeProvider.updateEnterpriseNotice(enterpriseNotice);
+	}
 
 }

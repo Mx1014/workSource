@@ -82,7 +82,7 @@ public class UclbrtHttpClient {
 		return getQrCode(paramsDTO, mobile, "", endTimeString);
 	}
 	
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation") 
 	public String TestFuncXML(String protocol,String  ip,String  port,String  communityNo,String  buildNo, String floorNo, String roomNo, String accSid,String  token,String areaCode,String mobile,String begTime,String endTime){
 		//所有跟ucl的请求共用一套手机号
 		mobile = "13480251015";

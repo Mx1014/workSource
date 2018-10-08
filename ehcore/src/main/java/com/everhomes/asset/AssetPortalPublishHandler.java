@@ -125,6 +125,12 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
     					cmd.setNamespaceId(app.getNamespaceId());
     					assetService.createOrUpdateAnAppMapping(cmd);
+    				}else {
+    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
+    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
+    					cmd.setNamespaceId(app.getNamespaceId());
+    					assetService.createOrUpdateAnAppMapping(cmd);
     				}
     			}
     		}

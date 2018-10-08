@@ -28,8 +28,10 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
@@ -93,6 +95,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+	protected UserProvider userProvider;
 
     @Override
     public String getIndexType() {
@@ -369,7 +374,21 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
                         dto.setCategoryItemName(item.getItemDisplayName());
                     }
                 }
+                
+				if (contract.getSponsorUid() != null) {
+					// 用户可能不在组织架构中 所以用nickname
+					User user = userProvider.findUserById(contract.getSponsorUid());
+					if (user != null) {
+						dto.setSponsorName(user.getNickName());
+					}
+				}
+                
                 processContractApartments(dto);
+                //查询合同适用场景，物业合同不修改资产状态。
+		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+		        if (contractCategory != null) {
+		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
                 dtos.add(dto);
             });
         }

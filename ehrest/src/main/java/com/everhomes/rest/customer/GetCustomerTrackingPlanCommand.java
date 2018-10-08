@@ -23,6 +23,8 @@ public class GetCustomerTrackingPlanCommand {
 
     private Long orgId;
 
+    private Byte customerSource;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -69,6 +71,14 @@ public class GetCustomerTrackingPlanCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
     }
 
     @Override

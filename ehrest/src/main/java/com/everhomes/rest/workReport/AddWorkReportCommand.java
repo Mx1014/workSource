@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  */
 public class AddWorkReportCommand {
 
+    private Integer namespaceId;
+
     private Long organizationId;
 
     private String reportName;
@@ -27,6 +29,14 @@ public class AddWorkReportCommand {
     private String moduleType;
 
     public AddWorkReportCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getOrganizationId() {

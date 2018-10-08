@@ -36,6 +36,8 @@ import com.everhomes.rest.customer.TrackingPlanReadStatus;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
@@ -165,6 +167,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         FieldGroup group = new FieldGroup();
         //用名字搜会有问题
         if (isContainChinese(sheetName)) {
+            if(sheetName.equals("招商客户")){
+                sheetName = "客户信息";
+            }
             group = fieldProvider.findGroupByGroupDisplayName(sheetName);
         } else {
             group = fieldProvider.findFieldGroup(Long.parseLong(sheetName));
@@ -221,7 +226,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     if (!fieldDTO.getFieldParam().contains("image")&&!fieldDTO.getFieldParam().contains("file")) {//导出时 非图片字段可导出 fix 26791
                         if (withData && fieldDTO.getFieldParam().contains("richText")) {
                             LOGGER.info("remove richText cell whern export data!");
-                        } else {
+                        }else {
                             DynamicField df = ConvertHelper.convert(fieldDTO, DynamicField.class);
                             df.setDisplayName(fieldDTO.getFieldDisplayName());
                             if ("trackingTime".equals(fieldDTO.getFieldName()) || "notifyTime".equals(fieldDTO.getFieldName())) {
@@ -772,6 +777,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         enterpriseCustomer.setOwnerId(customerInfo.getOwnerId());
         enterpriseCustomer.setOwnerType(customerInfo.getOwnerType());
         enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
+        enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
         String customerAdminString = "";
         String customerAddressString = "";
         Class<?> clz = EnterpriseCustomer.class.getSuperclass();//校验数字日期格式
@@ -993,7 +999,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
        if(StringUtils.isBlank(column.getValue())){
            return false;
        }
-        if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
+       if("categoryItemId".equals(column.getFieldName()) || "levelItemId".equals(column.getFieldName())
                 || "sourceItemId".equals(column.getFieldName()) || "contactGenderItemId".equals(column.getFieldName())
                 || "corpNatureItemId".equals(column.getFieldName()) || "corpIndustryItemId".equals(column.getFieldName())
                 || "corpPurposeItemId".equals(column.getFieldName()) || "corpProductCategoryItemId".equals(column.getFieldName())
@@ -1007,7 +1013,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 || "dropBox4ItemId".equals(column.getFieldName()) || "dropBox5ItemId".equals(column.getFieldName())
                 || "dropBox6ItemId".equals(column.getFieldName()) || "dropBox7ItemId".equals(column.getFieldName())
                 || "dropBox8ItemId".equals(column.getFieldName()) || "dropBox9ItemId".equals(column.getFieldName())
-                || "aptitudeFlagItemId".equals(column.getFieldName())) {
+                || "aptitudeFlagItemId".equals(column.getFieldName()) || "entryStatusItemId".equals(column.getFieldName())) {
            // 历史bug
             ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
             if(item != null) {
@@ -1028,6 +1034,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 return true;
             }
         }
+
+
 
         if ("trackingUid".equals(column.getFieldName())) {
             Boolean isAdmin = checkCustomerAdmin(customerInfo.getOrgId(), null, customerInfo.getNamespaceId());

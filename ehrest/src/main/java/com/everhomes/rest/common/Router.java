@@ -1,13 +1,16 @@
 // @formatter:off
 package com.everhomes.rest.common;
 
+import com.everhomes.rest.announcement.AnnouncementDetailActionData;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.meeting.MeetingRecordDetailActionData;
 import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
 import com.everhomes.rest.remind.SelfRemindDetailActionData;
 import com.everhomes.rest.remind.TrackRemindDetailActionData;
+import com.everhomes.rest.techpark.punch.PunchNotificationActionData;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
+import com.everhomes.rest.workReport.WorkReportIndexActionData;
 
 /**
  * <ul>
@@ -233,6 +236,9 @@ public enum Router {
     BULLETIN_OWN_BY_ORG(ActionType.NOTICE_MANAGERMENT,
             "zl://bulletin/own-by-org", NoParamActionData.class),
 
+    BULLETIN_DETAIL(ActionType.ANNOUNCEMENT_DETAIL,
+            "zl://bulletin/detail", AnnouncementDetailActionData.class),
+
     /**
      * resource-reservation
      */
@@ -249,7 +255,7 @@ public enum Router {
      * attendance
      */
     ATTENDANCE_PUNCH(ActionType.PUNCH,
-            "zl://attendance/punch", NoParamActionData.class),
+            "zl://attendance/index", PunchNotificationActionData.class),
 
     /**
      * video-conference
@@ -260,11 +266,12 @@ public enum Router {
     RENTAL_ORDER_DETAIL(ActionType.RENTAL,
             "zl://resource-reservation/detail", RentalOrderActionData.class),
     /**
-     * video-conference
+     * work_report_notice
      */
     WORK_REPORT_DETAILS(
             "zl://work-report/details", WorkReportDetailsActionData.class),
-
+    WORK_REPORT_INDEX(
+            "zl://work-report/index", WorkReportIndexActionData.class),
 
     /**
      * enterprise-notice

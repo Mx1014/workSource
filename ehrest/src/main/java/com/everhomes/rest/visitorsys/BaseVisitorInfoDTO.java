@@ -41,6 +41,9 @@ import java.util.List;
  * <li>createTime: (必填)预约创建时间</li>
  * <li>invitationNo: (必填)邀请码</li>
  * <li>visitorActionList: (选填)事件列表, {@link com.everhomes.rest.visitorsys.BaseVisitorActionDTO}</li>
+ * <li>authRuleType: 授权规则种类，0 时长，1 次数</li>
+ * <li>doorAccessInvalidTimes: 门禁使用次数</li>
+ * <li>doorAccessInvalidDuration: 门禁有效期（天）</li>
  * </ul>
  */
 public class BaseVisitorInfoDTO extends BaseVisitorDTO{
