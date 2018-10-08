@@ -8,7 +8,7 @@ package com.everhomes.rest.customer;
  * Created by ying.xiong on 2017/8/11.
  */
 public enum NamespaceCustomerType {
-    SHENZHOU("shenzhou"), EBEI("ebei");
+    SHENZHOU("shenzhou"), EBEI("ebei"), CM("cm");
 
     private String code;
     private NamespaceCustomerType(String code) {

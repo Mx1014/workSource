@@ -25,6 +25,7 @@ import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.openapi.ZjSyncdataBackup;
 import com.everhomes.openapi.ZjSyncdataBackupProvider;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -35,6 +36,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
+import com.everhomes.rest.customer.EbeiCustomer;
 import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.openapi.shenzhou.DataType;
@@ -42,6 +44,7 @@ import com.everhomes.rest.openapi.shenzhou.SyncFlag;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
+import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.userOrganization.UserOrganizationProvider;
@@ -101,6 +104,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     
     @Autowired
     private EnterpriseCustomerProvider customerProvider;
+
+    @Autowired
+    private EnterpriseSearcher customerSearcher;
     
     @Autowired
     private ContractSearcher contractSearcher;
@@ -203,8 +209,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
                 }
             }else{
-                LOGGER.error("sync customer from RuiAnCM errorCode: {}", cmSyncObject.getErrordescription());
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_EMPTY, "sync customer from RuiAnCM error");
+                LOGGER.error("sync data from RuiAnCM is fail" );
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync data from RuiAnCM is fail");
 
             }
 
@@ -693,4 +699,108 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
         return ts;
     }
+
+/*
+    private List<CMSyncObject> syncAllEnterprises(Integer namespaceId, String communityIdentifier, List<CMSyncObject> syncObjects) {
+        //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+        //allFlag为part时，仅更新单个特定的项目数据即可
+        Community community = communityProvider.findCommunityByNamespaceToken(NamespaceCommunityType.EBEI.getCode(), communityIdentifier);
+        if(community == null) {
+            return null;
+        }
+        List<EnterpriseCustomer> myEnterpriseCustomerList = customerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.CM.getCode(), community.getId());
+
+        //List<EbeiCustomer> mergeEnterpriseList = mergeBackupList(backupList, EbeiCustomer.class);
+
+        LOGGER.debug("syncDataToDb namespaceId: {}, myEnterpriseCustomerList size: {}, theirEnterpriseList size: {}",
+                namespaceId, myEnterpriseCustomerList.size(), syncObjects.size());
+
+        syncObjects.forEach(r -> {
+            r.getData().forEach(r -> {
+                r.getContractHeader().getPropertyID();
+            });
+        });
+
+        syncAllEnterprises(namespaceId, community.getId(), myEnterpriseCustomerList, contractHeaders);
+
+    }
+
+    //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
+    // state为0的数据删除，state为1的数据：我们有，更新；我们没有则新增
+    private List<CMDataObject> syncAllEnterprises(Integer namespaceId, Long communityId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<CMContractHeader> theirEnterpriseList) {
+        if (theirEnterpriseList != null) {
+            for (CMContractHeader cmContractHeader : theirEnterpriseList) {
+
+                Boolean notdeal = true;
+                if (myEnterpriseCustomerList != null) {
+                    for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
+                        if (NamespaceCustomerType.CM.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
+                                && enterpriseCustomer.getNamespaceCustomerToken().equals(cmContractHeader.getAccountID())) {
+                            notdeal = false;
+                            updateEnterpriseCustomer(enterpriseCustomer, communityId, cmContractHeader);
+                        }
+                    }
+                }
+                if(notdeal){
+                    // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                    List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, ebeiCustomer.getCompanyName());
+                    if (customers == null || customers.size() == 0) {
+                        insertEnterpriseCustomer(NAMESPACE_ID, communityId, ebeiCustomer);
+                    } else {
+                        updateEnterpriseCustomer(customers.get(0), communityId, ebeiCustomer);
+                    }
+                }
+
+            }
+
+        }
+    }
+
+
+    private void updateEnterpriseCustomer(EnterpriseCustomer customer, Long communityId, CMContractHeader contractHeader) {
+        LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, ebeiCustomer: {}",
+                StringHelper.toJsonString(customer), StringHelper.toJsonString(contractHeader));
+//        this.dbProvider.execute((TransactionStatus status) -> {
+        customer.setCommunityId(communityId);
+        customer.setNamespaceCustomerType(NamespaceCustomerType.CM.getCode());
+        customer.setNamespaceCustomerToken(contractHeader.getAccountID());
+        customer.setName(contractHeader.getAccountName());
+        customer.setNickName(contractHeader.getAccountName());
+        customer.setContactName(contractHeader.getConnector());
+        customer.setContactPhone(contractHeader.getConnectorPhone());
+        customer.setStatus(CommonStatus.ACTIVE.getCode());
+        customer.setOperatorUid(1L);
+        customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        customer.setVersion(ebeiCustomer.getVersion());
+//            if(customer.getTrackingUid() == null) {
+//                customer.setTrackingUid(-1L);
+//            }
+        customerProvider.updateEnterpriseCustomer(customer);
+        customerSearcher.feedDoc(customer);
+
+        //查找对应的企业账号
+        Organization organization = organizationProvider.findOrganizationById(customer.getOrganizationId());
+        if (organization == null) {
+            organization = insertOrganization(customer);
+            customer.setOrganizationId(organization.getId());
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        } else if (CommonStatus.fromCode(organization.getStatus()) != CommonStatus.ACTIVE || !organization.getName().equals(customer.getName())) {
+            organization.setName(customer.getName());
+            organization.setStatus(CommonStatus.ACTIVE.getCode());
+            organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            organization.setOperatorUid(1L);
+            organizationProvider.updateOrganization(organization);
+        }
+
+        insertOrUpdateOrganizationDetail(organization, customer);
+        insertOrUpdateOrganizationCommunityRequest(communityId, organization);
+        insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactPhone());
+        organizationSearcher.feedDoc(organization);
+//            return null;
+//        });
+    }
+
+*/
 }
+
+
