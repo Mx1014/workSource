@@ -12,6 +12,6 @@ public interface PaymentAuthsService {
 
 	List<EnterprisePaymentAuthsDTO> listEnterprisePaymentAuths(ListEnterprisePaymentAuthsCommand cmd);
 
-	void updateEnterpirsePaymentAuths(UpdateEnterpirsePaymentAuthsCommand cmd);
+	void updateEnterprisePaymentAuths(UpdateEnterprisePaymentAuthsCommand cmd);
 
 }
