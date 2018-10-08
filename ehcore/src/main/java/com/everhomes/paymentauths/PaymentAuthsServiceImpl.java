@@ -75,6 +75,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		}
 		if (printAuth != null) {
 			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(printAuth);
 			e.setAppId(printAppId);
 			e.setAppName(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
 			results.add(e);
