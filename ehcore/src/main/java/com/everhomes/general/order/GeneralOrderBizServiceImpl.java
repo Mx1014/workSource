@@ -31,7 +31,6 @@ public class GeneralOrderBizServiceImpl implements GeneralOrderBizService{
 					"sign verify faild");
 		}
 		
-		
 		LOGGER.info("cmd:"+cmd.toString());
 		GeneralOrderBizHandler bizHandler = getGeneralOrderBizHandler(cmd.getBusinessType());
 		if (null == bizHandler) {

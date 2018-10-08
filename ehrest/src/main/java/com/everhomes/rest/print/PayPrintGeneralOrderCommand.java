@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId : 项目id</li>
  * <li>organizationId : 用户公司id</li>
  * <li>clientAppName : app名称</li>
+ * <li>paymentMerchantId : 商户id</li>
+ * <li>appOriginId : 应用originId</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月6日
@@ -20,6 +22,8 @@ public class PayPrintGeneralOrderCommand {
 	private Long ownerId;
 	private Long organizationId;
 	private String clientAppName;
+	private Long paymentMerchantId;
+	private Long appOriginId;
 	
 	@Override
 	public String toString() {
@@ -64,5 +68,21 @@ public class PayPrintGeneralOrderCommand {
 
 	public void setClientAppName(String clientAppName) {
 		this.clientAppName = clientAppName;
+	}
+
+	public Long getPaymentMerchantId() {
+		return paymentMerchantId;
+	}
+
+	public void setPaymentMerchantId(Long paymentMerchantId) {
+		this.paymentMerchantId = paymentMerchantId;
+	}
+
+	public Long getAppOriginId() {
+		return appOriginId;
+	}
+
+	public void setAppOriginId(Long appOriginId) {
+		this.appOriginId = appOriginId;
 	}
 }

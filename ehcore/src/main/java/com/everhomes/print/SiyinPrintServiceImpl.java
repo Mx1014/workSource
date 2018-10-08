@@ -648,6 +648,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			cmd.setOwnerId(240111044331058733L);
 		}
 		
+		cmd.setPaymentMerchantId(100004L);
+		cmd.setAppOriginId(66348L);
 		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
 		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(cmd);
 		
@@ -662,7 +664,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 	
 	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
-		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.PRINT_ORDER_CODE);
+		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 	}
 
 	private Long getOrderPayeeAccount(PayPrintOrderCommandV2 cmd) {

@@ -5,9 +5,9 @@ import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 
 public interface GeneralOrderBizHandler {
 	String GENERAL_ORDER_HANDLER = "GeneralOrderHandler-";
-	
-	CreateMerchantOrderResponse createOrder(Object cmd);
 
 	void dealCallBack(OrderCallBackCommand cmd);
+
+	CreateMerchantOrderResponse createOrder(Object bussinessCommand);
 	
 }
