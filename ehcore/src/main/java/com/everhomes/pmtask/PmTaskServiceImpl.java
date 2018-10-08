@@ -535,7 +535,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskSearch.deleteById(task.getId());
 
 			LOGGER.error("Update pmTask elasticsearch error, task={}", task);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
 					"Update pmTask elasticsearch error.");
 		}
 	}
@@ -760,12 +760,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			String requestorName = cmd.getRequestorName();
 			if(StringUtils.isBlank(requestorPhone)){
 				LOGGER.error("RequestorPhone cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorPhone cannot be null.");
 			}
 			if(StringUtils.isBlank(requestorName)){
 				LOGGER.error("RequestorName cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorName cannot be null.");
 			}
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
@@ -859,12 +859,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
 			LOGGER.error("RequestorPhone cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorPhone cannot be null.");
 		}
 		if(StringUtils.isBlank(requestorName)){
 			LOGGER.error("RequestorName cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
@@ -1225,7 +1225,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			baos.flush();  
 		} catch (IOException e) {
 			LOGGER.error("ExportTasks is fail, cmd={}");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"ExportTasks is fail.");
 		}  
 		// 打开一个新的输入流  
@@ -1619,7 +1619,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkNamespaceId(Integer namespaceId){
 		if(namespaceId == null) {
         	LOGGER.error("Invalid namespaceId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid namespaceId parameter.");
         }
 	}
@@ -1627,7 +1627,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkId(Long id){
 		if(null == id) {
         	LOGGER.error("Invalid id parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid id parameter.");
         }
 	}
@@ -1636,7 +1636,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Category category = categoryProvider.findCategoryById(id);
 		if(null == category) {
         	LOGGER.error("Category not found, categoryId={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Category not found.");
         }
 		return category;
@@ -1653,13 +1653,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
         	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerId parameter.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
         	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerType parameter.");
         }
 	}
@@ -1668,7 +1668,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask pmTask = pmTaskProvider.findTaskById(id);
 		if(null == pmTask) {
         	LOGGER.error("PmTask not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTask not found.");
         }
 		return pmTask;
@@ -1678,7 +1678,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskLog pmTaskLog = pmTaskProvider.findTaskLogById(id);
 		if(null == pmTaskLog) {
         	LOGGER.error("PmTaskLog not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTaskLog not found.");
         }
 		return pmTaskLog;
@@ -1914,7 +1914,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOperateType(Byte operateType) {
 		if (null == operateType) {
         	LOGGER.error("Invalid operateType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid operateType parameter.");
         }
 		
@@ -1923,7 +1923,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOrganizationId(Long organizationId) {
 		if (null == organizationId) {
         	LOGGER.error("Invalid organizationId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid organizationId parameter.");
         }
 	}
@@ -2403,7 +2403,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("Export pmTask excel failed.", e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"Export pmTask excel failed.");
 		}try {
 			out.close();
@@ -2442,7 +2442,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
 		if(null == cmd.getAppId()) {
 			LOGGER.error("Invalid appId parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid appId parameter.");
 		}
 		String colName = "pmtask.hide.represent.";
@@ -2570,7 +2570,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHistoryAddress pmTaskHistoryAddress = pmTaskProvider.findTaskHistoryAddressById(cmd.getId());
 		if (null == pmTaskHistoryAddress) {
 			LOGGER.error("PmTaskHistoryAddress not found, id={}", cmd.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 					"PmTaskHistoryAddress not found.");
 		}
 		pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.INACTIVE.getCode());
@@ -2582,7 +2582,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
 
@@ -3201,7 +3201,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer exportType = cmd.getExportType();
 		if(null == exportType){
 			LOGGER.error("ExportType cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"ExportType cannot be null.");
 		}
 
@@ -3318,7 +3318,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
 		if(null == cmd.getId() && (null == cmd.getNamespaceId() && null == cmd.getOwnerId())){
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
 		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
@@ -3506,7 +3506,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListBusinessUsersCommand cmdPay = new ListBusinessUsersCommand();
 		if(null == cmd.getOrganizationId()){
 			LOGGER.error("Invalid OrganizationId, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid OrganizationId.");
 		}
 		// 给支付系统的bizUserId的形式：EhOrganizations1037001
@@ -3714,7 +3714,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());
@@ -3975,7 +3975,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskOrder paymentBillOrder = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
 		if(paymentBillOrder == null){
 			LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"can not find order record");
 		}
 
@@ -4037,7 +4037,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());
