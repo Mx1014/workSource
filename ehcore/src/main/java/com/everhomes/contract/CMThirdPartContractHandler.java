@@ -741,7 +741,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         if (theirSyncList != null) {
             Long customerId = 0L;
             for(CMSyncObject syncObject : theirSyncList) {
-                
+
                 for (CMDataObject dataObject : syncObject.getData()) {
                     CMContractHeader cmContractHeader = dataObject.getContractHeader();
 

@@ -90,4 +90,6 @@ public interface PmTaskProvider {
 
 	void clearOrderDetails();
 
+	void deletePmTaskOrder(Long id);
+
 }
