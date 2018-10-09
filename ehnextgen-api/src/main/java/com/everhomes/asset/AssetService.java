@@ -19,6 +19,7 @@ import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+import com.everhomes.util.Tuple;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -193,7 +194,7 @@ public interface AssetService {
     
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
-    void noticeTrigger(Integer namespaceId);
+//    void noticeTrigger(Integer namespaceId);
     
     List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
     
@@ -236,7 +237,7 @@ public interface AssetService {
 
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
-	void testLateFine(TestLateFineCommand cmd);
+//	void testLateFine(TestLateFineCommand cmd);
 	
 	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
 
@@ -252,7 +253,7 @@ public interface AssetService {
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
-	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+//	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
@@ -278,4 +279,6 @@ public interface AssetService {
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
+	
+	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
 }

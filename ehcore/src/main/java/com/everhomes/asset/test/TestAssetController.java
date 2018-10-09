@@ -1,31 +1,18 @@
 package com.everhomes.asset.test;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.schedule.AssetSchedule;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.asset.CreateGeneralBillCommand;
-import com.everhomes.rest.asset.CreateOrUpdateAssetMappingCmd;
-import com.everhomes.rest.asset.ListBillGroupsDTO;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListChargingItemsDTO;
-import com.everhomes.rest.asset.NoticeTriggerCommand;
-import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
 import com.everhomes.rest.asset.TestLateFineCommand;
-import com.everhomes.rest.portal.AssetModuleAppMappingDTO;
-import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -35,6 +22,9 @@ public class TestAssetController extends ControllerBase {
 	@Autowired
 	private AssetService assetService;
 	
+	@Autowired
+	private AssetSchedule assetSchedule;
+	
 	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
 	 * <b>URL: /test/testLateFine</b>
@@ -42,8 +32,8 @@ public class TestAssetController extends ControllerBase {
 	 */
 	@RequestMapping("testLateFine")
 	@RestReturn(value = String.class)
-	public RestResponse testLateFine(TestLateFineCommand cmd) {
-		assetService.testLateFine(cmd);
+	public RestResponse testLateFine() {
+		assetSchedule.lateFineCal();
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -70,8 +60,8 @@ public class TestAssetController extends ControllerBase {
 	 */
 	@RequestMapping("testUpdateBillDueDayCountOnTime")
 	@RestReturn(value = String.class)
-	public RestResponse testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
-		assetService.testUpdateBillDueDayCountOnTime(cmd);
+	public RestResponse testUpdateBillDueDayCountOnTime() {
+		assetSchedule.updateBillDueDayCountOnTime();
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -79,17 +69,16 @@ public class TestAssetController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /test/noticeTrigger</b>
+	 * <b>URL: /test/testAutoBillNotice</b>
 	 * <p>启动自动催缴的定时任务</p>
 	 */
-	@RequestMapping("noticeTrigger")
-	public RestResponse noticeTrigger(NoticeTriggerCommand cmd) {
-		assetService.noticeTrigger(cmd.getNamespaceId());
+	@RequestMapping("testAutoBillNotice")
+	public RestResponse testAutoBillNotice() {
+		assetSchedule.autoBillNotice();
 		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
-	
 
 }
