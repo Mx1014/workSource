@@ -6,11 +6,13 @@ import com.everhomes.rest.wx.MessageItem;
 import com.everhomes.rest.wx.TemplateMessage;
 import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class WechatMessageServiceImpl implements WeChatMessageService {
 
 
