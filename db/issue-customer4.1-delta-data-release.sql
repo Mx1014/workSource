@@ -13,29 +13,6 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruiancm
 -- DESCRIPTION: 此SECTION只在瑞安新天地-999929执行的脚本
--- AUTHOR: 杨崇鑫
--- REMARK: 配置客户V4.1瑞安CM对接的访问地址
-SET @id = ifnull((SELECT MAX(id) FROM `eh_configurations`),0);
-INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES (@id := @id + 1, 'RuiAnCM.sync.url', 'http://10.50.12.39/cm/WebService/OfficeApp-CM/OfficeApp_CMService.asmx', '瑞安新天地对接的第三方地址', 0, NULL, 1);
-INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
-	VALUES (@id:=@id+1, 'contractService', '999929', NULL, 999929, NULL, 1);
-	
--- AUTHOR: 杨崇鑫
--- REMARK: 初始化瑞安CM对接的默认账单组，由于该账单组是默认账单组，所以不允许删除
-set @id = 1000000;
-INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `category_id`, `biz_payee_type`, `biz_payee_id`, `is_default`) 
-	select @id:=@id+1, 999929, id, 'community', '缴费', 2, 5, 67663, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 1, 5, 1, NULL, 4, 3, NULL, NULL, 1
-		from eh_communities;
--- REMARK:瑞安CM对接 账单区分数据来源
-SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'asset.source', '10005', 'zh_CN', '瑞安CM产生');
--- REMARK: 瑞安CM对接 APP只支持查费，隐藏掉缴费
-SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0); 
-INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
-VALUES (@id := @id + 1, 999929, NULL, 0, 'PAY', NULL, NULL, NULL, NULL, NULL, NULL);		
-		
 -- AUTHOR: 唐岑
 -- REMARK: 创建新的园区
 -- 添加园区
@@ -88,4 +65,28 @@ INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_i
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063586');
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063587');
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063588');
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 配置客户V4.1瑞安CM对接的访问地址
+SET @id = ifnull((SELECT MAX(id) FROM `eh_configurations`),0);
+INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES (@id := @id + 1, 'RuiAnCM.sync.url', 'http://10.50.12.39/cm/WebService/OfficeApp-CM/OfficeApp_CMService.asmx', '瑞安新天地对接的第三方地址', 0, NULL, 1);
+INSERT INTO `eh_configurations`(`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) 
+	VALUES (@id:=@id+1, 'contractService', '999929', NULL, 999929, NULL, 1);
+	
+-- AUTHOR: 杨崇鑫
+-- REMARK: 初始化瑞安CM对接的默认账单组，由于该账单组是默认账单组，所以不允许删除
+set @id = 1000000;
+INSERT INTO `eh_payment_bill_groups`(`id`, `namespace_id`, `owner_id`, `owner_type`, `name`, `balance_date_type`, `bills_day`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `default_order`, `due_day`, `due_day_type`, `brother_group_id`, `bills_day_type`, `category_id`, `biz_payee_type`, `biz_payee_id`, `is_default`) 
+	select @id:=@id+1, 999929, id, 'community', '缴费', 2, 5, 67663, UTC_TIMESTAMP(), NULL, UTC_TIMESTAMP(), 1, 5, 1, NULL, 4, 3, NULL, NULL, 1
+		from eh_communities;
+-- REMARK:瑞安CM对接 账单区分数据来源
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'asset.source', '10005', 'zh_CN', '瑞安CM产生');
+-- REMARK: 瑞安CM对接 APP只支持查费，隐藏掉缴费
+SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0); 
+INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
+VALUES (@id := @id + 1, 999929, NULL, 0, 'PAY', NULL, NULL, NULL, NULL, NULL, NULL);		
+		
 -- --------------------- SECTION END ---------------------------------------------------------
