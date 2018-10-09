@@ -11,6 +11,11 @@
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR: 马世亨 2018-10-09
+-- REMARK: 住总报修由对接修改为左邻自有
+update eh_configurations set value = 'flow' where name = 'pmtask.handler-999955';
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
