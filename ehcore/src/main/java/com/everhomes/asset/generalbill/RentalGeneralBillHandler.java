@@ -16,7 +16,7 @@ import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
 import com.everhomes.rest.asset.modulemapping.AssetMapContractConfig;
-import com.everhomes.rest.asset.modulemapping.PrintInstanceConfigDTO;
+import com.everhomes.rest.asset.modulemapping.RentalInstanceConfigDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.util.StringHelper;
@@ -25,12 +25,15 @@ import com.everhomes.util.StringHelper;
  * @author created by ycx
  * @date 上午11:45:54
  */
-@Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.PRINT_MODULE)
-public class PrintGeneralBillHandler implements GeneralBillHandler{
+@Component(GeneralBillHandler.GENERALBILL_PREFIX + AssetSourceType.RENTAL_MODULE)
+public class RentalGeneralBillHandler implements GeneralBillHandler{
 	private Logger LOGGER = LoggerFactory.getLogger(ContractGeneralBillHandler.class);
 	
 	@Autowired
 	private AssetProvider assetProvider;
+	
+	@Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 	
 	public void createOrUpdateAssetModuleAppMapping(ServiceModuleApp app) {
     	String instanceConfig = app.getInstanceConfig();
@@ -39,23 +42,33 @@ public class PrintGeneralBillHandler implements GeneralBillHandler{
 	    		//格式化instanceConfig的json成对象
 				AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
 				if(assetInstanceConfigDTO != null) {
-					List<PrintInstanceConfigDTO> printInstanceConfigDTOList = assetInstanceConfigDTO.getPrintInstanceConfigDTOList();
-					for(PrintInstanceConfigDTO printInstanceConfigDTO : printInstanceConfigDTOList) {
-	    				AssetModuleAppMapping mapping = new AssetModuleAppMapping();
-	    				mapping.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-	    				mapping.setSourceType(AssetSourceTypeEnum.PRINT_MODULE.getSourceType());
-	    				mapping.setNamespaceId(app.getNamespaceId());
-	    				mapping.setOwnerType(printInstanceConfigDTO.getOwnerType());
-	    				mapping.setOwnerId(printInstanceConfigDTO.getOwnerId());
-	    				mapping.setBillGroupId(printInstanceConfigDTO.getBillGroupId());
-	    				mapping.setChargingItemId(printInstanceConfigDTO.getChargingItemId());
-	    				
-	    		    	assetProvider.createOrUpdateAssetModuleAppMapping(mapping);
+					List<RentalInstanceConfigDTO> rentalInstanceConfigDTOList = assetInstanceConfigDTO.getRentalInstanceConfigDTOList();
+					for(RentalInstanceConfigDTO rentalInstanceConfigDTO : rentalInstanceConfigDTOList) {
+						Long originId = rentalInstanceConfigDTO.getRentalOriginId();
+		    			ServiceModuleApp rentalApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
+		    			if(rentalApp != null) {
+		    				AssetModuleAppMapping mapping = new AssetModuleAppMapping();
+		    				mapping.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
+		    				mapping.setSourceType(AssetSourceTypeEnum.RENTAL_MODULE.getSourceType());
+		    				try {
+		    					mapping.setSourceId(Long.parseLong(rentalApp.getCustomTag()));
+		    				}catch (Exception e) {
+		    		            LOGGER.error("rental customTag can not parse Long, rentalOriginId={}, rentalCustomTag={}", originId, rentalApp.getCustomTag());
+		    		            e.printStackTrace();
+		    		        }
+		    				mapping.setNamespaceId(app.getNamespaceId());
+		    				mapping.setOwnerType(rentalInstanceConfigDTO.getOwnerType());
+		    				mapping.setOwnerId(rentalInstanceConfigDTO.getOwnerId());
+		    				mapping.setBillGroupId(rentalInstanceConfigDTO.getBillGroupId());
+		    				mapping.setChargingItemId(rentalInstanceConfigDTO.getChargingItemId());
+		    				
+		    		    	assetProvider.createOrUpdateAssetModuleAppMapping(mapping);
+		    			}
 					}
 	    		}
 			}
     	}catch (Exception e) {
-            LOGGER.error("failed to save mapping of print payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+            LOGGER.error("failed to save mapping of rental payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
             e.printStackTrace();
         }
 	}

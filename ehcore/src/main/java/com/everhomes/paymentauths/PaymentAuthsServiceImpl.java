@@ -12,7 +12,7 @@ import com.everhomes.rest.paymentauths.EnterpriesAuthDTO;
 import com.everhomes.rest.paymentauths.EnterprisePaymentAuthsDTO;
 import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsCommand;
 import com.everhomes.rest.paymentauths.PaymentAuthsAPPType;
-import com.everhomes.rest.paymentauths.UpdateEnterpirsePaymentAuthsCommand;
+import com.everhomes.rest.paymentauths.UpdateEnterprisePaymentAuthsCommand;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	@Override
 	public List<EnterprisePaymentAuthsDTO> listEnterprisePaymentAuths (ListEnterprisePaymentAuthsCommand cmd) {
 
-		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(UserContext.getCurrentNamespaceId(), cmd.getOrgnazitionId());
+		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrgnazitionId());
 		List<EnterprisePaymentAuthsDTO> results = new ArrayList<EnterprisePaymentAuthsDTO>();
 		List<EnterpriesAuthDTO> printAuth = new ArrayList<EnterpriesAuthDTO>();
 		Long printAppId = null;
@@ -62,10 +62,10 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			if (enterprisePaymentAuth.getAppName().equals(PaymentAuthsAPPType.CLOUD_PRINT.getCode())){
 				printAppId = enterprisePaymentAuth.getAppId();
 				if (enterprisePaymentAuth.getSourceType().equals("person")){
-					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
 					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
 				} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
-					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
 					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
 				}
 				authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
@@ -75,6 +75,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		}
 		if (printAuth != null) {
 			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(printAuth);
 			e.setAppId(printAppId);
 			e.setAppName(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
 			results.add(e);
@@ -83,7 +84,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	}
 	
 	@Override
-	public void updateEnterpirsePaymentAuths (UpdateEnterpirsePaymentAuthsCommand cmd){
+	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
@@ -96,7 +97,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			enterprisePaymentAuth.setEnterpriseId(cmd.getOrgnazitionId());
 			enterprisePaymentAuth.setNamespaceId(UserContext.getCurrentNamespaceId());
 			enterprisePaymentAuth.setSourceId(enterpriesAuth.getSourceIdA());
-			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectType());
+			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectionType());
 			enterprisePaymentAuth.setSourceName(enterpriesAuth.getSelectionName());
 			auths.add(enterprisePaymentAuth);
 		}

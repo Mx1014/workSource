@@ -38,11 +38,11 @@ public class PaymentAuthsController extends ControllerBase {
 	
 	/**
 	 * <p>列出授权用户</p>
-	 * <b>URL: paymentAuths/listEnterpirsePaymentAuths</b>
+	 * <b>URL: paymentAuths/listEnterprisePaymentAuths</b>
 	 */
 	@RequestMapping("listEnterprisePaymentAuths")
 	@RestReturn(value=EnterprisePaymentAuthsDTO.class, collection = true)
-	public RestResponse listEnterpirsePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
+	public RestResponse listEnterprisePaymentAuths(ListEnterprisePaymentAuthsCommand cmd) {
 		List<EnterprisePaymentAuthsDTO> dto = paymentAuthsService.listEnterprisePaymentAuths(cmd);
 		RestResponse response =  new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -52,12 +52,12 @@ public class PaymentAuthsController extends ControllerBase {
 	
 	/**
 	 * <p>更新授权用户</p>
-	 * <b>URL: paymentAuths/updateEnterpirsePaymentAuths</b>
+	 * <b>URL: paymentAuths/updateEnterprisePaymentAuths</b>
 	 */
-	@RequestMapping("updateEnterpirsePaymentAuths")
+	@RequestMapping("updateEnterprisePaymentAuths")
 	@RestReturn(value=EnterprisePaymentAuthsDTO.class, collection = true)
-	public RestResponse updateEnterpirsePaymentAuths(UpdateEnterpirsePaymentAuthsCommand cmd) {
-		paymentAuthsService.updateEnterpirsePaymentAuths(cmd);
+	public RestResponse updateEnterprisePaymentAuths(UpdateEnterprisePaymentAuthsCommand cmd) {
+		paymentAuthsService.updateEnterprisePaymentAuths(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

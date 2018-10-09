@@ -1,4 +1,4 @@
-package com.everhomes.rest.common;
+package com.everhomes.rest.asset.modulemapping;
 
 import com.everhomes.util.StringHelper;
 

@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>EnterprisePaymentAuthsDTO: 授权用户信息</li>
  * </ul>
  */
-public class UpdateEnterpirsePaymentAuthsCommand {
+public class UpdateEnterprisePaymentAuthsCommand {
 	
 	private Long orgnazitionId;
 	private EnterprisePaymentAuthsDTO enterprisePaymentAuthsDTO;

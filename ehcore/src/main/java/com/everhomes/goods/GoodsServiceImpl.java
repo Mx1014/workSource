@@ -72,21 +72,8 @@ public class GoodsServiceImpl implements GoodsService{
 	@Override 
 	public GetServiceGoodResponse getServiceGoodList(GetServiceGoodCommand cmd) {
 		GetServiceGoodResponse response = new GetServiceGoodResponse();
-
-		switch (cmd.getCategoryId()) {
-		case "ALL" :
-			GoodScopeDTO goodScopeDTO = getServiceGoodsScopes(cmd.getServiceType(),cmd.getNamespaceId());
-			response.setGoodScopeDTO(goodScopeDTO);
-			break;
-//		case "CATEGROY" :
-//			getServiceGoodsCategories();
-//			break;
-//		case "GOODS" :
-//			getServiceGoodsList();
-//			break;
-		default :
-			break;
-		}
+		GoodScopeDTO goodScopeDTO = getServiceGoodsScopes(cmd.getServiceType(),cmd.getNamespaceId());
+		response.setGoodScopeDTO(goodScopeDTO);
 		return response;
 	}
 	

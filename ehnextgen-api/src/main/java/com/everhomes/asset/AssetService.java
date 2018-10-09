@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
 import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
 import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
@@ -279,10 +278,5 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
-
-	void createContractMapping(CreateContractMappingCommand cmd);
-
-	void createEnergyMapping(CreateEnergyMappingCommand cmd);
 	
-
 }

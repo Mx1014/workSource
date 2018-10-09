@@ -4,11 +4,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * 	   <li>namespaceId </li>
  *     <li>orgnazitionId: 公司ID</li>
  * </ul>
  */
 public class ListEnterprisePaymentAuthsCommand {
 	private Long orgnazitionId;
+	private Integer namespaceId;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public Long getOrgnazitionId() {
 		return orgnazitionId;

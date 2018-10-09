@@ -10,7 +10,6 @@ import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
-import com.everhomes.rest.asset.modulemapping.CreateAnAppMappingCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.SiyinPrintInstanceConfig;
