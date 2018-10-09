@@ -96,6 +96,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
 		        variable.setOwnerId(ownerId);
 		        variable.setName(dto.getName());
 		        variable.setType(dto.getType());
+		        variable.setValue(dto.getValue());
 		        this.serviceAgreementprovider.createProtocolTemplateVariable(variable);
             }
         }
@@ -207,7 +208,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             if (!CollectionUtils.isEmpty(protocolTemplateVariablesList)) {
                 String protocolText = protocols.getContent();
                 for (ProtocolTemplateVariables protocolTemplateVariables : protocolTemplateVariablesList) {
-                    protocolText = protocolText.replace("$"+protocolTemplateVariables.getName()+"$", "");
+                    protocolText = protocolText.replace("$"+protocolTemplateVariables.getName()+"$", protocolTemplateVariables.getValue() == null?"":protocolTemplateVariables.getValue());
                 }
                 protocolTemplates.setContent(protocolText);
             }
