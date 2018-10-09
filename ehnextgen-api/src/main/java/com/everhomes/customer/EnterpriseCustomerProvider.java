@@ -38,6 +38,7 @@ public interface EnterpriseCustomerProvider {
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomers(Set<Long> customerIds);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType);
 
 
     void createCustomerAccount(CustomerAccount account);

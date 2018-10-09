@@ -53,7 +53,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
                 
                 ContractCategory contractCategory = contractProvider.findContractCategoryById(cmd.getCategoryId());
                 Byte contractApplicationScene = 0;
-                if (contractCategory.getContractApplicationScene() != null) {
+                if (contractCategory != null && contractCategory.getContractApplicationScene() != null) {
                 	contractApplicationScene = contractCategory.getContractApplicationScene();
 				}
         		
