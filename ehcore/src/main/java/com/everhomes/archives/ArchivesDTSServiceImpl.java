@@ -245,9 +245,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     private boolean saveContactsInfo(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         //  1.设置信息
-        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(data.getAccount().trim());
+        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, data.getContactToken().trim());
         if(null != employee){
-        	addCommand.setUpdateDetailId(employee.getId());
+        	addCommand.setUpdateDetailId(employee.getDetailId());
         }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
