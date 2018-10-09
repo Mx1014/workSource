@@ -31,6 +31,12 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
@@ -187,7 +193,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Autowired
 	public NamespaceProvider namespaceProvider;
     @Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
+    
     @Autowired
     protected GeneralOrderService orderService;
     @Autowired
@@ -578,7 +585,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
         //3、收款方是否有会员，无则报错
 		Long bizPayeeId = getOrderPayeeAccount(cmd);
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Stream.of(bizPayeeId).collect(Collectors.toList()));
+		
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(bizPayeeId));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
             throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
@@ -1871,7 +1882,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
-		List<PayUserDTO> payUserList = payServiceV2.getPayUserList(key,arrayList);
+		GetPayUserListByMerchantCommand cmd2 = new GetPayUserListByMerchantCommand();
+		cmd2.setUserId(key);
+		cmd2.setTag1(arrayList);
+		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
+		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
 		if(payUserList==null || payUserList.size() == 0){
 			return null;
 		}
@@ -1930,7 +1945,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(account==null){
 			return null;
 		}
-		List<PayUserDTO> payUserDTOS = payServiceV2.listPayUsersByIds(new ArrayList<>(Arrays.asList(account.getPayeeId())));
+		
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(account.getPayeeId()));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		List<PayUserDTO> payUserDTOS = resp.getResponse();
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
@@ -2105,7 +2124,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 							"Order amount is not equal to payAmount");
 				}
 				
-				updatePrintOrder(order, cmd.getOrderId()+"");
+				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}
 	
