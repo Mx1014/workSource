@@ -23,5 +23,8 @@ UPDATE `eh_configurations` SET `name`='prmt.server.app_secret' WHERE `name`='gor
 UPDATE `eh_configurations` SET `name`='prmt.default.personal_bind_phone' WHERE `name`='gorder.default.personal_bind_phone';
 UPDATE `eh_configurations` SET `name`='prmt.system_id' WHERE `name`='gorder.system_id';
 
-
+-- AUTHOR: 缪洲 20180930
+-- REMARK: issue-34780 增加未支付推送与短信模板
+INSERT INTO `eh_locale_templates`(`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('siyinprint.notification', 1, 'zh_CN', '未支付推送', '您有一笔云打印的订单未支付，请及时支付。', 0);
+INSERT INTO `eh_locale_templates`(`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('siyinprint.notification', 2, 'zh_CN', '未支付短信', '【${appName}】您有一笔云打印的订单未支付，请到云打印-打印记录中进行支付。', 0);
 -- --------------------- SECTION END ---------------------------------------------------------

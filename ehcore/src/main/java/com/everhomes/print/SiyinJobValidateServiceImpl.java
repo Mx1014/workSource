@@ -3,6 +3,7 @@ package com.everhomes.print;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.uclbrt.BASE64Decoder;
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -13,11 +14,18 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.print.job.SiyinPrintMessageJob;
+import com.everhomes.print.job.SiyinPrintNotifyJob;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.*;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -59,13 +67,16 @@ public class SiyinJobValidateServiceImpl {
     private LocaleStringProvider localeStringProvider;
 	@Autowired
 	private BigCollectionProvider bigCollectionProvider;
-	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	
+	@Autowired
+	protected AppUrlService appUrlService;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
-	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	@Autowired
 	private DbProvider dbProvider;
 	
@@ -76,6 +87,10 @@ public class SiyinJobValidateServiceImpl {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	//默认15分钟后取消
+	private Long ORDER_AUTO_CANCEL_TIME = 60 * 1000L;
+	private String queueName = "siyinprint";
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -177,6 +192,8 @@ public class SiyinJobValidateServiceImpl {
 //        	   	}
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
+	   		        //创建订单成功后建立两个定时任务
+	   		        createOrderOverTimeTask(order);
 	   			}else{
 	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	   			}
@@ -188,6 +205,40 @@ public class SiyinJobValidateServiceImpl {
 		});
 	}
 	
+	private void createOrderOverTimeTask(SiyinPrintOrder order) {
+		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
+				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "");
+		Map<String, Object> notifyMap = new HashMap<>();
+		notifyMap.put("userId",order.getCreatorUid());
+		notifyMap.put("content",notifyTextForOther);
+		scheduleProvider.scheduleSimpleJob(
+				queueName + order.getId(),
+				"sendNotify" + order.getId(),
+				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				SiyinPrintNotifyJob.class,
+				notifyMap
+		);
+		String appName = getAppName(order.getNamespaceId());
+		Map<String, Object> messageMap = new HashMap<>();
+		messageMap.put("appName",appName);
+		messageMap.put("creatorUid",order.getCreatorUid());
+		messageMap.put("namespaceId", order.getNamespaceId());
+		scheduleProvider.scheduleSimpleJob(
+				queueName + order.getId(),
+				"sendMessage" + order.getId(),
+				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				SiyinPrintMessageJob.class,
+				messageMap
+		);
+	}
+	
+	private String getAppName(Integer namespaceId) {
+		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(namespaceId,OSType.Android.getCode()));
+		if (appUrlDTO != null) {
+			return appUrlDTO.getName();
+		}
+		return "";
+	}
 	/*
 	 *减少用户下正在打印的任务的数量 
 	 */

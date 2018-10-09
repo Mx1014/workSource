@@ -21,21 +21,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.portal.PlatformContextNoWarnning;
-import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.asset.AssetTargetType;
-import com.everhomes.rest.asset.CreateGeneralBillCommand;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
-import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
-import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
@@ -45,7 +38,6 @@ import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.print.*;
 import com.everhomes.user.*;
@@ -53,7 +45,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,11 +83,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.qrcode.QRCodeController;
 import com.everhomes.qrcode.QRCodeService;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalOrderHandler;
-import com.everhomes.rentalv2.Rentalv2AccountProvider;
-import com.everhomes.rentalv2.Rentalv2PayService;
-import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.launchpad.ActionType;
@@ -109,7 +95,6 @@ import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.xml.XMLToJSON;
-import com.google.gson.JsonObject;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -133,6 +118,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "_";
 	public static final String PRINT_COMPANY_SPLIT = ",";
 	
+
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
 	@Autowired
@@ -206,7 +192,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     protected GeneralOrderService orderService;
     @Autowired
     protected AssetService assetService;
-    
+	
+	
+	
     @Value("${server.contextPath:}")
     private String contextPath;
 	
