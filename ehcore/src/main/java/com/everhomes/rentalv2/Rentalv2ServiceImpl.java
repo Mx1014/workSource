@@ -6019,6 +6019,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
+					dto.setResourceCounts(rsr.getCounts());
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
@@ -6194,6 +6195,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
+					dto.setResourceCounts(rsr.getCounts());
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
@@ -6364,6 +6366,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					// 支持复选，要换一种方式计算剩余数量
 					calculateAvailableCount(dto, rs, rsr, priceRules);
+					dto.setResourceCounts(rsr.getCounts());
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rule);
 
@@ -6530,6 +6533,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 				// 支持复选，要换一种方式计算剩余数量
 				calculateAvailableCount(dto, rs, rsr, priceRules);
+				dto.setResourceCounts(rsr.getCounts());
 
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rule);
