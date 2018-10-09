@@ -2136,7 +2136,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 							"Order amount is not equal to payAmount");
 				}
 				
-				updatePrintOrder(order, cmd.getOrderId()+"");
+				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}
 	
