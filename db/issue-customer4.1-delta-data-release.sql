@@ -13,6 +13,7 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruiancm
 -- DESCRIPTION: 此SECTION只在瑞安新天地-999929执行的脚本
+
 -- AUTHOR: 杨崇鑫
 -- REMARK: 配置客户V4.1瑞安CM对接的访问地址
 SET @id = ifnull((SELECT MAX(id) FROM `eh_configurations`),0);
@@ -79,6 +80,6 @@ INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_i
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063582');
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063583');
 INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063584');
-INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063585');
+INSERT INTO `eh_organization_communities` (`id`, `organization_id`, `community_id`) VALUES (@eh_organization_communities_id := @eh_organization_communities_id + 1, '1051547', '240111044332063585');		
 
 -- --------------------- SECTION END ---------------------------------------------------------
