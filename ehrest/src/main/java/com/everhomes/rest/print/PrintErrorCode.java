@@ -19,7 +19,6 @@ public class PrintErrorCode {
 	public static final int ERROR_ORDER_IS_PAYED = 10011; //订单已支付
 	public static final int ERROR_LOCK_ORDER_FAILED = 10012; //锁定订单失败
 	public static final int ERROR_EXPORT_EXCEL_FAILED = 10013; //文件导出失败
-	public static final int ERROR_EXPORT_EXCEL_FAILED = 10013; //文件导出失败
 
 	//eh_locale_strings
 	public static final String PRINT_COURSE_LIST= "print_course_list";//打印教程 ‘|’做分割
