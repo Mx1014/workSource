@@ -389,7 +389,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellB.setCellValue(contact.getAccount());
         cellC.setCellValue(contact.getContactEnName());
         cellD.setCellValue(ArchivesUtil.resolveArchivesEnum(contact.getGender(), ArchivesParameter.GENDER));
-        cellE.setCellValue(contact.getContactToken());
+        cellE.setCellValue(("86".equals(contact.getRegionCode()) ? "" : "+" + contact.getRegionCode() + " ") + contact.getContactToken());
         cellF.setCellValue(contact.getContactShortToken());
         cellG.setCellValue(contact.getWorkEmail());
         if (contact.getDepartments() != null)
