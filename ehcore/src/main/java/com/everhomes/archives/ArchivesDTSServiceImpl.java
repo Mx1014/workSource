@@ -20,6 +20,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -251,7 +252,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
-        addCommand.setAccount(data.getAccount());
+        addCommand.setAccount(StringUtils.isEmpty(data.getAccount()) ? null : data.getAccount());
         addCommand.setContactEnName(data.getContactEnName());
         addCommand.setGender(ArchivesUtil.convertToArchivesEnum(data.getGender(), ArchivesParameter.GENDER));
         addCommand.setContactShortToken(data.getContactShortToken());
