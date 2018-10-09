@@ -23,6 +23,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -1002,7 +1003,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setCode(ArchivesLocaleStringCode.ERROR_CONTACT_TOKEN_IS_EMPTY);
             return true;
         }
-        if (!Pattern.matches("^1\\d{10}$", getRealContactToken(contactToken, ArchivesParameter.CONTACT_TOKEN))) {
+        if (!checkContactToken(contactToken)) {
             LOGGER.warn("Contact token wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token wrong format");
@@ -1012,7 +1013,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesDepartment(ImportFileResultLog<T> log, T data, String department) {
+    private boolean checkContactToken(String contactToken) {
+    	if("86".equals(getRealContactToken(contactToken, ArchivesParameter.REGION_CODE))){
+    		return Pattern.matches("^1\\d{10}$", getRealContactToken(contactToken, ArchivesParameter.CONTACT_TOKEN));
+    	}
+    	return true; 
+	}
+
+	private <T> boolean checkArchivesDepartment(ImportFileResultLog<T> log, T data, String department) {
         if (!StringUtils.isEmpty(department)) {
             if (organizationService.getOrganizationNameByNameAndType(department, OrganizationGroupType.DEPARTMENT.getCode()) == null) {
                 LOGGER.warn("Department not found. data = {}", data);
