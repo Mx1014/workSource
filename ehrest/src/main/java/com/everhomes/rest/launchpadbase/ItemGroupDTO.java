@@ -41,7 +41,7 @@ public class ItemGroupDTO {
 
     private Byte titleFlag;
 
-    private Byte titleStyle;
+    private Integer titleStyle;
 
     private String subTitle;
 
@@ -146,11 +146,11 @@ public class ItemGroupDTO {
         this.titleFlag = titleFlag;
     }
 
-    public Byte getTitleStyle() {
+    public Integer getTitleStyle() {
         return titleStyle;
     }
 
-    public void setTitleStyle(Byte titleStyle) {
+    public void setTitleStyle(Integer titleStyle) {
         this.titleStyle = titleStyle;
     }
 
