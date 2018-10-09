@@ -78,14 +78,15 @@ public class GoodsServiceImpl implements GoodsService{
 		return response;
 	}
 	
-	private GoodScopeDTO getServiceGoodsScopes(String serviceType, Integer namespaceId){
+	private GoodScopeDTO getServiceGoodsScopes(Byte serviceType, Integer namespaceId){
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(namespaceId);
 		List<String> communitiesList = new ArrayList();
 
 		
 		switch (serviceType) {
-		case "停车缴费" :
+		//停车
+		case 2 :
 			for (Community community : communities){
 				String communitiy;
 				JSONObject communitityJson=new JSONObject();
@@ -108,7 +109,8 @@ public class GoodsServiceImpl implements GoodsService{
 			}
 			goodScopeDTO.setTagList(communitiesList);
 			break;
-		case "云打印" : 
+			//云打印
+		case 3 : 
 			for (Community community : communities){
 				String communitiy;
 				JSONObject communitityJson=new JSONObject();
