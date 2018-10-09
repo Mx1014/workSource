@@ -743,8 +743,8 @@ public class ContractProviderImpl implements ContractProvider {
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
-		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
-		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		/*query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
