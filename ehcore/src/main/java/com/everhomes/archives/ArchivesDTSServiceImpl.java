@@ -157,6 +157,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 	            if (flag)
 	                coverCount++;
             }catch(RuntimeErrorException e){
+            	LOGGER.warn("导入通讯录,保存单个数据出错", e);
             	log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
             	log.setData(data);
                 log.setErrorLog(e.getMessage());
