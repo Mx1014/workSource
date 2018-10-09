@@ -95,7 +95,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			enterprisePaymentAuth.setAppId(enterprisePaymentAuths.getAppId());
 			enterprisePaymentAuth.setAppName(enterprisePaymentAuths.getAppName());
 			enterprisePaymentAuth.setEnterpriseId(cmd.getOrgnazitionId());
-			enterprisePaymentAuth.setNamespaceId(UserContext.getCurrentNamespaceId());
+			enterprisePaymentAuth.setNamespaceId(cmd.getNamespaceId());
 			enterprisePaymentAuth.setSourceId(enterpriesAuth.getSourceIdA());
 			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectionType());
 			enterprisePaymentAuth.setSourceName(enterpriesAuth.getSelectionName());
