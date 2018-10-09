@@ -62,10 +62,10 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			if (enterprisePaymentAuth.getAppName().equals(PaymentAuthsAPPType.CLOUD_PRINT.getCode())){
 				printAppId = enterprisePaymentAuth.getAppId();
 				if (enterprisePaymentAuth.getSourceType().equals("person")){
-					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
 					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
 				} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
-					authDTO.setFlowUserSelectType(enterprisePaymentAuth.getSourceType());
+					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
 					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
 				}
 				authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
@@ -97,7 +97,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			enterprisePaymentAuth.setEnterpriseId(cmd.getOrgnazitionId());
 			enterprisePaymentAuth.setNamespaceId(UserContext.getCurrentNamespaceId());
 			enterprisePaymentAuth.setSourceId(enterpriesAuth.getSourceIdA());
-			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectType());
+			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectionType());
 			enterprisePaymentAuth.setSourceName(enterpriesAuth.getSelectionName());
 			auths.add(enterprisePaymentAuth);
 		}

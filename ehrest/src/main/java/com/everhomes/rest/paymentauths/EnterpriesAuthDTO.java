@@ -1,7 +1,7 @@
 package com.everhomes.rest.paymentauths;
 /**
  * <ul>
- *     <li>flowUserSelectType: 用户类型（person,deparment）</li>
+ *     <li>flowUserSelectionType: 用户类型（person,deparment）</li>
  *     <li>selectionName: 用户名称</li>
  *     <li>sourceIdA: 用户ID</li>
  *     <li>sourceTypeA: "source_user","source_department"</li>
@@ -10,19 +10,20 @@ package com.everhomes.rest.paymentauths;
 
 public class EnterpriesAuthDTO {
 
-	private String flowUserSelectType;
+	private String flowUserSelectionType;
 	private String selectionName;
 	private Long sourceIdA;
 	private String sourceTypeA;
 	
-	public String getFlowUserSelectType() {
-		return flowUserSelectType;
+
+	public String getFlowUserSelectionType() {
+		return flowUserSelectionType;
 	}
-	
-	public void setFlowUserSelectType(String flowUserSelectType) {
-		this.flowUserSelectType = flowUserSelectType;
+
+	public void setFlowUserSelectionType(String flowUserSelectionType) {
+		this.flowUserSelectionType = flowUserSelectionType;
 	}
-	
+
 	public String getSelectionName() {
 		return selectionName;
 	}
