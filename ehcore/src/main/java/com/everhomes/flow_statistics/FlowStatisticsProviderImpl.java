@@ -8,7 +8,6 @@ import com.everhomes.rest.flow_statistics.FlowVersionCycleDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhFlowNodes;
-import com.everhomes.server.schema.tables.records.EhButtScriptConfigRecord;
 import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;

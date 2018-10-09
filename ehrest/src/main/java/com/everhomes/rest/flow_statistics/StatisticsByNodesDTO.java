@@ -6,7 +6,7 @@ public class StatisticsByNodesDTO {
     private String nodeName ;//(节点名)
     private Long nodeId ;//(节点ID)
     private Integer nodeLevel ;//(节点level)
-    private Long handleTimes ;//(处理次数)
+    private Integer handleTimes ;//(处理次数)
     private Double averageHandleCycle ;//(平均处理时长)
 
     public String getNodeName() {
@@ -33,11 +33,11 @@ public class StatisticsByNodesDTO {
         this.nodeLevel = nodeLevel;
     }
 
-    public Long getHandleTimes() {
+    public Integer getHandleTimes() {
         return handleTimes;
     }
 
-    public void setHandleTimes(Long handleTimes) {
+    public void setHandleTimes(Integer handleTimes) {
         this.handleTimes = handleTimes;
     }
 

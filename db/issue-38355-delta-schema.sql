@@ -3,6 +3,7 @@
 -- REMARK:　添加工作流记录处理表
 CREATE TABLE `eh_flow_statistics_handle_log` (
   `id` BIGINT(32) NOT NULL COMMENT '主键',
+  `log_id`   BIGINT(32)  COMMENT 'log主键',
   `namespace_id` INT(11) DEFAULT NULL COMMENT '域空间ＩＤ',
   `flow_main_id` BIGINT(32) DEFAULT NULL,
   `flow_version` INT(11) DEFAULT NULL COMMENT '版本号',
