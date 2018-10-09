@@ -19,8 +19,6 @@ public class GetProtocolDetailResponse {
 
     private String content;
 
-    @ItemType(ProtocolTemplateVariableDTO.class)
-    private List<ProtocolTemplateVariableDTO> variables;
 
     public Byte getType() {
         return type;
@@ -38,13 +36,6 @@ public class GetProtocolDetailResponse {
         this.content = content;
     }
 
-    public List<ProtocolTemplateVariableDTO> getVariables() {
-        return variables;
-    }
-
-    public void setVariables(List<ProtocolTemplateVariableDTO> variables) {
-        this.variables = variables;
-    }
 
     @Override
     public String toString() {

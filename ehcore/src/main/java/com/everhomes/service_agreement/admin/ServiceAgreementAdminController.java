@@ -113,7 +113,7 @@ public class ServiceAgreementAdminController extends ControllerBase{
      * <p>根据域空间ID和类型获取协议</p>
      */
     @RequestMapping("getProtocol")
-    @RestReturn(value=GetProtocolTemplateResponse.class)
+    @RestReturn(value=GetProtocolResponse.class)
     public RestResponse getProtocol(GetProtocolCommand cmd) {
 
         GetProtocolResponse res = serviceAgreementService.getProtocolTemplateDetail(cmd);
@@ -142,7 +142,7 @@ public class ServiceAgreementAdminController extends ControllerBase{
      * <p>根据域空间ID和类型获取协议详情</p>
      */
     @RequestMapping("getProtocolDetail")
-    @RestReturn(value=GetProtocolTemplateResponse.class)
+    @RestReturn(value=GetProtocolDetailResponse.class)
     public RestResponse getProtocolDetail(GetProtocolCommand cmd) {
 
         GetProtocolDetailResponse res = serviceAgreementService.getProtocolDetail(cmd);
