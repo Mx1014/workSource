@@ -5040,12 +5040,17 @@ public class CustomerServiceImpl implements CustomerService {
         if (results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             String code = "";
+            String baseInfo = "";
+
             if(cmd.getModuleName().equals("enterprise_customer")){
                 code = DynamicExcelStrings.CUSTOEMR;
+                baseInfo = DynamicExcelStrings.baseIntro;
             }else if(cmd.getModuleName().equals("investment_promotion")){
                 code = DynamicExcelStrings.INVITED_CUSTOMER;
+                baseInfo = DynamicExcelStrings.invitedBaseIntro;
+
             }
-            return dynamicExcelService.exportDynamicExcel( code, null, sheetNames, cmd, true, true, null);
+            return dynamicExcelService.exportDynamicExcel( code, baseInfo, sheetNames, cmd, true, true, null);
         }
         return null;
     }

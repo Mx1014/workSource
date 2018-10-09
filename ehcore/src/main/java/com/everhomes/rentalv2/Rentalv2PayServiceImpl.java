@@ -587,20 +587,24 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         PreOrderDTO dto = ConvertHelper.convert(record, PreOrderDTO.class);
         dto.setAmount(changePayAmount(cmd.getAmount()));
         dto.setExtendInfo(cmd.getExtendInfo());
-        ListClientSupportPayMethodCommandResponse response = payServiceV2.listClientSupportPayMethod("NS"+UserContext.getCurrentNamespaceId(),
-                cmd.getClientAppName());
-        List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
-        if (paymentMethods != null)
-             dto.setPayMethod(paymentMethods.stream().map(r->{
-                 PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-                 if (r.getPaymentParams() != null) {
-                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
-                     convert.setPaymentParams(paymentParamsDTO);
-                 }
-                 convert.setExtendInfo(getPayMethodExtendInfo());
-                 return convert;
-             }).collect(Collectors.toList()));
+        if (cmd.getClientAppName() != null) {
+            ListClientSupportPayMethodCommandResponse response = payServiceV2.listClientSupportPayMethod("NS" + UserContext.getCurrentNamespaceId(),
+                    cmd.getClientAppName());
+            List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
+            if (paymentMethods != null)
+                dto.setPayMethod(paymentMethods.stream().map(r->{
+                    PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                    String paymentLogo = contentServerService.parserUri(r.getPaymentLogo());
+                    convert.setPaymentLogo(paymentLogo);
+                    if (r.getPaymentParams() != null) {
+                        PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
+                        paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
+                        convert.setPaymentParams(paymentParamsDTO);
+                    }
+                    convert.setExtendInfo(getPayMethodExtendInfo());
+                    return convert;
+                }).collect(Collectors.toList()));
+        }
         return dto;
     }
 
@@ -631,7 +635,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 
-                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
+                        order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
                     //判断支付金额与订单金额是否相同
                     if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
                         onOrderRecordSuccess(order);

@@ -33,9 +33,11 @@ import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpadbase.IndexType;
+import com.everhomes.rest.launchpadbase.groupinstanceconfig.CardExtension;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Application;
 import com.everhomes.rest.launchpadbase.indexconfigjson.Container;
 import com.everhomes.rest.module.AccessControlType;
+import com.everhomes.rest.module.RouterInfo;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -181,6 +183,13 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LocaleStringService localeStringService;
+
+
+	@Autowired
+	private RouterInfoService routerService;
+
+	@Autowired
+	private LaunchPadService launchPadService;
 
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
@@ -687,6 +696,14 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroup.setVersionId(portalLayout.getVersionId());
 
+		portalItemGroup.setTitle(cmd.getTitle());
+		portalItemGroup.setTitleFlag(cmd.getTitleFlag());
+		portalItemGroup.setTitleUri(cmd.getTitleUri());
+		portalItemGroup.setTitleStyle(cmd.getTitleStyle());
+		portalItemGroup.setTitleMoreFlag(cmd.getTitleMoreFlag());
+		portalItemGroup.setTitleSize(cmd.getTitleSize());
+		portalItemGroup.setSubTitle(cmd.getSubTitle());
+
 		Integer maxDefaultOrder = portalItemGroupProvider.findMaxDefaultOrder(portalLayout.getId());
 		if(maxDefaultOrder == null){
 			maxDefaultOrder = 0;
@@ -715,6 +732,13 @@ public class PortalServiceImpl implements PortalService {
 		portalItemGroup.setOperatorUid(user.getId());
 		portalItemGroup.setDescription(cmd.getDescription());
 		portalItemGroup.setContentType(cmd.getContentType());
+		portalItemGroup.setTitle(cmd.getTitle());
+		portalItemGroup.setTitleFlag(cmd.getTitleFlag());
+		portalItemGroup.setTitleUri(cmd.getTitleUri());
+		portalItemGroup.setTitleStyle(cmd.getTitleStyle());
+		portalItemGroup.setTitleMoreFlag(cmd.getTitleMoreFlag());
+		portalItemGroup.setTitleSize(cmd.getTitleSize());
+		portalItemGroup.setSubTitle(cmd.getSubTitle());
 		portalItemGroupProvider.updatePortalItemGroup(portalItemGroup);
 		return processPortalItemGroupDTO(portalItemGroup);
 	}
@@ -748,12 +772,13 @@ public class PortalServiceImpl implements PortalService {
 		dto.setCreateTime(portalItemGroup.getCreateTime().getTime());
 		dto.setUpdateTime(portalItemGroup.getUpdateTime().getTime());
 		ItemGroupInstanceConfig config = (ItemGroupInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
-		if(null != config){
-			if(!StringUtils.isEmpty(config.getTitleUri())){
-				String url = contentServerService.parserUri(config.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-				config.setTitleUrl(url);
-			}
 
+		if(!StringUtils.isEmpty(portalItemGroup.getTitleUri())){
+			String url = contentServerService.parserUri(portalItemGroup.getTitleUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+			dto.setTitleUrl(url);
+		}
+
+		if(null != config){
 			if(!StringUtils.isEmpty(config.getIconUri())){
 				String url = contentServerService.parserUri(config.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 				config.setIconUrl(url);
@@ -762,6 +787,13 @@ public class PortalServiceImpl implements PortalService {
 			if(!StringUtils.isEmpty(config.getAllOrMoreIconUri())){
 				String url = contentServerService.parserUri(config.getAllOrMoreIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 				config.setAllOrMoreIconUrl(url);
+			}
+
+
+			//历史遗留问题，titleFlag和title放在了config中，但它们是组件公有属性，应该放在PortalItemGroup。改正之后，下面代码是兼容数据用的。
+			if(StringUtils.isEmpty(dto.getTitleFlag()) && StringUtils.isEmpty(dto.getTitle())){
+				dto.setTitleFlag(config.getTitleFlag());
+				dto.setTitle(config.getTitle());
 			}
 
 			dto.setInstanceConfig(StringHelper.toJsonString(config));
@@ -1940,8 +1972,18 @@ public class PortalServiceImpl implements PortalService {
 			}
 
 
-			//设置标题信息
-			setTitleConfig(group, instanceConfig, user);
+//			//设置标题信息
+//			setTitleConfig(group, instanceConfig, user);
+			if(!StringUtils.isEmpty(itemGroup.getTitleUri())){
+				String url = contentServerService.parserUri(itemGroup.getTitleUri(), EntityType.USER.getCode(), user.getId());
+				group.setTitleUrl(url);
+			}
+
+			//历史遗留问题，titleFlag和title放在了config中，但它们是组件公有属性，应该放在PortalItemGroup。改正之后，下面代码是兼容数据用的。
+			if(StringUtils.isEmpty(itemGroup.getTitleFlag()) && StringUtils.isEmpty(itemGroup.getTitle())){
+				group.setTitleFlag(instanceConfig.getTitleFlag());
+				group.setTitle(instanceConfig.getTitle());
+			}
 
 
 			if(Widget.fromCode(group.getWidget()) == Widget.NAVIGATOR){
@@ -2044,6 +2086,36 @@ public class PortalServiceImpl implements PortalService {
 				publishTabItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 				group.setInstanceConfig(config);
+			}else if(Widget.fromCode(group.getWidget()) == Widget.CARDEXTENSION){
+				CardExtension config = new CardExtension();
+
+				if(instanceConfig.getAppOriginId() != null){
+
+					List<Long> appOriginIds = new ArrayList<>();
+					appOriginIds.add(instanceConfig.getAppOriginId());
+					List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsByOriginIds(versionId, appOriginIds);
+
+					if(apps != null && apps.size() > 0){
+						ServiceModuleApp app = apps.get(0);
+						config.setModuleId(app.getModuleId());
+						config.setAppId(app.getOriginId());
+						config.setItemGroup(itemGroup.getName());
+
+						ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+						if(module != null){
+							config.setClientHandlerType(module.getClientHandlerType());
+						}
+
+						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
+						//填充路由信息
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null);
+						config.setRouterPath(routerInfo.getPath());
+						config.setRouterQuery(routerInfo.getQuery());
+					}
+				}
+
+				group.setInstanceConfig(config);
+
 			}
 			groups.add(group);
 
@@ -2127,24 +2199,24 @@ public class PortalServiceImpl implements PortalService {
 	}
 
 
-	private void setTitleConfig(LaunchPadLayoutGroup group, ItemGroupInstanceConfig instanceConfig, User user){
-
-		if(group == null || instanceConfig == null || user == null){
-			return;
-		}
-
-		group.setTitleFlag(instanceConfig.getTitleFlag());
-		group.setTitleStyle(instanceConfig.getTitleStyle());
-		group.setSubTitle(instanceConfig.getSubTitle());
-		group.setTitleSize(instanceConfig.getTitleSize());
-		group.setTitleMoreFlag(instanceConfig.getTitleMoreFlag());
-
-		group.setTitle(instanceConfig.getTitle());
-		if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
-			String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), user.getId());
-			group.setIconUrl(url);
-		}
-	}
+//	private void setTitleConfig(LaunchPadLayoutGroup group, ItemGroupInstanceConfig instanceConfig, User user){
+//
+//		if(group == null || instanceConfig == null || user == null){
+//			return;
+//		}
+//
+//		group.setTitleFlag(instanceConfig.getTitleFlag());
+//		group.setTitleStyle(instanceConfig.getTitleStyle());
+//		group.setSubTitle(instanceConfig.getSubTitle());
+//		group.setTitleSize(instanceConfig.getTitleSize());
+//		group.setTitleMoreFlag(instanceConfig.getTitleMoreFlag());
+//
+//		group.setTitle(instanceConfig.getTitle());
+//		if(!StringUtils.isEmpty(instanceConfig.getTitleUri())){
+//			String url = contentServerService.parserUri(instanceConfig.getTitleUri(), EntityType.USER.getCode(), user.getId());
+//			group.setIconUrl(url);
+//		}
+//	}
 
 	//暂时没有用到
 	private void publishNavigationBar(Long versionId, Byte publishType){
@@ -3323,7 +3395,7 @@ public class PortalServiceImpl implements PortalService {
 						if(!StringUtils.isEmpty(padLayoutGroup.getTitle()) || !StringUtils.isEmpty(padLayoutGroup.getIconUrl())){
 							config.setTitleFlag(TitleFlag.LEFT.getCode());
 							config.setTitle(padLayoutGroup.getTitle());
-							config.setTitleUri(padLayoutGroup.getIconUrl());
+							//config.setTitleUri(padLayoutGroup.getIconUrl());
 						}
 						config.setColumnCount(padLayoutGroup.getColumnCount());
 						itemGroup.setInstanceConfig(StringHelper.toJsonString(config));

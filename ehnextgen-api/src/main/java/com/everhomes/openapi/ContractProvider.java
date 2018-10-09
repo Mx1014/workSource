@@ -1,6 +1,11 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+
+import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
@@ -130,7 +135,7 @@ public interface ContractProvider {
 
 	List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode);
 
-	
+	List<ContractCategory> listContractAppCategory(Integer namespaceId);
 
 	
 }

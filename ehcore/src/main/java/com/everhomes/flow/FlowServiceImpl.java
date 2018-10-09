@@ -3127,9 +3127,10 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEventLog> enterLogs = new ArrayList<>();
         for (FlowCase aCase : allFlowCase) {
             if (organizationId == null) {
+
                 organizationId = aCase.getOrganizationId();
             }
-            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(aCase.getCurrentNodeId(), aCase.getId(), aCase.getStepCount());
+            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeNotCompleteEnterLogs(aCase.getCurrentNodeId(), aCase.getId(), aCase.getStepCount());
             if (logs.size() > 0) {
                 enterLogs.addAll(logs);
             }

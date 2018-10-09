@@ -104,6 +104,8 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
             flowService.createFlowCase(createFlowCaseCommand);
             PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+            generalFormProvider.setInvestmentAdId(referId,cmd.getInvestmentAdId());
+            
             return dto;
         });
         return result;

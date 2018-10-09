@@ -1,7 +1,7 @@
-package com.everhomes.wx.message;
+package com.everhomes.rest.wx;
 
 
-public class Item {
+public class MessageItem {
 
     private Object value;
     private String color;
@@ -22,7 +22,7 @@ public class Item {
         this.color = color;
     }
 
-    public Item(Object value, String color) {
+    public MessageItem(Object value, String color) {
         this.value = value;
         this.color = color;
     }

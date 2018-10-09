@@ -3420,11 +3420,22 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
 //添加园区与域空间的关联
 			createNamespaceResource(namespaceId, community.getId());
-			//添加企业可见园区,管理公司可以看到添加的园区
-			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
-			organizationCommunity.setCommunityId(community.getId());
-			organizationCommunity.setOrganizationId(cmd.getOrganizationId());
-			organizationProvider.createOrganizationCommunity(organizationCommunity);
+
+
+
+			//标准版先写的使用pmOrgId创建OrganizationCommunity，后面定制版又使用了organizationId通过接口创建园区。
+			//TODO 以后谁有心情把它统一一下吧，现在就这样
+			//增加管理公司
+			if(cmd.getPmOrgId() != null){
+				organizationService.createOrganizationCommunity(cmd.getPmOrgId(), community.getId());
+			}else if(cmd.getOrganizationId() != null){
+				//添加企业可见园区,管理公司可以看到添加的园区
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(community.getId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}
+
 
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
