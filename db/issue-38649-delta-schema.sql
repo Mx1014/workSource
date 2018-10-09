@@ -23,7 +23,6 @@ CREATE TABLE `eh_protocol_template_variables`(
 CREATE TABLE `eh_protocols`(
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `template_id` BIGINT NOT NULL COMMENT '模板ID',
   `status` TINYINT NOT NULL COMMENT '状态：1为失效，2为生效',
   `content` MEDIUMTEXT COMMENT '文本',
   `type` TINYINT COMMENT '协议类型，1为服务协议，2为隐私协议',
