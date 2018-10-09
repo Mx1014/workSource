@@ -157,6 +157,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 	            if (flag)
 	                coverCount++;
             }catch(RuntimeErrorException e){
+            	LOGGER.warn("导入通讯录,保存单个数据出错", e);
             	log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
             	log.setData(data);
                 log.setErrorLog(e.getMessage());
@@ -244,6 +245,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     private boolean saveContactsInfo(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         //  1.设置信息
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(data.getAccount().trim());
+        if(null != employee){
+        	addCommand.setUpdateDetailId(employee.getId());
+        }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
         addCommand.setAccount(data.getAccount());
