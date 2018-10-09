@@ -12,7 +12,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
-import com.everhomes.rest.asset.TestLateFineCommand;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
