@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.asset.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -65,7 +64,6 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.customer.CustomerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -88,20 +86,18 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.order.PaymentOrderRecord;
-import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
-import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.AssetMapContractConfig;
 import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
@@ -124,15 +120,10 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.servicemoduleapp.CreateMappingAndConfigsCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
@@ -147,7 +138,6 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
@@ -181,48 +171,6 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 //import com.everhomes.contract.ContractService;
 
@@ -4176,20 +4124,20 @@ public class AssetServiceImpl implements AssetService {
         return new ArrayList<>();
     }
 
-    @Override
-    public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
-
-        List<AssetBillTemplateFieldDTO> dtos = new ArrayList<>();
-        Long templateVersion = assetProvider.getTemplateVersion(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType());
-        if(templateVersion == 0L) {
-            dtos = assetProvider.findTemplateFieldByTemplateVersion(0L, cmd.getOwnerType(), 0L, cmd.getTargetType(), 0L);
-        } else {
-            dtos = assetProvider.findTemplateFieldByTemplateVersion(
-                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(), templateVersion);
-        }
-
-        return dtos;
-    }
+//    @Override
+//    public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
+//
+//        List<AssetBillTemplateFieldDTO> dtos = new ArrayList<>();
+//        Long templateVersion = assetProvider.getTemplateVersion(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType());
+//        if(templateVersion == 0L) {
+//            dtos = assetProvider.findTemplateFieldByTemplateVersion(0L, cmd.getOwnerType(), 0L, cmd.getTargetType(), 0L);
+//        } else {
+//            dtos = assetProvider.findTemplateFieldByTemplateVersion(
+//                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(), templateVersion);
+//        }
+//
+//        return dtos;
+//    }
 
     private AssetVendor checkAssetVendor(String targetType,Long targetId){
         if(null == targetId) {
@@ -4261,25 +4209,25 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
-    @Override
-    public HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
-        Integer pageSize = Integer.MAX_VALUE;
-        cmd.setPageSize(pageSize);
-
-        ListSimpleAssetBillsResponse billResponse = listSimpleAssetBills(cmd);
-        List<SimpleAssetBillDTO> dtos = billResponse.getBills();
-
-        URL rootPath = RentalServiceImpl.class.getResource("/");
-        String filePath =rootPath.getPath() + this.downloadDir ;
-        File file = new File(filePath);
-        if(!file.exists())
-            file.mkdirs();
-        filePath = filePath + "AssetBills"+System.currentTimeMillis()+".xlsx";
-        //新建了一个文件
-        this.createAssetBillsBook(filePath, dtos);
-
-        return download(filePath,response);
-    }
+//    @Override
+//    public HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
+//        Integer pageSize = Integer.MAX_VALUE;
+//        cmd.setPageSize(pageSize);
+//
+//        ListSimpleAssetBillsResponse billResponse = listSimpleAssetBills(cmd);
+//        List<SimpleAssetBillDTO> dtos = billResponse.getBills();
+//
+//        URL rootPath = RentalServiceImpl.class.getResource("/");
+//        String filePath =rootPath.getPath() + this.downloadDir ;
+//        File file = new File(filePath);
+//        if(!file.exists())
+//            file.mkdirs();
+//        filePath = filePath + "AssetBills"+System.currentTimeMillis()+".xlsx";
+//        //新建了一个文件
+//        this.createAssetBillsBook(filePath, dtos);
+//
+//        return download(filePath,response);
+//    }
 
     public void createAssetBillsBook(String path,List<SimpleAssetBillDTO> dtos) {
         Workbook wb = new XSSFWorkbook();
@@ -4377,52 +4325,52 @@ public class AssetServiceImpl implements AssetService {
         return response;
     }
 
-    @Override
-    public ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
-        ListAssetBillTemplateCommand command = ConvertHelper.convert(cmd, ListAssetBillTemplateCommand.class);
-        Map<Long,List<Field>> fieldMap = getTemplateFields(command);
-        Long templateVersion = 0L;
-        List<Field> fields = new ArrayList<Field>();
-        if(fieldMap.keySet().size() > 0) {
-            templateVersion = fieldMap.keySet().iterator().next();
-            fields = fieldMap.get(templateVersion);
-        }
-
-
-        ImportDataResponse importDataResponse = new ImportDataResponse();
-        try {
-            //解析excel
-            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
-
-            if(null == resultList || resultList.isEmpty()){
-                LOGGER.error("File content is empty，userId="+userId);
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
-                        "File content is empty");
-            }
-            LOGGER.debug("Start import data...,total:" + resultList.size());
-
-            List<String> errorDataLogs = importAssetBills(cmd, convertToStrList(resultList), fields, userId, templateVersion);
-
-
-            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
-            if(null == errorDataLogs || errorDataLogs.isEmpty()){
-                LOGGER.debug("Data import all success...");
-            }else{
-                //记录导入错误日志
-                for (String log : errorDataLogs) {
-                    LOGGER.error(log);
-                }
-            }
-
-            importDataResponse.setTotalCount((long)resultList.size()-1);
-            importDataResponse.setFailCount((long)errorDataLogs.size());
-            importDataResponse.setLogs(errorDataLogs);
-        } catch (IOException e) {
-            LOGGER.error("File can not be resolved...");
-            e.printStackTrace();
-        }
-        return importDataResponse;
-    }
+//    @Override
+//    public ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+//        ListAssetBillTemplateCommand command = ConvertHelper.convert(cmd, ListAssetBillTemplateCommand.class);
+//        Map<Long,List<Field>> fieldMap = getTemplateFields(command);
+//        Long templateVersion = 0L;
+//        List<Field> fields = new ArrayList<Field>();
+//        if(fieldMap.keySet().size() > 0) {
+//            templateVersion = fieldMap.keySet().iterator().next();
+//            fields = fieldMap.get(templateVersion);
+//        }
+//
+//
+//        ImportDataResponse importDataResponse = new ImportDataResponse();
+//        try {
+//            //解析excel
+//            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+//
+//            if(null == resultList || resultList.isEmpty()){
+//                LOGGER.error("File content is empty，userId="+userId);
+//                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+//                        "File content is empty");
+//            }
+//            LOGGER.debug("Start import data...,total:" + resultList.size());
+//
+//            List<String> errorDataLogs = importAssetBills(cmd, convertToStrList(resultList), fields, userId, templateVersion);
+//
+//
+//            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+//            if(null == errorDataLogs || errorDataLogs.isEmpty()){
+//                LOGGER.debug("Data import all success...");
+//            }else{
+//                //记录导入错误日志
+//                for (String log : errorDataLogs) {
+//                    LOGGER.error(log);
+//                }
+//            }
+//
+//            importDataResponse.setTotalCount((long)resultList.size()-1);
+//            importDataResponse.setFailCount((long)errorDataLogs.size());
+//            importDataResponse.setLogs(errorDataLogs);
+//        } catch (IOException e) {
+//            LOGGER.error("File can not be resolved...");
+//            e.printStackTrace();
+//        }
+//        return importDataResponse;
+//    }
 
     private List<String> convertToStrList(List list) {
         List<String> result = new ArrayList<String>();
@@ -4465,47 +4413,47 @@ public class AssetServiceImpl implements AssetService {
         return result;
     }
 
-    private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId, Long templateVersion){
-        List<String> errorDataLogs = new ArrayList<String>();
-
-//        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        for (String str : list) {
-            String[] s = str.split("\\|\\|");
-            dbProvider.execute((TransactionStatus status) -> {
-                CreatAssetBillCommand bill = new CreatAssetBillCommand();
-                bill.setOwnerId(cmd.getOwnerId());
-                bill.setOwnerType(cmd.getOwnerType());
-                bill.setTargetId(cmd.getTargetId());
-                bill.setTargetType(cmd.getTargetType());
-                bill.setTemplateVersion(templateVersion);
-                bill.setSource(AssetBillSource.THIRD_PARTY.getCode());
-                int i = 0;
-                for(Field field : fields) {
-                    try {
-                        field.setAccessible(true);
-                        if("class java.sql.Timestamp".equals(field.getType().toString())) {
-                            field.set(bill, covertStrToTimestamp(s[i]));
-                        } else if("class java.math.BigDecimal".equals(field.getType().toString())) {
-                            if(s[i] != null && !"null".equals(s[i])) {
-                                field.set(bill, new BigDecimal(s[i]));
-                            }
-
-                        } else {
-                            field.set(bill, field.getType().getConstructor(field.getType()).newInstance(s[i]));
-                        }
-
-                        i++;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                creatAssetBill(bill);
-                return null;
-            });
-        }
-        return errorDataLogs;
-
-    }
+//    private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId, Long templateVersion){
+//        List<String> errorDataLogs = new ArrayList<String>();
+//
+////        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        for (String str : list) {
+//            String[] s = str.split("\\|\\|");
+//            dbProvider.execute((TransactionStatus status) -> {
+//                CreatAssetBillCommand bill = new CreatAssetBillCommand();
+//                bill.setOwnerId(cmd.getOwnerId());
+//                bill.setOwnerType(cmd.getOwnerType());
+//                bill.setTargetId(cmd.getTargetId());
+//                bill.setTargetType(cmd.getTargetType());
+//                bill.setTemplateVersion(templateVersion);
+//                bill.setSource(AssetBillSource.THIRD_PARTY.getCode());
+//                int i = 0;
+//                for(Field field : fields) {
+//                    try {
+//                        field.setAccessible(true);
+//                        if("class java.sql.Timestamp".equals(field.getType().toString())) {
+//                            field.set(bill, covertStrToTimestamp(s[i]));
+//                        } else if("class java.math.BigDecimal".equals(field.getType().toString())) {
+//                            if(s[i] != null && !"null".equals(s[i])) {
+//                                field.set(bill, new BigDecimal(s[i]));
+//                            }
+//
+//                        } else {
+//                            field.set(bill, field.getType().getConstructor(field.getType()).newInstance(s[i]));
+//                        }
+//
+//                        i++;
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                creatAssetBill(bill);
+//                return null;
+//            });
+//        }
+//        return errorDataLogs;
+//
+//    }
 
     private Timestamp covertStrToTimestamp(String str) {
         String formatStr = configurationProvider.getValue("asset.accountperiod.format", "yyyyMMdd");
@@ -4553,54 +4501,54 @@ public class AssetServiceImpl implements AssetService {
 
     }
 
-    @Override
-    public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
-        //校验创建账单的权限
-        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
-        AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
-        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
-        bill.setSource(AssetBillSource.MANUAL.getCode());
-        bill.setCreatorUid(UserContext.current().getUser().getId());
-        getTotalAmount(bill);
-
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        bill.setNamespaceId(namespaceId);
-        if(cmd.getAddressId() == null) {
-            Address address = addressProvider.findApartmentAddress(namespaceId, cmd.getTargetId(), cmd.getBuildingName(), cmd.getApartmentName());
-            cmd.setAddressId(address.getId());
-            bill.setAddressId(address.getId());
-        }
-        Community community = communityProvider.findCommunityById(cmd.getTargetId());
-        //园区 查公司表
-        if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-
-            OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(cmd.getAddressId());
-            if(organizationAddress != null) {
-                bill.setTenantId(organizationAddress.getOrganizationId());
-                bill.setTenantType(TenantType.ENTERPRISE.getCode());
-            }
-        }
-        //小区 查家庭
-        else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-            Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
-            if(family != null) {
-                bill.setTenantId(family.getId());
-                bill.setTenantType(TenantType.FAMILY.getCode());
-            }
-        }
-        assetProvider.creatAssetBill(bill);
-
-        FindAssetBillCommand command = new FindAssetBillCommand();
-        command.setId(bill.getId());
-        command.setOwnerId(bill.getOwnerId());
-        command.setOwnerType(bill.getOwnerType());
-        command.setTargetId(bill.getTargetId());
-        command.setTargetType(bill.getTargetType());
-        command.setTemplateVersion(bill.getTemplateVersion());
-        AssetBillTemplateValueDTO dto = findAssetBill(command);
-
-        return dto;
-    }
+//    @Override
+//    public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
+//        //校验创建账单的权限
+//        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
+//        AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
+//        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
+//        bill.setSource(AssetBillSource.MANUAL.getCode());
+//        bill.setCreatorUid(UserContext.current().getUser().getId());
+//        getTotalAmount(bill);
+//
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        bill.setNamespaceId(namespaceId);
+//        if(cmd.getAddressId() == null) {
+//            Address address = addressProvider.findApartmentAddress(namespaceId, cmd.getTargetId(), cmd.getBuildingName(), cmd.getApartmentName());
+//            cmd.setAddressId(address.getId());
+//            bill.setAddressId(address.getId());
+//        }
+//        Community community = communityProvider.findCommunityById(cmd.getTargetId());
+//        //园区 查公司表
+//        if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+//
+//            OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(cmd.getAddressId());
+//            if(organizationAddress != null) {
+//                bill.setTenantId(organizationAddress.getOrganizationId());
+//                bill.setTenantType(TenantType.ENTERPRISE.getCode());
+//            }
+//        }
+//        //小区 查家庭
+//        else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+//            Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
+//            if(family != null) {
+//                bill.setTenantId(family.getId());
+//                bill.setTenantType(TenantType.FAMILY.getCode());
+//            }
+//        }
+//        assetProvider.creatAssetBill(bill);
+//
+//        FindAssetBillCommand command = new FindAssetBillCommand();
+//        command.setId(bill.getId());
+//        command.setOwnerId(bill.getOwnerId());
+//        command.setOwnerType(bill.getOwnerType());
+//        command.setTargetId(bill.getTargetId());
+//        command.setTargetType(bill.getTargetType());
+//        command.setTemplateVersion(bill.getTemplateVersion());
+//        AssetBillTemplateValueDTO dto = findAssetBill(command);
+//
+//        return dto;
+//    }
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd) {
@@ -4629,82 +4577,82 @@ public class AssetServiceImpl implements AssetService {
         return bill;
     }
 
-    @Override
-    public AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd) {
-        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//    @Override
+//    public AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd) {
+//        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//
+//        bill = ConvertHelper.convert(cmd, AssetBill.class);
+//
+//        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
+//        bill.setUpdateUid(UserContext.current().getUser().getId());
+//        getTotalAmount(bill);
+//        assetProvider.updateAssetBill(bill);
+//
+//        FindAssetBillCommand command = new FindAssetBillCommand();
+//        command.setId(bill.getId());
+//        command.setOwnerId(bill.getOwnerId());
+//        command.setOwnerType(bill.getOwnerType());
+//        command.setTargetId(bill.getTargetId());
+//        command.setTargetType(bill.getTargetType());
+//        command.setTemplateVersion(bill.getTemplateVersion());
+//        AssetBillTemplateValueDTO dto = findAssetBill(command);
+//
+//        return dto;
+//    }
 
-        bill = ConvertHelper.convert(cmd, AssetBill.class);
-
-        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
-        bill.setUpdateUid(UserContext.current().getUser().getId());
-        getTotalAmount(bill);
-        assetProvider.updateAssetBill(bill);
-
-        FindAssetBillCommand command = new FindAssetBillCommand();
-        command.setId(bill.getId());
-        command.setOwnerId(bill.getOwnerId());
-        command.setOwnerType(bill.getOwnerType());
-        command.setTargetId(bill.getTargetId());
-        command.setTargetType(bill.getTargetType());
-        command.setTemplateVersion(bill.getTemplateVersion());
-        AssetBillTemplateValueDTO dto = findAssetBill(command);
-
-        return dto;
-    }
-
-    @Override
-    public void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd) {
-        //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
-
-        List<AssetBill> bills = assetProvider.listUnpaidBillsGroupByTenant(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
-
-        if(bills != null && bills.size() > 0) {
-            Integer namespaceId = UserContext.getCurrentNamespaceId();
-            LocaleString localeString = localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.NOTIFY_FEE,
-                    "zh_CN");
-            String content = localeString.getText();
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("unpaid bills = {}", bills);
-            }
-
-            for(AssetBill bill : bills) {
-                if (bill.getContactNo() != null) {
-                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, bill.getContactNo());
-                    if (identifier != null) {
-                        sendMessageToUser(identifier.getOwnerUid(), content);
-                    }
-                } else {
-                    //没有contactNo的家庭 通知所有家庭成员
-                    if (TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
-                        List<GroupMember> groupMembers = groupProvider.findGroupMemberByGroupId(bill.getTenantId());
-                        if (groupMembers != null && groupMembers.size() > 0) {
-                            for(GroupMember groupMember : groupMembers) {
-                                if (EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
-                                    sendMessageToUser(groupMember.getMemberId(), content);
-                                }
-                            }
-                        }
-                    }
-
-                    //没有contactNo的企业 通知所有企业管理员
-                    if (TenantType.ENTERPRISE.equals(TenantType.fromCode(bill.getTenantType()))) {
-                        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
-                        command.setOwnerId(bill.getTenantId());
-                        command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-                        command.setOrganizationId(bill.getTenantId());
-                        List<OrganizationContactDTO> orgContact = rolePrivilegeService.listOrganizationAdministrators(command);
-                        if (orgContact != null && orgContact.size() > 0) {
-                            for(OrganizationContactDTO contact : orgContact) {
-                                if (OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
-                                    sendMessageToUser(contact.getTargetId(), content);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    @Override
+//    public void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd) {
+//        //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
+//
+//        List<AssetBill> bills = assetProvider.listUnpaidBillsGroupByTenant(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//
+//        if(bills != null && bills.size() > 0) {
+//            Integer namespaceId = UserContext.getCurrentNamespaceId();
+//            LocaleString localeString = localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.NOTIFY_FEE,
+//                    "zh_CN");
+//            String content = localeString.getText();
+//            if(LOGGER.isDebugEnabled()) {
+//                LOGGER.debug("unpaid bills = {}", bills);
+//            }
+//
+//            for(AssetBill bill : bills) {
+//                if (bill.getContactNo() != null) {
+//                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, bill.getContactNo());
+//                    if (identifier != null) {
+//                        sendMessageToUser(identifier.getOwnerUid(), content);
+//                    }
+//                } else {
+//                    //没有contactNo的家庭 通知所有家庭成员
+//                    if (TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
+//                        List<GroupMember> groupMembers = groupProvider.findGroupMemberByGroupId(bill.getTenantId());
+//                        if (groupMembers != null && groupMembers.size() > 0) {
+//                            for(GroupMember groupMember : groupMembers) {
+//                                if (EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
+//                                    sendMessageToUser(groupMember.getMemberId(), content);
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//                    //没有contactNo的企业 通知所有企业管理员
+//                    if (TenantType.ENTERPRISE.equals(TenantType.fromCode(bill.getTenantType()))) {
+//                        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+//                        command.setOwnerId(bill.getTenantId());
+//                        command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//                        command.setOrganizationId(bill.getTenantId());
+//                        List<OrganizationContactDTO> orgContact = rolePrivilegeService.listOrganizationAdministrators(command);
+//                        if (orgContact != null && orgContact.size() > 0) {
+//                            for(OrganizationContactDTO contact : orgContact) {
+//                                if (OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
+//                                    sendMessageToUser(contact.getTargetId(), content);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private void sendMessageToUser(Long userId, String content) {
         if(LOGGER.isDebugEnabled()) {
@@ -4724,57 +4672,57 @@ public class AssetServiceImpl implements AssetService {
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
-    @Override
-    public void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status) {
-        if(cmd.getIds() != null && cmd.getIds().size() > 0) {
-            for(Long id : cmd.getIds()) {
-                AssetBill bill = assetProvider.findAssetBill(id, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//    @Override
+//    public void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status) {
+//        if(cmd.getIds() != null && cmd.getIds().size() > 0) {
+//            for(Long id : cmd.getIds()) {
+//                AssetBill bill = assetProvider.findAssetBill(id, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//
+//                if(bill != null) {
+//                    bill.setStatus(status.getCode());
+//                    bill.setUpdateUid(UserContext.current().getUser().getId());
+//                    assetProvider.updateAssetBill(bill);
+//                }
+//
+//            }
+//        }
+//
+//    }
 
-                if(bill != null) {
-                    bill.setStatus(status.getCode());
-                    bill.setUpdateUid(UserContext.current().getUser().getId());
-                    assetProvider.updateAssetBill(bill);
-                }
+//    @Override
+//    public void deleteBill(DeleteBillCommand cmd) {
+//        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//
+//        bill.setStatus(AssetBillStatus.INACTIVE.getCode());
+//        bill.setUpdateUid(UserContext.current().getUser().getId());
+//        bill.setDeleteUid(UserContext.current().getUser().getId());
+//        bill.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//
+//        assetProvider.updateAssetBill(bill);
+//    }
 
-            }
-        }
-
-    }
-
-    @Override
-    public void deleteBill(DeleteBillCommand cmd) {
-        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
-
-        bill.setStatus(AssetBillStatus.INACTIVE.getCode());
-        bill.setUpdateUid(UserContext.current().getUser().getId());
-        bill.setDeleteUid(UserContext.current().getUser().getId());
-        bill.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-        assetProvider.updateAssetBill(bill);
-    }
-
-    @Override
-    public List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd) {
-
-        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ASSET_BILL_TEMPLATE.getCode()).tryEnter(()-> {
-            if(cmd.getDtos() != null && cmd.getDtos().size() > 0) {
-                for(AssetBillTemplateFieldDTO dto : cmd.getDtos()) {
-                    AssetBillTemplateFields field = ConvertHelper.convert(dto, AssetBillTemplateFields.class);
-                    field.setTemplateVersion(field.getTemplateVersion() + 1);
-                    assetProvider.creatTemplateField(field);
-                }
-            }
-        });
-
-        ListAssetBillTemplateCommand command = new ListAssetBillTemplateCommand();
-        command.setOwnerType(cmd.getDtos().get(0).getOwnerType());
-        command.setOwnerId(cmd.getDtos().get(0).getOwnerId());
-        command.setTargetType(cmd.getDtos().get(0).getTargetType());
-        command.setTargetId(cmd.getDtos().get(0).getTargetId());
-
-        List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(command);
-        return dtos;
-    }
+//    @Override
+//    public List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd) {
+//
+//        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ASSET_BILL_TEMPLATE.getCode()).tryEnter(()-> {
+//            if(cmd.getDtos() != null && cmd.getDtos().size() > 0) {
+//                for(AssetBillTemplateFieldDTO dto : cmd.getDtos()) {
+//                    AssetBillTemplateFields field = ConvertHelper.convert(dto, AssetBillTemplateFields.class);
+//                    field.setTemplateVersion(field.getTemplateVersion() + 1);
+//                    assetProvider.creatTemplateField(field);
+//                }
+//            }
+//        });
+//
+//        ListAssetBillTemplateCommand command = new ListAssetBillTemplateCommand();
+//        command.setOwnerType(cmd.getDtos().get(0).getOwnerType());
+//        command.setOwnerId(cmd.getDtos().get(0).getOwnerId());
+//        command.setTargetType(cmd.getDtos().get(0).getTargetType());
+//        command.setTargetId(cmd.getDtos().get(0).getTargetId());
+//
+//        List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(command);
+//        return dtos;
+//    }
 
     @Override
     public Boolean checkTokenRegister(CheckTokenRegisterCommand cmd) {
@@ -4787,23 +4735,23 @@ public class AssetServiceImpl implements AssetService {
         return true;
     }
 
-    @Override
-    public NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd) {
-        NotifyTimesResponse response = new NotifyTimesResponse();
-        long startTime = getTimesMonthmorning();
-        long endTime = getTimesMonthnight();
-
-        int count = assetProvider.countNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
-                new Timestamp(startTime), new Timestamp(endTime));
-        response.setNotifyTimes(count);
-
-        AssetBillNotifyRecords lastRecord = assetProvider.getLastAssetBillNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
-
-        if(lastRecord != null) {
-            response.setLastNotifyTime(lastRecord.getCreateTime());
-        }
-        return response;
-    }
+//    @Override
+//    public NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd) {
+//        NotifyTimesResponse response = new NotifyTimesResponse();
+//        long startTime = getTimesMonthmorning();
+//        long endTime = getTimesMonthnight();
+//
+//        int count = assetProvider.countNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
+//                new Timestamp(startTime), new Timestamp(endTime));
+//        response.setNotifyTimes(count);
+//
+//        AssetBillNotifyRecords lastRecord = assetProvider.getLastAssetBillNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+//
+//        if(lastRecord != null) {
+//            response.setLastNotifyTime(lastRecord.getCreateTime());
+//        }
+//        return response;
+//    }
 
     @Override
     public AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd) {
@@ -4832,29 +4780,29 @@ public class AssetServiceImpl implements AssetService {
         return cal.getTimeInMillis();
     }
 
-    private Map<Long, List<Field>> getTemplateFields(ListAssetBillTemplateCommand cmd) {
-        List<Field> fields = new ArrayList<>();
-        Map<Long, List<Field>> fieldMap = new HashMap<Long, List<Field>>();
-        List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(cmd);
-        if(dtos != null && dtos.size() > 0) {
-            Class c=CreatAssetBillCommand.class;
-            try {
-                Long templateVersion = 0L;
-                for(AssetBillTemplateFieldDTO dto : dtos) {
-                    if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(dto.getSelectedFlag()))) {
-                        templateVersion = dto.getTemplateVersion();
-                        Field field = c.getDeclaredField(dto.getFieldName());
-                        fields.add(field);
-                    }
-                }
-                fieldMap.put(templateVersion, fields);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return fieldMap;
-    }
+//    private Map<Long, List<Field>> getTemplateFields(ListAssetBillTemplateCommand cmd) {
+//        List<Field> fields = new ArrayList<>();
+//        Map<Long, List<Field>> fieldMap = new HashMap<Long, List<Field>>();
+//        List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(cmd);
+//        if(dtos != null && dtos.size() > 0) {
+//            Class c=CreatAssetBillCommand.class;
+//            try {
+//                Long templateVersion = 0L;
+//                for(AssetBillTemplateFieldDTO dto : dtos) {
+//                    if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(dto.getSelectedFlag()))) {
+//                        templateVersion = dto.getTemplateVersion();
+//                        Field field = c.getDeclaredField(dto.getFieldName());
+//                        fields.add(field);
+//                    }
+//                }
+//                fieldMap.put(templateVersion, fields);
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return fieldMap;
+//    }
 
 	//线下缴费场景，显示付费凭证图片
 	@Override

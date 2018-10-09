@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -12,51 +13,51 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-
-import java.io.OutputStream;
 
 /**
  * Created by Administrator on 2017/2/20.
  */
 public interface AssetService {
 
-	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
-
+//	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
+//
 	ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
-
-	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
-
-	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
-
-	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
-
+//
+//	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
+//
+//	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+//
+//	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
+//
 	AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
-
-	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
-
-	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
-
-	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
-
-	void deleteBill(DeleteBillCommand cmd);
-
-	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
-
+//
+//	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
+//
+//	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
+//
+//	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
+//
+//	void deleteBill(DeleteBillCommand cmd);
+//
+//	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
+//
 	Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
-
-	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
-
+//
+//	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
+//
 	AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
-
+//
 	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+	
+	//=============================================================================
+	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
+	//=============================================================================
 
 	ListBillsResponse listBills(ListBillsCommand cmd);
 
