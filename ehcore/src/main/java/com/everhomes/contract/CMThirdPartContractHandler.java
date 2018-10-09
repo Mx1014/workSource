@@ -231,7 +231,11 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         //存储瑞安合同
         try {
-            syncDataToDb(DataType.CONTRACT.getCode(), communityIdentifier, taskId, categoryId, contractApplicationScene);
+        	List<CMDataObject> dataObjects = new ArrayList<>();
+        	for(CMSyncObject temp : cmSyncObjects){
+        		dataObjects.addAll(temp.getData());
+        	}
+            syncDataToDb(DataType.CONTRACT.getCode(), dataObjects, taskId, categoryId, contractApplicationScene);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause contract " );
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CONTRACT_ERROR, "sync data from RuiAnCM is fail cause contract");
@@ -246,10 +250,6 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
         //String url = "http://183.62.222.87:5902/sf";
         
-
-
-
-
 
 
 /*        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
@@ -289,17 +289,17 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     }
 
     
-    private void syncDataToDb(Byte dataType, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene) {
-        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
+    private void syncDataToDb(Byte dataType,List<CMDataObject> mergeContractList, Long taskId, Long categoryId, Byte contractApplicationScene) {
+        /*List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, dataType);
         if (backupList == null || backupList.isEmpty()) {
             LOGGER.debug("syncDataToDb backupList is empty, NAMESPACE_ID: {}, dataType: {}", NAMESPACE_ID, dataType);
             return ;
-        }
+        }*/
         try {
-            LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
-            updateAllData(dataType, NAMESPACE_ID, communityIdentifier, backupList, categoryId, contractApplicationScene);
+            //LOGGER.debug("syncDataToDb backupList size：{}", backupList.size());
+            updateAllData(dataType, NAMESPACE_ID, mergeContractList, categoryId, contractApplicationScene);
         } finally {
-            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            //zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
         }
 
@@ -342,13 +342,13 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         zjSyncdataBackupProvider.createZjSyncdataBackup(backup);
     }
     
-    private void updateAllData(Byte dataType, Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList, Long categoryId, Byte contractApplicationScene) {
+    private void updateAllData(Byte dataType, Integer namespaceId, List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
         DataType cmDataType = DataType.fromCode(dataType);
         LOGGER.debug("CM DataType : {}", cmDataType);
         switch (cmDataType) {
             case CONTRACT:
                 LOGGER.debug("syncDataToDb SYNC CONTRACT");
-                syncAllContracts(namespaceId, communityIdentifier, backupList, categoryId, contractApplicationScene);
+                syncAllContracts(namespaceId, mergeContractList, categoryId, contractApplicationScene);
                 break;
             case APARTMENT_LIVING_STATUS:
                 //syncApartmentLivingStatus(namespaceId, backupList);
@@ -359,11 +359,11 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
     }
     
-    private void syncAllContracts(Integer namespaceId, String communityIdentifier, List<ZjSyncdataBackup> backupList, Long categoryId, Byte contractApplicationScene) {
+    private void syncAllContracts(Integer namespaceId,  List<CMDataObject> mergeContractList, Long categoryId, Byte contractApplicationScene) {
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
         //allFlag为part时，仅更新单个特定的项目数据即可
     	
-    	List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
+    	/*List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
     	
 		for (int i = 0; i < mergeContractList.size(); i++) {
 			Community community = communityProvider.findCommunityByNamespaceToken(
@@ -373,7 +373,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 				return;
 			}
 			mergeContractList.get(i).setCommunityId(community.getId());
-		}
+			
+		}*/
        
         
         //List<CMDataObject> mergeContractList = mergeBackupList(backupList, CMDataObject.class);
