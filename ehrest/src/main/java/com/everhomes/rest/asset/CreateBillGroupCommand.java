@@ -19,6 +19,9 @@ import javax.validation.constraints.NotNull;
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
+ * <li>categoryId: 缴费多应用ID</li>
+ * <li>organizationId:管理公司ID</li>
+ * <li>appId:应用ID</li>
  *</ul>
  */
 public class CreateBillGroupCommand {
