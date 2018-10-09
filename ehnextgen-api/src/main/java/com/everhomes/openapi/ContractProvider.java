@@ -67,6 +67,7 @@ public interface ContractProvider {
 
 	Map<Long, List<Contract>> listContractGroupByCommunity();
 	String findLastContractVersionByCommunity(Integer namespaceId, Long communityId);
+	Timestamp findLastContractVersionByCommunity(Integer namespaceId);
 
 	List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId);
 	List<Contract> listContractsByAddressId(Long addressId);

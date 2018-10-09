@@ -187,6 +187,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
             enterprises = enterprises.substring(enterprises.indexOf(">{")+1, enterprises.indexOf("</string>"));
 
+            LOGGER.info("sync from RuiAnCM is complete. ");
+
             CMSyncObject cmSyncObject =
                     (CMSyncObject) StringHelper.fromJsonString(enterprises, CMSyncObject.class);
 

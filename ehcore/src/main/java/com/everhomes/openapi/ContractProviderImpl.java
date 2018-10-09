@@ -738,6 +738,20 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public Timestamp findLastContractVersionByCommunity(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.UPDATE_TIME);
+		}
+		return null;
+	}
+
+
+	@Override
 	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
