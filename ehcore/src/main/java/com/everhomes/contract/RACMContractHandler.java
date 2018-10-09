@@ -67,7 +67,7 @@ public class RACMContractHandler extends DefaultContractServiceImpl {
                 if (contractCategory != null && contractCategory.getContractApplicationScene() != null) {
                 	contractApplicationScene = contractCategory.getContractApplicationScene();
 				}
-        		LOGGER.debug("RuiAn CM sync start , version is : {} , task is : {} , cmd is : {} , contractApplicationScene is : {} , communityId is : {}" , version, task, cmd, contractApplicationScene, community.getNamespaceCommunityToken() ,  , );
+        		LOGGER.debug("RuiAn CM sync start , version is : {} , task is : {} , cmd is : {} , contractApplicationScene is : {} , communityId is : {}" , version, task, cmd, contractApplicationScene, community.getNamespaceCommunityToken());
                 contractHandler.syncContractsFromThirdPart("1", version, community.getNamespaceCommunityToken(), task.getId(), cmd.getCategoryId(), contractApplicationScene);
                 return response;
             }, task);
