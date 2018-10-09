@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -80,42 +81,52 @@ public class GoodsServiceImpl implements GoodsService{
 	private GoodScopeDTO getServiceGoodsScopes(String serviceType, Integer namespaceId){
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(namespaceId);
-		List<TagDTO> communitiesList = new ArrayList();
+		List<String> communitiesList = new ArrayList();
+
+		
 		switch (serviceType) {
 		case "停车缴费" :
 			for (Community community : communities){
-				TagDTO communitiyDTO = new TagDTO();
-				communitiyDTO.setId(community.getId());
-				communitiyDTO.setName(community.getName());
-				List<TagDTO> parkingLotList = new ArrayList();
+				String communitiy;
+				JSONObject communitityJson=new JSONObject();
+				communitityJson.put("id", community.getId());
+				communitityJson.put("name", community.getName());
+				List<String> parkingLotList = new ArrayList();
 				String ownerType = "communities";
 				List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
 				for(ParkingLot parkingLot : parkinglots){
-					TagDTO parkingDTO = new TagDTO();
-					parkingDTO.setId(parkingLot.getId());
-					parkingDTO.setName(parkingLot.getName());
-					parkingLotList.add(parkingDTO);
+					String parking;
+					JSONObject parkingJson=new JSONObject();
+					parkingJson.put("id", parkingLot.getId());
+					parkingJson.put("name", parkingLot.getName());
+					parking = parkingJson.toString();
+					parkingLotList.add(parking);
 				}
-				communitiyDTO.setTagList(parkingLotList);
-				communitiesList.add(communitiyDTO);
+				communitityJson.put("tag", parkingLotList);
+				communitiy = communitityJson.toString();
+				communitiesList.add(communitiy);
 			}
 			goodScopeDTO.setTagList(communitiesList);
 			break;
 		case "云打印" : 
 			for (Community community : communities){
-				TagDTO communitiyDTO = new TagDTO();
-				communitiyDTO.setId(community.getId());
-				communitiyDTO.setName(community.getName());
-				List<TagDTO> printerList = new ArrayList();
+				String communitiy;
+				JSONObject communitityJson=new JSONObject();
+				communitityJson.put("id", community.getId());
+				communitityJson.put("name", community.getName());
+				List<String> printerList = new ArrayList();
 				List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByOwnerId(community.getId());
 				for(SiyinPrintPrinter siyinPrintPrinter : SiyinPrintPrinters){
-					TagDTO printerDTO = new TagDTO();
-					printerDTO.setId(siyinPrintPrinter.getId());
-					printerDTO.setName(siyinPrintPrinter.getReaderName());
-					printerList.add(printerDTO);
+					String printer;
+					JSONObject printerJson=new JSONObject();
+					printerJson.put("id", siyinPrintPrinter.getId());
+					printerJson.put("name", siyinPrintPrinter.getReaderName());
+					printer = printerJson.toString();
+					printerList.add(printer);
 				}
-				communitiyDTO.setTagList(printerList);
-				communitiesList.add(communitiyDTO);
+				communitityJson.put("tag", printerList);
+				communitiy = communitityJson.toString();
+				communitiesList.add(communitiy);
 			}
 			goodScopeDTO.setTagList(communitiesList);
 			break;

@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
 public class GoodScopeDTO {
 	
 	private String title;
-	private List<TagDTO> tagList;
+	private List<String> tagList;
 	
 	public String getTitle() {
 		return title;
@@ -25,11 +25,11 @@ public class GoodScopeDTO {
 		this.title = title;
 	}
 	
-	public List<TagDTO> getTagList() {
+	public List<String> getTagList() {
 		return tagList;
 	}
 	
-	public void setTagList(List<TagDTO> tagList) {
+	public void setTagList(List<String> tagList) {
 		this.tagList = tagList;
 	}
 	
