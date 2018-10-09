@@ -161,6 +161,13 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         //增加频次  repeatType
         if(cmd.getRepeatType()!=null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
+        
+      //MultiManagement company
+        if (cmd.getOwnerId() != null && cmd.getOwnerId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//            if (!StringUtils.isNullOrEmpty(cmd.getOwnerType()))
+//                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;
