@@ -7285,6 +7285,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
         if (employee == null)
             return true;
+        LOGGER.debug("employee contact token = {}, param token = {}, result is {}", employee.getContactToken(), contactToken, employee.getContactToken().equals(contactToken));
         return employee.getContactToken().equals(contactToken);
     }
 
