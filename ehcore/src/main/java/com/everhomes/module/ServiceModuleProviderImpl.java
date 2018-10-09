@@ -835,6 +835,23 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+    @Override
+    public List<Long> listExcludeCauseWhiteList(){
+        List<Long> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
+        SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
+
+        context.select(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .from(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS)
+                .groupBy(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .fetch().map(r -> {
+            results.add(r.getValue(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID));
+            return null;
+        });
+        return results;
+
+    }
+
 
     @Override
     public List<ServiceModuleIncludeFunction> listIncludeFunctions(Integer namespaceId, Long communityId, Long moduleId) {
@@ -842,13 +859,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
         SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
 
-        Condition cond = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.NAMESPACE_ID.ne(namespaceId);
+        Condition cond = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId);
         Condition cond2 = null;
         if (communityId != null) {
-            cond2 = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(communityId);
-            cond2 = cond2.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(0L));
-            cond2 = cond2.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.isNotNull());
-            cond = cond.or(cond2);
+            cond2 = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.eq(communityId);
+            cond2 = cond2.or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L));
+            cond2 = cond2.or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.isNull());
+            cond = cond.and(cond2);
         }
         if (moduleId != null)
             cond = cond.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));

@@ -47,6 +47,8 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
+import com.everhomes.asset.AppAssetCategory;
+import com.everhomes.asset.AssetExportHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
@@ -135,6 +137,8 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.PaymentChargingItemType;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
@@ -145,6 +149,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -304,6 +309,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 
 	@Autowired
 	protected TaskService taskService;
+	
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
 
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -3865,20 +3873,26 @@ long assetCategoryId = 0l;
 	@Override
 	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
 		// 查询应用列表
-		List<ServiceModuleApp> serviceModuleApp = serviceModuleAppService.listReleaseServiceModuleApp(cmd.getNamespaceId(), ServiceModuleConstants.CONTRACT_MODULE, null, null, null);
-		List<ContractCategoryListDTO> resultList = null;
-
-		if (serviceModuleApp.size() > 0) {
-			resultList = serviceModuleApp.stream().map((c) -> {
-				ContractCategoryListDTO dto = ConvertHelper.convert(c, ContractCategoryListDTO.class);
-				ContractInstanceConfig contractInstanceConfig = (ContractInstanceConfig) StringHelper
-						.fromJsonString(c.getInstanceConfig(), ContractInstanceConfig.class);
-				dto.setCategoryId(contractInstanceConfig.getCategoryId());
-				dto.setContractApplicationScene(contractInstanceConfig.getContractApplicationScene());
-				return dto;
-			}).collect(Collectors.toList());
+		List<ContractCategoryListDTO> dtos = new ArrayList<ContractCategoryListDTO>();
+		//1、根据域空间ID查询出所有的合同应用eh_contract_categories
+		List<ContractCategory> appContractCategorieList = contractProvider.listContractAppCategory(cmd.getNamespaceId());
+		for(ContractCategory appContractCategory : appContractCategorieList) {
+			//2、根据categoryId查询eh_service_module_apps表的custom_tag，取出应用名称
+			Long categoryId = appContractCategory.getId();
+			ContractCategoryListDTO dto = new ContractCategoryListDTO();
+			dto.setCategoryId(categoryId);
+			dto.setContractApplicationScene(appContractCategory.getContractApplicationScene());
+			if(categoryId != null) {
+				ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(
+						cmd.getNamespaceId(), null, ServiceModuleConstants.CONTRACT_MODULE, categoryId.toString());
+				if(serviceModuleApp != null) {
+					dto.setName(serviceModuleApp.getName());
+					dtos.add(dto);//只有categoryId，没有合同应用名称，说明该合同应用已在公共平台那边删除
+				}
+			}
 		}
-		return resultList;
+		return dtos;
+		
 	}
 
 	@Override

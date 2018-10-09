@@ -6,17 +6,23 @@ import com.everhomes.util.StringHelper;
 import java.math.BigDecimal;
 
 /**
- * 
- * <ul>参数:
- * <li>id: 门户itemGroup的id</li>
- * <li>label: 门户itemGroup名称</li>
- * <li>description: 门户itemGroup描述</li>
- * <li>separatorFlag: 底部隔栏flag</li>
- * <li>separatorHeight: 底部隔栏高度</li>
- * <li>widget: 组件</li>
- * <li>contentType: 组件内展示内容</li>
- * <li>style: 组件样式</li>
- * <li>instanceConfig: 组件的配置参数，具体参数具体定义</li>
+ * <ul>
+ *     <li>id: 门户itemGroup的id</li>
+ *     <li>label: 门户itemGroup名称</li>
+ *     <li>description: 门户itemGroup描述</li>
+ *     <li>separatorFlag: 底部隔栏flag</li>
+ *     <li>separatorHeight: 底部隔栏高度</li>
+ *     <li>widget: 组件</li>
+ *     <li>contentType: 组件内展示内容</li>
+ *     <li>style: 组件样式</li>
+ *     <li>instanceConfig: 组件的配置参数，具体参数具体定义</li>
+ *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
+ *     <li>title: 标题</li>
+ *     <li>titleUri: 标题uri</li>
+ *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
+ *     <li>subTitle: 副标题</li>
+ *     <li>titleSize: 标题大小，0-小，1-中，2-大，参考{@link TitleSize}</li>
+ *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class UpdatePortalItemGroupCommand {
@@ -39,21 +45,19 @@ public class UpdatePortalItemGroupCommand {
 
 	private String instanceConfig;
 
-	public UpdatePortalItemGroupCommand() {
+	private Byte titleFlag;
 
-	}
+	private String title;
 
-	public UpdatePortalItemGroupCommand(Long id, String label, String description, Byte separatorFlag, BigDecimal separatorHeight, String widget, String style, String instanceConfig) {
-		super();
-		this.id = id;
-		this.label = label;
-		this.description = description;
-		this.separatorFlag = separatorFlag;
-		this.separatorHeight = separatorHeight;
-		this.widget = widget;
-		this.style = style;
-		this.instanceConfig = instanceConfig;
-	}
+	private String titleUri;
+
+	private Integer titleStyle;
+
+	private String subTitle;
+
+	private Byte titleSize;
+
+	private Byte titleMoreFlag;
 
 	public Long getId() {
 		return id;
@@ -125,6 +129,62 @@ public class UpdatePortalItemGroupCommand {
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
+	}
+
+	public Byte getTitleFlag() {
+		return titleFlag;
+	}
+
+	public void setTitleFlag(Byte titleFlag) {
+		this.titleFlag = titleFlag;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getTitleUri() {
+		return titleUri;
+	}
+
+	public void setTitleUri(String titleUri) {
+		this.titleUri = titleUri;
+	}
+
+	public Integer getTitleStyle() {
+		return titleStyle;
+	}
+
+	public void setTitleStyle(Integer titleStyle) {
+		this.titleStyle = titleStyle;
+	}
+
+	public String getSubTitle() {
+		return subTitle;
+	}
+
+	public void setSubTitle(String subTitle) {
+		this.subTitle = subTitle;
+	}
+
+	public Byte getTitleSize() {
+		return titleSize;
+	}
+
+	public void setTitleSize(Byte titleSize) {
+		this.titleSize = titleSize;
+	}
+
+	public Byte getTitleMoreFlag() {
+		return titleMoreFlag;
+	}
+
+	public void setTitleMoreFlag(Byte titleMoreFlag) {
+		this.titleMoreFlag = titleMoreFlag;
 	}
 
 	@Override

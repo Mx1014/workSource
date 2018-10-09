@@ -213,7 +213,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//申请记录
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -839,7 +840,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//房源招租权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -995,7 +997,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -1514,7 +1517,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -1779,7 +1783,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public void updateLeasePromotionOrder(UpdateLeasePromotionOrderCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 		if (null == cmd.getId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,

@@ -823,6 +823,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 		processServiceUrl(dto);
+		processCommentCount(dto);
+		processCommentToken(dto);
 		return dto;
 	}
 
@@ -1153,6 +1155,25 @@ public class YellowPageServiceImpl implements YellowPageService {
 			} else {
 				dto.setCommentCount(0);
 			}
+		}
+	}
+	
+	private void processCommentCount(ServiceAllianceDTO dto) {
+		ServiceAlliances sa = this.yellowPageProvider.queryServiceAllianceTopic(null, null, dto.getParentId());
+		if (sa == null || null == sa.getEnableComment()
+				|| CommonStatus.INACTIVE == CommonStatus.fromCode(sa.getEnableComment())) { // 当enableComment>0时，都算作开启
+			dto.setCommentCount(null);
+			return;
+		}
+
+		List<Long> ownerIds = Arrays.asList(dto.getId());
+		Map<String, Integer> mapcounts = commentProvider.listServiceAllianceCommentCountByOwner(
+				UserContext.getCurrentNamespaceId(), ServiceAllianceOwnerType.SERVICE_ALLIANCE.getCode(), ownerIds);
+		String key = String.valueOf(dto.getId());
+		if (mapcounts.get(key) != null) {
+			dto.setCommentCount(mapcounts.get(key));
+		} else {
+			dto.setCommentCount(0);
 		}
 	}
 

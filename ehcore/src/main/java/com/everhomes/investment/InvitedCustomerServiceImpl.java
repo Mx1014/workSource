@@ -15,8 +15,10 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -28,10 +30,12 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
@@ -122,7 +126,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -166,7 +172,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
@@ -225,7 +233,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 contact.setNamespaceId(cmd.getNamespaceId());
                 contact.setStatus(CommonStatus.ACTIVE.getCode());
                 contact.setCustomerSource(cmd.getCustomerSource());
-                invitedCustomerProvider.createContact(contact);
+                if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                    invitedCustomerProvider.createContact(contact);
+                }
             });
         }
         // reflush requirement
@@ -270,7 +280,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 tracker.setNamespaceId(cmd.getNamespaceId());
                 tracker.setStatus(CommonStatus.ACTIVE.getCode());
                 tracker.setCustomerId(cmd.getId());
-                invitedCustomerProvider.createTracker(tracker);
+                if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                    invitedCustomerProvider.createTracker(tracker);
+                }
             });
         }
         EnterpriseCustomer customer = ConvertHelper.convert(customerDTO, EnterpriseCustomer.class);
@@ -320,7 +332,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         customerSearcher.deleteById(cmd.getId());
         DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
-        customerService.deleteEnterpriseCustomer(cmd2, true);
+        customerService.deleteEnterpriseCustomer(cmd2, false);
         invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 
@@ -531,6 +543,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd){
+
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_ENTERPRISE_CUSTOMER, cmd.getOrgId(), cmd.getCommunityId());
+
+
         List<Long> customerIds = cmd.getCustomerIds();
         List<EnterpriseCustomer> customers = new ArrayList<>();
 
@@ -585,7 +601,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     tracker.setStatus(CommonStatus.ACTIVE.getCode());
                     tracker.setCustomerId(invitedCustomerDTO.getId());
                     tracker.setCustomerSource(invitedCustomerDTO.getCustomerSource());
-                    invitedCustomerProvider.createTracker(tracker);
+                    if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                        invitedCustomerProvider.createTracker(tracker);
+                    }
                 });
             }
             invitedCustomerDTO.setTrackers(trackers);
@@ -611,6 +629,20 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         cmd.setIsAdmin(isAdmin);
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
+
+
+    @Override
+    public DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        return fieldService.importDynamicExcel(cmd,mfile);
+    }
+
+    @Override
+    public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        customerService.exportContractListByContractList(cmd);
+    }
+
 
     @Override
     public InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd) {
@@ -642,7 +674,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -686,7 +720,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
@@ -704,6 +740,23 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         }
 
         return null;
+    }
+
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = null;
+        if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
+            res = customerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+            res = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            customerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
     }
 
 }

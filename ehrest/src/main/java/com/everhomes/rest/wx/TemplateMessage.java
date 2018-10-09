@@ -1,9 +1,8 @@
-package com.everhomes.wx.message;
+package com.everhomes.rest.wx;
 
 import com.everhomes.util.StringHelper;
 
 import java.util.HashMap;
-
 
 
 public class TemplateMessage {
@@ -14,7 +13,7 @@ public class TemplateMessage {
     private String color;
 
     //{"xxxx", {"value": "xxx", "color": "xxxx"}}
-    private HashMap<String, Item> data;
+    private HashMap<String, MessageItem> data;
 
 
     public TemplateMessage() {
@@ -61,20 +60,20 @@ public class TemplateMessage {
         this.color = color;
     }
 
-    public HashMap<String, Item> getData() {
+    public HashMap<String, MessageItem> getData() {
         return data;
     }
 
-    public void setData(HashMap<String, Item> data) {
+    public void setData(HashMap<String, MessageItem> data) {
         this.data = data;
     }
 
 
     public void add(String key, String value, String color) {
-        data.put(key, new Item(value, color));
+        data.put(key, new MessageItem(value, color));
     }
 
-    public void add(String key, Item item) {
+    public void add(String key, MessageItem item) {
         data.put(key, item);
     }
 

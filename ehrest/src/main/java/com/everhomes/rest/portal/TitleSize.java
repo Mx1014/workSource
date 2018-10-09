@@ -3,13 +3,13 @@ package com.everhomes.rest.portal;
 
 /**
  * <ul>
- *     <li>SMALL((byte) 1): 小</li>
- *     <li>MUDIUM((byte) 2): 中</li>
- *     <li>LARGE((byte) 3): 大</li>
+ *     <li>SMALL((byte) 0): 小</li>
+ *     <li>MEDIUM((byte) 1): 中</li>
+ *     <li>LARGE((byte) 2): 大</li>
  * </ul>
  */
 public enum TitleSize {
-    SMALL((byte) 1), MUDIUM((byte) 2), LARGE((byte) 3);
+    SMALL((byte) 0), MEDIUM((byte) 1), LARGE((byte) 2);
 
     private byte code;
 
