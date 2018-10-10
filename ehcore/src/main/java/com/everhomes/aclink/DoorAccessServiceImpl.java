@@ -5546,7 +5546,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         rsp.setQrCode(auth.getQrKey());
 		return rsp;
 	}
-
+	
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd) {
 		if(cmd.getOwnerType() == DoorAccessOwnerType.ENTERPRISE.getCode()){
 			deleteAuthWhenLeaveFromOrg(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getUserId());
@@ -5578,5 +5578,26 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
     	
     	LOGGER.info("delete all auths ok! ownerId=" + cmd.getOwnerId() + " userId=" + cmd.getUserId());
+	}
+	
+	@Override
+	public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd) {
+		ListDoorAccessResponse rsp = searchDoorAccessByAdmin(cmd);
+		List<DoorAccessDTO> dtos = rsp.getDoors();
+		List<DoorAccessLiteDTO> dtosL = new ArrayList<DoorAccessLiteDTO>();
+		if(dtos != null && dtos.size() > 0){
+			for(DoorAccessDTO dto : dtos){
+				dtosL.add(ConvertHelper.convert(dto, DoorAccessLiteDTO.class));
+			}
+		}
+		ListDoorAccessLiteResponse rspL = ConvertHelper.convert(rsp, ListDoorAccessLiteResponse.class);
+		rspL.setDoors(dtosL);
+		return rspL;
+	}
+
+	@Override
+	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 }
