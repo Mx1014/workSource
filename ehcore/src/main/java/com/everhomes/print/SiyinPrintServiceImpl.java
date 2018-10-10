@@ -2121,6 +2121,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
+		
 		mfpLogNotification(StringHelper.toJsonString(cmd),response);
 	}
 

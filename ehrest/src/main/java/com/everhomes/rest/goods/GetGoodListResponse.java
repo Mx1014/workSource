@@ -2,6 +2,7 @@ package com.everhomes.rest.goods;
 
 import java.util.List;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * @author huangmingbo 
  * @date 2018年10月10日
  */
-public class GetGoodListResponse {
+public class GetGoodListResponse extends RestResponse{
 	private List<GoodTagDTO> goods;
 	
 	@Override

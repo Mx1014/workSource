@@ -24,10 +24,9 @@ public class GoodsPromotionContoller  extends ControllerBase {
 	 @RestReturn(value=GetGoodListResponse.class)
 	 public RestResponse getGoodList(GetGoodListCommand cmd) {
 		 GetGoodListResponse resp = goodsServce.getGoodList(cmd);
-	     RestResponse response = new RestResponse(resp);
-	     response.setErrorCode(ErrorCodes.SUCCESS);
-	     response.setErrorDescription("OK");
-	     return response;
+	     resp.setErrorCode(ErrorCodes.SUCCESS);
+	     resp.setErrorDescription("OK");
+	     return resp;
 	 }
 	 
 	 

@@ -7,21 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.general.order.GeneralOrderBizHandler;
-import com.everhomes.goods.GoodsService;
 import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.AssetSourceType;
-import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.order.OrderType.OrderTypeEnum;
 import com.everhomes.rest.print.PrintErrorCode;
-import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPayType;
-import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -29,12 +24,6 @@ import com.everhomes.util.StringHelper;
 public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintGeneralOrderHandlerImpl.class);
-	
-	@Autowired
-	GoodsService goodsService;
-	
-	@Autowired
-	UserProvider userProvider;
 	
 	@Autowired
 	SiyinPrintOrderProvider siyinPrintOrderProvider;
@@ -75,6 +64,6 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	@Override
 	void fillEnterprisePaySpecificInfo(CreateGeneralBillInfo createBillInfo, CreateOrderBaseInfo baseInfo) {
 		createBillInfo.setSourceType(AssetSourceType.PRINT_MODULE);
-		createBillInfo.setSourceId(ServiceModuleConstants.PRINT_MODULE);
+		createBillInfo.setSourceId(null); //单应用设置为空
 	}
 }
