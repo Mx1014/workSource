@@ -381,9 +381,10 @@ public class FieldProviderImpl implements FieldProvider {
         Map<Long, ScopeField> fields = new HashMap<>();
         SelectQuery<EhVarFieldScopesRecord> query = context.selectQuery(Tables.EH_VAR_FIELD_SCOPES);
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.NAMESPACE_ID.eq(namespaceId));
-        if (ownerId != null && ownerId != 0) {
+        //动态字段跟园区走，不跟管理公司
+        /*if (ownerId != null && ownerId != 0) {
             query.addConditions(Tables.EH_VAR_FIELD_SCOPES.OWNER_ID.eq(ownerId));
-        }
+        }*/
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.MODULE_NAME.eq(moduleName));
         //query.addConditions(Tables.EH_VAR_FIELD_SCOPES.GROUP_PATH.like(groupPath + "/%"));
         query.addConditions(Tables.EH_VAR_FIELD_SCOPES.STATUS.eq(VarFieldStatus.ACTIVE.getCode()));
