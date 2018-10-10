@@ -6,7 +6,7 @@ package com.everhomes.rest.paymentauths;
  * </ul>
  */
 public enum PaymentAuthsAPPType {
-	CLOUD_PRINT("云打印");
+	CLOUD_PRINT("66348");
 
 	
     private String code;
