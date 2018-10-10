@@ -64,8 +64,8 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		Long printAppId = null;
 		for(EnterprisePaymentAuths enterprisePaymentAuth : authsList){
 			EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
-			Long cloudPrint = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
-			if (enterprisePaymentAuth.getAppId() == cloudPrint){
+			Long appId = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
+			if (enterprisePaymentAuth.getAppId().equals(appId)){
 				printAppId = enterprisePaymentAuth.getAppId();
 				if (enterprisePaymentAuth.getSourceType().equals("person")){
 					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
