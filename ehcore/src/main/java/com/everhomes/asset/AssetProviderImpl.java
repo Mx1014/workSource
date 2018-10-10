@@ -60,6 +60,7 @@ import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetProjectDefaultFlag;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -1215,6 +1216,7 @@ public class AssetProviderImpl implements AssetProvider {
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
+        //标准版支持多管理公司
         if(allScope){
             query.addConditions(t.ORG_ID.eq(organizationId));
         }
@@ -6261,35 +6263,60 @@ public class AssetProviderImpl implements AssetProvider {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
-        List<PaymentBillGroup> scopes = context.selectFrom(t1)
-        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+        //查询出管理公司下的默认配置
+        List<PaymentBillGroup> defaultBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .and(t1.ORG_ID.eq(cmd.getOrganizationId()))
                 .fetchInto(PaymentBillGroup.class);
-        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .fetchInto(PaymentBillGroup.class);
-        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
-        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        //查询出该项目下的具体配置
+        List<PaymentBillGroup> projectBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .fetchInto(PaymentBillGroup.class);
+        if(defaultBillGroup == null) {
+        	if(projectBillGroup == null) {
+        		//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+        		response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
         	}else {
-        		scopes = context.selectFrom(t1)
-	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-	                    .fetchInto(PaymentBillGroup.class);
-        		if(scopes.size() > 0) {
-        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}
+        }else {
+        	if(projectBillGroup == null) {
+        		//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}else {
+        		//如果默认配置和项目具体配置都不为空
+        		Long brotherGroupId = projectBillGroup.get(0).getBrotherGroupId();
+        		if(brotherGroupId != null) {
+        			Byte defaultStatus = AssetProjectDefaultFlag.PERSONAL.getCode();
+        			for(PaymentBillGroup paymentBillGroup : defaultBillGroup) {
+        				if(brotherGroupId.equals(paymentBillGroup.getId())) {
+        					//如果项目具体配置的brotherGroupId不为空，并且在该管理公司的默认配置中，那么说明该项目的配置不是从其他管理公司授权带过来的，所以是使用默认配置
+        					defaultStatus = AssetProjectDefaultFlag.DEFAULT.getCode();
+        					break;
+        				}
+        			}
+        			response.setDefaultStatus(defaultStatus);
         		}else {
-        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        			//如果项目具体配置的brotherGroupId为空，那么该具体项目做过个性化的修改（已被解耦）
+        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         		}
         	}
-
+        }
+        
+//        List<PaymentBillGroup> scopes = context.selectFrom(t1)
+//        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                .fetchInto(PaymentBillGroup.class);
+//        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+//        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        }else {//说明该域空间下已经有数据了
 //        	scopes = context.selectFrom(t1)
 //            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
 //                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
@@ -6299,11 +6326,20 @@ public class AssetProviderImpl implements AssetProvider {
 //        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
 //        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
 //        	}else {
-//        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		scopes = context.selectFrom(t1)
+//	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+//	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//	                    .fetchInto(PaymentBillGroup.class);
+//        		if(scopes.size() > 0) {
+//        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		}else {
+//        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		}
 //        	}
-
-
-        }
+//        }
+        
        return response;
 	}
 
