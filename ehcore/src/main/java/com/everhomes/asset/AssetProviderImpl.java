@@ -6306,19 +6306,17 @@ public class AssetProviderImpl implements AssetProvider {
         		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         	}else {
         		//如果默认配置和项目具体配置都不为空
-        		Long brotherGroupId = projectBillGroup.get(0).getBrotherGroupId();
-        		if(brotherGroupId != null) {
-        			Byte defaultStatus = AssetProjectDefaultFlag.PERSONAL.getCode();
-        			for(PaymentBillGroup paymentBillGroup : defaultBillGroup) {
-        				if(brotherGroupId.equals(paymentBillGroup.getId())) {
-        					//如果项目具体配置的brotherGroupId不为空，并且在该管理公司的默认配置中，那么说明该项目的配置不是从其他管理公司授权带过来的，所以是使用默认配置
-        					defaultStatus = AssetProjectDefaultFlag.DEFAULT.getCode();
-        					break;
-        				}
-        			}
-        			response.setDefaultStatus(defaultStatus);
+        		List<Long> defaultBillGroupId = new ArrayList<Long>(); 
+        		List<Long> projectBrotherGroupId = new ArrayList<Long>();
+        		for(PaymentBillGroup paymentBillGroup : defaultBillGroup) {
+        			defaultBillGroupId.add(paymentBillGroup.getId());
+        		}
+        		for(PaymentBillGroup paymentBillGroup : projectBillGroup) {
+        			projectBrotherGroupId.add(paymentBillGroup.getBrotherGroupId());
+        		}
+        		if(defaultBillGroupId.containsAll(projectBrotherGroupId) && projectBrotherGroupId.containsAll(defaultBillGroupId)) {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
         		}else {
-        			//如果项目具体配置的brotherGroupId为空，那么该具体项目做过个性化的修改（已被解耦）
         			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         		}
         	}
