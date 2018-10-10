@@ -92,7 +92,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
-		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths.getEnterpriseAuth());
+		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths);
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
 			if (enterpriesAuth.getSourceIdA() == null || enterpriesAuth.getSourceIdA().SIZE ==0) {
 				continue;
