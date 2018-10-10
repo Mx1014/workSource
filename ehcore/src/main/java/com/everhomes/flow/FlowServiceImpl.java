@@ -4939,6 +4939,12 @@ public class FlowServiceImpl implements FlowService {
         Long formVersion = 0L;
 
         FlowEntityType type = FlowEntityType.fromCode(entityType);
+
+        // 兼容老的数据, 老的没有 entityType
+        if (type == null) {
+            type = FlowEntityType.FLOW;
+        }
+
         switch (type) {
             case FLOW:
                 Flow flow = flowProvider.getFlowById(entityId);
