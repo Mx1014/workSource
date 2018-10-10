@@ -6141,47 +6141,88 @@ public class AssetProviderImpl implements AssetProvider {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
 		EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-		Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
-		List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-				.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .fetchInto(PaymentChargingItemScope.class);
-		if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))//用于判断是否是使用默认配置，还是处于解耦状态
-                    .fetchInto(PaymentChargingItemScope.class);
-        	if(scopes != null && scopes.size() != 0) {
-            	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            }else {
-            	scopes = context.selectFrom(t1)
-            			.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                        .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                        .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                        .fetchInto(PaymentChargingItemScope.class);
-            	if(scopes != null && scopes.size() == 0) {
-            		scopes = context.selectFrom(t1)
-                    		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-                            .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                            .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                            .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                            .fetchInto(PaymentChargingItemScope.class);
-            		if(scopes.size() > 0) {
-            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}else {
-            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}
-            	}else {
-            		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            	}
-    		}
-        }
+		//查询出管理公司下的默认配置
+		List<PaymentChargingItemScope> defaultChargingItem = context.selectFrom(t1)
+				.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+				.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+				.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+				.and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
+				.fetchInto(PaymentChargingItemScope.class);
+		//查询出该项目下的具体配置
+		List<PaymentChargingItemScope> projectChargingItem = context.selectFrom(t1)
+				.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+				.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+				.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+				.fetchInto(PaymentChargingItemScope.class);
+		if(defaultChargingItem.size() == 0) {
+			if(projectChargingItem.size() == 0) {
+				//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+				response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+			}else {
+				//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+			}
+		}else {
+			if(projectChargingItem.size() == 0) {
+				//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+			}else {
+				//如果默认配置和项目具体配置都不为空
+				Byte decouplingFlag= projectChargingItem.get(0).getDecouplingFlag();
+				if(decouplingFlag.equals((byte)0)) {
+					//如果项目具体配置的decouplingFlag为0，说明是使用默认配置
+					response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+				}else {
+					//如果项目具体配置的decouplingFlag为1，那么该具体项目做过个性化的修改
+					response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+				}
+			}
+		}
+		
+//		Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
+//		List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+//				.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                .fetchInto(PaymentChargingItemScope.class);
+//		if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+//        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        }else {//说明该域空间下已经有数据了
+//        	scopes = context.selectFrom(t1)
+//            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                    .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))//用于判断是否是使用默认配置，还是处于解耦状态
+//                    .fetchInto(PaymentChargingItemScope.class);
+//        	if(scopes != null && scopes.size() != 0) {
+//            	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            }else {
+//            	scopes = context.selectFrom(t1)
+//            			.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                        .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                        .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                        .fetchInto(PaymentChargingItemScope.class);
+//            	if(scopes != null && scopes.size() == 0) {
+//            		scopes = context.selectFrom(t1)
+//                    		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+//                            .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                            .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                            .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                            .fetchInto(PaymentChargingItemScope.class);
+//            		if(scopes.size() > 0) {
+//            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            		}else {
+//            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            		}
+//            	}else {
+//            		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            	}
+//    		}
+//        }
+		
         return response;
     }
 	
