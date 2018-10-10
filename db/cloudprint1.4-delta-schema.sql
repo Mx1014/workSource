@@ -72,6 +72,10 @@ ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMME
 -- REMARK： 云打印 添加发票标识 
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
 
+-- AUTHOR: 缪洲 20181010
+-- REMARK： 云打印 添加支付方式字段
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式'
+
 
 
 

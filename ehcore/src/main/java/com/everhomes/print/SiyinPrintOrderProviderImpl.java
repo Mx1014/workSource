@@ -208,7 +208,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Override
 	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,
-			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize) {
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(DSL.trueCondition());
 		Condition condition = null;
@@ -234,6 +234,10 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		
 		if(orderStatus!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(orderStatus));
+		}
+		
+		if(payMode!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.eq(payMode));
 		}
 		
 		if(keywords!=null){

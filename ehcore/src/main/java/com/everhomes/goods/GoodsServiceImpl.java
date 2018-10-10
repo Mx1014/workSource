@@ -37,7 +37,7 @@ public class GoodsServiceImpl implements GoodsService{
 	private CommunityProvider communityProvider;
 	@Autowired
 	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
-	
+	private static String SCOPE = "范围";
 	@Override
 	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
 		GoodsPromotionHandler handler = getGoodsPromotionHandler(cmd.getBizType());
@@ -73,7 +73,7 @@ public class GoodsServiceImpl implements GoodsService{
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(namespaceId);
 		List<String> communitiesList = new ArrayList();
-
+		goodScopeDTO.setTitle(SCOPE);
 		
 		switch (serviceType) {
 		//停车
@@ -83,14 +83,16 @@ public class GoodsServiceImpl implements GoodsService{
 				JSONObject communitityJson=new JSONObject();
 				communitityJson.put("id", community.getId());
 				communitityJson.put("name", community.getName());
+				communitityJson.put("title", SCOPE);
 				List<String> parkingLotList = new ArrayList();
 				String ownerType = "communities";
 				List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
 				for(ParkingLot parkingLot : parkinglots){
 					String parking;
 					JSONObject parkingJson=new JSONObject();
-					parkingJson.put("id", parkingLot.getId());
+					parkingJson.put("id", parkingLot.getId().toString());
 					parkingJson.put("name", parkingLot.getName());
+					communitityJson.put("title", SCOPE);
 					parking = parkingJson.toString();
 					parkingLotList.add(parking);
 				}
@@ -105,7 +107,7 @@ public class GoodsServiceImpl implements GoodsService{
 			for (Community community : communities){
 				String communitiy;
 				JSONObject communitityJson=new JSONObject();
-				communitityJson.put("id", community.getId());
+				communitityJson.put("id", community.getId().toString());
 				communitityJson.put("name", community.getName());
 				List<String> printerList = new ArrayList();
 				List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByOwnerId(community.getId());

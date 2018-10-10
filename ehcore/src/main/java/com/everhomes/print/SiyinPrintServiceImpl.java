@@ -272,7 +272,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(map.get("ownerTypeList"),map.get("ownerIdList"),starttime
-				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
+				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1, cmd.getPayMode());
 		
 		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
 		if(printOrdersList!=null && printOrdersList.size()>pageSize){
@@ -2170,7 +2170,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Order amount is not equal to payAmount");
 				}
-				
+				if (cmd.getPaymentStatus()==29){
+					//企业支付
+					order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
+				} else{
+					//个人支付
+					order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+				} 
 				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}

@@ -5,6 +5,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.paymentauths.EnterprisePaymentAuths;
 import com.everhomes.paymentauths.PaymentAuthsProvider;
 import com.everhomes.paymentauths.PaymentAuthsService;
+import com.everhomes.print.SiyinPrintOrderProviderImpl;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.paymentauths.CheckUserAuthsCommand;
 import com.everhomes.rest.paymentauths.CheckUserAuthsResponse;
@@ -14,6 +15,9 @@ import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsCommand;
 import com.everhomes.rest.paymentauths.PaymentAuthsAPPType;
 import com.everhomes.rest.paymentauths.UpdateEnterprisePaymentAuthsCommand;
 import com.everhomes.user.UserContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +27,8 @@ import java.util.List;
 
 @Component
 public class PaymentAuthsServiceImpl implements PaymentAuthsService {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(PaymentAuthsServiceImpl.class);
+
 	@Autowired
 	private PaymentAuthsProvider paymentAuthsProvider;
 	@Autowired
@@ -87,6 +92,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
+		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths.getEnterpriseAuth());
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
 			if (enterpriesAuth.getSourceIdA() == null || enterpriesAuth.getSourceIdA().SIZE ==0) {
 				continue;
