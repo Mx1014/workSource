@@ -69,7 +69,7 @@ public class FlowStatisticsController extends ControllerBase {
      * <b>URL: /flowstatistics/statisticsByLanes</b>
      * <p>4). 按节点统计处理效率API</p>
      */
-    @RequestMapping("statisticsByLanes")
+    @RequestMapping("statisticsByNodes")
     @RestReturn(value=StatisticsByNodesResponse.class)
     public RestResponse statisticsByNodes( StatisticsByNodesCommand cmd ) {
 
