@@ -27,9 +27,9 @@ public class UserButtApiServiceImpl implements NashornModuleApiService {
     /**
      * 更新会员等级
      */
-    public void updateUserVipLevel(Long userId, Integer vipLevel){
-        LOGGER.info("the script call the api updateUserVipLevel . userId:{},vipLevel:{}",userId,vipLevel);
-        userService.updateUserVipLevel( userId,  vipLevel);
+    public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText){
+        LOGGER.info("the script call the api updateUserVipLevel . userId:{},vipLevel:{},vipLevelText",userId,vipLevel,vipLevelText);
+        userService.updateUserVipLevel( userId,  vipLevel ,vipLevelText);
     }
 
 

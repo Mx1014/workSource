@@ -371,5 +371,5 @@ public interface UserService {
      */
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 
-    void updateUserVipLevel(Long userId, Integer vipLevel);
+    void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText);
 }
