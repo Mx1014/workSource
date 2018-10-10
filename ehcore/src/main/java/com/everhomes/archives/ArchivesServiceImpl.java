@@ -116,6 +116,7 @@ public class ArchivesServiceImpl implements ArchivesService {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
             organizationService.checkOrganizationPrivilege(departmentId, PrivilegeConstants.CREATE_OR_MODIFY_PERSON);
         }*/
+    	cmd.setAccount(cmd.getAccount() == null? null : cmd.getAccount().trim());
         ArchivesContactDTO dto = new ArchivesContactDTO();
         //  组织架构添加人员
         AddOrganizationPersonnelCommand addCommand = new AddOrganizationPersonnelCommand();
