@@ -1,5 +1,7 @@
 package com.everhomes.service_agreement;
 
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.service_agreement.admin.GetProtocolDetailResponse;
 import com.everhomes.rest.service_agreement.admin.GetProtocolTemplateCommand;
 import com.everhomes.rest.service_agreement.admin.GetProtocolCommand;
@@ -12,6 +14,7 @@ import com.everhomes.rest.service_agreement.admin.SaveProtocolsCommand;
 import com.everhomes.rest.service_agreement.admin.SaveProtocolsTemplateCommand;
 import com.everhomes.util.DateHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +26,10 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * 服务协议 serviceImpl
@@ -39,6 +44,9 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+
+	@Autowired
+    private NamespaceProvider namespaceProvider;
 	
 	@Override
 	public ServiceAgreementDTO getServiceAgreementByNamespaceId(ServiceAgreementCommand cmd) {
@@ -111,7 +119,22 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             List<ProtocolTemplateVariableDTO> variables = new ArrayList<>();
             if (!CollectionUtils.isEmpty(protocolTemplateVariablesList)) {
                 for (ProtocolTemplateVariables protocolTemplateVariables : protocolTemplateVariablesList) {
-                    variables.add(ConvertHelper.convert(protocolTemplateVariables, ProtocolTemplateVariableDTO.class));
+                    ProtocolTemplateVariableDTO dto = ConvertHelper.convert(protocolTemplateVariables, ProtocolTemplateVariableDTO.class);
+                    if (dto.getName().equals("域空间名称")) {
+                        if (StringUtils.isBlank(dto.getValue())) {
+                            if (UserContext.currentUserId() == null)
+                                continue;
+
+                            Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
+                            dto.setValue(namespace.getName());
+                        }
+                    }
+                    if (dto.getName().equals("最后更新日期")) {
+                        if (StringUtils.isBlank(dto.getValue())) {
+                            dto.setValue(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG,   Locale.CHINESE).format(new java.util.Date()));
+                        }
+                    }
+                    variables.add(dto);
                 }
             }
             response.setType(protocolTemplates.getType());
@@ -196,7 +219,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             if (!CollectionUtils.isEmpty(protocolVariablesList)) {
                 String protocolText = protocols.getContent();
                 for (ProtocolVariables protocolVariables : protocolVariablesList) {
-                    protocolText = protocolText.replace("$"+protocolVariables.getName()+"$", protocolVariables.getValue());
+                    protocolText = protocolText.replace("<span style=\"color: #30a3e6;\">$"+protocolVariables.getName()+"$</span>", protocolVariables.getValue());
                 }
                 protocols.setContent(protocolText);
             }
@@ -208,7 +231,21 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             if (!CollectionUtils.isEmpty(protocolTemplateVariablesList)) {
                 String protocolText = protocols.getContent();
                 for (ProtocolTemplateVariables protocolTemplateVariables : protocolTemplateVariablesList) {
-                    protocolText = protocolText.replace("$"+protocolTemplateVariables.getName()+"$", protocolTemplateVariables.getValue() == null?"":protocolTemplateVariables.getValue());
+                    if (protocolTemplateVariables.getName().equals("域空间名称")) {
+                        if (StringUtils.isBlank(protocolTemplateVariables.getValue())) {
+                            if (UserContext.currentUserId() == null)
+                                continue;
+
+                            Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
+                            protocolTemplateVariables.setValue(namespace.getName());
+                        }
+                    }
+                    if (protocolTemplateVariables.getName().equals("最后更新日期")) {
+                        if (StringUtils.isBlank(protocolTemplateVariables.getValue())) {
+                            protocolTemplateVariables.setValue(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG,   Locale.CHINESE).format(new java.util.Date()));
+                        }
+                    }
+                    protocolText = protocolText.replace("<span style=\"color: #30a3e6;\">$"+protocolTemplateVariables.getName()+"$</span>", protocolTemplateVariables.getValue() == null?"":protocolTemplateVariables.getValue());
                 }
                 protocolTemplates.setContent(protocolText);
             }
