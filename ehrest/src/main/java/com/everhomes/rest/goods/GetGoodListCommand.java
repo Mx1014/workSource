@@ -1,63 +1,60 @@
 package com.everhomes.rest.goods;
 
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * <li>namespaceId : namespaceId</li>
- * <li>communityId : 项目id</li>
- * <li>appOriginId : 应用originId </li>
  * <li>merchantId : 商户id</li>
+ * <li>bizType : 服务类型,当前为模块id 如云打印是41400</li>
+ * <li>tagKeys : tag各层级标识 如项目id，停车场id</li>
+ * 注：对不同的模块，每层的tag意义是不同的，如云打印tag2表示的是打印机的名称
  * </ul>
  * @author huangmingbo 
  * @date 2018年9月29日
  */
 public class GetGoodListCommand {
-	
 	private Integer namespaceId;
-	private Long communityId;
-	private Long appOriginId;
 	private Long merchantId;
-	private ServiceModuleAppDTO moduleAppDTO;
-	
+	private Long bizType;
+	List<String> tagKeys;
+ 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
+
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	public Long getCommunityId() {
-		return communityId;
-	}
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
+
 	public Long getMerchantId() {
 		return merchantId;
 	}
+
 	public void setMerchantId(Long merchantId) {
 		this.merchantId = merchantId;
 	}
 
-	public Long getAppOriginId() {
-		return appOriginId;
+	public Long getBizType() {
+		return bizType;
 	}
 
-	public void setAppOriginId(Long appOriginId) {
-		this.appOriginId = appOriginId;
+	public void setBizType(Long bizType) {
+		this.bizType = bizType;
 	}
 
-	public ServiceModuleAppDTO getModuleAppDTO() {
-		return moduleAppDTO;
+	public List<String> getTagKeys() {
+		return tagKeys;
 	}
 
-	public void setModuleAppDTO(ServiceModuleAppDTO moduleAppDTO) {
-		this.moduleAppDTO = moduleAppDTO;
+	public void setTagKeys(List<String> tagKeys) {
+		this.tagKeys = tagKeys;
 	}
 }

@@ -1,5 +1,6 @@
 package com.everhomes.general.order;
 
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 
@@ -8,6 +9,6 @@ public interface GeneralOrderBizHandler {
 
 	void dealCallBack(OrderCallBackCommand cmd);
 
-	CreateMerchantOrderResponse createOrder(Object bussinessCommand);
-	
+	CreateMerchantOrderResponse createOrder(CreateOrderBaseInfo baseInfo);
+
 }

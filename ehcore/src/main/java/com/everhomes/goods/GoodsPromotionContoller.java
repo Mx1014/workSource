@@ -21,10 +21,10 @@ public class GoodsPromotionContoller  extends ControllerBase {
 	GoodsService goodsServce;
 	
 	 @RequestMapping("getGoodList")
-	 @RestReturn(value=GoodDTO.class,collection = true)
+	 @RestReturn(value=GetGoodListResponse.class)
 	 public RestResponse getGoodList(GetGoodListCommand cmd) {
-		 List<GoodDTO> dtos = goodsServce.getGoodList(cmd);
-	     RestResponse response = new RestResponse(dtos);
+		 GetGoodListResponse resp = goodsServce.getGoodList(cmd);
+	     RestResponse response = new RestResponse(resp);
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
