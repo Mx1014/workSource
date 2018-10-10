@@ -584,7 +584,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
         //3、收款方是否有会员，无则报错
-		Long bizPayeeId = getOrderPayeeAccount(cmd);
+		Long bizPayeeId = getOrderPayeeAccount(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
@@ -592,7 +592,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
                     "暂未绑定收款账户");
         }
 
@@ -631,23 +631,19 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			return null;
 		}
 		
-		if (StringUtils.isEmpty(cmd.getClientAppName())) {
-			cmd.setClientAppName("Android");
-		}
+        //3、收款方是否有会员，无则报错
+		Long bizPayeeId = getOrderPayeeAccount(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(bizPayeeId));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		List<PayUserDTO> payUserDTOs = resp.getResponse();
+        if (payUserDTOs == null || payUserDTOs.size() == 0){
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
+                    "暂未绑定收款账户");
+        }
 		
-		if (null == cmd.getOrganizationId()) {
-			cmd.setOrganizationId(1023080L);
-		}
-		
-		if (StringUtils.isEmpty(cmd.getOwnerType())) {
-			cmd.setOwnerType("community");
-		}
-		
-		if (null == cmd.getOwnerId()) {
-			cmd.setOwnerId(240111044331058733L);
-		}
-		
-		cmd.setPaymentMerchantId(100004L);
+		cmd.setPaymentMerchantId(bizPayeeId);
 		cmd.setAppOriginId(66348L);
 		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
 		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(cmd);
@@ -657,18 +653,19 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 		
 		//返回参数
-		PayPrintGeneralOrderResponse resp = new PayPrintGeneralOrderResponse();
-		resp.setGeneralOrderPageUrl(generalOrderResp.getPayUrl());
-		return resp;
+		PayPrintGeneralOrderResponse resp2 = new PayPrintGeneralOrderResponse();
+		resp2.setOrderId(generalOrderResp.getMerchantOrderId());
+		resp2.setMerchantId(generalOrderResp.getMerchantId());
+		return resp2;
 	}
 	
 	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
 		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 	}
 
-	private Long getOrderPayeeAccount(PayPrintOrderCommandV2 cmd) {
+	private Long getOrderPayeeAccount(Integer namespaceId, String ownerType, Long ownerId) {
 		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
-				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+				.getSiyinPrintBusinessPayeeAccountByOwner(namespaceId,ownerType,ownerId);
 		if (null == account) {
 			return null;
 		}

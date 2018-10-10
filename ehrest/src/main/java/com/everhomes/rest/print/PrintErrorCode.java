@@ -29,4 +29,8 @@ public class PrintErrorCode {
 	public static final int ERROR_CREATE_GENERAL_BILL= 10004;//创建统一订单失败
 	public static final int ERROR_GET_JOBS_FAILED= 10005;//获取打印renwu失败
 	
+	
+
+	public static final int ERROR_PAYEE_ACCOUNT_NOT_CONFIG= 11000;//收款账户未设置
+	
 }
