@@ -229,7 +229,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             ProtocolTemplates protocolTemplates = this.serviceAgreementprovider.getActiveProtocolTemplate(cmd.getType());
             List<ProtocolTemplateVariables> protocolTemplateVariablesList = this.serviceAgreementprovider.getProtocolTemplateVariables(protocolTemplates.getId());
             if (!CollectionUtils.isEmpty(protocolTemplateVariablesList)) {
-                String protocolText = protocols.getContent();
+                String protocolText = protocolTemplates.getContent();
                 for (ProtocolTemplateVariables protocolTemplateVariables : protocolTemplateVariablesList) {
                     if (protocolTemplateVariables.getName().equals("域空间名称")) {
                         if (StringUtils.isBlank(protocolTemplateVariables.getValue())) {
