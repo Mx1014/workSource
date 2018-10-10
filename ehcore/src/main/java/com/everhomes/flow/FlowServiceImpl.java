@@ -4940,24 +4940,25 @@ public class FlowServiceImpl implements FlowService {
 
         FlowEntityType type = FlowEntityType.fromCode(entityType);
 
-        // 兼容老的数据, 老的没有 entityType
         if (type == null) {
-            type = FlowEntityType.FLOW;
-        }
-
-        switch (type) {
-            case FLOW:
-                Flow flow = flowProvider.getFlowById(entityId);
-                formOriginId = flow.getFormOriginId();
-                formVersion = flow.getFlowVersion().longValue();
-                break;
-            case FLOW_NODE:
-                FlowNode flowNode = flowNodeProvider.getFlowNodeById(entityId);
-                formOriginId = flowNode.getFormOriginId();
-                formVersion = flowNode.getFormVersion();
-                break;
-            default:
-                break;
+            // 兼容老的数据, 老的没有 entityType
+            formOriginId = ctx.getFlowGraph().getFlow().getFormOriginId();
+            formVersion = ctx.getFlowGraph().getFlow().getFlowVersion().longValue();
+        } else {
+            switch (type) {
+                case FLOW:
+                    Flow flow = flowProvider.getFlowById(entityId);
+                    formOriginId = flow.getFormOriginId();
+                    formVersion = flow.getFlowVersion().longValue();
+                    break;
+                case FLOW_NODE:
+                    FlowNode flowNode = flowNodeProvider.getFlowNodeById(entityId);
+                    formOriginId = flowNode.getFormOriginId();
+                    formVersion = flowNode.getFormVersion();
+                    break;
+                default:
+                    break;
+            }
         }
 
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
