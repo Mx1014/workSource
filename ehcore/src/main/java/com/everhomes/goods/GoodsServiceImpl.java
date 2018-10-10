@@ -98,7 +98,7 @@ public class GoodsServiceImpl implements GoodsService{
 				for(ParkingLot parkingLot : parkinglots){
 					String parking;
 					JSONObject parkingJson=new JSONObject();
-					parkingJson.put("id", parkingLot.getId());
+					parkingJson.put("id", parkingLot.getId().toString());
 					parkingJson.put("name", parkingLot.getName());
 					parking = parkingJson.toString();
 					parkingLotList.add(parking);
@@ -114,7 +114,7 @@ public class GoodsServiceImpl implements GoodsService{
 			for (Community community : communities){
 				String communitiy;
 				JSONObject communitityJson=new JSONObject();
-				communitityJson.put("id", community.getId());
+				communitityJson.put("id", community.getId().toString());
 				communitityJson.put("name", community.getName());
 				List<String> printerList = new ArrayList();
 				List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByOwnerId(community.getId());
