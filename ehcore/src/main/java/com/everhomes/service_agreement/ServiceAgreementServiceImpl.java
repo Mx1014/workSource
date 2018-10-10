@@ -126,7 +126,9 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
                                 continue;
 
                             Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
-                            dto.setValue(namespace.getName());
+                            if (namespace != null) {
+                                dto.setValue(namespace.getName());
+                            }
                         }
                     }
                     if (dto.getName().equals("最后更新日期")) {
@@ -167,7 +169,24 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
                 List<ProtocolTemplateVariables> protocolTemplateVariablesList = this.serviceAgreementprovider.getProtocolTemplateVariables(protocolTemplates.getId());
                 if (!CollectionUtils.isEmpty(protocolTemplateVariablesList)) {
                     for (ProtocolTemplateVariables protocolTemplateVariables : protocolTemplateVariablesList) {
-                        variables.add(ConvertHelper.convert(protocolTemplateVariables, ProtocolVariableDTO.class));
+                        ProtocolVariableDTO dto = ConvertHelper.convert(protocolTemplateVariables, ProtocolVariableDTO.class);
+                        if (dto.getName().equals("域空间名称")) {
+                            if (StringUtils.isBlank(dto.getValue())) {
+                                if (UserContext.currentUserId() == null)
+                                    continue;
+
+                                Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
+                                if (namespace != null) {
+                                    dto.setValue(namespace.getName());
+                                }
+                            }
+                        }
+                        if (dto.getName().equals("最后更新日期")) {
+                            if (StringUtils.isBlank(dto.getValue())) {
+                                dto.setValue(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG,   Locale.CHINESE).format(new java.util.Date()));
+                            }
+                        }
+                        variables.add(dto);
                     }
                 }
                 response.setType(protocolTemplates.getType());
@@ -237,8 +256,9 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
                                 continue;
 
                             Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
-                            protocolTemplateVariables.setValue(namespace.getName());
-                        }
+                            if (namespace != null) {
+                                protocolTemplateVariables.setValue(namespace.getName());
+                            }                        }
                     }
                     if (protocolTemplateVariables.getName().equals("最后更新日期")) {
                         if (StringUtils.isBlank(protocolTemplateVariables.getValue())) {
