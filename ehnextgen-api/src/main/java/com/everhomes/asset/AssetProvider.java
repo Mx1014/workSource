@@ -236,7 +236,7 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId);
+    Long createBillGroup(CreateBillGroupCommand cmd, byte deCouplingFlag, Long brotherGroupId, Long nextGroupId, Boolean allScope);
 
     void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
 
