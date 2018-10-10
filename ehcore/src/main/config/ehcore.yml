@@ -183,3 +183,13 @@ spring.kafka:
     auto-commit-interval: 100
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+server:
+  port: 8080
+  address: ${INET_ADDRESS}
+
+eurekacli:
+    enabled: true
+    service-url: ${EUREKA_SERVICE_URL}
+    instance-id: ${server.address}:${spring.application.name}:${server.port}
+    instance-id: 10.1.110.80:ehcore:8080
