@@ -2284,8 +2284,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
                 .and(t1.CATEGORY_ID.eq(categoryId));
+        //标准版支持多管理公司，0L是为了兼容历史数据
         if (allScope) {
-            step.and(t1.ORG_ID.eq(orgId));
+            step.and(t1.ORG_ID.eq(orgId).or(t1.ORG_ID.eq(0L)));
         }
         List<PaymentChargingItemScope> scopes = step.and(t1.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetchInto(PaymentChargingItemScope.class);
@@ -3511,73 +3512,33 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds) {
-        //卸载参数
-    	List<ConfigChargingItems> configChargingItems = cmd.getChargingItemConfigs();
-    	Long communityId = cmd.getOwnerId();
-    	String ownerType = cmd.getOwnerType();
-    	Integer namespaceId = cmd.getNamespaceId();
-    	Long categoryId = cmd.getCategoryId();
-
-    	byte de_coupling = 1;
-        if(communityIds!=null && communityIds.size() >1){
-            for(int i = 0; i < communityIds.size(); i ++){
-                Long cid = communityIds.get(i);
-//                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-//                Boolean coupled = true;
-//                if(cid.longValue() != namespaceId.longValue()){
-//                    coupled = checkCoupling(cid,ownerType, categoryId);
-//                }
-//                if(coupled){
-//                    de_coupling = 0;
-//                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
-//                }
-
-                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cid);
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	de_coupling = 0;
-                	configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
-                }
-            }
-        }else{
-            //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling, categoryId);
-        }
+    public void configChargingItems(ConfigChargingItemsCommand cmd, byte de_coupling, Boolean allScope) {
+    	configChargingItemForOneCommunity(cmd.getChargingItemConfigs(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId(), de_coupling, cmd.getCategoryId(), 
+    			allScope, cmd.getOrganizationId());
     }
 
-//    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
-//        DSLContext context = getReadOnlyContext();
-//        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
-//                .from(itemScope)
-//                .where(itemScope.OWNER_TYPE.eq(ownerType))
-//                .and(itemScope.OWNER_ID.eq(communityId))
-//                .and(itemScope.CATEGORY_ID.eq(categoryId))
-//                .fetch(itemScope.DECOUPLING_FLAG);
-//        for(int i = 0; i < flags.size(); i ++){
-//            if(flags.get(i).byteValue() == (byte)1){
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, 
+    		Byte decouplingFlag, Long categoryId, Boolean allScope, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
         if(configChargingItems == null){
-            context.delete(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(communityId))
-                    // add categoryId constraint
-                    .and(t.CATEGORY_ID.eq(categoryId))
-                    .execute();
+        	//标准版增加的allScope参数，true：默认/全部，false：具体项目
+        	if(allScope) {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .and(t.ORG_ID.eq(organizationId))//标准版新增的管理公司ID
+	                .execute();
+        	}else {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .execute();
+        	}
             return;
         }
         for(int i = 0; i < configChargingItems.size(); i ++) {
@@ -3592,17 +3553,30 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setCategoryId(categoryId);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             scope.setDecouplingFlag(decouplingFlag);
-            scope.setDecouplingFlag(decouplingFlag);
             scope.setTaxRate(vo.getTaxRate());//增加税率
+            if(allScope) {
+            	scope.setOrgId(organizationId);//标准版新增的管理公司ID
+            }
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            context.delete(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(communityId))
-                    .and(t.NAMESPACE_ID.eq(namespaceId))
-                    .and(t.CATEGORY_ID.eq(categoryId))
-                    .execute();
+        	//标准版增加的allScope参数，true：默认/全部，false：具体项目
+        	if(allScope) {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.NAMESPACE_ID.eq(namespaceId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .and(t.ORG_ID.eq(organizationId))//标准版新增的管理公司ID
+	                .execute();
+        	}else {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.NAMESPACE_ID.eq(namespaceId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .execute();
+        	}
             if(list.size()>0){
                 dao.insert(list);
             }
@@ -4537,7 +4511,6 @@ public class AssetProviderImpl implements AssetProvider {
                 if(workFlag){
                 	response.setFailCause(AssetPaymentConstants.DELETE_GROUP_RULE_UNSAFE);
                     return response;
-                    //continue rules;
                 }
             }
             rules:for(int i = 0; i < rules.size(); i ++){

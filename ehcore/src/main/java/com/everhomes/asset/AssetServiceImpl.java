@@ -690,49 +690,6 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-/*    @Override
-    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
-            cmd.setPageSize(5000);
-        }
-//        cmd.setPageSize(130);
-        List<ListBillsDTO> dtos = new ArrayList<>();
-        //has already distributed
-        if(UserContext.getCurrentNamespaceId()==999983){
-            Integer pageSize = cmd.getPageSize();
-            if(pageSize <= 100){
-                dtos.addAll(listBills(cmd).getListBillsDTOS());
-            }
-            Integer hundred = 100;
-            Integer pageAnchor = 100;
-            if(pageSize > 100){
-                while(pageSize > 0){
-                    cmd.setPageSize(hundred);
-                    List<ListBillsDTO> back = listBills(cmd).getListBillsDTOS();
-                    if(back.size() > pageAnchor) {
-                        for(int i = 0; i < pageAnchor; i++){
-                            dtos.add(back.get(i));
-                        }
-                        break;
-                    }else{
-                        dtos.addAll(back);
-                    }
-
-                    pageSize = pageSize - 100;
-                    pageAnchor = pageSize;
-                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
-                }
-            }
-        }else{
-            dtos.addAll(listBills(cmd).getListBillsDTOS());
-        }
-        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
-    }*/
-    
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
@@ -744,17 +701,19 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        Boolean allScope = false;
+    	//标准版增加的allScope参数，true：默认/全部，false：具体项目
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            allScope = true;
+            cmd.setAllScope(true);
+        }else {
+        	cmd.setAllScope(false);
         }
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrganizationId(),allScope);
+        
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(), cmd.getOrganizationId(), cmd.getAllScope());
     }
 
     @Override
@@ -3038,17 +2997,38 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void configChargingItems(ConfigChargingItemsCommand cmd) {
-        Long communityId = cmd.getOwnerId();
-        Integer namespaceId = cmd.getNamespaceId();
-        List<Long> communityIds = new ArrayList<>();
-        if(communityId == null || communityId == -1){
-            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), cmd.getAppId(),true);
-        }
         // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.configChargingItems(cmd, communityIds);
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
+        	byte de_coupling = 0;
+            //1、先同步下去
+            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
+            for(int i =0; i < allCommunity.size(); i ++){
+                Long communityId = allCommunity.get(i);
+                cmd.setOwnerId(communityId);
+                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(communityId);
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
+                	Boolean allScope = false;
+                	assetProvider.configChargingItems(cmd, de_coupling, allScope);
+                }
+            }
+            //2、再创建全部配置
+            Boolean allScope = true;
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            assetProvider.configChargingItems(cmd, de_coupling, allScope);
+        }else{
+        	Boolean allScope = false;
+        	byte de_coupling = 1;
+        	assetProvider.configChargingItems(cmd, de_coupling, allScope);
+        }
     }
 
     private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
@@ -3332,7 +3312,6 @@ public class AssetServiceImpl implements AssetService {
         }
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
             brotherGroupId = getBrotherGroupId();
             //1、先同步下去
             List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
@@ -3345,8 +3324,9 @@ public class AssetServiceImpl implements AssetService {
                 isProjectNavigateDefaultCmd.setOwnerType("community");
                 isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                isProjectNavigateDefaultCmd.setOrganizationId(cmd.getOrganizationId());//标准版新增的管理公司ID
                 IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
                 	assetProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
                 }
             }
@@ -3385,6 +3365,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
+        //标准版增加的allScope参数，true：默认/全部，false：具体项目
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             cmd.setAllScope(true);
