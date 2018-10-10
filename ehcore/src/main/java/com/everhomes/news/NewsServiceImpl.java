@@ -1628,6 +1628,7 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		AppContext appContext = UserContext.current().getAppContext();
 		ListNewsCommand listCmd = new ListNewsCommand();
+		listCmd.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
 		listCmd.setOwnerId(appContext.getCommunityId());
 		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setPageAnchor(cmd.getPageAnchor());
