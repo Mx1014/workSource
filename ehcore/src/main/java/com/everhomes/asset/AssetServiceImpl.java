@@ -510,7 +510,7 @@ public class AssetServiceImpl implements AssetService {
             	 return null;
              }
          }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(),cmd.getOrgId(),cmd.getAllScope());
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(), cmd.getOrganizationId(), cmd.getAllScope());
     }
 
     @Override
@@ -754,7 +754,7 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCategoryId(0l);
         }
 
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrgId(),allScope);
+        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrganizationId(),allScope);
     }
 
     @Override
@@ -3347,15 +3347,14 @@ public class AssetServiceImpl implements AssetService {
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
                 IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
+                	assetProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
                 }
             }
             //2、再创建全部配置
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetProvider.createBillGroup(cmd,deCouplingFlag,null,brotherGroupId);
+            assetProvider.createBillGroup(cmd, deCouplingFlag, null, brotherGroupId, true);
         }else{
-            //去解耦同伴
-            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
+            assetProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
         }
     }
 
@@ -4679,7 +4678,7 @@ public class AssetServiceImpl implements AssetService {
 		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
         }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), null, cmd.getOrgId(),false);//对公转账不区分多入口，所以categoryId为null
+        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), null, cmd.getOrganizationId(), false);//对公转账不区分多入口，所以categoryId为null
 	}
 	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {

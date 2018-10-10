@@ -14,6 +14,8 @@ import javax.validation.constraints.NotNull;
  * <li>categoryId: 多入口id</li>
  * <li>moduleId: 模块id</li>
  * <li>billGroupId: 账单组id</li>
+ * <li>organizationId: 标准版新增的管理公司ID</li>
+ * <li>allScope: 标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
  *</ul>
  */
 public class OwnerIdentityCommand {
@@ -26,10 +28,9 @@ public class OwnerIdentityCommand {
     private Long categoryId;
     private Long moduleId;
     private Long billGroupId;
-
-    private Long orgId;
-
-    private Boolean allScope;
+    
+    private Long organizationId;//标准版新增的管理公司ID
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     public Long getModuleId() {
         return moduleId;
@@ -76,14 +77,6 @@ public class OwnerIdentityCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Long getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(Long orgId) {
-        this.orgId = orgId;
-    }
-
     public Boolean getAllScope() {
         return allScope;
     }
@@ -102,5 +95,13 @@ public class OwnerIdentityCommand {
 
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

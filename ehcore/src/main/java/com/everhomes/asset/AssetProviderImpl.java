@@ -1201,7 +1201,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long orgId, Boolean allScope) {
+    public List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId, Long organizationId, Boolean allScope) {
         List<ListBillGroupsDTO> list = new ArrayList<>();
         List<Long> userIds = new ArrayList<Long>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1216,7 +1216,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
         if(allScope){
-            query.addConditions(t.ORG_ID.eq(orgId));
+            query.addConditions(t.ORG_ID.eq(organizationId));
         }
         query.addOrderBy(t.DEFAULT_ORDER);
         query.fetch().map(r -> {
@@ -4030,7 +4030,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId) {
+    public Long createBillGroup(CreateBillGroupCommand cmd, byte deCouplingFlag, Long brotherGroupId, Long nextGroupId, Boolean allScope) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         Long nullId = null;
@@ -4038,9 +4038,8 @@ public class AssetProviderImpl implements AssetProvider {
         	nextGroupId = getNextSequence(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups.class);
         }
         if(deCouplingFlag == (byte) 1){
-            //去解耦
             //添加
-            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId, allScope);
             //去解耦同伴
             context.update(t)
                     .set(t.BROTHER_GROUP_ID,nullId)
@@ -4051,13 +4050,13 @@ public class AssetProviderImpl implements AssetProvider {
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
         	//添加
-            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId);
+            InsertBillGroup(cmd, brotherGroupId, context, t, nextGroupId, allScope);
             return nextGroupId;
         }
         return null;
     }
 
-    private void InsertBillGroup(CreateBillGroupCommand cmd, Long brotherGroupId, DSLContext context, EhPaymentBillGroups t, Long nextGroupId) {
+    private void InsertBillGroup(CreateBillGroupCommand cmd, Long brotherGroupId, DSLContext context, EhPaymentBillGroups t, Long nextGroupId, Boolean allScope) {
         com.everhomes.server.schema.tables.pojos.EhPaymentBillGroups group = new PaymentBillGroup();
         group.setId(nextGroupId);
         group.setBalanceDateType(cmd.getBillingCycle());
@@ -4084,6 +4083,9 @@ public class AssetProviderImpl implements AssetProvider {
         group.setBizPayeeId(cmd.getBizPayeeId());//增加收款方id
         group.setBizPayeeType(cmd.getBizPayeeType());//增加收款方类型
         group.setCategoryId(cmd.getCategoryId());
+        if(allScope) {
+        	group.setOrgId(cmd.getOrganizationId());//标准版新增的管理公司ID
+        }
         EhPaymentBillGroupsDao dao = new EhPaymentBillGroupsDao(context.configuration());
         dao.insert(group);
     }
