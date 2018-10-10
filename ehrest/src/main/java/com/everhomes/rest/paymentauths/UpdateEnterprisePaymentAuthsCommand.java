@@ -4,14 +4,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	   <li>orgnazitionId: 公司ID</li>
+ * 	   <li>organizationId: 公司ID</li>
  * 	   <li>namespaceId : 域空间</li>
  *     <li>EnterprisePaymentAuthsDTO: 授权用户信息</li>
  * </ul>
  */
 public class UpdateEnterprisePaymentAuthsCommand {
 	private Integer namespaceId;
-	private Long orgnazitionId;
+	private Long organizationId;
 	private EnterprisePaymentAuthsDTO enterprisePaymentAuthsDTO;
 
 
@@ -25,16 +25,14 @@ public class UpdateEnterprisePaymentAuthsCommand {
 	}
 
 
-	public Long getOrgnazitionId() {
-		return orgnazitionId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
 
-
-	public void setOrgnazitionId(Long orgnazitionId) {
-		this.orgnazitionId = orgnazitionId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
-
 
 
 	public EnterprisePaymentAuthsDTO getEnterprisePaymentAuthsDTO() {
