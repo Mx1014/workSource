@@ -64,7 +64,8 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		Long printAppId = null;
 		for(EnterprisePaymentAuths enterprisePaymentAuth : authsList){
 			EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
-			if (enterprisePaymentAuth.getAppName().equals(PaymentAuthsAPPType.CLOUD_PRINT.getCode())){
+			Long appId = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
+			if (enterprisePaymentAuth.getAppId().equals(appId)){
 				printAppId = enterprisePaymentAuth.getAppId();
 				if (enterprisePaymentAuth.getSourceType().equals("person")){
 					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
@@ -82,7 +83,6 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
 			e.setEnterpriseAuth(printAuth);
 			e.setAppId(printAppId);
-			e.setAppName(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
 			results.add(e);
 		}
 		return results;
@@ -92,21 +92,20 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
-		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths.getEnterpriseAuth());
+		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths);
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
 			if (enterpriesAuth.getSourceIdA() == null || enterpriesAuth.getSourceIdA().SIZE ==0) {
 				continue;
 			}
 			EnterprisePaymentAuths enterprisePaymentAuth = new EnterprisePaymentAuths();
 			enterprisePaymentAuth.setAppId(enterprisePaymentAuths.getAppId());
-			enterprisePaymentAuth.setAppName(enterprisePaymentAuths.getAppName());
-			enterprisePaymentAuth.setEnterpriseId(cmd.getOrgnazitionId());
+			enterprisePaymentAuth.setEnterpriseId(cmd.getOrganizationId());
 			enterprisePaymentAuth.setNamespaceId(cmd.getNamespaceId());
 			enterprisePaymentAuth.setSourceId(enterpriesAuth.getSourceIdA());
 			enterprisePaymentAuth.setSourceType(enterpriesAuth.getFlowUserSelectionType());
 			enterprisePaymentAuth.setSourceName(enterpriesAuth.getSelectionName());
 			auths.add(enterprisePaymentAuth);
 		}
-		paymentAuthsProvider.createEnterprisePaymentAuths(auths, enterprisePaymentAuths.getAppId(), cmd.getOrgnazitionId());
+		paymentAuthsProvider.createEnterprisePaymentAuths(auths, enterprisePaymentAuths.getAppId(), cmd.getOrganizationId());
 	}
 }

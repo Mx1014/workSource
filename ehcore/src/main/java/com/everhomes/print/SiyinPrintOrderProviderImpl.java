@@ -208,7 +208,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Override
 	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,
-			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode) {
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode, String payType) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(DSL.trueCondition());
 		Condition condition = null;
@@ -239,7 +239,9 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		if(payMode!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.eq(payMode));
 		}
-		
+		if(payType!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAID_TYPE.eq(payType));
+		}
 		if(keywords!=null){
 			condition = Tables.EH_SIYIN_PRINT_ORDERS.NICK_NAME.like("%"+keywords+"%");
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_COMPANY.like("%"+keywords+"%"));

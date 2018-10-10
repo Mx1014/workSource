@@ -74,6 +74,9 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -96,11 +99,14 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
+import com.everhomes.server.schema.tables.EhSiyinPrintOrders;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -272,7 +278,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(map.get("ownerTypeList"),map.get("ownerIdList"),starttime
-				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1, cmd.getPayMode());
+				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1, cmd.getPayMode(), cmd.getPayType());
 		
 		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
 		if(printOrdersList!=null && printOrdersList.size()>pageSize){
@@ -2171,13 +2177,33 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Order amount is not equal to payAmount");
 				}
-				if (cmd.getPaymentStatus()==29){
-					//企业支付
-					order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
-				} else{
-					//个人支付
-					order.setPayMode(PrintPayType.PERSON_PAY.getCode());
-				} 
+				
+				//用户积分
+				LocalEventBus.publish(event -> {
+					LocalEventContext context = new LocalEventContext();
+					context.setUid(order.getCreatorUid());
+					context.setNamespaceId(order.getNamespaceId());
+					context.setCommunityId(order.getOwnerId());
+					event.setContext(context);
+					event.setEntityType(EhSiyinPrintOrders.class.getSimpleName());
+					event.setEntityId(order.getId());
+					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
+				});
+				
+	            switch (cmd.getPaymentType()){
+                case 1:
+                case 7:
+                case 9:
+                case 21: 
+                	order.setPaidType(VendorType.WEI_XIN.getCode());
+                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	break;
+                case 29: order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
+                default: 
+                	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	break;
+            }
 				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}

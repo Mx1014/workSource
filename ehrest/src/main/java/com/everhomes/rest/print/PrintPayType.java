@@ -12,7 +12,7 @@ package com.everhomes.rest.print;
  */
 public enum PrintPayType {
     
-	PERSON_PAY((byte)0,"个人支付"),WAIT_FOR_ENTERPRISE_PAY((byte)1,"记账"),ENTERPRISE_PAID((byte)2,"已支付");
+	PERSON_PAY((byte)0,"个人支付"),WAIT_FOR_ENTERPRISE_PAY((byte)1,"已记账"),ENTERPRISE_PAID((byte)2,"已支付");
 	
 	private byte code;
 	private String desc;

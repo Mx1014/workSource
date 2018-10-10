@@ -84,8 +84,10 @@ public enum SystemEvent {
     RENTAL_RESOURCE_APPLY_CANCEL("rental.resource_apply_cancel"),
 
    //服务联盟
-    SERVICE_ALLIANCE_CREATE("service.alliance_create");
+    SERVICE_ALLIANCE_CREATE("service.alliance_create"),
 
+	//云打印
+	SIYIN_PRINT_PAID("siyin_print.paid");
     private String code;
 
     SystemEvent(String code) {
