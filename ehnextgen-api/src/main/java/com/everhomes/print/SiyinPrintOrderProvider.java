@@ -31,7 +31,7 @@ public interface SiyinPrintOrderProvider {
 
 	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,
-			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode);
 
     ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String s, String sNamespaceId, String userIdentifier, Object o, Object o1, Object o2);
 

@@ -32,6 +32,7 @@ import com.everhomes.rest.print.PayPrintGeneralOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintOwnerType;
+import com.everhomes.rest.print.PrintPayType;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderCommand;
@@ -87,6 +88,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		
 		//TODO 更新支付状态
 		LOGGER.info("dealEnterprisePayCallBack:"+StringHelper.toJsonString(cmd));
+		order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	}
 

@@ -41,7 +41,7 @@ public class ListPrintRecordsCommand {
 	private Long appId;
 	private Byte payType;
 	private Byte paymentType;
-
+	private Byte payMode;
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
@@ -142,6 +142,15 @@ public class ListPrintRecordsCommand {
 
 	public void setPaymentType(Byte paymentType) {
 		this.paymentType = paymentType;
+	}
+
+	
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
 	}
 
 	@Override

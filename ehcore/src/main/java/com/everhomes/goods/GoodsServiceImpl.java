@@ -37,7 +37,7 @@ public class GoodsServiceImpl implements GoodsService{
 	private CommunityProvider communityProvider;
 	@Autowired
 	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
-	
+	private static String SCOPE = "范围";
 	@Override
 	public List<GoodDTO> getGoodList(GetGoodListCommand cmd) {
 		ServiceModuleAppDTO appDto = getAppInfoByAppOriginId(cmd.getAppOriginId());
@@ -82,7 +82,7 @@ public class GoodsServiceImpl implements GoodsService{
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(namespaceId);
 		List<String> communitiesList = new ArrayList();
-
+		goodScopeDTO.setTitle(SCOPE);
 		
 		switch (serviceType) {
 		//停车
@@ -92,6 +92,7 @@ public class GoodsServiceImpl implements GoodsService{
 				JSONObject communitityJson=new JSONObject();
 				communitityJson.put("id", community.getId());
 				communitityJson.put("name", community.getName());
+				communitityJson.put("title", SCOPE);
 				List<String> parkingLotList = new ArrayList();
 				String ownerType = "communities";
 				List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
@@ -100,6 +101,7 @@ public class GoodsServiceImpl implements GoodsService{
 					JSONObject parkingJson=new JSONObject();
 					parkingJson.put("id", parkingLot.getId().toString());
 					parkingJson.put("name", parkingLot.getName());
+					communitityJson.put("title", SCOPE);
 					parking = parkingJson.toString();
 					parkingLotList.add(parking);
 				}
