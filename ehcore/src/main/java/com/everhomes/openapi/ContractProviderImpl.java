@@ -688,9 +688,9 @@ public class ContractProviderImpl implements ContractProvider {
 					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
 		}
 		// zuolin base
-		if(ownerId!=null){
+		/*if(ownerId!=null){
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
-		}
+		}*/
 
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -1292,9 +1292,9 @@ public class ContractProviderImpl implements ContractProvider {
 			
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
-			if (orgId != null) {
+			/*if (orgId != null) {
 				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId));
-			}
+			}*/
 		}else {
 			//查询所有的通用模板
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
