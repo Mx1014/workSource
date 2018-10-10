@@ -16,6 +16,15 @@ public class GetUserTreasureNewResponse {
     private Long coupon;
     private Long order;
     private String pointUrl;
+    private String vipLevelText;
+
+    public String getVipLevelText() {
+        return vipLevelText;
+    }
+
+    public void setVipLevelText(String vipLevelText) {
+        this.vipLevelText = vipLevelText;
+    }
 
     public String getPointUrl() {
         return pointUrl;
