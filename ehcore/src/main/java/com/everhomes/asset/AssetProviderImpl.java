@@ -1216,9 +1216,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-        //标准版支持多管理公司
+        //标准版支持多管理公司，0L是为了兼容历史数据
         if(allScope){
-            query.addConditions(t.ORG_ID.eq(organizationId));
+            query.addConditions(t.ORG_ID.eq(organizationId).or(t.ORG_ID.eq(0L)));
         }
         query.addOrderBy(t.DEFAULT_ORDER);
         query.fetch().map(r -> {
@@ -6269,7 +6269,7 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .and(t1.ORG_ID.eq(cmd.getOrganizationId()))
+                .and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
                 .fetchInto(PaymentBillGroup.class);
         //查询出该项目下的具体配置
         List<PaymentBillGroup> projectBillGroup = context.selectFrom(t1)
@@ -6278,8 +6278,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
                 .fetchInto(PaymentBillGroup.class);
-        if(defaultBillGroup == null) {
-        	if(projectBillGroup == null) {
+        if(defaultBillGroup.size() == 0) {
+        	if(projectBillGroup.size() == 0) {
         		//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
         		response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
         	}else {
@@ -6287,7 +6287,7 @@ public class AssetProviderImpl implements AssetProvider {
         		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         	}
         }else {
-        	if(projectBillGroup == null) {
+        	if(projectBillGroup.size() == 0) {
         		//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
         		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         	}else {
