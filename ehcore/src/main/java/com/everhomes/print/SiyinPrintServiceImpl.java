@@ -30,6 +30,7 @@ import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
@@ -40,6 +41,7 @@ import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantId
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
@@ -100,6 +102,8 @@ import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.xml.XMLToJSON;
 import org.springframework.web.multipart.MultipartFile;
@@ -200,6 +204,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     protected GeneralOrderService orderService;
     @Autowired
     protected AssetService assetService;
+    
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
+    
 	
 	
 	
@@ -644,11 +652,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                     "暂未绑定收款账户");
         }
 		
-		cmd.setPaymentMerchantId(bizPayeeId);
-		cmd.setAppOriginId(66348L);
-		GeneralOrderBizHandler handler = getSiyinPrintGeneralOrderHandler();
-		CreateMerchantOrderResponse generalOrderResp = handler.createOrder(cmd);
-		
+		//准备创建订单的参数，包括一些支付参数以及商品
+		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, bizPayeeId);
+		CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
+
 		//保存参数
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
@@ -660,8 +667,51 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return resp2;
 	}
 	
+	private CreateOrderBaseInfo buildCreateOrderBaseInfo(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order, Long merchantId) {
+		CreateOrderBaseInfo baseInfo = new CreateOrderBaseInfo();
+		baseInfo.setOrganizationId(cmd.getOrganizationId());
+		baseInfo.setOwnerId(cmd.getOwnerId());
+		baseInfo.setAppOriginId(getAppOriginId());
+		baseInfo.setClientAppName(cmd.getClientAppName());
+		baseInfo.setPaymentMerchantId(merchantId);
+		baseInfo.setGoods(buildGoods(cmd, order, merchantId));
+		baseInfo.setTotalAmount(order.getOrderTotalFee());
+		 String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.siyinprint", "/siyinprint/notifySiyinprintOrderPaymentV2"); 
+		baseInfo.setCallBackUrl(backUrl);
+		baseInfo.setOrderTitle("云打印订单");
+		baseInfo.setPaySourceType(SourceType.PC.getCode());
+		return baseInfo;
+	}
+
+	private List<GoodDTO> buildGoods(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order, Long merchantId) {
+		List<GoodDTO> goods = new ArrayList<>();
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		good.setTag1(cmd.getOwnerId()+"");
+		good.setTag2("copy");
+		good.setServeApplyName("这里填写服务提供商名称"); //
+		good.setGoodTag("这里填写商品标志");// 商品标志
+		good.setGoodName(order.getDetail());// 商品名称
+		good.setGoodDescription(order.getDetail());// 商品描述
+		good.setCounts(1);
+		good.setPrice(order.getOrderTotalFee());
+		good.setTotalPrice(order.getOrderTotalFee());
+		goods.add(good);
+		return goods;
+	}
+
+
 	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
 		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
+	}
+	
+	private Long getAppOriginId() {
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
+				UserContext.getCurrentNamespaceId(), 
+				ServiceModuleConstants.PRINT_MODULE, 
+				null, null, null);
+		
+		return apps.get(0).getOriginId();
 	}
 
 	private Long getOrderPayeeAccount(Integer namespaceId, String ownerType, Long ownerId) {

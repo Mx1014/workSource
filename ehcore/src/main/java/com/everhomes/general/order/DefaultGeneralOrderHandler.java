@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,14 @@ import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.print.SiyinPrintServiceImpl;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.general.order.CreateOrderCommonInfo;
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.general.order.OrderCallBackType;
 import com.everhomes.rest.order.OrderType;
@@ -53,19 +56,23 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 	@Autowired
 	private ConfigurationProvider configProvider;
 	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	
     @Value("${server.contextPath:}")
     private String contextPath;
     
     //子类实现
     abstract OrderTypeEnum getOrderTypeEnum();
-	abstract CreateOrderCommonInfo getCreateOrderInfo(Object bussinessCommand);
+	abstract void fillEnterprisePaySpecificInfo(CreateGeneralBillInfo billInfo, CreateOrderBaseInfo baseInfo);
 	abstract void dealInvoiceCallBack(OrderCallBackCommand cmd);
 	abstract void dealEnterprisePayCallBack(OrderCallBackCommand cmd);
 	
 	@Override
-	public CreateMerchantOrderResponse createOrder(Object bussinessCommand) {
+	public CreateMerchantOrderResponse createOrder(CreateOrderBaseInfo commonInfo) {
 		
-		CreateMerchantOrderCommand createOrderCmd = buildOrderCommand(bussinessCommand);
+		CreateMerchantOrderCommand createOrderCmd = buildOrderCommand(commonInfo);
 		LOGGER.info("createOrderCmd:"+StringHelper.toJsonString(createOrderCmd));
 		CreateMerchantOrderRestResponse createOrderResp = orderService.createMerchantOrder(createOrderCmd);
 		LOGGER.info("createOrderResp:"+StringHelper.toJsonString(createOrderResp));
@@ -86,33 +93,47 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		return orderCommandResponse;
 	}
 	
-	private CreateMerchantOrderCommand buildOrderCommand(Object bussinessCommand) {
-		CreateOrderCommonInfo info = getCreateOrderInfo(bussinessCommand);
-		if (null == info) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "can't get order info from",getHandlerName());
-		}
+	private CreateMerchantOrderCommand buildOrderCommand(CreateOrderBaseInfo info) {
 		CreateMerchantOrderCommand orderCmd = new CreateMerchantOrderCommand();
-		buildPayerInfo(orderCmd, info); //用户信息
-		buildGoods(orderCmd, info); //商品
-		buildGeneralBillInfo(orderCmd, info); //企业支付参数
-		buildOthers(orderCmd, info); //其他支付参数
+		buildPayerInfo(orderCmd, info); // 用户信息
+		buildGoods(orderCmd, info); // 商品
+		buildGeneralBillInfo(orderCmd, info); // 企业支付参数
+		buildOtherPayInfo(orderCmd, info); // 个人支付参数
 		return orderCmd;
 	}
 	
-	private void buildGeneralBillInfo(CreateMerchantOrderCommand orderCmd, CreateOrderCommonInfo info) {
+	private void buildGeneralBillInfo(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo baseInfo) {
 		CreateGeneralBillInfo createBillInfo = new CreateGeneralBillInfo();
+		
+		//添加通用的企业支付信息
 		createBillInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
-		createBillInfo.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-		createBillInfo.setOwnerId(info.getOwnerId());
-		createBillInfo.setSourceType(AssetSourceType.PRINT_MODULE);
-		createBillInfo.setSourceId(ServiceModuleConstants.PRINT_MODULE);
-		createBillInfo.setSourceName(info.getOrderRemark());
-		createBillInfo.setConsumeUserId(UserContext.currentUserId());
+		createBillInfo.setOwnerType("community");
+		createBillInfo.setOwnerId(baseInfo.getOwnerId());
 		createBillInfo.setTargetType(AssetTargetType.ORGANIZATION.getCode());
-		createBillInfo.setTargetId(info.getOrganizationId());
+		createBillInfo.setTargetId(baseInfo.getOrganizationId());
+		
+		//用户信息
+		fillGeneralBillUserInfo(createBillInfo, baseInfo.getOrganizationId());
+		
+		//添加业务特定信息
+		fillEnterprisePaySpecificInfo(createBillInfo, baseInfo); 
+		
+		//补空
+		if (StringUtils.isBlank(createBillInfo.getSourceName())) {
+			createBillInfo.setSourceName(baseInfo.getOrderTitle());
+		}
 	}
 	
-	private void buildOthers(CreateMerchantOrderCommand preOrderCommand, CreateOrderCommonInfo info) {
+	private void fillGeneralBillUserInfo(CreateGeneralBillInfo createBillInfo, Long organizationId) {
+		Long userId = UserContext.currentUserId();
+		createBillInfo.setConsumeUserId(userId);
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
+		if(null != organizationMember) {
+//			createBillInfo.setConsumerUserName(organizationMember.getContactName());
+		}
+	}
+	
+	private void buildOtherPayInfo(CreateMerchantOrderCommand preOrderCommand, CreateOrderBaseInfo info) {
 		preOrderCommand.setPaymentMerchantId(info.getPaymentMerchantId());
 		preOrderCommand.setAmount(changePayAmount(info.getTotalAmount()));
 		preOrderCommand.setAccountCode("NS"+ UserContext.getCurrentNamespaceId());
@@ -127,18 +148,18 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		preOrderCommand.setExtendInfo(getOrderTypeEnum().getMsg());
 		preOrderCommand.setGoodsName(info.getOrderTitle());
 		preOrderCommand.setGoodsDescription(getOrderTypeEnum().getMsg());
-		preOrderCommand.setSourceType(info.getSourceType());
+		preOrderCommand.setSourceType(info.getPaySourceType());
 		preOrderCommand.setOrderRemark1(info.getOrderTitle());
 		preOrderCommand.setOrderRemark3(String.valueOf(info.getOwnerId()));
 		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID,
 				"");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 	}
-	private void buildGoods(CreateMerchantOrderCommand orderCmd, CreateOrderCommonInfo info) {
+	private void buildGoods(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo info) {
 		orderCmd.setGoods(info.getGoods());
 	}
 	
-	private void buildPayerInfo(CreateMerchantOrderCommand orderCmd, CreateOrderCommonInfo info) {
+	private void buildPayerInfo(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo info) {
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
 		payerInfo.setOrganizationId(info.getOrganizationId()); // 左邻公司

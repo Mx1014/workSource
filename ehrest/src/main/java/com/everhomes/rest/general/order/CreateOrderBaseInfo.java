@@ -16,13 +16,12 @@ import com.everhomes.util.StringHelper;
  * <li>totalAmount : 总金额</li>
  * <li>callBackUrl : 个人支付回调url</li>
  * <li>orderTitle : 订单标题</li>
- * <li>orderRemark : 用于企业支付时，填写sourceName，可以认为是订单的业务标识</li>
- * <li>sourceType : 支付源 {@link com.everhomes.pay.order.SourceType}</li>
+ * <li>paySourceType : 支付源 {@link com.everhomes.pay.order.SourceType}</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月7日
  */
-public class CreateOrderCommonInfo {
+public class CreateOrderBaseInfo {
 	private Long organizationId;
 	private Long ownerId;
 	private Long appOriginId;
@@ -32,8 +31,7 @@ public class CreateOrderCommonInfo {
 	private BigDecimal totalAmount;
 	private String callBackUrl;
 	private String orderTitle;
-	private String orderRemark;
-	private Integer sourceType;
+	private Integer paySourceType;
 	
 	@Override
 	public String toString() {
@@ -89,14 +87,6 @@ public class CreateOrderCommonInfo {
 		this.orderTitle = orderTitle;
 	}
 
-	public Integer getSourceType() {
-		return sourceType;
-	}
-
-	public void setSourceType(Integer sourceType) {
-		this.sourceType = sourceType;
-	}
-
 	public Long getPaymentMerchantId() {
 		return paymentMerchantId;
 	}
@@ -113,20 +103,20 @@ public class CreateOrderCommonInfo {
 		this.goods = goods;
 	}
 
-	public String getOrderRemark() {
-		return orderRemark;
-	}
-
-	public void setOrderRemark(String orderRemark) {
-		this.orderRemark = orderRemark;
-	}
-
 	public Long getAppOriginId() {
 		return appOriginId;
 	}
 
 	public void setAppOriginId(Long appOriginId) {
 		this.appOriginId = appOriginId;
+	}
+
+	public Integer getPaySourceType() {
+		return paySourceType;
+	}
+
+	public void setPaySourceType(Integer paySourceType) {
+		this.paySourceType = paySourceType;
 	}
 
 }

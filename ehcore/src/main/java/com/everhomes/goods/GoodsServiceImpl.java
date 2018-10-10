@@ -39,17 +39,8 @@ public class GoodsServiceImpl implements GoodsService{
 	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
 	private static String SCOPE = "范围";
 	@Override
-	public List<GoodDTO> getGoodList(GetGoodListCommand cmd) {
-		ServiceModuleAppDTO appDto = getAppInfoByAppOriginId(cmd.getAppOriginId());
-		if(null == appDto) {
-			LOGGER.error("appDto not exist GetGoodListCommand = {}", cmd.toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "module app not exist");
-		}
-		
-		GoodsPromotionHandler handler = getGoodsPromotionHandler(appDto.getModuleId());
-		
-		//传递应用信息
-		cmd.setModuleAppDTO(appDto);
+	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
+		GoodsPromotionHandler handler = getGoodsPromotionHandler(cmd.getBizType());
 		return handler.getGoodList(cmd);
 	}
 	
@@ -138,13 +129,4 @@ public class GoodsServiceImpl implements GoodsService{
 		return goodScopeDTO;
 	}
 	
-	private ServiceModuleAppDTO getAppInfoByAppOriginId(Long appOriginId) {
-
-		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(appOriginId);
-		if (null == app) {
-			return null;
-		}
-
-		return ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-	}
 }

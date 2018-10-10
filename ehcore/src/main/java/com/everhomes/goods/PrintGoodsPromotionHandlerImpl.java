@@ -7,36 +7,28 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.goods.GetGoodListCommand;
-import com.everhomes.rest.order.OrderType.OrderTypeEnum;
-import com.everhomes.rest.promotion.order.GoodDTO;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.rest.goods.GetGoodListResponse;
+import com.everhomes.rest.goods.GoodBizEnum;
+import com.everhomes.rest.goods.GoodTagDTO;
 
-@Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + "printOrder") //要与OrderTypeEnum一致
+@Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PRINT_MODULE)
 public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
-	
 
-//	@Override
-//	public List<GoodDTO> getGoodList(GetGoodListCommand cmd, ServiceModuleApp app) {
-//		
-//		//根据商户id获取应用范围
-//		List<GoodDTO> goods = getGoods(cmd, app);
-//		List<GoodDTO> parents = getParents(goods);
-//		return goods;
-//	}
-//
-//	private List<GoodDTO> getParents(List<GoodDTO> goods) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	private List<GoodDTO> getGoods(GetGoodListCommand cmd, ServiceModuleApp app) {
-//		
-//		List<GoodDTO> goods = new ArrayList<>();
-////		goods
-//		
-//		return null;
-//	}
-
-
-	
+	@Override
+	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
+		//打印机所有域空间的商品都是一样的 这里直接使用meiju
+		GoodBizEnum[] goodBizEnums = GoodBizEnum.values();
+		List<GoodTagDTO> goods = new ArrayList<>();
+		for (int i = 0 ; i < goodBizEnums.length; i++) {
+			if (GoodBizEnum.TYPE_SIYIN_PRINT.equals(goodBizEnums[i].getType())) {
+				GoodTagDTO good = new GoodTagDTO();
+				good.setGoodTagKey(goodBizEnums[i].getIdentity());
+				good.setGoodTagKey(goodBizEnums[i].getName());
+				goods.add(good);
+			}
+		}
+		GetGoodListResponse resp = new GetGoodListResponse();
+		resp .setGoods(goods);
+		return resp;
+	}	
 }
