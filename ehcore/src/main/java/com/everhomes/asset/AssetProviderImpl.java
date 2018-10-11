@@ -60,6 +60,7 @@ import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetProjectDefaultFlag;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -1215,8 +1216,9 @@ public class AssetProviderImpl implements AssetProvider {
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
+        //标准版支持多管理公司，0L是为了兼容历史数据
         if(allScope){
-            query.addConditions(t.ORG_ID.eq(organizationId));
+            query.addConditions(t.ORG_ID.eq(organizationId).or(t.ORG_ID.eq(0L)));
         }
         query.addOrderBy(t.DEFAULT_ORDER);
         query.fetch().map(r -> {
@@ -2282,8 +2284,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(t1.OWNER_ID.eq(ownerId))
                 .and(t1.OWNER_TYPE.eq(ownerType))
                 .and(t1.CATEGORY_ID.eq(categoryId));
+        //标准版支持多管理公司，0L是为了兼容历史数据
         if (allScope) {
-            step.and(t1.ORG_ID.eq(orgId));
+            step.and(t1.ORG_ID.eq(orgId).or(t1.ORG_ID.eq(0L)));
         }
         List<PaymentChargingItemScope> scopes = step.and(t1.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()))
                 .fetchInto(PaymentChargingItemScope.class);
@@ -3509,73 +3512,33 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds) {
-        //卸载参数
-    	List<ConfigChargingItems> configChargingItems = cmd.getChargingItemConfigs();
-    	Long communityId = cmd.getOwnerId();
-    	String ownerType = cmd.getOwnerType();
-    	Integer namespaceId = cmd.getNamespaceId();
-    	Long categoryId = cmd.getCategoryId();
-
-    	byte de_coupling = 1;
-        if(communityIds!=null && communityIds.size() >1){
-            for(int i = 0; i < communityIds.size(); i ++){
-                Long cid = communityIds.get(i);
-//                //只要园区还有自己的scope，且一个scope的独立权得到承认，那么不能修改
-//                Boolean coupled = true;
-//                if(cid.longValue() != namespaceId.longValue()){
-//                    coupled = checkCoupling(cid,ownerType, categoryId);
-//                }
-//                if(coupled){
-//                    de_coupling = 0;
-//                    configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
-//                }
-
-                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cid);
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	de_coupling = 0;
-                	configChargingItemForOneCommunity(configChargingItems, cid, ownerType, namespaceId, de_coupling, categoryId);
-                }
-            }
-        }else{
-            //只有一个园区,不是list过来的
-            configChargingItemForOneCommunity(configChargingItems, communityId, ownerType, namespaceId, de_coupling, categoryId);
-        }
+    public void configChargingItems(ConfigChargingItemsCommand cmd, byte de_coupling, Boolean allScope) {
+    	configChargingItemForOneCommunity(cmd.getChargingItemConfigs(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getNamespaceId(), de_coupling, cmd.getCategoryId(), 
+    			allScope, cmd.getOrganizationId());
     }
 
-//    private Boolean checkCoupling(Long communityId, String ownerType, Long categoryId) {
-//        DSLContext context = getReadOnlyContext();
-//        List<Byte> flags = context.select(itemScope.DECOUPLING_FLAG)
-//                .from(itemScope)
-//                .where(itemScope.OWNER_TYPE.eq(ownerType))
-//                .and(itemScope.OWNER_ID.eq(communityId))
-//                .and(itemScope.CATEGORY_ID.eq(categoryId))
-//                .fetch(itemScope.DECOUPLING_FLAG);
-//        for(int i = 0; i < flags.size(); i ++){
-//            if(flags.get(i).byteValue() == (byte)1){
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-
-    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, Byte decouplingFlag, Long categoryId) {
+    private void configChargingItemForOneCommunity(List<ConfigChargingItems> configChargingItems, Long communityId, String ownerType, Integer namespaceId, 
+    		Byte decouplingFlag, Long categoryId, Boolean allScope, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
         EhPaymentChargingItemScopesDao dao = new EhPaymentChargingItemScopesDao(context.configuration());
         List<com.everhomes.server.schema.tables.pojos.EhPaymentChargingItemScopes> list = new ArrayList<>();
         if(configChargingItems == null){
-            context.delete(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(communityId))
-                    // add categoryId constraint
-                    .and(t.CATEGORY_ID.eq(categoryId))
-                    .execute();
+        	//标准版增加的allScope参数，true：默认/全部，false：具体项目
+        	if(allScope) {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .and(t.ORG_ID.eq(organizationId))//标准版新增的管理公司ID
+	                .execute();
+        	}else {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .execute();
+        	}
             return;
         }
         for(int i = 0; i < configChargingItems.size(); i ++) {
@@ -3590,17 +3553,30 @@ public class AssetProviderImpl implements AssetProvider {
             scope.setCategoryId(categoryId);
             scope.setProjectLevelName(vo.getProjectChargingItemName());
             scope.setDecouplingFlag(decouplingFlag);
-            scope.setDecouplingFlag(decouplingFlag);
             scope.setTaxRate(vo.getTaxRate());//增加税率
+            if(allScope) {
+            	scope.setOrgId(organizationId);//标准版新增的管理公司ID
+            }
             list.add(scope);
         }
         this.dbProvider.execute((TransactionStatus status) -> {
-            context.delete(t)
-                    .where(t.OWNER_TYPE.eq(ownerType))
-                    .and(t.OWNER_ID.eq(communityId))
-                    .and(t.NAMESPACE_ID.eq(namespaceId))
-                    .and(t.CATEGORY_ID.eq(categoryId))
-                    .execute();
+        	//标准版增加的allScope参数，true：默认/全部，false：具体项目
+        	if(allScope) {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.NAMESPACE_ID.eq(namespaceId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .and(t.ORG_ID.eq(organizationId))//标准版新增的管理公司ID
+	                .execute();
+        	}else {
+        		context.delete(t)
+	                .where(t.OWNER_TYPE.eq(ownerType))
+	                .and(t.OWNER_ID.eq(communityId))
+	                .and(t.NAMESPACE_ID.eq(namespaceId))
+	                .and(t.CATEGORY_ID.eq(categoryId))
+	                .execute();
+        	}
             if(list.size()>0){
                 dao.insert(list);
             }
@@ -4535,7 +4511,6 @@ public class AssetProviderImpl implements AssetProvider {
                 if(workFlag){
                 	response.setFailCause(AssetPaymentConstants.DELETE_GROUP_RULE_UNSAFE);
                     return response;
-                    //continue rules;
                 }
             }
             rules:for(int i = 0; i < rules.size(); i ++){
@@ -6166,47 +6141,93 @@ public class AssetProviderImpl implements AssetProvider {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
 		EhPaymentChargingItemScopes t1 = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t1");
-		Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
-		List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
-				.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .fetchInto(PaymentChargingItemScope.class);
-		if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))//用于判断是否是使用默认配置，还是处于解耦状态
-                    .fetchInto(PaymentChargingItemScope.class);
-        	if(scopes != null && scopes.size() != 0) {
-            	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            }else {
-            	scopes = context.selectFrom(t1)
-            			.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                        .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                        .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                        .fetchInto(PaymentChargingItemScope.class);
-            	if(scopes != null && scopes.size() == 0) {
-            		scopes = context.selectFrom(t1)
-                    		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-                            .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                            .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                            .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                            .fetchInto(PaymentChargingItemScope.class);
-            		if(scopes.size() > 0) {
-            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}else {
-            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}
-            	}else {
-            		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            	}
-    		}
-        }
+		//查询出管理公司下的默认配置
+		List<PaymentChargingItemScope> defaultChargingItem = context.selectFrom(t1)
+				.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+				.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+				.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+				.and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
+				.fetchInto(PaymentChargingItemScope.class);
+		//查询出该项目下的具体配置
+		List<PaymentChargingItemScope> projectChargingItem = context.selectFrom(t1)
+				.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+				.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+				.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+				.fetchInto(PaymentChargingItemScope.class);
+		if(defaultChargingItem.size() == 0) {
+			if(projectChargingItem.size() == 0) {
+				//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+				response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+			}else {
+				//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+			}
+		}else {
+			if(projectChargingItem.size() == 0) {
+				//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+			}else {
+				//如果默认配置和项目具体配置都不为空
+        		List<Long> defaultChargingItemId = new ArrayList<Long>(); 
+        		List<Long> projectChargingItemId = new ArrayList<Long>();
+        		for(PaymentChargingItemScope paymentChargingItemScope : defaultChargingItem) {
+        			defaultChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+        		}
+        		for(PaymentChargingItemScope paymentChargingItemScope : projectChargingItem) {
+        			projectChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+        		}
+        		if(defaultChargingItemId.containsAll(projectChargingItemId) && projectChargingItemId.containsAll(defaultChargingItemId)) {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+        		}else {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        		}
+			}
+		}
+		
+//		Byte decouplingFlag = new Byte("1");//用于判断是否是使用默认配置，还是处于解耦状态
+//		List<PaymentChargingItemScope> scopes = context.selectFrom(t1)
+//				.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                .fetchInto(PaymentChargingItemScope.class);
+//		if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+//        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        }else {//说明该域空间下已经有数据了
+//        	scopes = context.selectFrom(t1)
+//            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                    .and(t1.DECOUPLING_FLAG.eq(decouplingFlag))//用于判断是否是使用默认配置，还是处于解耦状态
+//                    .fetchInto(PaymentChargingItemScope.class);
+//        	if(scopes != null && scopes.size() != 0) {
+//            	response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            }else {
+//            	scopes = context.selectFrom(t1)
+//            			.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+//                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                        .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                        .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                        .fetchInto(PaymentChargingItemScope.class);
+//            	if(scopes != null && scopes.size() == 0) {
+//            		scopes = context.selectFrom(t1)
+//                    		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+//                            .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//                            .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//                            .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                            .fetchInto(PaymentChargingItemScope.class);
+//            		if(scopes.size() > 0) {
+//            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            		}else {
+//            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            		}
+//            	}else {
+//            		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//            	}
+//    		}
+//        }
+		
         return response;
     }
 	
@@ -6261,35 +6282,58 @@ public class AssetProviderImpl implements AssetProvider {
 		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
 		DSLContext context = getReadOnlyContext();
         EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
-        List<PaymentBillGroup> scopes = context.selectFrom(t1)
-        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+        //查询出管理公司下的默认配置
+        List<PaymentBillGroup> defaultBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
                 .fetchInto(PaymentBillGroup.class);
-        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-        }else {//说明该域空间下已经有数据了
-        	scopes = context.selectFrom(t1)
-            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-                    .fetchInto(PaymentBillGroup.class);
-        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
-        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        //查询出该项目下的具体配置
+        List<PaymentBillGroup> projectBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .fetchInto(PaymentBillGroup.class);
+        if(defaultBillGroup.size() == 0) {
+        	if(projectBillGroup.size() == 0) {
+        		//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+        		response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
         	}else {
-        		scopes = context.selectFrom(t1)
-	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-	                    .fetchInto(PaymentBillGroup.class);
-        		if(scopes.size() > 0) {
-        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        		//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}
+        }else {
+        	if(projectBillGroup.size() == 0) {
+        		//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}else {
+        		//如果默认配置和项目具体配置都不为空
+        		List<Long> defaultBillGroupId = new ArrayList<Long>(); 
+        		List<Long> projectBrotherGroupId = new ArrayList<Long>();
+        		for(PaymentBillGroup paymentBillGroup : defaultBillGroup) {
+        			defaultBillGroupId.add(paymentBillGroup.getId());
+        		}
+        		for(PaymentBillGroup paymentBillGroup : projectBillGroup) {
+        			projectBrotherGroupId.add(paymentBillGroup.getBrotherGroupId());
+        		}
+        		if(defaultBillGroupId.containsAll(projectBrotherGroupId) && projectBrotherGroupId.containsAll(defaultBillGroupId)) {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
         		}else {
-        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
         		}
         	}
-
+        }
+        
+//        List<PaymentBillGroup> scopes = context.selectFrom(t1)
+//        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//                .fetchInto(PaymentBillGroup.class);
+//        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
+//        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        }else {//说明该域空间下已经有数据了
 //        	scopes = context.selectFrom(t1)
 //            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
 //                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
@@ -6299,11 +6343,20 @@ public class AssetProviderImpl implements AssetProvider {
 //        	if(scopes.size() > 0 && scopes.get(0).getBrotherGroupId() != null) {
 //        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
 //        	}else {
-//        		response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		scopes = context.selectFrom(t1)
+//	            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
+//	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+//	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+//	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+//	                    .fetchInto(PaymentBillGroup.class);
+//        		if(scopes.size() > 0) {
+//        			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		}else {
+//        			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+//        		}
 //        	}
-
-
-        }
+//        }
+        
        return response;
 	}
 

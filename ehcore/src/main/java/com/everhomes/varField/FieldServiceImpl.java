@@ -645,35 +645,35 @@ public class FieldServiceImpl implements FieldService {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
                         //                if (scopeItems != null && scopeItems.size() < 1) {
 //                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), cmd.getCommunityId(), null);
-//    			}}
+//    			}
                     }
-                    //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+                }
+                //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
                 /*if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), null, null);
     			}*/
-                    //查询表单初始化的数据
+                //查询表单初始化的数据
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
-                        }
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
                     }
+                }
 
-                } else {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+            } else {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
+                    //                if (scopeItems != null && scopeItems.size() < 1) {
+//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        }
                     }
-//    			}
                 }
+//    			}
             }
             Map<Long, ScopeFieldItem> fieldItems = scopeItems;
             if (fields != null && fields.size() > 0) {
