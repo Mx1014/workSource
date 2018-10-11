@@ -7,6 +7,7 @@ import com.everhomes.rest.service_agreement.admin.GetProtocolResponse;
 import com.everhomes.rest.service_agreement.admin.GetProtocolTemplateResponse;
 import com.everhomes.rest.service_agreement.admin.SaveProtocolsCommand;
 import com.everhomes.rest.service_agreement.admin.SaveProtocolsTemplateCommand;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -141,6 +142,7 @@ public class ServiceAgreementAdminController extends ControllerBase{
      * <b>URL: /admin/adminServiceAgreement/getProtocolDetail</b>
      * <p>根据域空间ID和类型获取协议详情</p>
      */
+    @RequireAuthentication(false)
     @RequestMapping("getProtocolDetail")
     @RestReturn(value=GetProtocolDetailResponse.class)
     public RestResponse getProtocolDetail(GetProtocolCommand cmd) {
