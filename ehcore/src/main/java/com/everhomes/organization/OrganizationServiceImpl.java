@@ -14659,8 +14659,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setDtos(dtos);
         return response;
     }
-
-<<<<<<< HEAD
+    
     @Override
 	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
@@ -14707,7 +14706,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
-=======
     //	物业组所需获取企业员工的唯一标识符
     @Override
     public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
@@ -14716,6 +14714,5 @@ public class OrganizationServiceImpl implements OrganizationService {
             return "";
         return employee.getAccount();
     }
->>>>>>> org-4.6
 }
 
