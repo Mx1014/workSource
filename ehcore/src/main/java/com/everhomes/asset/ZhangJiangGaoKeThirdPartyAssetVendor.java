@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.zjgkVOs.BillCountResponse;
 import com.everhomes.asset.zjgkVOs.BillDetailResponse;
 import com.everhomes.asset.zjgkVOs.CommunityAddressDTO;
@@ -176,11 +177,15 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
 
     @Autowired
     private EquipmentService equipmentService;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
+    
 
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
-        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+        PaymentBillGroup group = assetGroupProvider.getBillGroupById(billGroupId);
         if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -932,7 +937,7 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(ownerId, cmd.getNamespaceId(), PrivilegeConstants.ASSET_MODULE_ID);
         if(organization!=null)
             orgId = organization.getId();
-        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId(), orgId, false);
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetGroupProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId(), orgId, false);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
