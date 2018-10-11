@@ -705,6 +705,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //
 		}
+		good.setGoodName(order.getDetail());
 		good.setGoodDescription(order.getDetail());// 商品描述
 		good.setCounts(1);
 		good.setPrice(order.getOrderTotalFee());
@@ -723,7 +724,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			bizEnum = GoodBizEnum.PRINT_SCAN;
 		}
 		good.setGoodTag(bizEnum.getIdentity());
-		good.setGoodName(bizEnum.getName());
+//		good.setGoodName(bizEnum.getName());
 	}
 
 
