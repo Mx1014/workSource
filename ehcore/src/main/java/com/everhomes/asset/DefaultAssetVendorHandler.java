@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -91,6 +92,9 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	
 	@Autowired
 	private AssetService assetService;
+	
+	@Autowired
+	private AssetGroupProvider assetGroupProvider;
 	
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
@@ -265,7 +269,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	}
 	
 	protected PaymentBillGroup checkBillGroup(CreatePaymentBillOrderCommand cmd) {
-        PaymentBillGroup billGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        PaymentBillGroup billGroup = assetGroupProvider.getBillGroupById(cmd.getBillGroupId());
         if(billGroup == null) {
             LOGGER.error("Bill group not found, billGroupId={}", cmd.getBillGroupId());
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_GROUP_NOT_FOUND, "Bill group not found");
