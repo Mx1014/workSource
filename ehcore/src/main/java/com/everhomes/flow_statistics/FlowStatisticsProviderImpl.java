@@ -115,7 +115,17 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
 
     }
 
-    public List<FlowEventLog> getFlowEventLogs(Long flowMainId ,Integer version ,List<Long>flowCases , Timestamp startDate ,Long flowNodeId){
+    /**
+     * 查询记录信息
+     * @param flowMainId
+     * @param version
+     * @param flowCases
+     * @param startDate
+     * @param flowNodeIds
+     * @return
+     */
+    @Override
+    public List<FlowEventLog> getFlowEventLogs(Long flowMainId ,Integer version ,List<Long>flowCases , Timestamp startDate ,List<Long> flowNodeIds){
         com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
         List<FlowEventLog> list =   this.queryFlowEventLog(new ListingLocator(), 0, (locator1, query) -> {
 
@@ -132,8 +142,8 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
             if(startDate != null){
                 query.addConditions(t.CREATE_TIME.ge(startDate));//大于等于
             }
-            if(flowNodeId != null){
-                query.addConditions(t.FLOW_NODE_ID.eq(flowNodeId));//等于
+            if(CollectionUtils.isNotEmpty(flowNodeIds)){
+                query.addConditions(t.FLOW_NODE_ID.in(flowNodeIds));//等于
             }
             return query;
 

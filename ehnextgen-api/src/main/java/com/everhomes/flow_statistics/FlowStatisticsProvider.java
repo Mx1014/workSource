@@ -6,6 +6,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow_statistics.FlowVersionCycleDTO;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface FlowStatisticsProvider {
@@ -19,4 +20,6 @@ public interface FlowStatisticsProvider {
     List<FlowEventLog> queryFlowEventLog(ListingLocator locator, int count,
                                          ListingQueryBuilderCallback callback ,
                                          ListingQueryBuilderCallback orderCallback );
+
+    List<FlowEventLog> getFlowEventLogs(Long flowMainId , Integer version , List<Long>flowCases , Timestamp startDate , List<Long> flowNodeIds);
 }

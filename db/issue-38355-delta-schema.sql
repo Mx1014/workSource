@@ -14,6 +14,7 @@ CREATE TABLE `eh_flow_statistics_handle_log` (
   `start_time` DATETIME DEFAULT NULL COMMENT '起始时间',
   `end_time` DATETIME DEFAULT NULL COMMENT '结束时间',
   `cycle` BIGINT(32) DEFAULT NULL COMMENT '周期时长（单位为秒 s）',
+  `create_time` DATETIME DEFAULT NULL COMMENT '记录创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
