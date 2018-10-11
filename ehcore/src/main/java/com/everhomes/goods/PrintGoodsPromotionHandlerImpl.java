@@ -23,7 +23,7 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 			if (GoodBizEnum.TYPE_SIYIN_PRINT.equals(goodBizEnums[i].getType())) {
 				GoodTagDTO good = new GoodTagDTO();
 				good.setGoodTagKey(goodBizEnums[i].getIdentity());
-				good.setGoodTagKey(goodBizEnums[i].getName());
+				good.setGoodTagValue(goodBizEnums[i].getName());
 				goods.add(good);
 			}
 		}
