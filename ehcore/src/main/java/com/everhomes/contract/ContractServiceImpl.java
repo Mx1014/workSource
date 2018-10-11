@@ -3291,6 +3291,9 @@ long assetCategoryId = 0l;
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
 			isNewFile = true;
+			if (null != cmd.getOwnerId() && cmd.getOwnerId() != -1 && cmd.getOwnerId() != 0 ) {
+				contractTemplate.setOrgId(0L);
+			}
 		}
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
@@ -3402,7 +3405,7 @@ long assetCategoryId = 0l;
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
-				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
+				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize, cmd.getAppId());
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
 

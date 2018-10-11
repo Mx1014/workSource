@@ -110,6 +110,7 @@ import java.util.Map;
 
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -138,6 +139,9 @@ public class ContractProviderImpl implements ContractProvider {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+    private OrganizationService organizationService;
 
 	@Override
 	public void createContract(Contract contract) {
@@ -1266,7 +1270,7 @@ public class ContractProviderImpl implements ContractProvider {
 
 	@Override
 	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId,
-			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+			Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
         EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
         EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
@@ -1292,6 +1296,8 @@ public class ContractProviderImpl implements ContractProvider {
 			
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
 		}else {
 			//查询所有的通用模板
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
@@ -1300,11 +1306,14 @@ public class ContractProviderImpl implements ContractProvider {
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
 			// get all communities data and all organization owner general data
 			if (orgId != null) {
-				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.ne(0L)));
+				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
+				//cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.ne(0L)));
 			}
+			
+			 List<Long> communityIds = new ArrayList<>();
+		     communityIds =  organizationService.getOrganizationProjectIdsByAppId(orgId, appId);
+		     cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.in(communityIds).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 		}
-
-
 
 		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
 		
