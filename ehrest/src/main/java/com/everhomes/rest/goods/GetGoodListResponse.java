@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * @author huangmingbo 
  * @date 2018年10月10日
  */
-public class GetGoodListResponse extends RestResponse{
+public class GetGoodListResponse{
 	private List<GoodTagDTO> goods;
 	
 	@Override

@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId : namespaceId</li>
  * <li>merchantId : 商户id</li>
+ * <li>serviceType : 业务名称 如打印/停车缴费，业务不关注，透传回去即可</li>
  * <li>bizType : 服务类型,当前为模块id 如云打印是41400</li>
  * <li>tagKeys : tag各层级标识 如项目id，停车场id</li>
  * 注：对不同的模块，每层的tag意义是不同的，如云打印tag2表示的是打印机的名称
@@ -18,6 +19,7 @@ import com.everhomes.util.StringHelper;
 public class GetGoodListCommand {
 	private Integer namespaceId;
 	private Long merchantId;
+	private String serviceType; 
 	private Long bizType;
 	List<String> tagKeys;
  	
@@ -56,5 +58,13 @@ public class GetGoodListCommand {
 
 	public void setTagKeys(List<String> tagKeys) {
 		this.tagKeys = tagKeys;
+	}
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
 	}
 }

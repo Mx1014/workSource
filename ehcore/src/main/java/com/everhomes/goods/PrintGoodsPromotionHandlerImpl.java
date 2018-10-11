@@ -32,21 +32,45 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 	private static String SCOPE = "范围";
 	@Override
 	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
-		//打印机所有域空间的商品都是一样的 这里直接使用meiju
+
+		List<String> tags = cmd.getTagKeys();
+		int pos = 0;
+		String tag1 = getTagByPos(tags, pos++);
+		String tag2 = getTagByPos(tags, pos++);
+		String tag3 = getTagByPos(tags, pos++);
+		String tag4 = getTagByPos(tags, pos++);
+		String tag5 = getTagByPos(tags, pos++);
+
+		// 打印机所有域空间的商品都是一样的 这里直接使用meiju
 		GoodBizEnum[] goodBizEnums = GoodBizEnum.values();
 		List<GoodTagDTO> goods = new ArrayList<>();
-		for (int i = 0 ; i < goodBizEnums.length; i++) {
+		for (int i = 0; i < goodBizEnums.length; i++) {
 			if (GoodBizEnum.TYPE_SIYIN_PRINT.equals(goodBizEnums[i].getType())) {
 				GoodTagDTO good = new GoodTagDTO();
-				good.setGoodTagKey(goodBizEnums[i].getIdentity());
-				good.setGoodTagValue(goodBizEnums[i].getName());
+				good.setServiceType(cmd.getServiceType());
+				good.setNamespaceId(cmd.getNamespaceId());
+				good.setTag1(tag1);
+				good.setTag2(tag2);
+				good.setTag3(tag3);
+				good.setTag4(tag4);
+				good.setTag5(tag5);
+				good.setGoodsTag(goodBizEnums[i].getIdentity());
+				good.setGoodsName(goodBizEnums[i].getName());
 				goods.add(good);
 			}
 		}
 		GetGoodListResponse resp = new GetGoodListResponse();
-		resp .setGoods(goods);
+		resp.setGoods(goods);
 		return resp;
 	}	
+	
+	private String getTagByPos(List<String> tags, int pos) {
+		if (null == tags) {
+			return null;
+		}
+		
+		return tags.size() > pos ? tags.get(pos) : null;
+	}
 	
 	@Override
 	public GetServiceGoodResponse getServiceGoodsScopes(GetServiceGoodCommand cmd){
