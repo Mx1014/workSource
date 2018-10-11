@@ -4,7 +4,7 @@ public enum  PayChannel {
     NORMAL_PAY("normal","个人支付"),
     ENTERPRISE_PAY("enterprise","企业支付"),
     ENTERPRISE_PAY_CHARGE("enterprise/charge","企业支付(记账)"),
-    ENTERPRISE_PAY_COMPLETE("enterprise/complete","企业支付(完成)");
+    ENTERPRISE_PAY_COMPLETE("enterprise/complete","企业支付(已付)");
 
     private String code;
     private String describe;

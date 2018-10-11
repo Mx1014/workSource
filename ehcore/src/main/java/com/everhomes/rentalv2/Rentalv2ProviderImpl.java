@@ -1486,7 +1486,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				});
 		if (null != result && result.size() > 0)
 			return result ;
-		return null;
+		return new ArrayList<>();
 	}
 	
 //
