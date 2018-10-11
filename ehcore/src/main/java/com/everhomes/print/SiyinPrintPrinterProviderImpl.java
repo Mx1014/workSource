@@ -70,6 +70,13 @@ public class SiyinPrintPrinterProviderImpl implements SiyinPrintPrinterProvider 
 	}
 	
 	@Override
+	public List<SiyinPrintPrinter> findSiyinPrintPrinterByNamespaceId(Integer namespaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
+				.where(Tables.EH_SIYIN_PRINT_PRINTERS.NAMESPACE_ID.eq(namespaceId))
+				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintPrinter.class));
+	}
+	
+	@Override
 	public List<SiyinPrintPrinter> listSiyinPrintPrinter() {
 		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
 				.orderBy(Tables.EH_SIYIN_PRINT_PRINTERS.ID.asc())
