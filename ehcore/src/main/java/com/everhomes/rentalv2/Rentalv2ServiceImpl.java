@@ -3964,6 +3964,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public AddRentalBillItemV3Response addRentalItemBillV3(AddRentalBillItemCommand cmd) {
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V3);
+
 		return null;
 	}
 
@@ -4528,7 +4530,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
-				null, null);
+				null, null,cmd.getPayChannel());
 
 		if (bills == null) {
 			return response;
