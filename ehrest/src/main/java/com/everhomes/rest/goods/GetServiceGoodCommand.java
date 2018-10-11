@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespacceId :域空间</li>
- * <li>serviceType : 服务类别 0-全部,1-资产,2-停车,3-云打印, 4-资源预约, 5-活动, 6-电商'</li>
+ * <li>bizType : 服务类型,当前为模块id 如云打印是41400</li>
  * <li>apiType : 所选类型：ALL,CATEGORY,GOODS </li>
  * <li>categoryId ：商品类型ID </li>
  * </ul>
@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetServiceGoodCommand {
 	
-	private Byte serviceType;
+	private Long bizType;
 	private String apiType;
 	private String categoryId;
 	private Integer namespaceId;
@@ -29,12 +29,13 @@ public class GetServiceGoodCommand {
 		this.namespaceId = namespaceId;
 	}
 	
-	public Byte getServiceType() {
-		return serviceType;
+
+	public Long getBizType() {
+		return bizType;
 	}
 
-	public void setServiceType(Byte serviceType) {
-		this.serviceType = serviceType;
+	public void setBizType(Long bizType) {
+		this.bizType = bizType;
 	}
 
 	public String getApiType() {
