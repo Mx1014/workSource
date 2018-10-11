@@ -104,7 +104,7 @@ public class RentalBillDTO {
 	private Byte payMode;
 	private String offlinePayName;
 	private String offlinePayPhone;
-	private Byte payChannel;
+	private String payChannel;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -621,11 +621,11 @@ public class RentalBillDTO {
 		this.accountName = accountName;
 	}
 
-	public Byte getPayChannel() {
+	public String getPayChannel() {
 		return payChannel;
 	}
 
-	public void setPayChannel(Byte payChannel) {
+	public void setPayChannel(String payChannel) {
 		this.payChannel = payChannel;
 	}
 }

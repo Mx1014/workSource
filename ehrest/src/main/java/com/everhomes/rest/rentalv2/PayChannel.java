@@ -1,25 +1,26 @@
 package com.everhomes.rest.rentalv2;
 
 public enum  PayChannel {
-    NORMAL_PAY((byte)0,"个人支付"),
-    ENTERPRISE_PAY((byte)1,"企业支付(记账)"),
-    ENTERPRISE_PAY_COMPLETE((byte)2,"企业支付(完成)");
+    NORMAL_PAY("normal","个人支付"),
+    ENTERPRISE_PAY("enterprise","企业支付"),
+    ENTERPRISE_PAY_CHARGE("enterprise/charge","企业支付(记账)"),
+    ENTERPRISE_PAY_COMPLETE("enterprise/complete","企业支付(完成)");
 
-    private byte code;
+    private String code;
     private String describe;
 
-    private PayChannel(byte code,String describe) {
+    private PayChannel(String code,String describe) {
         this.code = code;
         this.describe = describe;
     }
 
-    public byte getCode() {
+    public String getCode() {
         return this.code;
     }
 
-    public static PayChannel fromCode(byte code) {
+    public static PayChannel fromCode(String code) {
         for(PayChannel t : PayChannel.values()) {
-            if (t.code == code) {
+            if (t.code.equals(code)) {
                 return t;
             }
         }

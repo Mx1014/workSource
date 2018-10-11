@@ -33,7 +33,7 @@ public class ListRentalBillsCommand {
 	private Long endTime;
 	private java.lang.String     vendorType;
 	private Byte billStatus;
-	private Byte payChannel;
+	private String payChannel;
 	private Long pageAnchor;
     
 	private Integer pageSize;
@@ -158,11 +158,11 @@ public class ListRentalBillsCommand {
 		this.resourceType = resourceType;
 	}
 
-	public Byte getPayChannel() {
+	public String getPayChannel() {
 		return payChannel;
 	}
 
-	public void setPayChannel(Byte payChannel) {
+	public void setPayChannel(String payChannel) {
 		this.payChannel = payChannel;
 	}
 }
