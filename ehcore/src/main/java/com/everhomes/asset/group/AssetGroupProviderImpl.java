@@ -258,29 +258,6 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
                 .fetchOne(Tables.EH_PAYMENT_BILL_GROUPS.NAME);
     }
     
-    /**
-     * 标准版：为了兼容标准版引入的转交项目管理权
-     * 全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
-     */
-    public void decouplingHistoryBillGroup(Integer namespaceId, Long categoryId, Long billGroupId, List<Long> allCommunity) {
-    	DSLContext context = getReadWriteContext();
-    	EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
-    	List<Long> decouplingOwnerId = context.select(t.OWNER_ID)
-        		.from(t)
-                .where(t.NAMESPACE_ID.eq(namespaceId))
-                .and(t.CATEGORY_ID.eq(categoryId))
-                .and(t.BROTHER_GROUP_ID.eq(billGroupId))
-                .and(t.OWNER_ID.notIn(allCommunity))//为了兼容标准版引入的转交项目管理权
-                .fetch(t.OWNER_ID);
-        if(decouplingOwnerId != null && decouplingOwnerId.size() != 0) {
-        	Long nullId = null;
-            context.update(t)
-                    .set(t.BROTHER_GROUP_ID,nullId)
-                    .where(t.OWNER_ID.in(decouplingOwnerId))
-                    .execute();
-        }
-    }
-    
     public DeleteBillGroupReponse deleteBillGroupAndRules(DeleteBillGroupCommand cmd, List<Long> allCommunity) {
         DeleteBillGroupReponse response = new DeleteBillGroupReponse();
         DSLContext context = getReadWriteContext();
@@ -329,21 +306,47 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
             //删除会导致其他同伴解耦，解决issue-32616:删除从全部继承过来的账单组，具体显示还是显示了“注：该项目使用默认配置”文案
             Long nullId = null;
             this.dbProvider.execute((TransactionStatus status) -> {
-                context.delete(t)
-                        .where(t.BILL_GROUP_ID.eq(cmd.getBillGroupId()))
+                context.delete(Tables.EH_PAYMENT_BILL_GROUPS_RULES)
+                        .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.BILL_GROUP_ID.eq(cmd.getBillGroupId()))
                         .execute();
-                context.delete(t1)
-                        .where(t1.ID.eq(cmd.getBillGroupId()))
+                context.delete(Tables.EH_PAYMENT_BILL_GROUPS)
+                        .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId()))
                         .execute();
-                context.update(t1)
-                        .set(t1.BROTHER_GROUP_ID,nullId)
-                        .where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-                        .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                //解耦
+                context.update(Tables.EH_PAYMENT_BILL_GROUPS)
+                        .set(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID,nullId)
+                        .where(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.eq(cmd.getOwnerId()))
+                        .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_TYPE.eq(cmd.getOwnerType()))
+                        .and(Tables.EH_PAYMENT_BILL_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()))
+                        .and(Tables.EH_PAYMENT_BILL_GROUPS.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                         .execute();
                 return null;
             });
         }
         return response;
+    }
+    
+    /**
+     * 标准版：为了兼容标准版引入的转交项目管理权
+     * 全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+     */
+    public void decouplingHistoryBillGroup(Integer namespaceId, Long categoryId, Long billGroupId, List<Long> allCommunity) {
+    	DSLContext context = getReadWriteContext();
+    	EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
+    	List<Long> decouplingOwnerId = context.select(t.OWNER_ID)
+        		.from(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.CATEGORY_ID.eq(categoryId))
+                .and(t.BROTHER_GROUP_ID.eq(billGroupId))
+                .and(t.OWNER_ID.notIn(allCommunity))//为了兼容标准版引入的转交项目管理权
+                .fetch(t.OWNER_ID);
+        if(decouplingOwnerId != null && decouplingOwnerId.size() != 0) {
+        	Long nullId = null;
+            context.update(t)
+                    .set(t.BROTHER_GROUP_ID,nullId)
+                    .where(t.OWNER_ID.in(decouplingOwnerId))
+                    .execute();
+        }
     }
     
     public boolean checkBillsByBillGroupId(Long billGroupId) {
@@ -541,6 +544,8 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
                 .where(Tables.EH_PAYMENT_BILL_GROUPS_RULES.ID.eq(billGroupRuleId))
                 .fetchOneInto(PaymentBillGroupRule.class);
     }
+    
+    
     
 
 }
