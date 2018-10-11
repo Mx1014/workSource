@@ -58,7 +58,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	@Override
 	public List<EnterprisePaymentAuthsDTO> listEnterprisePaymentAuths (ListEnterprisePaymentAuthsCommand cmd) {
 
-		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrgnazitionId());
+		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrganizationId());
 		List<EnterprisePaymentAuthsDTO> results = new ArrayList<EnterprisePaymentAuthsDTO>();
 		List<EnterpriesAuthDTO> printAuth = new ArrayList<EnterpriesAuthDTO>();
 		Long printAppId = null;
