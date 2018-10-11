@@ -674,37 +674,37 @@ public class FieldServiceImpl implements FieldService {
                     }
 //    			}
                 }
-
-                Map<Long, ScopeFieldItem> fieldItems = scopeItems;
-                if (fields != null && fields.size() > 0) {
-                    List<FieldDTO> dtos = new ArrayList<>();
-                    fields.forEach(field -> {
-                        FieldDTO dto = dtoMap.get(field.getId());
-                        dto.setFieldType(field.getFieldType());
-                        dto.setFieldName(field.getName());
-                        if (fieldItems != null && fieldItems.size() > 0) {
-                            List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
-                            fieldItems.forEach((id, item) -> {
-                                if (field.getId().equals(item.getFieldId())) {
-                                    FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
-                                    items.add(fieldItem);
-                                }
-                            });
-                            //按default order排序
-                            items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
-                            // service alliance and activity expand items ,we add expand item flag for it
-                            addExpandItems(dto, items);
-                            dto.setItems(items);
-                        }
-                        dtos.add(dto);
-                    });
-                    dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
-                    //按default order排序
-                    dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
-                    return dtos;
-                }
+            }
+            Map<Long, ScopeFieldItem> fieldItems = scopeItems;
+            if (fields != null && fields.size() > 0) {
+                List<FieldDTO> dtos = new ArrayList<>();
+                fields.forEach(field -> {
+                    FieldDTO dto = dtoMap.get(field.getId());
+                    dto.setFieldType(field.getFieldType());
+                    dto.setFieldName(field.getName());
+                    if (fieldItems != null && fieldItems.size() > 0) {
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        fieldItems.forEach((id, item) -> {
+                            if (field.getId().equals(item.getFieldId())) {
+                                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                                items.add(fieldItem);
+                            }
+                        });
+                        //按default order排序
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items);
+                        dto.setItems(items);
+                    }
+                    dtos.add(dto);
+                });
+                dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
+                //按default order排序
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
+                return dtos;
             }
         }
+
         return null;
     }
 
