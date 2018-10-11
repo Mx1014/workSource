@@ -250,7 +250,11 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
                 .where(t.ID.eq(bo.getId()))
                 .execute();
     }
-
+    @Override
+    public void deleteAll(){
+        com.everhomes.server.schema.tables.EhFlowStatisticsHandleLog t = Tables.EH_FLOW_STATISTICS_HANDLE_LOG;
+        rwContext().delete(t).execute();
+    }
 
     /**
      * 查询底层方法

@@ -249,16 +249,20 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         return response ;
     }
 
-    public void method(Long flowMainId , Integer flowVersion)
-    {
-        //节点记录处理逻辑
-        //通过flowMainId，flowVersion查出工作流的所有节点
-        List<FlowNode> nodesList = flowStatisticsProvider.getFlowNodes(flowMainId ,flowVersion);
-        //切分出某一任务的所有记录并按节点与时间排好序
+    /**
+     * 统计泳道次数
+     * @param flowMainId
+     * @param version
+     * @param startTime
+     * @param endTime
+     * @param laneId
+     * @return
+     */
+    private Long countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId){
 
-        //计算各节点的任务处理时间
-
-        //通过flowMainId，flowVersion　查询logs记录，并且将其按时间顺序排序
+        //找出条件范围内有几次任务
+        //1.
+        return null ;
     }
 
 

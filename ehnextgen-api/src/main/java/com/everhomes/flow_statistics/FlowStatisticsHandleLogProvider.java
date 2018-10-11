@@ -19,6 +19,8 @@ public interface FlowStatisticsHandleLogProvider {
 
     void delete(FlowStatisticsHandleLog bo);
 
+    void deleteAll();
+
     List<FlowStatisticsHandleLog> query(ListingLocator locator, int count,
                                         ListingQueryBuilderCallback callback ,
                                         ListingQueryBuilderCallback orderCallback );

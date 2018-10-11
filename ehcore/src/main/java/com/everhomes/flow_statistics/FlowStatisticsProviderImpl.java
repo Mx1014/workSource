@@ -3,12 +3,21 @@ package com.everhomes.flow_statistics;
 import com.everhomes.buttscript.ButtScriptConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowNode;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow_statistics.FlowVersionCycleDTO;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowEventLogsDao;
+import com.everhomes.server.schema.tables.daos.EhFlowStatisticsHandleLogDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhFlowNodes;
+import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
 import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
+import com.everhomes.server.schema.tables.records.EhFlowStatisticsHandleLogRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -65,6 +74,7 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
      * @param version
      * @return
      */
+    @Override
     public List<FlowNode> getFlowNodes(Long flowMainId , Integer version){
 
         List<FlowNode> list = new ArrayList<FlowNode>();
@@ -78,5 +88,116 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
         list = query.fetchInto(FlowNode.class);
 
         return list ;
+    }
+
+    /**
+     * 获取所有指定类型为step_tracker的记录
+     * @return
+     */
+    @Override
+    public List<FlowEventLog> getAllFlowEventLogs(){
+
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+        List<FlowEventLog> list =   this.queryFlowEventLog(new ListingLocator(), 0, (locator1, query) -> {
+
+            query.addConditions(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+            return query;
+
+        },(locator2, query)->{ //排序
+            query.addOrderBy(t.NAMESPACE_ID);
+            query.addOrderBy(t.FLOW_MAIN_ID);
+            query.addOrderBy(t.FLOW_VERSION);
+            query.addOrderBy(t.ID);
+            return query;
+        });
+
+        return list ;
+
+    }
+
+    public List<FlowEventLog> getFlowEventLogs(Long flowMainId ,Integer version ,List<Long>flowCases , Timestamp startDate ,Long flowNodeId){
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+        List<FlowEventLog> list =   this.queryFlowEventLog(new ListingLocator(), 0, (locator1, query) -> {
+
+            query.addConditions(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+            if(flowMainId != null){
+                query.addConditions(t.FLOW_MAIN_ID.eq(flowMainId));
+            }
+            if(version != null){
+                query.addConditions(t.FLOW_VERSION.eq(version));
+            }
+            if(CollectionUtils.isNotEmpty(flowCases)){
+                query.addConditions(t.FLOW_CASE_ID.in(flowCases));
+            }
+            if(startDate != null){
+                query.addConditions(t.CREATE_TIME.ge(startDate));//大于等于
+            }
+            if(flowNodeId != null){
+                query.addConditions(t.FLOW_NODE_ID.eq(flowNodeId));//等于
+            }
+            return query;
+
+        },(locator2, query)->{ //排序
+            query.addOrderBy(t.CREATE_TIME);
+            return query;
+        });
+
+        return list ;
+    }
+
+    /**
+     *
+     * @param locator
+     * @param count
+     * @param callback 条件
+     * @param orderCallback 排序
+     * @return
+     */
+    public List<FlowEventLog> queryFlowEventLog(ListingLocator locator, int count,
+                                                ListingQueryBuilderCallback callback ,
+                                                ListingQueryBuilderCallback orderCallback ) {
+        com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
+
+        SelectQuery<EhFlowEventLogsRecord> query = context().selectQuery(t);
+        if (callback != null) {
+            callback.buildCondition(locator, query);
+        }
+        if (locator != null && locator.getAnchor() != null) {
+            query.addConditions(t.ID.ge(locator.getAnchor()));
+        }
+
+        if (count > 0) {
+            query.addLimit(count + 1);
+        }
+        if(orderCallback != null){
+            orderCallback.buildCondition(null, query);
+        }
+
+        List<FlowEventLog> list = query.fetchInto(FlowEventLog.class);
+        if (list.size() > count && count > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return list;
+    }
+
+    private EhFlowEventLogsDao rwDao() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return new EhFlowEventLogsDao(context.configuration());
+    }
+
+    private EhFlowEventLogsDao dao() {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return new EhFlowEventLogsDao(context.configuration());
+    }
+
+    private DSLContext rwContext() {
+        return dbProvider.getDslContext(AccessSpec.readWrite());
+    }
+
+    private DSLContext context() {
+        return dbProvider.getDslContext(AccessSpec.readOnly());
     }
 }
