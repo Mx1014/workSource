@@ -31,13 +31,7 @@ public class GoodsServiceImpl implements GoodsService{
 	
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
-	@Autowired
-	private ParkingProvider parkingProvider;
-	@Autowired
-	private CommunityProvider communityProvider;
-	@Autowired
-	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
-	private static String SCOPE = "范围";
+	
 	@Override
 	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
 		GoodsPromotionHandler handler = getGoodsPromotionHandler(cmd.getBizType());
@@ -63,70 +57,7 @@ public class GoodsServiceImpl implements GoodsService{
 
 	@Override 
 	public GetServiceGoodResponse getServiceGoodList(GetServiceGoodCommand cmd) {
-		GetServiceGoodResponse response = new GetServiceGoodResponse();
-		GoodScopeDTO goodScopeDTO = getServiceGoodsScopes(cmd.getServiceType(),cmd.getNamespaceId());
-		response.setGoodScopeDTO(goodScopeDTO);
-		return response;
+		GoodsPromotionHandler handler = getGoodsPromotionHandler(cmd.getBizType());
+		return handler.getServiceGoodsScopes(cmd);
 	}
-	
-	private GoodScopeDTO getServiceGoodsScopes(Byte serviceType, Integer namespaceId){
-		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
-		List<Community> communities = communityProvider.listNamespaceCommunities(namespaceId);
-		List<String> communitiesList = new ArrayList();
-		goodScopeDTO.setTitle(SCOPE);
-		
-		switch (serviceType) {
-		//停车
-		case 2 :
-			for (Community community : communities){
-				String communitiy;
-				JSONObject communitityJson=new JSONObject();
-				communitityJson.put("id", community.getId());
-				communitityJson.put("name", community.getName());
-				communitityJson.put("title", SCOPE);
-				List<String> parkingLotList = new ArrayList();
-				String ownerType = "communities";
-				List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
-				for(ParkingLot parkingLot : parkinglots){
-					String parking;
-					JSONObject parkingJson=new JSONObject();
-					parkingJson.put("id", parkingLot.getId().toString());
-					parkingJson.put("name", parkingLot.getName());
-					communitityJson.put("title", SCOPE);
-					parking = parkingJson.toString();
-					parkingLotList.add(parking);
-				}
-				communitityJson.put("tag", parkingLotList);
-				communitiy = communitityJson.toString();
-				communitiesList.add(communitiy);
-			}
-			goodScopeDTO.setTagList(communitiesList);
-			break;
-			//云打印
-		case 3 : 
-			for (Community community : communities){
-				String communitiy;
-				JSONObject communitityJson=new JSONObject();
-				communitityJson.put("id", community.getId().toString());
-				communitityJson.put("name", community.getName());
-				List<String> printerList = new ArrayList();
-				List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByOwnerId(community.getId());
-				for(SiyinPrintPrinter siyinPrintPrinter : SiyinPrintPrinters){
-					String printer;
-					JSONObject printerJson=new JSONObject();
-					printerJson.put("id", siyinPrintPrinter.getId());
-					printerJson.put("name", siyinPrintPrinter.getReaderName());
-					printer = printerJson.toString();
-					printerList.add(printer);
-				}
-				communitityJson.put("tag", printerList);
-				communitiy = communitityJson.toString();
-				communitiesList.add(communitiy);
-			}
-			goodScopeDTO.setTagList(communitiesList);
-			break;
-		}
-		return goodScopeDTO;
-	}
-	
 }
