@@ -238,7 +238,7 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
             if (!CollectionUtils.isEmpty(protocolVariablesList)) {
                 String protocolText = protocols.getContent();
                 for (ProtocolVariables protocolVariables : protocolVariablesList) {
-                    protocolText = protocolText.replace("<span style=\"color: #30a3e6;\">$"+protocolVariables.getName()+"$</span>", protocolVariables.getValue());
+                    protocolText = protocolText.replaceAll("<span[^>]*>\\$"+protocolVariables.getName()+"\\$</span>", protocolVariables.getValue());
                 }
                 protocols.setContent(protocolText);
             }
@@ -258,14 +258,15 @@ public class ServiceAgreementServiceImpl implements ServiceAgreementService {
                             Namespace namespace = this.namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
                             if (namespace != null) {
                                 protocolTemplateVariables.setValue(namespace.getName());
-                            }                        }
+                            }
+                        }
                     }
                     if (protocolTemplateVariables.getName().equals("最后更新日期")) {
                         if (StringUtils.isBlank(protocolTemplateVariables.getValue())) {
                             protocolTemplateVariables.setValue(DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG,   Locale.CHINESE).format(new java.util.Date()));
                         }
                     }
-                    protocolText = protocolText.replace("<span style=\"color: #30a3e6;\">$"+protocolTemplateVariables.getName()+"$</span>", protocolTemplateVariables.getValue() == null?"":protocolTemplateVariables.getValue());
+                    protocolText = protocolText.replaceAll("<span[^>]*>\\$"+protocolTemplateVariables.getName()+"\\$</span>", protocolTemplateVariables.getValue() == null?"":protocolTemplateVariables.getValue());
                 }
                 protocolTemplates.setContent(protocolText);
             }
