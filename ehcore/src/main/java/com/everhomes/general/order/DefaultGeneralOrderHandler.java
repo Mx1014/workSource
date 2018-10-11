@@ -122,6 +122,8 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		if (StringUtils.isBlank(createBillInfo.getSourceName())) {
 			createBillInfo.setSourceName(baseInfo.getOrderTitle());
 		}
+		
+		orderCmd.setCreateBillInfo(createBillInfo);//将billInfo放到cmd
 	}
 	
 	private void fillGeneralBillUserInfo(CreateGeneralBillInfo createBillInfo, Long organizationId) {
@@ -129,7 +131,7 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		createBillInfo.setConsumeUserId(userId);
 		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
 		if(null != organizationMember) {
-//			createBillInfo.setConsumerUserName(organizationMember.getContactName());
+			createBillInfo.setConsumeUserName(organizationMember.getContactName());
 		}
 	}
 	
