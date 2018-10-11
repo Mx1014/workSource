@@ -11,6 +11,8 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.util.RuntimeErrorException;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -189,7 +191,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId) {
+	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId, String printerName) {
 		SelectConditionStep<?> query =  getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
@@ -197,6 +199,11 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
+		
+		if (!StringUtils.isBlank(printerName)) {
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PRINTER_NAME.eq(printerName));
+		}
+		
 		LOGGER.info("findUnpaidUnlockedOrderByUserId sql = {}, param = {}.",query.getSQL(),query.getBindValues());
 		List<SiyinPrintOrder> list  = query.fetch()
 			.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
