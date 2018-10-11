@@ -81,7 +81,7 @@ ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '�
 
 -- AUTHOR: 郑思挺 20181011
 -- REMARK： 资源预约3.7.1
-ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL DEFAULT 0 COMMENT '支付类型 ' ;
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL DEFAULT 'normal' COMMENT '支付类型 ' ;
 
 
 

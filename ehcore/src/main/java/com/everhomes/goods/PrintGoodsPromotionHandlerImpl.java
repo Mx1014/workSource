@@ -91,13 +91,13 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 			communitityJson.put("id", community.getId().toString());
 			communitityJson.put("name", community.getName());
 			List<String> printerList = new ArrayList();
-			List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByOwnerId(community.getId());
+			List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByNamespaceId(cmd.getNamespaceId());
 			for(SiyinPrintPrinter siyinPrintPrinter : SiyinPrintPrinters){
 				String printer;
 				JSONObject printerJson=new JSONObject();
 				printerJson.put("id", siyinPrintPrinter.getId());
 				printerJson.put("name", siyinPrintPrinter.getReaderName());
-				printerJson.put("printerName", community.getName()+ "-" + siyinPrintPrinter.getReaderName());
+				printerJson.put("serveApplyName", community.getName()+ "-" + siyinPrintPrinter.getPrinterName());
 				printer = printerJson.toString();
 				printerList.add(printer);
 			}
