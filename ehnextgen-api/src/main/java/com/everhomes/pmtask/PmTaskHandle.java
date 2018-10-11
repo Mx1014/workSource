@@ -16,6 +16,7 @@ public interface PmTaskHandle {
 	String YUE_KONG_JIAN = "yue_kong_jian";
 	String TECHPARK_REDIS_KEY_PREFIX = "techparkSynchronizedData-pmtask";
 	String ZHUZONG = "zhuzong";
+	String ARCHIBUS = "archibus";
 
 	 PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone);
 	 
