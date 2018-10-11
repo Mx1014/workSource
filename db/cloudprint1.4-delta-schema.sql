@@ -74,7 +74,11 @@ ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEF
 
 -- AUTHOR: 缪洲 20181010
 -- REMARK： 云打印 添加支付方式字段
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式'
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式';
+
+-- AUTHOR: 郑思挺 20181011
+-- REMARK： 资源预约3.7.1
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL DEFAULT 0 COMMENT '支付类型 ' ;
 
 
 
