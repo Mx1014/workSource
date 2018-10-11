@@ -96,7 +96,6 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 				String printer;
 				JSONObject printerJson=new JSONObject();
 				printerJson.put("id", siyinPrintPrinter.getId());
-				printerJson.put("name", siyinPrintPrinter.getReaderName());
 				printerJson.put("serveApplyName", community.getName()+ "-" + siyinPrintPrinter.getPrinterName());
 				printer = printerJson.toString();
 				printerList.add(printer);
