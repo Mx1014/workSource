@@ -238,7 +238,7 @@ public interface AssetProvider {
 
     Long createBillGroup(CreateBillGroupCommand cmd, byte deCouplingFlag, Long brotherGroupId, Long nextGroupId, Boolean allScope);
 
-    void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
+    void modifyBillGroup(ModifyBillGroupCommand cmd, List<Long> allCommunity);
 
     List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
