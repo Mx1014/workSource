@@ -1055,12 +1055,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "User does not exist");
                 }
             } else {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Unable to locate user");
             }
         }
 
@@ -1069,7 +1069,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
             LOGGER.error("Password does not match for " + userIdentifierToken);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Invalid password");
         }
 
         if (deviceIdentifier != null && deviceIdentifier.isEmpty())
