@@ -77,6 +77,8 @@ import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -212,6 +214,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     
 	@Autowired
 	private ServiceModuleAppService serviceModuleAppService;
+	@Autowired
+	private CommunityProvider communityProvider;
+	
     
 	
 	
@@ -694,9 +699,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		good.setNamespace("NS");
 		good.setTag1(cmd.getOwnerId()+"");
 		good.setTag2("copy");
-		good.setServeApplyName("这里填写服务提供商名称"); //
-		good.setGoodTag("这里填写商品标志");// 商品标志
-		good.setGoodName(order.getDetail());// 商品名称
+		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+		if (null != community) {
+			good.setServeApplyName(community.getName()); //
+		}
+		good.setGoodTag("goods");// 商品标志
+		good.setGoodName("云打印");// 商品名称
 		good.setGoodDescription(order.getDetail());// 商品描述
 		good.setCounts(1);
 		good.setPrice(order.getOrderTotalFee());
@@ -2127,6 +2135,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
+		
 		mfpLogNotification(StringHelper.toJsonString(cmd),response);
 	}
 

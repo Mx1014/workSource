@@ -216,8 +216,4 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
         }
         return  amount.multiply(new BigDecimal(100)).longValue();
     }
-    
-    private String getHandlerName() {
-    	return getOrderTypeEnum().getPycode();
-    }
 }

@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class MfpLogNotificationV2Command {
     private Integer namespaceId;
-    private String ownerType;
+    private String ownerType = "community";
     private Long ownerId;
     private String phone;
 
