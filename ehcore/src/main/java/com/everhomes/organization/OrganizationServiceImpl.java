@@ -58,6 +58,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -265,6 +267,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private DbProvider dbProvider;
 
 
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+    
     @Autowired
     private ContractBuildingMappingProvider contractBuildingMappingProvider;
 
@@ -7693,6 +7698,30 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(Long detailId, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(String contactToken, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
     public void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd) {
         OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
         member.setContactName(cmd.getContactName());
@@ -9984,8 +10013,24 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setCommunities(treeDTOs);
         return response;
     }
+    
+    @Override
+    public OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd){
 
+        Organization org = checkOrganization(cmd.getId());
 
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"not exist app namespace mapping");
+		}
+		
+		if(!org.getNamespaceId().equals(appNamespaceMapping.getNamespaceId())){
+			return null;
+		}
+    	return listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag());
+    };
+	
     @Override
     public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
@@ -14615,6 +14660,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
+<<<<<<< HEAD
     @Override
 	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
@@ -14661,5 +14707,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
+=======
+    //	物业组所需获取企业员工的唯一标识符
+    @Override
+    public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(targetId, orgId);
+        if(employee == null)
+            return "";
+        return employee.getAccount();
+    }
+>>>>>>> org-4.6
 }
 
