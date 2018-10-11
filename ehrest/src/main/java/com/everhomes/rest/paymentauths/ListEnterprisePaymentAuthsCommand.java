@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListEnterprisePaymentAuthsCommand {
-	private Long orgnazitionId;
+	private Long organizationId;
 	private Integer namespaceId;
 
 	public Integer getNamespaceId() {
@@ -20,12 +20,12 @@ public class ListEnterprisePaymentAuthsCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getOrgnazitionId() {
-		return orgnazitionId;
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setOrgnazitionId(Long orgnazitionId) {
-		this.orgnazitionId = orgnazitionId;
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	@Override

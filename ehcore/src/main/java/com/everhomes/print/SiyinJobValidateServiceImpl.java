@@ -209,8 +209,8 @@ public class SiyinJobValidateServiceImpl {
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
 				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "");
 		Map<String, Object> notifyMap = new HashMap<>();
-		notifyMap.put("userId",order.getCreatorUid());
 		notifyMap.put("content",notifyTextForOther);
+		notifyMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
 				queueName + order.getId(),
 				"sendNotify" + order.getId(),
@@ -221,8 +221,7 @@ public class SiyinJobValidateServiceImpl {
 		String appName = getAppName(order.getNamespaceId());
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("appName",appName);
-		messageMap.put("creatorUid",order.getCreatorUid());
-		messageMap.put("namespaceId", order.getNamespaceId());
+		messageMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
 				queueName + order.getId(),
 				"sendMessage" + order.getId(),
