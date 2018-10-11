@@ -6170,14 +6170,19 @@ public class AssetProviderImpl implements AssetProvider {
 				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
 			}else {
 				//如果默认配置和项目具体配置都不为空
-				Byte decouplingFlag= projectChargingItem.get(0).getDecouplingFlag();
-				if(decouplingFlag.equals((byte)0)) {
-					//如果项目具体配置的decouplingFlag为0，说明是使用默认配置
-					response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
-				}else {
-					//如果项目具体配置的decouplingFlag为1，那么该具体项目做过个性化的修改
-					response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
-				}
+        		List<Long> defaultChargingItemId = new ArrayList<Long>(); 
+        		List<Long> projectChargingItemId = new ArrayList<Long>();
+        		for(PaymentChargingItemScope paymentChargingItemScope : defaultChargingItem) {
+        			defaultChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+        		}
+        		for(PaymentChargingItemScope paymentChargingItemScope : projectChargingItem) {
+        			projectChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+        		}
+        		if(defaultChargingItemId.containsAll(projectChargingItemId) && projectChargingItemId.containsAll(defaultChargingItemId)) {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+        		}else {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        		}
 			}
 		}
 		
