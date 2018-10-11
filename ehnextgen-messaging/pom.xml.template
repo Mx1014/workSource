@@ -214,6 +214,11 @@
             <artifactId>user-rest-sdk</artifactId>
             <version>unite-user-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.owasp.antisamy</groupId>
+            <artifactId>antisamy</artifactId>
+            <version>1.5.6</version>
+        </dependency>
     </dependencies>
 
     <build>
