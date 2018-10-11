@@ -1638,6 +1638,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         	dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
         	dto.setId(r.getValue(Tables.EH_DOOR_AUTH.ID));
         	dto.setDoorId(r.getValue(Tables.EH_DOOR_AUTH.DOOR_ID));
+        	dto.setHardwareId(r.getValue(Tables.EH_DOOR_ACCESS.HARDWARE_ID));
+
         	list.add(dto);
         	//TODO 去重?userId,doorId,authType,licenseeType,groupType,临时授权
             return null;
@@ -1740,6 +1742,38 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             return null;
         }
         return auths.get(0);
+	}
+
+	@Override
+	public List<DoorAuth> listValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd) {
+        ListingLocator locator = new ListingLocator();
+        long now = DateHelper.currentGMTTime().getTime();
+        List<DoorAuth> auths = queryDoorAuthAllLicensee(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(getLevelQryCondition(ConvertHelper.convert(qryCmd,ListAuthsByLevelandLocationCommand.class)));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(qryCmd.getDoorId()));
+                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()).
+                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+                Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
+                query.addConditions(c1.or(c2));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(DoorAuthStatus.VALID.getCode()));
+                if(qryCmd.getRightVisitor() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(qryCmd.getRightVisitor().byteValue()));
+                }
+                if(qryCmd.getRightRemote() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(qryCmd.getRightRemote().byteValue()));
+                }
+
+                return query;
+            }
+        });
+
+        return auths;
 	}
 
 }

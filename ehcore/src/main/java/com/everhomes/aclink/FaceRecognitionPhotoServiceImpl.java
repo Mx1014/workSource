@@ -239,7 +239,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 				DoorAuthDTO authDto = ConvertHelper.convert(auth, DoorAuthDTO.class);
 				AesUserKey aesUserKey = doorAccessService.getAesUserKey(user, auth);
 		        if(aesUserKey == null) {
-		        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
+		        	//throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
+		        	continue;
 		        }
 		        
 		        byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
@@ -259,8 +260,10 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 					rsp.setPhone(auth.getPhone());
 				}
 			}
-		}else{
-			//没有权限就不同步
+		}
+
+		if(listauthDtos.size() == 0){
+			//没有有效权限
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
 		}
 		List<Long> userIds = new ArrayList<Long>();

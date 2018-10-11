@@ -144,4 +144,6 @@ public interface DoorAuthProvider {
 	 */
 	DoorAuth queryValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd);
 
+	List<DoorAuth> listValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd);
+
 }

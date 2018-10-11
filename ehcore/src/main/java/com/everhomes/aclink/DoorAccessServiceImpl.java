@@ -8,10 +8,8 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipayLogger;
-import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
-import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
@@ -71,6 +69,8 @@ import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.openapi.FamilyAddressDTO;
+import com.everhomes.rest.openapi.OrganizationAddressDTO;
 import com.everhomes.rest.openapi.UserAddressDTO;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -95,9 +95,6 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils; 
-import com.google.gson.JsonArray;
-import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -105,9 +102,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.hibernate.boot.model.naming.Identifier;
 import org.jooq.Condition;
-import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -122,8 +117,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -139,10 +132,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.sql.Timestamp;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
 
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber, ApplicationListener<ContextRefreshedEvent> {
@@ -173,9 +162,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private AclinkProvider aclinkProvider;
-    
-    @Autowired
-    private AesServerKeyProvider aesServerKeyProvider;
     
     @Autowired
     private AclinkMessageSequence aclinkMessageSequence;
@@ -483,7 +469,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListDoorAccessResponse searchDoorAccessByAdmin(QueryDoorAccessAdminCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
         
         List<DoorAccessDTO> dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
@@ -3567,6 +3553,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
         QueryValidDoorAuthForeverCommand qryCmd = ConvertHelper.convert(getLevelQryCmdByUser(user), QueryValidDoorAuthForeverCommand.class);
         qryCmd.setDoorId(cmd.getDoorId());
+        qryCmd.setRightVisitor(DoorAuthStatus.VALID.getCode());
         DoorAuth AprovAuth = doorAuthProvider.queryValidDoorAuthForever(qryCmd);
         if(AprovAuth == null || AprovAuth.getRightVisitor() != (byte) 1){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE,
@@ -4616,34 +4603,34 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //        
 //    }
     
-    private void testEncrypt() {
-        try {
-            String aesServerKey = "s87SHk+R/IOw6dV7QkX/pA==";
-            String aesUserKey = "mf8eLAiV+bbmo6egNjsCzw==";
-            byte[] serverKey = Base64.decodeBase64(aesServerKey);
-            byte[] userKey = Base64.decodeBase64(aesUserKey);
-            SecretKeySpec skeySpec = new SecretKeySpec(serverKey, "AES");
-            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-            byte[] rlt = cipher.doFinal(userKey);
-            
-            byte[] time = new byte[4];
-            System.arraycopy(rlt, 0, time, 0, 4);
-         
-            long timeL = DataUtil.byteArrayToInt(time);
-            LOGGER.info("time=" + timeL);
-            Date dt = new Date(timeL * 1000);
-            Date et = new Date(1476327557913l);
-            Date ct = new Date(1476317477917l);
-            
-            ct = new Date(1476327557913l + KEY_TICK_7_DAY);
-//            LOGGER.info("date=" + DateHelper.format(dt) + " create=" + DateHelper.format(ct) + " expire=" + DateHelper.format(et));
-            LOGGER.info(StringHelper.toHexString(rlt));
-            
-        } catch(Exception ex) {
-            
-        }        
-    }
+//    private void testEncrypt() {
+//        try {
+//            String aesServerKey = "s87SHk+R/IOw6dV7QkX/pA==";
+//            String aesUserKey = "mf8eLAiV+bbmo6egNjsCzw==";
+//            byte[] serverKey = Base64.decodeBase64(aesServerKey);
+//            byte[] userKey = Base64.decodeBase64(aesUserKey);
+//            SecretKeySpec skeySpec = new SecretKeySpec(serverKey, "AES");
+//            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+//            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+//            byte[] rlt = cipher.doFinal(userKey);
+//            
+//            byte[] time = new byte[4];
+//            System.arraycopy(rlt, 0, time, 0, 4);
+//         
+//            long timeL = DataUtil.byteArrayToInt(time);
+//            LOGGER.info("time=" + timeL);
+//            Date dt = new Date(timeL * 1000);
+//            Date et = new Date(1476327557913l);
+//            Date ct = new Date(1476317477917l);
+//            
+//            ct = new Date(1476327557913l + KEY_TICK_7_DAY);
+////            LOGGER.info("date=" + DateHelper.format(dt) + " create=" + DateHelper.format(ct) + " expire=" + DateHelper.format(et));
+//            LOGGER.info(StringHelper.toHexString(rlt));
+//            
+//        } catch(Exception ex) {
+//            
+//        }        
+//    }
 
 	@Override
 	public Action onLocalBusMessage(Object arg0, String arg1, Object arg2,
@@ -4969,36 +4956,36 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return "failed!";
     }
     
-    private String aliTest001(HttpServletRequest r) {
-        LOGGER.info("" + r.getParameterMap());
-        LOGGER.info("app_auth_code=" + r.getParameter("app_auth_code"));
-        AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
-        request.setBizContent(String.format("{\"grant_type\":\"authorization_code\",\"code\":\"%s\"}", r.getParameter("app_auth_code")));
-        try {
-            AlipayOpenAuthTokenAppResponse openAuthResponse = getAlipayClient().execute(request);
-            LOGGER.info("accessToken=" + openAuthResponse.getAppAuthToken() + "refreshToken" + openAuthResponse.getAppRefreshToken());
-            
-            //request.putOtherTextParam("app_auth_token", "201611BB888ae9acd6e44fec9940d09201abfE16");
-//            AlipayOpenAuthTokenAppQueryRequest request2 = new AlipayOpenAuthTokenAppQueryRequest();
-//            request2.setBizContent("{" +
-//            "    \"app_auth_token\":\""+openAuthResponse.getAppAuthToken()+"\"" +
-//            "  }");
-//            AlipayOpenAuthTokenAppQueryResponse apiListResponse = alipayClient.execute(request2);
-//            LOGGER.info("apiListResponse=" + apiListResponse.getBody());
-            
-            AlipayUserInfoShareRequest requestUser = new AlipayUserInfoShareRequest();
-            requestUser.putOtherTextParam("app_auth_token", openAuthResponse.getAppAuthToken());
-            AlipayUserInfoShareResponse responseUser = getAlipayClient().execute(requestUser, null, openAuthResponse.getAppAuthToken());
-
-            return responseUser.getBody();
-            
-        } catch (AlipayApiException e) {
-            //处理异常
-            e.printStackTrace();
-        }
-        
-        return "failed";
-    }
+//    private String aliTest001(HttpServletRequest r) {
+//        LOGGER.info("" + r.getParameterMap());
+//        LOGGER.info("app_auth_code=" + r.getParameter("app_auth_code"));
+//        AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
+//        request.setBizContent(String.format("{\"grant_type\":\"authorization_code\",\"code\":\"%s\"}", r.getParameter("app_auth_code")));
+//        try {
+//            AlipayOpenAuthTokenAppResponse openAuthResponse = getAlipayClient().execute(request);
+//            LOGGER.info("accessToken=" + openAuthResponse.getAppAuthToken() + "refreshToken" + openAuthResponse.getAppRefreshToken());
+//            
+//            //request.putOtherTextParam("app_auth_token", "201611BB888ae9acd6e44fec9940d09201abfE16");
+////            AlipayOpenAuthTokenAppQueryRequest request2 = new AlipayOpenAuthTokenAppQueryRequest();
+////            request2.setBizContent("{" +
+////            "    \"app_auth_token\":\""+openAuthResponse.getAppAuthToken()+"\"" +
+////            "  }");
+////            AlipayOpenAuthTokenAppQueryResponse apiListResponse = alipayClient.execute(request2);
+////            LOGGER.info("apiListResponse=" + apiListResponse.getBody());
+//            
+//            AlipayUserInfoShareRequest requestUser = new AlipayUserInfoShareRequest();
+//            requestUser.putOtherTextParam("app_auth_token", openAuthResponse.getAppAuthToken());
+//            AlipayUserInfoShareResponse responseUser = getAlipayClient().execute(requestUser, null, openAuthResponse.getAppAuthToken());
+//
+//            return responseUser.getBody();
+//            
+//        } catch (AlipayApiException e) {
+//            //处理异常
+//            e.printStackTrace();
+//        }
+//        
+//        return "failed";
+//    }
     
 //    @Override
 //    public String faceTest() {
@@ -6209,66 +6196,93 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd) {
 		GetUserKeyInfoRespnose rsp = new GetUserKeyInfoRespnose();
 		User user = UserContext.current().getUser();
-		DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-		if(!auth.getUserId().equals(user.getId())){
-			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, String.format("user.id {%d} not equal auth.userId{%d}",user.getId(),auth.getUserId()));
-		}
-		if (!auth.getRightOpen().equals((byte) 1)) {
-			return null;
-		}
-
-		DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-		if (doorAccess != null) {
-			rsp.setHardwareId(doorAccess.getHardwareId());
-			// ---clone DoorAccess 20180408 by liuyilin
-			if (doorAccess.getMacCopy() != null && !doorAccess.getMacCopy().isEmpty()) {
-				rsp.setHardwareId(doorAccess.getMacCopy());
+		
+		rsp.setIsSupportRemote(DoorAuthStatus.INVALID.getCode());
+		rsp.setIsSupportTempAuth(DoorAuthStatus.INVALID.getCode());
+		
+		if(cmd.getDoorId() == null && cmd.getAuthId() != null){
+			DoorAuth auth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
+			//校验用户
+			if(!checkUserAuthByUser(user, auth)){
+				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, String.format("user.id {%d} not pair auth.userId{%d}",user.getId(),auth.getUserId()));
 			}
-			// ---
+			cmd.setDoorId(auth.getDoorId());
 		}
-		
-		rsp.setAuthId(auth.getId());
-		rsp.setIsSupportRemote(auth.getRightRemote());
-		rsp.setIsSupportQR(doorAccess.getHasQr());
-		rsp.setIsSupportTempAuth(auth.getRightVisitor());
-		
-		if(rsp.getIsSupportQR().equals(DoorAuthStatus.VALID.getCode())){
+		if(cmd.getDoorId() != null){
+	        QueryValidDoorAuthForeverCommand qryCmd = ConvertHelper.convert(getLevelQryCmdByUser(user), QueryValidDoorAuthForeverCommand.class);
+	        qryCmd.setDoorId(cmd.getDoorId());
 			
-			// TODO Auto-generated method stub
-	    	if(!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-	    		Long now = DateHelper.currentGMTTime().getTime();
-	    		if(auth.getValidEndMs() < now) {
-	    		//已经失效，删除它
-	            auth.setStatus(DoorAuthStatus.INVALID.getCode());
-	            doorAuthProvider.updateDoorAuth(auth);
-	            return null;
-	            }
-	    		
-	    		if(auth.getValidFromMs() > now) {
-	    			return null;
-	    		}
-	    	}
-	    	//TODO 生成其他各种类型二维码钥匙
-	    	List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
-	        doZuolinQRKey(false, user, doorAccess, auth, qrKeys);
-	        if(qrKeys.size() > 0){
-	        	rsp.setQrInfo(qrKeys.get(0));
-	        }
+			List<DoorAuth> authList = doorAuthProvider.listValidDoorAuthForever(qryCmd);
+			if(authList != null && authList.size() > 0){
+				DoorAuth auth = authList.get(0);
+				for(DoorAuth itemAuth : authList){
+					if(itemAuth.getRightRemote().equals(DoorAuthStatus.VALID.getCode())){
+						rsp.setAuthId(itemAuth.getId());
+						rsp.setIsSupportRemote(DoorAuthStatus.VALID.getCode());
+						auth = itemAuth;
+					}
+					if(itemAuth.getRightVisitor().equals(DoorAuthStatus.VALID.getCode())){
+						rsp.setIsSupportTempAuth(DoorAuthStatus.VALID.getCode());
+					}
+				}
+				
+				DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+				if (doorAccess != null && doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
+					rsp.setHardwareId(doorAccess.getHardwareId());
+					// ---clone DoorAccess 20180408 by liuyilin
+					if (doorAccess.getMacCopy() != null && !doorAccess.getMacCopy().isEmpty()) {
+						rsp.setHardwareId(doorAccess.getMacCopy());
+					}
+					// ---
+				}else{
+					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, String.format("door.id {%d} not found",cmd.getDoorId()));
+				}
+
+				rsp.setAuthId(auth.getId());
+				rsp.setIsSupportQR(doorAccess.getHasQr());
+				rsp.setIsSupportFaceOpen(doorAccess.getLocalServerId() != null && doorAccess.getLocalServerId() > 0
+						? DoorAuthStatus.VALID.getCode() : DoorAuthStatus.INVALID.getCode());
+//TODO 临时授权
+//				rsp.setOpenRemainCount(auth.getValidAuthAmount());
+				
+				if(rsp.getIsSupportQR().equals(DoorAuthStatus.VALID.getCode())){
+					
+					// TODO Auto-generated method stub
+			    	if(!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+			    		Long now = DateHelper.currentGMTTime().getTime();
+			    		if(auth.getValidEndMs() < now) {
+			    		//已经失效，删除它
+			            auth.setStatus(DoorAuthStatus.INVALID.getCode());
+			            doorAuthProvider.updateDoorAuth(auth);
+			            return null;
+			            }
+			    		
+			    		if(auth.getValidFromMs() > now) {
+			    			return null;
+			    		}
+			    	}
+			    	//TODO 生成其他各种类型二维码钥匙
+			    	List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
+			        doZuolinQRKey(false, user, doorAccess, auth, qrKeys);
+			        if(qrKeys.size() > 0){
+			        	rsp.setQrInfo(qrKeys.get(0));
+			        }
+				}
+				
+				if(rsp.getIsSupportTempAuth().equals(DoorAuthStatus.VALID.getCode())){
+					rsp.setIsAuthByCount(doorAccess.getEnableAmount());
+					rsp.setMaxAuthCount(doorAccess.getMaxCount());
+					rsp.setMaxAuthDay(doorAccess.getMaxDuration());
+				}
+//				rsp.setOpenVailadTime(auth.getc);
+		        
+		        //BLE
+		        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+		        rsp.setBlueToothSecret(aesUserKey.getSecret());
+			}else{
+				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, String.format("auth with user.id {%d} and door.id {%d} not found",user.getId(),cmd.getDoorId()));
+			}
 		}
-		
-		if(rsp.getIsSupportTempAuth().equals(DoorAuthStatus.VALID.getCode())){
-			rsp.setIsAuthByCount(doorAccess.getEnableAmount());
-			rsp.setMaxAuthCount(doorAccess.getMaxCount());
-			rsp.setMaxAuthDay(doorAccess.getMaxDuration());
-		}
-//		rsp.setOpenVailadTime(auth.getc);
-		
-		
-        
-        
-        //BLE
-        AesUserKey aesUserKey = generateAesUserKey(user, auth);
-        rsp.setBlueToothSecret(aesUserKey.getSecret());
 		return rsp;
 	}
 
@@ -6311,6 +6325,57 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		qryCmd.setOrganizationAddresses(addressDTO.getOrganizationAddresses());
 		return qryCmd;
 	}
+	
+	private boolean checkUserAuthByUser(User user, DoorAuth auth){
+		ListAuthsByLevelandLocationCommand qryCmd = getLevelQryCmdByUser(user);
+		Long authUid = auth.getUserId();
+		
+		List<Long> faIds = new ArrayList<Long>();
+		List<Long> fbIds = new ArrayList<Long>();
+		List<Long> fcIds = new ArrayList<Long>();
+		for (FamilyAddressDTO dto : qryCmd.getFamilyAddresses()) {
+			faIds.add(dto.getAdddress().getId());
+			fbIds.add(dto.getAdddress().getBuildingId());
+			fcIds.add(dto.getAdddress().getCommunityId());
+		}
+		
+		List<Long> oaIds = new ArrayList<Long>();
+		List<Long> obIds = new ArrayList<Long>();
+		List<Long> ocIds = new ArrayList<Long>();
+		for (OrganizationAddressDTO dto : qryCmd.getOrganizationAddresses()) {
+			if (dto.getAdddresses() != null && dto.getAdddresses().size() > 0) {
+				for (AddressDTO item : dto.getAdddresses()) {
+					oaIds.add(item.getId());
+					obIds.add(item.getBuildingId());
+					ocIds.add(item.getCommunityId());
+				}
+			}
+		}
+		
+		switch (DoorLicenseType.fromCode(auth.getLicenseeType() == null? 0:auth.getLicenseeType())){
+			case USER:
+				return authUid.equals(user.getId());
+			case ENTERPRISE:
+				return qryCmd.getOrgIds().indexOf(authUid) >= 0;
+			case ORG_COMMUNITY:
+				return qryCmd.getFamilyAddresses().indexOf(ocIds) >= 0;
+			case ORG_BUILDING:
+				return qryCmd.getFamilyAddresses().indexOf(obIds) >= 0;
+			case ORG_ADDRESS:
+				return qryCmd.getFamilyAddresses().indexOf(oaIds) >= 0;
+			case FAMILY_COMMUNITY:
+				return qryCmd.getFamilyAddresses().indexOf(fcIds) >= 0;
+			case FAMILY_BUILDING:
+				return qryCmd.getFamilyAddresses().indexOf(fbIds) >= 0;
+			case FAMILY_ADDRESS:
+				return qryCmd.getFamilyAddresses().indexOf(faIds) >= 0;
+			default:
+				return true;
+			
+		}
+		
+	}
+	
 }
 
 

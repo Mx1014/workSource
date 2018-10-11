@@ -60,12 +60,6 @@ public class QueryValidDoorAuthForeverCommand{
 	public void setDoorId(Long doorId) {
 		this.doorId = doorId;
 	}
-	public Byte getRightOpen() {
-		return rightOpen;
-	}
-	public void setRightOpen(Byte rightOpen) {
-		this.rightOpen = rightOpen;
-	}
 	public Byte getRightRemote() {
 		return rightRemote;
 	}
