@@ -82,6 +82,28 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
     }
 
     /**
+     * 通过原（处理前的）记录ＩＤ查询
+     * @param eventLogId
+     * @return
+     */
+    @Override
+    public List<FlowStatisticsHandleLog> getStatisticsHandleLogByEventLogId(Long eventLogId){
+
+        com.everhomes.server.schema.tables.EhFlowStatisticsHandleLog t = Tables.EH_FLOW_STATISTICS_HANDLE_LOG;
+        List<FlowStatisticsHandleLog> list =   this.query(new ListingLocator(), 0, (locator1, query) -> {
+
+            if(eventLogId!=null){
+                query.addConditions(t.LOG_ID.eq(eventLogId));
+            }
+            return query;
+        },(locator2, query)->{ //排序
+            return query;
+        });
+
+        return list ;
+    }
+
+    /**
      * 节点处理次数
      * @param flowMainId
      * @param version
@@ -126,6 +148,7 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
      * @param endTime
      * @return
      */
+    @Override
     public Long countNodesCycle(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime, Long nodeId){
         Long longCount = 0L ;
         try {
@@ -198,6 +221,7 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
      * @param endTime
      * @return
      */
+    @Override
     public Long countLanesCycle(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime, Long laneId){
         Long longCount = 0L ;
         try {

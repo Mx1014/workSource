@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow_statistics.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,9 @@ public class FlowStatisticsController extends ControllerBase {
 
     @Autowired
     private  FlowStatisticsService flowStatisticsService ;
+
+    @Autowired
+    private FlowStatisticsTaskService flowStatisticsTaskService ;
 
     /**
      * <b>URL: /flowstatistics/findFlowVersion</b>
@@ -80,6 +84,23 @@ public class FlowStatisticsController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /flowstatistics/statisticsHanldeLog</b>
+     * <p>5)处理统计数据接口</p>
+     */
+    @RequestMapping("statisticsHanldeLog")
+    @RestReturn(value=String.class)
+    public RestResponse statisticsHanldeLog( StatisticsHanldeLogCommand cmd ) {
+
+        if(cmd != null && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getIsAll())){
+            flowStatisticsTaskService.allStatistics();
+        }else{
+            flowStatisticsTaskService.appendStatistics();
+        }
+        RestResponse response = new RestResponse();
+        setResponseSuccess(response);
+        return response;
+    }
 
     /**
      * <p>设置response 成功信息</p>
