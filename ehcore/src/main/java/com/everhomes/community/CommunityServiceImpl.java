@@ -2715,7 +2715,7 @@ public class CommunityServiceImpl implements CommunityService {
 				    String[] organizationName = cmd.getOrganizationNames().split(";");
 				    Condition cond = Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[0] + "%");
 				    if (organizationName.length > 1) {
-				        for (int i=1;i<organizationName.length-1;i++) {
+				        for (int i=1;i<organizationName.length;i++) {
 				            cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[i] + "%"));
                         }
                     }
@@ -3157,8 +3157,17 @@ public class CommunityServiceImpl implements CommunityService {
 		//认证中 = 已认证、认证中 - 已认证
 		int authingCount = memberIds.size() - authCount;
 
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+
+		//未认证
+		int notAuthCount = 0;
+		if(users != null){
+			notAuthCount = users.size();
+		}
+
 		//全部 = 认证 + 认证中 + 未认证
-		int allCount = authCount + authingCount;
+		int allCount = authCount + authingCount + notAuthCount;
 
         //绑定微信的、男性、女性
         Set<Long> wxMemberIds = new HashSet<>();
@@ -3197,7 +3206,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setCommunityUsers(allCount);
 		resp.setAuthUsers(authCount);
 		resp.setAuthingUsers(authingCount);
-		resp.setWxUserCount(wxCount);
+        resp.setNotAuthUsers(notAuthCount);
+        resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
@@ -3217,12 +3227,18 @@ public class CommunityServiceImpl implements CommunityService {
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
+        //未认证用户 userprofile表中的用户-已认证或者认证中的用户
+        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+        if(users == null){
+            users = new ArrayList<>();
+        }
+        int notAuthCount = users.size();
 
 		//认证中 = 已认证、认证中 - 已认证
 		int authingCount = communityUserCount - authCount;
 
 		//总用户 =  已认证 + 认证中 + 未认证
-		int allCount = authCount + authingCount;
+		int allCount = authCount + authingCount + notAuthCount;
 
 
 		//微信用户 = 已认证、认证中的微信微信用户
@@ -3240,7 +3256,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setCommunityUsers(allCount);
 		resp.setAuthUsers(authCount);
 		resp.setAuthingUsers(authingCount);
-		resp.setWxUserCount(wxCount);
+        resp.setNotAuthUsers(notAuthCount);
+        resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
