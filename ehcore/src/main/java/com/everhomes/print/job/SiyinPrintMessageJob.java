@@ -2,12 +2,15 @@ package com.everhomes.print.job;
 
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.print.SiyinPrintNotificationTemplateCode;
+import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -39,16 +42,20 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
     private SmsProvider smsProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+	private SiyinPrintOrderProvider siyinPrintOrderProvider;
     
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
             String appName = jobMap.getString("appName");
-            Integer namespaceId = jobMap.getIntegerFromString("namespaceId");
-            Long creatorUid = jobMap.getLong("creatorUid");
-            sendMessageToUser(appName, namespaceId, creatorUid);
-
+            SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
+            if (order.getOrderStatus().equals(PrintOrderStatusType.UNPAID)){
+            	Integer namespaceId = order.getNamespaceId();
+            	Long creatorUid = order.getCreatorUid();
+            	sendMessageToUser(appName, namespaceId, creatorUid);
+            }
         }catch (Exception e) {
             LOGGER.error("SiyinPrintMessageJob error", e);
         }
