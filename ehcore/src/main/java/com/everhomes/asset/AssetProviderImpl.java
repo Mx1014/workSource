@@ -4067,7 +4067,7 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag) {
+    public void modifyBillGroup(ModifyBillGroupCommand cmd, List<Long> allCommunity) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
         UpdateQuery<EhPaymentBillGroupsRecord> query = context.updateQuery(t);
@@ -4084,19 +4084,41 @@ public class AssetProviderImpl implements AssetProvider {
         	query.addValue(t.BILLS_DAY_TYPE, cmd.getBillDayType());
         }
         
-        if(deCouplingFlag == (byte)0){
+        if(cmd.getAllScope()){
+        	//更新账单组配置
             query.addConditions(t.ID.eq(cmd.getBillGroupId()).or(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId())));
+            query.addConditions(t.OWNER_ID.in(allCommunity));//兼容标准版引入的转交项目管理权
             query.execute();
-            return;
+            //全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据billGroupId查询出所有关联的项目（包括已经授权出去的项目）
+            List<Long> decouplingOwnerId = context.select(t.OWNER_ID)
+            		.from(t)
+                    .where(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(t.BROTHER_GROUP_ID.eq(cmd.getBillGroupId()))
+                    .and(t.OWNER_ID.notIn(allCommunity))//为了兼容标准版引入的转交项目管理权
+                    .fetch(t.OWNER_ID);
+            if(decouplingOwnerId != null && decouplingOwnerId.size() != 0) {
+            	Long nullId = null;
+                context.update(t)
+                        .set(t.BROTHER_GROUP_ID,nullId)
+                        .where(t.OWNER_ID.in(decouplingOwnerId))
+                        .execute();
+            }
         }else {
+        	//更新账单组配置
+        	query.addConditions(t.ID.eq(cmd.getBillGroupId()));
+            query.execute();
+            //具体项目修改billGroup的，此项目的所有group解耦
         	Long nullId = null;
             context.update(t)
                     .set(t.BROTHER_GROUP_ID,nullId)
                     .where(t.OWNER_ID.eq(cmd.getOwnerId()))
                     .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(t.OWNER_ID.in(allCommunity))//兼容标准版引入的转交项目管理权
                     .execute();
-            query.addConditions(t.ID.eq(cmd.getBillGroupId()));
-            query.execute();
         }
     }
 

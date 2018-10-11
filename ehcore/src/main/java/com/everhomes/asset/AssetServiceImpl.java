@@ -3345,15 +3345,17 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyBillGroup(ModifyBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
+    	List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), true);
+    	//标准版增加的allScope参数，true：默认/全部，false：具体项目
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             //全部的情况,修改billGroup的以及bro为billGroup的
-            deCouplingFlag = 0;
-            assetProvider.modifyBillGroup(cmd,deCouplingFlag);
-            return;
+            cmd.setAllScope(true);
+            assetProvider.modifyBillGroup(cmd, allCommunity);
+        }else {
+        	//具体项目修改billGroup的，此园区的所有group解耦
+        	cmd.setAllScope(false);
+            assetProvider.modifyBillGroup(cmd, allCommunity);
         }
-        //个体，修改billGroup的，以及此园区的所有group解耦
-        assetProvider.modifyBillGroup(cmd,deCouplingFlag);
     }
 
     @Override
