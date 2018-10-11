@@ -58,17 +58,17 @@ public class AssetChargingItemServiceImpl implements AssetChargingItemService {
                 IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetChargingItemProvider.isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
                 	Boolean allScope = false;
-                	assetProvider.configChargingItems(cmd, de_coupling, allScope);
+                	assetChargingItemProvider.configChargingItems(cmd, de_coupling, allScope);
                 }
             }
             //2、再创建全部配置
             Boolean allScope = true;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetProvider.configChargingItems(cmd, de_coupling, allScope);
+            assetChargingItemProvider.configChargingItems(cmd, de_coupling, allScope);
         }else{
         	Boolean allScope = false;
         	byte de_coupling = 1;
-        	assetProvider.configChargingItems(cmd, de_coupling, allScope);
+        	assetChargingItemProvider.configChargingItems(cmd, de_coupling, allScope);
         }
     }
 	

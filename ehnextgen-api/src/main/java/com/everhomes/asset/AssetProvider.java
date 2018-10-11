@@ -207,8 +207,6 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void configChargingItems(ConfigChargingItemsCommand cmd, byte de_coupling, Boolean allScope);
-
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
 
