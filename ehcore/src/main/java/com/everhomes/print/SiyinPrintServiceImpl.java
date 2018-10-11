@@ -31,6 +31,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
@@ -697,20 +698,32 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		List<GoodDTO> goods = new ArrayList<>();
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
-		good.setTag1(cmd.getOwnerId()+"");
-		good.setTag2("copy");
+		good.setTag1(cmd.getOwnerId() + "");
+		good.setTag2(order.getPrinterName());
+		fillGoodTagByJobType(good, order.getJobType());
 		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //
 		}
-		good.setGoodTag("goods");// 商品标志
-		good.setGoodName("云打印");// 商品名称
 		good.setGoodDescription(order.getDetail());// 商品描述
 		good.setCounts(1);
 		good.setPrice(order.getOrderTotalFee());
 		good.setTotalPrice(order.getOrderTotalFee());
 		goods.add(good);
 		return goods;
+	}
+	
+	private void fillGoodTagByJobType(GoodDTO good, Byte jobType) {
+		GoodBizEnum bizEnum = GoodBizEnum.NONE;
+		if (jobType.equals(PrintJobTypeType.PRINT.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_PRINT;
+		} else if (jobType.equals(PrintJobTypeType.COPY.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_COPY;
+		} else {
+			bizEnum = GoodBizEnum.PRINT_SCAN;
+		}
+		good.setGoodTag(bizEnum.getIdentity());
+		good.setGoodName(bizEnum.getName());
 	}
 
 
@@ -1972,12 +1985,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		List<SiyinPrintBusinessPayeeAccount> accounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts
-				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
-		if(accounts!=null && accounts.size()>0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"repeat account");
-		}
 		if(cmd.getId()!=null){
 			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
