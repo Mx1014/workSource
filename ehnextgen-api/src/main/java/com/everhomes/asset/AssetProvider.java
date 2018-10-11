@@ -121,10 +121,7 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId,Long orgId,Boolean allScope);
-
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
-
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
@@ -384,12 +381,8 @@ public interface AssetProvider {
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
-    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
     IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
-    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -472,5 +465,4 @@ public interface AssetProvider {
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 		
-	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -40,6 +41,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetGroupService assetGroupService;
+	
+	@Autowired
+	private AssetChargingItemService assetChargingItemService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -340,7 +344,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listAllChargingItems")
 	@RestReturn(value = ListChargingItemsDTO.class, collection = true)
 	public RestResponse listAllChargingItems(OwnerIdentityCommand cmd) {
-		List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+		List<ListChargingItemsDTO> list = assetChargingItemService.listAllChargingItems(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -382,7 +386,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("configChargingItems")
 	@RestReturn(value = String.class)
 	public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
-		assetService.configChargingItems(cmd);
+		assetChargingItemService.configChargingItems(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);

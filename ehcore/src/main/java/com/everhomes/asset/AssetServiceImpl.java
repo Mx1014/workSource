@@ -46,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
@@ -255,6 +256,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private AssetGroupProvider assetGroupProvider;
+    
+    @Autowired
+    private AssetChargingItemProvider assetChargingItemProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -674,22 +678,7 @@ public class AssetServiceImpl implements AssetService {
         exportOrdersUtil(dtos, cmd, response);
     }
 
-    @Override
-    public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-    	//标准版增加的allScope参数，true：默认/全部，false：具体项目
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            cmd.setAllScope(true);
-        }else {
-        	cmd.setAllScope(false);
-        }
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(), cmd.getOrganizationId(), cmd.getAllScope());
-    }
+    
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -2970,42 +2959,6 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listAvailableChargingItems(cmd);
     }
 
-    @Override
-    public void configChargingItems(ConfigChargingItemsCommand cmd) {
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-        	byte de_coupling = 0;
-            //1、先同步下去
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
-            for(int i =0; i < allCommunity.size(); i ++){
-                Long communityId = allCommunity.get(i);
-                cmd.setOwnerId(communityId);
-                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(communityId);
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isChargingItemsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
-                	Boolean allScope = false;
-                	assetProvider.configChargingItems(cmd, de_coupling, allScope);
-                }
-            }
-            //2、再创建全部配置
-            Boolean allScope = true;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetProvider.configChargingItems(cmd, de_coupling, allScope);
-        }else{
-        	Boolean allScope = false;
-        	byte de_coupling = 1;
-        	assetProvider.configChargingItems(cmd, de_coupling, allScope);
-        }
-    }
-
     public List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
         List<Long> communityIds = new ArrayList<>();
         communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, appId);
@@ -4378,13 +4331,13 @@ public class AssetServiceImpl implements AssetService {
         }
 		if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_ITEM.getCode())) {
 			//收费项配置
-			response = assetProvider.isChargingItemsForJudgeDefault(cmd);
+			response = assetChargingItemProvider.isChargingItemsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_STANDARDS.getCode())) {
 			//收费项计算规则
 			response = assetProvider.isChargingStandardsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.GROUPS.getCode())) {
 			//账单组
-			response = assetProvider.isBillGroupsForJudgeDefault(cmd);
+			response = assetGroupProvider.isBillGroupsForJudgeDefault(cmd);
 		}
 		return response;
 	}
@@ -5182,7 +5135,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.createChargingItem(cmd, communityIds);
+        assetChargingItemProvider.createChargingItem(cmd, communityIds);
 	}
 
 	//对接下载中心的导出账单列表

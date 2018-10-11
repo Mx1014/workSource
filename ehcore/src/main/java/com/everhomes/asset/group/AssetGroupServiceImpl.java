@@ -99,7 +99,7 @@ public class AssetGroupServiceImpl implements AssetGroupService {
                 isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
                 isProjectNavigateDefaultCmd.setOrganizationId(cmd.getOrganizationId());//标准版新增的管理公司ID
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetGroupProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
                 	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
                 }

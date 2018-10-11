@@ -86,8 +86,6 @@ public interface AssetService {
 
 	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
 
-	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
-
 	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
 	void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
@@ -121,8 +119,6 @@ public interface AssetService {
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
 	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void configChargingItems(ConfigChargingItemsCommand cmd);
 
 	void createChargingStandard(CreateChargingStandardCommand cmd);
 
