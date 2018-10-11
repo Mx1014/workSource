@@ -15,6 +15,7 @@ public class SearchRentalOrdersCommand {
     private String tag1;
     private String tag2;
     private Byte billStatus;
+    private Byte payChannel;
     private String vendorType;
     private Long pageAnchor;
     private Integer pageSize;
@@ -119,5 +120,13 @@ public class SearchRentalOrdersCommand {
 
     public void setVendorType(String vendorType) {
         this.vendorType = vendorType;
+    }
+
+    public Byte getPayChannel() {
+        return payChannel;
+    }
+
+    public void setPayChannel(Byte payChannel) {
+        this.payChannel = payChannel;
     }
 }

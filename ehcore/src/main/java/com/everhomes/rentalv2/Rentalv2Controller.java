@@ -316,6 +316,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/addRentalItemBillV3</b>
+	 * <p>
+	 * 添加场所商品订单(跳转同一订单支付)
+	 * </p>
+	 */
+	@RequestMapping("addRentalItemBillV3")
+	@RestReturn(value = AddRentalBillItemV3Response.class)
+	public RestResponse addRentalItemBillV3(@Valid AddRentalBillItemCommand cmd) {
+		AddRentalBillItemV3Response result = rentalService.addRentalItemBillV3(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/getRentalBillPayInfo</b>
 	 * <p>
 	 * 获取订单支付信息
@@ -341,6 +357,22 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(value = PreOrderDTO.class)
 	public RestResponse getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
 		PreOrderDTO result = rentalService.getRentalBillPayInfoV2(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/getRentalBillPayInfoV3</b>
+	 * <p>
+	 * 获取订单支付信息(统一订单使用)
+	 * </p>
+	 */
+	@RequestMapping("getRentalBillPayInfoV3")
+	@RestReturn(value = AddRentalBillItemV3Response.class)
+	public RestResponse getRentalBillPayInfoV3(GetRentalBillPayInfoCommand cmd) {
+		AddRentalBillItemV3Response result = rentalService.getRentalBillPayInfoV3(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

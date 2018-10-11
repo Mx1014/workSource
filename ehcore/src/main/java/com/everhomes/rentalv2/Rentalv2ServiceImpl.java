@@ -2517,6 +2517,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
+	public AddRentalBillItemV3Response getRentalBillPayInfoV3(GetRentalBillPayInfoCommand cmd) {
+
+		return null;
+	}
+
+	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag) {
 	    //防止二次进入
         if (order.getStatus().equals(status))
@@ -3952,10 +3958,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd) {
-
-		return (AddRentalBillItemV2Response) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
+		return createPayOrderV2(response,cmd);
 	}
 
+	@Override
+	public AddRentalBillItemV3Response addRentalItemBillV3(AddRentalBillItemCommand cmd) {
+		return null;
+	}
 
 	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, Integer paymentType,
 															 String flowCaseUrl) {
@@ -4004,11 +4014,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd) {
-
-		return (AddRentalBillItemCommandResponse) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V1);
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V1);
+		return response ;
 	}
 
-	private Object actualAddRentalItemBill(AddRentalBillItemCommand cmd, ActivityRosterPayVersionFlag version) {
+	private AddRentalBillItemV2Response createPayOrderV2(AddRentalBillItemCommandResponse responseV1,AddRentalBillItemCommand cmd){
+		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
+		AddRentalBillItemV2Response responseV2 = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType(), responseV1.getFlowCaseUrl());
+		//保存支付订单信息
+		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+		if (record != null){
+			record.setOrderId(bill.getId());
+			record.setStatus((byte)0);//未支付
+			record.setNamespaceId(UserContext.getCurrentNamespaceId());
+			record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
+			this.rentalv2AccountProvider.updateOrderRecord(record);
+		}
+		//当订单创建成功之后，在来创建定时任务
+		if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode()) && bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+			createOrderOverTimeTask(bill);
+		}
+		return responseV2;
+	}
+
+	private AddRentalBillItemCommandResponse actualAddRentalItemBill(AddRentalBillItemCommand cmd, ActivityRosterPayVersionFlag version) {
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
 
 		if (!bill.getStatus().equals(SiteBillStatus.INACTIVE.getCode()) &&
@@ -4126,24 +4155,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (orderCancelFlag[0]) {
 				createOrderOverTimeTask(bill);
 			}
-			return response;
-		} else {
-			Object obj = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType(), response.getFlowCaseUrl());
-			//保存支付订单信息
-			Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
-			if (record != null){
-				record.setOrderId(bill.getId());
-				record.setStatus((byte)0);//未支付
-				record.setNamespaceId(UserContext.getCurrentNamespaceId());
-				record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
-				this.rentalv2AccountProvider.updateOrderRecord(record);
-			}
-			//当订单创建成功之后，在来创建定时任务
-			if (orderCancelFlag[0]) {
-				createOrderOverTimeTask(bill);
-			}
-			return obj;
 		}
+		return response;
 	}
 
 	private List<RentalBillRuleDTO> getBillRules(RentalOrder bill) {
@@ -8027,7 +8040,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		AddRentalBillItemCommand actualCmd = ConvertHelper.convert(cmd, AddRentalBillItemCommand.class);
 
-		AddRentalBillItemCommandResponse tempResp = (AddRentalBillItemCommandResponse) actualAddRentalItemBill(actualCmd,
+		AddRentalBillItemCommandResponse tempResp =  actualAddRentalItemBill(actualCmd,
 				ActivityRosterPayVersionFlag.V1);
 
 		CommonOrderDTO dto = ConvertHelper.convert(tempResp, CommonOrderDTO.class);
@@ -8046,10 +8059,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd) {
 
 		AddRentalBillItemCommand actualCmd = ConvertHelper.convert(cmd, AddRentalBillItemCommand.class);
-
-		AddRentalBillItemV2Response tempResp = (AddRentalBillItemV2Response) actualAddRentalItemBill(actualCmd,
-				ActivityRosterPayVersionFlag.V2);
-
+		AddRentalBillItemCommandResponse responseV1 = actualAddRentalItemBill(actualCmd, ActivityRosterPayVersionFlag.V2);
+		AddRentalBillItemV2Response tempResp = createPayOrderV2(responseV1,actualCmd);
 		AddRentalOrderUsingInfoV2Response response = ConvertHelper.convert(tempResp, AddRentalOrderUsingInfoV2Response.class);
 		return response;
 	}
