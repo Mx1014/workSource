@@ -3175,7 +3175,6 @@ public class CommunityServiceImpl implements CommunityService {
         Set<Long> femaleMemberIds = new HashSet<>();
 
         List<User> allUsers = new ArrayList<>();
-        allUsers.addAll(users);
 
         //已认证或认证中
         List<Long> userIds = new ArrayList<>(memberIds);
@@ -3241,35 +3240,17 @@ public class CommunityServiceImpl implements CommunityService {
 		//总用户 =  已认证 + 认证中 + 未认证
 		int allCount = authCount + authingCount + notAuthCount;
 
-        //未认证中绑定微信的、男性、女性
-        Set<Long> wxMemberIds = new HashSet<>();
-        Set<Long> maleMemberIds = new HashSet<>();
-        Set<Long> femaleMemberIds = new HashSet<>();
-
-        if(users != null){
-            for(User u: users){
-                if(NamespaceUserType.fromCode(u.getNamespaceUserType()) == NamespaceUserType.WX){
-                    wxMemberIds.add(u.getId());
-                }
-                if(UserGender.fromCode(u.getGender()) == UserGender.FEMALE){
-                    femaleMemberIds.add(u.getId());
-                }
-                if(UserGender.fromCode(u.getGender()) == UserGender.MALE){
-                    maleMemberIds.add(u.getId());
-                }
-            }
-        }
 
 		//微信用户 = 已认证、认证中的微信微信用户
-		int wxCount =  wxAuthCount + wxMemberIds.size();
+		int wxCount =  wxAuthCount;
 
         //男性用户
         //已认证、认证中
         int maleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.MALE.getCode());
-        int maleCount = maleMemberIds.size() + maleAuthCount;
+        int maleCount = maleAuthCount;
         //女性用户
         int femaleAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, null, UserGender.FEMALE.getCode());
-        int femaleCount = femaleMemberIds.size() + femaleAuthCount;
+        int femaleCount = femaleAuthCount;
 
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(allCount);
