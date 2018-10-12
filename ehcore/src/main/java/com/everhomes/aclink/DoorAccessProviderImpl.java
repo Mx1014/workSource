@@ -340,6 +340,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     public List<ActiveDoorByEquipmentDTO> queryDoorAccessByEquipment(DoorStatisticEhCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+
         List<ActiveDoorByEquipmentDTO> dtos = new ArrayList<ActiveDoorByEquipmentDTO>();
         SelectHavingStep<Record2<Integer,Byte>> groupBy = context.select(t.ID.count().as("num")
                 ,t.DOOR_TYPE.as("type"))
@@ -359,6 +360,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     public List<ActiveDoorByFirmwareDTO> queryDoorAccessByFirmware(DoorStatisticEhCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+
         List<ActiveDoorByFirmwareDTO> dtos = new ArrayList<ActiveDoorByFirmwareDTO>();
         SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
                 ,Tables.EH_DOOR_ACCESS.FIRMWARE_NAME.as("firmware"))
@@ -419,6 +421,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         }
         List<DoorAccessDTO> objs = query.fetch().map((r) -> {
             DoorAccessDTO dto = ConvertHelper.convert(r, DoorAccessDTO.class);
+            dto.setNamespaceId(r.getValue(Tables.EH_DOOR_ACCESS.NAMESPACE_ID));
             return dto;
         });
         if(count > 0 && objs.size() > count) {

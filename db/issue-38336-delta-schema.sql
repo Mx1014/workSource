@@ -641,6 +641,7 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL
 -- REMARK: 20180930 issue-38336
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (64) NULL COMMENT '门禁设备固件版本';
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (64) NULL COMMENT '门禁设备固件名';
+
 CREATE TABLE `eh_aclink_firmware_package` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11) DEFAULT NULL,

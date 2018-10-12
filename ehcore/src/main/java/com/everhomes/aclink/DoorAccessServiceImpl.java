@@ -5295,6 +5295,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getOwnerId() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
                 }
+                if(cmd.getNamespaceId() != null){
+                    query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                }
+                if(cmd.getNamespaceName() != null){
+                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
+                }
+                if(cmd.getDoorType() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+
+                }
                 if(cmd.getDoor() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like(cmd.getDoor() + "%")
                             .or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like(cmd.getDoor()+"%")));

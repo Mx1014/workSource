@@ -25,9 +25,13 @@ public class ListDoorAccessEhCommand {
 
     private Long ownerId;
 
+    private String ownerName;
+
     private Byte ownerType;
 
-    private Long namespaceId;
+    private Integer namespaceId;
+
+    private String namespaceName;
 
     private String door;
 
@@ -67,6 +71,14 @@ public class ListDoorAccessEhCommand {
         this.ownerId = ownerId;
     }
 
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
     public Byte getOwnerType() {
         return ownerType;
     }
@@ -75,12 +87,20 @@ public class ListDoorAccessEhCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getNamespaceId() {
+    public Integer getNamespaceId() {
         return namespaceId;
     }
 
-    public void setNamespaceId(Long namespaceId) {
+    public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getNamespaceName() {
+        return namespaceName;
+    }
+
+    public void setNamespaceName(String namespaceName) {
+        this.namespaceName = namespaceName;
     }
 
     public String getDoor() {
