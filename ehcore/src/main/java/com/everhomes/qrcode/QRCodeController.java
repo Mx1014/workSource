@@ -60,7 +60,7 @@ public class QRCodeController extends ControllerBase {
     @RequestMapping("newQRCodeForActivity")
     @RestReturn(value=QRCodeDTO.class)
     public RestResponse newQRCodeForActivity(@Valid NewQRCodeCommand cmd) {
-        QRCodeDTO qrcodeDto = this.qrcodeService.createQRCode(cmd);
+        QRCodeDTO qrcodeDto = this.qrcodeService.createQRCodeForActivity(cmd);
 
         RestResponse response = new RestResponse(qrcodeDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
