@@ -199,7 +199,8 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
                 .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                 .fetchInto(PaymentChargingItemScope.class);
 		if(itemScopes != null && itemScopes.size() == 0) {
-			response.setDefaultStatus((byte)0);//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
+			//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
+			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
 		}else {
 			EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
 			//查询出管理公司下的默认配置
