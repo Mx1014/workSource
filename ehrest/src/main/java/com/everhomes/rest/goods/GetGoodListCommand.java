@@ -21,7 +21,7 @@ public class GetGoodListCommand {
 	private Long merchantId;
 	private String serviceType; 
 	private Long bizType;
-	List<String> tagKeys;
+	GoodTagInfo goodTagInfo;
  	
 	@Override
 	public String toString() {
@@ -44,6 +44,14 @@ public class GetGoodListCommand {
 		this.merchantId = merchantId;
 	}
 
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
+	}
+
 	public Long getBizType() {
 		return bizType;
 	}
@@ -52,19 +60,11 @@ public class GetGoodListCommand {
 		this.bizType = bizType;
 	}
 
-	public List<String> getTagKeys() {
-		return tagKeys;
+	public GoodTagInfo getGoodTagInfo() {
+		return goodTagInfo;
 	}
 
-	public void setTagKeys(List<String> tagKeys) {
-		this.tagKeys = tagKeys;
-	}
-
-	public String getServiceType() {
-		return serviceType;
-	}
-
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
+	public void setGoodTagInfo(GoodTagInfo goodTagInfo) {
+		this.goodTagInfo = goodTagInfo;
 	}
 }

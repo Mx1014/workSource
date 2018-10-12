@@ -7,13 +7,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>goods : 商品列表 {@link com.everhomes.rest.goods.GoodTagDTO}</li>
+ * <li>goods : 商品列表 {@link com.everhomes.rest.goods.GoodTagInfo}</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月10日
  */
 public class GetGoodListResponse{
-	private List<GoodTagDTO> goods;
+	private List<GoodTagInfo> goods;
 	
 	@Override
 	public String toString() {
@@ -21,12 +21,12 @@ public class GetGoodListResponse{
 	}
 
 
-	public List<GoodTagDTO> getGoods() {
+	public List<GoodTagInfo> getGoods() {
 		return goods;
 	}
 
 
-	public void setGoods(List<GoodTagDTO> goods) {
+	public void setGoods(List<GoodTagInfo> goods) {
 		this.goods = goods;
 	}
 }

@@ -19,7 +19,8 @@ import com.everhomes.rest.goods.GetServiceGoodCommand;
 import com.everhomes.rest.goods.GetServiceGoodResponse;
 import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.goods.GoodScopeDTO;
-import com.everhomes.rest.goods.GoodTagDTO;
+import com.everhomes.rest.goods.GoodTagInfo;
+import com.everhomes.util.ConvertHelper;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PRINT_MODULE)
 public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
@@ -32,28 +33,14 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 	private static String SCOPE = "范围";
 	@Override
 	public GetGoodListResponse getGoodList(GetGoodListCommand cmd) {
-
-		List<String> tags = cmd.getTagKeys();
-		int pos = 0;
-		String tag1 = getTagByPos(tags, pos++);
-		String tag2 = getTagByPos(tags, pos++);
-		String tag3 = getTagByPos(tags, pos++);
-		String tag4 = getTagByPos(tags, pos++);
-		String tag5 = getTagByPos(tags, pos++);
-
 		// 打印机所有域空间的商品都是一样的 这里直接使用meiju
 		GoodBizEnum[] goodBizEnums = GoodBizEnum.values();
-		List<GoodTagDTO> goods = new ArrayList<>();
+		List<GoodTagInfo> goods = new ArrayList<>();
 		for (int i = 0; i < goodBizEnums.length; i++) {
 			if (GoodBizEnum.TYPE_SIYIN_PRINT.equals(goodBizEnums[i].getType())) {
-				GoodTagDTO good = new GoodTagDTO();
+				GoodTagInfo good = ConvertHelper.convert(cmd.getGoodTagInfo(), GoodTagInfo.class);
 				good.setServiceType(cmd.getServiceType());
 				good.setNamespaceId(cmd.getNamespaceId());
-				good.setTag1(tag1);
-				good.setTag2(tag2);
-				good.setTag3(tag3);
-				good.setTag4(tag4);
-				good.setTag5(tag5);
 				good.setGoodsTag(goodBizEnums[i].getIdentity());
 				good.setGoodsName(goodBizEnums[i].getName());
 				goods.add(good);
@@ -64,13 +51,6 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 		return resp;
 	}	
 	
-	private String getTagByPos(List<String> tags, int pos) {
-		if (null == tags) {
-			return null;
-		}
-		
-		return tags.size() > pos ? tags.get(pos) : null;
-	}
 	
 	@Override
 	public GetServiceGoodResponse getServiceGoodsScopes(GetServiceGoodCommand cmd){

@@ -609,6 +609,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
@@ -656,6 +659,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
@@ -1961,6 +1967,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		cmd2.setUserId(key);
 		cmd2.setTag1(arrayList);
 		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		
 		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
 		if(payUserList==null || payUserList.size() == 0){
 			return null;
@@ -2018,7 +2028,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(account.getPayeeId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		List<PayUserDTO> payUserDTOS = resp.getResponse();
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		
+		List<PayUserDTO> payUserDTOS = resp.getResponse(); 
+		
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
@@ -2333,23 +2348,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			BillGroupDTO dto = new BillGroupDTO();
 			dto.setBillGroupName(r.getBillGroupName());
 			dto.setBillGroupToken(r.getBillGroupId());
-			return dto;
-		}).collect(Collectors.toList());
-	}
-
-	private List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd) {
-		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
-		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
-		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-		cmd2.setCategoryId(cmd.getChargeAppToken());
-		cmd2.setBillGroupId(cmd.getBillGroupToken());
-		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		List<ListChargingItemsDTO> dtos = assetService.listAvailableChargingItems(cmd2);
-		
-		return dtos.stream().map(r -> {
-			ChargeItemDTO dto = new ChargeItemDTO();
-			dto.setChargeItemName(r.getChargingItemName());
-			dto.setChargeItemToken(r.getChargingItemId());
 			return dto;
 		}).collect(Collectors.toList());
 	}

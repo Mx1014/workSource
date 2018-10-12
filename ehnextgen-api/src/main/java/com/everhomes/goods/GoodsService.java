@@ -6,7 +6,7 @@ import com.everhomes.rest.goods.GetGoodListCommand;
 import com.everhomes.rest.goods.GetGoodListResponse;
 import com.everhomes.rest.goods.GetServiceGoodCommand;
 import com.everhomes.rest.goods.GetServiceGoodResponse;
-import com.everhomes.rest.goods.GoodTagDTO;
+import com.everhomes.rest.goods.GoodTagInfo;
 import com.everhomes.rest.promotion.order.GoodDTO;
 
 public interface GoodsService {
