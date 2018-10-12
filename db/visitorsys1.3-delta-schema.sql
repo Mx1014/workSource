@@ -22,6 +22,6 @@ ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) CO
 
 -- AUTHOR: 马世亨
 -- REMARK: 访客办公地点表  20181001
-ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NOT NULL COMMENT '关联数据类型';
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
 -- end
