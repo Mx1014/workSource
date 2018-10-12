@@ -1,5 +1,6 @@
 package com.everhomes.controller;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.owasp.validator.html.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +44,15 @@ public class XssCleaner {
                 LOGGER.trace("XSS clean before: " + plainText);
             }
             final CleanResults cr = antiSamy.scan(plainText, policy);
-            // String str = StringEscapeUtils.escapeHtml(cr.getCleanHTML());
-            // str = str.replaceAll((antiSamy.scan("&nbsp;", policy)).getCleanHTML(), "");
-            // str = StringEscapeUtils.unescapeHtml(str);
-            // str = str.replaceAll("&quot;", "\"");
-            // str = str.replaceAll("&amp;", "&");
-            String cleanHTML = cr.getCleanHTML();
+            String str = StringEscapeUtils.escapeHtml(cr.getCleanHTML());
+            str = str.replaceAll((antiSamy.scan("&nbsp;", policy)).getCleanHTML(), "");
+            str = StringEscapeUtils.unescapeHtml(str);
+            str = str.replaceAll("&quot;", "\"");
+            str = str.replaceAll("&amp;", "&");
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("XSS clean after:" + cleanHTML);
+                LOGGER.trace("XSS clean after:" + str);
             }
-            return cleanHTML;
+            return str;
         } catch (ScanException e) {
             LOGGER.error("XSS clean failed for [" + plainText + "]", e);
         } catch (PolicyException e) {
