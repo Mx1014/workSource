@@ -1,21 +1,6 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import com.everhomes.rest.forum.PostStatus;
-import com.everhomes.rest.hotTag.HotFlag;
-import com.everhomes.rest.activity.*;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.DbProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
@@ -25,23 +10,43 @@ import com.everhomes.hotTag.HotTag;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.hotTag.HotFlag;
 import com.everhomes.rest.hotTag.HotTagServiceType;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Version;
+import com.everhomes.util.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 
 @Component(ActivityEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_ACTIVITY)
 public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
     private static final Logger LOGGER=LoggerFactory.getLogger(ActivityEmbeddedHandler.class);
+
+    private final Gson gson;
+	{
+		gson = new GsonBuilder()
+				.disableHtmlEscaping()
+				.registerTypeAdapter(Date.class, new GsonJacksonDateAdapter())
+				.registerTypeAdapter(Timestamp.class, new GsonJacksonTimestampAdapter())
+				.create();
+	}
     
     //版本分界线，对于活动来说，此版本之前为旧版本，按旧版本处理，之后为新版本
     private static final String SEPERATE_VERSION = "3.10.4";
@@ -75,7 +80,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             populateActivityVersion(result, post);
             processLocation(result);
             if(result!=null) 
-                return StringHelper.toJsonString(result);
+                return gson.toJson(result);
         }catch(Exception e){
             LOGGER.error("handle snapshot error",e);
         }
@@ -90,7 +95,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             if(result!=null){
             	populateActivityVersion(result.getActivity(), post);
             	processLocation(result.getActivity());
-                return StringHelper.toJsonString(result);
+                return gson.toJson(result);
             }
         }catch(Exception e){
             LOGGER.error("handle details error",e);
@@ -249,7 +254,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         //Long id=shardingProvider.allocShardableContentId(EhActivities.class).second();
         post.setEmbeddedId(id);
         
-        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+        ActivityPostCommand cmd = (ActivityPostCommand) gson.fromJson(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
         
         if (StringUtils.isNotBlank(cmd.getSignupEndTime()) && cmd.getSignupEndTime().compareTo(cmd.getEndTime()) > 0) {
@@ -385,7 +390,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
 		}
         
-        post.setEmbeddedJson(StringHelper.toJsonString(cmd));
+        post.setEmbeddedJson(gson.toJson(cmd));
         
         return post;
     }
@@ -393,7 +398,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     @Override
     public Post postProcessEmbeddedObject(Post post,Long communityId) {
         try{
-            ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+            ActivityPostCommand cmd = (ActivityPostCommand) gson.fromJson(post.getEmbeddedJson(),
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
@@ -446,7 +451,7 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 
 	@Override
 	public void afterPostDelete(Post post) {
-		ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+		ActivityPostCommand cmd = (ActivityPostCommand) gson.fromJson(post.getEmbeddedJson(),
 				ActivityPostCommand.class);
 		cmd.setId(post.getEmbeddedId());
 		cmd.setMaxQuantity(post.getMaxQuantity());
