@@ -161,6 +161,7 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
                     .where(t.OWNER_ID.eq(cmd.getOwnerId()))
                     .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
                     .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
                     .execute();
             return nextGroupId;
         }else if(deCouplingFlag == (byte)0){
