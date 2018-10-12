@@ -39,8 +39,6 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 		for (int i = 0; i < goodBizEnums.length; i++) {
 			if (GoodBizEnum.TYPE_SIYIN_PRINT.equals(goodBizEnums[i].getType())) {
 				GoodTagInfo good = ConvertHelper.convert(cmd.getGoodTagInfo(), GoodTagInfo.class);
-				good.setServiceType(cmd.getServiceType());
-				good.setNamespaceId(cmd.getNamespaceId());
 				good.setGoodsTag(goodBizEnums[i].getIdentity());
 				good.setGoodsName(goodBizEnums[i].getName());
 				goods.add(good);

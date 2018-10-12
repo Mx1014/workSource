@@ -20,7 +20,6 @@ import com.everhomes.rest.goods.GetServiceGoodCommand;
 import com.everhomes.rest.goods.GetServiceGoodResponse;
 import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.goods.GoodScopeDTO;
-import com.everhomes.rest.goods.GoodTagDTO;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PARKING_MODULE)
 public class ParkingGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
