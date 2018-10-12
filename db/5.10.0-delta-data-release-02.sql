@@ -3,7 +3,7 @@
 
 
 -- add by yuanlei
-SET @id = (SELECT MAX(id) + INTERVAL(500000000, MAX(id)) * 500000000 from eh_launch_pad_layouts);
+SET @id = SELECT MAX(id)  from eh_locale_strings;
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`,`locale`, `text`) VALUES(@id := @id+1,'organization', '900031', 'zh_CN', '无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10004,'zh_CN','该楼栋名称已经存在，请更换其他名称');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900032,'zh_CN','姓名为空');
@@ -13,10 +13,18 @@ insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900036,'zh_CN','是否属于服务商标志为空');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900037,'zh_CN','是否启用工作台标志为空');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900038,'zh_CN','公司名称不能超过50字');
-insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'community',10013,'zh_CN','楼栋名称不能超过20个汉字');
-insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'community',10014,'zh_CN','楼栋名称重复了');
-insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'address',20011,'zh_CN','门牌地址超过了20个汉字');
+
+-- 现网已有，导致冲突了。start1
+-- insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'community',10013,'zh_CN','楼栋名称不能超过20个汉字');
+-- insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'community',10014,'zh_CN','楼栋名称重复了');
+-- insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'address',20011,'zh_CN','门牌地址超过了20个汉字');
+
+-- 现网已有，导致冲突了。start2
+
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10005,'zh_CN','该项目下不存在该楼栋');
+
+SET @id = SELECT MAX(id) from eh_locale_templates;
+
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',1,'zh_CN','开启工作台','"${organizationName}"开启工作台' , 2);
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',2,'zh_CN','关闭工作台','"${organizationName}"关闭工作台' , 2);
 -- add by yuanlei
@@ -60,142 +68,142 @@ INSERT INTO `eh_second_app_types` (`id`, `name`, `app_type`) VALUES ('15', '运�
 
 -- 应用入口信息
 -- INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`) VALUES ('2', '50100', '组织架构', '通讯录', '1', '1', '2', '2', '0');
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('3', '50100', '组织架构', '组织架构', '2', '4', '1', '4', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('4', '50100', '组织架构', '通讯录', '2', '4', '2', '2', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('7', '50300', '职级管理', '职级管理', '2', '4', '1', '4', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('11', '50500', '员工认证', '员工认证', '2', '4', '1', '4', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('15', '50400', '人事档案', '人事档案', '2', '4', '1', '4', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('18', '52000', '流程审批', '审批', '1', '1', '2', '1', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('19', '52000', '流程审批', '审批管理', '2', '4', '1', '3', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('20', '52000', '流程审批', '审批', '2', '4', '2', '1', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('22', '50600', '打卡考勤', '打卡考勤', '1', '1', '2', '2', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('23', '50600', '打卡考勤', '考勤管理', '2', '4', '1', '4', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('24', '50600', '打卡考勤', '打卡考勤', '2', '4', '2', '2', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('26', '54000', '工作汇报', '工作汇报', '1', '1', '2', '1', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('27', '54000', '工作汇报', '汇报管理', '2', '4', '1', '3', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('28', '54000', '工作汇报', '工作汇报', '2', '4', '2', '1', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('35', '51300', '社保管理', '社保管理', '2', '4', '1', '4', '8', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('38', '51400', '薪酬管理', '工资条', '1', '1', '2', '2', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('39', '51400', '薪酬管理', '薪酬管理', '2', '4', '1', '4', '9', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('40', '51400', '薪酬管理', '工资条', '2', '4', '2', '2', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('42', '55000', '文档', '文档', '1', '1', '2', '1', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('43', '55000', '文档', '文档管理', '2', '4', '1', '3', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('44', '55000', '文档', '文档', '2', '4', '2', '1', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('50', '57000', '企业公告', '企业公告', '1', '1', '2', '1', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('51', '57000', '企业公告', '公告管理', '2', '4', '1', '3', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('52', '57000', '企业公告', '企业公告', '2', '4', '2', '1', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('55', '60100', '管理员管理', '管理员管理', '2', '4', '1', '0', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('59', '60210', '责任部门配置', '责任部门配置', '2', '4', '1', '0', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('62', '20830', '任务管理', '我的任务', '1', '1', '2', '1', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('63', '20830', '任务管理', '任务管理', '2', '4', '1', '3', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('64', '20830', '任务管理', '我的任务', '2', '4', '2', '1', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('67', '41300', '应用活跃统计', '应用活跃统计', '2', '4', '1', '15', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('71', '41330', '用户行为统计', '用户行为统计', '2', '4', '1', '15', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('75', '41020', '企业门禁', '企业门禁管理', '2', '4', '1', '4', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('79', '41010', '公共门禁', '公共门禁管理', '2', '4', '1', '11', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('82', '10300', '园区公告', '园区公告', '1', '2', '2', '6', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('83', '10300', '园区公告', '园区公告', '2', '4', '1', '6', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('84', '10300', '园区公告', '园区公告', '2', '5', '2', '6', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('87', '10900', '启动广告', '启动广告', '2', '4', '1', '6', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('90', '10400', '园区广告', '园区广告', '1', '2', '2', '6', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('91', '10400', '园区广告', '园区广告', '2', '4', '1', '6', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('92', '10400', '园区广告', '园区广告', '2', '5', '2', '6', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('94', '10800', '园区快讯', '园区快讯', '1', '2', '2', '6', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('95', '10800', '园区快讯', '园区快讯', '2', '4', '1', '6', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('96', '10800', '园区快讯', '园区快讯', '2', '5', '2', '6', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('98', '10500', '园区电子报', '园区电子报', '1', '2', '2', '6', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('99', '10500', '园区电子报', '园区电子报', '2', '4', '1', '6', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('103', '11000', '一键推送', '一键推送', '2', '4', '1', '6', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('107', '12200', '短信推送（定制）', '短信推送', '2', '4', '1', '6', '8', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('111', '34000', '用户管理', '用户管理', '2', '4', '1', '7', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('115', '35000', '用户认证', '用户认证', '2', '4', '1', '7', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('119', '47000', '积分管理', '积分管理', '2', '4', '1', '7', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('121', '10600', '园区活动', '园区活动管理', '1', '1', '1', '7', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('122', '10600', '园区活动', '园区活动', '1', '2', '2', '7', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('123', '10600', '园区活动', '园区活动管理', '2', '4', '1', '7', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('124', '10600', '园区活动', '园区活动', '2', '5', '2', '7', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('125', '10100', '园区论坛', '园区论坛管理', '1', '1', '1', '7', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('126', '10100', '园区论坛', '园区论坛', '1', '2', '2', '7', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('127', '10100', '园区论坛', '园区论坛管理', '2', '4', '1', '7', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('129', '10750', '俱乐部', '俱乐部管理', '1', '1', '1', '7', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('130', '10750', '俱乐部', '俱乐部', '1', '2', '2', '7', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('131', '10750', '俱乐部', '俱乐部管理', '2', '4', '1', '7', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('133', '10760', '行业协会', '行业协会管理', '1', '1', '1', '7', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('134', '10760', '行业协会', '行业协会', '1', '2', '2', '7', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('135', '10760', '行业协会', '行业协会管理', '2', '4', '1', '7', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('138', '41700', '问卷调查', '问卷调查', '1', '2', '2', '7', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('139', '41700', '问卷调查', '问卷调查管理', '2', '4', '1', '7', '8', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('143', '30600', '黑名单管理', '黑名单管理', '2', '4', '1', '7', '9', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('147', '51000', '举报管理', '举报管理', '2', '4', '1', '7', '10', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('150', '40100', '园区入驻', '园区入驻', '1', '2', '2', '9', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('151', '40100', '园区入驻', '园区入驻', '2', '4', '1', '10', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('152', '40100', '园区入驻', '园区入驻', '2', '5', '2', '9', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('155', '36000', '孵化器入驻（定制）', '孵化器入驻', '2', '4', '1', '10', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('158', '40200', '工位预订', '工位预订', '1', '2', '2', '9', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('159', '40200', '工位预订', '工位预订', '2', '4', '1', '10', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('160', '40200', '工位预订', '工位预订', '2', '5', '2', '9', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('162', '22000', '装修办理', '装修办理', '1', '2', '2', '9', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('163', '22000', '装修办理', '装修申请管理', '2', '4', '1', '11', '12', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('167', '22000', '楼宇资产管理', '楼宇资产管理', '2', '4', '1', '8', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('170', '33000', '企业管理', '园区企业', '1', '2', '2', '12', '15', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('171', '33000', '企业管理', '企业管理', '2', '4', '1', '8', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('173', '21100', '企业客户管理', '移动招商', '1', '1', '1', '8', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('175', '21100', '企业客户管理', '企业客户管理', '2', '4', '1', '8', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('183', '37000', '个人客户管理', '个人客户管理', '2', '4', '1', '8', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('187', '21200', '合同管理', '合同管理', '2', '4', '1', '10', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('191', '32500', '合同管理（定制）', '合同管理', '2', '4', '1', '10', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('194', '20400', '物业缴费', '物业缴费', '1', '2', '2', '9', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('195', '20400', '物业缴费', '物业缴费管理', '2', '4', '1', '14', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('199', '21300', '付款管理', '付款管理', '2', '4', '1', '14', '11', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('205', '40400', '资源预约', '资源预约管理', '1', '1', '1', '11', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('206', '40400', '资源预约', '资源预约', '1', '2', '2', '12', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('207', '40400', '资源预约', '资源预约管理', '2', '4', '1', '11', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('208', '40400', '资源预约', '资源预约', '2', '5', '2', '12', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('210', '40800', '停车缴费', '停车缴费', '1', '2', '2', '12', '8', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('211', '40800', '停车缴费', '停车缴费', '2', '4', '1', '11', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('213', '20900', '车辆放行', '车辆放行', '1', '1', '1', '11', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('215', '20900', '车辆放行', '车辆放行', '2', '4', '1', '11', '9', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('217', '49200', '物品搬迁', '物品放行', '1', '1', '1', '11', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('218', '49200', '物品搬迁', '物品搬迁', '1', '2', '2', '12', '9', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('219', '49200', '物品搬迁', '物品搬迁', '2', '4', '1', '11', '10', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('222', '40300', '服务热线', '服务热线', '1', '2', '2', '12', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('223', '40300', '服务热线', '服务热线', '2', '4', '1', '11', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('224', '40300', '服务热线', '服务热线', '2', '5', '2', '12', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('225', '41400', '企业云打印', '云打印管理', '1', '1', '1', '3', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('226', '41400', '企业云打印', '云打印', '1', '1', '2', '1', '10', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('227', '41400', '企业云打印', '云打印管理', '2', '4', '1', '3', '11', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('228', '41400', '企业云打印', '云打印', '2', '5', '2', '1', '11', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('230', '40700', '快递服务', '快递服务', '1', '2', '2', '12', '10', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('231', '40700', '快递服务', '快递服务', '2', '4', '1', '11', '13', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('234', '41500', '文件管理', '文件管理', '1', '2', '2', '6', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('235', '41500', '文件管理', '文件管理', '2', '4', '1', '6', '6', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('238', '41100', '一键上网', '一键上网', '1', '2', '2', '12', '11', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('239', '41100', '一键上网', '一键上网', '2', '4', '1', '11', '14', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('242', '40070', '园区地图（定制）', '园区地图', '1', '2', '2', '12', '12', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('243', '40070', '园区地图（定制）', '园区地图', '2', '4', '1', '11', '15', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('246', '40730', '企业人才（定制）', '企业人才', '1', '2', '2', '12', '13', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('247', '40730', '企业人才（定制）', '企业人才', '2', '4', '1', '11', '16', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('250', '41600', '园区审批（定制）', '园区审批', '1', '2', '2', '12', '14', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('251', '41600', '园区审批（定制）', '园区审批', '2', '4', '1', '11', '17', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('254', '41200', '电子钱包（定制）', '钱包', '1', '2', '2', '12', '16', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('255', '41200', '电子钱包（定制）', '一卡通', '2', '4', '1', '11', '18', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('258', '40500', '服务联盟', '服务联盟', '1', '2', '2', '13', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('259', '40500', '服务联盟', '服务联盟', '2', '4', '1', '13', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('260', '40500', '服务联盟', '服务联盟', '2', '5', '2', '13', '0', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('262', '20100', '物业报修', '物业报修', '1', '2', '2', '12', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('263', '20100', '物业报修', '报修管理', '2', '4', '1', '14', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('265', '20800', '物业巡检', '物业巡检', '1', '1', '1', '14', '1', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('267', '20800', '物业巡检', '物业巡检', '2', '4', '1', '14', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('269', '20600', '品质核查', '品质核查', '1', '1', '1', '14', '2', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('271', '20600', '品质核查', '品质核查', '2', '4', '1', '14', '4', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('273', '49100', '能耗管理', '能耗管理', '1', '1', '1', '14', '3', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('275', '49100', '能耗管理', '能耗管理', '2', '4', '1', '14', '5', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('279', '21000', '仓库管理', '仓库管理', '2', '4', '1', '14', '7', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('283', '26000', '采购管理', '采购管理', '2', '4', '1', '14', '8', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('287', '27000', '供应商管理', '供应商管理', '2', '4', '1', '14', '9', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('291', '25000', '请示单管理（定制）', '请示单管理', '2', '4', '1', '14', '10', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('306', '50700', '视频会议', '视频会议', '1', '1', '2', '1', '11', NULL);
-INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `second_app_type`, `default_order`, `uri`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '2', '2', '12', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('3', '50100', '组织架构', '组织架构', '2', '4', '1', '4', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('4', '50100', '组织架构', '通讯录', '2', '4', '2', '2', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('7', '50300', '职级管理', '职级管理', '2', '4', '1', '4', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('11', '50500', '员工认证', '员工认证', '2', '4', '1', '4', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('15', '50400', '人事档案', '人事档案', '2', '4', '1', '4', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('18', '52000', '流程审批', '审批', '1', '1', '2', '1', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('19', '52000', '流程审批', '审批管理', '2', '4', '1', '3', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('20', '52000', '流程审批', '审批', '2', '4', '2', '1', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('22', '50600', '打卡考勤', '打卡考勤', '1', '1', '2', '2', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('23', '50600', '打卡考勤', '考勤管理', '2', '4', '1', '4', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('24', '50600', '打卡考勤', '打卡考勤', '2', '4', '2', '2', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('26', '54000', '工作汇报', '工作汇报', '1', '1', '2', '1', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('27', '54000', '工作汇报', '汇报管理', '2', '4', '1', '3', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('28', '54000', '工作汇报', '工作汇报', '2', '4', '2', '1', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('35', '51300', '社保管理', '社保管理', '2', '4', '1', '4', '8', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('38', '51400', '薪酬管理', '工资条', '1', '1', '2', '2', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('39', '51400', '薪酬管理', '薪酬管理', '2', '4', '1', '4', '9', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('40', '51400', '薪酬管理', '工资条', '2', '4', '2', '2', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('42', '55000', '文档', '文档', '1', '1', '2', '1', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('43', '55000', '文档', '文档管理', '2', '4', '1', '3', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('44', '55000', '文档', '文档', '2', '4', '2', '1', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('50', '57000', '企业公告', '企业公告', '1', '1', '2', '1', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('51', '57000', '企业公告', '公告管理', '2', '4', '1', '3', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('52', '57000', '企业公告', '企业公告', '2', '4', '2', '1', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('55', '60100', '管理员管理', '管理员管理', '2', '4', '1', '0', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('59', '60210', '责任部门配置', '责任部门配置', '2', '4', '1', '0', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('62', '20830', '任务管理', '我的任务', '1', '1', '2', '1', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('63', '20830', '任务管理', '任务管理', '2', '4', '1', '3', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('64', '20830', '任务管理', '我的任务', '2', '4', '2', '1', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('67', '41300', '应用活跃统计', '应用活跃统计', '2', '4', '1', '15', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('71', '41330', '用户行为统计', '用户行为统计', '2', '4', '1', '15', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('75', '41020', '企业门禁', '企业门禁管理', '2', '4', '1', '4', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('79', '41010', '公共门禁', '公共门禁管理', '2', '4', '1', '11', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('82', '10300', '园区公告', '园区公告', '1', '2', '2', '6', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('83', '10300', '园区公告', '园区公告', '2', '4', '1', '6', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('84', '10300', '园区公告', '园区公告', '2', '5', '2', '6', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('87', '10900', '启动广告', '启动广告', '2', '4', '1', '6', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('90', '10400', '园区广告', '园区广告', '1', '2', '2', '6', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('91', '10400', '园区广告', '园区广告', '2', '4', '1', '6', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('92', '10400', '园区广告', '园区广告', '2', '5', '2', '6', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('94', '10800', '园区快讯', '园区快讯', '1', '2', '2', '6', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('95', '10800', '园区快讯', '园区快讯', '2', '4', '1', '6', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('96', '10800', '园区快讯', '园区快讯', '2', '5', '2', '6', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('98', '10500', '园区电子报', '园区电子报', '1', '2', '2', '6', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('99', '10500', '园区电子报', '园区电子报', '2', '4', '1', '6', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('103', '11000', '一键推送', '一键推送', '2', '4', '1', '6', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('107', '12200', '短信推送（定制）', '短信推送', '2', '4', '1', '6', '8', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('111', '34000', '用户管理', '用户管理', '2', '4', '1', '7', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('115', '35000', '用户认证', '用户认证', '2', '4', '1', '7', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('119', '47000', '积分管理', '积分管理', '2', '4', '1', '7', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('121', '10600', '园区活动', '园区活动管理', '1', '1', '1', '7', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('122', '10600', '园区活动', '园区活动', '1', '2', '2', '7', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('123', '10600', '园区活动', '园区活动管理', '2', '4', '1', '7', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('124', '10600', '园区活动', '园区活动', '2', '5', '2', '7', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('125', '10100', '园区论坛', '园区论坛管理', '1', '1', '1', '7', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('126', '10100', '园区论坛', '园区论坛', '1', '2', '2', '7', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('127', '10100', '园区论坛', '园区论坛管理', '2', '4', '1', '7', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('129', '10750', '俱乐部', '俱乐部管理', '1', '1', '1', '7', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('130', '10750', '俱乐部', '俱乐部', '1', '2', '2', '7', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('131', '10750', '俱乐部', '俱乐部管理', '2', '4', '1', '7', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('133', '10760', '行业协会', '行业协会管理', '1', '1', '1', '7', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('134', '10760', '行业协会', '行业协会', '1', '2', '2', '7', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('135', '10760', '行业协会', '行业协会管理', '2', '4', '1', '7', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('138', '41700', '问卷调查', '问卷调查', '1', '2', '2', '7', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('139', '41700', '问卷调查', '问卷调查管理', '2', '4', '1', '7', '8', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('143', '30600', '黑名单管理', '黑名单管理', '2', '4', '1', '7', '9', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('147', '51000', '举报管理', '举报管理', '2', '4', '1', '7', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('150', '40100', '园区入驻', '园区入驻', '1', '2', '2', '9', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('151', '40100', '园区入驻', '园区入驻', '2', '4', '1', '10', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('152', '40100', '园区入驻', '园区入驻', '2', '5', '2', '9', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('155', '36000', '孵化器入驻（定制）', '孵化器入驻', '2', '4', '1', '10', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('158', '40200', '工位预订', '工位预订', '1', '2', '2', '9', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('159', '40200', '工位预订', '工位预订', '2', '4', '1', '10', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('160', '40200', '工位预订', '工位预订', '2', '5', '2', '9', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('162', '22000', '装修办理', '装修办理', '1', '2', '2', '9', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('163', '22000', '装修办理', '装修申请管理', '2', '4', '1', '11', '12', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('167', '22000', '楼宇资产管理', '楼宇资产管理', '2', '4', '1', '8', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('170', '33000', '企业管理', '园区企业', '1', '2', '2', '12', '15', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('171', '33000', '企业管理', '企业管理', '2', '4', '1', '8', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('173', '21100', '企业客户管理', '移动招商', '1', '1', '1', '8', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('175', '21100', '企业客户管理', '企业客户管理', '2', '4', '1', '8', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('183', '37000', '个人客户管理', '个人客户管理', '2', '4', '1', '8', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('187', '21200', '合同管理', '合同管理', '2', '4', '1', '10', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('191', '32500', '合同管理（定制）', '合同管理', '2', '4', '1', '10', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('194', '20400', '物业缴费', '物业缴费', '1', '2', '2', '9', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('195', '20400', '物业缴费', '物业缴费管理', '2', '4', '1', '14', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('199', '21300', '付款管理', '付款管理', '2', '4', '1', '14', '11', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('205', '40400', '资源预约', '资源预约管理', '1', '1', '1', '11', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('206', '40400', '资源预约', '资源预约', '1', '2', '2', '12', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('207', '40400', '资源预约', '资源预约管理', '2', '4', '1', '11', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('208', '40400', '资源预约', '资源预约', '2', '5', '2', '12', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('210', '40800', '停车缴费', '停车缴费', '1', '2', '2', '12', '8', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('211', '40800', '停车缴费', '停车缴费', '2', '4', '1', '11', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('213', '20900', '车辆放行', '车辆放行', '1', '1', '1', '11', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('215', '20900', '车辆放行', '车辆放行', '2', '4', '1', '11', '9', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('217', '49200', '物品搬迁', '物品放行', '1', '1', '1', '11', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('218', '49200', '物品搬迁', '物品搬迁', '1', '2', '2', '12', '9', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('219', '49200', '物品搬迁', '物品搬迁', '2', '4', '1', '11', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('222', '40300', '服务热线', '服务热线', '1', '2', '2', '12', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('223', '40300', '服务热线', '服务热线', '2', '4', '1', '11', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('224', '40300', '服务热线', '服务热线', '2', '5', '2', '12', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('225', '41400', '企业云打印', '云打印管理', '1', '1', '1', '3', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('226', '41400', '企业云打印', '云打印', '1', '1', '2', '1', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('227', '41400', '企业云打印', '云打印管理', '2', '4', '1', '3', '11', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('228', '41400', '企业云打印', '云打印', '2', '5', '2', '1', '11', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('230', '40700', '快递服务', '快递服务', '1', '2', '2', '12', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('231', '40700', '快递服务', '快递服务', '2', '4', '1', '11', '13', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('234', '41500', '文件管理', '文件管理', '1', '2', '2', '6', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('235', '41500', '文件管理', '文件管理', '2', '4', '1', '6', '6', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('238', '41100', '一键上网', '一键上网', '1', '2', '2', '12', '11', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('239', '41100', '一键上网', '一键上网', '2', '4', '1', '11', '14', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('242', '40070', '园区地图（定制）', '园区地图', '1', '2', '2', '12', '12', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('243', '40070', '园区地图（定制）', '园区地图', '2', '4', '1', '11', '15', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('246', '40730', '企业人才（定制）', '企业人才', '1', '2', '2', '12', '13', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('247', '40730', '企业人才（定制）', '企业人才', '2', '4', '1', '11', '16', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('250', '41600', '园区审批（定制）', '园区审批', '1', '2', '2', '12', '14', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('251', '41600', '园区审批（定制）', '园区审批', '2', '4', '1', '11', '17', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('254', '41200', '电子钱包（定制）', '钱包', '1', '2', '2', '12', '16', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('255', '41200', '电子钱包（定制）', '一卡通', '2', '4', '1', '11', '18', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('258', '40500', '服务联盟', '服务联盟', '1', '2', '2', '13', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('259', '40500', '服务联盟', '服务联盟', '2', '4', '1', '13', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('260', '40500', '服务联盟', '服务联盟', '2', '5', '2', '13', '0', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('262', '20100', '物业报修', '物业报修', '1', '2', '2', '12', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('263', '20100', '物业报修', '报修管理', '2', '4', '1', '14', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('265', '20800', '物业巡检', '物业巡检', '1', '1', '1', '14', '1', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('267', '20800', '物业巡检', '物业巡检', '2', '4', '1', '14', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('269', '20600', '品质核查', '品质核查', '1', '1', '1', '14', '2', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('271', '20600', '品质核查', '品质核查', '2', '4', '1', '14', '4', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('273', '49100', '能耗管理', '能耗管理', '1', '1', '1', '14', '3', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('275', '49100', '能耗管理', '能耗管理', '2', '4', '1', '14', '5', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('279', '21000', '仓库管理', '仓库管理', '2', '4', '1', '14', '7', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('283', '26000', '采购管理', '采购管理', '2', '4', '1', '14', '8', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('287', '27000', '供应商管理', '供应商管理', '2', '4', '1', '14', '9', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('291', '25000', '请示单管理（定制）', '请示单管理', '2', '4', '1', '14', '10', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('306', '50700', '视频会议', '视频会议', '1', '1', '2', '1', '11', NULL);
+INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '2', '2', '12', '10', NULL);
 
 
 -- 增加应用、项目和公司菜单
@@ -238,21 +246,25 @@ where nu.id = n_c.news_id;
 -- 20180528-huangliangming-配置项管理-#30016
 -- 初始化配置项表“是否只读”字段为“是”，值为1
 UPDATE eh_configurations s SET s.is_readonly = 1 ;
--- 添加菜单
-INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
-VALUES(30000000 ,'后台配置项',11000000,NULL,'server-configuration',1,2,'/11000000/30000000','zuolin',50,60100,3,'system','module',NULL);
--- 20180522-huangliangming
 
--- janson 电商
-INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`) VALUES ('1', 'zuolinAccount', '0', '0', 'd7c0c950-d57d-4290-9318-f927dcca92c2', '1k0ty3aZPC8bjMm8V9+pFmsU5B7cImfQXB4GUm4ACSFPP1IhZI5basNbUBXe7p6gJ7OC8J03DW1U8fvvtpim6Q==', NOW());
+-- 现网已有，导致冲突了。start2
+-- -- 添加菜单
+-- INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
+-- VALUES(30000000 ,'后台配置项',11000000,NULL,'server-configuration',1,2,'/11000000/30000000','zuolin',50,60100,3,'system','module',NULL);
+-- -- 20180522-huangliangming
+
+
+
+-- -- janson 电商
+-- INSERT INTO `eh_payment_accounts` (`id`, `name`, `account_id`, `system_id`, `app_key`, `secret_key`, `create_time`) VALUES ('1', 'zuolinAccount', '0', '0', 'd7c0c950-d57d-4290-9318-f927dcca92c2', '1k0ty3aZPC8bjMm8V9+pFmsU5B7cImfQXB4GUm4ACSFPP1IhZI5basNbUBXe7p6gJ7OC8J03DW1U8fvvtpim6Q==', NOW());
 -- end janson
 
+--
+-- -- 增加电商模块，用于运营板块 add by yanjun 201807041725
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92000', '电商', '0', '/92000', '1', '1', '2', '0', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '0', NULL);
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92100', '微商城', '92000', '/92000/92100', '1', '2', '2', '0', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', NULL, '2018-07-04 17:23:33', '0', '0', '0', '0', NULL, '1', '2', NULL);
 
--- 增加电商模块，用于运营板块 add by yanjun 201807041725
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92000', '电商', '0', '/92000', '1', '1', '2', '0', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '0', NULL);
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92100', '微商城', '92000', '/92000/92100', '1', '2', '2', '0', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', NULL, '2018-07-04 17:23:33', '0', '0', '0', '0', NULL, '1', '2', NULL);
-
-
+-- 现网已有，导致冲突了。end2
 -- -----------------------------------------------------  以上为 5.6.3 以前的脚本 ----------------------------------------
 
 -- -----------------------------------------------------  以下为 5.6.3 新增的脚本 ----------------------------------------
@@ -296,15 +308,18 @@ UPDATE eh_service_modules set app_type = 0 WHERE id in (50100,  50300, 50500, 50
 UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
 
 
+-- 注释掉，原因如下文描述  start3
 -- 增加应用、项目和公司菜单  (仅在标准版执行)
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15010000', '左邻标准版管理', '15000000', NULL, NULL, '1', '2', '/15000000/15010000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15010000', NULL, 'project-management', '1', '2', '/15000000/15010000/15040000', 'zuolin', '10', NULL, '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15010000', NULL, 'application-management', '1', '2', '/15000000/15010000/15030000', 'zuolin', '20', NULL, '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15010000', NULL, 'business-admin', '1', '2', '/15000000/15010000/15050000', 'zuolin', '40', NULL, '3', 'system', 'module', NULL);
-DELETE FROM `eh_web_menus` WHERE `id`='15030100';
-DELETE FROM `eh_web_menus` WHERE `id`='15030200';
-DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15010000', '左邻标准版管理', '15000000', NULL, NULL, '1', '2', '/15000000/15010000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15010000', NULL, 'project-management', '1', '2', '/15000000/15010000/15040000', 'zuolin', '10', NULL, '3', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15010000', NULL, 'application-management', '1', '2', '/15000000/15010000/15030000', 'zuolin', '20', NULL, '3', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15010000', NULL, 'business-admin', '1', '2', '/15000000/15010000/15050000', 'zuolin', '40', NULL, '3', 'system', 'module', NULL);
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030100';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030200';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+
+-- 注释掉，原因如下文描述  end3
 
 -- 公司门禁 员工认证 职级管理 任务管理 设置为org控制  add by yanjun 20180614
 UPDATE eh_service_modules SET module_control_type = 'org_control' WHERE id in (41020, 50500, 50300, 13000);
@@ -316,11 +331,11 @@ UPDATE `eh_service_module_apps` SET `instance_config`='{"url":"${home.url}/goods
 UPDATE `eh_service_modules` SET `client_handler_type`='2' WHERE `id`='49200';
 -- end
 
-
--- 增加电商模块，用于运营板块 add by yanjun 201807041725
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92000', '电商', '0', '/92000', '1', '1', '2', '0', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '0', NULL);
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92100', '微商城', '92000', '/92000/92100', '1', '2', '2', '0', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', NULL, '2018-07-04 17:23:33', '0', '0', '0', '0', NULL, '1', '2', NULL);
-
+-- 现网已有，导致冲突了。start4
+-- -- 增加电商模块，用于运营板块 add by yanjun 201807041725
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92000', '电商', '0', '/92000', '1', '1', '2', '0', '2018-07-04 17:22:11', NULL, NULL, '2018-07-04 17:22:20', '0', '0', '0', '0', NULL, '1', '0', NULL);
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`) VALUES ('92100', '微商城', '92000', '/92000/92100', '1', '2', '2', '0', '2018-07-04 17:23:28', '{\"url\":\"${stat.biz.server.url}zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=${stat.biz.server.url}nar/biz/web/app/user/index.html?clientrecommend=1#/recommend?_k=zlbiz#sign_suffix\"}', NULL, '2018-07-04 17:23:33', '0', '0', '0', '0', NULL, '1', '2', NULL);
+-- 现网已有，导致冲突了。end4
 
 -- 更新企业客户管理模块
 UPDATE eh_service_modules set client_handler_type = 2 where id = 21100;
@@ -451,100 +466,103 @@ UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id in (59100, 5300
 
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   start ---------------------------------
 
--- --------------企业OA相关功能提前融合到标准版，在5.9.0全量合并到标准版发布时需要跳过这部分脚本的执行-----------
-
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
-UPDATE eh_punch_rules SET punch_remind_flag=1,remind_minutes_on_duty=10 WHERE rule_type=1;
-
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 假期余额变更消息提醒文案配置
-SET @max_template_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),1);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10006, 'zh_CN', '消息标题','假期余额变动', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10007, 'zh_CN', '假期余额变动提醒：管理员调整假期余额','管理员调整了你的假期余额：<#if annualLeaveAdd != 0><#if annualLeaveAdd gt 0>发放<#else>扣除</#if>年假${annualLeaveAddShow}</#if><#if annualLeaveAdd != 0 && overtimeAdd != 0>，</#if><#if overtimeAdd != 0><#if overtimeAdd gt 0>发放<#else>扣除</#if>调休${overtimeAddShow}</#if>。当前余额为：年假${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10008, 'zh_CN', '假期余额变动提醒：年假/调休的审批被撤销/终止/删除','${categoryName}申请（${requestTime}） 已失效，假期已返还。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10009, 'zh_CN', '假期余额变动提醒：请假审批提交','${categoryName}申请（${requestTime}） 已提交，假期已扣除。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType eq 0>上班打卡<#else>下班打卡</#if>', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 2, 'zh_CN', '上班打卡提醒','最晚${onDutyTime}上班打卡，立即打卡', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 3, 'zh_CN', '下班打卡提醒','上班辛苦了，记得打下班卡', 0);
-
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 打卡记录报表排序
-UPDATE eh_punch_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
-SET l.detail_id=d.id
-WHERE d.target_id>0 AND l.detail_id IS NULL;
-
-UPDATE eh_punch_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
-SET l.detail_id=d.id
-WHERE d.target_id>0 AND l.detail_id IS NULL;
-
--- AUTHOR: 吴寒
--- REMARK: issue-33943 日程提醒1.2 增加5.9.0之后使用的提醒设置
-SET @id = (SELECT MAX(id) FROM eh_remind_settings);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'准时','0',NULL,'1','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5分钟','0',NULL,'2','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',300000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前15分钟','0',NULL,'3','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',900000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前30分钟','0',NULL,'4','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',1800000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1小时','0',NULL,'5','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',3600000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2小时','0',NULL,'6','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',7200000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1天','1',NULL,'7','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2天','2',NULL,'8','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前3天','3',NULL,'9','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5天','5',NULL,'10','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1周','7',NULL,'11','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES('remind.version.segmen','5.8.4','日程提醒的版本分隔','0',NULL,NULL);
-
-SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','1','zh_CN','完成日程发消息','${trackContractName}的日程“${planDescription}” 已完成','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','2','zh_CN','重置未完成日程发消息','${trackContractName}的日程“${planDescription}” 重置为未完成','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','3','zh_CN','修改日程发消息','${trackContractName}修改了日程“${planDescription}”','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','4','zh_CN','删除日程发消息','${trackContractName}删除了日程“${planDescription}”','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','5','zh_CN','取消共享日程发消息','${trackContractName}的日程“${planDescription}” 取消共享了','0');
+-- 现网已有，导致冲突了。start 6
 
 
--- AUTHOR: 吴寒
--- REMARK: 会议管理V1.2
-UPDATE eh_configurations SET VALUE = 5000 WHERE NAME ='meeting.record.word.limit';
-
--- AUTHOR: 荣楠
--- REMARK: 工作汇报V1.2
-UPDATE `eh_locale_templates` SET `text`='${applierName}给你提交了${reportName}（${reportTime}）', `code` = 101 WHERE `scope`='work.report.notification' AND `code`='1';
-UPDATE `eh_locale_templates` SET `text`='${applierName}更新了Ta的${reportName}（${reportTime}）', `code` = 102 WHERE `scope`='work.report.notification' AND `code`='2';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 回复了你', `code` = 1, `description` = '评论消息类型1' WHERE `scope`='work.report.notification' AND `code`='3';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 发表了评论', `code` = 2, `description` = '评论消息类型2' WHERE `scope`='work.report.notification' AND `code`='4';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 回复了你', `code` = 3, `description` = '评论消息类型3' WHERE `scope`='work.report.notification' AND `code`='5';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在${applierName}的${reportName}（${reportTime}）中 回复了你', `code` = 4, `description` = '评论消息类型4' WHERE `scope`='work.report.notification' AND `code`='6';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 发表了评论', `code` = 5, `description` = '评论消息类型5' WHERE `scope`='work.report.notification' AND `code`='7';
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endTime":"10:00","endType":1,"startTime":"15:00","startType":0}' WHERE `report_type` = 0;
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"5","startTime":"15:00","startType":0}' WHERE `report_type` = 1;
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"31","startTime":"15:00","startType":0}' WHERE `report_type` = 2;
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE (`id`='1') LIMIT 1;
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE (`id`='2') LIMIT 1;
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE (`id`='3') LIMIT 1;
-SET @config_id = (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES (@config_id := @config_id + 1, 'work.report.icon', 'cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ', 'the icon of the customize workReport ', '0', NULL, NULL);
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ' ;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE report_template_id = 1;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE report_template_id = 2;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE report_template_id = 3;
--- AUTHOR: ryan  20180827
--- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息
-
--- AUTHOR: ryan  20180827
--- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像
-
--- AUTHOR: ryan  20180926
--- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像
--- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
+-- -- --------------企业OA相关功能提前融合到标准版，在5.9.0全量合并到标准版发布时需要跳过这部分脚本的执行-----------
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
+-- UPDATE eh_punch_rules SET punch_remind_flag=1,remind_minutes_on_duty=10 WHERE rule_type=1;
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 假期余额变更消息提醒文案配置
+-- SET @max_template_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),1);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10006, 'zh_CN', '消息标题','假期余额变动', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10007, 'zh_CN', '假期余额变动提醒：管理员调整假期余额','管理员调整了你的假期余额：<#if annualLeaveAdd != 0><#if annualLeaveAdd gt 0>发放<#else>扣除</#if>年假${annualLeaveAddShow}</#if><#if annualLeaveAdd != 0 && overtimeAdd != 0>，</#if><#if overtimeAdd != 0><#if overtimeAdd gt 0>发放<#else>扣除</#if>调休${overtimeAddShow}</#if>。当前余额为：年假${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10008, 'zh_CN', '假期余额变动提醒：年假/调休的审批被撤销/终止/删除','${categoryName}申请（${requestTime}） 已失效，假期已返还。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10009, 'zh_CN', '假期余额变动提醒：请假审批提交','${categoryName}申请（${requestTime}） 已提交，假期已扣除。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+--
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType eq 0>上班打卡<#else>下班打卡</#if>', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 2, 'zh_CN', '上班打卡提醒','最晚${onDutyTime}上班打卡，立即打卡', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 3, 'zh_CN', '下班打卡提醒','上班辛苦了，记得打下班卡', 0);
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 打卡记录报表排序
+-- UPDATE eh_punch_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+-- SET l.detail_id=d.id
+-- WHERE d.target_id>0 AND l.detail_id IS NULL;
+--
+-- UPDATE eh_punch_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+-- SET l.detail_id=d.id
+-- WHERE d.target_id>0 AND l.detail_id IS NULL;
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: issue-33943 日程提醒1.2 增加5.9.0之后使用的提醒设置
+-- SET @id = (SELECT MAX(id) FROM eh_remind_settings);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'准时','0',NULL,'1','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5分钟','0',NULL,'2','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',300000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前15分钟','0',NULL,'3','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',900000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前30分钟','0',NULL,'4','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',1800000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1小时','0',NULL,'5','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',3600000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2小时','0',NULL,'6','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',7200000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1天','1',NULL,'7','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2天','2',NULL,'8','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前3天','3',NULL,'9','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5天','5',NULL,'10','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1周','7',NULL,'11','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+--
+-- INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES('remind.version.segmen','5.8.4','日程提醒的版本分隔','0',NULL,NULL);
+--
+-- SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','1','zh_CN','完成日程发消息','${trackContractName}的日程“${planDescription}” 已完成','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','2','zh_CN','重置未完成日程发消息','${trackContractName}的日程“${planDescription}” 重置为未完成','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','3','zh_CN','修改日程发消息','${trackContractName}修改了日程“${planDescription}”','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','4','zh_CN','删除日程发消息','${trackContractName}删除了日程“${planDescription}”','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','5','zh_CN','取消共享日程发消息','${trackContractName}的日程“${planDescription}” 取消共享了','0');
+--
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: 会议管理V1.2
+-- UPDATE eh_configurations SET VALUE = 5000 WHERE NAME ='meeting.record.word.limit';
+--
+-- -- AUTHOR: 荣楠
+-- -- REMARK: 工作汇报V1.2
+-- UPDATE `eh_locale_templates` SET `text`='${applierName}给你提交了${reportName}（${reportTime}）', `code` = 101 WHERE `scope`='work.report.notification' AND `code`='1';
+-- UPDATE `eh_locale_templates` SET `text`='${applierName}更新了Ta的${reportName}（${reportTime}）', `code` = 102 WHERE `scope`='work.report.notification' AND `code`='2';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 回复了你', `code` = 1, `description` = '评论消息类型1' WHERE `scope`='work.report.notification' AND `code`='3';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 发表了评论', `code` = 2, `description` = '评论消息类型2' WHERE `scope`='work.report.notification' AND `code`='4';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 回复了你', `code` = 3, `description` = '评论消息类型3' WHERE `scope`='work.report.notification' AND `code`='5';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在${applierName}的${reportName}（${reportTime}）中 回复了你', `code` = 4, `description` = '评论消息类型4' WHERE `scope`='work.report.notification' AND `code`='6';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 发表了评论', `code` = 5, `description` = '评论消息类型5' WHERE `scope`='work.report.notification' AND `code`='7';
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endTime":"10:00","endType":1,"startTime":"15:00","startType":0}' WHERE `report_type` = 0;
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"5","startTime":"15:00","startType":0}' WHERE `report_type` = 1;
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"31","startTime":"15:00","startType":0}' WHERE `report_type` = 2;
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE (`id`='1') LIMIT 1;
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE (`id`='2') LIMIT 1;
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE (`id`='3') LIMIT 1;
+-- SET @config_id = (SELECT MAX(id) FROM eh_configurations);
+-- INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES (@config_id := @config_id + 1, 'work.report.icon', 'cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ', 'the icon of the customize workReport ', '0', NULL, NULL);
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ' ;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE report_template_id = 1;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE report_template_id = 2;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE report_template_id = 3;
+-- -- AUTHOR: ryan  20180827
+-- -- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息
+--
+-- -- AUTHOR: ryan  20180827
+-- -- REMARK: 执行 /workReport/updateWorkReportReceiverAvatar 接口, 用以更新工作汇报接收人头像
+--
+-- -- AUTHOR: ryan  20180926
+-- -- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像
+-- -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
 
 -- 在 5.8.1-delta-data-release.sql 中已存在
 
@@ -576,15 +594,18 @@ UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRa
 -- VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'cs://1/image/aW1hZ2UvTVRwaU5tUXhNR013T1RGaVlUVmtNalF6TmpkaVpqZzVNVGhtWlRoaU1XVTRaQQ',1,1);
 -- -- -------------------END-----------------------------------------------
 
--- ------------------------园区公告功能提前融合到标准版 ----------------------
--- AUTHOR: 梁燕龙
--- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
-INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
-VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
-INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
-INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
----------------------------园区公告功能提前融合到标准版 END -------------
+-- -- ------------------------园区公告功能提前融合到标准版 ----------------------
+-- -- AUTHOR: 梁燕龙
+-- -- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
+-- INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+-- VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
+-- INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
+-- INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+-- ---------------------------园区公告功能提前融合到标准版 END -------------
+--
 
+
+-- 现网已有，导致冲突了。end 6
 
 -- ------------------------- 物业融合标准版------------------------------------
 -- AUTHOR:jiarui
