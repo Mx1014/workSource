@@ -62,7 +62,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId, Long appId);
 
 	void createContractParamGroupMap(ContractParamGroupMap map);
 	void deleteContractParamGroupMap(ContractParamGroupMap map);
@@ -110,7 +110,7 @@ public interface ContractProvider {
 	void createContractTemplate(ContractTemplate contractTemplate);
 	void updateContractTemplate(ContractTemplate contractTemplate);
 	ContractTemplate findContractTemplateById(Long id);
-	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, Long pageAnchor, Integer pageSize);
+	List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId, Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId);
 	void setPrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId, Long templateId);
 	//void deletePrintContractTemplate(Integer namespaceId, Long contractId, Long categoryId, String contractNumber, Long ownerId);
 	Boolean getContractTemplateById(Long id);

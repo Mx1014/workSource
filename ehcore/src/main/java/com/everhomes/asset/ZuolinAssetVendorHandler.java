@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -203,6 +204,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private LocaleStringProvider localeStringProvider;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
     
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -831,22 +835,6 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
         checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
-//        //查询合同，用来聚类
-//        List<ContractDTO> contracts = listCustomerContracts(cmd.getTargetType(), cmd.getTargetId(), cmd.getNamespaceId(), cmd.getOwnerId());
-//        if(contracts == null || contracts.size() < 1){
-//            return null;
-//        }
-//        List<Long> contractIds = new ArrayList<>();
-//        Map<Long,ContractDTO> contractMap = new HashMap<>();
-//        contracts.stream().forEach(r -> contractMap.put(r.getId(),r));
-//        contracts.stream().forEach(r -> contractIds.add(r.getId()));
-//        List<PaymentBills> bills = assetProvider.findSettledBillsByContractIds(contractIds);
-
-        //定位用户，如果是个人用户，前端拿不到用户id，从会话中获得
-//        if(cmd.getTargetType().equals(AssetPaymentStrings.EH_USER)){
-//            cmd.setTargetId(UserContext.currentUserId());
-//        }
-        
         List<PaymentBills> paymentBills = new ArrayList<PaymentBills>();
         if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
         	//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
@@ -949,10 +937,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
-                        dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
+                        dto.setBillGroupName(assetGroupProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
                         //新增收款方账户类型、账户ID字段 
-                        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(billGroupId);
+                        PaymentBillGroup paymentBillGroup = assetGroupProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
                         	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
                         	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
