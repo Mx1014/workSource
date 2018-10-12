@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @WebFilter(filterName = "xssFilter", urlPatterns = "/*", asyncSupported = true)
@@ -21,7 +23,24 @@ public class XssFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        chain.doFilter(xssHttpServletRequestWrapper((HttpServletRequest) request), response);
+        final Set<String> xssExcludeUriSet = ControllerBase.getRestMethodList("", "")
+                .stream()
+                .map(r -> (ExtendRestMethod) r)
+                .filter(r -> r.getXssExclude() != null)
+                .map(ExtendRestMethod::getUri)
+                .collect(Collectors.toSet());
+
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+
+        String contextPath = httpServletRequest.getContextPath();
+        String requestURI = httpServletRequest.getRequestURI();
+        String uri = requestURI.replaceFirst(contextPath, "");
+
+        if (!xssExcludeUriSet.contains(uri)) {
+            chain.doFilter(xssHttpServletRequestWrapper(httpServletRequest), response);
+        } else {
+            chain.doFilter(request, response);
+        }
     }
 
     private HttpServletRequestWrapper xssHttpServletRequestWrapper(HttpServletRequest request) {
