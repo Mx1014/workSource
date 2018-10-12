@@ -31,7 +31,9 @@ public interface FlowStatisticsHandleLogProvider {
 
     Long countLanesCycle(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime, Long laneId) ;
 
-    Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId) ;
+    Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId, Long nodeId) ;
 
     List<FlowStatisticsHandleLog> getStatisticsHandleLogByEventLogId(Long eventLogId) ;
+
+    Integer countLanes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime);
 }

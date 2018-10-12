@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.daos.EhFlowStatisticsHandleLogDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
 import com.everhomes.server.schema.tables.pojos.EhFlowStatisticsHandleLog;
 import com.everhomes.server.schema.tables.records.EhFlowStatisticsHandleLogRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -185,7 +186,7 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
      * @return
      */
     @Override
-    public Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId) {
+    public Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId , Long nodeId) {
         Integer intCount = 0 ;
         try {
 
@@ -246,6 +247,42 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
         } catch (Exception ex) {
             //fetchAny() maybe return null
             return longCount;
+        }
+    }
+
+    /**
+     * 统计泳道个数
+     * @param flowMainId
+     * @param version
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public Integer countLanes(Long flowMainId, Integer version, Timestamp startTime, Timestamp endTime) {
+        Integer intCount = 0 ;
+        try {
+            SelectConditionStep step = context().select(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_LANES_ID)
+                    .from(Tables.EH_FLOW_STATISTICS_HANDLE_LOG)
+                    .where(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_MAIN_ID.eq(flowMainId))
+                    .and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_VERSION.eq(version));
+
+            if(startTime != null){
+                step.and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.START_TIME.ge(startTime));
+            }
+            if(endTime != null){
+                step.and(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.END_TIME.le(endTime));
+            }
+
+            step.groupBy(Tables.EH_FLOW_STATISTICS_HANDLE_LOG.FLOW_LANES_ID);
+            List<Long> count = step.fetchInto(Long.class);
+            if(CollectionUtils.isNotEmpty(count)){
+                intCount =  count.size();
+            }
+            return intCount;
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return intCount;
         }
     }
 

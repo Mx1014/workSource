@@ -91,6 +91,32 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
     }
 
     /**
+     * 通过节点ｌｅｖｅｌ获取节点信息
+     * @param flowMainId
+     * @param version
+     * @param flowNodeLevel
+     * @return
+     */
+    @Override
+    public FlowNode getFlowNodeByFlowLevel(Long flowMainId, Integer version, Integer flowNodeLevel) {
+
+        List<FlowNode> list = new ArrayList<FlowNode>();
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowNodes.class));
+        com.everhomes.server.schema.tables.EhFlowNodes t = Tables.EH_FLOW_NODES;
+        SelectQuery<EhFlowNodesRecord> query = context.selectQuery(t);
+        query.addConditions(t.FLOW_MAIN_ID.eq(flowMainId));
+        query.addConditions(t.FLOW_VERSION.eq(version));
+        query.addConditions(t.NODE_LEVEL.eq(flowNodeLevel));
+        list = query.fetchInto(FlowNode.class);
+
+        if(CollectionUtils.isNotEmpty(list)){
+            return list.get(0);
+        }
+        return null ;
+    }
+
+    /**
      * 获取所有指定类型为step_tracker的记录
      * @return
      */

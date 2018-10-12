@@ -8,6 +8,8 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class FlowStatisticsServiceImpl implements FlowStatisticsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStatisticsServiceImpl.class);
 
     @Autowired
     private FlowProvider flowProvider ;
@@ -133,6 +137,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             dto.setNodeLevel(node.getNodeLevel());
             //处理次数
             Integer times = flowStatisticsHandleLogProvider.countNodesTimes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),node.getId());
+            if(times==null&& times.equals(0)){
+                LOGGER.debug("countNodesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},nodeId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),node.getId());
+            }
             //处理时长
             Long cycles = flowStatisticsHandleLogProvider.countNodesCycle(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),node.getId());
 
@@ -151,6 +158,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         }
         //总处理次数
         Integer times = flowStatisticsHandleLogProvider.countNodesTimes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),null);
+        if(times==null&& times.equals(0)){
+            LOGGER.debug("countAllNodesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
+        }
         //总处理时长
         Long cycles = flowStatisticsHandleLogProvider.countNodesCycle(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),null);
         //当前周期节点平均处理时长(当前节点或子流程处理总时长/处理次数)
@@ -203,7 +213,10 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             Timestamp lastStartTime = new java.sql.Timestamp(lastStartDate.getTime());
             Timestamp lastEndTime =     new java.sql.Timestamp(lastEndDate.getTime());
 
-            Integer lastTimes = flowStatisticsHandleLogProvider.countLanesTimes(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
+            Integer lastTimes = this.countLanesTimes(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
+            if(lastTimes==null&& lastTimes.equals(0)){
+                LOGGER.debug("countLastLanesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},laneId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
+            }
             Long lastCycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
             Long lastAverageCycle = 0L ;
             if(lastCycles!=null && lastTimes!=null&& !lastTimes.equals(0)){
@@ -217,7 +230,10 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
             dto.setLastCycleAverage(lastAverage);
             //当前周期平均处理耗时(泳道平均处理耗时=泳道总处理耗时/经过泳道的次数)
-            Integer times = flowStatisticsHandleLogProvider.countLanesTimes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
+            Integer times = this.countLanesTimes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
+            if(times==null&& times.equals(0)){
+                LOGGER.debug("countLanesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},laneId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
+            }
             Long cycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
             Long averageCycle = 0L ;
             if(cycles!=null && times!=null&& !times.equals(0)){
@@ -233,12 +249,15 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             Double earlyComaredVal = (lastAverage - average) /average ;
             dto.setEarlyComparedVal(earlyComaredVal);
         }
-        //当前周期泳道平均处理时长
-        Integer times = flowStatisticsHandleLogProvider.countLanesTimes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),null);
+        //当前周期泳道平均处理时长(所有泳道的处理时长总和/泳道个数)
+        Integer lanesCount = flowStatisticsHandleLogProvider.countLanes(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
+        if(lanesCount==null&& lanesCount.equals(0)){
+            LOGGER.debug("countLanes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
+        }
         Long cycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),null);
         Long averageCycle = 0L ;
-        if(cycles!=null && times!=null&& !times.equals(0)){
-            averageCycle = cycles/times ;
+        if(cycles!=null && lanesCount!=null&& !lanesCount.equals(0)){
+            averageCycle = cycles/lanesCount ;
         }
         Double average = 0D;
         //由秒转化为小时
@@ -258,11 +277,21 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
      * @param laneId
      * @return
      */
-    private Long countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId){
+    private Integer countLanesTimes(Long flowMainId , Integer version ,Timestamp startTime , Timestamp endTime , Long laneId){
 
-        //找出条件范围内有几次任务
-        //1.
-        return null ;
+        //1.查询出该泳道信息
+        FlowLane lane = flowLaneProvider.findById(laneId);
+        if(lane == null){
+            return 0 ;
+        }
+        //2.查询同该泳道首个节点
+        FlowNode node = flowStatisticsProvider.getFlowNodeByFlowLevel(flowMainId,version,lane.getFlowNodeLevel());
+        if(node == null){
+            return 0 ;
+        }
+        //3.统计首个节点的记录数即为经过该泳道的次数（以进入的次数为准）
+        Integer times = flowStatisticsHandleLogProvider.countLanesTimes(flowMainId,version,startTime,endTime,laneId,node.getId());
+        return times ;
     }
 
 
