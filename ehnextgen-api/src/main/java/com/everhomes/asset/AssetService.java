@@ -118,10 +118,6 @@ public interface AssetService {
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
-	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void createChargingStandard(CreateChargingStandardCommand cmd);
-
 	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
 
 	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
@@ -129,8 +125,6 @@ public interface AssetService {
 	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
 
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
-
-	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
