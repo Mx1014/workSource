@@ -465,19 +465,39 @@ public class AssetChargingItemProviderImpl implements AssetChargingItemProvider 
 				response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
 			}else {
 				//如果默认配置和项目具体配置都不为空
-        		List<Long> defaultChargingItemId = new ArrayList<Long>(); 
-        		List<Long> projectChargingItemId = new ArrayList<Long>();
-        		for(PaymentChargingItemScope paymentChargingItemScope : defaultChargingItem) {
-        			defaultChargingItemId.add(paymentChargingItemScope.getChargingItemId());
-        		}
-        		for(PaymentChargingItemScope paymentChargingItemScope : projectChargingItem) {
-        			projectChargingItemId.add(paymentChargingItemScope.getChargingItemId());
-        		}
-        		if(defaultChargingItemId.containsAll(projectChargingItemId) && projectChargingItemId.containsAll(defaultChargingItemId)) {
-        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
-        		}else {
-        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
-        		}
+				Byte deCouplingFlag = 1;
+				if(deCouplingFlag.equals(projectChargingItem.get(0).getDecouplingFlag())){
+					response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+				}else {
+					List<Long> defaultChargingItemId = new ArrayList<Long>(); 
+	        		List<BigDecimal> defaultChargingItemTaxRate = new ArrayList<BigDecimal>(); 
+	        		List<String> defaultChargingItemProjectLevelName = new ArrayList<String>(); 
+	        		
+	        		List<Long> projectChargingItemId = new ArrayList<Long>();
+	        		List<BigDecimal> projectChargingItemTaxRate = new ArrayList<BigDecimal>(); 
+	        		List<String> projectChargingItemProjectLevelName = new ArrayList<String>(); 
+	        		
+	        		for(PaymentChargingItemScope paymentChargingItemScope : defaultChargingItem) {
+	        			defaultChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+	        			defaultChargingItemTaxRate.add(paymentChargingItemScope.getTaxRate());
+	        			defaultChargingItemProjectLevelName.add(paymentChargingItemScope.getProjectLevelName());
+	        		}
+	        		for(PaymentChargingItemScope paymentChargingItemScope : projectChargingItem) {
+	        			projectChargingItemId.add(paymentChargingItemScope.getChargingItemId());
+	        			projectChargingItemTaxRate.add(paymentChargingItemScope.getTaxRate());
+	        			projectChargingItemProjectLevelName.add(paymentChargingItemScope.getProjectLevelName());
+	        		}
+	        		if(defaultChargingItemId.containsAll(projectChargingItemId) 
+	        				&& projectChargingItemId.containsAll(defaultChargingItemId)
+	        				&& defaultChargingItemTaxRate.containsAll(projectChargingItemTaxRate) 
+	        				&& projectChargingItemTaxRate.containsAll(defaultChargingItemTaxRate)
+	        				&& defaultChargingItemProjectLevelName.containsAll(projectChargingItemProjectLevelName) 
+	        				&& projectChargingItemProjectLevelName.containsAll(defaultChargingItemProjectLevelName)) {
+	        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+	        		}else {
+	        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+	        		}
+				}
 			}
 		}
         return response;
