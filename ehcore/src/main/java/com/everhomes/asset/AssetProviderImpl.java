@@ -3434,56 +3434,6 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag) {
-    	//卸载参数
-    	Long chargingStandardId = cmd.getChargingStandardId();
-    	Long ownerId = cmd.getOwnerId();
-    	String ownerType = cmd.getOwnerType();
-    	Long categoryId = cmd.getCategoryId();
-
-        DSLContext context = getReadWriteContext();
-        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
-        com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
-        Long nullId = null;
-        if(deCouplingFlag == (byte)1){
-            //去解耦
-            context.delete(standard)
-                    .where(standard.ID.eq(chargingStandardId))
-                    .execute();
-            //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
-            //只要做了删除动作，那么该项目下的配置全部解耦
-            context.update(standardScope)
-                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                    .where(standardScope.OWNER_ID.eq(ownerId))
-                    .and(standardScope.OWNER_TYPE.eq(ownerType))
-                    .and(standardScope.CATEGORY_ID.eq(categoryId))
-                    .execute();
-            context.delete(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .execute();
-            context.delete(formula)
-                    .where(formula.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .execute();
-        }else if(deCouplingFlag == (byte)0){
-            //耦合
-            List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .fetch(standardScope.CHARGING_STANDARD_ID);
-            standardIds.add(chargingStandardId);
-            context.delete(standard)
-                    .where(standard.ID.eq(chargingStandardId))
-                    .execute();
-            context.delete(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.in(standardIds))
-                    .execute();
-            context.delete(formula)
-                    .where(formula.CHARGING_STANDARD_ID.in(standardIds))
-                    .execute();
-        }
-    }
-
-    @Override
     public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
         DSLContext context = getReadOnlyContext();
         List<ListAvailableVariablesDTO> list = new ArrayList<>();

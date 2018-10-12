@@ -211,8 +211,6 @@ public interface AssetProvider {
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
-    void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag);
-
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
     String getVariableIdenfitierById(Long variableId);
@@ -326,11 +324,9 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
-
     Long findCategoryIdFromBillGroup(Long billGroupId);
 
     void insertAssetCategory(EhAssetAppCategories c);
-
 
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
  
