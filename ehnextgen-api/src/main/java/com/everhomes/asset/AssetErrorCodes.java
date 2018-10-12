@@ -6,25 +6,24 @@ package com.everhomes.asset;
  */
 
 public class AssetErrorCodes {
-    static final String SCOPE = "assetv2";
+    public static final String SCOPE = "assetv2";
 
-    static final int ERROR_IN_GENERATING = 10001;
-    static final int NO_COMMUNITY_CHOSE = 10002;
-    static final int FAIL_IN_GENERATION = 10003;
+    public static final int ERROR_IN_GENERATING = 10001;
+    public static final int NO_COMMUNITY_CHOSE = 10002;
+    public static final int FAIL_IN_GENERATION = 10003;
 
-    static final int UNIQUE_BILL_ITEM_CHECK = 10004;
-    static final int CHANGE_SAFE_CHECK = 10005;
-    static final int HTTP_EBEI_ERROR = 10006;
-    static final int HAS_PAID_BILLS = 10007;
-    static final int NOT_CORP_MANAGER = 10008;
+    public static final int UNIQUE_BILL_ITEM_CHECK = 10004;
+    public static final int CHANGE_SAFE_CHECK = 10005;
+    public static final int HTTP_EBEI_ERROR = 10006;
+    public static final int HAS_PAID_BILLS = 10007;
+    public static final int NOT_CORP_MANAGER = 10008;
     /** 帐单组不存在 */
-    static final int BILL_GROUP_NOT_FOUND = 10009;
+    public static final int BILL_GROUP_NOT_FOUND = 10009;
     /** 收款方帐号没有配置 */
-    static final int PAYMENT_PAYEE_NOT_CONFIG = 10010;
+    public static final int PAYMENT_PAYEE_NOT_CONFIG = 10010;
     /** 缴费订单创建失败 */
-    static final int BILL_ORDER_CREATION_FAILED = 10011;
-
+    public static final int BILL_ORDER_CREATION_FAILED = 10011;
     
-    static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
-    static final int STANDARD_RELEATE_CONTRACT_CHECK = 10021;
+    public static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
+    public static final int STANDARD_RELEATE_CONTRACT_CHECK = 10021;
 }

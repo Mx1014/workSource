@@ -12,6 +12,10 @@ import java.math.BigDecimal;
  * <li>instruction:说明</li>
  * <li>suggestUnitPrice:建议单价</li>
  * <li>areaSizeType:计费面积类型</li>
+ * <li>categoryId: 缴费多应用ID</li>
+ * <li>organizationId:管理公司ID</li>
+ * <li>appId:应用ID</li>
+ * <li>allScope:标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
  *</ul>
  */
 public class ModifyChargingStandardCommand {
@@ -24,6 +28,11 @@ public class ModifyChargingStandardCommand {
     private String ownerType;
     private Integer namespaceId;
     private Byte useUnitPrice;
+    
+    private Long categoryId;
+    private Long organizationId;
+    private Long appId;
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     public Byte getUseUnitPrice() {
         return useUnitPrice;
@@ -108,4 +117,36 @@ public class ModifyChargingStandardCommand {
     public void setChargingStandardName(String chargingStandardName) {
         this.chargingStandardName = chargingStandardName;
     }
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
+	}
 }

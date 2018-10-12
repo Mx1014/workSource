@@ -5816,7 +5816,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 
-
+		//管理公司全部项目范围
+		if (cmd.getAllScope() == 1) {
+			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			cmd.setCommunityIds(communityIds);
+		}
+		
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
 
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());

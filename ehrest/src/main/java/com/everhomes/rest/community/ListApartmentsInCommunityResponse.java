@@ -2,6 +2,7 @@ package com.everhomes.rest.community;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class ListApartmentsInCommunityResponse {
@@ -14,7 +15,8 @@ public class ListApartmentsInCommunityResponse {
 	private Double totalChargeArea;
 	private Double totalRent;
 	private Double totalAreaAveragePrice;
-	List<ApartmentInfoDTO> apartments;
+	@ItemType(ApartmentInfoDTO.class)
+	private List<ApartmentInfoDTO> apartments;
 	private Long nextPageAnchor;
 	
 	public Integer getTotalRelatedContractNumber() {
