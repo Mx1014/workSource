@@ -29,5 +29,7 @@ public interface AssetStandardProvider {
 	
 	void deleteChargingStandard(DeleteChargingStandardCommand cmd, List<Long> allCommunity);
 	
+	void decouplingHistoryStandard(Integer namespaceId, Long categoryId, Long chargingStandardId, List<Long> allCommunity);
+	
 	
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillCertificate;
 import com.everhomes.asset.PaymentChargingStandardScope;
 import com.everhomes.asset.PaymentChargingStandards;
 import com.everhomes.asset.PaymentFormula;
@@ -32,6 +33,7 @@ import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListChargingStandardsResponse;
@@ -131,10 +133,17 @@ public class AssetStandardServiceImpl implements AssetStandardService {
             Boolean allScope = true;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             InsertChargingStandards(cmd, null, brotherStandardId, allScope);
-            //全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
-            //根据billGroupId查询出所有关联的项目（包括已经授权出去的项目）
-            
-            
+            //全部项目修改standard的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据standard查询出所有关联的项目（包括已经授权出去的项目）
+            ListChargingStandardsCommand listChargingStandardsCommand = ConvertHelper.convert(cmd, ListChargingStandardsCommand.class);
+            listChargingStandardsCommand.setChargingItemId(cmd.getChargingItemId());
+            listChargingStandardsCommand.setPageSize(999999999);
+            ListChargingStandardsResponse response = listOnlyChargingStandards(listChargingStandardsCommand);
+            List<ListChargingStandardsDTO> listChargingStandardsDTOs = response.getList();
+            for(ListChargingStandardsDTO dto : listChargingStandardsDTOs) {
+            	Long chargingStandardId = dto.getChargingStandardId();
+            	assetStandardProvider.decouplingHistoryStandard(cmd.getNamespaceId(), cmd.getCategoryId(), chargingStandardId, allCommunityIds);
+            }
         }else{
         	Boolean allScope = false;
             InsertChargingStandards(cmd, null, null, allScope);
