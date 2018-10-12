@@ -3,6 +3,15 @@ package com.everhomes.service_agreement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.service_agreement.admin.ProtocolTemplateStatus;
+import com.everhomes.server.schema.tables.daos.EhProtocolTemplateVariablesDao;
+import com.everhomes.server.schema.tables.daos.EhProtocolTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhProtocolVariablesDao;
+import com.everhomes.server.schema.tables.daos.EhProtocolsDao;
+import com.everhomes.server.schema.tables.pojos.EhProtocolTemplateVariables;
+import com.everhomes.server.schema.tables.pojos.EhProtocolTemplates;
+import com.everhomes.server.schema.tables.pojos.EhProtocolVariables;
+import com.everhomes.server.schema.tables.pojos.EhProtocols;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -119,9 +128,141 @@ public class ServiceAgreementProviderImpl implements ServiceAgreementProvider {
 
 	}
 
-	/**
+	@Override
+	public ProtocolTemplates getActiveProtocolTemplate(Byte type) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_PROTOCOL_TEMPLATES.STATUS.eq(ProtocolTemplateStatus.RUNNING.getCode())
+                .and(Tables.EH_PROTOCOL_TEMPLATES.TYPE.eq(type));
+		SelectJoinStep<Record> query = context.select().from(Tables.EH_PROTOCOL_TEMPLATES);
+		query.where(condition);
+
+		return ConvertHelper.convert(query.fetchOne(), ProtocolTemplates.class);
+	}
+
+    @Override
+    public ProtocolTemplates getProtocolTemplateById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolTemplatesDao dao = new EhProtocolTemplatesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ProtocolTemplates.class);
+    }
+
+    @Override
+    public void updateProtocolTemplate(ProtocolTemplates protocolTemplates) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolTemplatesDao dao = new EhProtocolTemplatesDao(context.configuration());
+        dao.update(protocolTemplates);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhProtocolTemplates.class, protocolTemplates.getId());
+    }
+
+    @Override
+    public Long createProtocolTemplate(ProtocolTemplates protocolTemplates) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhProtocolTemplates.class));
+        protocolTemplates.setId(id);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolTemplatesDao dao = new EhProtocolTemplatesDao(context.configuration());
+        dao.insert(protocolTemplates);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhProtocolTemplates.class, null);
+        return id;
+    }
+
+    @Override
+    public void createProtocolTemplateVariable(ProtocolTemplateVariables protocolTemplateVariables) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhProtocolTemplateVariables.class));
+        protocolTemplateVariables.setId(id);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolTemplateVariablesDao dao = new EhProtocolTemplateVariablesDao(context.configuration());
+        dao.insert(protocolTemplateVariables);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhProtocolTemplateVariables.class, null);
+    }
+
+    @Override
+    public List<ProtocolTemplateVariables> getProtocolTemplateVariables(Long ownerId) {
+	    List<ProtocolTemplateVariables> variables = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_PROTOCOL_TEMPLATE_VARIABLES.OWNER_ID.eq(ownerId);
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_PROTOCOL_TEMPLATE_VARIABLES);
+        query.where(condition);
+        query.fetch().map(r ->{
+            variables.add(ConvertHelper.convert(r, ProtocolTemplateVariables.class));
+            return null;
+        });
+        return variables;
+    }
+
+    @Override
+    public List<ProtocolVariables> getProtocolVariables(Long ownerId, Integer namespaceId) {
+        List<ProtocolVariables> variables = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_PROTOCOL_VARIABLES.OWNER_ID.eq(ownerId)
+                .and(Tables.EH_PROTOCOL_VARIABLES.NAMESPACE_ID.eq(namespaceId));
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_PROTOCOL_VARIABLES);
+        query.where(condition);
+        query.fetch().map(r ->{
+            variables.add(ConvertHelper.convert(r, ProtocolVariables.class));
+            return null;
+        });
+        return variables;
+	}
+
+    @Override
+    public Protocols getProtocols(Integer namespaceId, Byte type) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_PROTOCOLS.STATUS.eq(ProtocolTemplateStatus.RUNNING.getCode())
+                .and(Tables.EH_PROTOCOLS.NAMESPACE_ID.eq(namespaceId)).and(Tables.EH_PROTOCOLS.TYPE.eq(type));
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_PROTOCOLS);
+        query.where(condition);
+
+        return ConvertHelper.convert(query.fetchOne(), Protocols.class);
+	}
+
+    @Override
+    public Protocols getProtocolsById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolsDao dao = new EhProtocolsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), Protocols.class);
+    }
+
+    @Override
+    public void updateProtocol(Protocols protocols) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolsDao dao = new EhProtocolsDao(context.configuration());
+        dao.update(protocols);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhProtocolTemplates.class, protocols.getId());
+    }
+
+    @Override
+    public Long createProtocol(Protocols protocols) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhProtocols.class));
+        protocols.setId(id);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolsDao dao = new EhProtocolsDao(context.configuration());
+        dao.insert(protocols);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhProtocols.class, null);
+        return id;
+    }
+
+    @Override
+    public void createProtocolVariables(ProtocolVariables protocolVariables) {
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhProtocolVariables.class));
+        protocolVariables.setId(id);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhProtocolVariablesDao dao = new EhProtocolVariablesDao(context.configuration());
+        dao.insert(protocolVariables);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhProtocolVariables.class, null);
+    }
+
+    /**
 	 * 取默认协议模板
-	 * @param namespaceId用户域空间
 	 * @return
 	 */
 	private String getDefaultServiceAgreement(Integer namespaceId){
