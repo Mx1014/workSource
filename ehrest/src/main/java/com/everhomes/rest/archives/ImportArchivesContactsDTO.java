@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>contactName: 姓名</li>
+ * <li>account: 账号(唯一标识)</li>
  * <li>contactEnName: 英文名</li>
  * <li>gender: 性别</li>
  * <li>contactToken: 手机</li>
@@ -17,6 +18,8 @@ import com.everhomes.util.StringHelper;
 public class ImportArchivesContactsDTO {
 
     private String contactName;
+
+    private String account;
 
     private String contactEnName;
 
@@ -41,6 +44,14 @@ public class ImportArchivesContactsDTO {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getContactEnName() {

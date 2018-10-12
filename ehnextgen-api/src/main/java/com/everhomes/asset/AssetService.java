@@ -70,8 +70,6 @@ public interface AssetService {
 
 	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
 
-	List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
 
 	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
@@ -87,8 +85,6 @@ public interface AssetService {
 	void modifyBillStatus(BillIdCommand cmd);
 
 	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
-
-	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
 	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -124,8 +120,6 @@ public interface AssetService {
 
 	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
 
-	void configChargingItems(ConfigChargingItemsCommand cmd);
-
 	void createChargingStandard(CreateChargingStandardCommand cmd);
 
 	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
@@ -138,19 +132,11 @@ public interface AssetService {
 
 	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 
-	void createBillGroup(CreateBillGroupCommand cmd);
-
-	void modifyBillGroup(ModifyBillGroupCommand cmd);
-
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
 	ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-	void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
-
 	DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
-
-	DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -231,8 +217,6 @@ public interface AssetService {
     
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
-	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-	
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -281,4 +265,6 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 	
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
+	
+	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
 }

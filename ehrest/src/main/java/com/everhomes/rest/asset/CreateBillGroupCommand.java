@@ -50,7 +50,6 @@ public class CreateBillGroupCommand {
     private Long categoryId;
 
     private Long organizationId;
-
     private Long appId;
 
     public Long getCategoryId() {
@@ -174,4 +173,5 @@ public class CreateBillGroupCommand {
     public void setAppId(Long appId) {
         this.appId = appId;
     }
+
 }

@@ -54,6 +54,7 @@ import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentBillGroup;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -350,6 +351,8 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	@Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;
 
+	@Autowired
+	private AssetGroupProvider assetGroupProvider;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -2678,7 +2681,7 @@ long assetCategoryId = 0l;
 				processContractChargingChangeAddresses(changeDTO);
 				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
 				if(changeDTO.getBillGroupId() != null) {
-					PaymentBillGroup group = assetProvider.getBillGroupById(changeDTO.getBillGroupId());
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(changeDTO.getBillGroupId());
 					if(group != null) {
 						changeDTO.setBillGroupName(group.getName());
 					}
@@ -2756,7 +2759,7 @@ long assetCategoryId = 0l;
 				itemDto.setLateFeeformula(lateFeeformula);
 				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
 				if(itemDto.getBillGroupId() != null) {
-					PaymentBillGroup group = assetProvider.getBillGroupById(itemDto.getBillGroupId());
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(itemDto.getBillGroupId());
 					if(group != null) {
 						itemDto.setBillGroupName(group.getName());
 					}
@@ -3288,6 +3291,9 @@ long assetCategoryId = 0l;
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
 			isNewFile = true;
+			if (null != cmd.getOwnerId() && cmd.getOwnerId() != -1 && cmd.getOwnerId() != 0 ) {
+				contractTemplate.setOrgId(0L);
+			}
 		}
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
@@ -3399,7 +3405,7 @@ long assetCategoryId = 0l;
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
-				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
+				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize, cmd.getAppId());
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
 

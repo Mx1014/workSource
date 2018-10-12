@@ -46,6 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
@@ -251,6 +253,12 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
 	protected TaskService taskService;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
+    
+    @Autowired
+    private AssetChargingItemProvider assetChargingItemProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -485,35 +493,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
-    	//标准版增加的allScope参数，true：默认/全部，false：具体项目
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            cmd.setAllScope(true);
-        }else {
-        	cmd.setAllScope(false);
-        }
-        if(cmd.getOwnerType() == null) {
-        	cmd.setOwnerType("community");
-        }
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
-            // 转换
-             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-             //issue-36480 【物业缴费6.5】合同应用没有关联物业缴费应用，签合同的时候添加计价条款，账单组显示了内容
-             if(assetCategoryId != null) {
-            	 cmd.setCategoryId(assetCategoryId);
-             }else {
-            	 return null;
-             }
-         }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(),cmd.getOrgId(),cmd.getAllScope());
-    }
-
-    @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
@@ -690,49 +669,6 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-/*    @Override
-    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
-            cmd.setPageSize(5000);
-        }
-//        cmd.setPageSize(130);
-        List<ListBillsDTO> dtos = new ArrayList<>();
-        //has already distributed
-        if(UserContext.getCurrentNamespaceId()==999983){
-            Integer pageSize = cmd.getPageSize();
-            if(pageSize <= 100){
-                dtos.addAll(listBills(cmd).getListBillsDTOS());
-            }
-            Integer hundred = 100;
-            Integer pageAnchor = 100;
-            if(pageSize > 100){
-                while(pageSize > 0){
-                    cmd.setPageSize(hundred);
-                    List<ListBillsDTO> back = listBills(cmd).getListBillsDTOS();
-                    if(back.size() > pageAnchor) {
-                        for(int i = 0; i < pageAnchor; i++){
-                            dtos.add(back.get(i));
-                        }
-                        break;
-                    }else{
-                        dtos.addAll(back);
-                    }
-
-                    pageSize = pageSize - 100;
-                    pageAnchor = pageSize;
-                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
-                }
-            }
-        }else{
-            dtos.addAll(listBills(cmd).getListBillsDTOS());
-        }
-        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
-    }*/
-    
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
@@ -742,20 +678,7 @@ public class AssetServiceImpl implements AssetService {
         exportOrdersUtil(dtos, cmd, response);
     }
 
-    @Override
-    public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        Boolean allScope = false;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            allScope = true;
-        }
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrgId(),allScope);
-    }
+    
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -953,7 +876,7 @@ public class AssetServiceImpl implements AssetService {
                     if(groupRules != null && groupRules.size() !=0) {
                     	groupRule = groupRules.get(0);
                     }
-                    group = assetProvider.getBillGroupById(rule.getBillGroupId());
+                    group = assetGroupProvider.getBillGroupById(rule.getBillGroupId());
 
                     if(group == null || groupRule == null){
                         throw new RuntimeException("bill group or grouprule is null");
@@ -3036,22 +2959,7 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listAvailableChargingItems(cmd);
     }
 
-    @Override
-    public void configChargingItems(ConfigChargingItemsCommand cmd) {
-        Long communityId = cmd.getOwnerId();
-        Integer namespaceId = cmd.getNamespaceId();
-        List<Long> communityIds = new ArrayList<>();
-        if(communityId == null || communityId == -1){
-            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), cmd.getAppId(),true);
-        }
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        assetProvider.configChargingItems(cmd, communityIds);
-    }
-
-    private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
+    public List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
         List<Long> communityIds = new ArrayList<>();
         communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, appId);
         if(includeNamespace){
@@ -3322,62 +3230,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void createBillGroup(CreateBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        Long brotherGroupId = null;
-        //创造账单组不涉及到安全问题，所以只需要看同步与否
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherGroupId = getBrotherGroupId();
-            //1、先同步下去
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
-            for(int i =0; i < allCommunity.size(); i ++){
-                Long communityId = allCommunity.get(i);
-                cmd.setOwnerId(communityId);
-                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
-                }
-            }
-            //2、再创建全部配置
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetProvider.createBillGroup(cmd,deCouplingFlag,null,brotherGroupId);
-        }else{
-            //去解耦同伴
-            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
-        }
-    }
-
-    private Long getBrotherGroupId() {
-    	long nextGroupId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_GROUPS.getClass()));
-    	return nextGroupId;
-    }
-
-    @Override
-    public void modifyBillGroup(ModifyBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            //全部的情况,修改billGroup的以及bro为billGroup的
-            deCouplingFlag = 0;
-            assetProvider.modifyBillGroup(cmd,deCouplingFlag);
-            return;
-        }
-        //个体，修改billGroup的，以及此园区的所有group解耦
-        assetProvider.modifyBillGroup(cmd,deCouplingFlag);
-    }
-
-    @Override
     public ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
         ListChargingStandardsResponse response = new ListChargingStandardsResponse();
         if(cmd.getPageSize() ==null){
@@ -3386,6 +3238,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor() == null){
             cmd.setPageAnchor(0l);
         }
+        //标准版增加的allScope参数，true：默认/全部，false：具体项目
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             cmd.setAllScope(true);
@@ -3440,45 +3293,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        Long brotherRuleId = null;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
-            for(int i = 0; i < allCommunity.size(); i ++){
-                cmd.setOwnerId(allCommunity.get(i));
-                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
-                if(coupled){
-                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-                }
-            }
-        }else if(cmd.getOwnerId() != null && cmd.getOwnerId() != -1){
-            //添加+解耦，判断safe+修改+解耦group和rule
-            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-        }
-    }
-
-    private boolean checkCoupledForGroupRule(Long ownerId, String ownerType) {
-        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunityWithBro(ownerId,ownerType,false);
-        if(list.size() > 0){
-            //没有bro，不耦合或者为空
-            List<EhPaymentBillGroupsRules> list2 = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
-            if(list2.size() == 0){
-                return true;
-            }
-            return false;
-        }
-        //有bro，肯定耦合
-        return true;
-    }
-
-    @Override
     public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
         //获得此rule，ownerid = namesapceid，则在全部操作页面, 修改全部的+bro；如果ownerid != namespaceid，则在single，需要改变，并 不需要 解耦所有账单组合rule
-        EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
+        EhPaymentBillGroupsRules rule = assetGroupProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
         //1、物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
         boolean workFlag = assetProvider.checkIsUsedByGeneralBill(rule.getBillGroupId(), rule.getChargingItemId());
         if(workFlag) {
@@ -3491,31 +3308,10 @@ public class AssetServiceImpl implements AssetService {
         if(rule.getOwnerid().intValue() == rule.getNamespaceId().intValue()){
             //全部
             deCouplingFlag = 0;
-            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+            return assetGroupProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }else{
-            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+            return assetGroupProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }
-    }
-
-    /**
-     * 如果已经关联合同（不论状态）或者新增账单被使用，则不能修改或删除
-     */
-    @Override
-    public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-    	//1、物业缴费V6.6统一账单：如果该账单组被其他模块应用选中了，则不允许删除
-        boolean workFlag = assetProvider.checkIsUsedByGeneralBill(cmd.getBillGroupId(), null);
-        if(workFlag) {
-        	DeleteBillGroupReponse response = new DeleteBillGroupReponse();
-        	response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
-            return response;
-        }
-        //2、缴费模块原来的判断是否可以删除逻辑
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
-            deCouplingFlag = 0;
-            return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-        }
-        return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     @Override
@@ -4535,13 +4331,13 @@ public class AssetServiceImpl implements AssetService {
         }
 		if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_ITEM.getCode())) {
 			//收费项配置
-			response = assetProvider.isChargingItemsForJudgeDefault(cmd);
+			response = assetChargingItemProvider.isChargingItemsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_STANDARDS.getCode())) {
 			//收费项计算规则
 			response = assetProvider.isChargingStandardsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.GROUPS.getCode())) {
 			//账单组
-			response = assetProvider.isBillGroupsForJudgeDefault(cmd);
+			response = assetGroupProvider.isBillGroupsForJudgeDefault(cmd);
 		}
 		return response;
 	}
@@ -4673,13 +4469,6 @@ public class AssetServiceImpl implements AssetService {
         //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
     	cmd.setPaymentType(2);//2代表对公转账
         return listPaymentBill(cmd);
-	}
-
-	public List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd) {
-		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-        }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), null, cmd.getOrgId(),false);//对公转账不区分多入口，所以categoryId为null
 	}
 	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -5275,7 +5064,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public ListBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
-		PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+		PaymentBillGroup group = assetGroupProvider.getBillGroupById(billGroupId);
 		String billItemName = assetProvider.findChargingItemNameById(charingItemId);
 		BigDecimal taxRate = assetProvider.getBillItemTaxRate(billGroupId, charingItemId);//后台直接查费项对应的税率
 		//组装创建账单请求
@@ -5346,7 +5135,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.createChargingItem(cmd, communityIds);
+        assetChargingItemProvider.createChargingItem(cmd, communityIds);
 	}
 
 	//对接下载中心的导出账单列表
