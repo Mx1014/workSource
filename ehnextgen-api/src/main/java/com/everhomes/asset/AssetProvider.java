@@ -121,10 +121,7 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId,Long orgId,Boolean allScope);
-
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
-
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
@@ -210,8 +207,6 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void configChargingItems(ConfigChargingItemsCommand cmd, byte de_coupling, Boolean allScope);
-
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
 
@@ -228,19 +223,13 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
     void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
-    
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
-
-    List<PaymentFormula> getFormulas(Long id);
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId);
 
@@ -384,12 +373,6 @@ public interface AssetProvider {
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
-    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -472,5 +455,4 @@ public interface AssetProvider {
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 		
-	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }

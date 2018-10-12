@@ -94,21 +94,24 @@ public class AssetGroupServiceImpl implements AssetGroupService {
                 cmd.setOwnerId(communityId);
                 //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
             	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerId(communityId);
                 isProjectNavigateDefaultCmd.setOwnerType("community");
                 isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
                 isProjectNavigateDefaultCmd.setOrganizationId(cmd.getOrganizationId());//标准版新增的管理公司ID
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetGroupProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
-                	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
+                	Boolean allScope = false;
+                	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, allScope);
                 }
             }
             //2、再创建全部配置
+            Boolean allScope = true;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetGroupProvider.createBillGroup(cmd, deCouplingFlag, null, brotherGroupId, true);
+            assetGroupProvider.createBillGroup(cmd, deCouplingFlag, null, brotherGroupId, allScope);
         }else{
-        	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
+        	Boolean allScope = false;
+        	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, allScope);
         }
     }
     

@@ -25,10 +25,13 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
+import com.everhomes.rest.asset.AssetProjectDefaultFlag;
 import com.everhomes.rest.asset.CreateBillGroupCommand;
 import com.everhomes.rest.asset.DeleteBillGroupCommand;
 import com.everhomes.rest.asset.DeleteBillGroupReponse;
 import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.rest.contract.ContractStatus;
@@ -261,16 +264,15 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
     public DeleteBillGroupReponse deleteBillGroupAndRules(DeleteBillGroupCommand cmd, List<Long> allCommunity) {
         DeleteBillGroupReponse response = new DeleteBillGroupReponse();
         DSLContext context = getReadWriteContext();
-        EhPaymentBillGroupsRules t = Tables.EH_PAYMENT_BILL_GROUPS_RULES.as("t");
-        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
         //标准版增加的allScope参数，true：默认/全部，false：具体项目
         if(cmd.getAllScope()){
         	//获取当前管理公司管理下的所有与其有继承关系的项目
-            List<Long> existProjectGroupIds = context.select(t1.ID)
-                    .from(t1)
-                    .where(t1.ID.eq(cmd.getBillGroupId()).or(t1.BROTHER_GROUP_ID.eq(cmd.getBillGroupId())))
-                    .and(t1.OWNER_ID.in(allCommunity)) //兼容标准版引入的转交项目管理权
-                    .fetch(t1.ID);
+            List<Long> existProjectGroupIds = context.select(Tables.EH_PAYMENT_BILL_GROUPS.ID)
+                    .from(Tables.EH_PAYMENT_BILL_GROUPS)
+                    .where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(cmd.getBillGroupId())
+                    		.or(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(cmd.getBillGroupId())))
+                    .and(Tables.EH_PAYMENT_BILL_GROUPS.OWNER_ID.in(allCommunity)) //兼容标准版引入的转交项目管理权
+                    .fetch(Tables.EH_PAYMENT_BILL_GROUPS.ID);
             //校验是否可以删除
             for(Long groupId : existProjectGroupIds){
                 boolean workFlag = checkBillsByBillGroupId(groupId);
@@ -545,7 +547,55 @@ public class AssetGroupProviderImpl implements AssetGroupProvider {
                 .fetchOneInto(PaymentBillGroupRule.class);
     }
     
-    
-    
+    public IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
+		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
+		DSLContext context = getReadOnlyContext();
+        EhPaymentBillGroups t1 = Tables.EH_PAYMENT_BILL_GROUPS.as("t1");
+        //查询出管理公司下的默认配置
+        List<PaymentBillGroup> defaultBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
+                .fetchInto(PaymentBillGroup.class);
+        //查询出该项目下的具体配置
+        List<PaymentBillGroup> projectBillGroup = context.selectFrom(t1)
+        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+                .fetchInto(PaymentBillGroup.class);
+        if(defaultBillGroup.size() == 0) {
+        	if(projectBillGroup.size() == 0) {
+        		//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+        		response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+        	}else {
+        		//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}
+        }else {
+        	if(projectBillGroup.size() == 0) {
+        		//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        	}else {
+        		//如果默认配置和项目具体配置都不为空
+        		List<Long> defaultBillGroupId = new ArrayList<Long>(); 
+        		List<Long> projectBrotherGroupId = new ArrayList<Long>();
+        		for(PaymentBillGroup paymentBillGroup : defaultBillGroup) {
+        			defaultBillGroupId.add(paymentBillGroup.getId());
+        		}
+        		for(PaymentBillGroup paymentBillGroup : projectBillGroup) {
+        			projectBrotherGroupId.add(paymentBillGroup.getBrotherGroupId());
+        		}
+        		if(defaultBillGroupId.containsAll(projectBrotherGroupId) && projectBrotherGroupId.containsAll(defaultBillGroupId)) {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+        		}else {
+        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+        		}
+        	}
+        }
+        return response;
+	}
 
 }

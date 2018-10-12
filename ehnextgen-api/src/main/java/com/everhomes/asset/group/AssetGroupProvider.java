@@ -8,6 +8,8 @@ import com.everhomes.rest.asset.CreateBillGroupCommand;
 import com.everhomes.rest.asset.DeleteBillGroupCommand;
 import com.everhomes.rest.asset.DeleteBillGroupReponse;
 import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ModifyBillGroupCommand;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
@@ -39,4 +41,6 @@ public interface AssetGroupProvider {
     DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag);
     
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
+    
+    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
 }
