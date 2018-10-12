@@ -129,7 +129,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("exportArchivesContacts")
     @RestReturn(value = String.class)
     public RestResponse exportArchivesContacts(ListArchivesContactsCommand cmd){
-        archivesService.exportArchivesContacts(cmd);
+        archivesDTSService.exportArchivesContacts(cmd);
         return new RestResponse();
     }
 
@@ -140,7 +140,7 @@ public class ArchivesController extends ControllerBase{
     @RequestMapping("verifyPersonnelByPassword")
     @RestReturn(value = String.class)
     public RestResponse verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd){
-        archivesService.verifyPersonnelByPassword(cmd);
+        archivesDTSService.verifyPersonnelByPassword(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

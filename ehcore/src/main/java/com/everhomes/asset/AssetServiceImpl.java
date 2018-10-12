@@ -46,6 +46,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
+import com.everhomes.asset.group.AssetGroupProvider;
+import com.everhomes.asset.standard.AssetStandardProvider;
 import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheAccessor;
@@ -251,6 +254,15 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
 	protected TaskService taskService;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
+    
+    @Autowired
+    private AssetChargingItemProvider assetChargingItemProvider;
+    
+    @Autowired
+    private AssetStandardProvider assetStandardProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -485,32 +497,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd) {
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            cmd.setAllScope(true);
-        }
-        if(cmd.getOwnerType() == null) {
-        	cmd.setOwnerType("community");
-        }
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
-            // 转换
-             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
-             //issue-36480 【物业缴费6.5】合同应用没有关联物业缴费应用，签合同的时候添加计价条款，账单组显示了内容
-             if(assetCategoryId != null) {
-            	 cmd.setCategoryId(assetCategoryId);
-             }else {
-            	 return null;
-             }
-         }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(),cmd.getOrgId(),cmd.getAllScope());
-    }
-
-    @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
@@ -687,49 +673,6 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-/*    @Override
-    public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
-            cmd.setPageSize(5000);
-        }
-//        cmd.setPageSize(130);
-        List<ListBillsDTO> dtos = new ArrayList<>();
-        //has already distributed
-        if(UserContext.getCurrentNamespaceId()==999983){
-            Integer pageSize = cmd.getPageSize();
-            if(pageSize <= 100){
-                dtos.addAll(listBills(cmd).getListBillsDTOS());
-            }
-            Integer hundred = 100;
-            Integer pageAnchor = 100;
-            if(pageSize > 100){
-                while(pageSize > 0){
-                    cmd.setPageSize(hundred);
-                    List<ListBillsDTO> back = listBills(cmd).getListBillsDTOS();
-                    if(back.size() > pageAnchor) {
-                        for(int i = 0; i < pageAnchor; i++){
-                            dtos.add(back.get(i));
-                        }
-                        break;
-                    }else{
-                        dtos.addAll(back);
-                    }
-
-                    pageSize = pageSize - 100;
-                    pageAnchor = pageSize;
-                    cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
-                }
-            }
-        }else{
-            dtos.addAll(listBills(cmd).getListBillsDTOS());
-        }
-        exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
-    }*/
-    
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
             cmd.setPageSize(Long.parseLong("5000"));
@@ -739,20 +682,7 @@ public class AssetServiceImpl implements AssetService {
         exportOrdersUtil(dtos, cmd, response);
     }
 
-    @Override
-    public List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd) {
-        Boolean allScope = false;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            allScope = true;
-        }
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-
-        return assetProvider.listChargingItems(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getCategoryId(),cmd.getOrgId(),allScope);
-    }
+    
 
     @Override
     public List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd) {
@@ -834,7 +764,6 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void paymentExpectanciesCalculate(PaymentExpectanciesCommand cmd) {
-
         LOGGER.info("cmd for paymentExpectancies is : " + cmd.toString());
         List<Long> categoryIdList = assetProvider.getOriginIdFromMappingAppForEnergy(cmd.getModuleId(), cmd.getCategoryId(), PrivilegeConstants.ASSET_MODULE_ID, cmd.getNamesapceId());
         // 转categoryId
@@ -864,13 +793,13 @@ public class AssetServiceImpl implements AssetService {
                     //获得包裹中的地址包裹, named var1
                     List<ContractProperty> var1 = rule.getProperties();
                     //获得标准, inside formula can be found, together with variables in feerule, amont of bills can be calculated
-                    EhPaymentChargingStandards standard = assetProvider.findChargingStandardById(rule.getChargingStandardId());
+                    EhPaymentChargingStandards standard = assetStandardProvider.findChargingStandardById(rule.getChargingStandardId());
                     PaymentChargingItemScope itemScope = assetProvider.findChargingItemScope(rule.getChargingItemId(),cmd.getOwnerType(),cmd.getOwnerId());
                     Set<String> varIdens = new HashSet<>();
                     //获得formula的额外内容,阶梯和区间公式的补充
                     List<PaymentFormula> formulaCondition = null;
                     if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
-                        formulaCondition = assetProvider.getFormulas(standard.getId());
+                        formulaCondition = assetStandardProvider.getFormulas(standard.getId());
                         for(int m = 0; m < formulaCondition.size(); m ++){
                             varIdens.add(formulaCondition.get(m).getConstraintVariableIdentifer());
                         }
@@ -878,7 +807,7 @@ public class AssetServiceImpl implements AssetService {
                     //获得standard公式, and find all the variables inside this formula, store inside a set named varIdens
                     String formula = null;
                     if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
-                        formulaCondition = assetProvider.getFormulas(standard.getId());
+                        formulaCondition = assetStandardProvider.getFormulas(standard.getId());
                         if(formulaCondition!=null){
                             if(formulaCondition.size()>1){
                                 LOGGER.error("the bill standard id is ={}, formula size is ={} which is more than one!"
@@ -950,7 +879,7 @@ public class AssetServiceImpl implements AssetService {
                     if(groupRules != null && groupRules.size() !=0) {
                     	groupRule = groupRules.get(0);
                     }
-                    group = assetProvider.getBillGroupById(rule.getBillGroupId());
+                    group = assetGroupProvider.getBillGroupById(rule.getBillGroupId());
 
                     if(group == null || groupRule == null){
                         throw new RuntimeException("bill group or grouprule is null");
@@ -3033,209 +2962,13 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listAvailableChargingItems(cmd);
     }
 
-    @Override
-    public void configChargingItems(ConfigChargingItemsCommand cmd) {
-        Long communityId = cmd.getOwnerId();
-        Integer namespaceId = cmd.getNamespaceId();
+    public List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
         List<Long> communityIds = new ArrayList<>();
-        if(communityId == null || communityId == -1){
-            communityIds = getAllCommunity(namespaceId, cmd.getOrganizationId(), cmd.getAppId(),true);
-        }
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        assetProvider.configChargingItems(cmd, communityIds);
-    }
-
-    private List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace) {
-        List<Long> communityIds = new ArrayList<>();
-        //全部的情况
-//        ListCommunityByNamespaceCommand cmd1 = new ListCommunityByNamespaceCommand();
-//        cmd1.setNamespaceId(namespaceId);
-//        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-//        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-//        listServiceModuleAppsCommand.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-//        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
-//        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
-           communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, appId);
-//        }
-        //标准版之后不再使用
-//        ListCommunityByNamespaceCommandResponse communitResponse = namespaceResourceService.listCommunityByNamespace(cmd1);
-//        List<CommunityDTO> communities = communitResponse.getCommunities();
-//        if (communities == null || communities.size() < 1){
-//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NO_COMMUNITY_CHOSE,"no communities is available");
-//        }
-//        for(int i = 0; i < communities.size(); i++){
-//            communityIds.add(communities.get(i).getId());
-//        }
+        communityIds =  organizationService.getOrganizationProjectIdsByAppId(organizationId, appId);
         if(includeNamespace){
             communityIds.add(namespaceId.longValue());
         }
         return communityIds;
-    }
-
-    @Override
-    public void createChargingStandard(CreateChargingStandardCommand cmd) {
-         // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            List<Long> allCommunityIds = getAllCommunity(cmd.getNamespaceId(),cmd.getOrganizationId(),cmd.getAppId(),false);
-            Long brotherStandardId = null;
-            brotherStandardId = getBrotherStandardId();
-            for(int i = 0; i < allCommunityIds.size(); i ++){
-                Long cid = allCommunityIds.get(i);
-//                // 园区下brother_standard_id不为null的即为coupled
-//                boolean coupled = assetProvider.checkCoupledChargingStandard(cid, cmd.getCategoryId());
-//                if(coupled){
-//                    //耦合
-//                    cmd.setOwnerId(cid);
-//                    InsertChargingStandards(cmd, brotherStandardId);
-//                }
-                IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cid);
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isChargingStandardsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	//耦合
-                	cmd.setOwnerId(cid);
-                	InsertChargingStandards(cmd, brotherStandardId, null);
-                }
-            }
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            InsertChargingStandards(cmd, null, brotherStandardId);
-        }else{
-            InsertChargingStandards(cmd, null, null);
-            assetProvider.deCoupledForChargingItem(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId());
-        }
-    }
-
-    private Long getBrotherStandardId() {
-    	long nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
-    	return nextStandardId;
-    }
-
-    private Long InsertChargingStandards(CreateChargingStandardCommand cmd, Long brotherStandardId, Long nextStandardId) {
-        if(cmd.getFormulaType() == 1 || cmd.getFormulaType() == 2){
-            String formula_no_quote = cmd.getFormula();
-            formula_no_quote = formula_no_quote.replace("[[","");
-            formula_no_quote = formula_no_quote.replace("]]","");
-            cmd.setFormula(formula_no_quote);
-        }
-        EhPaymentChargingStandards c = new PaymentChargingStandards();
-        EhPaymentChargingStandardsScopes s = new PaymentChargingStandardScope();
-        // create a chargingstandard
-        c.setBillingCycle(cmd.getBillingCycle());
-        c.setChargingItemsId(cmd.getChargingItemId());
-        c.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        c.setCreatorUid(0l);
-        c.setFormula(cmd.getFormula());
-        c.setFormulaJson(cmd.getFormulaJson());
-        c.setFormulaType(cmd.getFormulaType());
-        if(nextStandardId == null) {
-        	nextStandardId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS.getClass()));
-        }
-        c.setId(nextStandardId);
-        c.setName(cmd.getChargingStandardName());
-        c.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        c.setInstruction(cmd.getInstruction());
-        c.setSuggestUnitPrice(cmd.getSuggestUnitPrice());
-        c.setAreaSizeType(cmd.getAreaSizeType());
-        if(cmd.getUseUnitPrice() != null && cmd.getUseUnitPrice().byteValue() == (byte)1){
-            c.setPriceUnitType(cmd.getUseUnitPrice());
-        }
-
-        // create formula that fits the standard
-        CreateFormulaCommand cmd1 = ConvertHelper.convert(cmd,CreateFormulaCommand.class);
-        cmd1.setChargingStandardId(nextStandardId);
-        List<EhPaymentFormula> f = createFormula(cmd1);
-
-
-        // create a scope corresponding to the chargingstandard just created
-        s.setChargingStandardId(nextStandardId);
-        s.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        s.setCreatorUid(0l);
-        s.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.getClass())));
-        s.setOwnerType(cmd.getOwnerType());
-        s.setOwnerId(cmd.getOwnerId());
-        // add categoryId constraint
-        s.setCategoryId(cmd.getCategoryId());
-
-        s.setNamespaceId(cmd.getNamespaceId());
-        s.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        s.setBrotherStandardId(brotherStandardId);
-        this.dbProvider.execute((TransactionStatus status) ->{
-            assetProvider.createChargingStandard(c,s,f);
-            return null;
-        });
-        return nextStandardId;
-
-    }
-
-    @Override
-    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-        checkNullProhibit("chargingStandardId",cmd.getChargingStandardId());
-        checkNullProhibit("new chargingStandardName",cmd.getChargingStandardName());
-//        // 检查此园区下的此standard是否已经在工作(已经被 groupRUle引用，引用时消除园区的itemScope和standardScope的所有的decoupled)，若yes，则也能修改
-//        boolean inWork = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-//        if(inWork){
-//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.)
-//        }
-        // 由于chargingStandard要变化，所以对于全部的情况直接修改，不需要coupling；
-        // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1) {
-            deCouplingFlag = 0;
-            //修改未耦合的
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getUseUnitPrice());
-        }else{
-            //单个园区的情况
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getUseUnitPrice());
-//            List<Long> standardIds = assetProvider.deleteAllChargingStandardScope(cmd.getOwnerId(),cmd.getOwnerType());
-//            //有耦合时，使用此. 耦合的情况指的是，同一个standardId，域名和域空间均有scope
-//            boolean coupled = checkCoupledForStandard(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingStandardId(),cmd.getNamespaceId());
-//            if(coupled){
-//                assetProvider.updateChargingStandardByCreating(cmd.getChargingStandardName(),cmd.getInstruction(),cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-//            }else{
-//                assetProvider.modifyChargingStandard(cmd);
-//            }
-        }
-    }
-
-
-
-    @Override
-    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
-        return assetProvider.getChargingStandardDetail(cmd);
-    }
-
-    /**
-     * 删除一个收费标准，删除之前，查询其是否已经被引用
-     * 1. 是否已经被处于有效期的合同引用
-     */
-    @Override
-    public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-    	//issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
-        //只要关联了合同（包括草稿合同）就不能删除标准
-    	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
-    	if(workFlag){
-    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
-        }
-    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-    	byte deCouplingFlag = 1;
-        // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
-            return dto;
-        }
-        // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
-        assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
-        return dto;
     }
 
 //    private boolean checkSafeDeleteId(String name, Long chargingStandardId,String ownerType,Long ownerId) {
@@ -3250,180 +2983,6 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
         return assetProvider.listAvailableVariables(cmd);
-    }
-
-    /**
-     * 解析公式，传来的公式可以是identifer构成的，也可以是汉字构成的，先按照后者解析
-     * 返回值
-     *  1. formula公式名称，将解析符号去掉即可
-     *  普通公式时：
-     *      2. formulaJson公式解析式，去掉解析符号将汉字替换为对应的标识
-     *      3. formulaType，将传来的返回
-     *  阶梯公式时：
-     *      2. 需要自己组装公式，从公式表中得到条件与公式并存储
-     *      3.
-     *  梯度公式时：
-     *      2. 需要自己组装公式，从公式表中得到条件与公式并存储
-     *      3. 返回id
-     */
-    @Override
-    public List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd) {
-        List<EhPaymentFormula> list = new ArrayList<>();
-        Byte formulaType = cmd.getFormulaType();
-        if (formulaType == 1 ) {
-            EhPaymentFormula paymentFormula = new PaymentFormula();
-            long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
-            paymentFormula.setId(nextPaymentFormulaId);
-            paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
-            paymentFormula.setCreatorUid(0l);
-            paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            paymentFormula.setName(cmd.getFormula());
-            paymentFormula.setFormulaType(formulaType);
-            paymentFormula.setFormula(cmd.getFormula());
-            paymentFormula.setFormulaJson("gdje");
-            list.add(paymentFormula);
-        } else if (formulaType == 2) {
-            //普通公式时
-            String str = cmd.getFormula();
-            List<String> formulaAndJson = setFormula(str);
-
-            EhPaymentFormula paymentFormula = new PaymentFormula();
-            long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
-            paymentFormula.setId(nextPaymentFormulaId);
-            paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
-            paymentFormula.setCreatorUid(0l);
-            paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            paymentFormula.setName(formulaAndJson.get(0));
-            paymentFormula.setFormulaType(formulaType);
-            paymentFormula.setFormula(formulaAndJson.get(0));
-            paymentFormula.setFormulaJson(formulaAndJson.get(1));
-            list.add(paymentFormula);
-        } else if (formulaType == 3 || formulaType == 4) {
-            //存储条件
-            List<VariableConstraints> envelop = cmd.getStepValuePairs();
-            StringBuilder name = new StringBuilder();
-            for (int i = 0; i < envelop.size(); i++) {
-                VariableConstraints variableConstraints = envelop.get(i);
-                EhPaymentFormula paymentFormula = new PaymentFormula();
-
-                String eachFormula = variableConstraints.getFormula();
-                List<String> formularAndJson = setFormula(eachFormula);
-
-                paymentFormula.setFormulaType(cmd.getFormulaType());
-                paymentFormula.setFormula(formularAndJson.get(0));
-                paymentFormula.setFormulaJson(formularAndJson.get(1));
-                long nextPaymentFormulaId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_FORMULA.getClass()));
-                paymentFormula.setId(nextPaymentFormulaId);
-                paymentFormula.setChargingStandardId(cmd.getChargingStandardId());
-                //获得一个区间5个约束条件
-                paymentFormula.setConstraintVariableIdentifer(variableConstraints.getVariableIdentifier());
-                paymentFormula.setStartConstraint(variableConstraints.getStartConstraint());
-                if(variableConstraints.getStartNum()!=null){
-                    paymentFormula.setStartNum(new BigDecimal(variableConstraints.getStartNum()));
-                }
-                paymentFormula.setEndConstraint(variableConstraints.getEndConstraint());
-                if(variableConstraints.getEndNum()!=null){
-                    paymentFormula.setEndNum(new BigDecimal(variableConstraints.getEndNum()));
-                }
-
-
-                paymentFormula.setCreatorUid(0l);
-                paymentFormula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                paymentFormula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                list.add(paymentFormula);
-                name.append(formularAndJson.get(0) + "+");
-            }
-            if(name.lastIndexOf("+")==name.length()-1) name.deleteCharAt(name.length()-1);
-            for(int i = 0 ; i < list.size(); i ++){
-                list.get(i).setName(name.toString());
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public void createBillGroup(CreateBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        Long brotherGroupId = null;
-        //创造账单组不涉及到安全问题，所以只需要看同步与否
-        // set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherGroupId = getBrotherGroupId();
-            //1、先同步下去
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
-            for(int i =0; i < allCommunity.size(); i ++){
-                Long communityId = allCommunity.get(i);
-                cmd.setOwnerId(communityId);
-                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
-            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
-                isProjectNavigateDefaultCmd.setOwnerType("community");
-                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
-                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
-                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
-                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
-                	assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
-                }
-            }
-            //2、再创建全部配置
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetProvider.createBillGroup(cmd,deCouplingFlag,null,brotherGroupId);
-        }else{
-            //去解耦同伴
-            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
-        }
-    }
-
-    private Long getBrotherGroupId() {
-    	long nextGroupId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_GROUPS.getClass()));
-    	return nextGroupId;
-    }
-
-    @Override
-    public void modifyBillGroup(ModifyBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            //全部的情况,修改billGroup的以及bro为billGroup的
-            deCouplingFlag = 0;
-            assetProvider.modifyBillGroup(cmd,deCouplingFlag);
-            return;
-        }
-        //个体，修改billGroup的，以及此园区的所有group解耦
-        assetProvider.modifyBillGroup(cmd,deCouplingFlag);
-    }
-
-    @Override
-    public ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-        ListChargingStandardsResponse response = new ListChargingStandardsResponse();
-        if(cmd.getPageSize() ==null){
-            cmd.setPageSize(20);
-        }
-        if(cmd.getPageAnchor() == null){
-            cmd.setPageAnchor(0l);
-        }
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            cmd.setAllScope(true);
-        }// set category default is 0 representing the old data
-        if(cmd.getCategoryId() == null){
-            cmd.setCategoryId(0l);
-        }
-        List<ListChargingStandardsDTO> list =  assetProvider.listOnlyChargingStandards(cmd);
-        if(list.size() > cmd.getPageSize()){
-            response.setNextPageAnchor(cmd.getPageAnchor()+cmd.getPageSize().longValue());
-            list.remove(list.size()-1);
-        }else{
-            response.setNextPageAnchor(null);
-        }
-        response.setList(list);
-        return response;
     }
 
 //    private void setCmdCategoryDefault(Object obj, Long v){
@@ -3462,45 +3021,9 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-        byte deCouplingFlag = 1;
-        Long brotherRuleId = null;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherRuleId = assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-            List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), false);
-            for(int i = 0; i < allCommunity.size(); i ++){
-                cmd.setOwnerId(allCommunity.get(i));
-                boolean coupled = checkCoupledForGroupRule(cmd.getOwnerId(),cmd.getOwnerType());
-                if(coupled){
-                    assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-                }
-            }
-        }else if(cmd.getOwnerId() != null && cmd.getOwnerId() != -1){
-            //添加+解耦，判断safe+修改+解耦group和rule
-            assetProvider.addOrModifyRuleForBillGroup(cmd,brotherRuleId,deCouplingFlag);
-        }
-    }
-
-    private boolean checkCoupledForGroupRule(Long ownerId, String ownerType) {
-        List<EhPaymentBillGroupsRules> list = assetProvider.getBillGroupRuleByCommunityWithBro(ownerId,ownerType,false);
-        if(list.size() > 0){
-            //没有bro，不耦合或者为空
-            List<EhPaymentBillGroupsRules> list2 = assetProvider.getBillGroupRuleByCommunity(ownerId,ownerType);
-            if(list2.size() == 0){
-                return true;
-            }
-            return false;
-        }
-        //有bro，肯定耦合
-        return true;
-    }
-
-    @Override
     public DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd) {
         //获得此rule，ownerid = namesapceid，则在全部操作页面, 修改全部的+bro；如果ownerid != namespaceid，则在single，需要改变，并 不需要 解耦所有账单组合rule
-        EhPaymentBillGroupsRules rule = assetProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
+        EhPaymentBillGroupsRules rule = assetGroupProvider.findBillGroupRuleById(cmd.getBillGroupRuleId());
         //1、物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
         boolean workFlag = assetProvider.checkIsUsedByGeneralBill(rule.getBillGroupId(), rule.getChargingItemId());
         if(workFlag) {
@@ -3513,31 +3036,10 @@ public class AssetServiceImpl implements AssetService {
         if(rule.getOwnerid().intValue() == rule.getNamespaceId().intValue()){
             //全部
             deCouplingFlag = 0;
-            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+            return assetGroupProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }else{
-            return assetProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
+            return assetGroupProvider.deleteBillGroupRuleById(cmd.getBillGroupRuleId(),deCouplingFlag);
         }
-    }
-
-    /**
-     * 如果已经关联合同（不论状态）或者新增账单被使用，则不能修改或删除
-     */
-    @Override
-    public DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-    	//1、物业缴费V6.6统一账单：如果该账单组被其他模块应用选中了，则不允许删除
-        boolean workFlag = assetProvider.checkIsUsedByGeneralBill(cmd.getBillGroupId(), null);
-        if(workFlag) {
-        	DeleteBillGroupReponse response = new DeleteBillGroupReponse();
-        	response.setFailCause(AssetPaymentConstants.DELTE_GROUP_UNSAFE);
-            return response;
-        }
-        //2、缴费模块原来的判断是否可以删除逻辑
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
-            deCouplingFlag = 0;
-            return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
-        }
-        return assetProvider.deleteBillGroupAndRules(cmd.getBillGroupId(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId());
     }
 
     @Override
@@ -3553,46 +3055,13 @@ public class AssetServiceImpl implements AssetService {
 //        return assetProvider.isInWorkGroupRule(rule);
 //    }
 
-    private List<String> setFormula( String str) {
-        List<String> formulaAndJson = new ArrayList<>();
-        String formula = str;
-        formula = formula.replace("[[","");
-        formula = formula.replace("]]","");
-
-        formulaAndJson.add(formula);
-        Set<String> replaces = new HashSet<>();
-        String formulaJson = formula;
-        char[] formularChars = formulaJson.toCharArray();
-        int index = 0;
-        int start = 0;
-        while(index < formularChars.length){
-            if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                replaces.add(formulaJson.substring(start,index==formulaJson.length()-1?index+1:index));
-                start = index+1;
-            }
-            index++;
-        }
-        Iterator<String> iterator = replaces.iterator();
-        while(iterator.hasNext()){
-            String targetStr = iterator.next();
-            String substitute = assetProvider.getVariableIdenfitierByName(targetStr);
-            if(!StringUtils.isBlank(substitute)){
-                formulaJson = formulaJson.replace(targetStr,substitute);
-            }
-        }
-
-        formulaAndJson.add(formulaJson);
-        return formulaAndJson;
-    }
-
-    private void checkNullProhibit(String name , Object object) {
+    public void checkNullProhibit(String name , Object object) {
         if(object == null) {
             LOGGER.error(name + " cannot be null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     name+ " cannot be null");
         }
     }
-
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
@@ -4557,13 +4026,13 @@ public class AssetServiceImpl implements AssetService {
         }
 		if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_ITEM.getCode())) {
 			//收费项配置
-			response = assetProvider.isChargingItemsForJudgeDefault(cmd);
+			response = assetChargingItemProvider.isChargingItemsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.CHARGING_STANDARDS.getCode())) {
 			//收费项计算规则
-			response = assetProvider.isChargingStandardsForJudgeDefault(cmd);
+			response = assetStandardProvider.isChargingStandardsForJudgeDefault(cmd);
 		}else if(cmd.getModuleType() != null && cmd.getModuleType().equals(AssetModuleType.GROUPS.getCode())) {
 			//账单组
-			response = assetProvider.isBillGroupsForJudgeDefault(cmd);
+			response = assetGroupProvider.isBillGroupsForJudgeDefault(cmd);
 		}
 		return response;
 	}
@@ -4695,13 +4164,6 @@ public class AssetServiceImpl implements AssetService {
         //12:"微信刷卡支付（被扫）",13:"支付宝刷卡支付(被扫)",15:"账户余额",21:"微信公众号js支付"
     	cmd.setPaymentType(2);//2代表对公转账
         return listPaymentBill(cmd);
-	}
-
-	public List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd) {
-		if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            cmd.setOwnerId(cmd.getNamespaceId().longValue());
-        }
-        return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), null, cmd.getOrgId(),false);//对公转账不区分多入口，所以categoryId为null
 	}
 	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
@@ -5297,7 +4759,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public ListBillsDTO createGeneralBillForCommunity(CreateGeneralBillCommand cmd, Long categoryId, Long billGroupId, Long charingItemId) {
-		PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+		PaymentBillGroup group = assetGroupProvider.getBillGroupById(billGroupId);
 		String billItemName = assetProvider.findChargingItemNameById(charingItemId);
 		BigDecimal taxRate = assetProvider.getBillItemTaxRate(billGroupId, charingItemId);//后台直接查费项对应的税率
 		//组装创建账单请求
@@ -5368,7 +4830,7 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        assetProvider.createChargingItem(cmd, communityIds);
+        assetChargingItemProvider.createChargingItem(cmd, communityIds);
 	}
 
 	//对接下载中心的导出账单列表

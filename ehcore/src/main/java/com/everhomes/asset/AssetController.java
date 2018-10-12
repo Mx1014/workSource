@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.asset.chargingitem.AssetChargingItemService;
+import com.everhomes.asset.group.AssetGroupService;
+import com.everhomes.asset.standard.AssetStandardService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -36,6 +39,15 @@ public class AssetController extends ControllerBase {
 	//private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
 	@Autowired
 	private AssetService assetService;
+	
+	@Autowired
+	private AssetGroupService assetGroupService;
+	
+	@Autowired
+	private AssetChargingItemService assetChargingItemService;
+	
+	@Autowired
+	private AssetStandardService assetStandardService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -336,7 +348,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listAllChargingItems")
 	@RestReturn(value = ListChargingItemsDTO.class, collection = true)
 	public RestResponse listAllChargingItems(OwnerIdentityCommand cmd) {
-		List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+		List<ListChargingItemsDTO> list = assetChargingItemService.listAllChargingItems(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -378,7 +390,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("configChargingItems")
 	@RestReturn(value = String.class)
 	public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
-		assetService.configChargingItems(cmd);
+		assetChargingItemService.configChargingItems(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -406,7 +418,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listOnlyChargingStandards")
 	@RestReturn(value = ListChargingStandardsResponse.class, collection = true)
 	public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-		ListChargingStandardsResponse resp = assetService.listOnlyChargingStandards(cmd);
+		ListChargingStandardsResponse resp = assetStandardService.listOnlyChargingStandards(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -420,7 +432,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse createChargingStandard(CreateChargingStandardCommand cmd) {
-		assetService.createChargingStandard(cmd);
+		assetStandardService.createChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -434,7 +446,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-		assetService.modifyChargingStandard(cmd);
+		assetStandardService.modifyChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -448,7 +460,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("getChargingStandardDetail")
 	@RestReturn(value = GetChargingStandardDTO.class)
 	public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
-		GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+		GetChargingStandardDTO dto = assetStandardService.getChargingStandardDetail(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -462,7 +474,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteChargingStandard")
 	@RestReturn(value = DeleteChargingStandardDTO.class)
 	public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-		DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+		DeleteChargingStandardDTO dto = assetStandardService.deleteChargingStandard(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -490,7 +502,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillGroups")
 	@RestReturn(value = ListBillGroupsDTO.class, collection = true)
 	public RestResponse listBillGroups(OwnerIdentityCommand cmd) {
-		List<ListBillGroupsDTO> list = assetService.listBillGroups(cmd);
+		List<ListBillGroupsDTO> list = assetGroupService.listBillGroups(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -504,7 +516,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createBillGroup")
 	@RestReturn(value = String.class)
 	public RestResponse createBillGroup(CreateBillGroupCommand cmd) {
-		assetService.createBillGroup(cmd);
+		assetGroupService.createBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -518,7 +530,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyBillGroup")
 	@RestReturn(value = String.class)
 	public RestResponse modifyBillGroup(ModifyBillGroupCommand cmd) {
-		assetService.modifyBillGroup(cmd);
+		assetGroupService.modifyBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -546,7 +558,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteBillGroup")
 	@RestReturn(value = DeleteBillGroupReponse.class)
 	public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-		DeleteBillGroupReponse res = assetService.deleteBillGroup(cmd);
+		DeleteBillGroupReponse res = assetGroupService.deleteBillGroup(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -588,7 +600,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("addOrModifyRuleForBillGroup")
 	@RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
 	public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-		assetService.addOrModifyRuleForBillGroup(cmd);
+		assetGroupService.addOrModifyRuleForBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1370,7 +1382,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillGroupsForEnt")
 	@RestReturn(value = ListBillGroupsDTO.class, collection = true)
 	public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
-		List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
+		List<ListBillGroupsDTO> list = assetGroupService.listBillGroupsForEnt(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);

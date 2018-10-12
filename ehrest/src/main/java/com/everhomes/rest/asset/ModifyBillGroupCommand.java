@@ -17,6 +17,9 @@ import javax.validation.constraints.NotNull;
  * <li>bizPayeeAccount:收款方账户名称</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
+ * <li>organizationId: 标准版新增的管理公司ID</li>
+ * <li>allScope: 标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
+ * <li>appId:应用ID</li>
  *</ul>
  */
 public class ModifyBillGroupCommand {
@@ -33,6 +36,18 @@ public class ModifyBillGroupCommand {
     @NotNull
     private Byte dueDayType;
     private Byte billDayType;
+    private Integer namespaceId;
+    private String ownerType;
+    private Long ownerId;
+    private Long categoryId;
+    
+    private String bizPayeeAccount;
+    private String bizPayeeType;
+    private String bizPayeeId;
+    
+    private Long organizationId;//标准版新增的管理公司ID
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
+    private Long appId;
 
     public Byte getBillDayType() {
         return billDayType;
@@ -41,14 +56,6 @@ public class ModifyBillGroupCommand {
     public void setBillDayType(Byte billDayType) {
         this.billDayType = billDayType;
     }
-
-    private Integer namespaceId;
-    private String ownerType;
-    private Long ownerId;
-    
-    private String bizPayeeAccount;
-    private String bizPayeeType;
-    private String bizPayeeId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -154,5 +161,37 @@ public class ModifyBillGroupCommand {
 
 	public void setBizPayeeId(String bizPayeeId) {
 		this.bizPayeeId = bizPayeeId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 }

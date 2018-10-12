@@ -13,7 +13,7 @@ import java.io.Serializable;
  *     <li>serviceName: serviceName</li>
  * </ul>
  */
-public class FlowServiceTypeDTO implements Serializable {
+public class FlowServiceTypeDTO {
 
     private Long id;
     private Long moduleId;

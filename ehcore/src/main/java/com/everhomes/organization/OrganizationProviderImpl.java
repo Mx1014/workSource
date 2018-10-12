@@ -320,6 +320,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
+    public OrganizationMemberDetails findOrganizationPersonnelByAccount(String account) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCOUNT.eq(account));
+        return query.fetchAnyInto(OrganizationMemberDetails.class);
+    }
+
+    @Override
     public List<Organization> findOrganizationByCommunityId(Long communityId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -419,6 +427,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (null != pageSize) {
             query.addLimit(pageSize);
         }
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
+    }
+
+    @Override
+    public List<Organization> listOrganizationsByPath(Long organizationId){
+        List<Organization> result = new ArrayList<Organization>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + organizationId + "%"));
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, Organization.class));
             return null;
@@ -2900,7 +2921,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         context.delete(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
                 .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
-                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
                 .execute();
     }

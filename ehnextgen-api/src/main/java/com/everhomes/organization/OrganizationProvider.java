@@ -57,6 +57,8 @@ public interface OrganizationProvider {
 
     List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
 
+    List<Organization> listOrganizationsByPath(Long organizationId);
+
     void createOrganizationMember(OrganizationMember organizationMember);
 
     void updateOrganizationMember(OrganizationMember organizationMember);
@@ -229,6 +231,7 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail);
 
+    OrganizationMemberDetails findOrganizationPersonnelByAccount(String account);
     /**
      * Create enterprise details
      *
@@ -261,7 +264,6 @@ public interface OrganizationProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback);
 
     OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
-
     List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count,
                                                                           ListingQueryBuilderCallback queryBuilderCallback);
 

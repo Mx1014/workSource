@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -203,6 +204,9 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private LocaleStringProvider localeStringProvider;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
     
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -949,10 +953,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
                     List<PaymentBills> enclosedBills = (List<PaymentBills>) entry.getValue();
                     if (enclosedBills.size() > 0){
                         Long billGroupId = enclosedBills.get(0).getBillGroupId();
-                        dto.setBillGroupName(assetProvider.getbillGroupNameById(billGroupId));
+                        dto.setBillGroupName(assetGroupProvider.getbillGroupNameById(billGroupId));
                         dto.setBillGroupId(billGroupId);
                         //新增收款方账户类型、账户ID字段 
-                        PaymentBillGroup paymentBillGroup = assetProvider.getBillGroupById(billGroupId);
+                        PaymentBillGroup paymentBillGroup = assetGroupProvider.getBillGroupById(billGroupId);
                         if(paymentBillGroup != null) {
                         	dto.setBizPayeeId(paymentBillGroup.getBizPayeeId());
                         	dto.setBizPayeeType(paymentBillGroup.getBizPayeeType());
