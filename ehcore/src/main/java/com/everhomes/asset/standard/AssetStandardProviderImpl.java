@@ -1,6 +1,5 @@
 package com.everhomes.asset.standard;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,18 +8,11 @@ import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.UpdateQuery;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.asset.AssetErrorCodes;
-import com.everhomes.asset.AssetPaymentConstants;
-import com.everhomes.asset.PaymentBillGroup;
-import com.everhomes.asset.PaymentBillGroupRule;
 import com.everhomes.asset.PaymentChargingItemScope;
 import com.everhomes.asset.PaymentChargingStandards;
 import com.everhomes.asset.PaymentChargingStandardsScopes;
@@ -29,37 +21,16 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetProjectDefaultFlag;
-import com.everhomes.rest.asset.CreateBillGroupCommand;
-import com.everhomes.rest.asset.DeleteBillGroupCommand;
-import com.everhomes.rest.asset.DeleteBillGroupReponse;
-import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
-import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
-import com.everhomes.rest.asset.ModifyBillGroupCommand;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.order.PaymentUserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhContractChargingItems;
-import com.everhomes.server.schema.tables.EhContracts;
-import com.everhomes.server.schema.tables.EhPaymentBillGroups;
-import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
-import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 /**
@@ -216,33 +187,48 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
 			response.setDefaultStatus((byte)0);//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
 		}else {
 			EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
-	        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
-	        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+			//查询出管理公司下的默认配置
+	        List<PaymentChargingStandardsScopes> defaultStandard = context.selectFrom(t1)
+	        		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))
+	                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                .and(t1.ORG_ID.eq(cmd.getOrganizationId()).or(t1.ORG_ID.eq(0L)))//标准版支持多管理公司，0L是为了兼容历史数据
 	                .fetchInto(PaymentChargingStandardsScopes.class);
-	        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-	        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-	        }else {//说明该域空间下已经有数据了
-	        	scopes = context.selectFrom(t1)
-	            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-	                    .fetchInto(PaymentChargingStandardsScopes.class);
-	        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
-	        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
+	        //查询出该项目下的具体配置
+	        List<PaymentChargingStandardsScopes> projectStandard = context.selectFrom(t1)
+	        		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
+	                .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
+	                .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	                .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
+	                .fetchInto(PaymentChargingStandardsScopes.class);
+	        if(defaultStandard.size() == 0) {
+	        	if(projectStandard.size() == 0) {
+	        		//如果默认配置和项目具体配置都为空，那么是初始化状态，使用默认配置
+	        		response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
 	        	}else {
-	        		scopes = context.selectFrom(t1)
-		            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-		                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-		                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-		                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-		                    .fetchInto(PaymentChargingStandardsScopes.class);
-	        		if(scopes.size() > 0) {
-            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}else {
-            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}
+	        		//如果默认配置为空，项目具体配置不为空，那么该具体项目做过个性化的修改（新增）
+	        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+	        	}
+	        }else {
+	        	if(projectStandard.size() == 0) {
+	        		//如果默认配置不为空，项目具体配置为空，那么该具体项目做过个性化的修改（删除）
+	        		response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+	        	}else {
+	        		//如果默认配置和项目具体配置都不为空
+	        		List<Long> defaultStandardId = new ArrayList<Long>(); 
+	        		List<Long> projectBrotherStandardId = new ArrayList<Long>();
+	        		for(PaymentChargingStandardsScopes standard : defaultStandard) {
+	        			defaultStandardId.add(standard.getChargingStandardId());
+	        		}
+	        		for(PaymentChargingStandardsScopes standard : projectStandard) {
+	        			projectBrotherStandardId.add(standard.getBrotherStandardId());
+	        		}
+	        		if(defaultStandardId.containsAll(projectBrotherStandardId) && projectBrotherStandardId.containsAll(defaultStandardId)) {
+	        			response.setDefaultStatus(AssetProjectDefaultFlag.DEFAULT.getCode());
+	        		}else {
+	        			response.setDefaultStatus(AssetProjectDefaultFlag.PERSONAL.getCode());
+	        		}
 	        	}
 	        }
 		}
