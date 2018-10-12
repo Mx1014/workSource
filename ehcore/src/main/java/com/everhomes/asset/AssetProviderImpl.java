@@ -3404,43 +3404,7 @@ public class AssetProviderImpl implements AssetProvider {
             paymentFormulaDao.insert(f);
 //        }
     }
-
-    @Override
-    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId, Byte useUnitPrice) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
-        if(deCouplingFlag == (byte)1){
-            //去解耦
-            Long nullId = null;
-            context.update(t)
-                    .set(t.NAME,chargingStandardName)
-                    .set(t.INSTRUCTION,instruction)
-                    .where(t.ID.eq(chargingStandardId))
-                    .execute();
-            context.update(standardScope)
-                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                    .where(standardScope.OWNER_TYPE.eq(ownerType))
-                    .and(standardScope.OWNER_ID.eq(ownerId))
-                    .execute();
-        }else if(deCouplingFlag == (byte)0 ) {
-            //bro和本人是 chargingStandardId的进行修改
-            List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .or(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))//修复issue-29576 收费项计算规则-标准名称不能修改
-                    .fetch(standardScope.CHARGING_STANDARD_ID);
-            UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
-            query.addValue(t.NAME, chargingStandardName);
-            if(useUnitPrice != null && useUnitPrice.byteValue() == 1){
-                query.addValue(t.PRICE_UNIT_TYPE, (byte)1);
-            }
-            query.addValue(t.INSTRUCTION, instruction);
-            query.addConditions(t.ID.in(fetch));
-            query.execute();
-        }
-    }
-
+    
     @Override
     public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
         DSLContext context = getReadOnlyContext();

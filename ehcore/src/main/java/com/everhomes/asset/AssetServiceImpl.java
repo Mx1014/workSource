@@ -2971,68 +2971,6 @@ public class AssetServiceImpl implements AssetService {
         return communityIds;
     }
 
-
-    
-    @Override
-    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-        checkNullProhibit("chargingStandardId",cmd.getChargingStandardId());
-        checkNullProhibit("new chargingStandardName",cmd.getChargingStandardName());
-//        // 检查此园区下的此standard是否已经在工作(已经被 groupRUle引用，引用时消除园区的itemScope和standardScope的所有的decoupled)，若yes，则也能修改
-//        boolean inWork = checkSafeDeleteId(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName(),cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-//        if(inWork){
-//            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.)
-//        }
-        // 由于chargingStandard要变化，所以对于全部的情况直接修改，不需要coupling；
-        // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
-        byte deCouplingFlag = 1;
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1) {
-            deCouplingFlag = 0;
-            //修改未耦合的
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getUseUnitPrice());
-        }else{
-            //单个园区的情况
-            assetProvider.modifyChargingStandard(cmd.getChargingStandardId(),cmd.getChargingStandardName(),cmd.getInstruction(),deCouplingFlag,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getUseUnitPrice());
-//            List<Long> standardIds = assetProvider.deleteAllChargingStandardScope(cmd.getOwnerId(),cmd.getOwnerType());
-//            //有耦合时，使用此. 耦合的情况指的是，同一个standardId，域名和域空间均有scope
-//            boolean coupled = checkCoupledForStandard(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getChargingStandardId(),cmd.getNamespaceId());
-//            if(coupled){
-//                assetProvider.updateChargingStandardByCreating(cmd.getChargingStandardName(),cmd.getInstruction(),cmd.getChargingStandardId(),cmd.getOwnerId(),cmd.getOwnerType());
-//            }else{
-//                assetProvider.modifyChargingStandard(cmd);
-//            }
-        }
-    }
-
-    @Override
-    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
-        return assetProvider.getChargingStandardDetail(cmd);
-    }
-
-    /**
-     * 删除一个收费标准，删除之前，查询其是否已经被引用
-     * 1. 是否已经被处于有效期的合同引用
-     */
-    @Override
-    public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-    	//issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
-        //只要关联了合同（包括草稿合同）就不能删除标准
-    	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
-    	if(workFlag){
-    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
-        }
-    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-    	byte deCouplingFlag = 1;
-        // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
-            return dto;
-        }
-        // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
-        assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
-        return dto;
-    }
-
 //    private boolean checkSafeDeleteId(String name, Long chargingStandardId,String ownerType,Long ownerId) {
 //        Boolean safe = false;
 //        if(Tables.EH_PAYMENT_CHARGING_STANDARDS.getName().equals(name)){
@@ -3046,8 +2984,6 @@ public class AssetServiceImpl implements AssetService {
     public List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd) {
         return assetProvider.listAvailableVariables(cmd);
     }
-
-    
 
 //    private void setCmdCategoryDefault(Object obj, Long v){
 //        Class clz = obj.getClass();
@@ -3119,14 +3055,13 @@ public class AssetServiceImpl implements AssetService {
 //        return assetProvider.isInWorkGroupRule(rule);
 //    }
 
-    private void checkNullProhibit(String name , Object object) {
+    public void checkNullProhibit(String name , Object object) {
         if(object == null) {
             LOGGER.error(name + " cannot be null");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     name+ " cannot be null");
         }
     }
-
 
     private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);

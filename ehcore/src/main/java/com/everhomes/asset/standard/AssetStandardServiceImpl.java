@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentChargingStandardScope;
@@ -25,11 +26,16 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetProjectDefaultFlag;
 import com.everhomes.rest.asset.CreateChargingStandardCommand;
 import com.everhomes.rest.asset.CreateFormulaCommand;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.DeleteChargingStandardDTO;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListChargingStandardsResponse;
+import com.everhomes.rest.asset.ModifyChargingStandardCommand;
 import com.everhomes.rest.asset.VariableConstraints;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -38,6 +44,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 /**
  * @author created by ycx
@@ -124,6 +131,10 @@ public class AssetStandardServiceImpl implements AssetStandardService {
             Boolean allScope = true;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
             InsertChargingStandards(cmd, null, brotherStandardId, allScope);
+            //全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据billGroupId查询出所有关联的项目（包括已经授权出去的项目）
+            
+            
         }else{
         	Boolean allScope = false;
             InsertChargingStandards(cmd, null, null, allScope);
@@ -315,6 +326,53 @@ public class AssetStandardServiceImpl implements AssetStandardService {
 
         formulaAndJson.add(formulaJson);
         return formulaAndJson;
+    }
+    
+    public void modifyChargingStandard(ModifyChargingStandardCommand cmd) {
+        assetService.checkNullProhibit("chargingStandardId",cmd.getChargingStandardId());
+        assetService.checkNullProhibit("new chargingStandardName",cmd.getChargingStandardName());
+        
+        List<Long> allCommunity = assetService.getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), true);
+        // 由于chargingStandard要变化，所以对于全部的情况直接修改，不需要coupling；
+        // 对于单个园区要求修改，则 删除原来的scope和，拿到原来的standard，删除原来的standard，修改后新建一个standard和同一个scope
+    	//标准版增加的allScope参数，true：默认/全部，false：具体项目
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
+            //全部的情况,修改billGroup的以及bro为billGroup的
+            cmd.setAllScope(true);
+            assetStandardProvider.modifyChargingStandard(cmd, allCommunity);
+        }else {
+        	//具体项目修改billGroup的，此园区的所有group解耦
+        	cmd.setAllScope(false);
+        	assetStandardProvider.modifyChargingStandard(cmd, allCommunity);
+        }
+    }
+    
+    /**
+     * 删除一个收费标准，删除之前，查询其是否已经被引用
+     * 1. 是否已经被处于有效期的合同引用
+     */
+    public DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd) {
+    	//issue-27671 【合同管理】删除收费项“租金”的标准后，进入修改合同条款信息页面，进入“修改”页面，标准显示了“数字”
+        //只要关联了合同（包括草稿合同）就不能删除标准
+    	boolean workFlag = assetProvider.isInWorkChargingStandard(cmd.getNamespaceId(), cmd.getChargingStandardId());
+    	if(workFlag){
+    		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
+        }
+    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
+    	byte deCouplingFlag = 1;
+        // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
+        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
+            deCouplingFlag = 0;
+            assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
+            return dto;
+        }
+        // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
+        assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
+        return dto;
+    }
+    
+    public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
+        return assetProvider.getChargingStandardDetail(cmd);
     }
 
 	

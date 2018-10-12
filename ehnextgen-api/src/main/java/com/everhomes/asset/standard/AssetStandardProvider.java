@@ -7,6 +7,7 @@ import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ModifyChargingStandardCommand;
 import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
 
 /**
@@ -22,5 +23,9 @@ public interface AssetStandardProvider {
 	EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
 	
 	IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+	
+	void modifyChargingStandard(ModifyChargingStandardCommand cmd, List<Long> allCommunity);
+	
+	
 	
 }

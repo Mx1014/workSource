@@ -446,7 +446,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-		assetService.modifyChargingStandard(cmd);
+		assetStandardService.modifyChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -460,7 +460,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("getChargingStandardDetail")
 	@RestReturn(value = GetChargingStandardDTO.class)
 	public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
-		GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+		GetChargingStandardDTO dto = assetStandardService.getChargingStandardDetail(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -474,7 +474,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteChargingStandard")
 	@RestReturn(value = DeleteChargingStandardDTO.class)
 	public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-		DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+		DeleteChargingStandardDTO dto = assetStandardService.deleteChargingStandard(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +28,14 @@ import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ModifyChargingStandardCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandards;
 import com.everhomes.server.schema.tables.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.records.EhPaymentChargingStandardsRecord;
 import com.everhomes.util.IntegerUtil;
 import com.everhomes.util.RuntimeErrorException;
 /**
@@ -234,6 +239,74 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
 		}
         return response;
 	}
+    
+    public void modifyChargingStandard(ModifyChargingStandardCommand cmd, List<Long> allCommunity) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        if(cmd.getAllScope()){
+        	//bro和本人是 chargingStandardId的进行修改
+            List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
+                    .from(standardScope)
+                    .where(standardScope.BROTHER_STANDARD_ID.eq(cmd.getChargingStandardId())
+                    		.or(standardScope.CHARGING_STANDARD_ID.eq(cmd.getChargingStandardId())))//修复issue-29576 收费项计算规则-标准名称不能修改
+                    .and(standardScope.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(standardScope.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(standardScope.OWNER_ID.in(allCommunity))//兼容标准版引入的转交项目管理权
+                    .fetch(standardScope.CHARGING_STANDARD_ID);
+            UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
+            query.addValue(t.NAME, cmd.getChargingStandardName());
+            if(cmd.getUseUnitPrice() != null && cmd.getUseUnitPrice().byteValue() == 1){
+                query.addValue(t.PRICE_UNIT_TYPE, (byte)1);
+            }
+            query.addValue(t.INSTRUCTION, cmd.getInstruction());
+            query.addConditions(t.ID.in(fetch));
+            query.execute();
+            //全部项目修改standard的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据standard查询出所有关联的项目（包括已经授权出去的项目）
+            decouplingHistoryStandard(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getChargingStandardId(), allCommunity);
+        }else{
+        	//去解耦
+            Long nullId = null;
+            context.update(t)
+                    .set(t.NAME,cmd.getChargingStandardName())
+                    .set(t.INSTRUCTION,cmd.getInstruction())
+                    .where(t.ID.eq(cmd.getChargingStandardId()))
+                    .execute();
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(standardScope.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(standardScope.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .and(standardScope.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(standardScope.OWNER_ID.in(allCommunity))//兼容标准版引入的转交项目管理权
+                    .execute();
+        }
+    }
+
+    
+    /**
+     * 标准版：为了兼容标准版引入的转交项目管理权
+     * 全部项目修改standard的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+     */
+    public void decouplingHistoryStandard(Integer namespaceId, Long categoryId, Long chargingStandardId, List<Long> allCommunity) {
+    	DSLContext context = getReadWriteContext();
+    	EhPaymentChargingStandardsScopes t = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t");
+    	List<Long> decouplingOwnerId = context.select(t.OWNER_ID)
+        		.from(t)
+                .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.CATEGORY_ID.eq(categoryId))
+                .and(t.BROTHER_STANDARD_ID.eq(chargingStandardId))
+                .and(t.OWNER_ID.notIn(allCommunity))//为了兼容标准版引入的转交项目管理权
+                .fetch(t.OWNER_ID);
+        if(decouplingOwnerId != null && decouplingOwnerId.size() != 0) {
+        	Long nullId = null;
+            context.update(t)
+                    .set(t.BROTHER_STANDARD_ID,nullId)
+                    .where(t.OWNER_ID.in(decouplingOwnerId))
+                    .execute();
+        }
+    }
     
     
 }
