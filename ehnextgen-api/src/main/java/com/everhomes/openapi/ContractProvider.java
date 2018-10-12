@@ -62,7 +62,7 @@ public interface ContractProvider {
 
 	void createContractParam(ContractParam param);
 	void updateContractParam(ContractParam param);
-	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId);
+	ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId, Long appId);
 
 	void createContractParamGroupMap(ContractParamGroupMap map);
 	void deleteContractParamGroupMap(ContractParamGroupMap map);
