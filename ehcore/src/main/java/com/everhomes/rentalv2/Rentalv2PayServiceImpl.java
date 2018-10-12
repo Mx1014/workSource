@@ -18,9 +18,13 @@ import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.*;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
+import com.everhomes.rest.promotion.order.controller.CreateMerchantOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.promotion.order.*;
@@ -235,6 +239,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         return handler.getAccountId(order);
     }
 
+    private Long getRentalOrderMerchant(Long rentalBillId){
+        RentalOrder order = rentalv2Provider.findRentalBillById(rentalBillId);
+        RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+
+        return handler.gerMerchantId(order);
+    }
+
     private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
         if (payUserDTO == null)
             return null;
@@ -329,8 +340,84 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public AddRentalBillItemV3Response createMerchantPreOrder(PreOrderCommand cmd,RentalOrder order) {
         AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+        //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
+        Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(cmd.getOrderId());
+        if (record != null){
+            response.setMerchantId(record.getMerchantId());
+            response.setPayUrl(record.getPayUrl());
+            response.setMerchantOrderId(record.getMerchantOrderId());
+            return response;
+        }
+        //2、收款商户是否存在，无则报错
+        cmd.setMerchantId(this.getRentalOrderMerchant(order.getId()));
+        PayUserDTO payUserDTO = new PayUserDTO();
+        if (cmd.getMerchantId() != null){
+            GetPayAccountByMerchantIdCommand cmd2 = new GetPayAccountByMerchantIdCommand();
+            cmd2.setId(cmd.getMerchantId());
+            cmd2.setNamespaceId(UserContext.getCurrentNamespaceId());
+            GetPayAccountByMerchantIdRestResponse payAccountByMerchantId = orderService.getPayAccountByMerchantId(cmd2);
+            payUserDTO = payAccountByMerchantId.getResponse();
+        }
+        if (payUserDTO == null ){
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
+                    "暂未绑定收款账户");
+        }else
+            cmd.setAccountName(payUserDTO.getUserAliasName());
+        //3、组装报文，发起下单请求
+        CreateMerchantOrderResponse merchantOrderResp = createMerchantOrder(cmd, order);
+
+        //4、组装并保存返回值
+
+
 
         return null;
+    }
+
+    private AddRentalBillItemV3Response saveMerchantOrderRecord(PreOrderCommand cmd,
+                                                                CreateMerchantOrderResponse merchantOrderResp){
+        AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+        response.setMerchantOrderId(merchantOrderResp.getMerchantOrderId());
+        response.setMerchantId(merchantOrderResp.getMerchantId());
+        response.setPayUrl(merchantOrderResp.getPayUrl());
+
+        Rentalv2OrderRecord record = new Rentalv2OrderRecord();
+        record.setOrderNo(cmd.getOrderId());
+        record.setBizOrderNum(response.getBizOrderNum());
+        record.setPayOrderId(response.getOrderId());
+        record.setAccountId(cmd.getBizPayeeId());
+        record.setAmount(changePayAmount(cmd.getAmount()));
+        record.setOrderCommitNonce(response.getOrderCommitNonce());
+        record.setOrderCommitTimestamp(response.getOrderCommitTimestamp());
+        record.setOrderCommitToken(response.getOrderCommitToken());
+        record.setOrderCommitUrl(response.getOrderCommitUrl());
+        record.setPayInfo(response.getPayInfo());
+        record.setAccountName(cmd.getAccountName());
+
+
+        this.rentalv2AccountProvider.createOrderRecord(record);
+
+    }
+
+    private CreateMerchantOrderResponse createMerchantOrder(PreOrderCommand preOrderCommand,RentalOrder order){
+        CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(preOrderCommand);
+        CreateMerchantOrderCommand createMerchantOrderCommand = ConvertHelper.convert(createOrderCommand,CreateMerchantOrderCommand.class);
+        createMerchantOrderCommand.setPaymentMerchantId(preOrderCommand.getMerchantId());
+        RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+        handler.processCreateMerchantOrderCmd(createMerchantOrderCommand,order);
+        CreateMerchantOrderRestResponse createOrderResp = orderService.createMerchantOrder(createMerchantOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create merchant order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
+        }
+        return createOrderResp.getResponse();
     }
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
@@ -452,7 +539,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
      * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
        CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
      */
-    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+    private boolean checkOrderRestResponseIsSuccess(RestResponseBase response){
         if(response != null && response.getErrorCode() != null
                 && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
             return true;

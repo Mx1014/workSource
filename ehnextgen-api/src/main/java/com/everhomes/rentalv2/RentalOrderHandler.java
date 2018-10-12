@@ -1,5 +1,7 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.promotion.order.CreateMerchantOrderCommand;
+
 import java.math.BigDecimal;
 
 /**
@@ -47,4 +49,8 @@ public interface RentalOrderHandler {
 
     //获取收款方账户id
     public Long getAccountId(RentalOrder order);
+
+    default public Long gerMerchantId(RentalOrder order){return null;}
+
+    default public void processCreateMerchantOrderCmd(CreateMerchantOrderCommand cmd,RentalOrder order){}
 }
