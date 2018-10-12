@@ -285,21 +285,30 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
-        orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        orgCmd.setOrganizationId(cmd.getOwnerId());
-        OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
-        List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
         ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
-        List<BaseOfficeLocationDTO> dtos = new ArrayList<>();
-        if(null != list && list.size() > 0){
-            dtos = list.stream().map(r->{
-                BaseOfficeLocationDTO dto = new BaseOfficeLocationDTO();
-                dto.setOfficeLocationName(r.getSiteName());
-                return dto;
-            }).collect(Collectors.toList());
+        if(ownerType.getCode().equals(VisitorsysOwnerType.ENTERPRISE.getCode())){
+            FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
+            orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            orgCmd.setOrganizationId(cmd.getOwnerId());
+            OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
+            List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
+
+            Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
+            Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
+            List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+
+
+            List<BaseOfficeLocationDTO> dtos = new ArrayList<>();
+            if(null != list && list.size() > 0){
+                for (OfficeSiteDTO r : list){
+                    for (VisitorSysOfficeLocation r1 : visitorSysOfficeLocations){
+//                        if(r.getId() == r1.)
+                    }
+                }
+            }
+            response.setOfficeLocationList(dtos);
         }
-        response.setOfficeLocationList(dtos);
+
         return response;
     }
 
@@ -316,26 +325,49 @@ public class VisitorSysServiceImpl implements VisitorSysService{
 //        }
 //        if(visitorSysOfficeLocations.size()==0) {
 //            List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
-//            VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
-//            if (ownerType.ENTERPRISE == ownerType) {
-//                Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
-//                location.setOfficeLocationName(organization.getName());
-//            } else {
+//
+//            if (ownerType.COMMUNITY == ownerType) {
+//                VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//
 //                Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 //                location.setOfficeLocationName(community.getName());
-//            }
-//            Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
-//                    + cmd.getOwnerType()
-//                    + cmd.getOwnerId()).enter(() -> {
-//                List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
-//                if(locations.size()==0) {
-//                    location.setStatus(CommonStatus.ACTIVE.getCode());
-//                    visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
-//                    return location;
+//
+//                Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
+//                        + cmd.getOwnerType()
+//                        + cmd.getOwnerId()).enter(() -> {
+//                    List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//                    if(locations.size()==0) {
+//                        location.setStatus(CommonStatus.ACTIVE.getCode());
+//                        visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//                        return location;
+//                    }
+//                    return locations.get(0);
+//                });
+//                officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
+//            } else if (ownerType.ENTERPRISE == ownerType) {
+//                FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
+//                orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//                orgCmd.setOrganizationId(cmd.getOwnerId());
+//                OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
+//                List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
+//                for (OfficeSiteDTO officesite : list) {
+//                    VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//                    location.setOfficeLocationName(officesite.getSiteName());
+//                    Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
+//                            + cmd.getOwnerType()
+//                            + cmd.getOwnerId()).enter(() -> {
+//                        List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//                        if(locations.size()==0) {
+//                            location.setStatus(CommonStatus.ACTIVE.getCode());
+//                            visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//                            return location;
+//                        }
+//                        return locations.get(0);
+//                    });
+//                    officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
 //                }
-//                return locations.get(0);
-//            });
-//            officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
+//            }
+//
 //            response.setOfficeLocationList(officeLocationList);
 //        }else {
 //            response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
