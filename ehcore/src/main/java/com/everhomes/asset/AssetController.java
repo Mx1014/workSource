@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
@@ -48,6 +49,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetStandardService assetStandardService;
+	
+	@Autowired
+	private AssetAppService assetAppService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -882,6 +886,20 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /asset/functionDisableList</b>
+	 * <p>功能失效列表</p>
+	 */
+	@RequestMapping("functionDisableList")
+	@RestReturn(value = FunctionDisableListDto.class)
+	public RestResponse functionDisableList(FunctionDisableListCommand cmd) {
+		FunctionDisableListDto dto = assetAppService.functionDisableList(cmd);
+		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 	/**
 	 * <p>显示一个用户的物业账单</p>
@@ -893,7 +911,7 @@ public class AssetController extends ControllerBase {
 		if (cmd.getNamespaceId() != UserContext.getCurrentNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-		List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+		List<ShowBillForClientV2DTO> dtos = assetAppService.showBillForClientV2(cmd);
 		RestResponse response = new RestResponse(dtos);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -907,7 +925,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listAllBillsForClient")
 	@RestReturn(value = ListAllBillsForClientDTO.class, collection = true)
 	public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-		List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+		List<ListAllBillsForClientDTO> dtos = assetAppService.listAllBillsForClient(cmd);
 		RestResponse response = new RestResponse(dtos);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -921,7 +939,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("showBillDetailForClient")
 	@RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
 	public RestResponse showBillDetailForClient(BillIdCommand cmd) {
-		ShowBillDetailForClientResponse res = assetService.getBillDetailForClient(cmd);
+		ShowBillDetailForClientResponse res = assetAppService.getBillDetailForClient(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1115,20 +1133,6 @@ public class AssetController extends ControllerBase {
 		RestResponse restResponse = new RestResponse(res);
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return restResponse;
-	}
-
-	/**
-	 * <b>URL: /asset/functionDisableList</b>
-	 * <p>功能失效列表</p>
-	 */
-	@RequestMapping("functionDisableList")
-	@RestReturn(value = FunctionDisableListDto.class)
-	public RestResponse functionDisableList(FunctionDisableListCommand cmd) {
-		FunctionDisableListDto dto = assetService.functionDisableList(cmd);
-		RestResponse restResponse = new RestResponse(dto);
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
 

@@ -68,8 +68,6 @@ public interface AssetService {
 
 	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
 
-	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
 
 	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
@@ -139,12 +137,6 @@ public interface AssetService {
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
-
-	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
-
-	List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
-
-	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
@@ -257,4 +249,8 @@ public interface AssetService {
 	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
 	
 	void checkNullProhibit(String name , Object object);
+	
+	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
+	
+	AssetVendorHandler getAssetVendorHandler(String vendorName);
 }
