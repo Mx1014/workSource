@@ -11,14 +11,11 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
-import com.everhomes.print.SiyinPrintPrinter;
-import com.everhomes.print.SiyinPrintPrinterProvider;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.goods.GetGoodListCommand;
 import com.everhomes.rest.goods.GetGoodListResponse;
 import com.everhomes.rest.goods.GetServiceGoodCommand;
 import com.everhomes.rest.goods.GetServiceGoodResponse;
-import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.goods.GoodScopeDTO;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PARKING_MODULE)
