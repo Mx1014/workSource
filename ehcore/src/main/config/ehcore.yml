@@ -55,7 +55,7 @@ endpoint.mappings: true
 management.security.enabled: false
 management.security.role: SUPERUSER
 management.context-path: /manage
-management.port: 8082
+management.port: 8080
 
 spring.jmx.enabled: true
 endpoints.jmx.domain: ehcore

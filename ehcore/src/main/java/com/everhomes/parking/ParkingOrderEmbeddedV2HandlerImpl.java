@@ -12,6 +12,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.PayUtil;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -92,7 +93,6 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
 			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-
 			//先将状态置为已付款
 			if(order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
@@ -100,6 +100,8 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				order.setOrderNo(parkingService.createOrderNo(lot));
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {
@@ -148,6 +150,8 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
@@ -157,6 +161,8 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}

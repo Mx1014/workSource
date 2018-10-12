@@ -31,6 +31,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
@@ -2212,12 +2213,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                 case 9:
                 case 21: 
                 	order.setPaidType(VendorType.WEI_XIN.getCode());
-                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
-                case 29: order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
+                case 29: order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
                 default: 
                 	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
             }
 				updatePrintOrder(order, cmd.getBizOrderNum());
