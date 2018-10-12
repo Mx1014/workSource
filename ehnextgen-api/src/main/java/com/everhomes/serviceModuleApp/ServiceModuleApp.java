@@ -23,6 +23,7 @@ public class ServiceModuleApp extends EhServiceModuleApps {
     private String dependentAppIds;
     private Byte supportThirdFlag;
     private String iconUri;
+    private Long entryId;
 
 
     @Override
@@ -145,5 +146,13 @@ public class ServiceModuleApp extends EhServiceModuleApps {
 
     public void setIconUri(String iconUri) {
         this.iconUri = iconUri;
+    }
+
+    public Long getEntryId() {
+        return entryId;
+    }
+
+    public void setEntryId(Long entryId) {
+        this.entryId = entryId;
     }
 }

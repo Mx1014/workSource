@@ -2107,7 +2107,7 @@ public class PortalServiceImpl implements PortalService {
 
 						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
 						//填充路由信息
-						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null);
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null);
 						config.setRouterPath(routerInfo.getPath());
 						config.setRouterQuery(routerInfo.getQuery());
 					}
