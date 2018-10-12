@@ -117,20 +117,8 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void createChargingStandard(CreateChargingStandardCommand cmd);
-
-	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
-
-	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
-
+	
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
-
-	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
@@ -267,4 +255,6 @@ public interface AssetService {
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
 	
 	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
+	
+	void checkNullProhibit(String name , Object object);
 }

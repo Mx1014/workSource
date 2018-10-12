@@ -2379,13 +2379,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(variable.NAME);
     }
 
-    private com.everhomes.server.schema.tables.pojos.EhPaymentVariables findVariableByIden(String iden) {
-        DSLContext context = getReadOnlyContext();
-        return context.selectFrom(Tables.EH_PAYMENT_VARIABLES)
-                .where(Tables.EH_PAYMENT_VARIABLES.IDENTIFIER.eq(iden))
-                .fetchOneInto(com.everhomes.server.schema.tables.pojos.EhPaymentVariables.class);
-    }
-
     private boolean hasDigit(String iden) {
         char[] chars = iden.toCharArray();
         for(char c : chars){
@@ -3411,43 +3404,7 @@ public class AssetProviderImpl implements AssetProvider {
             paymentFormulaDao.insert(f);
 //        }
     }
-
-    @Override
-    public void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId, Byte useUnitPrice) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
-        if(deCouplingFlag == (byte)1){
-            //去解耦
-            Long nullId = null;
-            context.update(t)
-                    .set(t.NAME,chargingStandardName)
-                    .set(t.INSTRUCTION,instruction)
-                    .where(t.ID.eq(chargingStandardId))
-                    .execute();
-            context.update(standardScope)
-                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                    .where(standardScope.OWNER_TYPE.eq(ownerType))
-                    .and(standardScope.OWNER_ID.eq(ownerId))
-                    .execute();
-        }else if(deCouplingFlag == (byte)0 ) {
-            //bro和本人是 chargingStandardId的进行修改
-            List<Long> fetch = context.select(standardScope.CHARGING_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .or(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))//修复issue-29576 收费项计算规则-标准名称不能修改
-                    .fetch(standardScope.CHARGING_STANDARD_ID);
-            UpdateQuery<EhPaymentChargingStandardsRecord> query = context.updateQuery(t);
-            query.addValue(t.NAME, chargingStandardName);
-            if(useUnitPrice != null && useUnitPrice.byteValue() == 1){
-                query.addValue(t.PRICE_UNIT_TYPE, (byte)1);
-            }
-            query.addValue(t.INSTRUCTION, instruction);
-            query.addConditions(t.ID.in(fetch));
-            query.execute();
-        }
-    }
-
+    
     @Override
     public GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd) {
         DSLContext context = getReadOnlyContext();
@@ -3474,56 +3431,6 @@ public class AssetProviderImpl implements AssetProvider {
                     return null;
                 });
         return dto;
-    }
-
-    @Override
-    public void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag) {
-    	//卸载参数
-    	Long chargingStandardId = cmd.getChargingStandardId();
-    	Long ownerId = cmd.getOwnerId();
-    	String ownerType = cmd.getOwnerType();
-    	Long categoryId = cmd.getCategoryId();
-
-        DSLContext context = getReadWriteContext();
-        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
-        com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
-        Long nullId = null;
-        if(deCouplingFlag == (byte)1){
-            //去解耦
-            context.delete(standard)
-                    .where(standard.ID.eq(chargingStandardId))
-                    .execute();
-            //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
-            //只要做了删除动作，那么该项目下的配置全部解耦
-            context.update(standardScope)
-                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
-                    .where(standardScope.OWNER_ID.eq(ownerId))
-                    .and(standardScope.OWNER_TYPE.eq(ownerType))
-                    .and(standardScope.CATEGORY_ID.eq(categoryId))
-                    .execute();
-            context.delete(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .execute();
-            context.delete(formula)
-                    .where(formula.CHARGING_STANDARD_ID.eq(chargingStandardId))
-                    .execute();
-        }else if(deCouplingFlag == (byte)0){
-            //耦合
-            List<Long> standardIds = context.select(standardScope.CHARGING_STANDARD_ID)
-                    .from(standardScope)
-                    .where(standardScope.BROTHER_STANDARD_ID.eq(chargingStandardId))
-                    .fetch(standardScope.CHARGING_STANDARD_ID);
-            standardIds.add(chargingStandardId);
-            context.delete(standard)
-                    .where(standard.ID.eq(chargingStandardId))
-                    .execute();
-            context.delete(standardScope)
-                    .where(standardScope.CHARGING_STANDARD_ID.in(standardIds))
-                    .execute();
-            context.delete(formula)
-                    .where(formula.CHARGING_STANDARD_ID.in(standardIds))
-                    .execute();
-        }
     }
 
     @Override
@@ -3565,92 +3472,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .from(t)
                 .where(t.NAME.eq(targetStr))
                 .fetchOne(0,String.class);
-    }
-
-    public List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-        List<ListChargingStandardsDTO> list = new ArrayList<>();
-        DSLContext context = getReadOnlyContext();
-        EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
-        EhPaymentChargingStandards t = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("t");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.BILLING_CYCLE,t.ID,t.NAME,t.FORMULA,t.FORMULA_TYPE,t.SUGGEST_UNIT_PRICE,t.AREA_SIZE_TYPE, t.PRICE_UNIT_TYPE);
-        query.addFrom(t,t1);
-        query.addConditions(t.CHARGING_ITEMS_ID.eq(cmd.getChargingItemId()));
-        query.addConditions(t1.CHARGING_STANDARD_ID.eq(t.ID));
-        query.addConditions(t1.OWNER_ID.eq(cmd.getOwnerId()));
-        query.addConditions(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
-        if(cmd.getAllScope()){
-            query.addConditions(t1.ORG_ID.eq(cmd.getOrgId()));
-        }
-        //add category constraint
-        query.addConditions(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
-        query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize()+1);
-        query.fetch().map(r -> {
-            ListChargingStandardsDTO dto = new ListChargingStandardsDTO();
-            dto.setBillingCycle(r.getValue(t.BILLING_CYCLE));
-            dto.setChargingStandardId(r.getValue(t.ID));
-            dto.setChargingStandardName(r.getValue(t.NAME));
-            dto.setFormula(r.getValue(t.FORMULA));
-            dto.setFormulaType(r.getValue(t.FORMULA_TYPE));
-            dto.setSuggestUnitPrice(r.getValue(t.SUGGEST_UNIT_PRICE));
-            dto.setAreaSizeType(r.getValue(t.AREA_SIZE_TYPE));
-            Byte priceUnitType = r.getValue(t.PRICE_UNIT_TYPE);
-            if(priceUnitType != null){
-                //fixed as using unit price of day
-                dto.setUseUnitPrice((byte)1);
-            }else{
-                dto.setUseUnitPrice((byte)0);
-            }
-            list.add(dto);
-            return null;
-        });
-        for(int i = 0; i < list.size(); i ++){
-            ListChargingStandardsDTO dto = list.get(i);
-            Long chargingStandardId = dto.getChargingStandardId();
-            //获得标准
-            com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards standard = findChargingStandardById(chargingStandardId);
-            Set<String> varIdens = new HashSet<>();
-            //获得formula的额外内容
-            List<PaymentFormula> formulaCondition = null;
-            if(standard.getFormulaType()==3 || standard.getFormulaType() == 4){
-                formulaCondition = getFormulas(standard.getId());
-                for(int m = 0; m < formulaCondition.size(); m ++){
-                    varIdens.add(findVariableByIden(formulaCondition.get(m).getConstraintVariableIdentifer()).getName());
-                }
-            }
-            //获得standard公式
-            String formula = null;
-            if(standard.getFormulaType()==1 || standard.getFormulaType() == 2){
-                formulaCondition = getFormulas(standard.getId());
-                if(formulaCondition!=null){
-                    if(formulaCondition.size()>1){
-                        LOGGER.error("普通公式的标准的id为"+standard.getId()+",对应了"+formulaCondition.size()+"条公式!");
-                    }
-                    PaymentFormula paymentFormula = formulaCondition.get(0);
-                    formula = paymentFormula.getFormulaJson();
-                }else{
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"找不到公式,标准的id为"+standard.getId()+"");
-                }
-            }
-            if(formula!=null){
-                char[] formularChars = formula.toCharArray();
-                int index = 0;
-                int start = 0;
-                while(index < formularChars.length){
-                    if(formularChars[index]=='+'||formularChars[index]=='-'||formularChars[index]=='*'||formularChars[index]=='/'||index == formularChars.length-1){
-                        String var = formula.substring(start,index==formula.length()-1?index+1:index);
-                        if(!IntegerUtil.hasDigit(var)){
-                            varIdens.add(findVariableByIden(var).getName());
-                        }
-                        start = index+1;
-                    }
-                    index++;
-                }
-
-            }
-            dto.setVariableNames(new ArrayList<>(varIdens));
-        }
-        return list;
     }
 
     @Override
@@ -3729,14 +3550,6 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return list;
     }
-    
-    @Override
-    public com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId) {
-        DSLContext context = getReadOnlyContext();
-        return context.selectFrom(Tables.EH_PAYMENT_CHARGING_STANDARDS)
-                .where(Tables.EH_PAYMENT_CHARGING_STANDARDS.ID.eq(chargingStandardId))
-                .fetchOneInto(PaymentChargingStandards.class);
-    }
 
     public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId) {
     	SelectQuery<EhPaymentBillGroupsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_GROUPS).getQuery();
@@ -3809,14 +3622,6 @@ public class AssetProviderImpl implements AssetProvider {
             list.add(dto);
         }
         return list;
-    }
-
-    @Override
-    public List<PaymentFormula> getFormulas(Long id) {
-        DSLContext context = getReadOnlyContext();
-        return context.selectFrom(Tables.EH_PAYMENT_FORMULA)
-                .where(Tables.EH_PAYMENT_FORMULA.CHARGING_STANDARD_ID.eq(id))
-                .fetchInto(PaymentFormula.class);
     }
 
     @Override
@@ -5239,53 +5044,6 @@ public class AssetProviderImpl implements AssetProvider {
         vo.setBillGroupDTO(dto);
         return vo;
     }
-	
-	public IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd) {
-		IsProjectNavigateDefaultResp response = new IsProjectNavigateDefaultResp();
-		DSLContext context = getReadOnlyContext();
-		EhPaymentChargingItemScopes t = Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.as("t");
-		List<PaymentChargingItemScope> itemScopes = context.selectFrom(t)
-                .where(t.OWNER_ID.eq(cmd.getOwnerId()))
-                .and(t.OWNER_TYPE.eq(cmd.getOwnerType()))
-                .and(t.CATEGORY_ID.eq(cmd.getCategoryId()))
-                .and(t.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-                .fetchInto(PaymentChargingItemScope.class);
-		if(itemScopes != null && itemScopes.size() == 0) {
-			response.setDefaultStatus((byte)0);//收费项标准Tab页在还没选费项的前提下，不展示使用默认配置
-		}else {
-			EhPaymentChargingStandardsScopes t1 = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("t1");
-	        List<PaymentChargingStandardsScopes> scopes = context.selectFrom(t1)
-	        		.where(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	        		.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-	                .fetchInto(PaymentChargingStandardsScopes.class);
-	        if(scopes != null && scopes.size() == 0) {//判断是否是初始化的时候，初始化的时候全部里面没配置、项目也没配置，该域空间下没有数据
-	        	response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-	        }else {//说明该域空间下已经有数据了
-	        	scopes = context.selectFrom(t1)
-	            		.where(t1.OWNER_ID.eq(cmd.getOwnerId()))
-	                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-	                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-	                    .fetchInto(PaymentChargingStandardsScopes.class);
-	        	if(scopes.size() > 0 && scopes.get(0).getBrotherStandardId() != null) {
-	        		response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-	        	}else {
-	        		scopes = context.selectFrom(t1)
-		            		.where(t1.OWNER_ID.eq(cmd.getNamespaceId().longValue()))//如果默认配置有配置，那么说明具体项目有做删除操作
-		                    .and(t1.OWNER_TYPE.eq(cmd.getOwnerType()))
-		                    .and(t1.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-		                    .and(t1.CATEGORY_ID.eq(cmd.getCategoryId()))
-		                    .fetchInto(PaymentChargingStandardsScopes.class);
-	        		if(scopes.size() > 0) {
-            			response.setDefaultStatus((byte)0);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}else {
-            			response.setDefaultStatus((byte)1);//1：代表使用的是默认配置，0：代表有做过个性化的修改
-            		}
-	        	}
-	        }
-		}
-        return response;
-	}
 	
     public String getProjectNameByBillID(Long billId) {
 		String projectName = getReadOnlyContext().select(Tables.EH_COMMUNITIES.NAME)

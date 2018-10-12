@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
+import com.everhomes.asset.standard.AssetStandardService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -44,6 +45,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetChargingItemService assetChargingItemService;
+	
+	@Autowired
+	private AssetStandardService assetStandardService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -414,7 +418,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listOnlyChargingStandards")
 	@RestReturn(value = ListChargingStandardsResponse.class, collection = true)
 	public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-		ListChargingStandardsResponse resp = assetService.listOnlyChargingStandards(cmd);
+		ListChargingStandardsResponse resp = assetStandardService.listOnlyChargingStandards(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -428,7 +432,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse createChargingStandard(CreateChargingStandardCommand cmd) {
-		assetService.createChargingStandard(cmd);
+		assetStandardService.createChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -442,7 +446,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-		assetService.modifyChargingStandard(cmd);
+		assetStandardService.modifyChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -456,7 +460,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("getChargingStandardDetail")
 	@RestReturn(value = GetChargingStandardDTO.class)
 	public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
-		GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+		GetChargingStandardDTO dto = assetStandardService.getChargingStandardDetail(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -470,7 +474,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteChargingStandard")
 	@RestReturn(value = DeleteChargingStandardDTO.class)
 	public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-		DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+		DeleteChargingStandardDTO dto = assetStandardService.deleteChargingStandard(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);

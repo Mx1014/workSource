@@ -671,7 +671,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId) {
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId, Long appId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
 		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
@@ -690,12 +690,15 @@ public class ContractProviderImpl implements ContractProvider {
 		if(communityId == null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(0L)
 					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
+			
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
+			
 		}
 		// zuolin base 
 		/*if(ownerId!=null){
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
 		}*/
-
+		
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, ContractParam.class));
