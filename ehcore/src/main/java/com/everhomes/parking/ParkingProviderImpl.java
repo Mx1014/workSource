@@ -432,7 +432,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
 																  String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize) {
+																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, 
+																  Long pageAnchor, Integer pageSize,Byte payMode) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -467,6 +468,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.like("%" + keyWords + "%")
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.like("%" + keyWords + "%"))
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
+		}
+		if(payMode!=null){
+            query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
 		}
         if (null != status) {
             query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));

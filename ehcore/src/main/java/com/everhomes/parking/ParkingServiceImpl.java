@@ -1128,7 +1128,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getPaySource(),cmd.getKeyWords(),cmd.getPageAnchor(), pageSize, cmd.getPayMode());
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -1644,7 +1644,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStatus(), cmd.getPaySource(), cmd.getKeyWords(), cmd.getPageAnchor(), cmd.getPageSize(), cmd.getPayMode());
 		Workbook wb = new XSSFWorkbook();
 
 		Font font = wb.createFont();

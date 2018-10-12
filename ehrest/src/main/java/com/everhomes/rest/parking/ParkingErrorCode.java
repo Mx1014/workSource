@@ -41,7 +41,6 @@ public interface ParkingErrorCode {
 
     int CAR_ENTRY_INFO_NOT_FOUND = 10033;
     
-    
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败

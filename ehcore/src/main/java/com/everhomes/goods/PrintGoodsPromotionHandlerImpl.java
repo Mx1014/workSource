@@ -59,36 +59,6 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 		List<Community> communities = communityProvider.listNamespaceCommunities(cmd.getNamespaceId());
 		List<String> communitiesList = new ArrayList();
 		goodScopeDTO.setTitle(SCOPE);
-		
-//		switch (c,d) {
-//		//停车
-//		case 2 :
-//			for (Community community : communities){
-//				String communitiy;
-//				JSONObject communitityJson=new JSONObject();
-//				communitityJson.put("id", community.getId());
-//				communitityJson.put("name", community.getName());
-//				communitityJson.put("title", SCOPE);
-//				List<String> parkingLotList = new ArrayList();
-//				String ownerType = "communities";
-//				List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
-//				for(ParkingLot parkingLot : parkinglots){
-//					String parking;
-//					JSONObject parkingJson=new JSONObject();
-//					parkingJson.put("id", parkingLot.getId().toString());
-//					parkingJson.put("name", parkingLot.getName());
-//					communitityJson.put("title", SCOPE);
-//					parking = parkingJson.toString();
-//					parkingLotList.add(parking);
-//				}
-//				communitityJson.put("tag", parkingLotList);
-//				communitiy = communitityJson.toString();
-//				communitiesList.add(communitiy);
-//			}
-//			goodScopeDTO.setTagList(communitiesList);
-//			break;
-//			//云打印
-//		case 3 : 
 		for (Community community : communities){
 			String communitiy;
 			JSONObject communitityJson=new JSONObject();

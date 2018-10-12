@@ -7,63 +7,62 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.general.order.GeneralOrderBizHandler;
-import com.everhomes.print.SiyinPrintOrder;
-import com.everhomes.print.SiyinPrintOrderProvider;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.general.order.OrderCallBackCommand;
 import com.everhomes.rest.order.OrderType.OrderTypeEnum;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
-@Component(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + "printOrder") //与OrderTypeEnum的pyCode保持一致
-public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
+@Component(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + "parking") //与OrderTypeEnum的pyCode保持一致
+public class ParkingGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(PrintGeneralOrderHandlerImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ParkingGeneralOrderHandlerImpl.class);
+	
 	
 	@Autowired
-	SiyinPrintOrderProvider siyinPrintOrderProvider;
-	
+	private ParkingProvider parkingProvider;
 
 	@Override
 	void dealInvoiceCallBack(OrderCallBackCommand cmd) {
-		SiyinPrintOrder order = siyinPrintOrderProvider
-				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getCallBackInfo().getBusinessOrderId());
 		if (null == order) {
 			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
 		}
 		
-		order.setIsInvoiced(TrueOrFalseFlag.TRUE.getCode());
-		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		order.setInvoiceStatus((byte)2);
+		
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	@Override
 	void dealEnterprisePayCallBack(OrderCallBackCommand cmd) {
 		
-		SiyinPrintOrder order = siyinPrintOrderProvider
-				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getCallBackInfo().getBusinessOrderId());
 		if (null == order) {
-			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO, "order not exist");
 		}
 		
 		//TODO 更新支付状态
 		LOGGER.info("dealEnterprisePayCallBack:"+StringHelper.toJsonString(cmd));
 		order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
-		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		parkingProvider.updateParkingRechargeOrder(order);
 	}
 
 	@Override
 	OrderTypeEnum getOrderTypeEnum() {
-		return OrderTypeEnum.PRINT_ORDER;
+		return OrderTypeEnum.PARKING;
 	}
 
 	@Override
 	void fillEnterprisePaySpecificInfo(CreateGeneralBillInfo createBillInfo, CreateOrderBaseInfo baseInfo) {
-		createBillInfo.setSourceType(AssetSourceType.PRINT_MODULE);
+		createBillInfo.setSourceType(AssetSourceType.PARKING_MODULE);
 		createBillInfo.setSourceId(null); //单应用设置为空
 	}
 }
