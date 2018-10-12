@@ -29,13 +29,10 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.rentalv2.PreOrderCommand;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.RentalV2ResourceType;
-import com.everhomes.rest.rentalv2.RuleSourceType;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -327,6 +324,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
 
         return preOrderDTO;
+    }
+
+    @Override
+    public AddRentalBillItemV3Response createMerchantPreOrder(PreOrderCommand cmd,RentalOrder order) {
+        AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+
+        return null;
     }
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
