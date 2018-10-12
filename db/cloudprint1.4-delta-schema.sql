@@ -87,7 +87,10 @@ ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NUL
 ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
 ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
 
-
+-- AUTHOR: 缪洲 20181011
+-- REMARK： 停车6.7.2 添加支付方式与支付类型字段
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '0:个人支付，1：已记账，2：已支付，支付类型';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `payment_Type` VARCHAR(32) COMMENT '10001:alipay,10002:weixin';
 
 
 
