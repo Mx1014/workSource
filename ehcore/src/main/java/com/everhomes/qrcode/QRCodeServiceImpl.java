@@ -4,10 +4,12 @@ package com.everhomes.qrcode;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.activity.ActivityQRCodeDTO;
 import com.everhomes.rest.qrcode.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,35 @@ public class QRCodeServiceImpl implements QRCodeService {
 
         return toQRCodeDTO(qrcode);
     }
-    
+
+    @Override
+    public QRCodeDTO createQRCodeForActivity(NewQRCodeCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+
+        QRCode qrcode = new QRCode();
+        qrcode.setDescription(cmd.getDescription());
+        qrcode.setRouteUri(cmd.getRouteUri());
+        qrcode.setHandler(cmd.getHandler());
+        qrcode.setActionType(cmd.getActionType());
+        qrcode.setActionData(cmd.getActionData());
+        qrcode.setStatus(QRCodeStatus.ACTIVE.getCode());
+        qrcode.setViewCount(0L);
+        qrcode.setCreatorUid(operatorId);
+        qrcode.setExtra(cmd.getExtra());
+
+        Long expireSeconds = cmd.getExpireSeconds();
+        if(expireSeconds != null) {
+            qrcode.setExpireTime(new Timestamp(DateHelper.currentGMTTime().getTime() + expireSeconds * 1000));
+        }
+
+        qrCodeListenerManager.onQRCodeCreating(cmd.getHandler(), qrcode);
+        qrcodeProvider.createQRCode(qrcode);
+        qrCodeListenerManager.onQRCodeCreated(cmd.getHandler(), qrcode);
+
+        return toQRCodeDTOForActivity(qrcode);
+    }
+
     @Override
     public QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd) {
         return getQRCodeInfoById(cmd.getQrid(), cmd.getSource());
@@ -120,6 +150,25 @@ public class QRCodeServiceImpl implements QRCodeService {
         url += "qr?qrid=" + qrid;
         qrcodeDto.setUrl(url);
         
+        return qrcodeDto;
+    }
+
+
+    private QRCodeDTO toQRCodeDTOForActivity(QRCode qrcode) {
+        QRCodeDTO qrcodeDto = ConvertHelper.convert(qrcode, QRCodeDTO.class);
+        String url = configProvider.getValue(ConfigConstants.HOME_URL, "");
+        if(!url.endsWith("/")) {
+            url += "/";
+        }
+        ActivityQRCodeDTO activityQRCodeDTO = new ActivityQRCodeDTO();
+        if (!StringUtils.isBlank(qrcodeDto.getActionData())) {
+            activityQRCodeDTO = (ActivityQRCodeDTO)StringHelper.fromJsonString(qrcodeDto.getActionData(), ActivityQRCodeDTO.class);
+        }
+        url += "activity/build/index.html#/checkIn?forumId=%s&topicId=%s&activityId=%s&namespaceId=%s&wechatSignup=%s&categoryId=%s";
+        url = String.format(url, activityQRCodeDTO.getForumId(), activityQRCodeDTO.getTopicId(), activityQRCodeDTO.getActivityId(),
+                UserContext.getCurrentNamespaceId(), activityQRCodeDTO.getWechatSignup(),activityQRCodeDTO.getCategoryId());
+        qrcodeDto.setUrl(url);
+
         return qrcodeDto;
     }
 }

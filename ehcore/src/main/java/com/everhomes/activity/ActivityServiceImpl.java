@@ -3190,13 +3190,17 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
-        
+        if (DateHelper.currentGMTTime().getTime() > activity.getEndTimeMs()) {
+            LOGGER.error("activity is already ended, activityid+{}",cmd.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_ACTIVITY_END, "activity is already ended, activityid+{}",cmd.getActivityId());
+        }
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
         if(acroster == null) {
         	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId={}, userId = {}",cmd.getActivityId()
         			, user.getId());
         	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_CHECKIN_UN_CONFIRMED, "check in error id = {}, userId = {}", cmd.getActivityId(), user.getId());
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "check in error id = {}, userId = {}", cmd.getActivityId(), user.getId());
         }
         // 签到增加异常消息 modify sfyan 20160712
         if(acroster.getConfirmFlag() == null) {
