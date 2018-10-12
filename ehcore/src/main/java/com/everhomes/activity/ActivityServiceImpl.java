@@ -3408,7 +3408,52 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
             response.setCheckinQRUrl(baseDir + "/activity/checkin?activityId=" + activity.getId());
             response.setCreatorFlag(1);
         }
+        //填充创建者信息
+        populatePostCreatorInfo(activity.getCreatorUid(), response);
         return response;
+    }
+
+    private void populatePostCreatorInfo(Long creatorId, ActivityListResponse response) {
+        String creatorNickName = "";
+        String creatorAvatar = "";
+        User creator = userProvider.findUserById(creatorId);
+        if(creator != null) {
+            creatorNickName = creator.getNickName();
+            creatorAvatar = creator.getAvatar();
+        }
+
+        response.setCreatorNickName(creatorNickName);
+        response.setCreatorAvatar(creatorAvatar);
+        /*解决web 帖子头像问题，当帖子创建者没有头像时，取默认头像   by sw */
+        if(StringUtils.isEmpty(creatorAvatar)) {
+
+            //防止creator空指针  add by yanjun 20171011
+            Integer namespaceId = 0;
+            if(creator != null && creator.getNamespaceId() != null){
+                namespaceId = creator.getNamespaceId();
+            }
+            creatorAvatar = configProvider.getValue(namespaceId, "user.avatar.default.url", "");
+        }
+
+        if(creatorAvatar != null && creatorAvatar.length() > 0) {
+            String avatarUrl = getResourceUrlByUir(creatorAvatar,
+                    EntityType.USER.getCode(), creatorId);
+            response.setCreatorAvatarUrl(avatarUrl);
+        }
+    }
+
+    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=" + uri
+                        + ", ownerType=" + ownerType + ", ownerId=" + ownerId, e);
+            }
+        }
+
+        return url;
     }
     
     /**

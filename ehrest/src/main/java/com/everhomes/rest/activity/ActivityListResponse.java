@@ -12,19 +12,50 @@ import com.everhomes.util.StringHelper;
  *<li>checkinQRUrl:二维码路径</li>
  *<li>roster:  参考{@link com.everhomes.rest.activity.ActivityMemberDTO}</li>
  *<li>nextAnchor: </li>
+ *<li>creatorNickName: 创建者昵称</li>
+ *<li>creatorAvatar: 创建者在圈内的头像URI</li>
+ *<li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  *</ul>
  */
 public class ActivityListResponse {
     private ActivityDTO activity;
     private Integer creatorFlag;
     private String checkinQRUrl;
-    
+    private String creatorNickName;
+
+    private String creatorAvatar;
+
+    private String creatorAvatarUrl;
     @ItemType(ActivityMemberDTO.class)
     private List<ActivityMemberDTO> roster;
     
     private Long nextAnchor;
     
     public ActivityListResponse() {
+    }
+
+    public String getCreatorNickName() {
+        return creatorNickName;
+    }
+
+    public void setCreatorNickName(String creatorNickName) {
+        this.creatorNickName = creatorNickName;
+    }
+
+    public String getCreatorAvatar() {
+        return creatorAvatar;
+    }
+
+    public void setCreatorAvatar(String creatorAvatar) {
+        this.creatorAvatar = creatorAvatar;
+    }
+
+    public String getCreatorAvatarUrl() {
+        return creatorAvatarUrl;
+    }
+
+    public void setCreatorAvatarUrl(String creatorAvatarUrl) {
+        this.creatorAvatarUrl = creatorAvatarUrl;
     }
 
     public ActivityDTO getActivity() {
