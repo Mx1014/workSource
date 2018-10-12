@@ -358,16 +358,16 @@ public class AssetStandardServiceImpl implements AssetStandardService {
     	if(workFlag){
     		throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.STANDARD_RELEATE_CONTRACT_CHECK,"if a standard releate contracts cannot delele!");
         }
-    	DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
-    	byte deCouplingFlag = 1;
-        // 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
-        if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
-            deCouplingFlag = 0;
-            assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
-            return dto;
+    	List<Long> allCommunity = assetService.getAllCommunity(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getAppId(), true);
+    	if(cmd.getOwnerId() == null || cmd.getOwnerId() ==-1) {
+    		// 全部：在工作的收费标准(所属的item在账单组中存在视为工作中)，一定是没有bro的，所以直接删除，id和bro id的即可
+        	cmd.setAllScope(true);
+        	assetStandardProvider.deleteChargingStandard(cmd, allCommunity);
+        }else {
+        	cmd.setAllScope(false);
+        	assetStandardProvider.deleteChargingStandard(cmd, allCommunity);
         }
-        // 对于个体园区，删除c,s,f，对于id为standardid的，顺便查询是否有brother，有则干掉
-        assetProvider.deleteChargingStandard(cmd, deCouplingFlag);
+        DeleteChargingStandardDTO dto = new DeleteChargingStandardDTO();
         return dto;
     }
     

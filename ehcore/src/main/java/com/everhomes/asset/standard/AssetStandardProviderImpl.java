@@ -14,7 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.asset.AssetErrorCodes;
+import com.everhomes.asset.AssetPaymentConstants;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.PaymentChargingItemScope;
 import com.everhomes.asset.PaymentChargingStandards;
 import com.everhomes.asset.PaymentChargingStandardsScopes;
@@ -24,6 +28,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetProjectDefaultFlag;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
@@ -55,6 +60,11 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
  
     @Autowired
     private com.everhomes.paySDK.api.PayService payServiceV2;
+    
+    @Autowired
+    private AssetProvider assetProvider;
+    
+    private static EhPaymentChargingStandards standard = Tables.EH_PAYMENT_CHARGING_STANDARDS.as("standard");
     
     private DSLContext getReadOnlyContext(){
         return this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -283,7 +293,65 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
                     .execute();
         }
     }
-
+    
+    @Override
+    public void deleteChargingStandard(DeleteChargingStandardCommand cmd, List<Long> allCommunity) {
+        DSLContext context = getReadWriteContext();
+        EhPaymentChargingStandardsScopes standardScope = Tables.EH_PAYMENT_CHARGING_STANDARDS_SCOPES.as("standardScope");
+        com.everhomes.server.schema.tables.EhPaymentFormula formula = Tables.EH_PAYMENT_FORMULA.as("formula");
+        Long nullId = null;
+        //标准版增加的allScope参数，true：默认/全部，false：具体项目
+        if(cmd.getAllScope()){
+        	//获取当前管理公司管理下的所有与其有继承关系的项目
+        	List<Long> existProjectStandardIds = context.select(standardScope.CHARGING_STANDARD_ID)
+                  .from(standardScope)
+                  .where(standardScope.BROTHER_STANDARD_ID.eq(cmd.getChargingStandardId()))
+                  .and(standardScope.OWNER_ID.in(allCommunity))//兼容标准版引入的转交项目管理权
+                  .fetch(standardScope.CHARGING_STANDARD_ID);
+        	existProjectStandardIds.add(cmd.getChargingStandardId());
+            //删除“获取当前管理公司管理下的所有与其有继承关系的项目"
+            for(Long chargingStandardId : existProjectStandardIds){
+                this.dbProvider.execute((TransactionStatus status) -> {
+                	context.delete(standard)
+		                  .where(standard.ID.eq(chargingStandardId))
+		                  .execute();
+		          context.delete(standardScope)
+		                  .where(standardScope.CHARGING_STANDARD_ID.in(existProjectStandardIds))
+		                  .and(standardScope.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+		                  .execute();
+		          context.delete(formula)
+		                  .where(formula.CHARGING_STANDARD_ID.in(existProjectStandardIds))
+		                  .execute();
+                    return null;
+                });
+            }
+            //全部项目修改standard的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据standard查询出所有关联的项目（包括已经授权出去的项目）
+            decouplingHistoryStandard(cmd.getNamespaceId(), cmd.getCategoryId(), cmd.getChargingStandardId(), allCommunity);
+        }else{
+        	//去解耦
+            context.delete(standard)
+                    .where(standard.ID.eq(cmd.getChargingStandardId()))
+                    .execute();
+            //issue-34458 在具体项目新增一条标准（自定义的标准），“注：该项目使用默认配置”文案不消失，刷新也不消失
+            //只要做了删除动作，那么该项目下的配置全部解耦
+            context.update(standardScope)
+                    .set(standardScope.BROTHER_STANDARD_ID,nullId)
+                    .where(standardScope.OWNER_ID.eq(cmd.getOwnerId()))
+                    .and(standardScope.OWNER_TYPE.eq(cmd.getOwnerType()))
+                    .and(standardScope.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(standardScope.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .execute();
+            context.delete(standardScope)
+                    .where(standardScope.CHARGING_STANDARD_ID.eq(cmd.getChargingStandardId()))
+                    .and(standardScope.CATEGORY_ID.eq(cmd.getCategoryId()))
+                    .and(standardScope.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+                    .execute();
+            context.delete(formula)
+                    .where(formula.CHARGING_STANDARD_ID.eq(cmd.getChargingStandardId()))
+                    .execute();
+        }
+    }
     
     /**
      * 标准版：为了兼容标准版引入的转交项目管理权

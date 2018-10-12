@@ -211,8 +211,6 @@ public interface AssetProvider {
 
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
 
-    void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag);
-
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
     String getVariableIdenfitierById(Long variableId);
