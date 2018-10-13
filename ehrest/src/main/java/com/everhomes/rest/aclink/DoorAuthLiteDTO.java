@@ -2,6 +2,7 @@
 package com.everhomes.rest.aclink;
 
 import java.sql.Timestamp;
+import java.io.Serializable;
 
 import com.everhomes.util.StringHelper;
 
@@ -23,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>authMethod: 授权方式,mobile/admin{@link com.everhomes.aclink.DoorAuthMethodType}</li>
  * </ul>
  */
-public class DoorAuthLiteDTO implements Comparable<DoorAuthLiteDTO> {
+public class DoorAuthLiteDTO implements Comparable<DoorAuthLiteDTO>, Serializable{
     private Long id;
     private Long ownerId;
     private String ownerName;
