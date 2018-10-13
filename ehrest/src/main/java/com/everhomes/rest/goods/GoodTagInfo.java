@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>serviceType : 根据请求参数回填</li>
+ * <li>serviceTypeName : 根据请求参数回填</li>
  * <li>namespaceId : namespaceId</li>
  * <li>tag1Key : tag1Key</li>
  * <li>tag2Key : tag2Key</li>
@@ -23,7 +24,8 @@ import com.everhomes.util.StringHelper;
  * @date 2018年10月9日
  */
 public class GoodTagInfo {
-	private String serviceType;
+	private Long serviceType;
+	private String serviceTypeName;
 	private Integer namespaceId;
 	private String tag1Key;
 	private String tag2Key;
@@ -139,20 +141,28 @@ public class GoodTagInfo {
 		this.tag5Name = tag5Name;
 	}
 
-	public String getServiceType() {
-		return serviceType;
-	}
-
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
-	}
-
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(Long serviceType) {
+		this.serviceType = serviceType;
+	}
+
+	public String getServiceTypeName() {
+		return serviceTypeName;
+	}
+
+	public void setServiceTypeName(String serviceTypeName) {
+		this.serviceTypeName = serviceTypeName;
 	}
 
 }

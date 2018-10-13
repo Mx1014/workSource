@@ -19,7 +19,6 @@ import com.everhomes.util.StringHelper;
 public class GetGoodListCommand {
 	private Integer namespaceId;
 	private Long merchantId;
-	private String serviceType; 
 	private Long bizType;
 	GoodTagInfo goodTagInfo;
  	
@@ -42,14 +41,6 @@ public class GetGoodListCommand {
 
 	public void setMerchantId(Long merchantId) {
 		this.merchantId = merchantId;
-	}
-
-	public String getServiceType() {
-		return serviceType;
-	}
-
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
 	}
 
 	public Long getBizType() {
