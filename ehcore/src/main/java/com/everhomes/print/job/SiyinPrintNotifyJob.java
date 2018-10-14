@@ -37,7 +37,7 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
             String content = jobMap.getString("content");
             SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
-            if (order.getOrderStatus().equals(PrintOrderStatusType.UNPAID)){
+            if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
             	Long userId = order.getCreatorUid();
             	sendMessageToUser(userId,content);
             }

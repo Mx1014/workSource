@@ -1,21 +1,13 @@
 package com.everhomes.print.job;
 
-import com.everhomes.messaging.MessagingService;
 import com.everhomes.print.SiyinPrintNotificationTemplateCode;
 import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.Tuple;
@@ -51,7 +43,7 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
             String appName = jobMap.getString("appName");
             SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
-            if (order.getOrderStatus().equals(PrintOrderStatusType.UNPAID)){
+            if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
             	Integer namespaceId = order.getNamespaceId();
             	Long creatorUid = order.getCreatorUid();
             	sendMessageToUser(appName, namespaceId, creatorUid);
@@ -62,10 +54,10 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
 
     }
     private void sendMessageToUser(String appName, Integer namespaceId, Long creatorUid) {
-        String templateScope = SiyinPrintNotificationTemplateCode.SCOPE;
+        String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = SiyinPrintNotificationTemplateCode.locale;
-        int templateId = SiyinPrintNotificationTemplateCode.PRINT_UNPAID_MESSAGE;
-
+        int templateId = SmsTemplateCode.PRINT_UNPAID_MESSAGE;
+        
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("appName", appName);
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(creatorUid,

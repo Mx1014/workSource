@@ -94,7 +94,8 @@ public class SiyinJobValidateServiceImpl {
 	
 	
 	//默认15分钟后取消
-	private Long ORDER_AUTO_CANCEL_TIME = 60 * 1000L;
+	private Long PRINT_UNPAID_NOTIFY_TIME = 29 * 1000L;
+	private Long PRINT_UNPAID_MESSAGE_TIME = 30 * 1000L;
 	private String queueName = "siyinprint";
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
@@ -221,7 +222,7 @@ public class SiyinJobValidateServiceImpl {
 		scheduleProvider.scheduleSimpleJob(
 				queueName + order.getId(),
 				"sendNotify" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_NOTIFY_TIME),
 				SiyinPrintNotifyJob.class,
 				notifyMap
 		);
@@ -232,7 +233,7 @@ public class SiyinJobValidateServiceImpl {
 		scheduleProvider.scheduleSimpleJob(
 				queueName + order.getId(),
 				"sendMessage" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_MESSAGE_TIME),
 				SiyinPrintMessageJob.class,
 				messageMap
 		);
