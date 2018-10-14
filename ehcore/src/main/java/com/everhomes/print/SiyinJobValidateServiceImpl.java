@@ -95,8 +95,7 @@ public class SiyinJobValidateServiceImpl {
 	
 	//默认15分钟后取消
 	private Long PRINT_UNPAID_NOTIFY_TIME = 30 * 1000L;
-	private Long PRINT_UNPAID_MESSAGE_TIME = 24 * 60 * 1000L;
-	private String queueName = "siyinprint";
+	private Long PRINT_UNPAID_MESSAGE_TIME = 60 * 1000L;
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -215,12 +214,12 @@ public class SiyinJobValidateServiceImpl {
 	
 	private void createOrderOverTimeTask(SiyinPrintOrder order) {
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
-				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "");
+				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
 		Map<String, Object> notifyMap = new HashMap<>();
 		notifyMap.put("content",notifyTextForOther);
 		notifyMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + "notify" +order.getId(),
+				"siyinprintnotify" +order.getId(),
 				"sendNotify" + order.getId(),
 				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_NOTIFY_TIME),
 				SiyinPrintNotifyJob.class,
@@ -231,7 +230,7 @@ public class SiyinJobValidateServiceImpl {
 		messageMap.put("appName",appName);
 		messageMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + "message" +order.getId(),
+				"siyinprintmessage" +order.getId(),
 				"sendMessage" + order.getId(),
 				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_MESSAGE_TIME),
 				SiyinPrintMessageJob.class,
