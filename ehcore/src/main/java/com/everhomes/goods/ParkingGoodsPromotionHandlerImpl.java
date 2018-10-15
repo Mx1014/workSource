@@ -17,6 +17,7 @@ import com.everhomes.rest.goods.GetGoodListResponse;
 import com.everhomes.rest.goods.GetServiceGoodCommand;
 import com.everhomes.rest.goods.GetServiceGoodResponse;
 import com.everhomes.rest.goods.GoodScopeDTO;
+import com.everhomes.rest.goods.TagDTO;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PARKING_MODULE)
 public class ParkingGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl{
@@ -33,32 +34,28 @@ public class ParkingGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandl
 		GetServiceGoodResponse response = new GetServiceGoodResponse();
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(cmd.getNamespaceId());
-		List<String> communitiesList = new ArrayList();
+		List<TagDTO> communitiesList = new ArrayList<>();
 		goodScopeDTO.setTitle(SCOPE);
 		for (Community community : communities){
-			String communitiy;
-			JSONObject communitityJson=new JSONObject();
-			communitityJson.put("id", community.getId());
-			communitityJson.put("name", community.getName());
-			communitityJson.put("title", SCOPE);
-			List<String> parkingLotList = new ArrayList();
-			String ownerType = "communities";
+			List<TagDTO> parkingLotList = new ArrayList<>();
+			String ownerType = "community";
 			List<ParkingLot> parkinglots = parkingProvider.listParkingLots(ownerType, community.getId());
 			for(ParkingLot parkingLot : parkinglots){
-				String parking;
-				JSONObject parkingJson=new JSONObject();
-				parkingJson.put("id", parkingLot.getId().toString());
-				parkingJson.put("name", parkingLot.getName());
-				parkingJson.put("serveApplyName", community.getName()+ "-" + parkingLot.getName());
-				communitityJson.put("title", SCOPE);
-				parking = parkingJson.toString();
+				TagDTO parking = new TagDTO();
+				parking.setId(parkingLot.getId().toString());
+				parking.setName(parkingLot.getName());
 				parkingLotList.add(parking);
 			}
-			communitityJson.put("tag", parkingLotList);
-			communitiy = communitityJson.toString();
+			
+			TagDTO communitiy = new TagDTO();
+			communitiy.setId(community.getId()+"");
+			communitiy.setName(community.getName());
+			communitiy.setTags(parkingLotList);
 			communitiesList.add(communitiy);
 		}
+		
 		goodScopeDTO.setTagList(communitiesList);
+		response.setGoodScopeDTO(goodScopeDTO);
 		return response;
 	}
 
