@@ -4,13 +4,13 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>押金状态, 0-未缴, 2-已缴</li>
+ *     <li>押金状态, 1-未缴, 2-已缴</li>
  * </ul>
  * Created by djm on 2018/9/29.
  */
 public enum ContractDepositType {
 
-	UNPAID((byte) 0, "未缴"), PAID((byte) 2, "已缴");
+	UNPAID((byte) 1, "未缴"), PAID((byte) 2, "已缴");
 
 	private byte code;
 	private String desc;
