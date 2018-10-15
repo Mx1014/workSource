@@ -332,6 +332,22 @@ public class ParkingController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /parking/createParkingRechargeGeneralOrder</b>
+     * <p>创建临时订单</p>
+     */
+    @RequestMapping("createParkingTempGeneralOrder")
+    @RestReturn(value=CreateParkingGeneralOrderResponse.class)
+    public RestResponse createParkingRechargeGeneralOrder(CreateParkingRechargeGeneralOrderCommand cmd) {
+    	CreateParkingGeneralOrderResponse dto = parkingService.createParkingRechargeGeneralOrder(cmd);
+
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 
     /**
      * <b>URL: /parking/listPayeeAccount </b>

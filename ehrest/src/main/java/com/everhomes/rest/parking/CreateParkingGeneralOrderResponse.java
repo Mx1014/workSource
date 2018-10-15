@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>orderId : 统一订单的订单id</li>
  * <li>merchantId : 商户id</li>
+ * <li>payUrl:统一订单跳转链接</li>
  * </ul>
  */
 public class CreateParkingGeneralOrderResponse {

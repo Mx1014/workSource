@@ -691,7 +691,6 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
 		param.setClientAppName(cmd.getClientAppName());
-		param.setOrderId(cmd.getOrderId());
 		return (CreateParkingGeneralOrderResponse) createGeneralOrder(param, ParkingRechargeType.TEMPORARY.getCode(), ActivityRosterPayVersionFlag.V3);
 
 	}
