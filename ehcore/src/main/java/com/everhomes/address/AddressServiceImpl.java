@@ -1166,7 +1166,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         }
 
         FamilyDTO familyDTO = processNewAddressClaimV2(cmd);
-        autoApproveMember(familyDTO.getCommunityId(), familyDTO.getId(), familyDTO.getAddressId());
+        //autoApproveMember(familyDTO.getCommunityId(), familyDTO.getId(), familyDTO.getAddressId());
 
         if (cmd.getReplacedAddressId() != null) {
             DisclaimAddressCommand disclaimCmd = new DisclaimAddressCommand();
