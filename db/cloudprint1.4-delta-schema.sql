@@ -71,11 +71,26 @@ ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMME
 -- AUTHOR: 黄明波 20181007
 -- REMARK： 云打印 添加发票标识 
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
+ALTER TABLE `eh_siyin_print_printers` ADD COLUMN `printer_name` VARCHAR(128) NOT NULL COMMENT 'printer name' ;
+ALTER TABLE `eh_siyin_print_records` ADD COLUMN `serial_number` VARCHAR(128) NULL DEFAULT NULL COMMENT 'reader_name' ;
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `printer_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '打印机名称';
 
 -- AUTHOR: 缪洲 20181010
 -- REMARK： 云打印 添加支付方式字段
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式'
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式';
 
+-- AUTHOR: 郑思挺 20181011
+-- REMARK： 资源预约3.7.1
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL DEFAULT 'normal' COMMENT '支付类型 ' ;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(255) NULL AFTER `pay_info`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `pay_url`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
+ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
+
+-- AUTHOR: 缪洲 20181011
+-- REMARK： 停车6.7.2 添加支付方式与支付类型字段
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '0:个人支付，1：已记账，2：已支付，支付类型';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(64) COMMENT '统一订单ID';
 
 
 

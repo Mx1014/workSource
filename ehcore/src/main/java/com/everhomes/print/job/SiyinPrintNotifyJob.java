@@ -1,11 +1,14 @@
 package com.everhomes.print.job;
 
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.print.SiyinPrintOrder;
+import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import org.quartz.JobDataMap;
@@ -26,15 +29,18 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
 
     @Autowired
     private MessagingService messagingService;
-
+    @Autowired
+	private SiyinPrintOrderProvider siyinPrintOrderProvider;
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
-            Long userId = jobMap.getLong("userId");
             String content = jobMap.getString("content");
-            sendMessageToUser(userId,content);
-
+            SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
+            if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
+            	Long userId = order.getCreatorUid();
+            	sendMessageToUser(userId,content);
+            }
         }catch (Exception e) {
             LOGGER.error("SiyinPrintMessageJob error", e);
         }

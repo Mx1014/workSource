@@ -23,7 +23,8 @@ public class GoodsPromotionContoller  extends ControllerBase {
 	 @RequestMapping("getGoodList")
 	 @RestReturn(value=GetGoodListResponse.class)
 	 public RestResponse getGoodList(GetGoodListCommand cmd) {
-		 GetGoodListResponse resp = goodsServce.getGoodList(cmd);
+		 GetGoodListResponse response = goodsServce.getGoodList(cmd);
+		 RestResponse resp = new RestResponse(response);
 	     resp.setErrorCode(ErrorCodes.SUCCESS);
 	     resp.setErrorDescription("OK");
 	     return resp;

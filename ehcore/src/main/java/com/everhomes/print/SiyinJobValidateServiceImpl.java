@@ -30,6 +30,8 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.xml.XMLToJSON;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,8 @@ public class SiyinJobValidateServiceImpl {
 	@Autowired
 	private SiyinPrintOrderProvider siyinPrintOrderProvider;
 	@Autowired
+	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
+	@Autowired
 	private SiyinPrintRecordProvider siyinPrintRecordProvider;
 	@Autowired
 	private SiyinPrintSettingProvider siyinPrintSettingProvider;
@@ -88,9 +92,10 @@ public class SiyinJobValidateServiceImpl {
 	@Autowired
 	private OrganizationService organizationService;
 	
+	
 	//默认15分钟后取消
-	private Long ORDER_AUTO_CANCEL_TIME = 60 * 1000L;
-	private String queueName = "siyinprint";
+	private Long PRINT_UNPAID_NOTIFY_TIME = 30 * 1000L;
+	private Long PRINT_UNPAID_MESSAGE_TIME = 60 * 1000L;
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -164,6 +169,8 @@ public class SiyinJobValidateServiceImpl {
 		record.setMonoSurfaceCount(object.getInteger("mono_surface"));
 		record.setPaperSize(getPaperSizeCode(object.getString("paper_size")));
 		record.setStartTime(object.getString("print_time"));
+		record.setSerialNumber(object.getString("serial_number"));
+		record.setPrinterName(getPrinterNameBySerialNumber(record.getSerialNumber()));
 		record.setJobStatus("FinishJob");
 		record.setGroupName("___OAUTH___");
 		record.setStatus(CommonStatus.ACTIVE.getCode());
@@ -207,26 +214,25 @@ public class SiyinJobValidateServiceImpl {
 	
 	private void createOrderOverTimeTask(SiyinPrintOrder order) {
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
-				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "");
+				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
 		Map<String, Object> notifyMap = new HashMap<>();
-		notifyMap.put("userId",order.getCreatorUid());
 		notifyMap.put("content",notifyTextForOther);
+		notifyMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + order.getId(),
+				"siyinprintnotify" +order.getId(),
 				"sendNotify" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_NOTIFY_TIME),
 				SiyinPrintNotifyJob.class,
 				notifyMap
 		);
 		String appName = getAppName(order.getNamespaceId());
 		Map<String, Object> messageMap = new HashMap<>();
 		messageMap.put("appName",appName);
-		messageMap.put("creatorUid",order.getCreatorUid());
-		messageMap.put("namespaceId", order.getNamespaceId());
+		messageMap.put("orderNo", order.getOrderNo());
 		scheduleProvider.scheduleSimpleJob(
-				queueName + order.getId(),
+				"siyinprintmessage" +order.getId(),
 				"sendMessage" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + ORDER_AUTO_CANCEL_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_MESSAGE_TIME),
 				SiyinPrintMessageJob.class,
 				messageMap
 		);
@@ -365,7 +371,7 @@ public class SiyinJobValidateServiceImpl {
 		return null;
 	}
 	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId());
+		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
         if(order == null){
         	order = new SiyinPrintOrder();
         	order.setNamespaceId(record.getNamespaceId());
@@ -384,6 +390,7 @@ public class SiyinJobValidateServiceImpl {
         	order.setOrderTotalFee(new BigDecimal("0"));
         	order.setCreatorUid(record.getCreatorUid());
         	order.setOperatorUid(record.getOperatorUid());
+        	order.setPrinterName(record.getPrinterName());
         	User user = userProvider.findUserById(record.getCreatorUid());
     		order.setNickName(user == null?"":user.getNickName());
     		
@@ -399,6 +406,16 @@ public class SiyinJobValidateServiceImpl {
 		return order;
 	}
 	
+	private String getPrinterNameBySerialNumber(String serialNumber) {
+		
+		SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(serialNumber);
+		if (null == printer) {
+			return null;
+		}
+		
+		return printer.getPrinterName();
+	}
+
 	/**
 	 * 创建订单编号
 	 */

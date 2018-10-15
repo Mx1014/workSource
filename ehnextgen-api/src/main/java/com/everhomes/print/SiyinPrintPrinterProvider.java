@@ -17,4 +17,6 @@ public interface SiyinPrintPrinterProvider {
 
 	List<SiyinPrintPrinter> findSiyinPrintPrinterByOwnerId(Long ownerId);
 
+	List<SiyinPrintPrinter> findSiyinPrintPrinterByNamespaceId(Integer namespaceId);
+
 }

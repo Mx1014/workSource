@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
  * <li>payType:支付方式，全部则为空,参考{@link com.everhomes.rest.organization.VendorType}</li>
- * <li>payMode:支付类型，全部则为空，参考 {@link com.everhomes.rest.print.PrintPayType}
+ * <li>payMode:支付类型，全部则为空，参考 {@link com.everhomes.rest.general.order.GorderPayType}</li>
  * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  * </ul>
  *

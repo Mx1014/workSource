@@ -44,6 +44,7 @@ import com.everhomes.util.StringHelper;
  * <li>originalPrice: 原价</li>
  * <li>invoiceName: 发票名称</li>
  * <li>paySource: 缴费来源， 参考{@link com.everhomes.rest.parking.ParkingPaySourceType}</li>
+ * <li>payMode : 支付类型，全部则为空，参考 {@link com.everhomes.rest.print.PrintPayType}</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
@@ -85,7 +86,8 @@ public class ParkingRechargeOrderDTO {
     private String invoiceName;
     private String paySource;
     private Byte invoiceFlag;
-
+    private Byte payMode;
+    
     public BigDecimal getOriginalPrice() {
         return originalPrice;
     }
@@ -389,5 +391,12 @@ public class ParkingRechargeOrderDTO {
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
 	}
-    
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
 }

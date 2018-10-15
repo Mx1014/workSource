@@ -31,6 +31,8 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.general.order.GorderPayType;
+import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
@@ -608,6 +610,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
@@ -655,6 +660,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
@@ -697,20 +705,35 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		List<GoodDTO> goods = new ArrayList<>();
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
-		good.setTag1(cmd.getOwnerId()+"");
-		good.setTag2("copy");
+		good.setServeType(ServiceModuleConstants.PRINT_MODULE+"");
+		good.setServeApplyName("云打印");
+		good.setTag1(cmd.getOwnerId() + "");
+		good.setTag2(order.getPrinterName());
+		fillGoodTagByJobType(good, order.getJobType());
 		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //
 		}
-		good.setGoodTag("goods");// 商品标志
-		good.setGoodName("云打印");// 商品名称
+		good.setGoodName(order.getDetail());
 		good.setGoodDescription(order.getDetail());// 商品描述
 		good.setCounts(1);
 		good.setPrice(order.getOrderTotalFee());
 		good.setTotalPrice(order.getOrderTotalFee());
 		goods.add(good);
 		return goods;
+	}
+	
+	private void fillGoodTagByJobType(GoodDTO good, Byte jobType) {
+		GoodBizEnum bizEnum = GoodBizEnum.NONE;
+		if (jobType.equals(PrintJobTypeType.PRINT.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_PRINT;
+		} else if (jobType.equals(PrintJobTypeType.COPY.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_COPY;
+		} else {
+			bizEnum = GoodBizEnum.PRINT_SCAN;
+		}
+		good.setGoodTag(bizEnum.getIdentity());
+//		good.setGoodName(bizEnum.getName());
 	}
 
 
@@ -1947,6 +1970,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		cmd2.setUserId(key);
 		cmd2.setTag1(arrayList);
 		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		
 		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
 		if(payUserList==null || payUserList.size() == 0){
 			return null;
@@ -1972,12 +1999,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		List<SiyinPrintBusinessPayeeAccount> accounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts
-				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
-		if(accounts!=null && accounts.size()>0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"repeat account");
-		}
 		if(cmd.getId()!=null){
 			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
@@ -2010,7 +2031,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(account.getPayeeId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		List<PayUserDTO> payUserDTOS = resp.getResponse();
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		
+		List<PayUserDTO> payUserDTOS = resp.getResponse(); 
+		
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
@@ -2204,12 +2230,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                 case 9:
                 case 21: 
                 	order.setPaidType(VendorType.WEI_XIN.getCode());
-                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
-                case 29: order.setPayMode(PrintPayType.ENTERPRISE_PAID.getCode());
+                case 29: order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
                 default: 
                 	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-                	order.setPayMode(PrintPayType.PERSON_PAY.getCode());
+                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
             }
 				updatePrintOrder(order, cmd.getBizOrderNum());
@@ -2325,23 +2351,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			BillGroupDTO dto = new BillGroupDTO();
 			dto.setBillGroupName(r.getBillGroupName());
 			dto.setBillGroupToken(r.getBillGroupId());
-			return dto;
-		}).collect(Collectors.toList());
-	}
-
-	private List<ChargeItemDTO> listChargeItems(ListChargeItemsCommand cmd) {
-		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
-		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
-		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-		cmd2.setCategoryId(cmd.getChargeAppToken());
-		cmd2.setBillGroupId(cmd.getBillGroupToken());
-		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		List<ListChargingItemsDTO> dtos = assetService.listAvailableChargingItems(cmd2);
-		
-		return dtos.stream().map(r -> {
-			ChargeItemDTO dto = new ChargeItemDTO();
-			dto.setChargeItemName(r.getChargingItemName());
-			dto.setChargeItemToken(r.getChargingItemId());
 			return dto;
 		}).collect(Collectors.toList());
 	}

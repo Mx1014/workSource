@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>callBackUrl : 个人支付回调url</li>
  * <li>orderTitle : 订单标题</li>
  * <li>paySourceType : 支付源 {@link com.everhomes.pay.order.SourceType}</li>
+ * <li>returnUrl:统一订单界面跳转url</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月7日
@@ -32,6 +33,7 @@ public class CreateOrderBaseInfo {
 	private String callBackUrl;
 	private String orderTitle;
 	private Integer paySourceType;
+	private String returnUrl;
 	
 	@Override
 	public String toString() {
@@ -119,4 +121,11 @@ public class CreateOrderBaseInfo {
 		this.paySourceType = paySourceType;
 	}
 
+	public String getReturnUrl() {
+		return returnUrl;
+	}
+
+	public void setReturnUrl(String returnUrl) {
+		this.returnUrl = returnUrl;
+	}
 }
