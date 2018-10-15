@@ -611,6 +611,20 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/getFlowGraphByFlowVersion</b>
+     * <p>获取工作流流程图</p>
+     */
+    @RequestMapping("getFlowGraphByFlowVersion")
+    @RestReturn(value = FlowGraphDTO.class)
+    public RestResponse getFlowGraphByFlowVersion(@Valid FlowIdVersionCommand cmd) {
+        FlowGraphDTO flowGraphDTO = flowService.getFlowGraphByFlowVersion(cmd);
+        RestResponse response = new RestResponse(flowGraphDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/flow/createFlowButton</b>
      * <p>新增按钮</p>
      */

@@ -4721,6 +4721,27 @@ public class FlowServiceImpl implements FlowService {
         return graphDTO;
     }
 
+    @Override
+    public FlowGraphDTO getFlowGraphByFlowVersion(FlowIdVersionCommand cmd) {
+        ValidatorUtil.validate(cmd);
+        Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+        if (flow == null) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS,
+                    "flow not exist flowId=%s", cmd.getFlowId());
+        }
+        FlowGraphDTO graphDTO = toFlowGraphDTO(flow ,cmd.getFlowVersion());
+
+        // flow-2.0之前的工作流没有link和lane，兼容一下
+        if (graphDTO.getNodes().size() > 0
+                && graphDTO.getLinks().size() == 0
+                && graphDTO.getLanes().size() == 0) {
+            FlowIdCommand cmd1 = new FlowIdCommand();
+            cmd1.setFlowId(cmd.getFlowId());
+            processStartAndEndNode(cmd1, flow, graphDTO);
+        }
+        return graphDTO;
+    }
+
     private void processStartAndEndNode(FlowIdCommand cmd, Flow flow, FlowGraphDTO graphDTO) {
         dbProvider.execute(status -> {
             List<FlowNodeDTO> nodes = graphDTO.getNodes();
@@ -7070,6 +7091,29 @@ public class FlowServiceImpl implements FlowService {
         flowGraph.setLanes(lanes);
 
         List<FlowCondition> conditions = flowConditionProvider.listFlowCondition(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+        flowGraph.setConditions(conditions.stream().map(this::toFlowConditionDTO).collect(Collectors.toList()));
+
+        return flowGraph;
+    }
+
+    private FlowGraphDTO toFlowGraphDTO(Flow flow , Integer flowVersionId) {
+        FlowGraphDTO flowGraph = new FlowGraphDTO();
+        flowGraph.setFlowId(flow.getId());
+
+        List<FlowNode> nodeList = flowNodeProvider.findFlowNodesByFlowId(flow.getId(), flowVersionId);
+        List<FlowNodeDTO> nodes = nodeList.stream().map(this::toFlowNodeDTO).collect(Collectors.toList());
+        flowGraph.setNodes(nodes);
+
+        List<FlowLink> linkList = flowLinkProvider.listFlowLink(flow.getId(), flowVersionId);
+        List<FlowLinkDTO> links = linkList.stream().map(this::toFlowLinkDTO).collect(Collectors.toList());
+        flowGraph.setLinks(links);
+
+        List<FlowLane> laneList = flowLaneProvider.listFlowLane(flow.getId(), flowVersionId);
+        List<FlowLaneDTO> lanes = laneList.stream().map(this::toFlowLaneDTO)
+                .sorted(Comparator.comparingInt(FlowLaneDTO::getLaneLevel)).collect(Collectors.toList());
+        flowGraph.setLanes(lanes);
+
+        List<FlowCondition> conditions = flowConditionProvider.listFlowCondition(flow.getId(), flowVersionId);
         flowGraph.setConditions(conditions.stream().map(this::toFlowConditionDTO).collect(Collectors.toList()));
 
         return flowGraph;

@@ -551,4 +551,6 @@ public interface FlowService {
     Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
 
     void doFlowMirror(DoFlowMirrorCommand cmd);
+
+	FlowGraphDTO getFlowGraphByFlowVersion(FlowIdVersionCommand cmd);
 }
