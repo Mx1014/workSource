@@ -5,6 +5,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
@@ -118,6 +119,8 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
 			createBillInfo.setConsumeUserName(organizationMember.getContactName());
         }
         createBillInfo.setSourceName("资源预订");
+        createBillInfo.setSourceType(AssetSourceType.RENTAL_MODULE);
+        createBillInfo.setSourceId(order.getResourceTypeId());
         cmd.setCreateBillInfo(createBillInfo);
 
         //设置商品信息
