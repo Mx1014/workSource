@@ -179,7 +179,7 @@ public interface ParkingService {
 
     void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd);
 
-    CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempGeneralOrderCommand cmd);
+    CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempOrderCommand cmd);
 
-	CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeGeneralOrderCommand cmd);
+	CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeOrderCommand cmd);
 }

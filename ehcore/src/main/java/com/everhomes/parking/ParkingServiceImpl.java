@@ -652,7 +652,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeGeneralOrderCommand cmd){
+	public CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeOrderCommand cmd){
 
 		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
 			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
@@ -681,7 +681,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempGeneralOrderCommand cmd) {
+	public CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempOrderCommand cmd) {
 		checkOrderToken(cmd.getOrderToken());
 		CreateParkingRechargeGeneralOrderCommand param = new CreateParkingRechargeGeneralOrderCommand();
 		param.setOwnerType(cmd.getOwnerType());
