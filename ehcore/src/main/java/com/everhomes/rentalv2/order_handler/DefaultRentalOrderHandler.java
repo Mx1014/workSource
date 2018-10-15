@@ -90,6 +90,16 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
 
     @Override
     public Long gerMerchantId(RentalOrder order) {
+        //查特殊账户
+        List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
+        if (accounts != null && accounts.size()>0)
+            return accounts.get(0).getMerchantId();
+        //查通用账户
+        accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
+                null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
+        if (accounts != null && accounts.size()>0)
+            return accounts.get(0).getMerchantId();
         return null;
     }
 
