@@ -10637,7 +10637,7 @@ public class PunchServiceImpl implements PunchService {
         if(pdls != null && pdls.size() > 0){
             for(PunchDayLog pdl : pdls){
                 PunchMemberDTO dto = convertPDLToPunchMemberDTO(pdl);
-                dto.setStatisticsUnit(itemType.getUnit());
+                dto.setStatisticsUnit(itemType ==null ? null : itemType.getUnit());
                 dto.setStatisticsCount(getPunchStatisticCountByItemType(pdl, itemType));
 
                 results.add(dto);
