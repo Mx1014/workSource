@@ -3975,7 +3975,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	@Override
 	public AddRentalBillItemV3Response addRentalItemBillV3(AddRentalBillItemCommand cmd) {
 		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V3);
-		return (AddRentalBillItemV3Response)createPayOrder(response,cmd,ActivityRosterPayVersionFlag.V2);
+		return (AddRentalBillItemV3Response)createPayOrder(response,cmd,ActivityRosterPayVersionFlag.V3);
 	}
 
 	private PreOrderCommand convertOrderDTOForV2(RentalOrder order, String clientAppName, Integer paymentType) {
