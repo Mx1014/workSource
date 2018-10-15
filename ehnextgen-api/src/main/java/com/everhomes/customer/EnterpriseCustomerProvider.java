@@ -12,9 +12,11 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +26,9 @@ import java.util.Set;
  */
 public interface EnterpriseCustomerProvider {
     void createEnterpriseCustomer(EnterpriseCustomer customer);
+    void createEnterpriseCustomers(Collection<EhEnterpriseCustomers> customers);
     void updateEnterpriseCustomer(EnterpriseCustomer customer);
+    void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers);
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
@@ -145,6 +149,8 @@ public interface EnterpriseCustomerProvider {
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
+	void saveCustomerEvents(int i, List<EhEnterpriseCustomers> customers, Byte deviceType);
+
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType, String moduleName);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	

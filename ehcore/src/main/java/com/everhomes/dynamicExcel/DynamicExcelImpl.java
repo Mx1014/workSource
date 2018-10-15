@@ -270,6 +270,9 @@ public class DynamicExcelImpl implements DynamicExcelService{
         Workbook workbook = initExcelWorkBook(file);
         DynamicExcelHandler excelHandler = getHandler(code);
         Map<Object,Object> context = new HashMap<>();
+        long startTime = System.currentTimeMillis();
+        LOGGER.debug("import customer Excel Data start: {}" , startTime);
+
         //遍历所有的sheet
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             Sheet sheet = null;
@@ -289,7 +292,12 @@ public class DynamicExcelImpl implements DynamicExcelService{
                     headers.add(headerDisplay);
                     headers.removeIf((r) -> r.equals("错误原因"));
                 }
+                //根据
+                long startGetDynamicSheetTime = System.currentTimeMillis();
+                LOGGER.debug("the function : getDynamicSheet is start {}" , startGetDynamicSheetTime);
                 List<DynamicSheet> ds = excelHandler.getDynamicSheet(sheet.getSheetName(), params, headers, true, false);
+                long endGetDynamicSheetTime = System.currentTimeMillis();
+                LOGGER.debug("the function : getDynamicSheet is end {} , amount cost : {} ms" , endGetDynamicSheetTime, endGetDynamicSheetTime - startGetDynamicSheetTime);
                 if (ds.size() != 1) {
                     LOGGER.error("returned wrong number of dynamicSheet for import = {},size={}", sheet.getSheetName(), ds.size());
                 } else {
@@ -322,7 +330,11 @@ public class DynamicExcelImpl implements DynamicExcelService{
                         //设置导出报错的结果excel的标题
                         importFileResponse.setTitle(dynamicFieldGroup);
                     }
+                    long startImportCustomerDynamicExcelDataTime = System.currentTimeMillis();
+                    LOGGER.debug("the function : importCustomerDynamicExcelData is start {}" , startImportCustomerDynamicExcelDataTime);
                     List<ImportFileResultLog<Map<String,String>>> results =  importCustomerDynamicExcelData(finalHeadRow, params, response, excelHandler, context, finalSheet, headers, ds, rowDatas, dynamicFields);
+                    long endImportCustomerDynamicExcelDataTime = System.currentTimeMillis();
+                    LOGGER.debug("the function : importCustomerDynamicExcelData is end {},amount cost : {} ms" , endImportCustomerDynamicExcelDataTime, endImportCustomerDynamicExcelDataTime - startImportCustomerDynamicExcelDataTime);
                     importFileResponse.setTotalCount((long) rowDatas.size());
                     importFileResponse.setFailCount((long) results.size());
                     importFileResponse.setLogs(results);
@@ -357,8 +369,18 @@ public class DynamicExcelImpl implements DynamicExcelService{
     private List<ImportFileResultLog<Map<String,String>>> importCustomerDynamicExcelData(Integer headerRow, Object params, DynamicImportResponse response, DynamicExcelHandler excelHandler, Map<Object, Object> context, Sheet sheet, List<String> headers, List<DynamicSheet> ds, List<DynamicRowDTO> rowDatas, List<DynamicField> dynamicFields) {
         List<ImportFileResultLog<Map<String,String>>> resultLogs =new ArrayList<>();
         // get each row column data from excel
+        long startGetDynamicColumnDataTime = System.currentTimeMillis();
+        LOGGER.debug("the function : getDynamicColumnData is start : {} " , startGetDynamicColumnDataTime);
         rowDatas = getDynamicColumnData(headerRow, sheet, headers, rowDatas, dynamicFields);
+        long endGetDynamicColumnDataExcelDataTime = System.currentTimeMillis();
+        LOGGER.debug("the function : getDynamicColumnData is end {},amount cost : {} ms" , endGetDynamicColumnDataExcelDataTime, endGetDynamicColumnDataExcelDataTime - startGetDynamicColumnDataTime);
+
+        long startImportDataTime = System.currentTimeMillis();
+        LOGGER.debug("the function : importData is start : {} " , startImportDataTime);
         excelHandler.importData(ds.get(0), rowDatas, params, context, response,resultLogs);
+        long endImportDataTime = System.currentTimeMillis();
+        LOGGER.debug("the function : importData is end {},amount cost : {} ms" , endImportDataTime, endImportDataTime - startImportDataTime);
+
         return resultLogs;
     }
 

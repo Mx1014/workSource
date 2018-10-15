@@ -111,13 +111,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,6 +154,24 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
     }
 
+    @Override
+    public void createEnterpriseCustomers(Collection<EhEnterpriseCustomers> customers) {
+        LOGGER.info("create customers: {}", StringHelper.toJsonString(customers));
+        customers.forEach(customer ->{
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseCustomers.class));
+            customer.setId(id);
+            customer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            customer.setStatus(CommonStatus.ACTIVE.getCode());
+        });
+
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomers.class, id));
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        dao.insert(customers);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseCustomers.class, null);
+    }
+
 
 	@Override
     public void updateEnterpriseCustomer(EnterpriseCustomer customer) {
@@ -170,6 +182,21 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(customer);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, customer.getId());
+    }
+
+    @Override
+    public void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
+        customers.forEach(customer -> {
+            LOGGER.debug("updateEnterpriseCustomer customer: {}",
+                    StringHelper.toJsonString(customer));
+
+            customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        });
+
+        dao.update(customers);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, null);
     }
 
     @Override
@@ -1615,6 +1642,46 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
             dao.insert(event);
             DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
         }
+    }
+
+    @Override
+    public void saveCustomerEvents(int i, List<EhEnterpriseCustomers> customers, Byte deviceType) {
+        List<EhCustomerEvents> events = new ArrayList<>();
+        customers.forEach(customer -> {
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCustomerEvents.class));
+            CustomerEvent event = new CustomerEvent();
+            event.setId(id);
+            event.setNamespaceId(UserContext.getCurrentNamespaceId());
+            event.setCustomerType(CustomerType.ENTERPRISE.getCode());
+            event.setCustomerId(customer.getId());
+            event.setCustomerName(customer.getName());
+            event.setContactName(customer.getContactName());
+            event.setDeviceType(deviceType);
+            String content = null;
+            switch(i){
+                case 1 :
+                    content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.ADD , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+                    break;
+                case 2 :
+                    content = localeTemplateService.getLocaleTemplateString(CustomerTrackingTemplateCode.SCOPE, CustomerTrackingTemplateCode.DELETE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+                    break;
+                case 3 :
+                    content = compareEnterpriseCustomer((ConvertHelper.convert(customer, EnterpriseCustomer.class)),null, null);
+                    break;
+                default :break;
+            }
+            if(StringUtils.isNotEmpty(content)){
+                event.setContent(content);
+                event.setCreatorUid(UserContext.currentUserId());
+                event.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                events.add(event);
+            }
+        });
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCustomerEvents.class));
+        EhCustomerEventsDao dao = new EhCustomerEventsDao(context.configuration());
+        LOGGER.info("saveCustomerEventWithInsert: " + events);
+        dao.insert(events);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhCustomerEvents.class, null);
     }
 
 
