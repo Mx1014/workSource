@@ -63,6 +63,9 @@ update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100)
 UPDATE eh_service_modules set app_type = 1 WHERE id = 41400;
 UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
 
+UPDATE eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE id = 41400;
+UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE module_id = 41400;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
