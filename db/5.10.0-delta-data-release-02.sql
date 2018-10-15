@@ -19,7 +19,7 @@
 
 
 -- add by yuanlei
-SET @id = SELECT MAX(id)  from eh_locale_strings;
+SET @id = (SELECT MAX(id)  from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`,`locale`, `text`) VALUES(@id := @id+1,'organization', '900031', 'zh_CN', '无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10004,'zh_CN','该楼栋名称已经存在，请更换其他名称');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900032,'zh_CN','姓名为空');
@@ -39,7 +39,7 @@ insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,
 
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10005,'zh_CN','该项目下不存在该楼栋');
 
-SET @id = SELECT MAX(id) from eh_locale_templates;
+SET @id = (SELECT MAX(id) from eh_locale_templates);
 
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',1,'zh_CN','开启工作台','"${organizationName}"开启工作台' , 2);
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',2,'zh_CN','关闭工作台','"${organizationName}"关闭工作台' , 2);
