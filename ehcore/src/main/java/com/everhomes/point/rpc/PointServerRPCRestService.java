@@ -52,8 +52,8 @@ public class PointServerRPCRestService {
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(60000);
-        factory.setReadTimeout(60000);
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(5000);
         RestTemplate  template = new RestTemplate(factory);
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
         ResponseEntity<? extends RestResponseBase> responseEntity = template.exchange(requestEntity, responseType);
