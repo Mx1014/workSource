@@ -6994,7 +6994,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return code;
     }
     
-    private Map<Integer, byte[]> getSmartCardSegments(String cardCode) {
+    private Map<Integer, byte[]> getSmartCardSegments(String cardCode, List<Integer> segOrders) {
     	byte[] code = Base64.getDecoder().decode(cardCode);
     	int i = 0, len, typ;
     	byte[] b = new byte[2];
@@ -7007,6 +7007,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				break;
 			}
 			typ = (int)code[i];
+			if(segOrders != null) {
+				segOrders.add(typ);				
+			}
+			
 			i += 3;
 			byte[] seg = new byte[len];
 			System.arraycopy(code, i, seg, 0, i+len);
@@ -7064,7 +7068,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     	
       try {
 			if(payCodeVerify(payCode)) {
-				resp.getVerifyResults().add("OK");
+				resp.getVerifyResults().add("PayOK");
 			} else {
 				resp.getVerifyResults().add("ERROR");
 			}
@@ -7084,7 +7088,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 return resp;
             }
             
-            Map<Integer, byte[]> segs = getSmartCardSegments(cmd.getCardCode());
+            List<Integer> orders = new ArrayList<Integer>();
+            Map<Integer, byte[]> segs = getSmartCardSegments(cmd.getCardCode(), orders);
             byte[] paySeg = segs.getOrDefault(new Integer(SmartCardType.SMART_CARD_PAY.getCode()), null);
             if(paySeg == null) {
             	return resp;
