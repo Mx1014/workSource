@@ -153,6 +153,15 @@ public class Rentalv2AccountProviderImpl implements  Rentalv2AccountProvider {
     }
 
     @Override
+    public Rentalv2OrderRecord getOrderRecordByMerchantOrderId(Long merchantOrderId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        Record record = context.select().from(Tables.EH_RENTALV2_ORDER_RECORDS).where(Tables.EH_RENTALV2_ORDER_RECORDS.MERCHANT_ORDER_ID.eq(merchantOrderId)).fetchOne();
+        if (record == null)
+            return null;
+        return ConvertHelper.convert(record,Rentalv2OrderRecord.class);
+    }
+
+    @Override
     public void deleteOrderRecordByOrderNo(Long orderNo) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         DeleteWhereStep<EhRentalv2OrderRecordsRecord> step = context

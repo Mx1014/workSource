@@ -16,6 +16,7 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.*;
+import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.RestResponseBase;
@@ -368,10 +369,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         CreateMerchantOrderResponse merchantOrderResp = createMerchantOrder(cmd, order);
 
         //4、组装并保存返回值
+        response = saveMerchantOrderRecord(cmd,merchantOrderResp);
 
 
-
-        return null;
+        return response;
     }
 
     private AddRentalBillItemV3Response saveMerchantOrderRecord(PreOrderCommand cmd,
@@ -383,20 +384,15 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         Rentalv2OrderRecord record = new Rentalv2OrderRecord();
         record.setOrderNo(cmd.getOrderId());
-        record.setBizOrderNum(response.getBizOrderNum());
-        record.setPayOrderId(response.getOrderId());
-        record.setAccountId(cmd.getBizPayeeId());
+        record.setMerchantId(merchantOrderResp.getMerchantId());
         record.setAmount(changePayAmount(cmd.getAmount()));
-        record.setOrderCommitNonce(response.getOrderCommitNonce());
-        record.setOrderCommitTimestamp(response.getOrderCommitTimestamp());
-        record.setOrderCommitToken(response.getOrderCommitToken());
-        record.setOrderCommitUrl(response.getOrderCommitUrl());
-        record.setPayInfo(response.getPayInfo());
         record.setAccountName(cmd.getAccountName());
-
+        record.setPayUrl(merchantOrderResp.getPayUrl());
+        record.setMerchantOrderId(merchantOrderResp.getMerchantOrderId());
 
         this.rentalv2AccountProvider.createOrderRecord(record);
 
+        return response;
     }
 
     private CreateMerchantOrderResponse createMerchantOrder(PreOrderCommand preOrderCommand,RentalOrder order){
@@ -697,9 +693,16 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         return dto;
     }
 
+    public static boolean verifyCallbackSignature(MerchantPaymentNotificationCommand cmd) {
+        Map<String, String> params = new HashMap();
+        StringHelper.toStringMap(null, cmd, params);
+        params.remove("signature");
+        return SignatureHelper.verifySignature(params, PaySettings.getSecretKey(), cmd.getSignature());
+    }
+
     @Override
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-        if (!PayUtil.verifyCallbackSignature(cmd))
+    public void payNotify(MerchantPaymentNotificationCommand cmd) {
+        if (!verifyCallbackSignature(cmd))
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
         if(cmd.getPaymentStatus() == null) {
@@ -708,7 +711,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         //success
         if(cmd.getPaymentStatus() != null) {
-                Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            Rentalv2OrderRecord record ;
+            if (cmd.getMerchantOrderId() != null)
+                record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            else
+                record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
                 order.setAccountName(record.getAccountName()); //记录收款方账号
@@ -717,6 +724,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     case 7:
                     case 9:
                     case 21: order.setVendorType(VendorType.WEI_XIN.getCode());break;
+                    case 29: order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());break;
                     default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());break;
                 }
 

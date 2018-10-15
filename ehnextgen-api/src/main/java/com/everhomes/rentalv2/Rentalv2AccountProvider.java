@@ -26,6 +26,8 @@ public interface Rentalv2AccountProvider {
 
     Rentalv2OrderRecord getOrderRecordByBizOrderNo(String bizOrderNo);
 
+    Rentalv2OrderRecord getOrderRecordByMerchantOrderId(Long merchantOrderId);
+
     void deleteOrderRecordByOrderNo(Long orderNo);
 
 
