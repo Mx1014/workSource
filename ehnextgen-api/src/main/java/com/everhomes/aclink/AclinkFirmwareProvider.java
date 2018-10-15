@@ -19,5 +19,7 @@ public interface AclinkFirmwareProvider {
             ListingQueryBuilderCallback queryBuilderCallback);
 
     AclinkFirmware queryAclinkFirmwareMax();
+    //add by liqingyan
+    Long createFirmwarePackage (AclinkFirmwarePackage obj);
 
 }

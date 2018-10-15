@@ -652,22 +652,25 @@ CREATE TABLE `eh_aclink_device` (
 	`support_face` TINYINT(4) DEFAULT NULL COMMENT '人脸识别开门 0：不支持 1：支持',
 	`support_tempauth` TINYINT(4) DEFAULT NULL COMMENT '临时授权 0：不支持 1：支持',
 	`firmware` VARCHAR(128) DEFAULT NULL COMMENT '固件名称',
+	`firmware_id` bigint(20),
 	`update` TINYINT(4) DEFAULT NULL COMMENT '默认升级 0：不支持 1：支持',
 	`status` tinyint(4) DEFAULT 1 COMMENT '状态 0：失效 1：有效',
-  PRIMARY KEY (`id`)
+  	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁设备类型';
 
 CREATE TABLE `eh_aclink_firmware_new` (
-  `id` bigint(20) auto_increment ,
+  	`id` bigint(20) auto_increment ,
 	`name` VARCHAR(128) COMMENT '固件名称',
 	`version` VARCHAR(128) COMMENT '版本号，例如1.0.0',
 	`number` int(11) DEFAULT NULL COMMENT '固件编号',
 	`description` VARCHAR(1024) DEFAULT NULL,
-  `bluetooth` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
-  `wifi` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  	`bluetooth_name` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
+	`bluetooth_id` bigint(20),
+  	`wifi_name` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
+	`wifi_id` bigint(20),
+  	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
 	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
-  PRIMARY KEY (`id`)
+  	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件新表';
 
 CREATE TABLE `eh_aclink_firmware_package` (

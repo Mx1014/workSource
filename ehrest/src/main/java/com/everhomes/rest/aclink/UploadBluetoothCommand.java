@@ -3,89 +3,71 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 
 import java.io.File;
+import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>upload:上传文件</li>
- * <li>uploadName:上传文件名称</li>
- * <li>uploadType:上传文件扩展名</li>
- * <li>contentType: 内容类型：file-文件, folder-文件夹 参考{@link com.everhomes.rest.filemanagement.FileContentType}</li>
- * <li>contentName: 内容名称</li>
- * <li>contentSuffix: 后缀名称(文件夹忽略)</li>
- * <li>contentSize: 内容大小(文件夹忽略)</li>
- * <li>contentUri: 内容uri(文件夹忽略)</li>
+ * <li>name:程序名称</li>
+ * <li>downloadUrl:固件程序url</li>
+ * <li>type:固件程序类型 0：蓝牙 1：wifi</li>
+ * <li>size: 程序大小</li>
+ * <li>status: 状态 0：失效 1：有效</li>
  * </ul>
  */
 public class UploadBluetoothCommand {
 
-    private Long catalogId;
+    public String name;
+    public String downloadUrl;
+    public Byte type;
+    public Integer size;
+//    public Timestamp createTime;
+    public Byte status;
 
-    private Long parentId;
-
-    private String contentType;
-
-    private String contentName;
-
-    private String contentSuffix;
-
-    private Integer contentSize;
-
-    private String contentUri;
-
-    public Long getCatalogId() {
-        return catalogId;
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setCatalogId(Long catalogId) {
-        this.catalogId = catalogId;
+    public String getDownloadUrl() {
+        return downloadUrl;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public Byte getType() {
+        return type;
     }
 
-    public String getContentType() {
-        return contentType;
+    public void setType(Byte type) {
+        this.type = type;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
+    public Integer getSize() {
+        return size;
     }
 
-    public String getContentName() {
-        return contentName;
+    public void setSize(Integer size) {
+        this.size = size;
     }
 
-    public void setContentName(String contentName) {
-        this.contentName = contentName;
+//    public Timestamp getCreateTime() {
+//        return createTime;
+//    }
+//
+//    public void setCreateTime(Timestamp createTime) {
+//        this.createTime = createTime;
+//    }
+
+    public Byte getStatus() {
+        return status;
     }
 
-    public String getContentSuffix() {
-        return contentSuffix;
-    }
-
-    public void setContentSuffix(String contentSuffix) {
-        this.contentSuffix = contentSuffix;
-    }
-
-    public Integer getContentSize() {
-        return contentSize;
-    }
-
-    public void setContentSize(Integer contentSize) {
-        this.contentSize = contentSize;
-    }
-
-    public String getContentUri() {
-        return contentUri;
-    }
-
-    public void setContentUri(String contentUri) {
-        this.contentUri = contentUri;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

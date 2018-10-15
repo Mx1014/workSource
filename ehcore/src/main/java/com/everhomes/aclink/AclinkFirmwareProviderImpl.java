@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.EhAclinkFirmwarePackageDao;
+import com.everhomes.server.schema.tables.pojos.EhAclinkFirmwarePackage;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -55,6 +57,19 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
         EhAclinkFirmwareDao dao = new EhAclinkFirmwareDao(context.configuration());
         dao.insert(obj);
         return id;
+    }
+//add by liqingyan
+    @Override
+    @Caching(evict = {@CacheEvict(value = "aclinkFirmwarePackageMax", key = "'fix'")})
+    public Long createFirmwarePackage(AclinkFirmwarePackage obj){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFirmware.class));
+        obj.setId(id);
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+        EhAclinkFirmwarePackageDao dao = new EhAclinkFirmwarePackageDao(context.configuration());
+        dao.insert(obj);
+    return null;
     }
 
     @Override

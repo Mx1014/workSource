@@ -5371,15 +5371,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void uploadBluetooth(UploadBluetoothCommand cmd){
-        FileContent content = new FileContent();
-        if (!content.getContentType().equals(FileContentType.FOLDER.getCode())) {
-            if (cmd.getContentSuffix() == null)
-                throw RuntimeErrorException.errorWith(FileManagementErrorCode.SCOPE, FileManagementErrorCode.ERROR_SUFFIX_NULL,
-                        "the suffix can not be null.");
-            content.setContentSuffix(cmd.getContentSuffix().toLowerCase());
-            content.setSize(cmd.getContentSize());
-            content.setContentUri(cmd.getContentUri());
-        }
+        AclinkFirmwarePackage pkg = (AclinkFirmwarePackage)ConvertHelper.convert(cmd,AclinkFirmwarePackage.class);
+        pkg.setStatus(new Byte((byte)1));
+//        pkg.setType(new Byte((byte)0));
+        aclinkFirmwareProvider.createFirmwarePackage(pkg);
 
     }
 
