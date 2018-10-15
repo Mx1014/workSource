@@ -642,11 +642,46 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (64) NULL COMMENT '门禁设备固件版本';
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (64) NULL COMMENT '门禁设备固件名';
 
-CREATE TABLE `eh_aclink_firmware_package` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) DEFAULT NULL,
-  `type` TINYINT(4) DEFAULT NULL COMMENT '程序类型 0：蓝牙 1：wifi',
-  `content_uri` varchar(1024) DEFAULT NULL COMMENT '存储地址' ,
+CREATE TABLE `eh_aclink_device` (
+	`id` bigint(20) auto_increment ,
+	`name` VARCHAR(128) COMMENT '设备类型名称',
+	`type` TINYINT(4) DEFAULT NULL COMMENT '设备类型 0：自有设备 1：第三方设备',
+	`description` VARCHAR(1024) DEFAULT NULL COMMENT '设备特性',
+	`support_bt` TINYINT(4) DEFAULT NULL COMMENT '蓝牙开门 0：不支持 1：支持',
+	`support_qr` TINYINT(4) DEFAULT NULL COMMENT '二维码开门 0：不支持 1：支持',
+	`support_face` TINYINT(4) DEFAULT NULL COMMENT '人脸识别开门 0：不支持 1：支持',
+	`support_tempauth` TINYINT(4) DEFAULT NULL COMMENT '临时授权 0：不支持 1：支持',
+	`firmware` VARCHAR(128) DEFAULT NULL COMMENT '固件名称',
+	`update` TINYINT(4) DEFAULT NULL COMMENT '默认升级 0：不支持 1：支持',
+	`status` tinyint(4) DEFAULT 1 COMMENT '状态 0：失效 1：有效',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁设备类型';
+
+CREATE TABLE `eh_aclink_firmware_new` (
+  `id` bigint(20) auto_increment ,
+	`name` VARCHAR(128) COMMENT '固件名称',
+	`version` VARCHAR(128) COMMENT '版本号，例如1.0.0',
+	`number` int(11) DEFAULT NULL COMMENT '固件编号',
+	`description` VARCHAR(1024) DEFAULT NULL,
+  `bluetooth` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
+  `wifi` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件新表';
+
+CREATE TABLE `eh_aclink_firmware_package` (
+  `id` bigint(20) auto_increment ,
+	`name` VARCHAR(128) COMMENT '程序名称',
+  `type` TINYINT(4) DEFAULT NULL COMMENT '程序类型 0：蓝牙 1：wifi',
+	`size` int(11),
+  `download_url` varchar(1024) DEFAULT NULL COMMENT '存储地址' ,
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件程序表';
+
+CREATE TABLE `eh_aclink_firmware_new` (
+
+
+)
