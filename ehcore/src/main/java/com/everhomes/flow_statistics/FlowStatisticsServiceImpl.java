@@ -124,6 +124,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         StatisticsByNodesResponse response = new StatisticsByNodesResponse();
         List<StatisticsByNodesDTO> list  = new ArrayList<StatisticsByNodesDTO>();
         response.setDtos(list);
+        response.setCurrentCycleNodesAverage(0D);
         Long flowMainId = cmd.getFlowMainId() ;
         Integer flowVersion = cmd.getFlowVersion();
         //查出该工作流的所有节点；
@@ -199,6 +200,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         StatisticsByLanesResponse response = new StatisticsByLanesResponse();
         List<StatisticsByLanesDTO> list = new ArrayList<StatisticsByLanesDTO>();
         response.setDtos(list);
+        response.setCurrentCycleLanesAverage(0D);
         if(cmd.getStartDate() == null ||cmd.getEndDate()==null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "the startDate and endDate can not be null .");

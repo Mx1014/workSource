@@ -70,7 +70,7 @@ public class FlowStatisticsController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /flowstatistics/statisticsByLanes</b>
+     * <b>URL: /flowstatistics/statisticsByNodes</b>
      * <p>4). 按节点统计处理效率API</p>
      */
     @RequestMapping("statisticsByNodes")
