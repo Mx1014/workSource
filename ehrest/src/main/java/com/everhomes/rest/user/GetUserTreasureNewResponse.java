@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>coupon: 礼券数量 </li>
  *     <li>order: 订单数量 </li>
  *     <li>pointUrl: 积分跳转URL</li>
+ *     <li>vipLevelText: 会员等级</li>
  * </ul>
  */
 public class GetUserTreasureNewResponse {
