@@ -407,8 +407,10 @@ public class AssetServiceImpl implements AssetService {
             }
         } catch(Exception e){
             LOGGER.error("YZX MAIL SEND FAILED");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "YZX MAIL SEND FAILED");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    "YZX MAIL SEND FAILED");
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.MESSAGE_SEND_FAILED,
+            		"YZX MAIL SEND FAILED");
         }
 
         for (int k = 0; k < uids.size(); k++) {
@@ -808,8 +810,10 @@ public class AssetServiceImpl implements AssetService {
                             PaymentFormula paymentFormula = formulaCondition.get(0);
                             formula = paymentFormula.getFormulaJson();
                         }else{
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
-                                    ,"formula cannot be found, standard id is "+standard.getId()+"");
+//                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
+//                                    ,"formula cannot be found, standard id is "+standard.getId()+"");
+                        	throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.FORMULA_CANNOT_BE_FOUND,
+                        			"formula cannot be found, standard id is "+standard.getId()+"");
                         }
                     }
                     char[] formularChars = formula.toCharArray();
@@ -886,8 +890,10 @@ public class AssetServiceImpl implements AssetService {
                         BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
                         if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
                                 assetProvider.deleteContractPayment(contractId);
-                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+//                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                                		"目前计费周期只支持按月，按季，按年");
                         }
                         // #31113 by-dinfjianmin
     					if (property.getAddressId() != null) {
@@ -911,8 +917,10 @@ public class AssetServiceImpl implements AssetService {
                     BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
                     if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
                             assetProvider.deleteContractPayment(contractId);
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                                    ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+//                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                    ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                            		"目前计费周期只支持按月，按季，按年");
                     }
 
                     assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
@@ -2643,7 +2651,7 @@ public class AssetServiceImpl implements AssetService {
 //                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(namespaceId,map.getKey());
 //                    for (int i = 0; i < bills.size(); i++) {
 //                        PaymentBills bill = bills.get(i);
-//                        if (!needNoticeBills.containsKey(bill.getId())) {
+//                        if (!needNoticeBills.containsKey(bill.getId())) {催缴短信发送失败
 //                            List<PaymentNoticeConfig> days = map.getValue();
 //                            for (int j = 0; j < days.size(); j++) {
 //                                PaymentNoticeConfig day = days.get(j);
