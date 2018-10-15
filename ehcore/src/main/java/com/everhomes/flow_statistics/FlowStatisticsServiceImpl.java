@@ -2,6 +2,7 @@ package com.everhomes.flow_statistics;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
+import com.everhomes.rest.flow.FlowNodeType;
 import com.everhomes.rest.flow_statistics.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -131,6 +132,16 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             return response;
         }
         for(FlowNode node : nodesList){
+            if(node == null){
+                continue ;
+            }
+            if (FlowNodeType.START.getCode().equals(node.getNodeType())) {
+                continue ;
+            }
+            if (FlowNodeType.END.getCode().equals(node.getNodeType())) {
+                continue ;
+            }
+
             StatisticsByNodesDTO dto = new StatisticsByNodesDTO();
             dto.setNodeName(node.getNodeName());
             dto.setNodeId(node.getId());
@@ -155,6 +166,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             }
             dto.setHandleTimes(times);
             dto.setAverageHandleCycle(average);
+            response.getDtos().add(dto);
         }
         //总处理次数
         Integer times = flowStatisticsHandleLogProvider.countNodesTimes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),null);
@@ -199,6 +211,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             return response;
         }
         for(FlowLane lane :lanesList){
+            if(isStartOrEndLanes(flowMainId,flowVersion,lane.getId())){
+                continue ;
+            }
             StatisticsByLanesDTO dto = new StatisticsByLanesDTO();
             dto.setLaneId(lane.getId());
             dto.setLaneLevel(lane.getLaneLevel());
@@ -248,6 +263,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
             Double earlyComaredVal = (lastAverage - average) /average ;
             dto.setEarlyComparedVal(earlyComaredVal);
+            response.getDtos().add(dto);
         }
         //当前周期泳道平均处理时长(所有泳道的处理时长总和/泳道个数)
         Integer lanesCount = flowStatisticsHandleLogProvider.countLanes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()));
@@ -294,5 +310,30 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         return times ;
     }
 
+    /**
+     * 判断一个泳道是不是开始或结束的泳道
+     * @param flowMainId
+     * @param version
+     * @param laneId
+     * @return
+     */
+    private boolean isStartOrEndLanes(Long flowMainId , Integer version ,Long laneId){
+
+        //查询出节点，再从节点类型判断，按理说开始或结束泳道只有一个节点
+        List<FlowNode> nodes = flowStatisticsProvider.getFlowNodeByLaneId(flowMainId,version,laneId);
+        if(CollectionUtils.isNotEmpty(nodes)){
+            FlowNode node = nodes.get(0);
+            if(node == null){
+                return false ;
+            }
+            if (FlowNodeType.START.getCode().equals(node.getNodeType())) {
+                return true ;
+            }
+            if (FlowNodeType.END.getCode().equals(node.getNodeType())) {
+                return true ;
+            }
+        }
+        return false ;
+    }
 
 }

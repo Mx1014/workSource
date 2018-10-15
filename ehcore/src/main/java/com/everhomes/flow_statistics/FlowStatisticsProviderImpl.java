@@ -220,6 +220,22 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
         return list;
     }
 
+    @Override
+    public List<FlowNode> getFlowNodeByLaneId(Long flowMainId, Integer version, Long laneId) {
+
+        List<FlowNode> list = new ArrayList<FlowNode>();
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowNodes.class));
+        com.everhomes.server.schema.tables.EhFlowNodes t = Tables.EH_FLOW_NODES;
+        SelectQuery<EhFlowNodesRecord> query = context.selectQuery(t);
+        query.addConditions(t.FLOW_MAIN_ID.eq(flowMainId));
+        query.addConditions(t.FLOW_VERSION.eq(version));
+        query.addConditions(t.FLOW_LANE_ID.eq(laneId));
+        list = query.fetchInto(FlowNode.class);
+
+        return list ;
+    }
+
     private EhFlowEventLogsDao rwDao() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhFlowEventLogsDao(context.configuration());

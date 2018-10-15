@@ -24,4 +24,6 @@ public interface FlowStatisticsProvider {
     List<FlowEventLog> getFlowEventLogs(Long flowMainId , Integer version , List<Long>flowCases , Timestamp startDate , List<Long> flowNodeIds);
 
     FlowNode getFlowNodeByFlowLevel(Long flowMainId , Integer version , Integer flowNodeLevel);
+
+    List<FlowNode> getFlowNodeByLaneId(Long flowMainId , Integer version ,Long laneId);
 }
