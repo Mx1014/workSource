@@ -16,8 +16,6 @@ import com.everhomes.util.StringHelper;
 public class GetServiceGoodResponse {
 	
 	private GoodScopeDTO goodScopeDTO;
-//	private List<GoodCategoryDTO> goodCategoryList;
-//	private List<GoodDTO> goodDTOList;
 	
 	@Override
 	public String toString() {

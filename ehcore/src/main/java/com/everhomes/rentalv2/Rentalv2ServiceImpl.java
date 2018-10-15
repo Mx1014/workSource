@@ -3,6 +3,7 @@ package com.everhomes.rentalv2;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
@@ -2445,7 +2446,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return dto;
 	}
 
-	private PreOrderDTO buildPreOrderDTO(RentalOrder order, String clientAppName, Integer paymentType) {
+	private PreOrderCommand buildPreOrderDTO(RentalOrder order, String clientAppName, Integer paymentType) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
@@ -2478,42 +2479,57 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		preOrderCommand.setClientAppName(clientAppName);
-
-		return rentalv2PayService.createPreOrder(preOrderCommand,order);
+        return preOrderCommand;
 	}
 
 	public PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd) {
-		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
+		return (PreOrderDTO)getRentalBillPayInfo(cmd,ActivityRosterPayVersionFlag.V2);
+	}
 
-		if (null == order) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
-		}
+	private Object getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd,ActivityRosterPayVersionFlag version){
+        RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getId());
+        if (null == order) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
+        }
 
-		if (order.getStatus().equals(SiteBillStatus.FAIL.getCode())) {
-			LOGGER.error("Order has been canceled");
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
-		}
-		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
-				order.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
-			changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
-			return null;
-		}
-		PreOrderDTO preOrderDTO = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
-		//保存支付订单信息
-		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-		if (record != null){ //欠费订单保存
-			record.setOrderId(order.getId());
-			record.setStatus((byte)0);//未支付
-			record.setNamespaceId(UserContext.getCurrentNamespaceId());
-			if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))
-				record.setPaymentOrderType(OrderRecordType.OWNINGFEE.getCode());//欠费订单
-			else
-				record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
-			this.rentalv2AccountProvider.updateOrderRecord(record);
-		}
-		return preOrderDTO;
+        if (order.getStatus().equals(SiteBillStatus.FAIL.getCode())) {
+            LOGGER.error("Order has been canceled");
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_ORDER_CANCELED, "Order has been canceled");
+        }
+        if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
+                order.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
+            changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+            return null;
+        }
+        PreOrderCommand preOrderCommand = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
+        Object obj = null;
+        if (ActivityRosterPayVersionFlag.V2 == version) {
+            PreOrderDTO preOrderDTO = rentalv2PayService.createPreOrder(preOrderCommand, order);
+            obj = preOrderDTO;
+        }else if (ActivityRosterPayVersionFlag.V3 == version){
+            AddRentalBillItemV3Response merchantPreOrder = rentalv2PayService.createMerchantPreOrder(preOrderCommand, order);
+            obj = merchantPreOrder;
+        }
+        //保存支付订单信息
+        Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
+        if (record != null){ //欠费订单保存
+            record.setOrderId(order.getId());
+            record.setStatus((byte)0);//未支付
+            record.setNamespaceId(UserContext.getCurrentNamespaceId());
+            if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))
+                record.setPaymentOrderType(OrderRecordType.OWNINGFEE.getCode());//欠费订单
+            else
+                record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
+            this.rentalv2AccountProvider.updateOrderRecord(record);
+        }
+        return obj;
+    }
+
+	@Override
+	public AddRentalBillItemV3Response getRentalBillPayInfoV3(GetRentalBillPayInfoCommand cmd) {
+		return (AddRentalBillItemV3Response)getRentalBillPayInfo(cmd,ActivityRosterPayVersionFlag.V3);
 	}
 
 	@Override
@@ -3952,13 +3968,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd) {
-
-		return (AddRentalBillItemV2Response) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V2);
+		return (AddRentalBillItemV2Response)createPayOrder(response,cmd,ActivityRosterPayVersionFlag.V2);
 	}
 
+	@Override
+	public AddRentalBillItemV3Response addRentalItemBillV3(AddRentalBillItemCommand cmd) {
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V3);
+		return (AddRentalBillItemV3Response)createPayOrder(response,cmd,ActivityRosterPayVersionFlag.V3);
+	}
 
-	private AddRentalBillItemV2Response convertOrderDTOForV2(RentalOrder order, String clientAppName, Integer paymentType,
-															 String flowCaseUrl) {
+	private PreOrderCommand convertOrderDTOForV2(RentalOrder order, String clientAppName, Integer paymentType) {
 		PreOrderCommand preOrderCommand = new PreOrderCommand();
 
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
@@ -3987,28 +4007,59 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			preOrderCommand.setCommitFlag(1);
 		}
 
-		PreOrderDTO callBack = null;
-		if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0
-				&& order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) //只有线上支付在这个时候下单
-			callBack = rentalv2PayService.createPreOrder(preOrderCommand,order);
-
-		AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
-		response.setPreOrderDTO(callBack);
-		response.setFlowCaseUrl(flowCaseUrl);
-		response.setBillId(order.getId());
-
-		return response;
+		return preOrderCommand;
 	}
-
 
 
 	@Override
 	public AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd) {
-
-		return (AddRentalBillItemCommandResponse) actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V1);
+		AddRentalBillItemCommandResponse response = actualAddRentalItemBill(cmd, ActivityRosterPayVersionFlag.V1);
+		return response ;
 	}
 
-	private Object actualAddRentalItemBill(AddRentalBillItemCommand cmd, ActivityRosterPayVersionFlag version) {
+	private Object createPayOrder(AddRentalBillItemCommandResponse responseV1,AddRentalBillItemCommand cmd,
+                                  ActivityRosterPayVersionFlag version){
+		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
+        PreOrderCommand preOrderCommand = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType());
+        Object obj = null;
+        if (ActivityRosterPayVersionFlag.V2 == version) {
+            PreOrderDTO callBack = null;
+            if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0
+                    && bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) //只有线上支付在这个时候下单
+                callBack = rentalv2PayService.createPreOrder(preOrderCommand, bill);
+
+            AddRentalBillItemV2Response response = new AddRentalBillItemV2Response();
+            response.setPreOrderDTO(callBack);
+            response.setFlowCaseUrl(responseV1.getFlowCaseUrl());
+            response.setBillId(bill.getId());
+            obj = response;
+        }else if (ActivityRosterPayVersionFlag.V3 == version) {
+            AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+            if (preOrderCommand.getAmount().compareTo(new BigDecimal(0)) > 0
+                    && bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) //只有线上支付在这个时候下单
+                response = rentalv2PayService.createMerchantPreOrder(preOrderCommand,bill);
+            response.setFlowCaseUrl(responseV1.getFlowCaseUrl());
+            response.setBillId(bill.getId());
+            obj = response;
+        }
+
+		//保存支付订单信息
+		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+		if (record != null){
+			record.setOrderId(bill.getId());
+			record.setStatus((byte)0);//未支付
+			record.setNamespaceId(UserContext.getCurrentNamespaceId());
+			record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
+			this.rentalv2AccountProvider.updateOrderRecord(record);
+		}
+		//当订单创建成功之后，在来创建定时任务
+		if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode()) && bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+			createOrderOverTimeTask(bill);
+		}
+		return obj;
+	}
+
+	private AddRentalBillItemCommandResponse actualAddRentalItemBill(AddRentalBillItemCommand cmd, ActivityRosterPayVersionFlag version) {
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
 
 		if (!bill.getStatus().equals(SiteBillStatus.INACTIVE.getCode()) &&
@@ -4126,24 +4177,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			if (orderCancelFlag[0]) {
 				createOrderOverTimeTask(bill);
 			}
-			return response;
-		} else {
-			Object obj = convertOrderDTOForV2(bill, cmd.getClientAppName(), cmd.getPaymentType(), response.getFlowCaseUrl());
-			//保存支付订单信息
-			Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
-			if (record != null){
-				record.setOrderId(bill.getId());
-				record.setStatus((byte)0);//未支付
-				record.setNamespaceId(UserContext.getCurrentNamespaceId());
-				record.setPaymentOrderType(OrderRecordType.NORMAL.getCode());//支付订单
-				this.rentalv2AccountProvider.updateOrderRecord(record);
-			}
-			//当订单创建成功之后，在来创建定时任务
-			if (orderCancelFlag[0]) {
-				createOrderOverTimeTask(bill);
-			}
-			return obj;
 		}
+		return response;
 	}
 
 	private List<RentalBillRuleDTO> getBillRules(RentalOrder bill) {
@@ -4515,7 +4550,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
-				null, null);
+				null, null,cmd.getPayChannel());
 
 		if (bills == null) {
 			return response;
@@ -8027,7 +8062,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		AddRentalBillItemCommand actualCmd = ConvertHelper.convert(cmd, AddRentalBillItemCommand.class);
 
-		AddRentalBillItemCommandResponse tempResp = (AddRentalBillItemCommandResponse) actualAddRentalItemBill(actualCmd,
+		AddRentalBillItemCommandResponse tempResp =  actualAddRentalItemBill(actualCmd,
 				ActivityRosterPayVersionFlag.V1);
 
 		CommonOrderDTO dto = ConvertHelper.convert(tempResp, CommonOrderDTO.class);
@@ -8046,10 +8081,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	public AddRentalOrderUsingInfoV2Response addRentalOrderUsingInfoV2(AddRentalOrderUsingInfoCommand cmd) {
 
 		AddRentalBillItemCommand actualCmd = ConvertHelper.convert(cmd, AddRentalBillItemCommand.class);
-
-		AddRentalBillItemV2Response tempResp = (AddRentalBillItemV2Response) actualAddRentalItemBill(actualCmd,
-				ActivityRosterPayVersionFlag.V2);
-
+		AddRentalBillItemCommandResponse responseV1 = actualAddRentalItemBill(actualCmd, ActivityRosterPayVersionFlag.V2);
+		AddRentalBillItemV2Response tempResp = (AddRentalBillItemV2Response)createPayOrder(responseV1,actualCmd,ActivityRosterPayVersionFlag.V2);
 		AddRentalOrderUsingInfoV2Response response = ConvertHelper.convert(tempResp, AddRentalOrderUsingInfoV2Response.class);
 		return response;
 	}
@@ -8197,6 +8230,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (null != timeIntervals && !timeIntervals.isEmpty()) {
 			dto.setTimeStep(timeIntervals.get(0).getTimeStep());
 		}
+		//发票信息
+		Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+		if (record != null) {
+			dto.setInvoiceFlag(bill.getInvoiceFlag());
+			String invoiceUrl = configurationProvider.getValue(0, "home.url", "");//营销系统和core共用一个域名
+			if (TrueOrFalseFlag.FALSE.getCode().equals(bill.getInvoiceFlag())) {
+				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-application";
+			} else {
+				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-detail/2";
+			}
+			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum());
+			dto.setInvoiceUrl(invoiceUrl);
+		}
 
 
 	}
@@ -8334,7 +8380,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	@Override
 	public PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd) {
 		RentalOrder bill = actualRenewRentalOrder(cmd);
-		PreOrderDTO dto = buildPreOrderDTO(bill, cmd.getClientAppName(), null);
+		PreOrderCommand preOrderCommand = buildPreOrderDTO(bill, cmd.getClientAppName(), null);
+        PreOrderDTO preOrderDTO = rentalv2PayService.createPreOrder(preOrderCommand, bill);
 		//保存支付订单信息
 		Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
 		if (record != null){
@@ -8344,7 +8391,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			record.setPaymentOrderType(OrderRecordType.RENEW.getCode());//续费订单
 			this.rentalv2AccountProvider.updateOrderRecord(record);
 		}
-		return dto;
+		return preOrderDTO;
 	}
 
 	private RentalOrder actualRenewRentalOrder(RenewRentalOrderCommand cmd) {

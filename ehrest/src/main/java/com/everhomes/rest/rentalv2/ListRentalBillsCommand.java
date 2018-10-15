@@ -13,7 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>startTime：开始时间</li> 
  * <li>endTime：结束时间</li> 
  * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
-* <li>billStatus：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>   
+* <li>billStatus：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.rentalv2.SiteBillStatus}</li>
+ * <li>payChannel：支付类型  0个人支付1企业支付(记账)2企业支付(完成)  参考{@link com.everhomes.rest.rentalv2.PayChannel}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * <li>currentPMId: 当前管理公司ID</li>
@@ -31,7 +32,8 @@ public class ListRentalBillsCommand {
 	private Long startTime; 
 	private Long endTime;
 	private java.lang.String     vendorType;
-	private Byte billStatus;  
+	private Byte billStatus;
+	private String payChannel;
 	private Long pageAnchor;
     
 	private Integer pageSize;
@@ -154,5 +156,13 @@ public class ListRentalBillsCommand {
 
 	public void setResourceType(String resourceType) {
 		this.resourceType = resourceType;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
 	}
 }

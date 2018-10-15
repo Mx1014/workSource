@@ -15,7 +15,7 @@ import com.everhomes.rest.promotion.order.GoodDTO;
 
 @RestController
 @RequestMapping("/goods")
-public class GoodsPromotionContoller  extends ControllerBase {
+public class GoodsPromotionController  extends ControllerBase {
 	
 	@Autowired
 	GoodsService goodsServce;

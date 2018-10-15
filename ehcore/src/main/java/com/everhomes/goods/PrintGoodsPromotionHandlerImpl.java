@@ -20,6 +20,7 @@ import com.everhomes.rest.goods.GetServiceGoodResponse;
 import com.everhomes.rest.goods.GoodBizEnum;
 import com.everhomes.rest.goods.GoodScopeDTO;
 import com.everhomes.rest.goods.GoodTagInfo;
+import com.everhomes.rest.goods.TagDTO;
 import com.everhomes.util.ConvertHelper;
 
 @Component(GoodsPromotionHandler.GOODS_PROMOTION_HANDLER_PREFIX + ServiceModuleConstants.PRINT_MODULE)
@@ -55,26 +56,22 @@ public class PrintGoodsPromotionHandlerImpl extends DefaultGoodsPromotionHandler
 		GetServiceGoodResponse response = new GetServiceGoodResponse();
 		GoodScopeDTO goodScopeDTO = new GoodScopeDTO();
 		List<Community> communities = communityProvider.listNamespaceCommunities(cmd.getNamespaceId());
-		List<String> communitiesList = new ArrayList();
+		List<TagDTO> communitiesList = new ArrayList<>();
 		goodScopeDTO.setTitle(SCOPE);
 		for (Community community : communities){
-			String communitiy;
-			JSONObject communitityJson=new JSONObject();
-			communitityJson.put("id", community.getId().toString());
-			communitityJson.put("name", community.getName());
-			List<String> printerList = new ArrayList();
+			List<TagDTO> printerList = new ArrayList<>();
 			List<SiyinPrintPrinter> SiyinPrintPrinters = siyinPrintPrinterProvider.findSiyinPrintPrinterByNamespaceId(cmd.getNamespaceId());
 			for(SiyinPrintPrinter siyinPrintPrinter : SiyinPrintPrinters){
-				String printer;
-				JSONObject printerJson=new JSONObject();
-				printerJson.put("id", siyinPrintPrinter.getPrinterName());
-				printerJson.put("name", siyinPrintPrinter.getPrinterName());
-				printerJson.put("serveApplyName", community.getName()+ "-" + siyinPrintPrinter.getPrinterName());
-				printer = printerJson.toString();
+				TagDTO printer = new TagDTO();
+				printer.setId(siyinPrintPrinter.getPrinterName());
+				printer.setName(siyinPrintPrinter.getPrinterName());
 				printerList.add(printer);
 			}
-			communitityJson.put("tag", printerList);
-			communitiy = communitityJson.toString();
+			
+			TagDTO communitiy = new TagDTO();
+			communitiy.setId(community.getId().toString());
+			communitiy.setName(community.getName());
+			communitiy.setTags(printerList);
 			communitiesList.add(communitiy);
 		}
 		goodScopeDTO.setTagList(communitiesList);

@@ -16,11 +16,21 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.pay.order.*;
+import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
+import com.everhomes.rest.promotion.order.controller.CreateMerchantOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
 import com.everhomes.rest.promotion.order.*;
@@ -29,13 +39,10 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.rentalv2.PreOrderCommand;
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.RentalV2ResourceType;
-import com.everhomes.rest.rentalv2.RuleSourceType;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
+import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -105,14 +112,19 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         list.add("0");
         if (cmd.getCommunityId() != null)
              list.add(cmd.getCommunityId().toString());
-        List<PayUserDTO> payUserDTOs = payServiceV2.getPayUserList(userPrefix + cmd.getOrganizationId(), list);
+        GetPayUserListByMerchantCommand cmd2 = new GetPayUserListByMerchantCommand();
+        cmd2.setUserId(userPrefix + cmd.getOrganizationId());
+        cmd2.setTag1(list);
+        GetMerchantListByPayUserIdRestResponse restResponse = orderService.getMerchantListByPayUserId(cmd2);
+        List<GetPayUserListByMerchantDTO> merchantDTOS = restResponse.getResponse();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(payUserDTOs));
+            LOGGER.debug("List rental payee accounts(response), orgnizationId={}, tags={}, response={}", cmd.getOrganizationId(), cmd.getCommunityId(), GsonUtil.toJson(merchantDTOS));
         }
 
         List<ListBizPayeeAccountDTO> result = new ArrayList<ListBizPayeeAccountDTO>();
-        if (payUserDTOs != null) {
-            for (PayUserDTO payUserDTO : payUserDTOs) {
+        if (merchantDTOS != null) {
+            for (GetPayUserListByMerchantDTO merchantDTO : merchantDTOS) {
+                PayUserDTO payUserDTO = ConvertHelper.convert(merchantDTO,PayUserDTO.class);
                 ListBizPayeeAccountDTO dto = convertAccount(payUserDTO);
                 result.add(dto);
             }
@@ -126,7 +138,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                 null,RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
         if (accounts == null || accounts.size() == 0)
             return null;
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
+
+        ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+        cmd2.setIds(accounts.stream().map(r -> r.getMerchantId()).collect(Collectors.toList()));
+        ListPayUsersByMerchantIdsRestResponse restResponse = orderService.listPayUsersByMerchantIds(cmd2);
+        List<PayUserDTO> payUserDTOs = restResponse.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0)
             return null;
         ListBizPayeeAccountDTO dto = convertAccount(payUserDTOs.get(0));
@@ -140,7 +156,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         rentalv2AccountProvider.deletePayAccount(null,cmd.getCommunityId(),RuleSourceType.DEFAULT.getCode(),cmd.getResourceTypeId());
         //添加
         Rentalv2PayAccount account = new Rentalv2PayAccount();
-        account.setAccountId(cmd.getAccountId());
+        account.setMerchantId(cmd.getAccountId());//支付账号换成商户id
         account.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
         account.setCommunityId(cmd.getCommunityId());
         account.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -167,7 +183,11 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             accounts.remove(accounts.size()-1);
             response.setNextPageAnchor(accounts.get(accounts.size()-1).getId());
         }
-        List<PayUserDTO> payUserDTOS = payServiceV2.listPayUsersByIds(accounts.stream().map(r -> r.getAccountId()).collect(Collectors.toList()));
+
+        ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+        cmd2.setIds(accounts.stream().map(r -> r.getMerchantId()).collect(Collectors.toList()));
+        ListPayUsersByMerchantIdsRestResponse restResponse = orderService.listPayUsersByMerchantIds(cmd2);
+        List<PayUserDTO> payUserDTOS = restResponse.getResponse();
         response.setResourceAccounts(new ArrayList<>());
         accounts.forEach(r->{
             ResourceAccountDTO dto = new ResourceAccountDTO();
@@ -193,21 +213,21 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         List<Rentalv2PayAccount> accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                 null, RuleSourceType.DEFAULT.getCode(), cmd.getResourceTypeId(), null, null);
         if (accounts !=null && accounts.size()>0){//检测通用账户
-            List<Rentalv2PayAccount> collect = accounts.stream().filter(r -> r.getAccountId().equals(cmd.getAccountId())).collect(Collectors.toList());
+            List<Rentalv2PayAccount> collect = accounts.stream().filter(r -> r.getMerchantId().equals(cmd.getAccountId())).collect(Collectors.toList());
             if (collect!=null && collect.size()>0)
                 throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                         "此收款账户为通用收款账户，请重新选择");
         }
         if (cmd.getId() != null){//更新
             Rentalv2PayAccount account = rentalv2AccountProvider.getAccountById(cmd.getId());
-            if (!account.getAccountId().equals(cmd.getAccountId())){
+            if (!account.getMerchantId().equals(cmd.getAccountId())){
                 accounts = rentalv2AccountProvider.listPayAccounts(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                         null, RuleSourceType.RESOURCE.getCode(), cmd.getResourceId(), null, null);
                 if (accounts!=null && accounts.size()>0)
                     throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
                             cmd.getResourceName()+"已设置非通用收款账户，不可重复添加");
             }
-            account.setAccountId(cmd.getAccountId());
+            account.setMerchantId(cmd.getAccountId());//账号id换成商户Id
             account.setSourceId(cmd.getResourceId());
             account.setResourceName(cmd.getResourceName());
             rentalv2AccountProvider.updatePayAccount(account);
@@ -225,7 +245,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             account.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
             account.setSourceType(RuleSourceType.RESOURCE.getCode());
             account.setSourceId(cmd.getResourceId());
-            account.setAccountId(cmd.getAccountId());
+            account.setMerchantId(cmd.getAccountId());//账号id换成商户Id
             rentalv2AccountProvider.createPayAccount(account);
         }
     }
@@ -236,6 +256,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 
         return handler.getAccountId(order);
+    }
+
+    private Long getRentalOrderMerchant(Long rentalBillId){
+        RentalOrder order = rentalv2Provider.findRentalBillById(rentalBillId);
+        RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+
+        return handler.gerMerchantId(order);
     }
 
     private ListBizPayeeAccountDTO convertAccount(PayUserDTO payUserDTO){
@@ -265,6 +292,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     }
 
     //检查买方（付款方）会员，无则创建
+    @Deprecated
     public Long checkAndCreatePaymentUser(Long payerId, Integer namespaceId){
         PayUserDTO payUserDTO = new PayUserDTO();
         //根据tag查询支付帐号
@@ -327,6 +355,84 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
 
         return preOrderDTO;
+    }
+
+    @Override
+    public AddRentalBillItemV3Response createMerchantPreOrder(PreOrderCommand cmd,RentalOrder order) {
+        AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+        //1、查order表，如果order已经存在，则返回已有的合同，交易停止；否则，继续
+        Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(cmd.getOrderId());
+        if (record != null){
+            response.setMerchantId(record.getMerchantId());
+            response.setPayUrl(record.getPayUrl());
+            response.setMerchantOrderId(record.getMerchantOrderId());
+            return response;
+        }
+        //2、收款商户是否存在，无则报错
+        cmd.setMerchantId(this.getRentalOrderMerchant(order.getId()));
+        PayUserDTO payUserDTO = new PayUserDTO();
+        if (cmd.getMerchantId() != null){
+            GetPayAccountByMerchantIdCommand cmd2 = new GetPayAccountByMerchantIdCommand();
+            cmd2.setId(cmd.getMerchantId());
+            cmd2.setNamespaceId(UserContext.getCurrentNamespaceId());
+            GetPayAccountByMerchantIdRestResponse payAccountByMerchantId = orderService.getPayAccountByMerchantId(cmd2);
+            payUserDTO = payAccountByMerchantId.getResponse();
+        }
+        if (payUserDTO == null ){
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
+                    "暂未绑定收款账户");
+        }else
+            cmd.setAccountName(payUserDTO.getUserAliasName());
+        //3、组装报文，发起下单请求
+        CreateMerchantOrderResponse merchantOrderResp = createMerchantOrder(cmd, order);
+
+        //4、组装并保存返回值
+        response = saveMerchantOrderRecord(cmd,merchantOrderResp);
+
+
+        return response;
+    }
+
+    private AddRentalBillItemV3Response saveMerchantOrderRecord(PreOrderCommand cmd,
+                                                                CreateMerchantOrderResponse merchantOrderResp){
+        AddRentalBillItemV3Response response = new AddRentalBillItemV3Response();
+        response.setMerchantOrderId(merchantOrderResp.getMerchantOrderId());
+        response.setMerchantId(merchantOrderResp.getMerchantId());
+        response.setPayUrl(merchantOrderResp.getPayUrl());
+
+        Rentalv2OrderRecord record = new Rentalv2OrderRecord();
+        record.setOrderNo(cmd.getOrderId());
+        record.setMerchantId(merchantOrderResp.getMerchantId());
+        record.setAmount(changePayAmount(cmd.getAmount()));
+        record.setAccountName(cmd.getAccountName());
+        record.setPayUrl(merchantOrderResp.getPayUrl());
+        record.setMerchantOrderId(merchantOrderResp.getMerchantOrderId());
+
+        this.rentalv2AccountProvider.createOrderRecord(record);
+
+        return response;
+    }
+
+    private CreateMerchantOrderResponse createMerchantOrder(PreOrderCommand preOrderCommand,RentalOrder order){
+        CreatePurchaseOrderCommand createOrderCommand = preparePaymentBillOrder(preOrderCommand);
+        CreateMerchantOrderCommand createMerchantOrderCommand = ConvertHelper.convert(createOrderCommand,CreateMerchantOrderCommand.class);
+        createMerchantOrderCommand.setPaymentMerchantId(preOrderCommand.getMerchantId());
+        RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
+        handler.processCreateMerchantOrderCmd(createMerchantOrderCommand,order);
+        CreateMerchantOrderRestResponse createOrderResp = orderService.createMerchantOrder(createMerchantOrderCommand);
+        if(!checkOrderRestResponseIsSuccess(createOrderResp)) {
+            String scope = OrderErrorCode.SCOPE;
+            int code = OrderErrorCode.ERROR_CREATE_ORDER_FAILED;
+            String description = "Failed to create merchant order";
+            if(createOrderResp != null) {
+                code = (createOrderResp.getErrorCode() == null) ? code : createOrderResp.getErrorCode()  ;
+                scope = (createOrderResp.getErrorScope() == null) ? scope : createOrderResp.getErrorScope();
+                description = (createOrderResp.getErrorDescription() == null) ? description : createOrderResp.getErrorDescription();
+            }
+            throw RuntimeErrorException.errorWith(scope, code, description);
+        }
+        return createOrderResp.getResponse();
     }
 
     private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse, PreOrderCommand cmd){
@@ -448,7 +554,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
      * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
        CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
      */
-    private boolean checkOrderRestResponseIsSuccess(CreatePurchaseOrderRestResponse response){
+    private boolean checkOrderRestResponseIsSuccess(RestResponseBase response){
         if(response != null && response.getErrorCode() != null
                 && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
             return true;
@@ -606,9 +712,16 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         return dto;
     }
 
+    public static boolean verifyCallbackSignature(MerchantPaymentNotificationCommand cmd) {
+        Map<String, String> params = new HashMap();
+        StringHelper.toStringMap(null, cmd, params);
+        params.remove("signature");
+        return SignatureHelper.verifySignature(params, PaySettings.getSecretKey(), cmd.getSignature());
+    }
+
     @Override
-    public void payNotify(OrderPaymentNotificationCommand cmd) {
-        if (!PayUtil.verifyCallbackSignature(cmd))
+    public void payNotify(MerchantPaymentNotificationCommand cmd) {
+        if (!verifyCallbackSignature(cmd))
             throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
         if(cmd.getPaymentStatus() == null) {
@@ -617,7 +730,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
         //success
         if(cmd.getPaymentStatus() != null) {
-                Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            Rentalv2OrderRecord record ;
+            if (cmd.getMerchantOrderId() != null) {
+                record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+                record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
+                rentalv2AccountProvider.updateOrderRecord(record);
+            }
+            else
+                record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
                 RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
                 order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
                 order.setAccountName(record.getAccountName()); //记录收款方账号
@@ -626,6 +746,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
                     case 7:
                     case 9:
                     case 21: order.setVendorType(VendorType.WEI_XIN.getCode());break;
+                    case 29: order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());break;
                     default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());break;
                 }
 

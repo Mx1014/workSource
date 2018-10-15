@@ -37,6 +37,8 @@ import java.util.Date;
  * <li>customObject: 业务数据 各个资源类型不一样 {@link com.everhomes.rest.rentalv2.VipParkingUseInfoDTO}</li>
  * <li>rentalType: rentalType</li>
  * <li>timeStep: timeStep</li>
+ * <li>invoiceFlag: 是否开发票 0 未开 1已开</li>
+ * <li>invoiceUrl: 开发票链接</li>
  * </ul>
  */
 public class RentalOrderDTO {
@@ -79,6 +81,8 @@ public class RentalOrderDTO {
 	private String customObject;
 
 	private Byte rentalType;
+	private Byte invoiceFlag;
+	private String invoiceUrl;
 
 	private Double timeStep;
 
@@ -326,5 +330,21 @@ public class RentalOrderDTO {
 
 	public void setScene(String scene) {
 		this.scene = scene;
+	}
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
+	}
+
+	public String getInvoiceUrl() {
+		return invoiceUrl;
+	}
+
+	public void setInvoiceUrl(String invoiceUrl) {
+		this.invoiceUrl = invoiceUrl;
 	}
 }
