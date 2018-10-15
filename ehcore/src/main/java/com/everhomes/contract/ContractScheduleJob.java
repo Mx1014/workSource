@@ -117,12 +117,12 @@ public class ContractScheduleJob extends QuartzJobBean {
                     return;
                 }
 
-                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId, null,null,null);
+                ContractParam communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), communityId, null,null,null,null);
                 if(communityExist == null && communityId != null) {
                     // find the organization of this community
                     OrganizationDTO owner = equipmentService.getAuthOrgByProjectIdAndModuleId(communityId, community.getNamespaceId(), ServiceModuleConstants.CONTRACT_MODULE);
                     if(owner!=null)
-                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null,null,owner.getId(),null);
+                    communityExist = contractProvider.findContractParamByCommunityId(community.getNamespaceId(), null,null,owner.getId(),null,null);
                 }
                 ContractParam param = communityExist;
 

@@ -43,4 +43,6 @@ public interface AssetGroupProvider {
     EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
+    
+    void decouplingHistoryBillGroup(Integer namespaceId, Long categoryId, Long billGroupId, List<Long> allCommunity);
 }

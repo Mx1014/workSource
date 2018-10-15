@@ -2330,6 +2330,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
+			dto.setIdentityNumber(user.getIdentityNumberTag());
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2444,6 +2445,7 @@ public class CommunityServiceImpl implements CommunityService {
             User user = this.userProvider.findUserById(cmd.getUserId());
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
+                communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
             }
 
             //是否展示会员等级
@@ -5814,7 +5816,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 
-
+		//管理公司全部项目范围
+		if (cmd.getAllScope() == 1) {
+			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			cmd.setCommunityIds(communityIds);
+		}
+		
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
 
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());

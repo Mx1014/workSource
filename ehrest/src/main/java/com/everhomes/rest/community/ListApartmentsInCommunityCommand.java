@@ -1,5 +1,8 @@
 package com.everhomes.rest.community;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class ListApartmentsInCommunityCommand {
@@ -22,8 +25,37 @@ public class ListApartmentsInCommunityCommand {
     private String buildingName;
     private Integer pageSize;
     private Long pageAnchor;
-    
-    public String getBuildingName() {
+    @ItemType(Long.class)
+    private List<Long> communityIds;
+    private Long organizationId;
+    private Long appId;
+    private Byte allScope;
+   
+	public Byte getAllScope() {
+		return allScope;
+	}
+	public void setAllScope(Byte allScope) {
+		this.allScope = allScope;
+	}
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+	public Long getAppId() {
+		return appId;
+	}
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+	public String getBuildingName() {
 		return buildingName;
 	}
 	public void setBuildingName(String buildingName) {

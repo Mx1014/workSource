@@ -94,21 +94,31 @@ public class AssetGroupServiceImpl implements AssetGroupService {
                 cmd.setOwnerId(communityId);
                 //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
             	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
-                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerId(communityId);
                 isProjectNavigateDefaultCmd.setOwnerType("community");
                 isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
                 isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
                 isProjectNavigateDefaultCmd.setOrganizationId(cmd.getOrganizationId());//标准版新增的管理公司ID
                 IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetGroupProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
                 if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals(AssetProjectDefaultFlag.DEFAULT.getCode())) {
-                	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
+                	Boolean allScope = false;
+                	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, allScope);
                 }
             }
             //2、再创建全部配置
+            Boolean allScope = true;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            assetGroupProvider.createBillGroup(cmd, deCouplingFlag, null, brotherGroupId, true);
+            assetGroupProvider.createBillGroup(cmd, deCouplingFlag, null, brotherGroupId, allScope);
+            //全部项目修改billGroup的，具体项目与其有关联关系，但是由于标准版引入了转交项目管理权，那么需要解耦已经转交项目管理权的项目
+            //根据billGroupId查询出所有关联的项目（包括已经授权出去的项目）
+            List<ListBillGroupsDTO> listBillGroupsDTOs = assetGroupProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(), cmd.getCategoryId(), cmd.getOrganizationId(), allScope);
+            for(ListBillGroupsDTO dto : listBillGroupsDTOs) {
+            	Long billGroupId = dto.getBillGroupId();
+            	assetGroupProvider.decouplingHistoryBillGroup(cmd.getNamespaceId(), cmd.getCategoryId(), billGroupId, allCommunity);
+            }
         }else{
-        	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, false);
+        	Boolean allScope = false;
+        	assetGroupProvider.createBillGroup(cmd, deCouplingFlag, brotherGroupId, null, allScope);
         }
     }
     

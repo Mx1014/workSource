@@ -209,13 +209,7 @@ public interface AssetProvider {
 
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
-            , Byte useUnitPrice);
-
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-    void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag);
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
@@ -223,19 +217,13 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
     void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
-    
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
-
-    List<PaymentFormula> getFormulas(Long id);
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId);
 
@@ -336,11 +324,9 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
-
     Long findCategoryIdFromBillGroup(Long billGroupId);
 
     void insertAssetCategory(EhAssetAppCategories c);
-
 
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
  
@@ -378,8 +364,6 @@ public interface AssetProvider {
     PaymentLateFine findLastedFine(Long id);
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
-    
-    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
