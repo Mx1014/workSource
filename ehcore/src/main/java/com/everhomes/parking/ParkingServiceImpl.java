@@ -847,18 +847,13 @@ public class ParkingServiceImpl implements ParkingService {
 	private CreateParkingGeneralOrderResponse convertOrderDTOForV3(ParkingRechargeOrder order, String clientAppName, ParkingLot parkingLot, Integer paymentType, Long merchantId){
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		String returnUrl = null;
-		Map<String, String> returnUrlParam= new HashMap<String, String>();
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
-			returnUrlParam.put("orderId", String.valueOf(order.getOrderNo()));
-			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.recharge.url", "zl://parking/monthCardRechargeStatus?orderId=${orderId}");
-			returnUrl = StringHelper.interpolate(returnUrl,returnUrlParam);
+			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getOrderNo()));
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrlParam.put("orderId", String.valueOf(order.getOrderNo()));
-			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.tempfee.url", "zl://parking/tempFeeStatus?orderId=${orderId}");
-			returnUrl = StringHelper.interpolate(returnUrl,returnUrlParam);
+			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getOrderNo()));			
 		}
 		//收款方是否有会员，无则报错
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
@@ -3923,8 +3918,12 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public GetInvoiceUrlResponse getInvoiceUrl (GetInvoiceUrlCommand cmd){
-		
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getGeneralOrderId());
-		return null;
+		String homeurl = configProvider.getValue("home.url", "");
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(cmd.getOrderId());
+		String generalOrderId = order.getGeneralOrderId();
+		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
+		String Url = homeurl + "app/appinvoice?businessOrderNumber=" + generalOrderId;
+		response.setInvoiceUrl(Url);
+		return response;
 	}
 }

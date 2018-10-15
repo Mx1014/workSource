@@ -1236,9 +1236,9 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/getInvoiceUrl </b>
-     * <p>初始化停车场对接功能表</p>
+     * <p>申请开票url</p>
      */
-    @RequestMapping("initFuncLists")
+    @RequestMapping("getInvoiceUrl")
     @RestReturn(value=GetInvoiceUrlResponse.class)
     public RestResponse getInvoiceUrl(GetInvoiceUrlCommand cmd) {
     	GetInvoiceUrlResponse resp =  parkingService.getInvoiceUrl(cmd);
