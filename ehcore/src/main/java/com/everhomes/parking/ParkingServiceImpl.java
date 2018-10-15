@@ -863,7 +863,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"");
 		}
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
-		Long bizPayeeId = payeeAccounts.get(0).getPayeeId();
+		Long bizPayeeId = payeeAccounts.get(0).getMerchantId();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
 		if(null == resp || null == resp.getResponse()) {
