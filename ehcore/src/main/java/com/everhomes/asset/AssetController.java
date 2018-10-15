@@ -1563,7 +1563,7 @@ public class AssetController extends ControllerBase {
     @RequestMapping("setDoorAccessParam")
     @RestReturn(value = String.class)
     public RestResponse setDoorAccessParam(@Valid SetDoorAccessParamCommand cmd) {
-		//assetService.setDoorAccessParam(cmd);
+		assetService.setDoorAccessParam(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1571,16 +1571,12 @@ public class AssetController extends ControllerBase {
     }
     
     /**
-     * <p>对接门禁：设置缴费门禁基础参数</p>
+     * <p>对接门禁：获取缴费门禁基础参数</p>
      * <b>URL: /asset/getDoorAccessParam</b>
      */
     @RequestMapping("getDoorAccessParam")
     @RestReturn(value=ListDoorAccessParamResponse.class)
     public RestResponse createAuthBatch(@Valid GetDoorAccessParamCommand cmd) {
-    	//assetService.getDoorAccessParam(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        return new RestResponse(assetService.getDoorAccessParam(cmd));
     }
 }

@@ -84,6 +84,7 @@ import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.ExemptionItemDTO;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.IsContractChangeFlagDTO;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
@@ -118,6 +119,7 @@ import com.everhomes.rest.asset.VariableIdAndValue;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -125,10 +127,12 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetDooraccessParams;
 import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
+import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
@@ -150,7 +154,9 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillGroupsRulesDao;
@@ -5739,5 +5745,32 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
         }
         return dto;
     }
+
+	@Override
+	public void createDoorAccessParam(AssetDooraccessParam assetDooraccessParam) {
+		long id = this.dbProvider.allocPojoRecordId(EhAssetDooraccessParams.class);
+		assetDooraccessParam.setId(id);
+		assetDooraccessParam.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessParam.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+		assetDooraccessParam.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class, id));
+        EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
+        dao.insert(assetDooraccessParam);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetDooraccessParams.class, null);
+	}
+
+	@Override
+	public List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<AssetDooraccessParam> list = dslContext.select()
+	        .from(Tables.EH_ASSET_DOORACCESS_PARAMS)
+	        .where(Tables.EH_ASSET_DOORACCESS_PARAMS.NAMESPACE_ID.eq(cmd.getNamespaceId()))
+	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.ORG_ID.eq(cmd.getOrgId()))
+	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.CATEGORY_ID.eq(cmd.getCategoryId()))
+	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.OWNER_ID.eq(cmd.getOwnerId()))
+	        .fetchInto(AssetDooraccessParam.class);
+		return list;
+	}
 
 }

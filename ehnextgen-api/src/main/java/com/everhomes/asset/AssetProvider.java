@@ -24,6 +24,7 @@ import com.everhomes.rest.asset.CreateChargingItemCommand;
 import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
@@ -446,5 +447,7 @@ public interface AssetProvider {
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
+	void createDoorAccessParam(AssetDooraccessParam asseDooraccessParam);
+	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
 		
 }

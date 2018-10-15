@@ -27,7 +27,7 @@ public class SetDoorAccessParamCommand {
     private String ownerType;
     private Long orgId;
     private Byte paramsStatus;
-    private Integer arrearageDays;
+    private Long arrearageDays;
     private String dooraccessList;
     private Long categoryId;
     
@@ -71,11 +71,11 @@ public class SetDoorAccessParamCommand {
 		this.paramsStatus = paramsStatus;
 	}
 
-	public Integer getArrearageDays() {
+	public Long getArrearageDays() {
 		return arrearageDays;
 	}
 
-	public void setArrearageDays(Integer arrearageDays) {
+	public void setArrearageDays(Long arrearageDays) {
 		this.arrearageDays = arrearageDays;
 	}
 

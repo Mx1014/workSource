@@ -14,11 +14,18 @@ public class DoorAccessParamDTO {
 	private String ownerType;
 	private Long orgId;
 	private Byte paramsStatus;
-	private Integer arrearageDays;
+	private Long arrearageDays;
 	private Long categoryId;
+	private String dooraccessList;
 	@ItemType(DooraccessList.class)
     private List<DooraccessList> dooraccess;
 	
+	public String getDooraccessList() {
+		return dooraccessList;
+	}
+	public void setDooraccessList(String dooraccessList) {
+		this.dooraccessList = dooraccessList;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -49,10 +56,10 @@ public class DoorAccessParamDTO {
 	public void setParamsStatus(Byte paramsStatus) {
 		this.paramsStatus = paramsStatus;
 	}
-	public Integer getArrearageDays() {
+	public Long getArrearageDays() {
 		return arrearageDays;
 	}
-	public void setArrearageDays(Integer arrearageDays) {
+	public void setArrearageDays(Long arrearageDays) {
 		this.arrearageDays = arrearageDays;
 	}
 	public Long getCategoryId() {

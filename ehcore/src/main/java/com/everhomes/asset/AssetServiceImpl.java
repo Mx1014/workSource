@@ -44,6 +44,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.DoorAccess;
+import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
@@ -77,6 +79,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -96,6 +99,9 @@ import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractTemplateDTO;
+import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
+import com.everhomes.rest.contract.ListContractTemplatesResponse;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -151,6 +157,7 @@ import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 //import com.everhomes.contract.ContractService;
 
@@ -263,6 +270,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private AssetStandardProvider assetStandardProvider;
+    
+    @Autowired
+    DoorAccessProvider doorAccessProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -4936,5 +4946,41 @@ public class AssetServiceImpl implements AssetService {
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
+	}
+
+	@Override
+	public void setDoorAccessParam(SetDoorAccessParamCommand cmd) {
+		AssetDooraccessParam assetDooraccessParam = ConvertHelper.convert(cmd, AssetDooraccessParam.class);
+		assetProvider.createDoorAccessParam(assetDooraccessParam);
+		
+	}
+
+	@Override
+	public ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd) {
+		List<AssetDooraccessParam> list = assetProvider.listDooraccessParams(cmd);
+		ListDoorAccessParamResponse response = new ListDoorAccessParamResponse();
+		if (list.size() > 0) {
+			List<DoorAccessParamDTO> resultList = list.stream().map((c) -> {
+				DoorAccessParamDTO dto = ConvertHelper.convert(c, DoorAccessParamDTO.class);
+				List<String> contactExtraTels = Arrays.asList(dto.getDooraccessList().split(","));
+				List<DooraccessList> dooraccessList = new ArrayList<DooraccessList>();
+				for (int i = 0; i < contactExtraTels.size(); i++) {
+					DooraccessList dooraccess = new DooraccessList();
+					String DooraccessId = contactExtraTels.get(i);
+					DoorAccess access = doorAccessProvider.getDoorAccessById(Long.parseLong(DooraccessId));
+					dooraccess.setId(Long.parseLong(DooraccessId));
+					if (access.getDisplayName() == null) {
+						dooraccess.setDooraccessName(access.getName());
+					} else {
+						dooraccess.setDooraccessName(access.getDisplayName());
+					}
+					dooraccessList.add(dooraccess);
+				}
+				dto.setDooraccess(dooraccessList);
+				return dto;
+			}).collect(Collectors.toList());
+			response.setDoorAccessParamDTOs(resultList);
+		}
+		return response;
 	}
 }

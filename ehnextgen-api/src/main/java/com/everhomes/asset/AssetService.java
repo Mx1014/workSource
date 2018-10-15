@@ -253,4 +253,6 @@ public interface AssetService {
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
 	
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	void setDoorAccessParam(SetDoorAccessParamCommand cmd);
+	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
 }
