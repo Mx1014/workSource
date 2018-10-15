@@ -23,7 +23,15 @@ public class AssetErrorCodes {
     public static final int PAYMENT_PAYEE_NOT_CONFIG = 10010;
     /** 缴费订单创建失败 */
     public static final int BILL_ORDER_CREATION_FAILED = 10011;
+    /** 催缴短信发送失败-第三方授权异常 */
+    public static final int MESSAGE_SEND_FAILED = 10012;
+    /** 收费项标准公式不存在 */
+    public static final int FORMULA_CANNOT_BE_FOUND = 10013;
+    /** 收费项标准类型错误 */
+    public static final int STANDARD_BILLING_CYCLE_NOT_FOUND = 10014;
     
     public static final int GROUP_UNIQUE_BILL_ITEM_CHECK = 10020;
     public static final int STANDARD_RELEATE_CONTRACT_CHECK = 10021;
+    
+    
 }

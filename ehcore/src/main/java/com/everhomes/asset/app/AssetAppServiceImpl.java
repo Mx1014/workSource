@@ -27,11 +27,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.ClientIdentityCommand;
 import com.everhomes.rest.asset.FunctionDisableListCommand;
 import com.everhomes.rest.asset.FunctionDisableListDto;
 import com.everhomes.rest.asset.ListAllBillsForClientCommand;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListBillDetailOnDateChangeCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
 import com.everhomes.rest.asset.ShowBillForClientV2Command;
 import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -66,6 +69,38 @@ public class AssetAppServiceImpl implements AssetAppService {
 	
 	@Autowired
     private ContractServiceImpl contractService;
+	
+    public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
+        //企业用户的话判断是否为企业管理员
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId.longValue() == userId.longValue()){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
+
+        //app用户的权限还未判断，是否可以查看账单
+        AssetVendor assetVendor = assetService.checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = assetService.getAssetVendorHandler(vendorName);
+        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId(), cmd.getNamespaceId());
+    }
 	
 	public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
         FunctionDisableListDto dto = new FunctionDisableListDto();
@@ -208,6 +243,14 @@ public class AssetAppServiceImpl implements AssetAppService {
         return handler.getBillDetailForClient(cmd.getOwnerId(),cmd.getBillId(),cmd.getTargetType(),cmd.getOrganizationId());
     }
     
-    
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
+        AssetVendor assetVendor = assetService.checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = assetService.getAssetVendorHandler(vendorName);
+        if(cmd.getTargetType().equals("eh_user")) {
+            cmd.setTargetId(UserContext.currentUserId());
+        }
+        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId(), cmd.getBillGroupId());
+    }
 	
 }
