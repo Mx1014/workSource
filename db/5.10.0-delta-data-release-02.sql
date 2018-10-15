@@ -206,14 +206,19 @@ INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entr
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '2', '2', '12', '10', NULL);
 
 
+
+-- 标准版的菜单，基线不用。start1.5
+
 -- 增加应用、项目和公司菜单
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15000000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15025000', 'zuolin', '30', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15000000', NULL, 'application-management', '1', '2', '/15000000/15030000', 'zuolin', '40', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15000000', NULL, 'project-management', '1', '2', '/15000000/15040000', 'zuolin', '50', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15000000', NULL, 'business-admin', '1', '2', '/15000000/15050000', 'zuolin', '60', NULL, '2', 'system', 'module', NULL);
-DELETE FROM `eh_web_menus` WHERE `id`='15030100';
-DELETE FROM `eh_web_menus` WHERE `id`='15030200';
-DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15000000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15025000', 'zuolin', '30', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15000000', NULL, 'application-management', '1', '2', '/15000000/15030000', 'zuolin', '40', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15000000', NULL, 'project-management', '1', '2', '/15000000/15040000', 'zuolin', '50', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15000000', NULL, 'business-admin', '1', '2', '/15000000/15050000', 'zuolin', '60', NULL, '2', 'system', 'module', NULL);
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030100';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030200';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+
+-- 标准版的菜单，基线不用。end1.5
 
 -- 公司门禁 员工认证 职级管理 任务管理 设置为org控制  add by yanjun 20180614
 UPDATE eh_service_modules SET module_control_type = 'org_control' WHERE id in (41020, 50500, 50300, 13000);
