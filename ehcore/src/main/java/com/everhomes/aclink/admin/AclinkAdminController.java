@@ -69,6 +69,20 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/aclink/listDoorAccess</b>
+     * <p>获取门禁列表 lite版</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorAccess")
+    @RestReturn(value=ListDoorAccessLiteResponse.class)
+    public RestResponse listDoorAccessByOwnerIdLite(@Valid QueryDoorAccessAdminCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessByOwnerIdLite(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * 
      * <b>URL: /admin/aclink/updateDoorAccess</b>
      * <p>更新门禁信息</p>
@@ -129,7 +143,23 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createFormalAuthBatch</b>
+     * <p>批量创建(正式)授权</p>
+     * @return
+     */
+    @RequestMapping("createFormalAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
+    	doorAccessService.createFormalAuthBatch(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     /**
      * 
      * <b>URL: /admin/aclink/deleteDoorAccess</b>

@@ -181,8 +181,12 @@ public interface DoorAccessService {
 	public void createVisitorBatch(CreateVisitorBatchCommand cmd);
 
 	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd);
+	
+	public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd);
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
+	
+	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
 
 	BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd);
 
