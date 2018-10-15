@@ -255,6 +255,7 @@ public class FlowProviderImpl implements FlowProvider {
         if (cmd.getOrgId() != null) {
             query.addConditions(t.ORGANIZATION_ID.eq(cmd.getOrgId()));
         }
+
         query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
     }
 

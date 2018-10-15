@@ -47,12 +47,11 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.asset.AppAssetCategory;
-import com.everhomes.asset.AssetExportHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentBillGroup;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -99,6 +98,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -136,10 +136,10 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.organization.pm.PaymentChargingItemType;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ContractInstanceConfig;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.FieldDTO;
@@ -149,7 +149,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -311,8 +310,10 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	protected TaskService taskService;
 	
 	@Autowired
-	private ServiceModuleAppProvider serviceModuleAppProvider;
+    private PortalService portalService;
 
+	@Autowired
+	private AssetGroupProvider assetGroupProvider;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -658,9 +659,9 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId(),null);
 		if(communityExist == null && cmd.getCommunityId() != null && cmd.getCategoryId() !=null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId(),null);
 		}
 		
 		Calendar cal=Calendar.getInstance();
@@ -2086,11 +2087,13 @@ long assetCategoryId = 0l;
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_UPDATE, cmd.getOrgId(), cmd.getCommunityId());
 		String contractNumberRulejson = StringHelper.toJsonString(cmd.getGenerateContractNumberRule());
 		ContractParam param = ConvertHelper.convert(cmd, ContractParam.class);
-		param.setOwnerId(cmd.getOrgId());
+		if (cmd.getCommunityId() == null) {
+			param.setOwnerId(cmd.getOrgId());
+		}
 		param.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId(),null);
 		if(cmd.getId() == null && communityExist == null) {
 			contractProvider.createContractParam(param);
 			dealParamGroupMap(param.getId(), cmd.getNotifyGroups(), cmd.getPaidGroups());
@@ -2158,24 +2161,24 @@ long assetCategoryId = 0l;
 		 * 我们此处获得参数设置也是不需要进行权限校验的，所以在这里以及设置参数那边，我们把权限的校验规则给放开，不做权限校验。
 		 */
 		//checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_PARAM_LIST, cmd.getOrgId(), cmd.getCommunityId());
-		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), cmd.getOrgId(), cmd.getCategoryId());
+		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(), null,cmd.getCategoryId(),cmd.getAppId());
 		//查询在某一个入口，某一个小区，某个收付款合同类型，最低规则
 		if(communityExist != null) {
 			return toContractParamDTO(communityExist);
 		} else if(communityExist == null && cmd.getCommunityId() != null) {
 			//设置的全部规则，又分为不同入口的全部规则，收付款
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(),cmd.getCategoryId());
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, cmd.getPayorreceiveContractType(),cmd.getOrgId(),cmd.getCategoryId(),cmd.getAppId());
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}else {//原来的规则
-				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null,cmd.getOrgId(), null);
+				communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null,cmd.getOrgId(), null,cmd.getAppId());
 				if(communityExist != null) {
 					return toContractParamDTO(communityExist);
 				}
 			}
 		//原来的规则
 		} else if(communityExist == null && cmd.getPayorreceiveContractType() != null && cmd.getCategoryId() != null) {
-			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, cmd.getOrgId(),null);
+			communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), null, null, cmd.getOrgId(),cmd.getCategoryId(),cmd.getAppId());
 			if(communityExist != null) {
 				return toContractParamDTO(communityExist);
 			}
@@ -2664,7 +2667,7 @@ long assetCategoryId = 0l;
 				processContractChargingChangeAddresses(changeDTO);
 				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
 				if(changeDTO.getBillGroupId() != null) {
-					PaymentBillGroup group = assetProvider.getBillGroupById(changeDTO.getBillGroupId());
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(changeDTO.getBillGroupId());
 					if(group != null) {
 						changeDTO.setBillGroupName(group.getName());
 					}
@@ -2742,7 +2745,7 @@ long assetCategoryId = 0l;
 				itemDto.setLateFeeformula(lateFeeformula);
 				//物业缴费V6.3合同概览计价条款需要增加账单组名称字段
 				if(itemDto.getBillGroupId() != null) {
-					PaymentBillGroup group = assetProvider.getBillGroupById(itemDto.getBillGroupId());
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(itemDto.getBillGroupId());
 					if(group != null) {
 						itemDto.setBillGroupName(group.getName());
 					}
@@ -3303,7 +3306,13 @@ long assetCategoryId = 0l;
 				//来自通用模板修改
 				contractTemplate.setVersion(contractTemplateParent.getVersion()+1);
 			}else {
+				isNewFile = true;
 				contractTemplate.setVersion(0);
+				//查询gogs上面的数据
+				String moduleType = "ContractTemplate_" + cmd.getCategoryId();
+				GogsRepo repo = gogsRepo(contractTemplateParent.getNamespaceId(), moduleType, ServiceModuleConstants.CONTRACT_MODULE, "EhContractTemplate", contractTemplateParent.getOwnerId());
+				String contents=gogsGetScript(repo, contractTemplateParent.gogsPath(), contractTemplateParent.getLastCommit());
+				contractTemplate.setContents(gogsGetScript(repo, contractTemplateParent.gogsPath(), contractTemplateParent.getLastCommit()));
 			}
 			if (contractTemplateParent.getLastCommit() == null) {
 				isNewFile = true;
@@ -3316,6 +3325,9 @@ long assetCategoryId = 0l;
 			contractTemplate.setVersion(0);
 			contractTemplate.setParentId(0L);
 			isNewFile = true;
+			if (null != cmd.getOwnerId() && cmd.getOwnerId() != -1 && cmd.getOwnerId() != 0 ) {
+				contractTemplate.setOrgId(0L);
+			}
 		}
 		if ("gogs".equals(contractTemplate.getContentType())) {
 			//使用gogs存储合同内容
@@ -3427,7 +3439,7 @@ long assetCategoryId = 0l;
 		int namespaceId =UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		List<ContractTemplate> list = contractProvider.listContractTemplates(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getOrgId(),
-				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize);
+				cmd.getCategoryId(), cmd.getName(), cmd.getPageAnchor(), pageSize, cmd.getAppId());
 		
 		ListContractTemplatesResponse response = new ListContractTemplatesResponse();
 
@@ -3874,22 +3886,18 @@ long assetCategoryId = 0l;
 	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
 		// 查询应用列表
 		List<ContractCategoryListDTO> dtos = new ArrayList<ContractCategoryListDTO>();
-		//1、根据域空间ID查询出所有的合同应用eh_contract_categories
-		List<ContractCategory> appContractCategorieList = contractProvider.listContractAppCategory(cmd.getNamespaceId());
-		for(ContractCategory appContractCategory : appContractCategorieList) {
-			//2、根据categoryId查询eh_service_module_apps表的custom_tag，取出应用名称
-			Long categoryId = appContractCategory.getId();
+		ListServiceModuleAppsCommand lerviceModuleAppsCmd = new ListServiceModuleAppsCommand();
+		lerviceModuleAppsCmd.setNamespaceId(cmd.getNamespaceId());
+		lerviceModuleAppsCmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
+		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(lerviceModuleAppsCmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+		for(ServiceModuleAppDTO appContractCategory : serviceModuleApps) {
+			ContractInstanceConfig map = (ContractInstanceConfig) StringHelper.fromJsonString(appContractCategory.getInstanceConfig(), ContractInstanceConfig.class);
 			ContractCategoryListDTO dto = new ContractCategoryListDTO();
-			dto.setCategoryId(categoryId);
-			dto.setContractApplicationScene(appContractCategory.getContractApplicationScene());
-			if(categoryId != null) {
-				ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(
-						cmd.getNamespaceId(), null, ServiceModuleConstants.CONTRACT_MODULE, categoryId.toString());
-				if(serviceModuleApp != null) {
-					dto.setName(serviceModuleApp.getName());
-					dtos.add(dto);//只有categoryId，没有合同应用名称，说明该合同应用已在公共平台那边删除
-				}
-			}
+			dto.setCategoryId(map.getCategoryId());
+			dto.setContractApplicationScene(map.getContractApplicationScene());
+			dto.setName(appContractCategory.getName());
+			dtos.add(dto);
 		}
 		return dtos;
 		
