@@ -9,6 +9,7 @@ import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
@@ -682,7 +683,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequireAuthentication(false)
 	@RequestMapping("payNotify")
 	@RestReturn(String.class)
-	public RestResponse payNotify(OrderPaymentNotificationCommand cmd) {
+	public RestResponse payNotify(MerchantPaymentNotificationCommand cmd) {
 	    this.rentalv2PayService.payNotify(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

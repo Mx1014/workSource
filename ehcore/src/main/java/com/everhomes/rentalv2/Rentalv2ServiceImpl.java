@@ -3,6 +3,7 @@ package com.everhomes.rentalv2;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
@@ -8228,6 +8229,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				EhRentalv2Resources.class.getSimpleName(), bill.getRentalResourceId());
 		if (null != timeIntervals && !timeIntervals.isEmpty()) {
 			dto.setTimeStep(timeIntervals.get(0).getTimeStep());
+		}
+		//发票信息
+		Rentalv2OrderRecord record = rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(bill.getOrderNo()));
+		if (record != null) {
+			dto.setInvoiceFlag(bill.getInvoiceFlag());
+			String invoiceUrl = configurationProvider.getValue(0, "home.url", "");//营销系统和core共用一个域名
+			if (TrueOrFalseFlag.FALSE.getCode().equals(bill.getInvoiceFlag())) {
+				 invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-application";
+			} else {
+				invoiceUrl = invoiceUrl + "/promotion/app-invoice?businessOrderNumber=%s#/invoice-detail/2";
+			}
+			invoiceUrl = String.format(invoiceUrl, record.getBizOrderNum());
+			dto.setInvoiceUrl(invoiceUrl);
 		}
 
 
