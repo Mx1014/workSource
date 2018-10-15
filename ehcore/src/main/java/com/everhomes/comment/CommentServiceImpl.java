@@ -2,6 +2,7 @@
 package com.everhomes.comment;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.rest.comment.*;
 import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
@@ -15,6 +16,10 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public CommentDTO addComment(AddCommentCommand cmd) {
+		//xss过滤
+		String content = XssCleaner.clean(cmd.getContent());
+		cmd.setContent(content);
+
 		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
 
 		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());

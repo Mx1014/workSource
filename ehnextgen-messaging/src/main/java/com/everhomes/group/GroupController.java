@@ -4,6 +4,7 @@ package com.everhomes.group;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -57,6 +58,7 @@ public class GroupController extends ControllerBase {
      * <p>创建一个新group，并根据group创建对应的论坛（创建者自动成员group的成员，并拥有管理group的权限）</p>
      * <p>创建group时必须指定一个category，否则会报general:506错误。</p>
      */
+    @XssExclude
     @RequestMapping("create")
     @RestReturn(value=GroupDTO.class)
     public RestResponse create(@Valid CreateGroupCommand cmd) {
@@ -78,6 +80,7 @@ public class GroupController extends ControllerBase {
      * <b>URL: /group/update</b>
      * <p>更新group信息</p>
      */
+    @XssExclude
     @RequestMapping("update")
     @RestReturn(value=GroupDTO.class)
     public RestResponse update(@Valid UpdateGroupCommand cmd) {

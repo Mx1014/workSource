@@ -3,6 +3,7 @@ package com.everhomes.comment;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -28,6 +29,7 @@ public class CommentController extends ControllerBase {
      * <b>URL: /comment/addComment</b>
      * <p>创建新评论</p>
      */
+    @XssExclude
     @RequestMapping("addComment")
     @RestReturn(value=CommentDTO.class)
     public RestResponse addComment(@Valid AddCommentCommand cmd) {

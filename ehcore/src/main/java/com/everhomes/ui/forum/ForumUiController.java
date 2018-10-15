@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.everhomes.controller.XssExclude;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -98,6 +99,7 @@ public class ForumUiController extends ControllerBase {
      * <b>URL: /ui/forum/newTopicByScene</b>
      * <p>根据场景创建新帖</p>
      */
+    @XssExclude
     @RequestMapping("newTopicByScene")
     @RestReturn(value=PostDTO.class)
     public RestResponse newTopicByScene(@Valid NewTopicBySceneCommand cmd) {

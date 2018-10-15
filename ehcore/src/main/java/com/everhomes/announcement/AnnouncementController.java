@@ -3,6 +3,7 @@ package com.everhomes.announcement;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.announcement.AnnouncementDTO;
@@ -35,6 +36,7 @@ public class AnnouncementController extends ControllerBase {
      * <b>URL: /announcement/newAnnouncement</b>
      * <p>发布公告</p>
      */
+    @XssExclude
     @RequestMapping("newAnnouncement")
     @RestReturn(value = AnnouncementDTO.class)
     public RestResponse newOrgTopic(@Valid CreateAnnouncementCommand cmd) {
