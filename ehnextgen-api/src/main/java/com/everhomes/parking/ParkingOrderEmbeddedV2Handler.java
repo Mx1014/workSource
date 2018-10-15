@@ -1,12 +1,12 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
  * @Date 2018/6/8 9:47
  */
 public interface ParkingOrderEmbeddedV2Handler {
-    void payCallBack(OrderPaymentNotificationCommand cmd);
+    void payCallBack(MerchantPaymentNotificationCommand cmd);
 }

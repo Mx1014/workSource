@@ -44,7 +44,7 @@ public class ParkingGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	@Override
 	void dealEnterprisePayCallBack(OrderCallBackCommand cmd) {
 		
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getCallBackInfo().getBusinessOrderId());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(Long.valueOf(cmd.getCallBackInfo().getBusinessOrderId()));
 		if (null == order) {
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_GENERATE_ORDER_NO, "order not exist");
 		}

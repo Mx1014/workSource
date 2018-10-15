@@ -25,7 +25,7 @@ UPDATE `eh_configurations` SET `name`='prmt.system_id' WHERE `name`='gorder.syst
 
 -- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 增加未支付推送与短信模板
-INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (3421, 'sms.default', 83, 'zh_CN', '未支付短信', '【${appName}】您有一笔云打印的订单未支付，请到云打印-打印记录中进行支付。', 0);
+INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (3421, 'sms.default', 83, 'zh_CN', '未支付短信', '您有一笔云打印的订单未支付，请到云打印-打印记录中进行支付。', 0);
 
 -- AUTHOR: 缪洲 201801011
 -- REMARK: issue-34780 删除打印设置规则

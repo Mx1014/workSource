@@ -1635,7 +1635,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			PrintOrderStatusType orderStatusType = PrintOrderStatusType.fromCode(siyinPrintOrder.getOrderStatus());
 			//总体统计
 			addOrderTotalAmountToStat(allStat,siyinPrintOrder.getOrderTotalFee(),orderStatusType);
-			
+			LOGGER.info("siyinPrintOrderid :" + siyinPrintOrder.getOrderNo());
 			switch (jobType) {
 			case PRINT:
 				addOrderTotalAmountToStat(printStat, siyinPrintOrder.getOrderTotalFee(), orderStatusType);

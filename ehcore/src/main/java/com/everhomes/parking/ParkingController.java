@@ -11,6 +11,8 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -639,7 +641,7 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("notifyParkingRechargeOrderPaymentV2")
     @RestReturn(value = String.class)
     @RequireAuthentication(false)
-    public RestResponse notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+    public RestResponse notifyParkingRechargeOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 
         parkingService.notifyParkingRechargeOrderPaymentV2(cmd);
         RestResponse response = new RestResponse();
@@ -1227,6 +1229,20 @@ public class ParkingController extends ControllerBase {
     public RestResponse initFuncLists(GetParkingBussnessStatusCommand cmd) {
         parkingService.initFuncLists(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/getInvoiceUrl </b>
+     * <p>初始化停车场对接功能表</p>
+     */
+    @RequestMapping("initFuncLists")
+    @RestReturn(value=GetInvoiceUrlResponse.class)
+    public RestResponse getInvoiceUrl(GetInvoiceUrlCommand cmd) {
+    	GetInvoiceUrlResponse resp =  parkingService.getInvoiceUrl(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

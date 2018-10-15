@@ -57,8 +57,8 @@ public class SiyinPrintMessageJob extends QuartzJobBean {
         String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = SiyinPrintNotificationTemplateCode.locale;
         int templateId = SmsTemplateCode.PRINT_UNPAID_MESSAGE;
-        
-        List<Tuple<String, Object>> variables = smsProvider.toTupleList("appName", appName);
+        List<Tuple<String, Object>> variables = null;
+        //List<Tuple<String, Object>> variables = smsProvider.toTupleList("appName", appName);
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(creatorUid,
                 IdentifierType.MOBILE.getCode());

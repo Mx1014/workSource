@@ -172,4 +172,6 @@ public interface ParkingProvider {
 
 	ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo(long orderNo);
 
+	ParkingRechargeOrder findParkingRechargeOrderByGeneralOrderId(Long gorderId);
+
 }

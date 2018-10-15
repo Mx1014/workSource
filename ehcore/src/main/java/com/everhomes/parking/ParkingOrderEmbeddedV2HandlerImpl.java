@@ -17,6 +17,7 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -61,7 +62,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		return bizOrderNum;
 	}
 
-	private void paySuccess(OrderPaymentNotificationCommand cmd) {
+	private void paySuccess(MerchantPaymentNotificationCommand cmd) {
 		this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
 		this.checkPayAmountIsNull(cmd.getAmount());//
 
@@ -71,7 +72,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
-			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 			if (order == null) { //做一下兼容
 				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 				order = checkOrder(orderId);
@@ -260,7 +261,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	}
 
 	@Override
-	public void payCallBack(OrderPaymentNotificationCommand cmd) {
+	public void payCallBack(MerchantPaymentNotificationCommand cmd) {
 		//检查签名
 		if(!PayUtil.verifyCallbackSignature(cmd)){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -291,10 +292,10 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		}
 	}
 
-	private void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	private void refundSuccess(MerchantPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 		if (order == null) { //做一下兼容
 			Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 			order = checkOrder(orderId);

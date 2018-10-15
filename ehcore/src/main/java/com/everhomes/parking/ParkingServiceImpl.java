@@ -55,13 +55,17 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
 import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
@@ -848,12 +852,12 @@ public class ParkingServiceImpl implements ParkingService {
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
 			returnUrlParam.put("orderId", String.valueOf(order.getOrderNo()));
-			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.recharge.url", "zl://parking/monthCardRechargeStatus?orderId={orderId}");
+			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.recharge.url", "zl://parking/monthCardRechargeStatus?orderId=${orderId}");
 			returnUrl = StringHelper.interpolate(returnUrl,returnUrlParam);
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
 			returnUrlParam.put("orderId", String.valueOf(order.getOrderNo()));
-			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.tempfee.url", "zl://parking/tempFeeStatus?orderId={orderId}");
+			returnUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.parking.tempfee.url", "zl://parking/tempFeeStatus?orderId=${orderId}");
 			returnUrl = StringHelper.interpolate(returnUrl,returnUrlParam);
 		}
 		//收款方是否有会员，无则报错
@@ -892,6 +896,7 @@ public class ParkingServiceImpl implements ParkingService {
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+        parkingProvider.updateParkingRechargeOrder(order);
         
         CreateParkingGeneralOrderResponse resp2 = new CreateParkingGeneralOrderResponse();
 		resp2.setOrderId(generalOrderResp.getMerchantOrderId());
@@ -3375,10 +3380,15 @@ public class ParkingServiceImpl implements ParkingService {
 		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
-		List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
-		if(payUserList==null || payUserList.size() == 0){
-			return null;
+		GetPayUserListByMerchantCommand cmd2 = new GetPayUserListByMerchantCommand();
+		cmd2.setUserId(key);
+		cmd2.setTag1(arrayList);
+		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
+		//List<PayUserDTO> payUserList = sdkPayService.getPayUserList(key,arrayList);
+		if(null == resp || null == resp.getResponse()){
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
+		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
 		return payUserList.stream().map(r->{
 			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 			dto.setAccountId(r.getId());
@@ -3504,7 +3514,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+	public void notifyParkingRechargeOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 		parkingOrderEmbeddedV2Handler.payCallBack(cmd);
 	}
 
@@ -3909,5 +3919,12 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 			return null;
 		});
+	}
+	
+	@Override
+	public GetInvoiceUrlResponse getInvoiceUrl (GetInvoiceUrlCommand cmd){
+		
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getGeneralOrderId());
+		return null;
 	}
 }
