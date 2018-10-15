@@ -2242,8 +2242,8 @@ public class PunchServiceImpl implements PunchService {
                     break;
                 default:
                     if (!punchLog.getPunchType().equals(punchType.getPunchType())) {
-                    	//2018-10-11对第三方打卡来说,就直接返回成功了
-                    	if(CreateType.OTHER_THRID_PUNCH == CreateType.fromCode(punchLog.getCreateType()))
+                    	//2018-10-11对自动打卡来说,就直接返回成功了
+                    	if(CreateType.NORMAL_PUNCH != CreateType.fromCode(punchLog.getCreateType()))
                     		return response;
                         throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
                                 PunchServiceErrorCode.ERROR_PUNCH_TYPE, "重新获取上下班类型");
@@ -10596,7 +10596,7 @@ public class PunchServiceImpl implements PunchService {
         }
         if (!CollectionUtils.isEmpty(abnormalExceptionRequests)) {
             pdl.setPunchExceptionRequestCount(abnormalExceptionRequests.size());
-        }
+        } 
     }
 
     private void punchExceptionRequestCountByPunchMonthStatistics(PunchStatistic statistic, List<PunchExceptionRequestStatisticsItemDTO> statisticsItemDTOS) {
