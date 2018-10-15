@@ -850,10 +850,10 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
-			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getOrderNo()));
+			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getGeneralOrderId()));
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getOrderNo()));			
+			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getGeneralOrderId()));			
 		}
 		//收款方是否有会员，无则报错
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
@@ -3420,6 +3420,7 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
 			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
@@ -3436,8 +3437,13 @@ public class ParkingServiceImpl implements ParkingService {
 		if(accounts==null || accounts.size()==0){
 			return new ListBusinessPayeeAccountResponse();
 		}
-		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
-		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
+		
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+        cmd2.setIds(accounts.stream().map(r -> r.getMerchantId()).collect(Collectors.toList()));
+        ListPayUsersByMerchantIdsRestResponse restResponse = orderService.listPayUsersByMerchantIds(cmd2);
+        List<PayUserDTO> payUserDTOs = restResponse.getResponse();
+//		List<PayUserDTO> payUserDTOS = sdkPayService.listPayUsersByIds(accounts.stream().map(r -> r.getPayeeId()).collect(Collectors.toList()));
+		Map<Long,PayUserDTO> map = payUserDTOs.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		ListBusinessPayeeAccountResponse response = new ListBusinessPayeeAccountResponse();
 		response.setAccountList(accounts.stream().map(r->{
 			BusinessPayeeAccountDTO convert = ConvertHelper.convert(r, BusinessPayeeAccountDTO.class);
@@ -3449,6 +3455,7 @@ public class ParkingServiceImpl implements ParkingService {
 				convert.setPayeeAccountCode(payUserDTO.getAccountCode());
 				convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus()+1);//由，0非认证，1认证，变为 1，非认证，2，审核通过
 				convert.setPayeeRemark(payUserDTO.getRemark());
+				convert.setMerchantId(payUserDTO.getId());
 			}
 			return convert;
 		}).collect(Collectors.toList()));
