@@ -178,4 +178,8 @@ public interface ParkingService {
     void updateParkingUserNotice(UpdateUserNoticeCommand cmd);
 
     void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd);
+
+    CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempGeneralOrderCommand cmd);
+
+	CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeGeneralOrderCommand cmd);
 }

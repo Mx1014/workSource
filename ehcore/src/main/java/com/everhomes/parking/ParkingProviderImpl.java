@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
@@ -470,7 +471,13 @@ public class ParkingProviderImpl implements ParkingProvider {
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
 		}
 		if(payMode!=null){
-            query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
+			if (payMode == GorderPayType.ENTERPRISE_PAID.getCode()){
+				List<Byte> modes = new ArrayList();
+				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
+				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.in(modes));
+			} else
+				query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
 		}
         if (null != status) {
             query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));

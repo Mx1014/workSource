@@ -99,6 +99,8 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		buildGoods(orderCmd, info); // 商品
 		buildGeneralBillInfo(orderCmd, info); // 企业支付参数
 		buildOtherPayInfo(orderCmd, info); // 个人支付参数
+		if (info.getReturnUrl() != null && info.getReturnUrl().length() >0)
+			orderCmd.setReturnUrl(info.getReturnUrl());
 		return orderCmd;
 	}
 	
@@ -163,7 +165,7 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 	
 	private void buildPayerInfo(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo info) {
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
-		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
+		payerInfo.setNamespaceId(2);
 		payerInfo.setOrganizationId(info.getOrganizationId()); // 左邻公司
 		payerInfo.setUserId(UserContext.currentUserId());
 		payerInfo.setAppId(info.getAppOriginId());

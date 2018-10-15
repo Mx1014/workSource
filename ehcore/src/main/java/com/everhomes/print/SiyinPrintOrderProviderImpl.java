@@ -2,11 +2,13 @@
 package com.everhomes.print;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.ParkingErrorCode;
@@ -244,7 +246,13 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		
 		if(payMode!=null){
-			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.eq(payMode));
+			if (payMode == GorderPayType.ENTERPRISE_PAID.getCode()){
+				List<Byte> modes = new ArrayList();
+				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
+				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				query = query.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.in(modes));
+			} else
+				query = query.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
 		}
 		if(payType!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAID_TYPE.eq(payType));

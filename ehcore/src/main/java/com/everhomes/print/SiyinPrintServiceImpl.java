@@ -706,7 +706,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		GoodDTO good = new GoodDTO();
 		good.setNamespace("NS");
 		good.setServeType(ServiceModuleConstants.PRINT_MODULE+"");
-		good.setServeTypeName("云打印");
+		good.setServeApplyName("云打印");
 		good.setTag1(cmd.getOwnerId() + "");
 		good.setTag2(order.getPrinterName());
 		fillGoodTagByJobType(good, order.getJobType());
