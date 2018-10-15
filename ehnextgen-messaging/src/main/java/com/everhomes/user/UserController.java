@@ -1574,6 +1574,22 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+    
+    /**
+     * <b>URL: /user/smartCardVerify</b>
+     * <p>校验用户的 TOTP 是否合法 </p>
+     * @return {@link SmartCardVerifyResponse}
+     */
+    @RequestMapping("smartCardBarcodeVerify")
+    @RequireAuthentication(false)
+    @RestReturn(SmartCardVerifyResponse.class)
+    public RestResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse obj = userService.smartCardBarcodeVerify(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 
     /**
      * <b>URL: /user/generateSmartCardCode</b>

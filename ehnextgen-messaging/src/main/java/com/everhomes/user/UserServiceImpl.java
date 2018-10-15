@@ -77,6 +77,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.PushUsersCommand;
@@ -6942,7 +6943,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             SmartCardHandler aclinkCard = new SmartCardHandler();
             aclinkCard.setAppOriginId(41010L);
             aclinkCard.setModuleId(41010L);
-            aclinkCard.setData("test-only");
+            aclinkCard.setData("test-aclink-only");
             aclinkCard.setTitle("公共门禁");
             aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
             
@@ -6992,53 +6993,116 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         int code = totp.generateOneTimePassword(key, new Date(nowInSec * 1000));
         return code;
     }
-
-    @Override
-    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+    
+    private Map<Integer, byte[]> getSmartCardSegments(String cardCode) {
+    	byte[] code = Base64.getDecoder().decode(cardCode);
+    	int i = 0, len, typ;
+    	byte[] b = new byte[2];
+    	Map<Integer, byte[]> segments = new HashMap<Integer, byte[]>();
+    	while(i+3 < code.length) {
+			b[0] = code[i+1];
+			b[1] = code[i+2];
+			len = DataUtil.byteToShort(b);
+			if(i+3+len > code.length) {
+				break;
+			}
+			typ = (int)code[i];
+			i += 3;
+			byte[] seg = new byte[len];
+			System.arraycopy(code, i, seg, 0, i+len);
+			segments.put(new Integer(typ), seg);
+			i += len;
+    	}
+    	
+    	return segments;
+    }
+    
+    private boolean payCodeVerify(String payCode) throws InvalidKeyException, NoSuchAlgorithmException {
         TimeBasedOneTimePasswordGenerator totp;
-        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
-        resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
         int validWindow = 1;
 
-        try {
-            totp = getTotp();
-            Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
-            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 18) {
-                return resp;
+        totp = getTotp();
+        Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
+        String randomUid = payCode.substring(0, 9);
+        String totpCode = payCode.substring(9, 17);
+        Long uid = Long.parseLong(randomUid);
+        Long totpCodeInt = Long.parseLong(totpCode);
+        uid = (uid ^ totpCodeInt);
+        List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
+        if(cards != null) {
+            int j;
+            for(j = 0; j < cards.size(); j++) {
+                SmartCardKey card = cards.get(j);
+                for(long i = -validWindow; i <= validWindow; i++) {
+                    int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
+                    if(code == totpCodeInt) {
+                        return true;
+                    }
+                }
             }
 
-            String randomUid = cmd.getCardCode().substring(1, 10);
-            String totpCode = cmd.getCardCode().substring(10, 18);
-            Long uid = Long.parseLong(randomUid);
-            Long totpCodeInt = Long.parseLong(totpCode);
-            uid = (uid ^ totpCodeInt);
-            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
-            if(cards != null) {
-
-                int j;
-                OUTLOOP:
-                for(j = 0; j < cards.size(); j++) {
+            if(j < cards.size()) {
+                for(j = j+1; j < cards.size(); j++) {
+                    //invalid the old one
                     SmartCardKey card = cards.get(j);
-                    for(long i = -validWindow; i <= validWindow; i++) {
-                        int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
-                        if(code == totpCodeInt) {
-                            resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
-                            break OUTLOOP;
-                        }
+                    if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                        card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                        smartCardKeyProvider.updateSmartCardKey(card);
                     }
                 }
+            }
 
-                if(j < cards.size()) {
-                    for(j = j+1; j < cards.size(); j++) {
-                        //invalid the old one
-                        SmartCardKey card = cards.get(j);
-                        if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
-                            card.setStatus(TrueOrFalseFlag.FALSE.getCode());
-                            smartCardKeyProvider.updateSmartCardKey(card);
-                        }
-                    }
-                }
+        }
 
+        return false;    	
+    }
+
+    @Override
+    public SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd) {
+    	SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+    	String payCode = cmd.getCardCode().substring(1);
+    	
+      try {
+			if(payCodeVerify(payCode)) {
+				resp.getVerifyResults().add("OK");
+			} else {
+				resp.getVerifyResults().add("ERROR");
+			}
+		} catch (InvalidKeyException | NoSuchAlgorithmException e) {
+			LOGGER.error("generate totp failed", e);
+		}    	
+      
+      return resp;
+    }
+    
+    @Override
+    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+
+        try {
+            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 20) {
+                return resp;
+            }
+            
+            Map<Integer, byte[]> segs = getSmartCardSegments(cmd.getCardCode());
+            byte[] paySeg = segs.getOrDefault(new Integer(SmartCardType.SMART_CARD_PAY.getCode()), null);
+            if(paySeg == null) {
+            	return resp;
+            }
+
+            String payCode = new String(paySeg);
+            if(payCodeVerify(payCode)) {
+            	resp.getVerifyResults().add("OK");
+            } else {
+            	resp.getVerifyResults().add("ERROR");
+            }
+            
+            byte[] aclinkSeg = segs.getOrDefault(SmartCardType.SMART_CARD_ACLINK.getCode(), null);
+            String aclinkCode = new String(aclinkSeg);
+            if(aclinkCode == "test-aclink-only") {
+            	resp.getVerifyResults().add("OK");
+            } else {
+            	resp.getVerifyResults().add("ERROR");
             }
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -7070,8 +7134,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 s2 = s1;
             }
 
-            resp.setQrCode("1" + s2 + String.valueOf(topt));
-
+            String val = s2 + String.valueOf(topt);
+            byte[] cardCode = new byte[val.length() + 3];
+            cardCode[0] = SmartCardType.SMART_CARD_PAY.getCode();
+            cardCode[1] = 0x0;
+            cardCode[2] = 0x17;
+            resp.setQrCode(org.apache.commons.codec.binary.Base64.encodeBase64String(cardCode));
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
