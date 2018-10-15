@@ -458,55 +458,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
-        //企业用户的话判断是否为企业管理员
-        out:{
-            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
-                Long userId = UserContext.currentUserId();
-                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                cmd1.setOrganizationId(cmd.getTargetId());
-                cmd1.setActivationFlag((byte)1);
-                cmd1.setOwnerType("EhOrganizations");
-                cmd1.setOwnerId(null);
-                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
-                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
-                LOGGER.info("organization manager check for bill display, userId = "+ userId);
-                for(OrganizationContactDTO dto : organizationContactDTOS){
-                    Long targetId = dto.getTargetId();
-                    if(targetId.longValue() == userId.longValue()){
-                        break out;
-                    }
-                }
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
-                        "not valid corp manager");
-            }
-        }
-
-        //app用户的权限还未判断，是否可以查看账单
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        String vendorName = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId(), cmd.getNamespaceId());
-    }
-
-    @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.showCreateBill(cmd.getBillGroupId());
-    }
-
-    @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        String vendorName = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        if(cmd.getTargetType().equals("eh_user")) {
-            cmd.setTargetId(UserContext.currentUserId());
-        }
-        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId(), cmd.getBillGroupId());
     }
 
     @Override
