@@ -43,6 +43,16 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100017', 'zh_CN', '账号一经设定，无法修改');
 
 
+-- AUTHOR: 严军
+-- REMARK: 客户端处理方式
+update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100);
+
+
+-- AUTHOR: 严军
+-- REMARK: 云打印设置为园区应用
+UPDATE eh_service_modules set app_type = 1 WHERE id = 41400;
+UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
