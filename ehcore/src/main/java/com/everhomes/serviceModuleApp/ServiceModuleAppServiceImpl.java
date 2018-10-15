@@ -972,6 +972,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					for (ServiceModuleEntry entry: serviceModuleEntries){
 						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
+
+							if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
+								appCommunityConfigDto.setDisplayName(entry.getEntryName());
+							}
+
 							tempConfigDtos.add(appCommunityConfigDto);
 						}
 					}
