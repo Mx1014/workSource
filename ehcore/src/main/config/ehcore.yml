@@ -161,8 +161,8 @@ nashorn.class.includes:
 #pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
 
 spring:
-    application:
-        name: ehcore
+  application:
+    name: ehcore
 
 # kafka
 spring.kafka:
@@ -189,9 +189,9 @@ server:
   address: ${INET_ADDRESS}
 
 eurekacli:
-    enabled: true
-    service-url: ${EUREKA_SERVICE_URL}
-    instance-id: ${server.address}:${spring.application.name}:${server.port}
+  enabled: true
+  service-url: ${EUREKA_SERVICE_URL}
+  instance-id: ${server.address}:${spring.application.name}:${server.port}
 
 # 配置 xssFilter 的开关
 xss.enabled: false
