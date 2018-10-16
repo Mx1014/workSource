@@ -45,6 +45,7 @@ import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
 import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
 import com.everhomes.rest.promotion.order.OrderErrorCode;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
@@ -699,8 +700,32 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		baseInfo.setCallBackUrl(backUrl);
 		baseInfo.setOrderTitle("云打印订单");
 		baseInfo.setPaySourceType(SourceType.PC.getCode());
+		baseInfo.setGoodsDetail(buildGoodsDetails(cmd, order));
 		return baseInfo;
 	}
+
+	private List<OrderDescriptionEntity> buildGoodsDetails(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order) {
+
+		// 设置订单展示
+		List<OrderDescriptionEntity> goodsDetail = new ArrayList<>();
+		OrderDescriptionEntity e = new OrderDescriptionEntity();
+		String jobTypeDescription = PrintJobTypeType.fromCode(order.getJobType()).getDescribe();
+		e.setKey("任务类型");
+		e.setValue(jobTypeDescription);
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey(jobTypeDescription + "详情");
+		e.setValue(order.getDetail());
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey("订单金额");
+		e.setValue(order.getOrderTotalFee().toString() + "元");
+		goodsDetail.add(e);
+		return goodsDetail;
+	}
+
 
 	private List<GoodDTO> buildGoods(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order, Long merchantId) {
 		List<GoodDTO> goods = new ArrayList<>();
@@ -713,9 +738,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		fillGoodTagByJobType(good, order.getJobType());
 		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
 		if (null != community) {
-			good.setServeApplyName(community.getName()); //
+			good.setServeApplyName(community.getName()+"-"+order.getPrinterName()); //
 		}
-		good.setGoodName(order.getDetail());
 		good.setGoodDescription(order.getDetail());// 商品描述
 		good.setCounts(1);
 		good.setPrice(order.getOrderTotalFee());
@@ -734,7 +758,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			bizEnum = GoodBizEnum.PRINT_SCAN;
 		}
 		good.setGoodTag(bizEnum.getIdentity());
-//		good.setGoodName(bizEnum.getName());
+		good.setGoodName(bizEnum.getName());
 	}
 
 

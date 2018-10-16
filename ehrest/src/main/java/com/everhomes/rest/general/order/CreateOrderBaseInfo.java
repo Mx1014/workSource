@@ -3,6 +3,7 @@ package com.everhomes.rest.general.order;
 import java.math.BigDecimal;
 import java.util.List;
 import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>clientAppName : 客户端标识</li>
  * <li>paymentMerchantId :商户id</li>
  * <li>goods :商品list {@link com.everhomes.rest.promotion.order.GoodDTO}</li>
+ * <li>goodsDetail :商品描述 {@link com.everhomes.rest.promotion.order.GoodDTO}</li>
  * <li>totalAmount : 总金额</li>
  * <li>callBackUrl : 个人支付回调url</li>
  * <li>orderTitle : 订单标题</li>
@@ -29,6 +31,7 @@ public class CreateOrderBaseInfo {
 	private String clientAppName;
 	private Long paymentMerchantId;
 	private List<GoodDTO> goods;
+	private List<OrderDescriptionEntity> goodsDetail;
 	private BigDecimal totalAmount;
 	private String callBackUrl;
 	private String orderTitle;
@@ -127,5 +130,13 @@ public class CreateOrderBaseInfo {
 
 	public void setReturnUrl(String returnUrl) {
 		this.returnUrl = returnUrl;
+	}
+
+	public List<OrderDescriptionEntity> getGoodsDetail() {
+		return goodsDetail;
+	}
+
+	public void setGoodsDetail(List<OrderDescriptionEntity> goodsDetail) {
+		this.goodsDetail = goodsDetail;
 	}
 }

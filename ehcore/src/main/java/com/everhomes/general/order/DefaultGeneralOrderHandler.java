@@ -161,6 +161,7 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 	}
 	private void buildGoods(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo info) {
 		orderCmd.setGoods(info.getGoods());
+		orderCmd.setGoodsDetail(info.getGoodsDetail());
 	}
 	
 	private void buildPayerInfo(CreateMerchantOrderCommand orderCmd, CreateOrderBaseInfo info) {
