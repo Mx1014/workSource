@@ -114,6 +114,8 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         ServiceModuleApp app = rentalCommonService.getServiceMoudleAppByResourceTypeId(order.getResourceTypeId());
         payerInfo.setAppId(app.getOriginId());
         cmd.setPayerInfo(payerInfo);
+        String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
+        cmd.setReturnUrl(String.format(returnUrl,order.getId(),order.getResourceType()));
 
         cmd.setGoodsName(app.getName());
         //设置账单参数

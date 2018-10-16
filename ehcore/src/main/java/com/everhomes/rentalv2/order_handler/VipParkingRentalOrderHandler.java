@@ -231,6 +231,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
             cmd.setPayerInfo(payerInfo);
             cmd.setGoodsName(app.getName());
         }
+        String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
+        cmd.setReturnUrl(String.format(returnUrl,order.getId(),order.getResourceType()));
 
         //设置账单参数
         CreateGeneralBillInfo createBillInfo = new CreateGeneralBillInfo();
