@@ -5370,7 +5370,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd){
         ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
 	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        ListingLocator locator = new ListingLocator();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<FirmwarePackageDTO> dtos = aclinkFirmwareProvider.listFirmwarePackage(locator, count, cmd);
         resp.setDtos(dtos);
