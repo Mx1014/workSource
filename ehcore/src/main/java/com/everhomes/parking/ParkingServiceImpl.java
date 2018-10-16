@@ -886,7 +886,7 @@ public class ParkingServiceImpl implements ParkingService {
         }
         
         CreateOrderBaseInfo baseInfo = new CreateOrderBaseInfo();
-		String backUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "parking/notifyParkingRechargeOrderPaymentV2"); 
+		String backUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2"); 
         baseInfo.setAppOriginId(getAppOriginId());
         baseInfo.setCallBackUrl(backUrl);
         baseInfo.setClientAppName(clientAppName);
@@ -2556,7 +2556,6 @@ public class ParkingServiceImpl implements ParkingService {
 //        });
 		//这个方法是在客户端支付完成之后才被调用，防止调用此方法之前，支付模块已回调成功，此时直接返回订单
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
-
 		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
 
 			ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
