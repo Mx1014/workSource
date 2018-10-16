@@ -850,10 +850,10 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
-			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getGeneralOrderId()));
+			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getId()));
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getGeneralOrderId()));			
+			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getId()));			
 		}
 		//收款方是否有会员，无则报错
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
