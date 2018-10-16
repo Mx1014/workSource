@@ -661,15 +661,14 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/aclink/uploadBluetooth</b>
-     * <p>上传蓝牙程序（左邻后台）</p>
+     * <b>URL: /admin/aclink/uploadFirmwarePackage</b>
+     * <p>上传门禁固件程序（左邻后台）</p>
      * @return OK 成功
      */
-    @RequestMapping("uploadBluetooth")
-    @RestReturn(value=String.class)
-    public RestResponse uploadBluetooth(@Valid UploadBluetoothCommand cmd){
-        doorAccessService.uploadBluetooth(cmd);
-        RestResponse response = new RestResponse();
+    @RequestMapping("uploadFirmwarePackage")
+    @RestReturn(value=FirmwarePackageDTO.class)
+    public RestResponse uploadFirmwarePackage(@Valid uploadFirmwarePackageCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.uploadFirmwarePackage(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -682,7 +681,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("uploadWifi")
     @RestReturn(value=String.class)
-    public RestResponse uploadWifi(@Valid UploadBluetoothCommand cmd){
+    public RestResponse uploadWifi(@Valid uploadFirmwarePackageCommand cmd){
         doorAccessService.uploadWifi(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

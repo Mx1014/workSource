@@ -7,7 +7,6 @@ import com.everhomes.user.User;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface DoorAccessService {
@@ -191,10 +190,10 @@ public interface DoorAccessService {
     void deleteFirmware (DeleteFirmwareCommand cmd);
 
     ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
+    //add by liqingyan
+    FirmwarePackageDTO uploadFirmwarePackage(uploadFirmwarePackageCommand cmd);
 
-    void uploadBluetooth(UploadBluetoothCommand cmd);
-
-    void uploadWifi(UploadBluetoothCommand cmd);
+    void uploadWifi(uploadFirmwarePackageCommand cmd);
 
     void downloadBluetooth(DownloadBluetoothCommand cmd);
 

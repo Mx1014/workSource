@@ -39,7 +39,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.filemanagement.FileContent;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
@@ -62,9 +61,6 @@ import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.energy.util.EnumType;
-import com.everhomes.rest.filemanagement.FileContentType;
-import com.everhomes.rest.filemanagement.FileManagementErrorCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -87,10 +83,7 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.everhomes.util.excel.ExcelUtils; 
-import com.google.gson.JsonArray;
 import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -98,7 +91,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.hibernate.boot.model.naming.Identifier;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -124,7 +116,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Security;
-import java.sql.Timestamp;
 import java.text.Format;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -5376,16 +5367,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
-    public void uploadBluetooth(UploadBluetoothCommand cmd){
+    public FirmwarePackageDTO uploadFirmwarePackage(uploadFirmwarePackageCommand cmd){
         AclinkFirmwarePackage pkg = (AclinkFirmwarePackage)ConvertHelper.convert(cmd,AclinkFirmwarePackage.class);
         pkg.setStatus(new Byte((byte)1));
 //        pkg.setType(new Byte((byte)0));
         aclinkFirmwareProvider.createFirmwarePackage(pkg);
-
+        return (FirmwarePackageDTO)ConvertHelper.convert(pkg, FirmwarePackageDTO.class);
     }
 
     @Override
-    public void uploadWifi(UploadBluetoothCommand cmd){
+    public void uploadWifi(uploadFirmwarePackageCommand cmd){
 
     }
     @Override
