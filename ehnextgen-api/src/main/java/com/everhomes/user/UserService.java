@@ -375,4 +375,6 @@ public interface UserService {
 
     void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText);
 
+    SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
+
 }
