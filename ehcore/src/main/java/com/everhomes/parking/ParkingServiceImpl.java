@@ -924,10 +924,10 @@ public class ParkingServiceImpl implements ParkingService {
 			good.setServeApplyName(community.getName()); //
 		}
 		good.setGoodName(bussinessType.getDesc());
-//		good.setGoodDescription(order.getPlateNumber());// 商品描述
+		good.setGoodDescription(order.getPlateNumber());// 商品描述
 		good.setCounts(1);
-//		good.setPrice(order.getPrice());
-//		good.setTotalPrice(order.getPrice());
+		good.setPrice(order.getPrice());
+		good.setTotalPrice(order.getPrice());
 		goods.add(good);
 		return goods;
 	}
