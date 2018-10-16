@@ -32,8 +32,8 @@ public class PointServerRPCRestService {
     RestTemplate  template;
     {
     	SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    	factory.setConnectTimeout(60000);
-        factory.setReadTimeout(60000);
+    	factory.setConnectTimeout(5000);
+        factory.setReadTimeout(5000);
         template = new RestTemplate(factory);
     }
     

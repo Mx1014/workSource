@@ -1,5 +1,25 @@
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: OPERATION
+-- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END OPERATION------------------------------------------------
 
 
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+
+-- AUTHOR:杨崇鑫 20181015
+-- REMARK:补充缴费模块“应用开小差”的错误码
+SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10012', 'zh_CN', '第三方授权异常');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10013', 'zh_CN', '收费项标准公式不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10014', 'zh_CN', '收费项标准类型错误');
+	
 -- 更新 layout
 SET @versionCode = '201810110200';
 
@@ -31,3 +51,99 @@ SET @locale_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100015', 'zh_CN', '账号重复');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100016', 'zh_CN', '账号长度不对或格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100017', 'zh_CN', '账号一经设定，无法修改');
+
+
+-- AUTHOR: 严军
+-- REMARK: 客户端处理方式
+update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100);
+
+
+-- AUTHOR: 严军
+-- REMARK: 云打印设置为园区应用
+UPDATE eh_service_modules set app_type = 1 WHERE id = 41400;
+UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
+
+UPDATE eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE id = 41400;
+UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE module_id = 41400;
+
+-- --------------------- SECTION END ALL -----------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-base
+-- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: dev
+-- DESCRIPTION: 此SECTION只在开发库中执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END dev -----------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zijing
+-- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END ---------------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: guangda
+-- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END guangda -------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: szbay
+-- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END szbay ---------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: chuangyechang
+-- DESCRIPTION: 此SECTION只在成都创业场-999964执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END chuangyechang -------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: anbang
+-- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END anbang---------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: nanshanquzhengfu
+-- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+-- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: guanzhouyuekongjian
+-- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+-- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ruianxintiandi
+-- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+-- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: wanzhihui
+-- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+-- --------------------- SECTION END wanzhihui ------------------------------------------

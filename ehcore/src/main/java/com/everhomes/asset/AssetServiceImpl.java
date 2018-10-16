@@ -407,8 +407,10 @@ public class AssetServiceImpl implements AssetService {
             }
         } catch(Exception e){
             LOGGER.error("YZX MAIL SEND FAILED");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-                    "YZX MAIL SEND FAILED");
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//                    "YZX MAIL SEND FAILED");
+            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.MESSAGE_SEND_FAILED,
+            		"YZX MAIL SEND FAILED");
         }
 
         for (int k = 0; k < uids.size(); k++) {
@@ -456,55 +458,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd) {
-        //企业用户的话判断是否为企业管理员
-        out:{
-            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
-                Long userId = UserContext.currentUserId();
-                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
-                cmd1.setOrganizationId(cmd.getTargetId());
-                cmd1.setActivationFlag((byte)1);
-                cmd1.setOwnerType("EhOrganizations");
-                cmd1.setOwnerId(null);
-                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
-                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
-                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
-                LOGGER.info("organization manager check for bill display, userId = "+ userId);
-                for(OrganizationContactDTO dto : organizationContactDTOS){
-                    Long targetId = dto.getTargetId();
-                    if(targetId.longValue() == userId.longValue()){
-                        break out;
-                    }
-                }
-                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
-                        "not valid corp manager");
-            }
-        }
-
-        //app用户的权限还未判断，是否可以查看账单
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        String vendorName = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        return handler.showBillForClient(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getBillGroupId(),cmd.getIsOnlyOwedBill(),cmd.getContractId(), cmd.getNamespaceId());
-    }
-
-    @Override
     public ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd) {
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.showCreateBill(cmd.getBillGroupId());
-    }
-
-    @Override
-    public ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
-        String vendorName = assetVendor.getVendorName();
-        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
-        if(cmd.getTargetType().equals("eh_user")) {
-            cmd.setTargetId(UserContext.currentUserId());
-        }
-        return handler.listBillDetailOnDateChange(cmd.getBillStatus(),cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetType(),cmd.getTargetId(),cmd.getDateStr(),cmd.getContractId(), cmd.getBillGroupId());
     }
 
     @Override
@@ -808,8 +766,10 @@ public class AssetServiceImpl implements AssetService {
                             PaymentFormula paymentFormula = formulaCondition.get(0);
                             formula = paymentFormula.getFormulaJson();
                         }else{
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
-                                    ,"formula cannot be found, standard id is "+standard.getId()+"");
+//                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER
+//                                    ,"formula cannot be found, standard id is "+standard.getId()+"");
+                        	throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.FORMULA_CANNOT_BE_FOUND,
+                        			"formula cannot be found, standard id is "+standard.getId()+"");
                         }
                     }
                     char[] formularChars = formula.toCharArray();
@@ -886,8 +846,10 @@ public class AssetServiceImpl implements AssetService {
                         BillingCycle standardBillingCycle = BillingCycle.fromCode(billingCycle);
                         if(standardBillingCycle == null || standardBillingCycle == BillingCycle.DAY){
                                 assetProvider.deleteContractPayment(contractId);
-                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+//                                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                        ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                                		"目前计费周期只支持按月，按季，按年");
                         }
                         // #31113 by-dinfjianmin
     					if (property.getAddressId() != null) {
@@ -911,8 +873,10 @@ public class AssetServiceImpl implements AssetService {
                     BillingCycle balanceBillingCycle = BillingCycle.fromCode(balanceDateType);
                     if(balanceBillingCycle == null || balanceBillingCycle == BillingCycle.DAY){
                             assetProvider.deleteContractPayment(contractId);
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                                    ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+//                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
+//                                    ,ErrorCodes.ERROR_INVALID_PARAMETER,"目前计费周期只支持按月，按季，按年");
+                            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.STANDARD_BILLING_CYCLE_NOT_FOUND,
+                            		"目前计费周期只支持按月，按季，按年");
                     }
 
                     assetFeeHandlerForBillCycles(uniqueRecorder,groupRule,group,rule,balanceBillingCycle,standard,billingCycle,itemScope);
@@ -2643,7 +2607,7 @@ public class AssetServiceImpl implements AssetService {
 //                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(namespaceId,map.getKey());
 //                    for (int i = 0; i < bills.size(); i++) {
 //                        PaymentBills bill = bills.get(i);
-//                        if (!needNoticeBills.containsKey(bill.getId())) {
+//                        if (!needNoticeBills.containsKey(bill.getId())) {催缴短信发送失败
 //                            List<PaymentNoticeConfig> days = map.getValue();
 //                            for (int j = 0; j < days.size(); j++) {
 //                                PaymentNoticeConfig day = days.get(j);

@@ -22,4 +22,8 @@ ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '�
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
 ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户增加会员等级信息。
+ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等级文本';
+
 -- end

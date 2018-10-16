@@ -7227,13 +7227,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
       }
 
     @Override
-    public void updateUserVipLevel(Long userId, Integer vipLevel) {
+    public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
         User user = this.userProvider.findUserById(userId);
         if(user == null){
             LOGGER.error("Unable to find the user , userId= {}",  userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
         }
         user.setVipLevel(vipLevel);
+        user.setVipLevelText(vipLevelText);
         userProvider.updateUser(user);
     }
 

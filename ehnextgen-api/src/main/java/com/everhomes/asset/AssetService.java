@@ -66,11 +66,7 @@ public interface AssetService {
 
 	void selectNotice(SelectedNoticeCommand cmd);
 
-	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
-
-	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
 	ListBillsDTO createBill(CreateBillCommand cmd);
 

@@ -1,9 +1,25 @@
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: OPERATION
+-- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END OPERATION------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ALL
+-- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+
+
+
+
+
 -- 标注版zuolin-base-2.1之前的数据
 
 
 
 -- add by yuanlei
-SET @id = SELECT MAX(id)  from eh_locale_strings;
+SET @id = (SELECT MAX(id)  from eh_locale_strings);
 INSERT INTO `eh_locale_strings`(`id`,`scope`, `code`,`locale`, `text`) VALUES(@id := @id+1,'organization', '900031', 'zh_CN', '无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10004,'zh_CN','该楼栋名称已经存在，请更换其他名称');
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'organization',900032,'zh_CN','姓名为空');
@@ -23,7 +39,7 @@ insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,
 
 insert into eh_locale_strings(`id`,scope,code,locale,`text`)values(@id := @id+1,'building',10005,'zh_CN','该项目下不存在该楼栋');
 
-SET @id = SELECT MAX(id) from eh_locale_templates;
+SET @id = (SELECT MAX(id) from eh_locale_templates);
 
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',1,'zh_CN','开启工作台','"${organizationName}"开启工作台' , 2);
 INSERT INTO eh_locale_templates(`id`,scope,code,locale,description,`text`,namespace_id)VALUES(@id := @id+1,'workbench',2,'zh_CN','关闭工作台','"${organizationName}"关闭工作台' , 2);
@@ -206,14 +222,19 @@ INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entr
 INSERT INTO `eh_service_module_entries` (`id`, `module_id`, `module_name`, `entry_name`, `terminal_type`, `location_type`, `scene_type`, `app_category_id`, `default_order`, `icon_uri`) VALUES ('312', '41000', '门禁（临时）', '门禁（临时）', '1', '2', '2', '12', '10', NULL);
 
 
+
+-- 标准版的菜单，基线不用。start1.5
+
 -- 增加应用、项目和公司菜单
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15000000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15025000', 'zuolin', '30', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15000000', NULL, 'application-management', '1', '2', '/15000000/15030000', 'zuolin', '40', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15000000', NULL, 'project-management', '1', '2', '/15000000/15040000', 'zuolin', '50', NULL, '2', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15000000', NULL, 'business-admin', '1', '2', '/15000000/15050000', 'zuolin', '60', NULL, '2', 'system', 'module', NULL);
-DELETE FROM `eh_web_menus` WHERE `id`='15030100';
-DELETE FROM `eh_web_menus` WHERE `id`='15030200';
-DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15000000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15025000', 'zuolin', '30', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15030000', '应用管理', '15000000', NULL, 'application-management', '1', '2', '/15000000/15030000', 'zuolin', '40', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15040000', '项目管理', '15000000', NULL, 'project-management', '1', '2', '/15000000/15040000', 'zuolin', '50', NULL, '2', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15050000', '企业管理', '15000000', NULL, 'business-admin', '1', '2', '/15000000/15050000', 'zuolin', '60', NULL, '2', 'system', 'module', NULL);
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030100';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030200';
+-- DELETE FROM `eh_web_menus` WHERE `id`='15030300';
+
+-- 标准版的菜单，基线不用。end1.5
 
 -- 公司门禁 员工认证 职级管理 任务管理 设置为org控制  add by yanjun 20180614
 UPDATE eh_service_modules SET module_control_type = 'org_control' WHERE id in (41020, 50500, 50300, 13000);
@@ -683,3 +704,88 @@ UPDATE eh_service_modules set app_type = 0 WHERE id = 59000;
 UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id = 59000;
 
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
+
+
+
+
+-- --------------------- SECTION END ALL -----------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-base
+-- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: dev
+-- DESCRIPTION: 此SECTION只在开发库中执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END dev -----------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zijing
+-- DESCRIPTION: 此SECTION只在清华信息港(紫荆)-999984执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END ---------------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: guangda
+-- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END guangda -------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: szbay
+-- DESCRIPTION: 此SECTION只在深圳湾-999966执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END szbay ---------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: chuangyechang
+-- DESCRIPTION: 此SECTION只在成都创业场-999964执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END chuangyechang -------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: anbang
+-- DESCRIPTION: 此SECTION只在安邦物业-999949执行的脚本
+-- AUTHOR:
+-- REMARK:
+-- --------------------- SECTION END anbang---------------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: nanshanquzhengfu
+-- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+-- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: guanzhouyuekongjian
+-- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+-- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: ruianxintiandi
+-- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+-- --------------------- SECTION END ruianxintiandi ------------------------------------------
+
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: wanzhihui
+-- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+-- --------------------- SECTION END wanzhihui ------------------------------------------
