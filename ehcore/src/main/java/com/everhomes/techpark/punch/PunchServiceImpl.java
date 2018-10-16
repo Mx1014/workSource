@@ -3172,8 +3172,10 @@ public class PunchServiceImpl implements PunchService {
             Calendar startDayOfThisMonth = Calendar.getInstance();
             startDayOfThisMonth.setTime(dateSF.get().parse(startDay));
             PunchRule pr = this.getPunchRule(detail);
-            statistic.setPunchOrgName(pr.getName());
-            statistic.setWorkDayCount(calculateWorkDayCountThisMonth(detail, dayLogList, startDayOfThisMonth, pr));
+            if(null != pr){
+            	statistic.setPunchOrgName(pr.getName());
+            	statistic.setWorkDayCount(calculateWorkDayCountThisMonth(detail, dayLogList, startDayOfThisMonth, pr));
+            }
             this.punchProvider.createPunchStatistic(statistic);
         } catch (Exception e) {
             LOGGER.error("#####refresh month log error!! detailId:[" + detail.getId() + "] organization id :[" + orgId + "] ", e);
