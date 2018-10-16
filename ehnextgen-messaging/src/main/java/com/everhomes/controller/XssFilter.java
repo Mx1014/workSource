@@ -1,5 +1,7 @@
 package com.everhomes.controller;
 
+import com.google.gson.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -11,14 +13,22 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@WebFilter(filterName = "xssFilter", urlPatterns = "/*", asyncSupported = true)
+@WebFilter(filterName = "xssFilter", urlPatterns = "/*")
 public class XssFilter extends GenericFilterBean {
+
+    private static final Gson gson;
+    static {
+        gson = new GsonBuilder()
+                .disableHtmlEscaping()
+                .create();
+    }
+
+    @Value("${xss.enabled:false}")
+    private boolean xssEnabled;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -36,7 +46,7 @@ public class XssFilter extends GenericFilterBean {
         String requestURI = httpServletRequest.getRequestURI();
         String uri = requestURI.replaceFirst(contextPath, "");
 
-        if (!xssExcludeUriSet.contains(uri)) {
+        if (xssEnabled && !xssExcludeUriSet.contains(uri)) {
             chain.doFilter(xssHttpServletRequestWrapper(httpServletRequest), response);
         } else {
             chain.doFilter(request, response);
@@ -52,7 +62,36 @@ public class XssFilter extends GenericFilterBean {
 
             @Override
             public String getParameter(String name) {
-                return XssCleaner.clean(super.getParameter(name));
+                String value = super.getParameter(name);
+                try {
+                    // json 里面的数据需要单独的过滤
+                    return jsonFilter(value);
+                } catch(JsonSyntaxException ex) {
+                    return XssCleaner.clean(value);
+                }
+            }
+
+            private String jsonFilter(String value) {
+                final JsonElement jsonElement = gson.fromJson(value, JsonElement.class);
+                if (jsonElement.isJsonObject()) {
+                    final JsonObject jsonObject = jsonElement.getAsJsonObject();
+                    final Set<Map.Entry<String, JsonElement>> entrySet = jsonObject.entrySet();
+                    final Map<Object, Object> newMap = new HashMap<>(entrySet.size());
+                    for (Map.Entry<String, JsonElement> entry : entrySet) {
+                        if (entry.getValue() != null) {
+                            newMap.put(entry.getKey(), XssCleaner.clean(entry.getValue().toString()));
+                        }
+                    }
+                    return gson.toJson(newMap);
+                } else if (jsonElement.isJsonArray()) {
+                    final JsonArray jsonArray = jsonElement.getAsJsonArray();
+                    final List<Object> newArray = new ArrayList<>(jsonArray.size());
+                    for (JsonElement element : jsonArray) {
+                        newArray.add(XssCleaner.clean(element.toString()));
+                    }
+                    return gson.toJson(newArray);
+                }
+                return XssCleaner.clean(value);
             }
 
             @Override
