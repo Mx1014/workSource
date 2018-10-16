@@ -51,6 +51,7 @@ import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.xml.XMLToJSON;
@@ -66,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -153,6 +155,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
     @Autowired
     private SyncDataTaskService syncDataTaskService;
+    
+    @Autowired
+	protected UserProvider userProvider;
 
     @Override
     public void syncContractsFromThirdPart(String pageOffset, String date, String communityIdentifier, Long taskId, Long categoryId, Byte contractApplicationScene){
@@ -495,6 +500,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         //处理过的客户ID
         contract.setCustomerId(cmContractData.getCustomerId());
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
+        if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
+        	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
+		}
+        //查询发起人id,这样查询有问题，查不出来的，最好直接传id过来
+        User user = userProvider.findUserByAccountName(cmContractData.getContractHeader().getCreateUserName());
+        if (user != null) {
+        	contract.setSponsorUid(user.getId());
+		}
         
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
@@ -619,6 +632,15 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         
         contract.setCustomerType(CustomerType.ENTERPRISE.getCode());
         contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
+        	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
+		}
+        //查询发起人id,这样查询有问题，查不出来的，最好直接传id过来
+        User user = userProvider.findUserByAccountName(cmContractData.getContractHeader().getCreateUserName());
+        if (user != null) {
+        	contract.setSponsorUid(user.getId());
+		}
 
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {

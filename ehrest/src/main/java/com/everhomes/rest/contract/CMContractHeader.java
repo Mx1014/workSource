@@ -57,9 +57,18 @@ public class CMContractHeader {
     private String SignDate;
 
     private String ModifyDate;
+    
+    private String CreateUserName;
 
+    public String getCreateUserName() {
+		return CreateUserName;
+	}
 
-    public String getOA_AccountID() {
+	public void setCreateUserName(String createUserName) {
+		CreateUserName = createUserName;
+	}
+
+	public String getOA_AccountID() {
         return OA_AccountID;
     }
 
