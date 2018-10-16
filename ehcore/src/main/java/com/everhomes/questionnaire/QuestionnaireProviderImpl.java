@@ -84,14 +84,14 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	@Override
 	public List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd, Integer namespaceId,
 														int pageSize) {
-		SelectConditionStep step = getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRES.fields()).from(Tables.EH_QUESTIONNAIRES)
-				.join(Tables.EH_QUESTIONNAIRE_RANGES)
-				.on(Tables.EH_QUESTIONNAIRE_RANGES.COMMUNITY_ID.eq(cmd.getOwnerId()))
-				.and(Tables.EH_QUESTIONNAIRE_RANGES.QUESTIONNAIRE_ID.eq(Tables.EH_QUESTIONNAIRES.ID))
+		SelectConditionStep step = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
+//				.join(Tables.EH_QUESTIONNAIRE_RANGES)
+//				.on(Tables.EH_QUESTIONNAIRE_RANGES.COMMUNITY_ID.eq(cmd.getOwnerId()))
+//				.and(Tables.EH_QUESTIONNAIRE_RANGES.QUESTIONNAIRE_ID.eq(Tables.EH_QUESTIONNAIRES.ID))
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				//屏蔽这个东西，使用范围表
-//				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(cmd.getOwnerType()))
-//				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(cmd.getOwnerId()))
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(cmd.getOwnerType()))
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(cmd.getOwnerId()))
 				.and(cmd.getPageAnchor()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.ID.lt(cmd.getPageAnchor()));
 
 		Condition condition = cmd.getStatus()==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.STATUS.eq(cmd.getStatus());
