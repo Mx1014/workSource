@@ -133,6 +133,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             return response;
         }
         for(FlowNode node : nodesList){
+
             if(node == null){
                 continue ;
             }
@@ -149,7 +150,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             dto.setNodeLevel(node.getNodeLevel());
             //处理次数
             Integer times = flowStatisticsHandleLogProvider.countNodesTimes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),node.getId());
-            if(times==null&& times.equals(0)){
+            if(times==null|| times == 0){
                 LOGGER.debug("countNodesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},nodeId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),node.getId());
             }
             //处理时长
@@ -157,12 +158,12 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
             //当前周期节点平均处理时长(当前节点或子流程处理总时长/处理次数)
             Long averageCycle = 0L ;
-            if(cycles!=null && times!=null&& !times.equals(0)){
+            if(cycles!=null && times!=null&& times != 0){
                 averageCycle = cycles/times ;
             }
             Double average = 0D;
             //由秒转化为小时
-            if(!averageCycle.equals(0)){
+            if(averageCycle!=0){
                 average = averageCycle.doubleValue()/60/60 ;
             }
             dto.setHandleTimes(times);
@@ -171,19 +172,19 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         }
         //总处理次数
         Integer times = flowStatisticsHandleLogProvider.countNodesTimes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),null);
-        if(times==null&& times.equals(0)){
+        if(times==null|| times == 0){
             LOGGER.debug("countAllNodesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
         }
         //总处理时长
         Long cycles = flowStatisticsHandleLogProvider.countNodesCycle(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),null);
         //当前周期节点平均处理时长(当前节点或子流程处理总时长/处理次数)
         Long averageCycle = 0L ;
-        if(cycles!=null && times!=null&& !times.equals(0)){
+        if(cycles!=null && times!=null&& times != 0){
              averageCycle = cycles/times ;
         }
         Double average = 0D;
         //由秒转化为小时
-        if(!averageCycle.equals(0)){
+        if(averageCycle != 0){
             average = averageCycle.doubleValue()/60/60 ;
         }
         response.setCurrentCycleNodesAverage(average);
@@ -227,59 +228,65 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             java.util.Date lastStartDate = DateUtils.dateAfterOrBeforeDays(new Date(cmd.getStartDate()),-cl);
             java.util.Date lastEndDate = DateUtils.dateAfterOrBeforeDays(new Date(cmd.getEndDate()),-cl);
 
-            Timestamp lastStartTime = new java.sql.Timestamp(lastStartDate.getTime());
-            Timestamp lastEndTime =     new java.sql.Timestamp(lastEndDate.getTime());
+            Timestamp lastStartTime = new Timestamp(lastStartDate.getTime());
+            Timestamp lastEndTime =     new Timestamp(lastEndDate.getTime());
 
             Integer lastTimes = this.countLanesTimes(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
-            if(lastTimes==null&& lastTimes.equals(0)){
+            if(lastTimes==null|| lastTimes==0){
                 LOGGER.debug("countLastLanesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},laneId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
             }
             Long lastCycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,lastStartTime,lastEndTime,lane.getId());
             Long lastAverageCycle = 0L ;
-            if(lastCycles!=null && lastTimes!=null&& !lastTimes.equals(0)){
+            if(lastCycles!=null && lastTimes!=null&& lastTimes!=0){
                 lastAverageCycle = lastCycles/lastTimes ;
             }
             Double lastAverage = 0D;
             //由秒转化为小时
-            if(!lastAverageCycle.equals(0)){
+            if(lastAverageCycle!=0){
                 lastAverage = lastAverageCycle.doubleValue()/60/60 ;
             }
 
             dto.setLastCycleAverage(lastAverage);
             //当前周期平均处理耗时(泳道平均处理耗时=泳道总处理耗时/经过泳道的次数)
             Integer times = this.countLanesTimes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),lane.getId());
-            if(times==null&& times.equals(0)){
+            if(times==null|| times==0){
                 LOGGER.debug("countLanesTimes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{},laneId:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate(),lane.getId());
             }
             Long cycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),lane.getId());
             Long averageCycle = 0L ;
-            if(cycles!=null && times!=null&& !times.equals(0)){
+            if(cycles!=null && times!=null&& times!=0){
                 averageCycle = cycles/times ;
             }
             Double average = 0D;
             //由秒转化为小时
-            if(!averageCycle.equals(0)){
+            if(averageCycle!=0){
                 average = averageCycle.doubleValue()/60/60 ;
             }
             dto.setCurrentCycleAverage(average);
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
-            Double earlyComaredVal = (lastAverage - average) /average ;
+            Double earlyComaredVal = 0D ;
+            if(lastAverage != 0){
+                earlyComaredVal = 100D ;
+            }
+            if(average != 0){
+                earlyComaredVal = (lastAverage - average) /average ;
+            }
             dto.setEarlyComparedVal(earlyComaredVal);
             response.getDtos().add(dto);
         }
         //当前周期泳道平均处理时长(所有泳道的处理时长总和/泳道个数)
         Integer lanesCount = flowStatisticsHandleLogProvider.countLanes(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()));
-        if(lanesCount==null&& lanesCount.equals(0)){
+        if(lanesCount==null|| lanesCount==0){
             LOGGER.debug("countLanes return null or 0 .flowMainId:{},flowVersion:{},startDate:{},endDate:{}",flowMainId,flowVersion,cmd.getStartDate(),cmd.getEndDate());
         }
         Long cycles = flowStatisticsHandleLogProvider.countLanesCycle(flowMainId,flowVersion,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),null);
         Long averageCycle = 0L ;
-        if(cycles!=null && lanesCount!=null&& !lanesCount.equals(0)){
+        if(cycles!=null && lanesCount!=null&& lanesCount != 0){
             averageCycle = cycles/lanesCount ;
         }
         Double average = 0D;
         //由秒转化为小时
-        if(!averageCycle.equals(0)){
+        if(averageCycle!=0){
             average = averageCycle.doubleValue()/60/60 ;
         }
         response.setCurrentCycleLanesAverage(average);
