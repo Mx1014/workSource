@@ -125,6 +125,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		}
 
 		punchProvider.createPunchExceptionRequest(request);
+		refreshPunchDayLog(flowCase, ga, request);
 		String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.VACATION_BALANCE_DEC_FOR_ASK_FOR_LEAVE), UserContext.current().getUser().getLocale(), "");
 		updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) -1, description);
 	}
@@ -200,15 +201,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		try {
 			// 如果审批类型是-加班请假等,重刷影响日期的pdl
 			if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
-				PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
-				if (pr != null) {
-					Calendar punCalendar = Calendar.getInstance();
-					punCalendar.setTime(request.getBeginTime());
-					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-					punCalendar.setTime(request.getEndTime());
-					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
-				}
+				refreshPunchDayLog(flowCase, ga, request);
 			}
 			punchNotificationService.setPunchNotificationInvalidBackground(request, ga.getNamespaceId(), new Date());
 		} catch (Exception e) {
@@ -219,6 +212,23 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		addVacationBalanceHistoryCount(flowCase.getApplyUserId(), ga, request, (byte) 1);
 
 		return request;
+	}
+
+	private void refreshPunchDayLog(FlowCase flowCase, GeneralApproval ga,
+			PunchExceptionRequest request) {
+		try{
+			PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
+			if (pr != null) {
+				Calendar punCalendar = Calendar.getInstance();
+				punCalendar.setTime(request.getBeginTime());
+				Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+				punCalendar.setTime(request.getEndTime());
+				Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+				punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+			}
+		}catch(Exception e){
+			LOGGER.error("flow case create refreshPunchDayLog error ", e);
+		}
 	}
 
 	private void addVacationBalanceHistoryCount(Long userId, GeneralApproval ga, PunchExceptionRequest request, byte operation) {
