@@ -73,23 +73,25 @@ public class XssFilter extends GenericFilterBean {
 
             private String jsonFilter(String value) {
                 final JsonElement jsonElement = gson.fromJson(value, JsonElement.class);
-                if (jsonElement.isJsonObject()) {
-                    final JsonObject jsonObject = jsonElement.getAsJsonObject();
-                    final Set<Map.Entry<String, JsonElement>> entrySet = jsonObject.entrySet();
-                    final Map<Object, Object> newMap = new HashMap<>(entrySet.size());
-                    for (Map.Entry<String, JsonElement> entry : entrySet) {
-                        if (entry.getValue() != null) {
-                            newMap.put(entry.getKey(), XssCleaner.clean(entry.getValue().toString()));
+                if (jsonElement != null) {
+                    if (jsonElement.isJsonObject()) {
+                        final JsonObject jsonObject = jsonElement.getAsJsonObject();
+                        final Set<Map.Entry<String, JsonElement>> entrySet = jsonObject.entrySet();
+                        final Map<Object, Object> newMap = new HashMap<>(entrySet.size());
+                        for (Map.Entry<String, JsonElement> entry : entrySet) {
+                            if (entry.getValue() != null) {
+                                newMap.put(entry.getKey(), XssCleaner.clean(entry.getValue().toString()));
+                            }
                         }
+                        return gson.toJson(newMap);
+                    } else if (jsonElement.isJsonArray()) {
+                        final JsonArray jsonArray = jsonElement.getAsJsonArray();
+                        final List<Object> newArray = new ArrayList<>(jsonArray.size());
+                        for (JsonElement element : jsonArray) {
+                            newArray.add(XssCleaner.clean(element.toString()));
+                        }
+                        return gson.toJson(newArray);
                     }
-                    return gson.toJson(newMap);
-                } else if (jsonElement.isJsonArray()) {
-                    final JsonArray jsonArray = jsonElement.getAsJsonArray();
-                    final List<Object> newArray = new ArrayList<>(jsonArray.size());
-                    for (JsonElement element : jsonArray) {
-                        newArray.add(XssCleaner.clean(element.toString()));
-                    }
-                    return gson.toJson(newArray);
                 }
                 return XssCleaner.clean(value);
             }
