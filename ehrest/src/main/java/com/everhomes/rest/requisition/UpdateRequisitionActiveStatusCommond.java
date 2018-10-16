@@ -17,6 +17,7 @@ public class UpdateRequisitionActiveStatusCommond {
     private String ownerType;
     private Long moduleId;
     private Long id;
+    private Long orgId;
     private Byte status;
 
     public Long getOwnerId() {
@@ -65,6 +66,14 @@ public class UpdateRequisitionActiveStatusCommond {
 
     public void setStatus(Byte status) {
         this.status = status;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override
