@@ -13,18 +13,21 @@ public class DoorAccessParamDTO {
 	private Long ownerId;
 	private String ownerType;
 	private Long orgId;
-	private Byte paramsStatus;
-	private Long arrearageDays;
+	private Long freezeDays;
+    private Long unfreezeDays;
 	private Long categoryId;
-	private String dooraccessList;
-	@ItemType(DooraccessList.class)
-    private List<DooraccessList> dooraccess;
 	
-	public String getDooraccessList() {
-		return dooraccessList;
+	public Long getFreezeDays() {
+		return freezeDays;
 	}
-	public void setDooraccessList(String dooraccessList) {
-		this.dooraccessList = dooraccessList;
+	public void setFreezeDays(Long freezeDays) {
+		this.freezeDays = freezeDays;
+	}
+	public Long getUnfreezeDays() {
+		return unfreezeDays;
+	}
+	public void setUnfreezeDays(Long unfreezeDays) {
+		this.unfreezeDays = unfreezeDays;
 	}
 	public Long getId() {
 		return id;
@@ -50,28 +53,10 @@ public class DoorAccessParamDTO {
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
 	}
-	public Byte getParamsStatus() {
-		return paramsStatus;
-	}
-	public void setParamsStatus(Byte paramsStatus) {
-		this.paramsStatus = paramsStatus;
-	}
-	public Long getArrearageDays() {
-		return arrearageDays;
-	}
-	public void setArrearageDays(Long arrearageDays) {
-		this.arrearageDays = arrearageDays;
-	}
 	public Long getCategoryId() {
 		return categoryId;
 	}
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
-	}
-	public List<DooraccessList> getDooraccess() {
-		return dooraccess;
-	}
-	public void setDooraccess(List<DooraccessList> dooraccess) {
-		this.dooraccess = dooraccess;
 	}
 }

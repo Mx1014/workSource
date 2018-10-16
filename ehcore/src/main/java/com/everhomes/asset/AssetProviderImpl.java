@@ -19,15 +19,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.jooq.UpdateQuery;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
@@ -156,6 +161,7 @@ import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
 import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
@@ -174,6 +180,7 @@ import com.everhomes.server.schema.tables.daos.EhPaymentLateFineDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentSubtractionItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
@@ -5745,6 +5752,16 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
         }
         return dto;
     }
+    
+    @Override
+	public AssetDooraccessParam findDoorAccessParamById(Long id) {
+		assert (id != null);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.pojos.EhAssetDooraccessParams.class, id));
+		EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
+		
+		return ConvertHelper.convert(dao.findById(id), AssetDooraccessParam.class);
+	}
 
 	@Override
 	public void createDoorAccessParam(AssetDooraccessParam assetDooraccessParam) {
@@ -5759,18 +5776,44 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetDooraccessParams.class, null);
 	}
+	
+	@Override
+	public void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class, assetDooraccessParam.getId()));
+        EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
 
+        assetDooraccessParam.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        assetDooraccessParam.setOperatorUid(UserContext.currentUserId());
+        
+		dao.update(assetDooraccessParam);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetDooraccessParams.class, assetDooraccessParam.getId());
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd) {
-		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		List<AssetDooraccessParam> list = dslContext.select()
-	        .from(Tables.EH_ASSET_DOORACCESS_PARAMS)
-	        .where(Tables.EH_ASSET_DOORACCESS_PARAMS.NAMESPACE_ID.eq(cmd.getNamespaceId()))
-	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.ORG_ID.eq(cmd.getOrgId()))
-	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.CATEGORY_ID.eq(cmd.getCategoryId()))
-	        .and(Tables.EH_ASSET_DOORACCESS_PARAMS.OWNER_ID.eq(cmd.getOwnerId()))
-	        .fetchInto(AssetDooraccessParam.class);
-		return list;
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
+		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+
+		Condition cond = t1.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
+		
+		if(cmd.getOwnerId() != null) {
+			cond = cond.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
+		}
+		if(cmd.getOwnerId() == null) {
+			cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
+		}
+
+		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+
+		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
+
+		return assetDooraccessParams;
 	}
 
 }

@@ -1547,14 +1547,14 @@ public class AssetController extends ControllerBase {
      * <p>对接门禁：获取门禁列表</p>
      * <b>URL: /asset/getDoorAccessList</b>
      */
-    @RequestMapping("getDoorAccessList")
+    /*@RequestMapping("getDoorAccessList")
     @RestReturn(value=ListDoorAccessLiteResponse.class)
     public RestResponse getDoorAccessList(@Valid QueryDoorAccessAdminCommand cmd) {
     	RestResponse response = new RestResponse(doorAccessService.listDoorAccessByOwnerIdLite(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
     
     /**
      * <p>对接门禁：设置缴费门禁基础参数</p>

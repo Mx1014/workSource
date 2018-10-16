@@ -449,5 +449,7 @@ public interface AssetProvider {
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 	void createDoorAccessParam(AssetDooraccessParam asseDooraccessParam);
 	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
+	AssetDooraccessParam findDoorAccessParamById(Long id);
+	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
 		
 }

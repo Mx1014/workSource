@@ -4,8 +4,6 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  *<ul>
  * <li>namespaceId:域空间id</li>
@@ -13,24 +11,29 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType:所属者类型</li>
  * <li>orgId: 管理公司id</li>
  * <li>paramsStatus:设置参数的状态</li>
- * <li>arrearageDays:欠费天数</li>
- * <li>dooraccessList:所选择禁用门禁的列表</li>
+ * <li>freezeDays:欠费多少天冻结</li>
+ * <li>unfreezeDays:缴费多少天解冻门禁</li>
  * <li>categoryId: 缴费应用id</li>
  *</ul>
  */
 public class SetDoorAccessParamCommand {
-    @NotNull
+	private Long id;
     private Integer namespaceId;
-    @NotNull
     private Long ownerId;
-    @NotNull
     private String ownerType;
     private Long orgId;
-    private Byte paramsStatus;
-    private Long arrearageDays;
-    private String dooraccessList;
+    private Long freezeDays;
+    private Long unfreezeDays;
     private Long categoryId;
     
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -63,28 +66,20 @@ public class SetDoorAccessParamCommand {
 		this.orgId = orgId;
 	}
 
-	public Byte getParamsStatus() {
-		return paramsStatus;
+	public Long getFreezeDays() {
+		return freezeDays;
 	}
 
-	public void setParamsStatus(Byte paramsStatus) {
-		this.paramsStatus = paramsStatus;
+	public void setFreezeDays(Long freezeDays) {
+		this.freezeDays = freezeDays;
 	}
 
-	public Long getArrearageDays() {
-		return arrearageDays;
+	public Long getUnfreezeDays() {
+		return unfreezeDays;
 	}
 
-	public void setArrearageDays(Long arrearageDays) {
-		this.arrearageDays = arrearageDays;
-	}
-
-	public String getDooraccessList() {
-		return dooraccessList;
-	}
-
-	public void setDooraccessList(String dooraccessList) {
-		this.dooraccessList = dooraccessList;
+	public void setUnfreezeDays(Long unfreezeDays) {
+		this.unfreezeDays = unfreezeDays;
 	}
 
 	public Long getCategoryId() {

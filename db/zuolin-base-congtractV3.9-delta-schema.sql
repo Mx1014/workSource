@@ -16,26 +16,6 @@ ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFA
 -- REMARK: 合同添加押金状态字段
 ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
 
--- AUTHOR: djm
--- REMARK: 对接门禁
-CREATE TABLE `eh_asset_dooraccess_params` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` INT(11) DEFAULT NULL,
-  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'owner_id',  
-  `owner_type` VARCHAR(64) NOT NULL,
-  `org_id` bigint(20) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT NULL,
-  `params_status` tinyint(4) DEFAULT NULL COMMENT '设置是否生效, 0-无效, 2-启用',
-  `arrearage_days` bigint(5) DEFAULT NULL,
-  `dooraccess_list` VARCHAR(64) NOT NULL,
-  `category_id` BIGINT COMMENT 'asset category id',
-  `creator_uid` bigint(20) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) DEFAULT NULL,
-  `operator_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='缴费对接门禁表';
-
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
 ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;

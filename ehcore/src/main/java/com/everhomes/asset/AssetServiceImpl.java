@@ -4951,8 +4951,23 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public void setDoorAccessParam(SetDoorAccessParamCommand cmd) {
 		AssetDooraccessParam assetDooraccessParam = ConvertHelper.convert(cmd, AssetDooraccessParam.class);
-		assetProvider.createDoorAccessParam(assetDooraccessParam);
-		
+		assetDooraccessParam.setOwnerType(EntityType.COMMUNITY.getCode());
+
+		// 更新
+		if (cmd.getId() != null) {
+			assetDooraccessParam = assetProvider.findDoorAccessParamById(cmd.getId());
+			assetDooraccessParam.setFreezeDays(cmd.getFreezeDays());
+			assetDooraccessParam.setUnfreezeDays(cmd.getUnfreezeDays());
+			if (cmd.getOwnerId() != null) {
+				assetDooraccessParam.setOrgId(null);
+			}
+			assetProvider.updateDoorAccessParam(assetDooraccessParam);
+		} else {
+			if (cmd.getOwnerId() != null) {
+				assetDooraccessParam.setOrgId(null);
+			}
+			assetProvider.createDoorAccessParam(assetDooraccessParam);
+		}
 	}
 
 	@Override
@@ -4962,21 +4977,6 @@ public class AssetServiceImpl implements AssetService {
 		if (list.size() > 0) {
 			List<DoorAccessParamDTO> resultList = list.stream().map((c) -> {
 				DoorAccessParamDTO dto = ConvertHelper.convert(c, DoorAccessParamDTO.class);
-				List<String> contactExtraTels = Arrays.asList(dto.getDooraccessList().split(","));
-				List<DooraccessList> dooraccessList = new ArrayList<DooraccessList>();
-				for (int i = 0; i < contactExtraTels.size(); i++) {
-					DooraccessList dooraccess = new DooraccessList();
-					String DooraccessId = contactExtraTels.get(i);
-					DoorAccess access = doorAccessProvider.getDoorAccessById(Long.parseLong(DooraccessId));
-					dooraccess.setId(Long.parseLong(DooraccessId));
-					if (access.getDisplayName() == null) {
-						dooraccess.setDooraccessName(access.getName());
-					} else {
-						dooraccess.setDooraccessName(access.getDisplayName());
-					}
-					dooraccessList.add(dooraccess);
-				}
-				dto.setDooraccess(dooraccessList);
 				return dto;
 			}).collect(Collectors.toList());
 			response.setDoorAccessParamDTOs(resultList);
