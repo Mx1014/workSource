@@ -9,8 +9,10 @@ import com.sun.media.jfxmedia.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ARCHIBUS)
 public class ArchibusPmTaskHandle{
@@ -35,8 +37,47 @@ public class ArchibusPmTaskHandle{
 //    }
 
 //    @Override
-    public Object getThirdAddress() {
+    public Object getThirdAddress(Map<String,String> req) {
 
+        try {
+
+            ArchibusProject project = getProject();
+
+            FmWorkDataServiceImplServiceLocator locator = new FmWorkDataServiceImplServiceLocator();
+            locator.setFmWorkDataServiceImplPortEndpointAddress(THIRDURL);
+            FmWorkDataService service = locator.getFmWorkDataServiceImplPort();
+            String pk = project.getPk_project();
+            if(!"resourcesType3".equals(req.get("resourcesType"))){
+                pk = req.get("parentId");
+            }
+            String json = service.getResources(pk,req.get("resourcesType"),project.getPk_project());
+            ArchibusEntity<ArchibusResource> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusResource>>(){});
+            if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+            }
+
+            LOGGER.debug(json);
+
+            return  result.getData();
+
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Object getThirdCategories() {
+
+        ArchibusProject project = getProject();
+
+        return null;
+    }
+
+
+    private ArchibusProject getProject(){
         try {
             FmWorkDataServiceImplServiceLocator locator = new FmWorkDataServiceImplServiceLocator();
             locator.setFmWorkDataServiceImplPortEndpointAddress(THIRDURL);
@@ -45,7 +86,7 @@ public class ArchibusPmTaskHandle{
             String json = service.areaInfo();
             ArchibusEntity<ArchibusArea> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusArea>>(){});
             if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+    //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
             }
 
             String areaId = "";
@@ -59,24 +100,20 @@ public class ArchibusPmTaskHandle{
             ArchibusEntity<ArchibusProject> result1 = JSONObject.parseObject(json1,new TypeReference<ArchibusEntity<ArchibusProject>>(){});
 
             if(result1.isSuccess()){
-                return result1.getData();
+                return result1.getData().get(0);
             }
-
-            LOGGER.debug(json);
-
-
         } catch (ServiceException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
+
     public static void main(String[] args) {
         ArchibusPmTaskHandle bean = new ArchibusPmTaskHandle();
-        bean.getThirdAddress();
+//        bean.getThirdAddress();
     }
 
 }
