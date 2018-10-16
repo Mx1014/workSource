@@ -119,4 +119,16 @@ public class NamespacesServiceImpl implements NamespacesService {
 
 		return false;
 	}
+
+	@Override
+	public Boolean isStdNamespace(Integer namespaceId) {
+
+
+		//for test
+		if(namespaceId == 2){
+			return true;
+		}
+
+		return false;
+	}
 }
