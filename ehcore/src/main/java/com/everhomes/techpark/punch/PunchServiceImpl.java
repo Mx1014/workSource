@@ -206,6 +206,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
+import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -6309,7 +6310,7 @@ public class PunchServiceImpl implements PunchService {
                     //刷新 daylog
                     OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(member.getTargetId(), orgId);
 
-                    refreshPunchDayLog(memberDetail, punCalendar);
+                    punchDayLogInitialize(memberDetail, orgId, punCalendar);
 
                 } catch (Exception e) {
                     LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
