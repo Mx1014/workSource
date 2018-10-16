@@ -78,6 +78,13 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 DELETE FROM eh_web_menus WHERE id = 15025000;
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
 
+-- AUTHOR: 严军
+-- REMARK: 设置默认的应用分类
+UPDATE eh_service_modules set app_type = 1 WHERE app_type is NULL;
+UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
+
+update eh_service_modules set client_handler_type = 2 WHERE id = 43000;
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
