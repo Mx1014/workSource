@@ -6294,11 +6294,31 @@ public class PunchServiceImpl implements PunchService {
     }
 
     @Override
-    public void testDayRefreshLogs(Long runDate) {
+    public void testDayRefreshLogs(Long runDate, Long orgId) {
         try {
             Calendar punCalendar = Calendar.getInstance();
-            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(505524L, 1045660L);
-            refreshPunchDayLog(memberDetail, punCalendar);
+            List<String> groupTypeList = new ArrayList<String>();
+            groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+            groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+            List<OrganizationMemberDTO> members = this.organizationService.listAllChildOrganizationPersonnel
+                    (orgId, groupTypeList, null);
+            //循环刷所有员工
+            for (OrganizationMemberDTO member : members) {
+                
+                try {
+                    //刷新 daylog
+                    OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(member.getTargetId(), orgId);
+
+                    refreshPunchDayLog(memberDetail, punCalendar);
+
+                } catch (Exception e) {
+                    LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
+                            + "] organization id :[" + orgId + "] ");
+                    LOGGER.error(e.getLocalizedMessage());
+
+                    e.printStackTrace();
+                }
+            } 
         } catch (Exception e) {
 
         }

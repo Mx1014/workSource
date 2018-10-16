@@ -169,7 +169,7 @@ public interface PunchService {
 
 	void punchDayLogInitialize(PunchDayLogInitializeCommand cmd);
 
-	void testDayRefreshLogs(Long runDate);
+	void testDayRefreshLogs(Long runDate, Long orgId);
 
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
@@ -359,4 +359,5 @@ public interface PunchService {
 	GoOutPunchLogDTO updateGoOutPunchLog(UpdateGoOutPunchLogCommand cmd);
 
 	GoOutPunchLogDTO getGoOutPunchLog(GetGoOutPunchLogCommand cmd);
+ 
 }
