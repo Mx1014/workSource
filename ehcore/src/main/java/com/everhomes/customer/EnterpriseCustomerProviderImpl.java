@@ -188,15 +188,15 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     public void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnterpriseCustomersDao dao = new EhEnterpriseCustomersDao(context.configuration());
-        customers.forEach(customer -> {
+/*        customers.forEach(customer -> {
             LOGGER.debug("updateEnterpriseCustomer customer: {}",
                     StringHelper.toJsonString(customer));
 
             customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        });
+        });*/
 
         dao.update(customers);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, null);
+        //DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEnterpriseCustomers.class, null);
     }
 
     @Override

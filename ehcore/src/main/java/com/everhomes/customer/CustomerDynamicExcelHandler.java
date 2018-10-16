@@ -741,7 +741,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
-            if(dynamicCustomers != null && dynamicCustomers.size() > 0){
+            if(dynamicCustomers.size() > 0){
                 batchInsertCustomerData(dynamicCustomers);
             }
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
@@ -959,7 +959,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
         //企业客户新增成功,保存客户事件
         //customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
-        customerProvider.saveCustomerEvents(1, customers, (byte) 0);
+        //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
 
 
         long startUpdateSyncCustomerTime = System.currentTimeMillis();
@@ -985,10 +985,10 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
 
         long startbatchUpdateCustomerTime = System.currentTimeMillis();
-        LOGGER.debug("batch insert customer is start : {} " , startbatchUpdateCustomerTime);
+        LOGGER.debug("batch update customer is start : {} " , startbatchUpdateCustomerTime);
         customerProvider.updateEnterpriseCustomers(updateCustomers);
         long endbatchUpdateCustomerTime = System.currentTimeMillis();
-        LOGGER.debug("batch insert customer is end : {},amount cost : {} ms" , endbatchUpdateCustomerTime, endbatchUpdateCustomerTime - startbatchUpdateCustomerTime);
+        LOGGER.debug("batch update customer is end : {},amount cost : {} ms" , endbatchUpdateCustomerTime, endbatchUpdateCustomerTime - startbatchUpdateCustomerTime);
 
 
 

@@ -377,7 +377,7 @@ public class DynamicExcelImpl implements DynamicExcelService{
 
         long startImportDataTime = System.currentTimeMillis();
         LOGGER.debug("the function : importData is start : {} " , startImportDataTime);
-        excelHandler.importData(ds.get(0), rowDatas, params, context, response,resultLogs);
+        excelHandler.importData(ds.get(0), rowDatas, params, context, response, resultLogs);
         long endImportDataTime = System.currentTimeMillis();
         LOGGER.debug("the function : importData is end {},amount cost : {} ms" , endImportDataTime, endImportDataTime - startImportDataTime);
 
