@@ -87,7 +87,7 @@ public class ParkingRechargeOrderDTO {
     private String paySource;
     private Byte invoiceFlag;
     private Byte payMode;
-    
+    private Byte invoiceStatus;
     public BigDecimal getOriginalPrice() {
         return originalPrice;
     }
@@ -399,4 +399,13 @@ public class ParkingRechargeOrderDTO {
 	public void setPayMode(Byte payMode) {
 		this.payMode = payMode;
 	}
+
+	public Byte getInvoiceStatus() {
+		return invoiceStatus;
+	}
+
+	public void setInvoiceStatus(Byte invoiceStatus) {
+		this.invoiceStatus = invoiceStatus;
+	}
+	
 }
