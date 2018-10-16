@@ -12333,6 +12333,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
+                else{//始终都要发消息
+                    organizationMember.setOrganizationId(enterpriseId);
+                    sendMessageForContactApproved(organizationMember);
+                }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
             if (leaveMembers.size() > 0) {
