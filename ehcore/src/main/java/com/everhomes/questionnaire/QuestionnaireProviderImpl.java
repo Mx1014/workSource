@@ -84,7 +84,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	@Override
 	public List<Questionnaire> listQuestionnaireByOwner(ListQuestionnairesCommand cmd, Integer namespaceId,
 														int pageSize) {
-		SelectConditionStep step = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
+		SelectConditionStep step = getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRES.fields()).from(Tables.EH_QUESTIONNAIRES)
 				.join(Tables.EH_QUESTIONNAIRE_RANGES)
 				.on(Tables.EH_QUESTIONNAIRE_RANGES.COMMUNITY_ID.eq(cmd.getOwnerId()))
 				.and(Tables.EH_QUESTIONNAIRE_RANGES.QUESTIONNAIRE_ID.eq(Tables.EH_QUESTIONNAIRES.ID))
