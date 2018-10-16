@@ -38,6 +38,9 @@ public class XssCleaner {
         if (plainText == null) {
             return null;
         }
+        if (plainText.isEmpty()) {
+            return plainText;
+        }
         AntiSamy antiSamy = new AntiSamy();
         try {
             if (LOGGER.isTraceEnabled()) {

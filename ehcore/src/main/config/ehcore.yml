@@ -166,9 +166,10 @@ spring:
 
 # kafka
 spring.kafka:
-  client-id: ehcore # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable
+  enabled: false # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
   bootstrap-servers: localhost:9092
   properties:
+    request.timeout.ms: 20000
     request.timeout.ms: 20000
   producer:
     retries: 0

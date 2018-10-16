@@ -4758,12 +4758,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String xqt = "xq.tian@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
-        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        // String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
 
         String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
                 cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
-        handler.sendMail(0, account, wjl, "User Appeal", body);
-        handler.sendMail(0, account, xqt, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, wjl, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, xqt, "User Appeal", body);
         // ------------------------------------------------------------------------
 
         return toUserAppealLogDTO(log);
@@ -6854,7 +6854,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
     /*******************统一用户同步数据**********************/
-    @KafkaListener(topicPattern = "user-create-event")
+    @KafkaListener(id="syncCreateUser", topicPattern = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
@@ -6881,7 +6881,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(topicPattern = "user-update-event")
+    @KafkaListener(id="syncUpdateUser", topicPattern = "user-update-event")
     public void syncUpdateUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
@@ -6896,7 +6896,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(topicPattern = "user-delete-event")
+    @KafkaListener(id="syncDeleteUser", topicPattern = "user-delete-event")
     public void syncDeleteUser(ConsumerRecord<?, String> record) {
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
@@ -6912,7 +6912,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(topicPattern = "userIdentifier-create-event")
+    @KafkaListener(id="syncCreateUserIdentifier", topicPattern = "userIdentifier-create-event")
     public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
@@ -6938,7 +6938,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(topicPattern = "userIdentifier-update-event")
+    @KafkaListener(id="syncUpdateUserIdentifier", topicPattern = "userIdentifier-update-event")
     public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
