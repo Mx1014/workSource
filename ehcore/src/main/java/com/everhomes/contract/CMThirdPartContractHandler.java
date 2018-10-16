@@ -251,8 +251,11 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_BILL_ERROR, "sync data from RuiAnCM is fail cause Bill");
         }
         //String url = "http://183.62.222.87:5902/sf";
-        
 
+        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
+
+        zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+        //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
 
 /*        if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
             List<CMDataObject> dtos = cmSyncObject.getData();
