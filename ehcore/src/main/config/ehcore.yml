@@ -49,7 +49,7 @@ endpoint.dump: true
 endpoint.metrics: true
 endpoint.configprops: true
 endpoint.beans: true
-endpoint.trace: trueN
+endpoint.trace: true
 endpoint.mappings: true
             
 management.security.enabled: false
@@ -166,7 +166,7 @@ spring:
 
 # kafka
 spring.kafka:
-  enabled: false # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
+  enabled: true # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
   bootstrap-servers: localhost:9092
   properties:
     request.timeout.ms: 20000
@@ -193,7 +193,6 @@ eurekacli:
     enabled: true
     service-url: ${EUREKA_SERVICE_URL}
     instance-id: ${server.address}:${spring.application.name}:${server.port}
-    instance-id: 10.1.110.80:ehcore:8080
 
 # 配置 xssFilter 的开关
 xss.enabled: false

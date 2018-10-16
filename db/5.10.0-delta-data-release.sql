@@ -4,6 +4,11 @@
 -- AUTHOR:梁燕龙 20181016
 -- REMARK:统一用户上线操作.
 -- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539678631
+
+-- AUTHOR:xq.tian 20181016
+-- REMARK:网关及注册中心部署.
+-- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539677844
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
 
