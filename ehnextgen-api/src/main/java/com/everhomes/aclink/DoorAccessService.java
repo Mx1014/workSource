@@ -190,6 +190,8 @@ public interface DoorAccessService {
 
     void deleteFirmware (DeleteFirmwareCommand cmd);
 
+    ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
+
     void uploadBluetooth(UploadBluetoothCommand cmd);
 
     void uploadWifi(UploadBluetoothCommand cmd);

@@ -639,11 +639,15 @@ ALTER TABLE `eh_general_form_val_requests` ADD COLUMN `operator_uid` BIGINT NULL
 
 -- AUTHOR: 李清岩
 -- REMARK: 20180930 issue-38336
-ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (64) NULL COMMENT '门禁设备固件版本';
-ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (64) NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件版本';
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_id` bigint(20) DEFAULT NULL COMMENT '门禁设备类型id';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_name` VARCHAR(128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `city_id` int(11) DEFAULT NULL COMMENT '城市id';
+ALTER TABLE `eh_door_access` ADD COLUMN `province` VARCHAR(64) DEFAULT NULL COMMENT '省份名';
 
 CREATE TABLE `eh_aclink_device` (
-	`id` bigint(20) auto_increment ,
+	`id` bigint(20),
 	`name` VARCHAR(128) COMMENT '设备类型名称',
 	`type` TINYINT(4) DEFAULT NULL COMMENT '设备类型 0：自有设备 1：第三方设备',
 	`description` VARCHAR(1024) DEFAULT NULL COMMENT '设备特性',
@@ -659,22 +663,22 @@ CREATE TABLE `eh_aclink_device` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁设备类型';
 
 CREATE TABLE `eh_aclink_firmware_new` (
-  	`id` bigint(20) auto_increment ,
+  `id` bigint(20),
 	`name` VARCHAR(128) COMMENT '固件名称',
 	`version` VARCHAR(128) COMMENT '版本号，例如1.0.0',
 	`number` int(11) DEFAULT NULL COMMENT '固件编号',
 	`description` VARCHAR(1024) DEFAULT NULL,
-  	`bluetooth_name` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
+  `bluetooth_name` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
 	`bluetooth_id` bigint(20),
-  	`wifi_name` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
+  `wifi_name` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
 	`wifi_id` bigint(20),
-  	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
 	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
   	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件新表';
 
 CREATE TABLE `eh_aclink_firmware_package` (
-  `id` bigint(20) auto_increment ,
+  `id` bigint(20),
 	`name` VARCHAR(128) COMMENT '程序名称',
   `type` TINYINT(4) DEFAULT NULL COMMENT '程序类型 0：蓝牙 1：wifi',
 	`size` int(11),

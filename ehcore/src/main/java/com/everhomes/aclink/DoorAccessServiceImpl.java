@@ -5370,6 +5370,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     }
     @Override
+    public ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd){
+
+	    return null;
+    }
+
+    @Override
     public void uploadBluetooth(UploadBluetoothCommand cmd){
         AclinkFirmwarePackage pkg = (AclinkFirmwarePackage)ConvertHelper.convert(cmd,AclinkFirmwarePackage.class);
         pkg.setStatus(new Byte((byte)1));

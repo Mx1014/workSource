@@ -645,6 +645,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/aclink/listFirmwarePackage</b>
+     * <p>列出固件包（左邻后台）</p>
+     * @return 固件包列表
+     */
+    @RequestMapping("listFirmwarePackage")
+    @RestReturn(value=ListFirmwarePackageResponse.class)
+    public RestResponse listFirmwarePackage (@Valid ListFirmwarePackageCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listFirmwarePackage(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/uploadBluetooth</b>
      * <p>上传蓝牙程序（左邻后台）</p>
