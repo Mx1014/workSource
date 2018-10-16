@@ -965,7 +965,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
 
         User user = UserContext.current().getUser();
-
+        rsp.setVipLevelText(user.getVipLevelText());
         BizMyUserCenterCountResponse response = fetchBizMyUserCenterCount(user);
 
         // UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.RECEIVED_COUPON_COUNT);

@@ -1058,7 +1058,10 @@ public class ForumServiceImpl implements ForumService {
             if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
             }
-            
+            // 如果content为NULL，返回空字符串，防止前端获取不到content报错，影响展示 add by yanlong.liang 20181010
+            if (postDto.getContent() == null) {
+                postDto.setContent("");
+            }
             return postDto;
 //            post = this.forumProvider.findPostById(postId);
 //            this.forumProvider.populatePostAttachments(post);
