@@ -146,7 +146,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         goodDTO.setServeType("资源预订");
         goodDTO.setTag1(order.getResourceTypeId().toString());
         goodDTO.setTag2(order.getCommunityId().toString());
-        goodDTO.setTag3(order.getRentalResourceId().toString());
+        goodDTO.setGoodTag(order.getRentalResourceId().toString());
         goods.add(goodDTO);
         cmd.setGoods(goods);
 
