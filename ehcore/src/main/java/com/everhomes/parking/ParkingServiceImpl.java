@@ -68,6 +68,7 @@ import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
 import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
@@ -79,6 +80,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.print.PayPrintGeneralOrderCommand;
 import com.everhomes.rest.print.PayPrintGeneralOrderResponse;
 import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.print.PrintJobTypeType;
 import com.everhomes.rest.rentalv2.*;
 
 import com.everhomes.server.schema.Tables;
@@ -896,6 +898,7 @@ public class ParkingServiceImpl implements ParkingService {
         baseInfo.setPaySourceType(SourceType.MOBILE.getCode());
         baseInfo.setTotalAmount(order.getPrice());
         baseInfo.setGoods(buildGoods(parkingLot, order, bizPayeeId, bussinessType));
+        baseInfo.setGoodsDetail(buildGoodsDetails(parkingLot, order, bussinessType));
         baseInfo.setReturnUrl(returnUrl);
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
@@ -921,14 +924,73 @@ public class ParkingServiceImpl implements ParkingService {
 			good.setServeApplyName(community.getName()); //
 		}
 		good.setGoodName(bussinessType.getDesc());
-		good.setGoodDescription(order.getPlateNumber());// 商品描述
+//		good.setGoodDescription(order.getPlateNumber());// 商品描述
 		good.setCounts(1);
-		good.setPrice(order.getPrice());
-		good.setTotalPrice(order.getPrice());
+//		good.setPrice(order.getPrice());
+//		good.setTotalPrice(order.getPrice());
 		goods.add(good);
 		return goods;
 	}
-	
+	private List<OrderDescriptionEntity> buildGoodsDetails(ParkingLot parkingLot, ParkingRechargeOrder order, ParkingBusinessType bussinessType) {
+
+		// 设置订单展示
+		List<OrderDescriptionEntity> goodsDetail = new ArrayList<>();
+		OrderDescriptionEntity e = new OrderDescriptionEntity();
+		Community community = communityProvider.findCommunityById(parkingLot.getOwnerId());
+		e.setKey("项目名称");
+		e.setValue(community.getName());
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey("停车场名");
+		e.setValue(parkingLot.getName());
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey("车牌号码");
+		e.setValue(order.getPlateNumber());
+		goodsDetail.add(e);
+		
+		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
+		if(rechargeType == ParkingRechargeType.MONTHLY){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String sdate = sdf.format(order.getEndPeriod());
+			e = new OrderDescriptionEntity();
+			e.setKey("当前有效期");
+			e.setValue(sdate);
+			goodsDetail.add(e);
+			
+			e = new OrderDescriptionEntity();
+			e.setKey("充值月数");
+			e.setValue(String.valueOf(order.getMonthCount()));
+			goodsDetail.add(e);
+		} else if (rechargeType == ParkingRechargeType.TEMPORARY){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			e = new OrderDescriptionEntity();
+			String startDate = sdf.format(order.getStartPeriod());
+			e.setKey("入场时间");
+			e.setValue(startDate);
+			goodsDetail.add(e);
+			
+			e = new OrderDescriptionEntity();
+			String endDate = sdf.format(order.getEndPeriod());
+			e.setKey("查询时间");
+			e.setValue(endDate);
+			goodsDetail.add(e);
+			
+			e = new OrderDescriptionEntity();
+			String delayDate = sdf.format(order.getDelayTime());
+			e.setKey("查询时间");
+			e.setValue(delayDate);
+			goodsDetail.add(e);
+		}
+		
+		e = new OrderDescriptionEntity();
+		e.setKey("订单金额");
+		e.setValue(String.valueOf(order.getPrice()));
+		goodsDetail.add(e);
+		return goodsDetail;
+	}
 	private Long getAppOriginId() {
 		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
 				2, 
@@ -3947,7 +4009,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(cmd.getOrderId());
 		String generalOrderId = order.getGeneralOrderId();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
-		String Url = homeurl + "app/appinvoice?businessOrderNumber=" + generalOrderId;
+		String Url = homeurl + "/app/appinvoice?businessOrderNumber=" + generalOrderId;
 		response.setInvoiceUrl(Url);
 		return response;
 	}
