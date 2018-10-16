@@ -14,7 +14,7 @@ import java.sql.Timestamp;
  * <li>status: 状态 0：失效 1：有效</li>
  * </ul>
  */
-public class UploadBluetoothCommand {
+public class UploadFirmwarePackageCommand {
     public Long id;
     public String name;
     public String downloadUrl;

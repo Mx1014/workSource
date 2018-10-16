@@ -4159,7 +4159,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         AclinkQueryLogResponse resp = new AclinkQueryLogResponse();
         resp.setDtos(new ArrayList<AclinkLogDTO>());
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
@@ -5314,7 +5313,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
-        return null;
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+	    return null;
     }
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
@@ -5353,30 +5355,45 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     }
     @Override
-    public void addFirmware (AddFirmwareCommand cmd){
-
+    public AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd){
+	    AclinkFirmwareNew firmware = (AclinkFirmwareNew) ConvertHelper.convert(cmd,AclinkFirmwareNew.class);
+        firmware.setStatus((byte)1);
+        aclinkFirmwareProvider.createFirmwareNew(firmware);
+        return (AclinkFirmwareNew)ConvertHelper.convert(firmware, AclinkFirmwareNew.class);
     }
     @Override
     public void deleteFirmware (DeleteFirmwareCommand cmd){
 
+
     }
     @Override
     public ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd){
-
-	    return null;
+        ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
+	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<FirmwarePackageDTO> dtos = aclinkFirmwareProvider.listFirmwarePackage(locator, count, cmd);
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+	    return resp;
     }
 
     @Override
-    public FirmwarePackageDTO uploadFirmwarePackage(uploadFirmwarePackageCommand cmd){
+    public FirmwarePackageDTO uploadFirmwarePackage(UploadFirmwarePackageCommand cmd){
         AclinkFirmwarePackage pkg = (AclinkFirmwarePackage)ConvertHelper.convert(cmd,AclinkFirmwarePackage.class);
         pkg.setStatus(new Byte((byte)1));
-//        pkg.setType(new Byte((byte)0));
         aclinkFirmwareProvider.createFirmwarePackage(pkg);
         return (FirmwarePackageDTO)ConvertHelper.convert(pkg, FirmwarePackageDTO.class);
     }
-
     @Override
-    public void uploadWifi(uploadFirmwarePackageCommand cmd){
+    public FirmwarePackageDTO deleteFirmwarePackage(DeleteFirmwarePackageCommand cmd){
+	            AclinkFirmwarePackage pkg = aclinkFirmwareProvider.findPackageById(cmd.getId());
+        pkg.setStatus(((byte)0));
+        aclinkFirmwareProvider.updateFirmwarePackage(pkg);
+        return (FirmwarePackageDTO)ConvertHelper.convert(pkg, FirmwarePackageDTO.class);
+    }
+    @Override
+    public void uploadWifi(UploadFirmwarePackageCommand cmd){
 
     }
     @Override

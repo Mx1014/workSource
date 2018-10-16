@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.FirmwarePackageDTO;
+import com.everhomes.rest.aclink.ListFirmwarePackageCommand;
 
 public interface AclinkFirmwareProvider {
 
@@ -21,5 +23,13 @@ public interface AclinkFirmwareProvider {
     AclinkFirmware queryAclinkFirmwareMax();
     //add by liqingyan
     Long createFirmwarePackage (AclinkFirmwarePackage obj);
+
+    Long updateFirmwarePackage (AclinkFirmwarePackage obj);
+
+    AclinkFirmwarePackage findPackageById(Long id);
+
+    List<FirmwarePackageDTO> listFirmwarePackage (ListingLocator locator, int count, ListFirmwarePackageCommand cmd);
+
+    Long createFirmwareNew(AclinkFirmwareNew obj);
 
 }

@@ -623,10 +623,9 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("addFirmware")
-    @RestReturn(value=String.class)
+    @RestReturn(value=AclinkFirmwareNew.class)
     public RestResponse addFirmware (@Valid AddFirmwareCommand cmd){
-        doorAccessService.addFirmware(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.addFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -661,29 +660,29 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/aclink/uploadFirmwarePackage</b>
-     * <p>上传门禁固件程序（左邻后台）</p>
+     * <b>URL: /admin/aclink/deleteFirmwarePackage</b>
+     * <p>删除固件程序（左邻后台）</p>
      * @return OK 成功
      */
-    @RequestMapping("uploadFirmwarePackage")
+    @RequestMapping("deleteFirmwarePackage")
     @RestReturn(value=FirmwarePackageDTO.class)
-    public RestResponse uploadFirmwarePackage(@Valid uploadFirmwarePackageCommand cmd){
-        RestResponse response = new RestResponse(doorAccessService.uploadFirmwarePackage(cmd));
+    public RestResponse deleteFirmwarePackage (@Valid DeleteFirmwarePackageCommand cmd){
+        doorAccessService.deleteFirmwarePackage(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /admin/aclink/uploadWifi</b>
-     * <p>上传wifi程序（左邻后台）</p>
+     * <b>URL: /admin/aclink/uploadFirmwarePackage</b>
+     * <p>上传固件程序（左邻后台）</p>
      * @return OK 成功
      */
-    @RequestMapping("uploadWifi")
-    @RestReturn(value=String.class)
-    public RestResponse uploadWifi(@Valid uploadFirmwarePackageCommand cmd){
-        doorAccessService.uploadWifi(cmd);
-        RestResponse response = new RestResponse();
+    @RequestMapping("uploadFirmwarePackage")
+    @RestReturn(value=FirmwarePackageDTO.class)
+    public RestResponse uploadWifi(@Valid UploadFirmwarePackageCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.uploadFirmwarePackage(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

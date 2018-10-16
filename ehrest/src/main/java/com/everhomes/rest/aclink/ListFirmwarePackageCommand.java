@@ -11,9 +11,19 @@ import com.everhomes.util.StringHelper;
  */
 public class ListFirmwarePackageCommand {
 
+    private Byte type;
+
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    public Byte getType() {
+        return type;
+    }
+
+    public void setType(Byte type) {
+        this.type = type;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

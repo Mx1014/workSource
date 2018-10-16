@@ -12,8 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.aclink.FirmwarePackageDTO;
+import com.everhomes.rest.aclink.ListFirmwarePackageCommand;
+import com.everhomes.server.schema.tables.daos.EhAclinkFirmwareNewDao;
 import com.everhomes.server.schema.tables.daos.EhAclinkFirmwarePackageDao;
-import com.everhomes.server.schema.tables.pojos.EhAclinkFirmwarePackage;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.EhAclinkFirmwarePackageRecord;
+import com.everhomes.server.schema.tables.records.EhAclinkLogsRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -26,8 +31,6 @@ import org.springframework.stereotype.Component;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinkFirmwareDao;
-import com.everhomes.server.schema.tables.pojos.EhAclinkFirmware;
-import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord;
 import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -58,6 +61,19 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
         dao.insert(obj);
         return id;
     }
+    //add by liqingyan
+    @Override
+    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})
+    public Long createFirmwareNew(AclinkFirmwareNew obj){
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFirmwareNew.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmwareNew.class));
+        obj.setId(id);
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+        EhAclinkFirmwareNewDao dao = new EhAclinkFirmwareNewDao(context.configuration());
+        dao.insert(obj);
+        return null;
+    }
 //add by liqingyan
     @Override
     @Caching(evict = {@CacheEvict(value = "aclinkFirmwarePackageMax", key = "'fix'")})
@@ -71,6 +87,48 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
         dao.insert(obj);
     return null;
     }
+
+    @Override
+    @Caching(evict = {@CacheEvict(value = "aclinkFirmwarePackageMax", key = "'fix'")})
+    public Long updateFirmwarePackage (AclinkFirmwarePackage obj){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
+        EhAclinkFirmwarePackageDao dao = new EhAclinkFirmwarePackageDao(context.configuration());
+        dao.update(obj);
+        return null;
+    }
+    @Override
+    public AclinkFirmwarePackage findPackageById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkFirmwarePackageDao dao = new EhAclinkFirmwarePackageDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), AclinkFirmwarePackage.class);
+    }
+
+
+//add by liqingyan
+    @Override
+    public List<FirmwarePackageDTO> listFirmwarePackage (ListingLocator locator, int count, ListFirmwarePackageCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAclinkFirmwarePackage.class));
+        SelectQuery<EhAclinkFirmwarePackageRecord> query = context.selectQuery(Tables.EH_ACLINK_FIRMWARE_PACKAGE);
+        query.addConditions(Tables.EH_ACLINK_FIRMWARE_PACKAGE.STATUS.eq((byte)1));
+        query.addConditions(Tables.EH_ACLINK_FIRMWARE_PACKAGE.TYPE.eq(cmd.getType()));
+
+        if (count > 0){
+            query.addLimit(count + 1);
+        }
+        List<FirmwarePackageDTO> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, FirmwarePackageDTO.class);
+        });
+
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+            objs.remove(objs.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+
 
     @Override
     @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})

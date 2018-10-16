@@ -185,15 +185,17 @@ public interface DoorAccessService {
 
     void changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
 
-    void addFirmware (AddFirmwareCommand cmd);
+    AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd);
 
     void deleteFirmware (DeleteFirmwareCommand cmd);
-
+    //add by liqingyan
     ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
     //add by liqingyan
-    FirmwarePackageDTO uploadFirmwarePackage(uploadFirmwarePackageCommand cmd);
+    FirmwarePackageDTO uploadFirmwarePackage(UploadFirmwarePackageCommand cmd);
+    //add by liqingyan
+    FirmwarePackageDTO deleteFirmwarePackage (DeleteFirmwarePackageCommand cmd);
 
-    void uploadWifi(uploadFirmwarePackageCommand cmd);
+    void uploadWifi(UploadFirmwarePackageCommand cmd);
 
     void downloadBluetooth(DownloadBluetoothCommand cmd);
 
