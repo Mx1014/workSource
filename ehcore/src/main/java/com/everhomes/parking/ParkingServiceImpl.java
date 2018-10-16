@@ -4006,7 +4006,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public GetInvoiceUrlResponse getInvoiceUrl (GetInvoiceUrlCommand cmd){
 		String homeurl = configProvider.getValue("home.url", "");
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByOrderNo(cmd.getOrderId());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		String generalOrderId = order.getGeneralOrderId();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
 		String Url = homeurl + "/app/appinvoice?businessOrderNumber=" + generalOrderId;
