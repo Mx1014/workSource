@@ -66,6 +66,19 @@ UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
 UPDATE eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE id = 41400;
 UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE module_id = 41400;
 
+-- AUTHOR: 严军
+-- REMARK: 工位预定客户端处理方式设置为内部链接
+update eh_service_modules set client_handler_type = 2 WHERE id in (40200);
+
+
+-- AUTHOR: 严军
+-- REMARK: 开放“应用入口”菜单
+DELETE FROM eh_web_menus WHERE id = 15010000;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15010000', '基础数据', '15000000', NULL, NULL, '1', '2', '/15000000/15010000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL);
+DELETE FROM eh_web_menus WHERE id = 15025000;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
