@@ -1,8 +1,14 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
--- AUTHOR:
--- REMARK:
+-- AUTHOR:梁燕龙 20181016
+-- REMARK:统一用户上线操作.
+-- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539678631
+
+-- AUTHOR:xq.tian 20181016
+-- REMARK:网关及注册中心部署.
+-- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539677844
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
 
@@ -65,6 +71,32 @@ UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
 
 UPDATE eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE id = 41400;
 UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE module_id = 41400;
+
+-- AUTHOR: 严军
+-- REMARK: 工位预定客户端处理方式设置为内部链接
+update eh_service_modules set client_handler_type = 2 WHERE id in (40200);
+
+
+-- AUTHOR: 严军
+-- REMARK: 开放“应用入口”菜单
+DELETE FROM eh_web_menus WHERE id = 15010000;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15010000', '基础数据', '15000000', NULL, NULL, '1', '2', '/15000000/15010000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL);
+DELETE FROM eh_web_menus WHERE id = 15025000;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
+
+-- AUTHOR: 严军
+-- REMARK: 设置默认的应用分类
+UPDATE eh_service_modules set app_type = 1 WHERE app_type is NULL;
+UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
+
+update eh_service_modules set client_handler_type = 2 WHERE id = 43000;
+
+-- AUTHOR: xq.tian
+-- REMARK: 用户名或密码错误提示 add by xq.tian  2018/10/11
+SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'user', '100020', 'zh_CN', '用户名或密码错误');
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
@@ -134,6 +166,12 @@ UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-p
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: guanzhouyuekongjian
 -- DESCRIPTION: 此SECTION只在广州越空间-999930执行的脚本
+
+-- AUTHOR: xq.tian
+-- REMARK: 越空间独立部署的 root 用户的密码修改为: eh#1802
+UPDATE eh_users SET password_hash='4eaded9b566765a1e70e2e0dc45204c14c4b9df41507a6b72c7cc7fe91d85341', salt='3023538e14053565b98fdfb2050c7709'
+WHERE account_name='root' AND namespace_id=0;
+
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 
 

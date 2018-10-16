@@ -1,6 +1,71 @@
 // @formatter:off
 package com.everhomes.print;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.*;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.http.HttpUtils;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.paySDK.PayUtil;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.qrcode.QRCodeController;
+import com.everhomes.qrcode.QRCodeService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.print.*;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.util.xml.XMLToJSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,86 +79,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.alibaba.fastjson.JSONArray;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.pay.order.CreateOrderCommand;
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.SourceType;
-import com.everhomes.paySDK.PayUtil;
-import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.print.*;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.BusBridgeProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.gorder.sdk.order.GeneralOrderService;
-import com.everhomes.http.HttpUtils;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.order.OrderUtil;
 //import com.everhomes.order.PayService;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.qrcode.QRCodeController;
-import com.everhomes.qrcode.QRCodeService;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalOrderHandler;
-import com.everhomes.rentalv2.Rentalv2AccountProvider;
-import com.everhomes.rentalv2.Rentalv2PayService;
-import com.everhomes.rentalv2.Rentalv2Provider;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
-import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
-import com.everhomes.rest.qrcode.QRCodeHandler;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.xml.XMLToJSON;
-import com.google.gson.JsonObject;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 
@@ -1720,20 +1706,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		nQRCmd.setDescription("cloud print");
 		nQRCmd.setExtra(cmd.getData());
 		nQRCmd.setHandler(QRCodeHandler.PRINT.getCode());
-		RestResponse restResponse = qrController.newQRCode(nQRCmd);
-		if(restResponse.getErrorCode() == 200){
-			GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
-			QRCodeDTO dto = (QRCodeDTO)restResponse.getResponseObject();
-			gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
-			gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
-			gQRcmd.setQrid(dto.getQrid());
-			try {
-				qrController.getQRCodeImage(gQRcmd, req, rps);
-			} catch (Exception e) {
-				LOGGER.error("e",e);
-			}
-		}else{
-			LOGGER.error("create qrcode error "+restResponse);
+
+		QRCodeDTO dto = qrcodeService.createQRCode(nQRCmd);
+
+		GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
+		gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
+		gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
+		gQRcmd.setQrid(dto.getQrid());
+		try {
+			qrController.getQRCodeImage(gQRcmd, req, rps);
+		} catch (Exception e) {
+			LOGGER.error("e",e);
 		}
 	}
 
@@ -1754,16 +1737,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return cmd;
 	}
 
-
-	public void mfpLogNotification(String jobData, HttpServletResponse response) {
-		try {
-			if(siyinJobValidateServiceImpl.mfpLogNotification(jobData)){
-				response.getOutputStream().write("OK".getBytes());
-				return ;
-			}
-			response.getOutputStream().write("FAIL".getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public void mfpLogNotification(MfpLogNotificationCommand cmd) {
+		boolean isOk = siyinJobValidateServiceImpl.mfpLogNotification(cmd.getJobData());
+		if (!isOk) {
+			LOGGER.error("jobData:"+cmd.getJobData());
 		}
 	}
 
@@ -1957,7 +1935,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
-		mfpLogNotification(StringHelper.toJsonString(cmd),response);
+		
+		try {
+			response.getOutputStream().write("OK".getBytes());
+		} catch (IOException e) {
+			LOGGER.info("return ok failed");
+		}
+		
+		MfpLogNotificationCommand cmd2 = new MfpLogNotificationCommand();
+		cmd2.setJobData(StringHelper.toJsonString(cmd));
+		mfpLogNotification(cmd2);
 	}
 
 
