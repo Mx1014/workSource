@@ -149,7 +149,7 @@ public interface UserService {
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
-
+    void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode);
     /**
      * 判断是否登录
      * @return
