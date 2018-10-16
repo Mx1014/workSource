@@ -3745,19 +3745,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					}
 				}
 			}
-			if(null != order.getBizOrderNum()){
-				preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
-				ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
-						cmd.getClientAppName());
-				List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
-				if (paymentMethods != null)
-					preOrderDTO.setPayMethod(paymentMethods.stream().map(r->{
-						PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-						convert.setExtendInfo(getPayMethodExtendInfo());
-						return convert;
-					}).collect(Collectors.toList()));
-				return preOrderDTO;
-			}
 			//1、检查买方（付款方）是否有会员，无则创建
 			User userById = userProvider.findUserById(UserContext.currentUserId());
 			UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), namespaceId);

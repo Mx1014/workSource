@@ -179,7 +179,25 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("exportCommunityUsers")
     public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
         communityService.exportCommunityUsers(cmd, response);
+    }
 
+    /**
+     * <b>URL: /community/exportCommunityAllUsers</b>
+     * <p>导出域空间下所有用户列表</p>
+     */
+    @RequestMapping("exportCommunityAllUsers")
+    public void exportCommunityAllUsers(ExportAllCommunityUsersCommand cmd) {
+        communityService.exportAllCommunityUsers(cmd);
+
+    }
+
+    /**
+     * <b>URL: /community/exportBatchCommunityUsers</b>
+     * <p>导出域空间下多个项目的用户列表</p>
+     */
+    @RequestMapping("exportBatchCommunityUsers")
+    public void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd) {
+        communityService.exportBatchCommunityUsers(cmd);
 
     }
 	
@@ -211,7 +229,6 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    	
     }
 
     /**
@@ -606,6 +623,20 @@ public class CommunityController extends ControllerBase {
     public RestResponse caculateAllBuildingArea() {
     	this.communityService.caculateAllBuildingArea();
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/listAllCommunityUsers</b>
+     * <p>查询域空间所有项目用户列表</p>
+     */
+    @RequestMapping("listAllCommunityUsers")
+    @RestReturn(value=ListAllCommunityUserResponse.class)
+    public RestResponse listAllCommunityUsers(ListAllCommunityUsersCommand cmd) {
+        ListAllCommunityUserResponse res = communityService.listAllUserCommunities(cmd);
+        RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

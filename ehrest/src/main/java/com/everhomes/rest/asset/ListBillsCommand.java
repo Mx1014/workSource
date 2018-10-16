@@ -3,6 +3,8 @@ package com.everhomes.rest.asset;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -36,6 +38,12 @@ import javax.validation.constraints.NotNull;
  * <li>targetIdForEnt: 对公转账的企业id</li>
  * <li>dueDayCountStart: 欠费天数开始范围</li>
  * <li>dueDayCountEnd: 欠费天数结束范围</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>sorts:参考{@link com.everhomes.rest.asset.ReSortCmd}</li>
  *</ul>
  */
 public class ListBillsCommand {
@@ -53,55 +61,69 @@ public class ListBillsCommand {
     private Byte billStatus;
     private String targetName;
     private String billGroupName;
-
     private Long billGroupId;
-    
     private String buildingName;
     private String apartmentName;
     private Byte status;
     private String targetType;
     private String contractNum;
     private Long organizationId;
-
     private Long categoryId;
-    
     private Long targetIdForEnt;
-    
     private Long dueDayCountStart;//欠费天数开始范围
     private Long dueDayCountEnd;//欠费天数结束范围
 
-    public Long getCategoryId() {
-        return categoryId;
+    private Long moduleId;//用于下载中心
+
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
-    
     private Integer paymentType;
     private Byte isUploadCertificate;
     private String customerTel;
+    private Long communityId;
 
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
 
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
 
-	public Byte getIsUploadCertificate() {
-		return isUploadCertificate;
-	}
+    //账单列表处增加筛选项：欠费金额、应收、已收、待收等排序
+    private List<ReSortCmd> sorts;
+    public Long getCommunityId() {
+        return communityId;
+    }
 
-	public void setIsUploadCertificate(Byte isUploadCertificate) {
-		this.isUploadCertificate = isUploadCertificate;
-	}
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
 
-	public Integer getPaymentType() {
-		return paymentType;
-	}
+    public Byte getIsUploadCertificate() {
+        return isUploadCertificate;
+    }
 
-	public void setPaymentType(Integer paymentType) {
-		this.paymentType = paymentType;
-	}
+    public void setIsUploadCertificate(Byte isUploadCertificate) {
+        this.isUploadCertificate = isUploadCertificate;
+    }
 
-	public Long getOrganizationId() {
+    public Integer getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(Integer paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public Long getOrganizationId() {
         return organizationId;
     }
 
@@ -264,35 +286,91 @@ public class ListBillsCommand {
 
     }
 
-	public String getCustomerTel() {
-		return customerTel;
-	}
+    public String getCustomerTel() {
+        return customerTel;
+    }
 
-	public void setCustomerTel(String customerTel) {
-		this.customerTel = customerTel;
-	}
+    public void setCustomerTel(String customerTel) {
+        this.customerTel = customerTel;
+    }
 
-	public Long getTargetIdForEnt() {
-		return targetIdForEnt;
-	}
+    public Long getTargetIdForEnt() {
+        return targetIdForEnt;
+    }
 
-	public void setTargetIdForEnt(Long targetIdForEnt) {
-		this.targetIdForEnt = targetIdForEnt;
-	}
+    public void setTargetIdForEnt(Long targetIdForEnt) {
+        this.targetIdForEnt = targetIdForEnt;
+    }
 
-	public Long getDueDayCountStart() {
-		return dueDayCountStart;
-	}
+    public Long getDueDayCountStart() {
+        return dueDayCountStart;
+    }
 
-	public void setDueDayCountStart(Long dueDayCountStart) {
-		this.dueDayCountStart = dueDayCountStart;
-	}
+    public void setDueDayCountStart(Long dueDayCountStart) {
+        this.dueDayCountStart = dueDayCountStart;
+    }
 
-	public Long getDueDayCountEnd() {
-		return dueDayCountEnd;
-	}
+    public Long getDueDayCountEnd() {
+        return dueDayCountEnd;
+    }
 
-	public void setDueDayCountEnd(Long dueDayCountEnd) {
-		this.dueDayCountEnd = dueDayCountEnd;
-	}
+    public void setDueDayCountEnd(Long dueDayCountEnd) {
+        this.dueDayCountEnd = dueDayCountEnd;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public Long getConsumeUserId() {
+        return consumeUserId;
+    }
+
+    public void setConsumeUserId(Long consumeUserId) {
+        this.consumeUserId = consumeUserId;
+    }
+
+    public Byte getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Byte deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public List<ReSortCmd> getSorts() {
+        return sorts;
+    }
+
+    public void setSorts(List<ReSortCmd> sorts) {
+        this.sorts = sorts;
+    }
 }

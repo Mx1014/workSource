@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -990,7 +991,8 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
                         }
                         phones.append(noticeTel.get(k)+",");
                     }
-                    dto.setNoticeTel(phones.toString());
+                    //dto.setNoticeTelList(phones.toString());
+                    dto.setNoticeTelList(Arrays.asList(phones.toString().split(",")));
                     dto.setBillId(sourceDto.getBillID());
                     dto.setBillGroupName(sourceDto.getFeeName()==null?"租金":sourceDto.getFeeName());
 //                    dto.setDateStr(sourceDto.getBillDate());

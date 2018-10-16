@@ -24,6 +24,7 @@ import java.math.BigDecimal;
  *     <li>paymentParams: 支付参数 微信公众号必传 {@link com.everhomes.rest.order.PaymentParamsDTO}</li>
  *     <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  *     <li>bizPayeeId:收款方账户id</li>
+ *     <li>accountName:收款方账户名称</li>
  * </ul>
  */
 public class PreOrderCommand {
@@ -49,6 +50,7 @@ public class PreOrderCommand {
     // 由于产品方案修改，支付收款方由各业务自己记录，故添加该ID，并且做兼容，当业务不填该ID时则取自通用表 by lqs 20180526
     private String bizPayeeType;
     private Long bizPayeeId;
+    private String accountName;
 
     @NotNull
     private BigDecimal amount;
@@ -155,7 +157,15 @@ public class PreOrderCommand {
         this.namespaceId = namespaceId;
     }
 
-//    public String getOwnerType() {
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    //    public String getOwnerType() {
 //        return ownerType;
 //    }
 //

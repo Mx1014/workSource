@@ -184,7 +184,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
             //added by wh 建立了审批单之后
 
-            EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+            EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
             LOGGER.debug("建立审批,handler 执行 onApprovalCreated ");
             handler.onApprovalCreated(flowCase);
 
@@ -260,7 +260,7 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
         //  extra process
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(approvalId);
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+        EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
         handler.processFormFields(fieldDTOs, cmd);
 
 
@@ -283,18 +283,8 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
     @Override
     public GeneralFormReminderDTO getGeneralFormReminder(GeneralFormReminderCommand cmd) {
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
-        EnterpriseApprovalHandler handler = getEnterpriseApprovalHandler(ga);
+        EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
         return handler.getGeneralFormReminder(cmd);
     }
 
-    private EnterpriseApprovalHandler getEnterpriseApprovalHandler(GeneralApproval ga) {
-        if (ga != null) {
-            EnterpriseApprovalHandler handler = PlatformContext.getComponent(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX
-                    + ga.getApprovalAttribute());
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return PlatformContext.getComponent(EnterpriseApprovalDefaultHandler.ENTERPRISE_APPROVAL_DEFAULT_HANDLER_NAME);
-    }
 }

@@ -11,6 +11,7 @@ import java.util.List;
  * <ul>
  * <li>rentalSiteId：场所id</li>
  * <li>siteName：场所名称</li>
+ * <li>resourceCounts：场所数量</li>
  * <li>introduction：详情</li>
  * <li>notice：备注文字</li>
  * <li>address：地址</li>
@@ -40,6 +41,7 @@ public class FindRentalSiteMonthStatusByWeekCommandResponse {
 
     private Long rentalSiteId;
     private String siteName;
+    private Double resourceCounts;
     private String introduction;
     private String notice;
     private String address;
@@ -83,6 +85,14 @@ public class FindRentalSiteMonthStatusByWeekCommandResponse {
 
     public void setSiteName(String siteName) {
         this.siteName = siteName;
+    }
+
+    public Double getResourceCounts() {
+        return resourceCounts;
+    }
+
+    public void setResourceCounts(Double resourceCounts) {
+        this.resourceCounts = resourceCounts;
     }
 
     public String getIntroduction() {

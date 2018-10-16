@@ -101,4 +101,18 @@ public class FormFieldAskForLeaveProcessor implements FormFieldProcessor {
         }
         return null;
     }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
+        if ("请假类型".equals(fieldName))
+            return "请假时段";
+        if ("开始时间".equals(fieldName))
+            return "请假时段";
+        if ("结束时间".equals(fieldName))
+            return "请假时段";
+        if ("请假时长".equals(fieldName))
+            return "请假时段";
+        return fieldName;
+    }
+
 }

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
  * <li>energyConsume: 费项的用量</li>
  * <li>energyUnit: 费项的用量单位</li>
  * <li>isConfigSubtraction:1：已经配置了减免费项，0：代表没有配置减免费项</li>
+ * <li>projectChargingItemName:费项显示名称</li>
  *</ul>
  */
 public class ShowBillDetailForClientDTO {
@@ -35,6 +36,8 @@ public class ShowBillDetailForClientDTO {
     //费项增加用量单位字段
     private String energyUnit;
     private Byte isConfigSubtraction;
+    //APP端也需更新:备注名称改为显示名称
+    private String projectChargingItemName;
 
     @Override
     public String toString() {
@@ -131,5 +134,13 @@ public class ShowBillDetailForClientDTO {
 
 	public void setIsConfigSubtraction(Byte isConfigSubtraction) {
 		this.isConfigSubtraction = isConfigSubtraction;
+	}
+
+	public String getProjectChargingItemName() {
+		return projectChargingItemName;
+	}
+
+	public void setProjectChargingItemName(String projectChargingItemName) {
+		this.projectChargingItemName = projectChargingItemName;
 	}
 }

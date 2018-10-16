@@ -232,7 +232,11 @@ public enum VersionRealmType {
     ANDROID_YUESPACE("Android_YueSpace"),
     IOS_YUESPACE("iOS_YueSpace"),
     ANDROID_INNOPLUS("Android_InnoPlus"),
-    IOS_INNOPLUS("iOS_InnoPlus")
+    IOS_INNOPLUS("iOS_InnoPlus"),
+    ANDROID_JINGUTONG("Android_JinGuTong"),
+    IOS_JINGUTONG("iOS_JinGuTong"),
+    ANDROID_BILINSHE("Android_BiLinShe"),
+    IOS_BILINSHE("iOS_BiLinShe")
     ;
 
     private String code;

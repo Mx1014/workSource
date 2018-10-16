@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.address;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -20,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * <li>orientation: 朝向</li>
  * <li>apartmentFloor: 房源所在楼层</li>
  * <li>freeArea: 可招租面积</li>
+ * <li>apartmentRent: 房源的租金</li>
+ * <li>apartmentRentType: 房源的租金类型</li>
  * </ul>
  */
 public class UpdateApartmentCommand {
@@ -37,7 +41,25 @@ public class UpdateApartmentCommand {
 	private String orientation;
 	private String apartmentFloor;
 	private Double freeArea;
+	private BigDecimal apartmentRent;
+	private Byte apartmentRentType;
 	
+	public BigDecimal getApartmentRent() {
+		return apartmentRent;
+	}
+
+	public void setApartmentRent(BigDecimal apartmentRent) {
+		this.apartmentRent = apartmentRent;
+	}
+
+	public Byte getApartmentRentType() {
+		return apartmentRentType;
+	}
+
+	public void setApartmentRentType(Byte apartmentRentType) {
+		this.apartmentRentType = apartmentRentType;
+	}
+
 	public Double getFreeArea() {
 		return freeArea;
 	}

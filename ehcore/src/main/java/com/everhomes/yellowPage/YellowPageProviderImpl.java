@@ -329,6 +329,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         saList = query.fetchInto(ServiceAlliances.class);
         
         if(saList != null && saList.size() > 0) {
+        	
+        	//优化性能 #37643
+        	for (ServiceAlliances sa : saList) {
+        		sa.setDescription(null);
+        	}
+        	
             return saList;
         }
         return saList;
@@ -391,6 +397,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		category.setId(id);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());
+		category.setDefaultOrder(id);
 	        
 		EhServiceAllianceCategoriesDao dao = new EhServiceAllianceCategoriesDao(context.configuration());
 		dao.insert(category);
@@ -608,6 +615,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			query.addLimit(pageSize+1);
 		}
 
+    	query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DEFAULT_ORDER.asc(), Tables.EH_SERVICE_ALLIANCE_CATEGORIES.ID.asc());
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query child categories, sql=" + query.getSQL());
@@ -1367,6 +1375,31 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	private DSLContext readOnlyContext() {
 		return dbProvider.getDslContext(AccessSpec.readOnly());
 	}
-	
+
+
+	@Override
+	public Map<Long, Long> getServiceTypeOrders(List<Long> idList) {
+		return readOnlyContext() 
+		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.DEFAULT_ORDER)
+		.from(SA_TYPE_TABLE)
+		.where(
+				SA_TYPE_TABLE.ID.in(idList)
+				.and(SA_TYPE_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()))
+				)
+		.fetch()
+		.intoMap(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.DEFAULT_ORDER);
+	}
+
+	private DSLContext readWriteContext() {
+		return dbProvider.getDslContext(AccessSpec.readWrite());
+	}
+	@Override
+	public void updateServiceTypeOrders(Long id, Long order) {
+		UpdateQuery<EhServiceAllianceCategoriesRecord> updateQuery = readWriteContext().updateQuery(SA_TYPE_TABLE);
+		updateQuery.addValue(SA_TYPE_TABLE.DEFAULT_ORDER, order);
+		updateQuery.addConditions(SA_TYPE_TABLE.ID.eq(id));
+		updateQuery.addConditions(SA_TYPE_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+		updateQuery.execute();
+	}
 	
 }

@@ -7,27 +7,29 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>contendIds: (List)内容ids</li>
+ * <li>contents: (List)要删除的文件/文件夹列表 参考 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * </ul>
  */
 public class DeleteFileContentCommand {
-
-    @ItemType(Long.class)
-    private List<Long> contendIds;
-
+ 
+    private List<FileContentDTO> contents; 
     public DeleteFileContentCommand() {
     }
-
-    public List<Long> getContendIds() {
-        return contendIds;
-    }
-
-    public void setContendIds(List<Long> contendIds) {
-        this.contendIds = contendIds;
-    }
+ 
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+	public List<FileContentDTO> getContents() {
+		return contents;
+	}
+
+
+	public void setContents(List<FileContentDTO> contents) {
+		this.contents = contents;
+	}
+ 
 }

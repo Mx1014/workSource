@@ -69,6 +69,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         String contactPhone = null;
         String enterpriseName = null;
         String description = null;
+        String customerName = null;
 
         for (PostApprovalFormItem item: values) {
             GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
@@ -85,6 +86,9 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
                     case USER_COMPANY:
                         //工作流images怎么传
                         enterpriseName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                    case CUSTOMER_NAME:
+                    	customerName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                     case CUSTOM_DATA:
                         json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
@@ -103,7 +107,6 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
                         break;
                 }
             }
-
         }
 
         EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
@@ -111,6 +114,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         cmd2.setContactPhone(contactPhone);
         cmd2.setEnterpriseName(enterpriseName);
         cmd2.setDescription(description);
+        cmd2.setCustomerName(customerName);
 
         cmd2.setRequestFormId(requestFormId);
         cmd2.setNamespaceId(cmd.getNamespaceId());

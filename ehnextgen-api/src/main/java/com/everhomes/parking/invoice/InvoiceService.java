@@ -2,6 +2,7 @@
 package com.everhomes.parking.invoice;
 
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.invoice.*;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface InvoiceService {
     GetPayeeIdByOrderNoResponse getPayeeIdByOrderNo(GetPayeeIdByOrderNoCommand cmd);
 
     List<ParkingLotDTO> listAllParkingLots(ListAllParkingLotsCommand cmd);
+
+	ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo(long orderNo);
 }

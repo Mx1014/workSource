@@ -55,7 +55,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             "visitorName", "followUpNumbers", "visitorPhone", "visitReasonId", "visitReason",
             "inviterId", "inviterName", "plannedVisitTime", "visitTime", "createTime", "visitStatus", "bookingStatus",
             "visitorType", "enterpriseId", "enterpriseName", "officeLocationId", "officeLocationName",
-            "statsDate", "statsHour", "statsWeek"};
+            "statsDate", "statsHour", "statsWeek","idNumber"};
     private static final DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @Autowired
     public VisitorSysVisitorProvider visitorSysVisitorProvider;
@@ -153,6 +153,10 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
 
         if (params.getEnterpriseId() != null) {
              fbList.add(FilterBuilders.termFilter("enterpriseId", params.getEnterpriseId()));
+        }
+
+        if(!StringUtils.isEmpty(params.getIdNumber())){
+            fbList.add(FilterBuilders.termFilter("idNumber",params.getIdNumber()));
         }
 
         VisitorsysSearchFlagType visitorsysSearchFlagType = VisitorsysSearchFlagType.fromCode(params.getSearchFlag());
@@ -614,6 +618,9 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
                 Object officeLocationName = source.get("officeLocationName");
                 if(officeLocationName!=null){
                     dto.setOfficeLocationName(String.valueOf(officeLocationName));}
+                Object idNumber = source.get("idNumber");
+                if(null != idNumber)
+                    dto.setIdNumber(String.valueOf(idNumber));
 
                 dtos.add(dto);
             }

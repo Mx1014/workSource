@@ -9,6 +9,7 @@ import java.util.List;
  * <ul>
  * <li>folders: 文件夹列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
  * <li>files: 文件列表 {@link com.everhomes.rest.filemanagement.FileContentDTO}</li>
+ * <li>path: 路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
  * </ul>
  */
 public class ListFileContentResponse {
@@ -21,6 +22,7 @@ public class ListFileContentResponse {
     @ItemType(FileContentDTO.class)
     private List<FileContentDTO> files;
 
+    private String path;
 
     public ListFileContentResponse() {
     }
@@ -53,4 +55,12 @@ public class ListFileContentResponse {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
 }

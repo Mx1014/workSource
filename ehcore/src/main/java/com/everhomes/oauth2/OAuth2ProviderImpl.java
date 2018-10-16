@@ -1,16 +1,5 @@
 package com.everhomes.oauth2;
 
-import java.util.List;
-
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -24,6 +13,16 @@ import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IdToken;
 import com.everhomes.util.WebTokenGenerator;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class OAuth2ProviderImpl implements OAuth2Provider {
@@ -179,5 +178,17 @@ public class OAuth2ProviderImpl implements OAuth2Provider {
         if(tokens.size() > 0)
             return tokens.get(0);
         return null;
+    }
+
+    @Override
+    public AccessToken findAccessTokenByAppAndGrantorUid(Long appId, Long grantorUid) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhOauth2Tokens t = Tables.EH_OAUTH2_TOKENS;
+
+        return context.select().from(t)
+                .where(t.APP_ID.eq(appId))
+                .and(t.GRANTOR_UID.eq(grantorUid))
+                .orderBy(t.ID.desc())
+                .fetchAnyInto(AccessToken.class);
     }
 }

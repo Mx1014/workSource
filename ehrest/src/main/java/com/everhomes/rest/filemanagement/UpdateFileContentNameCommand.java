@@ -6,6 +6,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>contentId: 内容id</li>
  * <li>contentName: 内容名称</li>
+ * <li>contentSuffix: 后缀名</li>
+ * <li>path: 路径 格式: /目录/文件夹1/文件夹2.../文件夹n</li>
  * </ul>
  */
 public class UpdateFileContentNameCommand {
@@ -15,6 +17,8 @@ public class UpdateFileContentNameCommand {
     private String contentName;
 
     private String contentSuffix;
+
+    private String path;
 
     public UpdateFileContentNameCommand() {
     }
@@ -46,5 +50,13 @@ public class UpdateFileContentNameCommand {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

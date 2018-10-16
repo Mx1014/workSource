@@ -1,0 +1,5 @@
+-- AUTHOR: 梁燕龙
+-- REMARK: 是否显示会员等级
+-- INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+-- VALUES ('user.show.vip.level', 'true', '用户管理是否展示隐私设置', '999929', NULL, '1');
+-- END

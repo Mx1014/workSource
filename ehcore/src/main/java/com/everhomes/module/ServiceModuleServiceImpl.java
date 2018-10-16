@@ -1102,6 +1102,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             ServiceModuleDTO current = iter.next();
             if (current.getParentId().equals(parentId)
                     && (ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.CLASSIFY || ServiceModuleCategory.fromCode(current.getCategory()) == ServiceModuleCategory.MODULE )) {
+                System.out.println(current.getId());
                 List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
                 results.add(current);
@@ -1223,12 +1224,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+        //白名单的定义：无论是配置在白名单还是黑名单中的按钮，都要先配置在eh_service_module_functions中，在此基础上，如果配置在白名单中的按钮所在的域空间与当前域空间一致，则显示该按钮。没有配置白名单的域空间则不显示该按钮
+        //实现方法是先取出所有的白名单中有的ID，作为准备从所有按钮（functionIds）中去掉的list（withoutWhiteList）。然后取出当前域空间和园区生效的白名单的ID（includeFunctions），并将它从withoutWhiteList中去除，将剩下的withoutWhiteList从functionIds中刨去，则剩下的就是根据白名单保留后的结果
+        //group by出所有的在白名单中的按钮ID，作为准备去除的部分
+        List<Long> withoutWhiteList = serviceModuleProvider.listExcludeCauseWhiteList();
+        //获得当前生效的白名单按钮ID
         List<ServiceModuleIncludeFunction> includeFunctions = serviceModuleProvider.listIncludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
-        if (includeFunctions != null && includeFunctions.size() > 0) {
-            includeFunctions.forEach(includeFunction -> {
-                functionIds.remove(includeFunction.getFunctionId());
-            });
+        if(withoutWhiteList != null && withoutWhiteList.size() > 0){
+            if (includeFunctions != null && includeFunctions.size() > 0) {
+                //将生效的白名单从将要去除的id列表中去除
+                includeFunctions.forEach(r -> withoutWhiteList.remove(r.getFunctionId()));
+
+                //将剩下的去除列表中的id从全部生效的按钮id中去除
+                /*
+                includeFunctions.forEach(includeFunction -> {
+                    functionIds.remove(includeFunction.getFunctionId());
+                });*/
+            }
+            withoutWhiteList.forEach(functionIds::remove);
+
         }
+
 
         return functionIds;
     }

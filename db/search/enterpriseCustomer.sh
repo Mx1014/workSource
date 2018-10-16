@@ -45,7 +45,11 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
             "sourceId":{"type":"long"},
             "sourceType":{"type":"string","index":"not_analyzed"},
             "propertyArea":{"type":"double"},
-			"lastTrackingTime":{"type":"date"}
+			"lastTrackingTime":{"type":"date"},
+			"requirementMinArea":{"type":"double"},
+			"requirementMaxArea":{"type":"double"},
+			"trackerName":{"type":"string", "index":"not_analyzed"},
+			"entryInfo":{"type":"long"}
 		}
 	}
 }

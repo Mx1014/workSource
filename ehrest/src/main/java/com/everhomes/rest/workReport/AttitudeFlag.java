@@ -26,7 +26,7 @@ public enum AttitudeFlag {
             return null;
         AttitudeFlag[] values = AttitudeFlag.values();
         for(AttitudeFlag value : values){
-            if(value.getCode() == code.byteValue())
+            if(value.getCode() == code)
                 return value;
         }
         

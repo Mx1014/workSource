@@ -16,6 +16,8 @@ import java.util.List;
  * <li>enableMonthCard:  月卡申请功能是否启用, 0：不启用，1：启用 {@link com.everhomes.rest.parking.ParkingConfigFlag}</li>
  * <li>monthCardFlow:  当前月卡工作流标识，参考 {@link com.everhomes.rest.parking.ParkingRequestFlowType}</li>
  * <li>flowModeList: 月卡模式列表， 参考{@link com.everhomes.rest.parking.ParkingRequestFlowType}</li>
+ * <li>enableNotice: 用户须知功能是否启用，0：不启用，1：启用</li>
+ * <li>enableInvoice: 发票功能是否启用，0：不启用，1：启用</li>
  *</ul>
  */
 

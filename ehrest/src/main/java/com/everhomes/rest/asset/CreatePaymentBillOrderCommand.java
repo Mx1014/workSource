@@ -22,6 +22,7 @@ import java.util.List;
  * <li>sourceType: 支付来源，如手机或PC之类，参考{@link com.everhomes.pay.order.SourceType}</li>
  * <li>extendInfo: 扩展信息，传给支付系统而支付系统会原样返回</li>
  * <li>billIds: 账单id列表</li>
+ * <li>pmsyOrderId: eh_pmsy_orders表的ID</li>
  *</ul>
  */
 public class CreatePaymentBillOrderCommand {
@@ -42,6 +43,8 @@ public class CreatePaymentBillOrderCommand {
     
     @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
+    
+    private String pmsyOrderId;
     
     public Integer getNamespaceId() {
         return namespaceId;
@@ -167,4 +170,12 @@ public class CreatePaymentBillOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getPmsyOrderId() {
+		return pmsyOrderId;
+	}
+
+	public void setPmsyOrderId(String pmsyOrderId) {
+		this.pmsyOrderId = pmsyOrderId;
+	}
 }

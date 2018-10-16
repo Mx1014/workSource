@@ -171,6 +171,8 @@ public interface ActivityService {
 
 	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
 
+    ListSignupInfoByOrganizationIdResponse listSignupInfoByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize);
+
 	void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response);
 
 	void deleteSignupInfo(DeleteSignupInfoCommand cmd);

@@ -9,6 +9,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filemanagement.FileService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -24,6 +25,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.meeting.AbandonMeetingReservationLockTimeCommand;
+import com.everhomes.rest.meeting.AttachmentOwnerType;
 import com.everhomes.rest.meeting.CancelMeetingReservationCommand;
 import com.everhomes.rest.meeting.CreateMeetingRecordCommand;
 import com.everhomes.rest.meeting.CreateOrUpdateMeetingRoomCommand;
@@ -43,6 +45,7 @@ import com.everhomes.rest.meeting.ListMyMeetingRecordsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingRecordsResponse;
 import com.everhomes.rest.meeting.ListMyMeetingsCommand;
 import com.everhomes.rest.meeting.ListMyMeetingsResponse;
+import com.everhomes.rest.meeting.MeetingAttachmentDTO;
 import com.everhomes.rest.meeting.MeetingGeneralFlag;
 import com.everhomes.rest.meeting.MeetingInvitationDTO;
 import com.everhomes.rest.meeting.MeetingMemberSourceType;
@@ -74,9 +77,11 @@ import com.everhomes.scheduler.MeetingRoomRecoveryScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhMeetingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhMeetingInvitations;
 import com.everhomes.server.schema.tables.pojos.EhMeetingReservations;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -87,6 +92,9 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.hp.hpl.sparta.xpath.ThisNodeTest;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -107,6 +115,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -116,6 +125,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class MeetingServiceImpl implements MeetingService, ApplicationListener<ContextRefreshedEvent> {
@@ -126,6 +137,8 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     private static final int MEETING_COMING_SOON_MINUTE = 10;
     private static final String LOCALE = "zh_CN";
 
+    @Autowired
+    private FileService fileService;
     @Autowired
     private MeetingProvider meetingProvider;
     @Autowired
@@ -495,6 +508,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecordDetailInfoDTO.setMeetingRecordShareDTOS(getUserAvatar(meetingInvitations));
         meetingRecordDetailInfoDTO.setContent(meetingRecord.getContent());
         meetingRecordDetailInfoDTO.setRecordWordLimit(getRecordWordLimit());
+        meetingRecordDetailInfoDTO.setMeetingAttachments(listMeetingAttachments(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords));
         return meetingRecordDetailInfoDTO;
     }
 
@@ -534,6 +548,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingReservationSimpleDTO.setSponsorDetailId(meetingReservation.getMeetingSponsorDetailId());
         meetingReservationSimpleDTO.setSponsorName(meetingReservation.getMeetingSponsorName());
         meetingReservationSimpleDTO.setMeetingDate(meetingReservation.getMeetingDate().getTime());
+        meetingReservationSimpleDTO.setAttachmentFlag(meetingReservation.getAttachmentFlag());
         return meetingReservationSimpleDTO;
     }
 
@@ -702,10 +717,31 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         MeetingReservationShowStatus status = buildMeetingReservationShowStatus(meetingReservation);
         meetingReservationDetailDTO.setStatus(status.getCode());
         meetingReservationDetailDTO.setShowStatus(status.toString());
+        meetingReservationDetailDTO.setMeetingAttachments(listMeetingAttachments(meetingReservation.getId(),AttachmentOwnerType.EhMeetingReservations));
         return meetingReservationDetailDTO;
     }
 
-    private MeetingReservationShowStatus buildMeetingReservationShowStatus(MeetingReservation meetingReservation) {
+    private List<MeetingAttachmentDTO> listMeetingAttachments(Long id,
+			AttachmentOwnerType attachmentOwnerType) {
+    	if(null == attachmentOwnerType)
+    		return null;
+    	List<MeetingAttachment> attachments = meetingProvider.listMeetingAttachements(id, attachmentOwnerType.getCode());
+    	if(null != attachments){
+    		return attachments.stream().map(r -> {
+    			return processAttachment2DTO(r);
+    		}).collect(Collectors.toList());
+    	}
+		return null;
+	}
+
+	private MeetingAttachmentDTO processAttachment2DTO(MeetingAttachment r) {
+		MeetingAttachmentDTO dto = ConvertHelper.convert(r , MeetingAttachmentDTO.class);
+		dto.setContentUrl(contentServerService.parserUri(dto.getContentUri()));
+		dto.setContentIconUrl(contentServerService.parserUri(dto.getContentIconUri()));
+		return dto;
+	}
+
+	private MeetingReservationShowStatus buildMeetingReservationShowStatus(MeetingReservation meetingReservation) {
         MeetingReservationShowStatus status = MeetingReservationShowStatus.COMING_SOON;
         if (MeetingReservationStatus.CANCELED == MeetingReservationStatus.fromCode(meetingReservation.getStatus())) {
             status = MeetingReservationShowStatus.CANCELED;
@@ -784,11 +820,27 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         addMeetingInvitations.addAll(cmd.getMeetingInvitations());
         addMeetingInvitations.removeAll(existMeetingInvitations);
+        
+        //附件
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingReservation.getId(), AttachmentOwnerType.EhMeetingReservations.getCode());
+        List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingReservation);
+        List<MeetingAttachment> existsAttachements = new ArrayList<>();
+        List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingReservation.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingReservation.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
+        }
         dbProvider.execute(transactionStatus -> {
             Long id = meetingProvider.updateMeetingReservation(updateMeetingReservation);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
             List<EhMeetingInvitations> addMeetingInvitationList = buildEhMeetingInvitations(addMeetingInvitations, id, MeetingInvitationRoleType.ATTENDEE);
             meetingProvider.batchCreateMeetingInvitations(addMeetingInvitationList);
+
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
+            meetingProvider.batchCreateMeetingAttachments(addAttachements);
+            
             return null;
         });
 
@@ -806,7 +858,65 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
+    private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
+			List<MeetingAttachment> newAttachements, List<MeetingAttachment> existsAttachements) {
+    	if(CollectionUtils.isEmpty(oldAttachements))
+			return Collections.emptyList();
+    	if(CollectionUtils.isEmpty(newAttachements))
+			return oldAttachements;
+    	List<MeetingAttachment> deleteAttachements = new ArrayList<>();
+		for (MeetingAttachment oldAttachment : oldAttachements) {
+            boolean shouldDelete = true;
+            for (MeetingAttachment newAttachment : newAttachements) {
+                if (newAttachment.getContentName().equals(oldAttachment.getContentName()) &&
+                		newAttachment.getContentUri().equals(oldAttachment.getContentUri()) ) {
+                    shouldDelete = false;
+                    existsAttachements.add(newAttachment);
+                    break;
+                }
+            }
+            if (shouldDelete) {
+            	deleteAttachements .add(oldAttachment);
+            }
+        }
+		return deleteAttachements;
+	}
+
+	private List<MeetingAttachment> findAddAttachments(List<MeetingAttachment> newAttachements,
+			List<MeetingAttachment> existsAttachements) {
+		if(CollectionUtils.isEmpty(newAttachements))
+			return Collections.emptyList();
+		List<MeetingAttachment> addAttachements = new ArrayList<>();
+		addAttachements.addAll(newAttachements);
+		addAttachements.removeAll(existsAttachements);
+		return addAttachements;
+	}
+
+	private List<MeetingAttachment> convertDTO2MeetingAttachment(
+			List<MeetingAttachmentDTO> meetingAttachments, MeetingReservation meetingReservation) {
+		if(meetingAttachments == null){
+			return null;
+		}
+		Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
+		return meetingAttachments.stream().map(r->{
+			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+			attachment.setNamespaceId(meetingReservation.getNamespaceId());
+			attachment.setOwnerType(AttachmentOwnerType.EhMeetingReservations.getCode());
+			attachment.setOwnerId(meetingReservation.getId());
+			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName())); 
+			return attachment;
+		}).collect(Collectors.toList());
+	}
+
+	private String processIconUri(Map<String, String> fileIconUriMap, String fileName) {
+		String suffix = "other";
+		if(null != fileName){
+			suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+		}
+		return fileIconUriMap.get(suffix) == null ? fileIconUriMap.get("other") : fileIconUriMap.get(suffix);
+	}
+
+	private void checkWhenUpdateMeetingReservation(MeetingReservation meetingReservation) {
         if (meetingReservation == null) {
             throw errorWithMeetingReservationNoExist();
         }
@@ -1009,6 +1119,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dto.setSponsorUserId(meetingReservation.getMeetingSponsorUserId());
             dto.setSponsorDetailId(meetingReservation.getMeetingSponsorDetailId());
             dto.setSponsorName(meetingReservation.getMeetingSponsorName());
+            dto.setAttachmentFlag(meetingReservation.getAttachmentFlag());
             MeetingReservationShowStatus status = buildMeetingReservationShowStatus(meetingReservation);
             dto.setStatus(status.getCode());
             dto.setShowStatus(status.toString());
@@ -1083,9 +1194,18 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         meetingRecord.setOperatorName(operatorName);
         meetingRecord.setContent(cmd.getContent());
 
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingRecord.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
+        }
+        
         List<EhMeetingInvitations> recordReceivers = buildEhMeetingInvitations(cmd.getMeetingRecordShareDTOS(), meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.createMeetingRecord(meetingRecord);
+            //附件 
+            List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord); 
+            meetingProvider.batchCreateMeetingAttachments(newAttachements);
             meetingProvider.batchCreateMeetingInvitations(recordReceivers);
             return null;
         });
@@ -1097,7 +1217,24 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return convertToMeetingRecordDetailInfoDTO(meetingReservation, meetingRecord, meetingInvitationDTOS);
     }
 
-    @Override
+    private List<MeetingAttachment> convertDTO2MeetingAttachment(
+			List<MeetingAttachmentDTO> meetingAttachments, MeetingRecord meetingRecord) {
+
+		if(meetingAttachments == null){
+			return null;
+		}
+		Map<String, String> fileIconUriMap = fileService.getFileIconUrl();
+		return meetingAttachments.stream().map(r->{
+			MeetingAttachment attachment = ConvertHelper.convert(r, MeetingAttachment.class);
+			attachment.setNamespaceId(UserContext.getCurrentNamespaceId());
+			attachment.setOwnerType(AttachmentOwnerType.EhMeetingRecords.getCode());
+			attachment.setOwnerId(meetingRecord.getId());
+			attachment.setContentIconUri(processIconUri(fileIconUriMap,r.getContentName()));
+			return attachment;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
     public MeetingRecordDetailInfoDTO updateMeetingRecord(UpdateMeetingRecordCommand cmd) {
         cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
         cmd.setMeetingRecordShareDTOS(getAndCheckMeetingInvitationDTOs(cmd.getMeetingRecordShareDTOS()));
@@ -1145,11 +1282,25 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
         addMeetingInvitations.addAll(cmd.getMeetingRecordShareDTOS());
         addMeetingInvitations.removeAll(existMeetingInvitations);
+
+        //附件
+        List<MeetingAttachment> oldAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
+        List<MeetingAttachment> newAttachements = convertDTO2MeetingAttachment(cmd.getMeetingAttachments(), meetingRecord);
+        List<MeetingAttachment> existsAttachements = new ArrayList<>();
+		List<MeetingAttachment> deleteAttachements = findDeleteAttachments(oldAttachements, newAttachements, existsAttachements);
+        List<MeetingAttachment> addAttachements = findAddAttachments(newAttachements, existsAttachements);
+        if(!CollectionUtils.isEmpty(cmd.getMeetingAttachments())){
+        	meetingRecord.setAttachmentFlag(MeetingGeneralFlag.ON.getCode());
+        }else{
+            meetingRecord.setAttachmentFlag(MeetingGeneralFlag.OFF.getCode());
+        }
         List<EhMeetingInvitations> newRecordReceivers = buildEhMeetingInvitations(addMeetingInvitations, meetingReservation.getId(), MeetingInvitationRoleType.CC);
         dbProvider.execute(transactionStatus -> {
             meetingProvider.updateMeetingRecord(meetingRecord);
             meetingProvider.batchDeleteMeetingInvitations(deleteMeetingInvitations);
             meetingProvider.batchCreateMeetingInvitations(newRecordReceivers);
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
+            meetingProvider.batchCreateMeetingAttachments(addAttachements);
             return null;
         });
         List<EhMeetingInvitations> newAllMeetingInvitations = meetingProvider.findMeetingInvitationsByMeetingId(meetingRecord.getMeetingReservationId(), MeetingInvitationRoleType.CC.getCode());
@@ -1174,10 +1325,12 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         if (!haveMeetingReservationWritePermission(meetingReservation)) {
             throw errorWithNoPermissionDeleteMeetingRecord();
         }
+        List<MeetingAttachment> deleteAttachements = meetingProvider.listMeetingAttachements(meetingRecord.getId(), AttachmentOwnerType.EhMeetingRecords.getCode());
         List<EhMeetingInvitations> recordReceivers = meetingProvider.findMeetingInvitationsByMeetingId(meetingReservation.getId(), MeetingInvitationRoleType.CC.getCode());
         dbProvider.execute(transactionStatus -> {
             meetingProvider.deleteMeetingRecord(meetingRecord);
             meetingProvider.batchDeleteMeetingInvitations(recordReceivers);
+            meetingProvider.batchDeleteMeetingAttachments(deleteAttachements);
             return null;
         });
     }
@@ -1206,6 +1359,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             dto.setReceiveTime(meetingRecord.getOperateTime().getTime());
             dto.setRecorderName(meetingRecord.getOperatorName());
             dto.setShowTitle(meetingRecord.getMeetingSubject() + "-会议纪要");
+            dto.setAttachmentFlag(meetingRecord.getAttachmentFlag());
             if (meetingRecord.getContent() != null && meetingRecord.getContent().length() > 100) {
                 dto.setSummary(meetingRecord.getContent().substring(0, 100));
             } else {

@@ -157,6 +157,7 @@ public interface ConfigConstants {
 	
 	String REMIND_COLOUR_LIST = "remind.colour.list";
     String REMIND_COLOUR_SHARE = "remind.colour.share";
+    String REMIND_VERSION_SEGMEN = "remind.version.segmen";
 
 	public static final String ASSET_SHENZHENWAN_EASLOGIN_ADDRESS = "asset.shenzhenwan.EASLogin_address";
 	public static final String ASSET_SHENZHENWAN_WSWSSYNCMYBAYFACADE_ADDRESS = "asset.shenzhenwan.WSWSSyncMyBayFacade_address";
@@ -179,7 +180,9 @@ public interface ConfigConstants {
     public static final String MEETING_RECORD_WORD_LIMIT = "meeting.record.word.limit";
 	public static final String ASSET_DINGFENGHUI_APPSHOWPAY = "asset.dingfenghui.appshowpay";
 	public static final String OPENAPI_LUFU_KEY = "openapi.lufu.key";
-	
+
+    String ENTERPRISE_NOTICE_WEB_SHARE_URL = "enterprise.notice.share.url";
+
 	public static final String APPLE_PUSHER_FLAG = "apple.pusher.flag";
 
 
@@ -210,8 +213,11 @@ public interface ConfigConstants {
     public static final String SENSITIVE_FILENAME = "sensitiveword.fileName";
     public static final String SENSITIVE_FILEPATH = "sensitiveword.filePath";
     public static final String SENSITIVE_SETTING = "sensitiveword.settings";
-
-    String ENTERPRISE_NOTICE_WEB_SHARE_URL = "enterprise.notice.share.url";
+ 
 
     public static final String SHOW_PRIVATE_FLAG = "personal.show.private.flag";
+    public static final String SHOW_USER_VIP_LEVEL = "user.show.vip.level";
+
+    //支付双向安全校验
+    public static final String SECURITY_PAY_SERVER = "security.pay.server";
 }

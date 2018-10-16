@@ -558,10 +558,29 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
-				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
 				return query;
 			}
     	});    	
+    }
+
+    /**
+     * 当前节点的还没有处理完成的处理人
+     */
+    @Override
+    public List<FlowEventLog> findCurrentNodeNotCompleteEnterLogs(Long nodeId, Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.ENTER_LOG_COMPLETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode()));
+				return query;
+			}
+    	});
     }
 
     /**
@@ -574,7 +593,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .from(Tables.EH_FLOW_EVENT_LOGS)
                 .where(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId))
                 .and(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId))
-                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()))
+                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
                 .fetchAnyInto(Long.class);
     }
 
@@ -603,7 +622,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     @Override
-    public List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator) {
+    public List<FlowOperateLogDTO> searchOperateLogs(SearchFlowOperateLogsCommand cmd, Integer pageSize, ListingLocator locator) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         com.everhomes.server.schema.tables.EhFlowEventLogs log = Tables.EH_FLOW_EVENT_LOGS;
@@ -617,24 +636,28 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                 .getQuery();
 
         query.addConditions(flowCase.STATUS.ne(FlowCaseStatus.INVALID.getCode()));// 无效状态的flowCase不要显示
+        query.addConditions(flowCase.DELETE_FLAG.ne(TrueOrFalseFlag.TRUE.getCode()));// 无效状态的flowCase不要显示
 
-        if (moduleId != null && moduleId != 0) {
-            query.addConditions(flowCase.MODULE_ID.eq(moduleId));
+        if (cmd.getModuleId() != null && cmd.getModuleId() != 0) {
+            query.addConditions(flowCase.MODULE_ID.eq(cmd.getModuleId()));
         }
-        if (flowCaseId != null && flowCaseId != 0) {
-            query.addConditions(flowCase.ID.eq(flowCaseId));
+        if (cmd.getOrganizationId() != null && cmd.getOrganizationId() != 0) {
+            query.addConditions(flowCase.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
         }
-        if (userId != null && userId != 0) {
-            query.addConditions(log.FLOW_USER_ID.eq(userId));
+        if (cmd.getFlowCaseId() != null && cmd.getFlowCaseId() != 0) {
+            query.addConditions(flowCase.ID.eq(cmd.getFlowCaseId()));
+        }
+        if (cmd.getUserId() != null && cmd.getUserId() != 0) {
+            query.addConditions(log.FLOW_USER_ID.eq(cmd.getUserId()));
         }
 
         query.addConditions(log.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()));
 
-        if (serviceType != null) {
-            query.addConditions(flowCase.SERVICE_TYPE.eq(serviceType));
+        if (cmd.getServiceType() != null) {
+            query.addConditions(flowCase.SERVICE_TYPE.eq(cmd.getServiceType()));
         }
-        if (keyword != null && keyword.length() > 0) {
-            String kw = "%" + keyword + "%";
+        if (cmd.getKeyword() != null && cmd.getKeyword().length() > 0) {
+            String kw = "%" + cmd.getKeyword() + "%";
             query.addConditions(flowCase.CONTENT.like(kw).or(flowCase.TITLE.like(kw)).or(flowCase.MODULE_NAME.like(kw)));
         }
         query.addOrderBy(log.ID.desc());

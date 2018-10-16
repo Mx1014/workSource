@@ -69,4 +69,15 @@ public class FormFieldGoOutProcessor implements FormFieldProcessor{
         }
         return null;
     }
+
+    @Override
+    public String parseFieldName(Flow flow, String fieldName, String extra) {
+        if ("开始时间".equals(fieldName))
+            return "外出时段";
+        if ("结束时间".equals(fieldName))
+            return "外出时段";
+        if ("外出时长".equals(fieldName))
+            return "外出时段";
+        return fieldName;
+    }
 }

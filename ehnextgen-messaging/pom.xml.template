@@ -210,14 +210,14 @@
         </dependency>
         <!-- http2-APNs pusher jar end -->
         <dependency>
-            <groupId>com.everhomes.user</groupId>
-            <artifactId>user-rest-sdk</artifactId>
-            <version>unite-user-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.owasp.antisamy</groupId>
             <artifactId>antisamy</artifactId>
             <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.everhomes.user</groupId>
+            <artifactId>user-rest-sdk</artifactId>
+            <version>unite-user-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

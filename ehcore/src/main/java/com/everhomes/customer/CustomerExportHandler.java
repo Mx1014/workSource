@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -157,6 +158,34 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         if(params.get("sortType") != null)
             sortType = Integer.valueOf(String.valueOf(params.get("sortType")));
 
+        Byte customerSource = null;
+        if(params.get("customerSource") != null)
+            customerSource = Byte.valueOf(String.valueOf(params.get("customerSource")));
+
+        BigDecimal requirementMinArea = null;
+        if(params.get("requirementMinArea") != null)
+            requirementMinArea = BigDecimal.valueOf((Long)params.get("requirementMinArea"));
+
+        BigDecimal requirementMaxArea = null;
+        if(params.get("requirementMaxArea") != null)
+            requirementMaxArea = BigDecimal.valueOf((Long)params.get("requirementMaxArea"));
+
+
+        Long entryStatusItemId = null;
+        if(params.get("entryStatusItemId") != null)
+            entryStatusItemId = (Long) params.get("entryStatusItemId");
+
+
+        String trackerUids = null;
+        if(params.get("trackerUids") != null)
+            trackerUids = (String) params.get("trackerUids");
+
+        String customerName = null;
+        if(params.get("customerName") != null)
+            customerName = (String) params.get("customerName");
+
+
+
 
         ExportEnterpriseCustomerCommand cmd = new ExportEnterpriseCustomerCommand();
         cmd.setCommunityId(communityId);
@@ -187,6 +216,12 @@ public class CustomerExportHandler implements FileDownloadTaskHandler {
         cmd.setPropertyType(propertyType);
         cmd.setSortField(sortField);
         cmd.setSortType(sortType);
+        cmd.setCustomerSource(customerSource);
+        cmd.setRequirementMaxArea(requirementMaxArea);
+        cmd.setRequirementMinArea(requirementMinArea);
+        cmd.setEntryStatusItemId(entryStatusItemId);
+        cmd.setTrackerUids(trackerUids);
+        cmd.setCustomerName(customerName);
 
 
         Long userId = (Long) params.get("userId");

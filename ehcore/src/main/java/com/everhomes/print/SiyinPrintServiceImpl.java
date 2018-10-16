@@ -887,7 +887,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		params.put("copy_mono_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_mono_limit", 50)));
 		params.put("copy_color_limit", String.valueOf(configurationProvider.getIntValue("print.siyin.copy_color_limit", 50)));
 		StringBuffer buffer = new StringBuffer();
-		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		String siyinUrl =  getSiyinServerUrl();
 
 		String url = buffer.append(siyinUrl).append("/authagent/oauthLogin").toString();
 		try {
@@ -1016,7 +1016,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Deprecated //使用司印二维码定制。，此接口废弃
 	private UnlockPrinterResponse unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
-        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+        String siyinUrl =  getSiyinServerUrl();
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
         String loginData = getLoginData(siyinUrl,cmd);
         
@@ -1531,7 +1531,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListQueueJobsResponse listQueueJobs(ListQueueJobsCommand cmd) {
-        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+        String siyinUrl =  getSiyinServerUrl();
 		Integer namespaceId = cmd.getNamespaceId();
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
@@ -1622,7 +1622,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	private void releaseQueueJobs(Map<String, String> rmjobsMap, Long communityId) {
-		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		String siyinUrl =  getSiyinServerUrl();
 		rmjobsMap.entrySet().forEach(r->{
 			Map<String, String> params = new HashMap<>();
 	        params.put("host_name", r.getKey());
@@ -1678,7 +1678,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void deleteQueueJobs(DeleteQueueJobsCommand cmd) {
 		checkPrinters(cmd.getJobs());
-		String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+		String siyinUrl =  getSiyinServerUrl();
 		Map<String, String> params = new HashMap<>();
         params.put("format", "String");
         params.put("action", "Cancel");
@@ -1759,9 +1759,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 			dto.setAccountId(r.getId());
 			dto.setAccountType(r.getUserType()==2?OwnerType.ORGANIZATION.getCode():OwnerType.USER.getCode());//帐号类型，1-个人帐号、2-企业帐号
-			dto.setAccountName(r.getUserName());
+			dto.setAccountName(r.getRemark());
 			dto.setAccountAliasName(r.getUserAliasName());
-			dto.setAccountStatus(Byte.valueOf(r.getRegisterStatus()+""));
+	        if (r.getRegisterStatus() != null && r.getRegisterStatus().intValue() == 1) {
+	            dto.setAccountStatus(PaymentUserStatus.ACTIVE.getCode());
+	        } else {
+	            dto.setAccountStatus(PaymentUserStatus.WAITING_FOR_APPROVAL.getCode());
+	        }
+			
 			return dto;
 		}).collect(Collectors.toList());
 		
@@ -1811,7 +1816,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
 		if(payUserDTO!=null){
 			convert.setPayeeUserType(payUserDTO.getUserType());
-			convert.setPayeeUserName(payUserDTO.getUserName());
+			convert.setPayeeUserName(payUserDTO.getRemark());
 			convert.setPayeeUserAliasName(payUserDTO.getUserAliasName());
 			convert.setPayeeAccountCode(payUserDTO.getAccountCode());
 			convert.setPayeeRegisterStatus(payUserDTO.getRegisterStatus());
@@ -2014,5 +2019,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
             return true;
         return false;
     }
-
+    
+    @Override
+	public String getSiyinServerUrl() {
+		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
+				PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+	}
 }

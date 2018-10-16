@@ -12,7 +12,7 @@ import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.ApprovalCategoryTimeSelectType;
 import com.everhomes.rest.approval.ApprovalStatus;
@@ -24,10 +24,13 @@ import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
-import com.everhomes.techpark.punch.PunchLog;
+import com.everhomes.techpark.punch.PunchNotificationService;
 import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.techpark.punch.PunchVacationBalance;
+import com.everhomes.techpark.punch.PunchVacationBalanceService;
+import com.everhomes.techpark.punch.utils.PunchDateUtils;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
@@ -67,6 +70,10 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 	protected OrganizationProvider organizationProvider;
 	@Autowired
 	private LocaleStringService localeStringService;
+	@Autowired
+	private PunchVacationBalanceService punchVacationBalanceService;
+	@Autowired
+	private PunchNotificationService punchNotificationService;
 
 
 	protected static ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>(){
@@ -108,21 +115,13 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			request.setDurationDay(new BigDecimal(String.valueOf(valDTO.getDuration() != null ? valDTO.getDuration() : 0)));
 			request.setDurationMinute(valDTO.getDurationInMinute());
 			request.setCategoryId(valDTO.getRestId());
-		}else if(GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH){
-
+		} else if (GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH) {
 			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndFeildType(flowCase.getId(),
 					GeneralFormFieldType.ABNORMAL_PUNCH.getCode());
-			ComponentAbnormalPunchValue valDTO= JSON.parseObject(val.getFieldStr3(), ComponentAbnormalPunchValue.class);
-
+			ComponentAbnormalPunchValue valDTO = JSON.parseObject(val.getFieldStr3(), ComponentAbnormalPunchValue.class);
 			request.setPunchDate(java.sql.Date.valueOf(valDTO.getAbnormalDate()));
 			request.setPunchType(valDTO.getPunchType());
 			request.setPunchIntervalNo(valDTO.getPunchIntervalNo());
-			//对于异常申请,如果没有打卡,需要增加一条打卡记录
-			PunchLog pl = punchProvider.findPunchLog(ga.getOrganizationId(), flowCase.getApplyUserId(), request.getPunchDate(), request.getPunchType(), request.getPunchIntervalNo());
-			if (null == pl) {
-				pl = punchService.getAbnormalPunchLog(request);
-				punchProvider.createPunchLog(pl);
-			}
 		}
 
 		punchProvider.createPunchExceptionRequest(request);
@@ -156,6 +155,38 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 	}
 
 	@Override
+	public void onFlowCaseDeleted(FlowCase flowCase) {
+		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+		PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+		if (request == null) {
+			return;
+		}
+		// 如果流程删除之前是审批通过状态，则删除以后，需要重新校准考勤状态，否则不需要
+		boolean showRefreshPunchDayLog = ApprovalStatus.AGREEMENT == ApprovalStatus.fromCode(request.getStatus());
+		boolean showUpdateVacationBalance = ApprovalStatus.REJECTION != ApprovalStatus.fromCode(request.getStatus());
+		punchProvider.deletePunchExceptionRequest(request);
+		// 审批单被驳回后已经退回余额，所以删除以后不需要再退
+		if (showUpdateVacationBalance) {
+			String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.VACATION_BALANCE_INCR_FOR_REJECT_ASK_FOR_LEAVE), UserContext.current().getUser().getLocale(), "");
+			// 返还假期余额
+			updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) 1, description);
+		}
+		if (!showRefreshPunchDayLog) {
+			return;
+		}
+		try {
+			// 统计年假使用合计和调休使用合计
+			addVacationBalanceHistoryCount(flowCase.getApplyUserId(), ga, request, (byte) -1);
+
+			Date startDay = PunchDateUtils.getDateBeginDate(new Date(request.getBeginTime().getTime()));
+			Date endDay = PunchDateUtils.getDateBeginDate(new Date(request.getEndTime().getTime()));
+			punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+		} catch (Exception e) {
+			LOGGER.error("refreshPunchDayLog error user_id = {}", flowCase.getApplyUserId());
+		}
+	}
+
+	@Override
 	public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
 		//通过就把状态置为已审批
 		GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
@@ -179,17 +210,18 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
 				}
 			}
+			punchNotificationService.setPunchNotificationInvalidBackground(request, ga.getNamespaceId(), new Date());
 		} catch (Exception e) {
 			LOGGER.error("refreshPunchDayLog error user_id = {}", flowCase.getApplyUserId());
 		}
 
 		// 统计年假使用合计和调休使用合计
-		addVacationBalanceHistoryCount(flowCase.getApplyUserId(), ga, request);
+		addVacationBalanceHistoryCount(flowCase.getApplyUserId(), ga, request, (byte) 1);
 
 		return request;
 	}
 
-	private void addVacationBalanceHistoryCount(Long userId, GeneralApproval ga, PunchExceptionRequest request) {
+	private void addVacationBalanceHistoryCount(Long userId, GeneralApproval ga, PunchExceptionRequest request, byte operation) {
 		if (!GeneralApprovalAttribute.ASK_FOR_LEAVE.getCode().equals(ga.getApprovalAttribute())
 				|| request.getCategoryId() == null || request.getCategoryId() <= 0) {
 			return;
@@ -199,9 +231,9 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			return;
 		}
 		if ("ANNUAL_LEAVE".equals(approvalCategory.getHanderType())) {
-			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), request.getDurationDay(), BigDecimal.ZERO);
+			punchVacationBalanceService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), request.getDurationDay().multiply(BigDecimal.valueOf(operation)), BigDecimal.ZERO);
 		} else if ("WORKING_DAY_OFF".equals(approvalCategory.getHanderType())) {
-			punchService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), BigDecimal.ZERO, request.getDurationDay());
+			punchVacationBalanceService.addVacationBalanceHistoryCount(userId, ga.getOrganizationId(), BigDecimal.ZERO, request.getDurationDay().multiply(BigDecimal.valueOf(operation)));
 		}
 	}
 
@@ -211,20 +243,28 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			return;
 		}
 		ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(request.getCategoryId());
-		if (approvalCategory == null) {
+		if (approvalCategory == null || approvalCategory.getNamespaceId() == null || approvalCategory.getNamespaceId() == 0) {
+			// 旧数据不更新余额
 			return;
 		}
-		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(applyUserId, ga.getOrganizationId());
+		OrganizationMemberDetails organizationMemberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(applyUserId, ga.getOrganizationId());
 		UpdateVacationBalancesCommand updateVacationBalancesCommand = new UpdateVacationBalancesCommand();
 		updateVacationBalancesCommand.setOrganizationId(ga.getOrganizationId());
-		updateVacationBalancesCommand.setDetailId(organizationMember.getDetailId());
+		updateVacationBalancesCommand.setDetailId(organizationMemberDetail.getId());
 		updateVacationBalancesCommand.setDescription(description);
+		int notificationCode = operation < 0 ? ApprovalServiceConstants.VACATION_BALANCE_CHANGED_NOTIFICATION_CONTENT_BY_REQUEST_SUBMIT : ApprovalServiceConstants.VACATION_BALANCE_CHANGED_NOTIFICATION_CONTENT_BY_REQUEST_CANCELD;
 		if ("ANNUAL_LEAVE".equals(approvalCategory.getHanderType())) {
 			updateVacationBalancesCommand.setAnnualLeaveBalanceCorrection(request.getDurationDay().doubleValue() * operation);
-			punchService.updateVacationBalances(updateVacationBalancesCommand);
+			PunchVacationBalance punchVacationBalance = punchVacationBalanceService.updateVacationBalances(updateVacationBalancesCommand);
+			String notificationContent = punchVacationBalanceService.buildVacationBalanceChangedNotificationContent(updateVacationBalancesCommand.getAnnualLeaveBalanceCorrection(),
+					0D, request, punchVacationBalance, approvalCategory, notificationCode);
+			punchVacationBalanceService.sendMessageWhenVacationBalanceChanged(organizationMemberDetail, notificationContent);
 		} else if ("WORKING_DAY_OFF".equals(approvalCategory.getHanderType())) {
 			updateVacationBalancesCommand.setOvertimeCompensationBalanceCorrection(request.getDurationDay().doubleValue() * operation);
-			punchService.updateVacationBalances(updateVacationBalancesCommand);
+			PunchVacationBalance punchVacationBalance = punchVacationBalanceService.updateVacationBalances(updateVacationBalancesCommand);
+			String notificationContent = punchVacationBalanceService.buildVacationBalanceChangedNotificationContent(0D,
+					updateVacationBalancesCommand.getOvertimeCompensationBalanceCorrection(), request, punchVacationBalance, approvalCategory, notificationCode);
+			punchVacationBalanceService.sendMessageWhenVacationBalanceChanged(organizationMemberDetail, notificationContent);
 		}
 	}
 

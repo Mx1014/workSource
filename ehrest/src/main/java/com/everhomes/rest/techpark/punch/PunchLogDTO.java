@@ -58,6 +58,8 @@ public class PunchLogDTO {
 
     private Byte deviceChangeFlag;
 	private Long punchOrgnizationId;
+	private Long punchRuleId;
+	private Long punchRuleTimeId;
     
     @Override
     public String toString() {
@@ -267,5 +269,21 @@ public class PunchLogDTO {
 
 	public void setStatusString(String statusString) {
 		this.statusString = statusString;
+	}
+
+	public Long getPunchRuleId() {
+		return punchRuleId;
+	}
+
+	public void setPunchRuleId(Long punchRuleId) {
+		this.punchRuleId = punchRuleId;
+	}
+
+	public Long getPunchRuleTimeId() {
+		return punchRuleTimeId;
+	}
+
+	public void setPunchRuleTimeId(Long punchRuleTimeId) {
+		this.punchRuleTimeId = punchRuleTimeId;
 	}
 }

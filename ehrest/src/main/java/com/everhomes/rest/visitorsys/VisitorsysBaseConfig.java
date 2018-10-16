@@ -19,7 +19,9 @@ import com.everhomes.util.StringHelper;
  *<li>allowPassportQrcodeFlag : (选填)允许通行证显示基于访客二维码的专属信息，{@link com.everhomes.rest.visitorsys.VisitorsysFlagType}</li>
  *<li>doorGuardId : (选填)门禁id</li>
  *<li>doorGuardName : (选填)门禁名称</li>
- * <li>allowCardReader : (选填)门禁名称</li>
+ *
+ * <li>visitorConfirmFlag : 到访确认</li>
+ * <li>allowCardReader : 身份证读卡器</li>
   *</ul>
   */
 public class VisitorsysBaseConfig {
@@ -38,6 +40,7 @@ public class VisitorsysBaseConfig {
     private String doorGuardId;
     private String doorGuardName;
 
+    private Byte visitorConfirmFlag;
     private Byte allowCardReader;
 
     public void generateDefaultValue(){
@@ -53,6 +56,8 @@ public class VisitorsysBaseConfig {
         doorGuardsFlag=0;
         doorGuardsValidAfterConfirmedFlag=0;
         allowPassportQrcodeFlag = 1;
+        visitorConfirmFlag = 1;
+        allowCardReader = 0;
     }
 
     public Byte getVisitorQrcodeFlag() {
@@ -165,6 +170,22 @@ public class VisitorsysBaseConfig {
 
     public void setAllowPassportQrcodeFlag(Byte allowPassportQrcodeFlag) {
         this.allowPassportQrcodeFlag = allowPassportQrcodeFlag;
+    }
+
+    public Byte getVisitorConfirmFlag() {
+        return visitorConfirmFlag;
+    }
+
+    public void setVisitorConfirmFlag(Byte visitorConfirmFlag) {
+        this.visitorConfirmFlag = visitorConfirmFlag;
+    }
+
+    public Byte getAllowCardReader() {
+        return allowCardReader;
+    }
+
+    public void setAllowCardReader(Byte allowCardReader) {
+        this.allowCardReader = allowCardReader;
     }
 
     @Override

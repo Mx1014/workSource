@@ -66,6 +66,6 @@ public interface RemindService {
 
     GetCurrentUserDetailIdResponse getCurrentUserContactSimpleInfo(GetCurrentUserDetailIdCommand cmd);
 
-    void remindSchedule();
+	void sendRemindMessage(Remind remind);
 
 }

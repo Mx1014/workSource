@@ -15,7 +15,8 @@ import java.util.List;
  * <li>amorpm： am(0),pm(1){@link com.everhomes.rest.rentalv2.AmorpmFlag} </li> 
  * <li>beginTime：开始时间(MM:SS)</li>
  * <li>endTime：结束时间(MM:SS)</li>
- * <li>counts：场所数量</li> 
+ * <li>counts：场所剩余数量</li>
+ * <li>resourceCounts：场所数量</li>
  * <li>unit：场所单位:1or0.5</li> 
  * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li>
  * <li>TimeStep：坐标轴单位时间（小时）</li> 
@@ -48,6 +49,7 @@ public class RentalSiteRulesDTO {
 	private Long beginTime;
 	private Long endTime;
 	private Double counts;
+	private Double resourceCounts;
 	private Double unit;
 	private java.math.BigDecimal price;
 	private BigDecimal initiatePrice;
@@ -113,6 +115,14 @@ public class RentalSiteRulesDTO {
 
 	public void setHalfApprovingUserPrice(BigDecimal halfApprovingUserPrice) {
 		this.halfApprovingUserPrice = halfApprovingUserPrice;
+	}
+
+	public Double getResourceCounts() {
+		return resourceCounts;
+	}
+
+	public void setResourceCounts(Double resourceCounts) {
+		this.resourceCounts = resourceCounts;
 	}
 
 	public Long getRentalSiteId() {

@@ -2,6 +2,10 @@ package com.everhomes.rest.customer;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerCurrentRentDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.CustomerTrackerDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
@@ -81,6 +85,7 @@ import java.util.List;
  */
 public class UpdateEnterpriseCustomerCommand {
     private Integer namespaceId;
+    private String moduleName;
     private Long orgId;
     private Long communityId;
     private Long id;
@@ -225,6 +230,110 @@ public class UpdateEnterpriseCustomerCommand {
     private List<CustomerAttachmentDTO> attachments;
 
     private Byte checkAuthFlag;
+
+    private String transactionRatio;
+    private Long expectedSignDate;
+    private Byte customerSource;
+    private Long entryStatusItemId;
+    private String entryStatusItemName;
+
+    @ItemType(CreateCustomerTrackingCommand.class)
+    private List<CreateCustomerTrackingCommand> trackingInfos;
+    @ItemType(CustomerContactDTO.class)
+    private List<CustomerContactDTO>  contacts ;
+    @ItemType(CustomerTrackerDTO.class)
+    private List<CustomerTrackerDTO> trackers;
+    private CustomerRequirementDTO requirement;
+    private CustomerCurrentRentDTO currentRent;
+
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getTransactionRatio() {
+        return transactionRatio;
+    }
+
+    public void setTransactionRatio(String transactionRatio) {
+        this.transactionRatio = transactionRatio;
+    }
+
+    public Long getExpectedSignDate() {
+        return expectedSignDate;
+    }
+
+    public void setExpectedSignDate(Long expectedSignDate) {
+        this.expectedSignDate = expectedSignDate;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
+    }
+
+    public Long getEntryStatusItemId() {
+        return entryStatusItemId;
+    }
+
+    public void setEntryStatusItemId(Long entryStatusItemId) {
+        this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public String getEntryStatusItemName() {
+        return entryStatusItemName;
+    }
+
+    public void setEntryStatusItemName(String entryStatusItemName) {
+        this.entryStatusItemName = entryStatusItemName;
+    }
+
+    public List<CreateCustomerTrackingCommand> getTrackingInfos() {
+        return trackingInfos;
+    }
+
+    public void setTrackingInfos(List<CreateCustomerTrackingCommand> trackingInfos) {
+        this.trackingInfos = trackingInfos;
+    }
+
+    public List<CustomerContactDTO> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<CustomerContactDTO> contacts) {
+        this.contacts = contacts;
+    }
+
+    public List<CustomerTrackerDTO> getTrackers() {
+        return trackers;
+    }
+
+    public void setTrackers(List<CustomerTrackerDTO> trackers) {
+        this.trackers = trackers;
+    }
+
+    public CustomerRequirementDTO getRequirement() {
+        return requirement;
+    }
+
+    public void setRequirement(CustomerRequirementDTO requirement) {
+        this.requirement = requirement;
+    }
+
+    public CustomerCurrentRentDTO getCurrentRent() {
+        return currentRent;
+    }
+
+    public void setCurrentRent(CustomerCurrentRentDTO currentRent) {
+        this.currentRent = currentRent;
+    }
 
     public Long getCommunityId() {
         return communityId;

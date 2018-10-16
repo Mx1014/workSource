@@ -132,12 +132,10 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					if (graphNode instanceof FlowGraphNodeStart && SiteBillStatus.APPROVING.getCode() == status) {
 
 					}else {
-						Boolean cancelOtherOrderFlag = false;
 						//支付成功之后 cancelOtherOrderFlag设置成true，取消其他竞争状态的订单
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
-							cancelOtherOrderFlag = true;
+							rentalv2Service.changeRentalOrderStatus(order, status, true);
 						}
-						rentalv2Service.changeRentalOrderStatus(order, status, cancelOtherOrderFlag);
 					}
 				}
 			}

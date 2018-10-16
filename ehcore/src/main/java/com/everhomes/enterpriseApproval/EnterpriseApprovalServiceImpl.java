@@ -6,7 +6,14 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.flow.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowAutoStepTransferDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseDetail;
+import com.everhomes.flow.FlowCaseProcessorsResolver;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalScopeMap;
@@ -20,11 +27,50 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.ArchivesOperationalConfigurationDTO;
 import com.everhomes.rest.archives.ArchivesParameter;
-import com.everhomes.rest.enterpriseApproval.*;
+import com.everhomes.rest.enterpriseApproval.ApprovalFilterType;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdCommand;
+import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
+import com.everhomes.rest.enterpriseApproval.CreateApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.CreateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowCommand;
+import com.everhomes.rest.enterpriseApproval.DeliverApprovalFlowsCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupAttribute;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalGroupDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalIdCommand;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalRecordDTO;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalTemplateCode;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsCommand;
+import com.everhomes.rest.enterpriseApproval.ListApprovalFlowRecordsResponse;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsCommand;
+import com.everhomes.rest.enterpriseApproval.ListEnterpriseApprovalsResponse;
+import com.everhomes.rest.enterpriseApproval.UpdateEnterpriseApprovalCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesCommand;
+import com.everhomes.rest.enterpriseApproval.VerifyApprovalTemplatesResponse;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.flow.CreateFlowCommand;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEntitySel;
+import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowEventType;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOperateLogDTO;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowOperateLogsCommand;
+import com.everhomes.rest.flow.UpdateFlowFormCommand;
+import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
+import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
+import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.user.UserInfo;
@@ -53,7 +99,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -408,6 +461,31 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             stepDTO.setEventType(FlowEventType.STEP_MODULE.getCode());
             stepDTO.setOperatorId(userId);
             flowService.processAutoStep(stepDTO);
+        }
+    }
+
+    @Override
+    public void deleteApprovalFlow(ApprovalFlowIdCommand cmd) {
+        FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
+        if (flowCase == null || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(flowCase.getDeleteFlag())) {
+            return;
+        }
+        flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+        flowCaseProvider.updateFlowCase(flowCase);
+
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+        if (ga == null) {
+            return;
+        }
+
+        GeneralApprovalAttribute attribute = GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute());
+        if (GeneralApprovalAttribute.CUSTOMIZE == attribute || GeneralApprovalAttribute.DEFAULT == attribute) {
+            // 自定义类型没有业务数据需要删除
+            return;
+        }
+        EnterpriseApprovalHandler handler = EnterpriseApprovalHandlerUtils.getEnterpriseApprovalHandler(ga);
+        if (handler != null) {
+            handler.onFlowCaseDeleted(flowCase);
         }
     }
 

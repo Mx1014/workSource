@@ -61,7 +61,13 @@ public interface CommunityService {
 
 	CommunityUserResponse listUserCommunitiesV2(ListCommunityUsersCommand cmd);
 
+	ListAllCommunityUserResponse listAllUserCommunities(ListAllCommunityUsersCommand cmd);
+
 	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
+
+	void exportAllCommunityUsers(ExportAllCommunityUsersCommand cmd);
+
+	void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
@@ -72,7 +78,9 @@ public interface CommunityService {
     CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
-	
+
+	CommunityUserAddressDTO qryCommunityUserAllByUserId(QryCommunityUserAllByUserIdCommand cmd);
+
 	CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd);

@@ -104,6 +104,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
     public UserInfo updateUserCompany(UpdateUserCompanyCommand cmd) {
         User user = UserContext.current().getUser();
         user.setCompany(cmd.getCompanyName());
+        user.setCompanyId(cmd.getCompanyId());
         userProvider.updateUser(user);
         return userService.getUserInfo(user.getId());
     }
@@ -137,22 +138,30 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
                 String homeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
                 dto.setLinkUrl(homeUrl+dto.getLinkUrl());
             }
-            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
-                UserTreasureDTO point = pointService.getPointTreasure();
-                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
-                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
-                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
-                }
-            }
+            //为了不影响个人中心，将获取积分的数据从此处移除，放到获取用户财富中。
+//            if (PersonalCenterSettingType.POINT.getCode().equals(r.getType())) {
+//                UserTreasureDTO point = null;
+//                 try {
+//                     point = pointService.getPointTreasure();
+//                 }catch (Exception e) {
+//                     LOGGER.error("get point exception");
+//                     e.printStackTrace();
+//                 }
+//                if (point != null && TrueOrFalseFlag.TRUE.getCode().equals(point.getStatus()) && TrueOrFalseFlag.TRUE.getCode().equals(point.getUrlStatus())) {
+//                    String homeUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+//                    dto.setLinkUrl(homeUrl + String.format(dto.getLinkUrl(), 1));
+//                }
+//            }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
                 User user = UserContext.current().getUser();
-                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
-                        UserProfileContstant.IS_APPLIED_SHOP);
-                dto.setLinkUrl(getApplyShopUrl());
-                if (applied != null) {
-                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
-                        dto.setLinkUrl(getManageShopUrl(user.getId()));
-                }
+//                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
+//                        UserProfileContstant.IS_APPLIED_SHOP);
+//                dto.setLinkUrl(getApplyShopUrl());
+//                if (applied != null) {
+//                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
+//                }
+                dto.setLinkUrl(getManageShopUrl(user.getId()));
+
             }
              switch (dto.getRegion()) {
                  case 0 :
@@ -202,7 +211,11 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
             if (mallId != null) {
                 manageShopPath = manageShopPath.replace("?","&");
-                return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+                if (homeurl.contains("?")) {
+                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
+                }else {
+                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+                }
             }else {
                 return homeurl + manageShopPath;
             }

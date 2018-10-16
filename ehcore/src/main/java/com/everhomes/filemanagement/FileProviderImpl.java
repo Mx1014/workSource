@@ -34,4 +34,15 @@ public class FileProviderImpl implements FileProvider {
             return results;
         return null;
     }
+
+    @Override
+    public FileIcon findFileIconByFileType(String fileType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhFileIconsRecord> query = context.selectQuery(Tables.EH_FILE_ICONS);
+        EhFileIconsRecord record = query.fetchAny();
+        if(null == record)
+            return null;
+        return record.map(r -> ConvertHelper.convert(r, FileIcon.class));
+    }
 }

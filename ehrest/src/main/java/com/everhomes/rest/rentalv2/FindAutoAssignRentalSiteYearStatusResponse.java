@@ -39,7 +39,7 @@ import com.everhomes.util.StringHelper;
  */
 public class FindAutoAssignRentalSiteYearStatusResponse {
 	private Long rentalSiteId; 
-	private String siteName; 
+	private String siteName;
 	private String introduction;  
 	private String notice;
 	private String address;
@@ -94,10 +94,6 @@ public class FindAutoAssignRentalSiteYearStatusResponse {
 	public void setSiteName(String siteName) {
 		this.siteName = siteName;
 	}
- 
-  
-
- 
 
 
 	public List<RentalSiteNumberDayRulesDTO> getSiteDays() {

@@ -438,7 +438,20 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/community/qryCommunityUserAllByUserId</b>
+     * <p>查询用户所在的地址</p>
+     */
+    @RequestMapping("qryCommunityUserAllByUserId")
+    @RestReturn(value=CommunityUserAddressDTO.class)
+    public RestResponse qryCommunityUserAllByUserId(@Valid QryCommunityUserAllByUserIdCommand cmd) {
+
+        RestResponse response =  new RestResponse(communityService.qryCommunityUserAllByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     /**
      * <b>URL: /admin/community/listOwnerBycommunityId</b>
      * <p>查询未注册的用户</p>

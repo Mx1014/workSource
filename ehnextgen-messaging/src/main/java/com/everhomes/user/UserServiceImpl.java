@@ -3392,9 +3392,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
         //加上province
-        Region city = regionProvider.findRegionById(organizationDto.getCityId());
+        //自动拆箱会导致空指针
+        Region city = null;
+        if (organizationDto.getCityId() != null) {
+            city = regionProvider.findRegionById(organizationDto.getCityId());
+        }
         if (city != null) {
-            Region province = regionProvider.findRegionById(city.getParentId());
+            Region province = null;
+            if (city.getParentId() != null) {
+                province = regionProvider.findRegionById(city.getParentId());
+            }
             if (province != null) {
                 organizationDto.setProvinceId(province.getId());
                 organizationDto.setProvinceName(province.getName());
@@ -6200,7 +6207,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
         resp.setContentCacheConfig(
                 (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
-
+        resp.setSecurityPayServer(this.configurationProvider.getValue(namespaceId, ConfigConstants.SECURITY_PAY_SERVER, "https://secpay.zuolin.com"));
         return resp;
     }
 
@@ -6843,8 +6850,19 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
           return null;
       }
 
+    @Override
+    public void updateUserVipLevel(Long userId, Integer vipLevel) {
+        User user = this.userProvider.findUserById(userId);
+        if(user == null){
+            LOGGER.error("Unable to find the user , userId= {}",  userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+        }
+        user.setVipLevel(vipLevel);
+        userProvider.updateUser(user);
+    }
 
-        private Organization checkOrganization(Long organizationId) {
+
+    private Organization checkOrganization(Long organizationId) {
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if(org == null){
                 LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);

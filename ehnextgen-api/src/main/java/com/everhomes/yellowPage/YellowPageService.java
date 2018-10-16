@@ -117,4 +117,6 @@ public interface YellowPageService {
 
 	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
 
+	void updateServiceTypeOrders(UpdateServiceTypeOrdersCommand cmd);
+
 }

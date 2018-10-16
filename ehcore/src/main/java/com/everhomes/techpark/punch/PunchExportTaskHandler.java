@@ -26,6 +26,8 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     TaskService taskService;
+    @Autowired
+    private PunchVacationBalanceService punchVacationBalanceService;
 
 
     @Override
@@ -94,7 +96,7 @@ public class PunchExportTaskHandler implements FileDownloadTaskHandler {
         } else if (reportType.equals("exportPunchScheduling")) {
             outputStream = punchService.getPunchSchedulingOutputStream(queryTime, employees, timeRules, taskId);
         }else if (reportType.equals("exportVacationBalances")) {
-            outputStream = punchService.getVacationBalanceOutputStream(ownerId, taskId);
+            outputStream = punchVacationBalanceService.getVacationBalanceOutputStream(ownerId, taskId);
         }
         taskService.updateTaskProcess(taskId, 99);
         CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);

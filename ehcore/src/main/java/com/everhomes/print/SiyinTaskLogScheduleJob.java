@@ -41,6 +41,10 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+	
+	@Autowired
+	private SiyinPrintService siyinPrintService;
+	
 
 	@Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -60,7 +64,7 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
 	            Map<String, String> params = new HashMap<>();
 	            params.put("start_time", sdf.format(new Date(startLong)));
 	            params.put("end_time", sdf.format(new Date(endLong)));
-	            String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+	            String siyinUrl =  siyinPrintService.getSiyinServerUrl();
 	
 	            String result = HttpUtils.post(siyinUrl + "/console/queryServlet", params, 30);
 	            String siyinCode = getSiyinCode(result);

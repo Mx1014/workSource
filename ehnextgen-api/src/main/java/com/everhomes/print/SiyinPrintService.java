@@ -76,5 +76,7 @@ public interface SiyinPrintService {
 
     void initPayeeAccount(MultipartFile[] files);
 
+	String getSiyinServerUrl();
+
     void mfpLogNotification(MfpLogNotificationCommand cmd);
 }

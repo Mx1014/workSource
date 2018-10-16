@@ -67,4 +67,7 @@ public interface EnterpriseApplyEntryProvider {
 	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType, Long categoryId);
 	
 	List<LeaseFormRequest> listLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType);
+
+	void updateApplyEntryTransformFlag(Long applyEntryId, byte transformFlag);
+	
 }

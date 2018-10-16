@@ -20,6 +20,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -55,6 +56,7 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.comment.OwnerTokenDTO;
 import com.everhomes.rest.comment.OwnerType;
@@ -295,6 +297,10 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
+        //敏感词过滤
         filterWords(cmd);
 
 
@@ -3568,10 +3574,14 @@ public class ForumServiceImpl implements ForumService {
                 ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
         if (post.getStatus() != null && post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+            int code = ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED;
+            if (post.getContentCategory() != null && post.getContentCategory() == CategoryConstants.CATEGORY_ID_NOTICE) {
+                code = ForumServiceErrorCode.ERROR_ANNOUNCEMENT_DELETED;
+            }
             LOGGER.error("Forum post is deleted, operatorId=" + operatorId + ", forumId=" + forumId
                     + ", postId=" + postId + ", tag=" + tag);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
-                    ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post is deleted");
+                    code, "Forum post is deleted");
         }
         return post;
     }
@@ -5452,6 +5462,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
 
         User user = UserContext.current().getUser();
         Long userId = user.getId();
@@ -5695,8 +5708,9 @@ public class ForumServiceImpl implements ForumService {
         
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
     }
-    
-    private ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
+
+    @Override
+    public ListPostCommandResponse listNoticeTopic(List<Long> organizationIds, List<Long> communityIds, String publishStatus, Integer pageSize, Long pageAnchor){
     	pageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
     	CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(pageAnchor);

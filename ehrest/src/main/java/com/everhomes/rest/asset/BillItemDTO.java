@@ -10,7 +10,6 @@ import java.math.BigDecimal;
  *<ul>
  * <li>billItemId:收费项目的id</li>
  * <li>billItemName:收费项目名称</li>
- * <li>amountReceivable:应收金额</li>
  * <li>description:描述</li>
  * <li>dateStr:账期</li>
  * <li>addressId:地址id</li>
@@ -22,6 +21,17 @@ import java.math.BigDecimal;
  * <li>energyConsume: 费项的用量</li>
  * <li>itemFineType: 费项类型，eh_payment_bill_items：费项，eh_payment_late_fine：滞纳金 ，参考{com.everhomes.rest.asset.AssetItemFineType}</li>
  * <li>itemType:费项类型，eh_payment_bill_items：费项（如：物业费），eh_payment_late_fine：减免滞纳金（如：物业费滞纳金）参考{com.everhomes.rest.asset.AssetSubtractionType}</li>
+ * <li>amountReceivable:应收金额</li>
+ * <li>amountReceivableWithoutTax:应收（不含税）</li>
+ * <li>taxAmount: 税额</li>
+ * <li>taxRate: 税率</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>canDelete:0：不可删除；1：可删除</li>
+ * <li>canModify:0：不可编辑；1：可编辑</li>
  *</ul>
  */
 public class BillItemDTO {
@@ -44,6 +54,16 @@ public class BillItemDTO {
     private BigDecimal amountReceivableWithoutTax;//增加应收（不含税）
     private BigDecimal taxAmount;//增加税额
     private BigDecimal taxRate;//增加税率
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
+    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+    private Byte canDelete;
+    private Byte canModify;
 
     @Override
     public String toString() {
@@ -189,5 +209,61 @@ public class BillItemDTO {
 
 	public void setTaxRate(BigDecimal taxRate) {
 		this.taxRate = taxRate;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public Long getConsumeUserId() {
+		return consumeUserId;
+	}
+
+	public void setConsumeUserId(Long consumeUserId) {
+		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public Byte getCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(Byte canDelete) {
+		this.canDelete = canDelete;
+	}
+
+	public Byte getCanModify() {
+		return canModify;
+	}
+
+	public void setCanModify(Byte canModify) {
+		this.canModify = canModify;
 	}
 }

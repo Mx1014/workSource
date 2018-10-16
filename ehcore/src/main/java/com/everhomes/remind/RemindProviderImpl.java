@@ -32,6 +32,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteConditionStep;
@@ -595,10 +596,11 @@ public class RemindProviderImpl implements RemindProvider {
     }
 
     @Override
-    public List<Remind> findUndoRemindsByRemindTime(Timestamp remindTime, int count) {
+    public List<Remind> findUndoRemindsByRemindTime(Timestamp remindStartTime, Timestamp remindEndTime, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhRemindsRecord> query = context.selectQuery(Tables.EH_REMINDS);
-        query.addConditions(Tables.EH_REMINDS.REMIND_TIME.eq(remindTime));
+        query.addConditions(Tables.EH_REMINDS.REMIND_TIME.greaterOrEqual(remindStartTime));
+        query.addConditions(Tables.EH_REMINDS.REMIND_TIME.lessOrEqual(remindEndTime));
         query.addConditions(Tables.EH_REMINDS.STATUS.eq(RemindStatus.UNDO.getCode()));
         query.addConditions(Tables.EH_REMINDS.REMIND_CATEGORY_ID.gt(Long.valueOf(0)));
         query.addConditions(Tables.EH_REMINDS.ACT_REMIND_TIME.isNull());
@@ -614,5 +616,13 @@ public class RemindProviderImpl implements RemindProvider {
         return result.map((r) -> {
             return ConvertHelper.convert(r, Remind.class);
         });
+    }
+    
+    @Override
+    public Remind getRemindById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhRemindsDao dao = new EhRemindsDao(context.configuration());
+        EhReminds remind = dao.findById(id);
+        return ConvertHelper.convert(remind, Remind.class);
     }
 }

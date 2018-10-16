@@ -61,7 +61,6 @@ import java.util.List;
  *     <li>buildingRename: 房间别名</li>
  *     <li>categoryId: 合同类型多入口</li>
  *     <li>costGenerationMethod: 费用收取方式，0：按计费周期，1：按实际天数</li>
- *     <li>contractApplicationScene: 合同应用场景contractApplicationScene，用于多入口</li>
  *     <li>templateId: 合同模板id</li>
  * </ul>
  * Created by ying.xiong on 2017/8/5.
@@ -116,8 +115,21 @@ public class UpdateContractCommand {
     private String settled;
     private Long categoryId;
     private Byte costGenerationMethod;
-    private Byte contractApplicationScene = 0;
     private Long templateId;
+
+	@ItemType(BuildingApartmentDTO.class)
+    private List<BuildingApartmentDTO> apartments;
+
+    @ItemType(ContractChargingItemDTO.class)
+    private List<ContractChargingItemDTO> chargingItems;
+
+    @ItemType(ContractAttachmentDTO.class)
+    private List<ContractAttachmentDTO> attachments;
+
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> adjusts;
+    @ItemType(ContractChargingChangeDTO.class)
+    private List<ContractChargingChangeDTO> frees;
 
     public Long getTemplateId() {
 		return templateId;
@@ -134,29 +146,7 @@ public class UpdateContractCommand {
 	public void setCostGenerationMethod(Byte costGenerationMethod) {
 		this.costGenerationMethod = costGenerationMethod;
 	}
-
-    public Byte getContractApplicationScene() {
-		return contractApplicationScene;
-	}
-
-	public void setContractApplicationScene(Byte contractApplicationScene) {
-		this.contractApplicationScene = contractApplicationScene;
-	}
-
-	@ItemType(BuildingApartmentDTO.class)
-    private List<BuildingApartmentDTO> apartments;
-
-    @ItemType(ContractChargingItemDTO.class)
-    private List<ContractChargingItemDTO> chargingItems;
-
-    @ItemType(ContractAttachmentDTO.class)
-    private List<ContractAttachmentDTO> attachments;
-
-    @ItemType(ContractChargingChangeDTO.class)
-    private List<ContractChargingChangeDTO> adjusts;
-    @ItemType(ContractChargingChangeDTO.class)
-    private List<ContractChargingChangeDTO> frees;
-
+	
     public Long getCategoryId() {
 		return categoryId;
 	}

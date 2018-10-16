@@ -5,6 +5,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +47,12 @@ public class AppController extends ControllerBase {
             if (app.getName().trim().startsWith("zuolin")) {
                 return new RestResponse("YES");
             }
+        }
+
+        // 之前是否授权过
+        boolean isGranted = appService.isGrantedApp(app, UserContext.currentUserId());
+        if (isGranted) {
+            return new RestResponse("YES");
         }
         return new RestResponse("NO");
     }

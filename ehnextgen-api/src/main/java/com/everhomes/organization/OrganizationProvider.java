@@ -310,6 +310,8 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembersByUId(Long uId);
 
+    List<OrganizationMember> listAllOrganizationMembersByUID(List<Long> uIds);
+
     List<OrganizationMember> listOrganizationMembersTargetIdExist();
 
     void createOrganizationOwner(OrganizationOwner owner);
@@ -581,6 +583,8 @@ public interface OrganizationProvider {
     List<OrganizationMember> queryOrganizationPersonnelsWithDownStream(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
     List<Long> queryOrganizationPersonnelDetailIds(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
+
+    List<Long> queryOrganizationPersonnelTargetIds(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
     Integer queryOrganizationPersonnelCounts(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 

@@ -23,6 +23,8 @@ import java.util.List;
  * <li>schedulings: 排班列表{@link com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO}</li>
  * <li>punchOvertimeRules: 加班规则，参考{@link com.everhomes.rest.techpark.punch.PunchOvertimeRuleDTO}</li>
  * <li>chinaHolidayFlag: 使用中国法定假日falg  0-否 1-是 </li>
+ * <li>punchRemindFlag: 打卡提醒开关 1-支持提醒 0-不支持提醒</li>
+ * <li>remindMinutesOnDuty: 上班提醒提前分钟数</li>
  * </ul>
  */
 public class AddPunchGroupCommand {
@@ -59,11 +61,8 @@ public class AddPunchGroupCommand {
 	private List<PunchOvertimeRuleDTO> punchOvertimeRules;
 	
 	private Byte chinaHolidayFlag;
-	
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+	private Byte punchRemindFlag;
+	private Integer remindMinutesOnDuty;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -160,4 +159,26 @@ public class AddPunchGroupCommand {
 	public void setPunchOvertimeRules(List<PunchOvertimeRuleDTO> punchOvertimeRules) {
 		this.punchOvertimeRules = punchOvertimeRules;
 	}
+
+	public Byte getPunchRemindFlag() {
+		return punchRemindFlag;
+	}
+
+	public void setPunchRemindFlag(Byte punchRemindFlag) {
+		this.punchRemindFlag = punchRemindFlag;
+	}
+
+	public Integer getRemindMinutesOnDuty() {
+		return remindMinutesOnDuty;
+	}
+
+	public void setRemindMinutesOnDuty(Integer remindMinutesOnDuty) {
+		this.remindMinutesOnDuty = remindMinutesOnDuty;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
 }

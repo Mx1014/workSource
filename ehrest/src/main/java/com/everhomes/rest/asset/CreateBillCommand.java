@@ -2,14 +2,14 @@
 package com.everhomes.rest.asset;
 
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.util.Date;
-import java.util.List;
-
 /**
  *<ul>
+ * <li>namespaceId:域空间ID</li>
  * <li>ownerType:所属者type</li>
  * <li>ownerId:所属者id</li>
  * <li>dateStr:账期</li>
@@ -27,12 +27,21 @@ import java.util.List;
  * <li>isOwed:是否欠费，0：正常；1：欠费</li>
  * <li>customerTel:客户手机号，用来滞后定位用户</li>
  * <li>assetPaymentBillAttachmentList: 附件数据，参考{@link com.everhomes.rest.asset.AssetPaymentBillAttachment}</li>
+ * <li>sourceType:各个业务系统定义的唯一标识</li>
+ * <li>sourceId:各个业务系统定义的唯一标识</li>
+ * <li>sourceName:账单来源（如：停车缴费）</li>
+ * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>canDelete:0：不可删除；1：可删除</li>
+ * <li>canModify:0：不可编辑；1：可编辑</li>
  *</ul>
  */
 public class CreateBillCommand {
+	private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String noticeTel;
+    //private String noticeTel;
     private String targetName;
     private String targetType;
     private Long targetId;
@@ -44,11 +53,34 @@ public class CreateBillCommand {
     private Byte isSettled;
     private String invoiceNum;
     private Long categoryId;
-    
+    //催缴手机号码列表
+    private List<String> noticeTelList;
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
-    public Long getCategoryId() {
+    //新增账单来源信息
+    private String sourceType;
+    private Long sourceId;
+    private String sourceName;
+    private Long consumeUserId;
+    private String thirdBillId;
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
+    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+    private Byte canDelete;
+    private Byte canModify;
+    //物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    private Long organizationId;
+    
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Long getCategoryId() {
         return categoryId;
     }
 
@@ -181,14 +213,6 @@ public class CreateBillCommand {
         this.billGroupDTO = billGroupDTO;
     }
 
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
-    }
-
     public String getTargetName() {
         return targetName;
     }
@@ -211,6 +235,86 @@ public class CreateBillCommand {
 
 	public void setAssetPaymentBillAttachmentList(List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList) {
 		this.assetPaymentBillAttachmentList = assetPaymentBillAttachmentList;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public Long getConsumeUserId() {
+		return consumeUserId;
+	}
+
+	public void setConsumeUserId(Long consumeUserId) {
+		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(Byte canDelete) {
+		this.canDelete = canDelete;
+	}
+
+	public Byte getCanModify() {
+		return canModify;
+	}
+
+	public void setCanModify(Byte canModify) {
+		this.canModify = canModify;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
 	}
 
 }

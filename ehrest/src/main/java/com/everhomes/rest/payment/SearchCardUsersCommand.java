@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>keyword: 手机号或者姓名</li>
+ * <li>status: 状态 0:解绑 2:已绑定</li>
  * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * <li>currentPMId: 当前管理公司ID</li>
@@ -18,6 +19,7 @@ public class SearchCardUsersCommand {
 	private String ownerType;
     private Long ownerId;
 	private String keyword;
+	private Byte status;
 	private Long pageAnchor;
 	private Integer pageSize;
 	private Long currentPMId;
@@ -79,7 +81,15 @@ public class SearchCardUsersCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

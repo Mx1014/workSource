@@ -5,6 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
@@ -92,4 +93,21 @@ public class InvoiceController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /invoice/parkingRechargeOrdersByOrderNo</b>
+     * <p>查询指定订单发票</p>
+     */
+    @RequestMapping("parkingRechargeOrdersByOrderNo")
+    @RestReturn(value=ParkingRechargeOrderDTO.class)
+    public RestResponse parkingRechargeOrdersByOrderNo(ParkingRechargeOrdersByOrderNoCommand cmd) {
+
+    	ParkingRechargeOrderDTO parkingRechargeOrder = invoiceService.parkingRechargeOrdersByOrderNo(cmd.getOrderNo());
+        RestResponse response = new RestResponse(parkingRechargeOrder);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }

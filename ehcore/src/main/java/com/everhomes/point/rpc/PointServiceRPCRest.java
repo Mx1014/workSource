@@ -1,9 +1,12 @@
 package com.everhomes.point.rpc;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,12 +29,18 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 	 * @param cmd
 	 * @return
 	 */
-	public PointScoreDTO getUserPoint(GetUserPointCommand cmd) {  
-   	
-    	RestResponse resp =
+	public PointScoreDTO getUserPoint(GetUserPointCommand cmd) {
+		//update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+		RestResponse resp = null ;
+		try {
+    		 resp =
                 call(URIConstants.POINTSCORE_GETUSERPOINT_URL, cmd, RestResponse.class);
+		}catch(Exception e){
+			LOGGER.error("something error happen while RPC to point system . e:{}",e);
+		}
     	if(resp == null){
-    		return null ;
+			PointScoreDTO dto  = new PointScoreDTO();
+    		return dto ;
     	}
     	Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
     	if(map !=null){
@@ -57,14 +66,23 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 	 * @return
 	 */
 	
-	    public ListPointLogsResponse  getUserPointLogs(ListPointLogsCommand cmd){  
-		   	
-	    	RestResponse resp =
-	                call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+	    public ListPointLogsResponse  getUserPointLogs(ListPointLogsCommand cmd){
+	    	//update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+			RestResponse resp = null ;
+			try {
+				 resp =
+						call(URIConstants.POINTSCORE_COSTUSERPOINTSCOREEVENT_URL, cmd, RestResponse.class);
+			}catch(Exception e){
+				LOGGER.error("something error happen while RPC to point system . e:{}",e);
+			}
+			ListPointLogsResponse response  = new ListPointLogsResponse();
+			List<PointLogDTO> logs = new ArrayList<PointLogDTO>();
+			response.setLogs(logs);
 	    	if(resp == null){
-	    		return null ;
+
+	    		return response ;
 	    	}
-	    	Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
+	    	/*Map<String ,Object> map = (Map<String ,Object>)resp.getResponseObject();
 	    	if(map !=null){
 	    		//LOGGER.info(resp.getResponseObject().toString());
 	    		ListPointLogsResponse response  = new ListPointLogsResponse();
@@ -74,12 +92,14 @@ public class PointServiceRPCRest extends PointServerRPCRestService {
 	    		List<PointLogDTO> logs = map.get("logs")==null?null:(List<PointLogDTO>)map.get("logs");
 	    		if(logs != null){
 	    			response.setLogs(logs);
-	    		}
-	    		
+	    		}*/
+			String str = StringHelper.toJsonString(resp.getResponseObject());
+			if(StringUtils.isNotBlank(str)){
+			    response = (ListPointLogsResponse)StringHelper.fromJsonString(str,ListPointLogsResponse.class);
 	        	return response ;
 	    	}
 	    	
-	    	return null ;
+	    	return response ;
 	    }
 	    
 	    /**
