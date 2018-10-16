@@ -14,7 +14,6 @@ import com.everhomes.util.StringHelper;
  * <li>businessType: 业务标识，{@link com.everhomes.rest.parking.ParkingBusinessType}</li>
  * <li>payeeId: 收款方账号id</li>
  * <li>payeeUserType: 收款方账号类型 帐号类型，{@link com.everhomes.rest.order.OwnerType}</li>
- * <li>merchantId:商户ID</li>
  * </ul>
  */
 public class CreateOrUpdateBusinessPayeeAccountCommand {
@@ -27,7 +26,6 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
     private String businessType;
     private Long payeeId;
     private String payeeUserType;
-    private Long merchantId;
 
     public Long getId() {
         return id;
@@ -101,14 +99,6 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
         this.payeeUserType = payeeUserType;
     }
 
-    
-    public Long getMerchantId() {
-		return merchantId;
-	}
-
-	public void setMerchantId(Long merchantId) {
-		this.merchantId = merchantId;
-	}
 
 	@Override
     public String toString() {
