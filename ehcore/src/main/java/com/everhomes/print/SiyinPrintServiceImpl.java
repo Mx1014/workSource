@@ -228,9 +228,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
-		}
+		//云打印V1.4删除打印设置权限
+//		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
+//		}
 		//检查参数
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		

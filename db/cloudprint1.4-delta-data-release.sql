@@ -33,5 +33,7 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 
 -- AUTHOR: 缪洲 201801011
 -- REMARK: issue-34780 删除打印设置规则
-DELETE FROM `eh_service_modules` WHERE parent_id = '41400' AND path = '/200/40000/41400/41430'
+DELETE FROM `eh_service_modules` WHERE parent_id = 41400 AND id = 41430;
+DELETE FROM `eh_acl_privileges` WHERE id = 4140041430;
+DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
 -- --------------------- SECTION END ---------------------------------------------------------
