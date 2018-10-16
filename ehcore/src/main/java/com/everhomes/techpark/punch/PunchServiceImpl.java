@@ -11457,7 +11457,8 @@ public class PunchServiceImpl implements PunchService {
     private Byte checkHasSubDpt(Long orgId) {
     	byte result = NormalFlag.YES.getCode();
     	List<Long> subDptIds = findSubDepartmentIds(orgId); 
-        if(CollectionUtils.isEmpty(subDptIds)){
+    	//subDptIds会包含本身
+        if(CollectionUtils.isEmpty(subDptIds) || subDptIds.size() <= 1){
         	result =  NormalFlag.NO.getCode();
         }
 		return result;
