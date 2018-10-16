@@ -5,10 +5,12 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -850,10 +852,17 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingBusinessType bussinessType = null;
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			bussinessType = ParkingBusinessType.MONTH_RECHARGE;
-			returnUrl = String.format("zl://parking/monthCardRechargeStatus?orderId=%s", String.valueOf(order.getId()));
+			returnUrl = String.format(configProvider.getValue("parking.recharge.return.url","zl://parking/monthCardRechargeStatus?orderId=%s"), String.valueOf(order.getId()));
+
 		}else if(rechargeType == ParkingRechargeType.TEMPORARY){
 			bussinessType = ParkingBusinessType.TEMPFEE;
-			returnUrl = String.format("zl://parking/tempFeeStatus?orderId=%s", String.valueOf(order.getId()));			
+			returnUrl = String.format(configProvider.getValue("parking.tempfee.return.url","zl://parking/tempFeeStatus?orderId=%s"), String.valueOf(order.getId()));			
+		}
+		
+		try {
+			returnUrl =URLEncoder.encode(returnUrl, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
 		//收款方是否有会员，无则报错
 		List<ParkingBusinessPayeeAccount> payeeAccounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, UserContext.getCurrentNamespaceId(),
