@@ -4,7 +4,7 @@ package com.everhomes.rest.module;
  * <ul>
  *     <li>MOBILE_WORKPLATFORM((byte) 1): 移动端工作台</li>
  *     <li>MOBILE_COMMUNITY((byte) 2): 移动端广场</li>
- *     <li>PC_MANAGEMENT((byte)3): pc端管理后台</li>
+ *     <li>PC_MANAGEMENT((byte)3): pc端运营后台</li>
  *     <li>PC_WORKPLATFORM((byte)4): pc端工作台</li>
  *     <li>PC_INDIVIDUAL((byte)5): pc门户</li>
  * </ul>

@@ -401,6 +401,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	@Autowired
 	private SmartCardKeyProvider smartCardKeyProvider;
 
+    @Autowired
+    private NamespacesService namespacesService;
+
 	private static long stepInSecond = 30;
 
    private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
@@ -6810,16 +6813,31 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 								//创建一个集合List<String>来承载办公地点名称的集合
 								//List<String> siteNameList = Lists.newArrayList();
 								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
-								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
-									//将每一个办公地点名称都保存在集合siteNameList中
-									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
-									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
-									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
-									addressSiteDTO.setCommunityName(community.getName());
-									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
-									addressSiteDTO.setCommunityId(community.getId());
-									addressSiteDtos.add(addressSiteDTO);
-								}
+
+
+                                //定制版没有办公点
+                                if(namespacesService.isStdNamespace(community.getNamespaceId())){
+                                    for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+                                        //将每一个办公地点名称都保存在集合siteNameList中
+                                        //siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+                                        AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                        addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+                                        addressSiteDTO.setCommunityName(community.getName());
+                                        addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                                        addressSiteDTO.setCommunityId(community.getId());
+                                        addressSiteDtos.add(addressSiteDTO);
+                                    }
+                                }else {
+                                    AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                    addressSiteDTO.setCommunityName(community.getName());
+                                    addressSiteDTO.setCommunityId(community.getId());
+                                    if(organizationDetail != null){
+                                        addressSiteDTO.setName(organizationDetail.getAddress());
+                                        addressSiteDTO.setWholeAddressName(organizationDetail.getAddress());
+                                    }
+
+                                }
+
 
 							}
 
