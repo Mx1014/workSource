@@ -691,14 +691,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		CreateOrderBaseInfo baseInfo = new CreateOrderBaseInfo();
 		baseInfo.setOrganizationId(cmd.getOrganizationId());
 		baseInfo.setOwnerId(cmd.getOwnerId());
-		baseInfo.setAppOriginId(getAppOriginId());
+		ServiceModuleApp app = getApp();
+		baseInfo.setAppOriginId(app.getOriginId());
 		baseInfo.setClientAppName(cmd.getClientAppName());
 		baseInfo.setPaymentMerchantId(merchantId);
 		baseInfo.setGoods(buildGoods(cmd, order, merchantId));
 		baseInfo.setTotalAmount(order.getOrderTotalFee());
 		 String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.siyinprint", "/siyinprint/notifySiyinprintOrderPaymentV2"); 
 		baseInfo.setCallBackUrl(backUrl);
-		baseInfo.setOrderTitle("云打印订单");
+		baseInfo.setOrderTitle(app.getName());
 		baseInfo.setPaySourceType(SourceType.PC.getCode());
 		baseInfo.setGoodsDetail(buildGoodsDetails(cmd, order));
 		return baseInfo;
@@ -766,13 +767,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 	}
 	
-	private Long getAppOriginId() {
+	private ServiceModuleApp getApp() {
 		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
 				UserContext.getCurrentNamespaceId(), 
 				ServiceModuleConstants.PRINT_MODULE, 
 				null, null, null);
 		
-		return apps.get(0).getOriginId();
+		return apps.get(0);
 	}
 
 	private Long getOrderPayeeAccount(Integer namespaceId, String ownerType, Long ownerId) {
