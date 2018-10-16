@@ -4010,6 +4010,11 @@ public class ParkingServiceImpl implements ParkingService {
 		String generalOrderId = order.getGeneralOrderId();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
 		String Url = homeurl + "/app/appinvoice?businessOrderNumber=" + generalOrderId;
+		try {
+			Url =URLEncoder.encode(Url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		response.setInvoiceUrl(Url);
 		return response;
 	}
