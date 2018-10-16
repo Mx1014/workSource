@@ -6,7 +6,9 @@ public interface AppConstants {
     public static final String APPKEY_BORDER = "b86ddb3b-ac77-4a65-ae03-7e8482a3db70";
     public static final String APPKEY_BIZ = "d80e06ca-3766-11e5-b18f-b083fe4e159f";
     public static final String APPKEY_APP = "bf925ea0-a5e0-11e4-a67c-00163e024631";
-    
+
+    public static final String APPKEY_SDK = "2f4cc25b-3d18-4485-ae10-fa954fbac829";
+
     public static final long APPID_DEFAULT = 0;
     public static final long APPID_MESSAGING = 1;
     public static final long APPID_FORUM = 2;

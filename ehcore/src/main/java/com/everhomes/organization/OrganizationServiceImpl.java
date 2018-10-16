@@ -25,6 +25,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -8396,6 +8397,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
 

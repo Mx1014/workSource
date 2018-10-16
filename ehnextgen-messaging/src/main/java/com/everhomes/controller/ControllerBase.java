@@ -1,14 +1,14 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.discover.RestMethod;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +19,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.discover.RestDiscover;
-import com.everhomes.discover.RestMethod;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.RequireAuthentication;
+import java.util.*;
 
 /**
  * 
@@ -40,15 +32,15 @@ import com.everhomes.util.RequireAuthentication;
 public class ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerBase.class);
     
-    private static Map<String, RestMethod> s_restMethodMap = new HashMap<String, RestMethod>();  
-    private static List<RestMethod> s_restMethodList = new ArrayList<RestMethod>();
+    private static Map<String, ExtendRestMethod> s_restMethodMap = new HashMap<>();
+    private static final List<RestMethod> s_restMethodList = new ArrayList<>();
     private static volatile boolean s_sortRestMethodList = false;
     
     @Autowired
     private LocaleStringService localeService;
     
     public ControllerBase() {
-        for(RestMethod restMethod: RestDiscover.discover(this.getClass(), null)) {
+        for(ExtendRestMethod restMethod: RestDiscover.discover(this.getClass(), null)) {
             s_restMethodMap.put(restMethod.getUri(), restMethod);
             s_restMethodList.add(restMethod);
             s_sortRestMethodList = true;
@@ -107,13 +99,8 @@ public class ControllerBase {
     public static List<RestMethod> getRestMethodList(String javadocRoot, String defaultSite) {
         if(s_sortRestMethodList) {
             synchronized(s_restMethodList) {
-                Collections.sort(s_restMethodList, (a, b) -> { return a.getUri().compareTo(b.getUri()); });
-
-                s_restMethodList = s_restMethodList.stream().map((m) -> {
-                    m.setJavadocUrl(javadocRoot + "/" + m.getFullJavadocUrl(defaultSite)); 
-                    return m;
-                }).collect(Collectors.toList());
-                
+                s_restMethodList.sort(Comparator.comparing(RestMethod::getUri));
+                s_restMethodList.forEach((m) -> m.setJavadocUrl(javadocRoot + "/" + m.getFullJavadocUrl(defaultSite)));
                 s_sortRestMethodList = false;
             }
         }
