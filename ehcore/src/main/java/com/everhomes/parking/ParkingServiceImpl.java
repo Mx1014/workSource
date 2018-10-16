@@ -4016,6 +4016,7 @@ public class ParkingServiceImpl implements ParkingService {
 			e.printStackTrace();
 		}
 		response.setInvoiceUrl(Url);
+		response.setPayMode(order.getPayMode());
 		return response;
 	}
 }

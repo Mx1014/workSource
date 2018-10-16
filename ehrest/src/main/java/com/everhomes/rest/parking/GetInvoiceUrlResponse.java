@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  */
 public class GetInvoiceUrlResponse {
     private String invoiceUrl;
+    private Byte payMode;
 
     public String getInvoiceUrl() {
 		return invoiceUrl;
@@ -20,6 +21,13 @@ public class GetInvoiceUrlResponse {
 		this.invoiceUrl = invoiceUrl;
 	}
 
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
 
 	@Override
     public String toString() {
