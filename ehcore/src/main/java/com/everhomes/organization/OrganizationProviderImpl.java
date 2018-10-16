@@ -6059,7 +6059,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(type))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
-                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.asc())
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.asc(), Tables.EH_ORGANIZATION_MEMBERS.ID.asc())
                 .fetchAnyInto(OrganizationMember.class);
         return organizationMember;
     }
