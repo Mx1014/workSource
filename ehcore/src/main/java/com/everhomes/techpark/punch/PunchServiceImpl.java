@@ -6298,27 +6298,19 @@ public class PunchServiceImpl implements PunchService {
     public void testDayRefreshLogs(Long runDate, Long orgId) {
         try {
             Calendar punCalendar = Calendar.getInstance();
-            List<String> groupTypeList = new ArrayList<String>();
-            groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-            groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-            List<OrganizationMemberDTO> members = this.organizationService.listAllChildOrganizationPersonnel
-                    (orgId, groupTypeList, null);
+            if(null != runDate){
+            	punCalendar.setTimeInMillis(runDate);
+            }
+            List<OrganizationMemberDetails> memberDetails = organizationProvider.queryOrganizationMemberDetails(new ListingLocator(), orgId, (locator, query) -> {
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+                return query;
+            });
+            if (CollectionUtils.isEmpty(memberDetails)) {
+                return;
+            }
             //循环刷所有员工
-            for (OrganizationMemberDTO member : members) {
-                
-                try {
-                    //刷新 daylog
-                    OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(member.getTargetId(), orgId);
-
-                    punchDayLogInitialize(memberDetail, orgId, punCalendar);
-
-                } catch (Exception e) {
-                    LOGGER.error("#####refresh day log error!! userid:[" + member.getTargetId()
-                            + "] organization id :[" + orgId + "] ");
-                    LOGGER.error(e.getLocalizedMessage());
-
-                    e.printStackTrace();
-                }
+            for (OrganizationMemberDetails memberDetail : memberDetails) { 
+            	punchDayLogInitialize(memberDetail, orgId, punCalendar);
             } 
         } catch (Exception e) {
 
