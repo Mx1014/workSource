@@ -242,6 +242,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		}
 		
 		InvestmentAdDetailDTO dto = ConvertHelper.convert(investmentAd, InvestmentAdDetailDTO.class);
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(dto.getCommunityId());
+		dto.setCurrentOrganizationId(currentOrganizationId);
 		//设置封面图url
 		Long userId = UserContext.currentUserId();
 		if (null != dto.getPosterUri()) {
