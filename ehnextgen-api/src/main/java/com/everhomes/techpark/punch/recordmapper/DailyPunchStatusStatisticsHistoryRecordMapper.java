@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch.recordmapper;
 
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.util.StringHelper;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -27,6 +28,9 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
     @PunchStatusStatisticsItem(defaultOrder = 7, type = PunchStatusStatisticsItemType.REST)
     private Integer restMemberCount;
 
+    @PunchStatusStatisticsItem(defaultOrder = 8, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+    
     public Integer getBelateMemberCount() {
         return belateMemberCount;
     }
@@ -100,4 +104,12 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getGoOutPunchDayCount() {
+		return goOutPunchDayCount;
+	}
+
+	public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+		this.goOutPunchDayCount = goOutPunchDayCount;
+	}
 }
