@@ -731,10 +731,12 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         //success
         if(cmd.getPaymentStatus() != null) {
             Rentalv2OrderRecord record ;
+            BigDecimal couponAmount = new BigDecimal(0);
             if (cmd.getMerchantOrderId() != null) {
                 record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
                 record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
                 rentalv2AccountProvider.updateOrderRecord(record);
+                couponAmount = changePayAmount(cmd.getCouponAmount());
             }
             else
                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
@@ -756,7 +758,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
                 if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
                     //判断支付金额与订单金额是否相同
-                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney().add(couponAmount)) == 0) {
                         onOrderRecordSuccess(order);
                         onOrderSuccess(order);
                     } else {
