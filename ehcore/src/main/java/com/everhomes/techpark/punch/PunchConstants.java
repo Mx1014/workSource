@@ -1,6 +1,8 @@
 package com.everhomes.techpark.punch;
 
 public class PunchConstants {
+
+	public static final Long MODULE_ID = 50600L;
 	public static final Integer PAGE_SIZE_AT_A_TIME = 1000;
 	public static final Long ONE_DAY_MS = 24 * 3600 * 1000L;
 	public static final Long DEFAULT_SPLIT_TIME = 4 * 3600 * 1000L;

@@ -11411,7 +11411,8 @@ public class PunchServiceImpl implements PunchService {
         Organization org = checkOrganization(cmd.getOrgId());
         try {
             if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
-                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())
+                    || resolver.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), cmd.getOrgId(), UserContext.currentUserId(), cmd.getAppId())) {
             	
             	response.setDeptName(org.getName());
                 response.setAdminFlag(NormalFlag.YES.getCode());
