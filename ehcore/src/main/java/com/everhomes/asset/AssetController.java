@@ -24,6 +24,7 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -52,16 +53,16 @@ public class AssetController extends ControllerBase {
 	 * 
 	 * @return 资产账单模板字段列表
 	 */
-//	@RequestMapping("listAssetBillTemplate")
-//	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
-//	public RestResponse listAssetBillTemplate(@Valid ListAssetBillTemplateCommand cmd) {
-//		List<AssetBillTemplateFieldDTO> dtos = this.assetService.listAssetBillTemplate(cmd);
-//
-//		RestResponse response = new RestResponse(dtos);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("listAssetBillTemplate")
+	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
+	public RestResponse listAssetBillTemplate(@Valid ListAssetBillTemplateCommand cmd) {
+		List<AssetBillTemplateFieldDTO> dtos = this.assetService.listAssetBillTemplate(cmd);
+
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <p>获取公司物业账单统计信息（一些老旧的项目还在用，如：张江高科）</p>
@@ -100,13 +101,13 @@ public class AssetController extends ControllerBase {
 	 * 导出账单
 	 * </p>
 	 */
-//	@RequestMapping("exportAssetBills")
-//	public HttpServletResponse exportAssetBills(@Valid ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
-//
-//		HttpServletResponse commandResponse = assetService.exportAssetBills(cmd, response);
-//
-//		return commandResponse;
-//	}
+	@RequestMapping("exportAssetBills")
+	public HttpServletResponse exportAssetBills(@Valid ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
+
+		HttpServletResponse commandResponse = assetService.exportAssetBills(cmd, response);
+
+		return commandResponse;
+	}
 
 	// 批量上传账单（与模板字段按字段展示名对应）
 	/**
@@ -115,23 +116,23 @@ public class AssetController extends ControllerBase {
 	 * 批量上传账单（与用户当前设置的模板字段按字段展示名对应）
 	 * </p>
 	 */
-//	@RequestMapping("importAssetBills")
-//	@RestReturn(value = ImportDataResponse.class)
-//	public RestResponse importAssetBills(@Valid ImportOwnerCommand cmd,
-//			@RequestParam(value = "attachment") MultipartFile[] files) {
-//		User manaUser = UserContext.current().getUser();
-//		Long userId = manaUser.getId();
-//		if (null == files || null == files[0]) {
-//			LOGGER.error("files is null。userId=" + userId);
-//			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-//					"files is null");
-//		}
-//		ImportDataResponse importDataResponse = this.assetService.importAssetBills(cmd, files[0], userId);
-//		RestResponse response = new RestResponse(importDataResponse);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("importAssetBills")
+	@RestReturn(value = ImportDataResponse.class)
+	public RestResponse importAssetBills(@Valid ImportOwnerCommand cmd,
+			@RequestParam(value = "attachment") MultipartFile[] files) {
+		User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if (null == files || null == files[0]) {
+			LOGGER.error("files is null。userId=" + userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.assetService.importAssetBills(cmd, files[0], userId);
+		RestResponse response = new RestResponse(importDataResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	// 新增账单
 	/**
@@ -140,17 +141,17 @@ public class AssetController extends ControllerBase {
 	 * 新增账单
 	 * </p>
 	 */
-//	@RequestMapping("creatAssetBill")
-//	@RestReturn(value = AssetBillTemplateValueDTO.class)
-//	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
-//
-//		AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
-//
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("creatAssetBill")
+	@RestReturn(value = AssetBillTemplateValueDTO.class)
+	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
+
+		AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
+
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	// 查看账单
 	/**
@@ -176,17 +177,17 @@ public class AssetController extends ControllerBase {
 	 * 编辑账单
 	 * </p>
 	 */
-//	@RequestMapping("updateAssetBill")
-//	@RestReturn(value = AssetBillTemplateValueDTO.class)
-//	public RestResponse updateAssetBill(@Valid UpdateAssetBillCommand cmd) {
-//
-//		AssetBillTemplateValueDTO bill = assetService.updateAssetBill(cmd);
-//
-//		RestResponse response = new RestResponse(bill);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("updateAssetBill")
+	@RestReturn(value = AssetBillTemplateValueDTO.class)
+	public RestResponse updateAssetBill(@Valid UpdateAssetBillCommand cmd) {
+
+		AssetBillTemplateValueDTO bill = assetService.updateAssetBill(cmd);
+
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	// 一键催缴
 	/**
@@ -195,17 +196,17 @@ public class AssetController extends ControllerBase {
 	 * 一键催缴
 	 * </p>
 	 */
-//	@RequestMapping("notifyUnpaidBillsContact")
-//	@RestReturn(value = String.class)
-//	public RestResponse notifyUnpaidBillsContact(@Valid NotifyUnpaidBillsContactCommand cmd) {
-//
-//		assetService.notifyUnpaidBillsContact(cmd);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("notifyUnpaidBillsContact")
+	@RestReturn(value = String.class)
+	public RestResponse notifyUnpaidBillsContact(@Valid NotifyUnpaidBillsContactCommand cmd) {
+
+		assetService.notifyUnpaidBillsContact(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	// 批量设置已缴
 	// 批量设置待缴
@@ -215,17 +216,17 @@ public class AssetController extends ControllerBase {
 	 * 批量设置已缴
 	 * </p>
 	 */
-//	@RequestMapping("setBillsPaid")
-//	@RestReturn(value = String.class)
-//	public RestResponse setBillsPaid(@Valid BillIdListCommand cmd) {
-//
-//		assetService.setBillsStatus(cmd, AssetBillStatus.PAID);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("setBillsPaid")
+	@RestReturn(value = String.class)
+	public RestResponse setBillsPaid(@Valid BillIdListCommand cmd) {
+
+		assetService.setBillsStatus(cmd, AssetBillStatus.PAID);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /asset/setBillsUnpaid</b>
@@ -233,17 +234,17 @@ public class AssetController extends ControllerBase {
 	 * 批量设置待缴
 	 * </p>
 	 */
-//	@RequestMapping("setBillsUnpaid")
-//	@RestReturn(value = String.class)
-//	public RestResponse setBillsUnpaid(@Valid BillIdListCommand cmd) {
-//
-//		assetService.setBillsStatus(cmd, AssetBillStatus.UNPAID);
-//
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("setBillsUnpaid")
+	@RestReturn(value = String.class)
+	public RestResponse setBillsUnpaid(@Valid BillIdListCommand cmd) {
+
+		assetService.setBillsStatus(cmd, AssetBillStatus.UNPAID);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	// 删除账单
 	/**
@@ -274,16 +275,16 @@ public class AssetController extends ControllerBase {
 	 * 
 	 * @return 资产账单模板字段列表
 	 */
-//	@RequestMapping("updateAssetBillTemplate")
-//	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
-//	public RestResponse updateAssetBillTemplate(@Valid UpdateAssetBillTemplateCommand cmd) {
-//		List<AssetBillTemplateFieldDTO> dtos = this.assetService.updateAssetBillTemplate(cmd);
-//
-//		RestResponse response = new RestResponse(dtos);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("updateAssetBillTemplate")
+	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
+	public RestResponse updateAssetBillTemplate(@Valid UpdateAssetBillTemplateCommand cmd) {
+		List<AssetBillTemplateFieldDTO> dtos = this.assetService.updateAssetBillTemplate(cmd);
+
+		RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /asset/checkTokenRegister</b>
@@ -291,14 +292,14 @@ public class AssetController extends ControllerBase {
 	 * </p>
 	 * @return
 	 */
-//	@RequestMapping("checkTokenRegister")
-//	@RestReturn(value = Boolean.class)
-//	public RestResponse checkTokenRegister(@Valid CheckTokenRegisterCommand cmd) {
-//		RestResponse response = new RestResponse(this.assetService.checkTokenRegister(cmd));
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("checkTokenRegister")
+	@RestReturn(value = Boolean.class)
+	public RestResponse checkTokenRegister(@Valid CheckTokenRegisterCommand cmd) {
+		RestResponse response = new RestResponse(this.assetService.checkTokenRegister(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /asset/notifyTimes</b>
@@ -308,15 +309,15 @@ public class AssetController extends ControllerBase {
 	 * 
 	 * @return
 	 */
-//	@RequestMapping("notifyTimes")
-//	@RestReturn(value = NotifyTimesResponse.class)
-//	public RestResponse notifyTimes(@Valid ImportOwnerCommand cmd) {
-//
-//		RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	@RequestMapping("notifyTimes")
+	@RestReturn(value = NotifyTimesResponse.class)
+	public RestResponse notifyTimes(@Valid ImportOwnerCommand cmd) {
+
+		RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <p>获取用户为管理员的公司列表（一些老旧的项目还在用，如：张江高科）</p>
@@ -671,11 +672,11 @@ public class AssetController extends ControllerBase {
 
 	/**
 	 * <p>删除一个账单</p>
-	 * <b>URL: /asset/deletBill</b>
+	 * <b>URL: /asset/deleteBill</b>
 	 */
-	@RequestMapping("deletBill")
+	@RequestMapping("deleteBill")
 	@RestReturn(value = String.class)
-	public RestResponse deletBill(BillIdCommand cmd) {
+	public RestResponse deleteBill(BillIdCommand cmd) {
 		String result = assetService.deleteBill(cmd);
 		RestResponse response = new RestResponse();
 		if (result.equals("OK")) {
@@ -832,19 +833,6 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
-	}
-
-	/**
-	 * <p>导出筛选过的所有账单</p>
-	 * <b>URL: /asset/exportPaymentBills</b>
-	 */
-	@RequestMapping("exportPaymentBills")
-	public HttpServletResponse exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
-		assetService.exportPaymentBills(cmd, response);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
 	}
 
 	/**
@@ -1202,19 +1190,6 @@ public class AssetController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /asset/noticeTrigger</b>
-	 * <p>启动自动催缴的定时任务</p>
-	 */
-	@RequestMapping("noticeTrigger")
-	public RestResponse noticeTrigger(NoticeTriggerCommand cmd) {
-		assetService.noticeTrigger(cmd.getNamespaceId());
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		restResponse.setErrorDescription("OK");
-		return restResponse;
-	}
-
-	/**
 	 * <b>URL: /asset/uploadCertificate</b>
 	 * <p>线下缴费场景，上传付费凭证图片</p>
 	 */
@@ -1353,19 +1328,6 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
-	}
-
-	/**
-	 * <p>对公转账：导出筛选过的所有账单</p>
-	 * <b>URL: /asset/exportSettledBillsForEnt</b>
-	 */
-	@RequestMapping("exportSettledBillsForEnt")
-	public HttpServletResponse exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
-		assetService.exportSettledBillsForEnt(cmd, response);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
 	}
 
 	/**
@@ -1518,5 +1480,48 @@ public class AssetController extends ControllerBase {
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		return restResponse;
 	}
-
+	
+	/**
+     * <p>新增收费项配置（物业缴费V6.0（UE优化）-30557）</p>
+     * <b>URL: /asset/createChargingItem</b>
+     */
+    @RequestMapping("createChargingItem")
+    @RestReturn(value = String.class)
+    public RestResponse createChargingItem(CreateChargingItemCommand cmd) {
+        assetService.createChargingItem(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        return response;
+    }
+    
+	/**
+	 * <p>导出筛选过的所有账单 (对接下载中心)</p>
+	 * <b>URL: /asset/exportPaymentBills</b>
+	 */
+	@RequestMapping("exportPaymentBills")
+	@RestReturn(value = String.class)
+	public RestResponse exportPaymentBills(@Valid ListBillsCommand cmd) {
+		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <p>对公转账：导出筛选过的所有账单(对接下载中心)</p>
+     * <b>URL: /asset/exportSettledBillsForEnt</b>
+     */
+    @RequestMapping("exportSettledBillsForEnt")
+    @RestReturn(value = String.class)
+    public RestResponse exportSettledBillsForEnt(@Valid ListBillsCommandForEnt cmd) {
+    	cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE_FORENT);
+		assetService.exportAssetListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
 }

@@ -114,4 +114,5 @@ public interface AddressProvider {
 	List<Address> findActiveAddressByBuildingNameAndCommunityId(String buildingName, Long communityId);
 
     List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
+    List<Address> findActiveApartmentsByBuildingId(Long buildingId);
 }

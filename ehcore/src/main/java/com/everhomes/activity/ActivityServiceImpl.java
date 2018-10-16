@@ -165,6 +165,7 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoCommand;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.ManualSignupCommand;
@@ -1814,6 +1815,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
+
+        User user = userProvider.findUserById(activityRoster.getUid());
+        if (user == null) {
+            user = new User();
+            user.setId(0L);
+            user.setExecutiveTag((byte) 0);
+        }
+        signupInfoDTO.setNickName(user.getNickName());
+        signupInfoDTO.setType(getAuthFlag(user));
+
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1848,22 +1859,17 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
                     signupInfoDTO.setPhone(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
                 }
+                if (StringUtils.isEmpty(signupInfoDTO.getNickName()) && postApprovalFormItem.getFieldName().equals("USER_NAME")) {
+                    signupInfoDTO.setNickName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                }
             }
             signupInfoDTO.setValues(results);
         }
-        User user = userProvider.findUserById(activityRoster.getUid());
-        if (user == null) {
-            user = new User();
-            user.setId(0L);
-            user.setExecutiveTag((byte) 0);
-        }
-        signupInfoDTO.setNickName(user.getNickName());
-        signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
 		}
-		
+		signupInfoDTO.setActivityName(activity.getSubject());
 		return signupInfoDTO;
 	}
 
@@ -2523,7 +2529,27 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
-	@Override
+    @Override
+    public ListSignupInfoByOrganizationIdResponse listSignupInfoByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize) {
+        ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
+	    List<ActivityRoster> list = this.activityProvider.listActivityRosterByOrganizationId(organizationId, namespaceId, pageAnchor, pageSize);
+	    if (list.size() > pageSize){
+            ActivityRoster remove = list.remove(list.size() -1);
+            response.setNextAnchor(remove.getId());
+        }
+        List<SignupInfoDTO> signupInfoDTOList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(list)) {
+	        for (ActivityRoster activityRoster : list) {
+                Activity activity = checkActivityExist(activityRoster.getActivityId());
+                SignupInfoDTO signupInfoDTO = convertActivityRoster(activityRoster, activity);
+                signupInfoDTOList.add(signupInfoDTO);
+            }
+        }
+        response.setSignupInfoDTOs(signupInfoDTOList);
+        return response;
+    }
+
+    @Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();

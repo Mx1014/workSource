@@ -6,6 +6,7 @@ package com.everhomes.rest.community.admin;
  *     <li>executiveFlag: 是否高管</li>
  *     <li>positionTag: 职位</li>
  *     <li>detailId: detailId</li>
+ *     <li>isAuth: 认证状态，请参考{@link com.everhomes.rest.organization.AuthFlag}</li>
  * </ul>
  */
 public class CommunityUserOrgDetailDTO {
@@ -16,7 +17,17 @@ public class CommunityUserOrgDetailDTO {
 
 	private Long detailId;
 
-	public Byte getExecutiveFlag() {
+    private Integer isAuth;
+
+    public Integer getIsAuth() {
+        return isAuth;
+    }
+
+    public void setIsAuth(Integer isAuth) {
+        this.isAuth = isAuth;
+    }
+
+    public Byte getExecutiveFlag() {
 		return executiveFlag;
 	}
 

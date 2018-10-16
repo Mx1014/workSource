@@ -4,6 +4,8 @@ package com.everhomes.visitorsys;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.DoorAccess;
+import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -22,6 +24,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
@@ -34,14 +37,12 @@ import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.aclink.CreateLocalVistorCommand;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -60,6 +61,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -164,6 +168,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private AppNamespaceMappingProvider appNamespaceMappingProvider;
     @Autowired
     private AppProvider appProvider;
+    @Autowired
+    private VisitorSysDoorAccessProvider visitorSysDoorAccessProvider;
+    @Autowired
+    private DoorAccessProvider doorAccessProvider;
     @Override
     public ListBookedVisitorsResponse listBookedVisitors(ListBookedVisitorsCommand cmd) {
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
@@ -658,7 +666,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.createVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
-        createVisitorActions(relatedVisitor);
+//        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
@@ -687,6 +695,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                 break;
             default:
                 return;
+        }
+//      自助登记状态置为已到访,活动记录为自助登记
+        VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
+        if(null == config.getBaseConfig() || TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+            if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+                actionFlag = ownerType==VisitorsysOwnerType.COMMUNITY?(byte)1:(byte)4;
+                action = visitorSysActionProvider.findVisitorSysActionByAction(visitor.getId(),actionFlag);
+            }
         }
         if(action == null){
             action = new VisitorSysAction();
@@ -722,7 +738,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkDoorGuard(relatedVisitor);
         visitorSysVisitorProvider.updateVisitorSysVisitor(relatedVisitor);
         visitorsysSearcher.syncVisitor(relatedVisitor);
-        createVisitorActions(relatedVisitor);
+//        createVisitorActions(relatedVisitor);
         sendMessageToAdmin(relatedVisitor,cmd);//发送消息给应用管理员，系统管理员，超级管理员，让管理员确认
         return null;
     }
@@ -1066,6 +1082,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             List<VisitorsysApprovalFormItem> formConfig = JSONObject.parseObject(forms.getTemplateText(),
                     new TypeReference<List<VisitorsysApprovalFormItem>>() {
                     });
+            for(VisitorsysApprovalFormItem form : formConfig){
+                if("invalidTime".equals(form.getFieldName())){
+                    formConfig.remove(form);
+                    break;
+                }
+            }
             response.setFormConfig(formConfig);
         }
         VisitorsysBaseConfig visitorsysBaseConfig = new VisitorsysBaseConfig();
@@ -1185,12 +1207,25 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(listDoorAccessResponse==null || listDoorAccessResponse.getDoors()==null){
             return null;
         }
+        List<VisitorSysDoorAccess> defaultConfigs = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        for (VisitorSysDoorAccess d1 : defaultConfigs) {
+            for (DoorAccessDTO d : listDoorAccessResponse.getDoors()) {
+                if (d1.getDoorAccessId().equals(d.getId())) {
+                    listDoorAccessResponse.getDoors().remove(d);
+                    break;
+                }
+            }
+        }
         ListDoorGuardsResponse response = new ListDoorGuardsResponse();
         response.setDoorGuardList(listDoorAccessResponse.getDoors().stream().map(r->{
             BaseDoorGuardDTO dto = new BaseDoorGuardDTO();
             dto.setDoorGuardId(String.valueOf(r.getId()));
             dto.setDoorGuardName(r.getName());
             dto.setHardwareId(r.getHardwareId());
+            dto.setMaxDuration(r.getMaxDuration());
+            dto.setMaxCount(r.getMaxCount());
+            dto.setEnableAmount(r.getEnableAmount());
+            dto.setEnableDuration(r.getEnableDuration());
             return dto;
         }).collect(Collectors.toList()));
         return response;
@@ -1279,9 +1314,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsFlag());
         VisitorsysFlagType validAfterConfirmedFlag = VisitorsysFlagType.fromCode(communityConfig.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
         boolean showQrcode =
-                communityConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
-                && communityConfig.getBaseConfig().getDoorGuardId().equals(communityVisitor.getDoorGuardId())
-                && (
+//                communityConfig.getBaseConfig().getDoorGuardId()!=null //配置的门禁和申请的门禁授权的门禁id必须一致
+//                && communityConfig.getBaseConfig().getDoorGuardId().equals(communityVisitor.getDoorGuardId())
+//                &&
+        (
                         (
                                 doorGuardsFlag == VisitorsysFlagType.YES //园区开启门禁对接
                                 && validAfterConfirmedFlag == VisitorsysFlagType.YES//门禁二维码需要在访客确认后生效
@@ -1331,6 +1367,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public GetBookedVisitorByIdResponse createOrUpdateVisitorForWeb(CreateOrUpdateVisitorCommand cmd) {
         beforePostForWeb(cmd);
+        cmd.setFromDevice(TrueOrFalseFlag.TRUE.getCode());
         return createOrUpdateVisitor(cmd);
 
     }
@@ -1464,6 +1501,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
         CreateOrUpdateVisitorCommand createOrUpdateVisitorCommand = ConvertHelper.convert(cmd, CreateOrUpdateVisitorCommand.class);
         createOrUpdateVisitorCommand = VisitorSysUtils.copyNotNullProperties(device, createOrUpdateVisitorCommand,new ArrayList(Arrays.asList("getId","setId")));
+        createOrUpdateVisitorCommand.setFromDevice(TrueOrFalseFlag.TRUE.getCode());
         GetBookedVisitorByIdResponse orUpdateVisitor = createOrUpdateVisitor(createOrUpdateVisitorCommand);
         return ConvertHelper.convert(orUpdateVisitor,CreateOrUpdateVisitorUIResponse.class);
     }
@@ -1968,6 +2006,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         return convert;
     }
 
+
+
+
     /**
      * 检查owerid是否在系统中存在
      * @param ownerType
@@ -2248,6 +2289,35 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else if(visitStatus == VisitorsysStatus.HAS_VISITED){//如果已到访状态
             generateConfirmVisitor(visitor,visitorType);
         }
+
+//      自助登记状态置为已到访
+        if(null != visitor.getFromDevice() && TrueOrFalseFlag.TRUE.getCode().equals(visitor.getFromDevice())){
+//          企业预约访客
+            if(visitor.getId()==null && !visitor.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) {
+                if (visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY) {
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.COMMUNITY.getCode(), visitor.getOwnerId());
+                    if (TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                            visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                            visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
+                } else {
+                    VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), visitor.getEnterpriseId());
+                    if (null == config.getBaseConfig() || TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                            visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                            visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    }
+                }
+            }
+//          企业自助登记
+            if(visitor.getId() != null && visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
+                VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), visitor.getEnterpriseId());
+                if (null == config.getBaseConfig() || TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                    visitor.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    visitor.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
+            }
+        }
+
         Map<String, VisitorsysApprovalFormItem> map =null;
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && visitor.getCommunityFormValues()!=null) {
             map = visitor.getCommunityFormValues().stream().collect(Collectors.toMap(VisitorsysApprovalFormItem::getFieldName, x -> x));
@@ -2280,7 +2350,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private void checkDoorGuard(GetConfigurationResponse configuration, VisitorSysVisitor visitor) {
         //门禁id为空
-        if(configuration.getBaseConfig()==null || configuration.getBaseConfig().getDoorGuardId()==null){
+//        if(configuration.getBaseConfig()==null || configuration.getBaseConfig().getDoorGuardId()==null){
+//            return;
+//        }
+        if(StringUtils.isEmpty(visitor.getDoorGuardId())){
             return;
         }
         VisitorsysFlagType doorGuardsFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsFlag());
@@ -2289,28 +2362,37 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysFlagType doorGuardsConfirmedFlag = VisitorsysFlagType.fromCode(configuration.getBaseConfig().getDoorGuardsValidAfterConfirmedFlag());
         VisitorsysStatus bookingStatus = checkBookingStatus(visitor.getBookingStatus());
-        if(VisitorsysFlagType.YES == doorGuardsConfirmedFlag && bookingStatus==VisitorsysStatus.NOT_VISIT){//确认到访才发放门禁二维码
-            return;
-        }
+//        if(VisitorsysFlagType.YES == doorGuardsConfirmedFlag && bookingStatus==VisitorsysStatus.NOT_VISIT){//确认到访才发放门禁二维码
+//            return;
+//        }
         //申请门禁二维码，并且设置到visitor中
         CreateLocalVistorCommand doorCmd = new CreateLocalVistorCommand();
         doorCmd.setPhone(visitor.getVisitorPhone());
-        doorCmd.setDoorId(Long.valueOf(configuration.getBaseConfig().getDoorGuardId()));
+        doorCmd.setDoorId(Long.valueOf(visitor.getDoorGuardId()));
         doorCmd.setNamespaceId(visitor.getNamespaceId());
         doorCmd.setUserName(visitor.getVisitorName());
         doorCmd.setDescription(visitor.getVisitReason());
+//      两种授权方式
         doorCmd.setAuthRuleType((byte)0);
         long now = System.currentTimeMillis();
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(now);
         doorCmd.setValidFromMs(now);
-        if(visitor.getInvalidTime()!=null && visitor.getInvalidTime().length()>0) {
-            Matcher matcher = numExtract.matcher(visitor.getInvalidTime());
-            if (matcher.find()) {
-                instance.add(Calendar.HOUR_OF_DAY, Integer.valueOf(matcher.group(1)));
-                doorCmd.setValidEndMs(instance.getTimeInMillis());
+        if(null != visitor.getDoorAccessAuthDuration()){
+            if(visitor.getDoorAccessAuthDurationType().equals((byte)0)){
+                instance.add(Calendar.DAY_OF_MONTH,visitor.getDoorAccessAuthDuration());
+            }else{
+                instance.add(Calendar.HOUR_OF_DAY,visitor.getDoorAccessAuthDuration());
             }
+            visitor.setDoorAccessEndTime(instance.getTimeInMillis());
+            doorCmd.setValidEndMs(instance.getTimeInMillis());
+            visitor.setDoorAccessEndTime(instance.getTimeInMillis());
         }
+        if(null != visitor.getDoorAccessAuthCount() && visitor.getDoorAccessEnableAuthCount().equals((byte)1)){
+            doorCmd.setAuthRuleType((byte)1);
+            doorCmd.setTotalAuthAmount(visitor.getDoorAccessAuthCount());
+        }
+
         if(visitor.getVisitorPicUri()!=null && visitor.getVisitorPicUri().length()>0){
             doorCmd.setHeadImgUri(visitor.getVisitorPicUri());
         }
@@ -2318,6 +2400,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
+            e.printStackTrace();
             LOGGER.error("error invoke dooraccess");
         }
         if(localVisitorAuth!=null){
@@ -2395,6 +2478,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         //创建企业临时访客，如果状态是等待确认，那么设置对应园区访客状态为隐藏
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         VisitorsysStatus visitStatus = checkVisitStatus(visitor.getVisitStatus());
+
         if(relatedVisitor == null
                 && visitorType == VisitorsysVisitorType.TEMPORARY){
             convert.setBookingStatus(null);
@@ -2434,6 +2518,56 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             convert.setVisitTime(relatedVisitor == null ? null : relatedVisitor.getVisitTime());
         }
+
+        //      是否需要到访确认
+//
+//        if(ownerType == VisitorsysOwnerType.COMMUNITY){
+//            VisitorSysConfiguration entConfig = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.ENTERPRISE.getCode(),visitor.getEnterpriseId());
+//            if(null != entConfig.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(entConfig.getBaseConfig().getVisitorConfirmFlag())){
+//                if(relatedVisitor == null
+//                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+//                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+//                }else{
+//                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+//                }
+//            } else {
+//                if(relatedVisitor == null
+//                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+//                    convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+//                }else{
+//                    convert.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+//                }
+//            }
+//        } else {
+//            VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(visitor.getNamespaceId(),VisitorsysOwnerType.COMMUNITY.getCode(),convert.getOwnerId());
+//            if(TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())){
+//                if(relatedVisitor == null
+//                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+//                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+//                }else{
+//                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+//                }
+//            } else {
+//                if(relatedVisitor == null
+//                        && visitorType == VisitorsysVisitorType.TEMPORARY){
+//                    convert.setVisitStatus(VisitorsysStatus.WAIT_CONFIRM_VISIT.getCode());
+//                }else{
+//                    convert.setBookingStatus(VisitorsysStatus.NOT_VISIT.getCode());
+//                }
+//            }
+//        }
+//        园区确认预约访客，企业的关联 和 园区登记临时访客，企业关联
+        if ((convert.getId() != null && convert.getVisitorType().equals(VisitorsysVisitorType.BE_INVITED.getCode())) ||
+                convert.getVisitorType().equals(VisitorsysVisitorType.TEMPORARY.getCode())) {
+            if (ownerType == VisitorsysOwnerType.COMMUNITY) {
+                VisitorSysConfiguration config = visitorSysConfigurationProvider.findVisitorSysConfigurationByOwner(convert.getNamespaceId(), VisitorsysOwnerType.ENTERPRISE.getCode(), convert.getEnterpriseId());
+                if (null != config.getBaseConfig() && TrueOrFalseFlag.FALSE.getCode().equals(config.getBaseConfig().getVisitorConfirmFlag())) {
+                    convert.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                    convert.setVisitStatus(VisitorsysStatus.HAS_VISITED.getCode());
+                }
+            }
+        }
+
         convert.setSendMessageInviterFlag(relatedVisitor ==null?visitor.getSendMessageInviterFlag():relatedVisitor.getSendMessageInviterFlag());
         convert.setSendSmsFlag(relatedVisitor ==null?visitor.getSendSmsFlag():relatedVisitor.getSendSmsFlag());
         return convert;
@@ -2599,5 +2733,127 @@ public class VisitorSysServiceImpl implements VisitorSysService{
                     , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild token "+token);
         }
         return id;
+    }
+
+    @Override
+    public IdentifierCardDTO getIDCardInfo() {
+        IdentifierCardDTO idCard;
+        String url = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"visitorsys.hardware.cardreader","http://localhost:9225/actionapi/ReadCard/Read");
+        Map<String,String> params = new HashMap<>();
+        String json = null;
+        try {
+            json = HttpUtils.post(url,params);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        IdentifierCardResponse resp = JSONObject.parseObject(json,new TypeReference<IdentifierCardResponse>(){});
+        if(TrueOrFalseFlag.FALSE.getCode().toString().equals(resp.getCode())){
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_READ_CARD,
+                    "读卡错误");
+        }
+        idCard = resp.getCardInfo();
+        return idCard;
+    }
+
+    @Override
+    public List<VisitorSysDoorAccessDTO> listDoorAccess(BaseVisitorsysCommand cmd) {
+        checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+        if(null == cmd.getNamespaceId())
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        return results.stream().map(r->{
+            VisitorSysDoorAccessDTO dto = ConvertHelper.convert(r,VisitorSysDoorAccessDTO.class);
+            DoorAccess result = doorAccessProvider.getDoorAccessById(dto.getDoorAccessId());
+            dto.setMaxCount(result.getMaxCount());
+            dto.setMaxDuration(result.getMaxDuration());
+            dto.setEnableAmount(result.getEnableAmount());
+            dto.setEnableDuration(result.getEnableDuration());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
+        if(null == cmd.getId()){
+            List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccess(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getDoorAccessId());
+            if(null != results && results.size() > 0){
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE,VisitorsysConstant.ERROR_ALREADY_EXIST,"Record Already exist.");
+            }
+            VisitorSysDoorAccess bean = ConvertHelper.convert(cmd,VisitorSysDoorAccess.class);
+            if(null == cmd.getNamespaceId())
+                bean.setNamespaceId(UserContext.getCurrentNamespaceId());
+            bean.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
+            visitorSysDoorAccessProvider.createVisitorSysDoorAccess(bean);
+        } else {
+            VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
+            if(null != cmd.getDefaultAuthDurationType())
+                bean.setDefaultAuthDurationType(cmd.getDefaultAuthDurationType());
+            if(null != cmd.getDefaultAuthDuration())
+                bean.setDefaultAuthDuration(cmd.getDefaultAuthDuration());
+            if(null != cmd.getDefaultEnableAuthCount())
+                bean.setDefaultEnableAuthCount(cmd.getDefaultEnableAuthCount());
+            if(null != cmd.getDefaultAuthCount())
+                bean.setDefaultAuthCount(cmd.getDefaultAuthCount());
+            visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(bean);
+        }
+    }
+
+    @Override
+    public void deleteDoorAccess(DeleteDoorAccessCommand cmd) {
+        if(null == cmd.getId()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+        }
+        VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
+        if(null != bean)
+            visitorSysDoorAccessProvider.deleteVisitorSysDoorAccesss(bean.getId());
+        if(bean.getDefaultDoorAccessFlag().equals((byte)1)){
+            List<VisitorSysDoorAccess> dooraccesses = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(bean.getNamespaceId(),bean.getOwnerType(),bean.getOwnerId());
+            if(null != dooraccesses && dooraccesses.size() > 0){
+                VisitorSysDoorAccess newdefault = dooraccesses.get(0);
+                CreateOrUpdateDoorAccessCommand newdefaultCmd = new CreateOrUpdateDoorAccessCommand();
+                newdefaultCmd.setId(newdefault.getId());
+                newdefaultCmd.setNamespaceId(newdefault.getNamespaceId());
+                newdefaultCmd.setOwnerType(newdefault.getOwnerType());
+                newdefaultCmd.setOwnerId(newdefault.getOwnerId());
+                setDefaultAccess(newdefaultCmd);
+            }
+        }
+    }
+
+    @Override
+    public void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+        if(null == cmd.getId()){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+        }
+        List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+        results.forEach(r ->{
+            if(r.getId().equals(cmd.getId())){
+                r.setDefaultDoorAccessFlag(TrueOrFalseFlag.TRUE.getCode());
+                visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(r);
+            }else{
+                if(TrueOrFalseFlag.TRUE.getCode().equals(r.getDefaultDoorAccessFlag())){
+                    r.setDefaultDoorAccessFlag(TrueOrFalseFlag.FALSE.getCode());
+                    visitorSysDoorAccessProvider.updateVisitorSysDoorAccess(r);
+                }
+
+            }
+        });
+    }
+
+    @Override
+    public void removeInvalidTime() {
+        List<VisitorSysConfiguration> configs = visitorSysConfigurationProvider.listVisitorSysConfiguration();
+    }
+
+    @Override
+    public GetConfigurationResponse getConfigurationForManage(GetConfigurationCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return getConfiguration(cmd);
+    }
+
+    @Override
+    public List<VisitorSysDoorAccessDTO> listDoorAccessForManage(BaseVisitorsysCommand cmd) {
+        checkMoblieManagePrivilege(cmd);
+        return listDoorAccess(cmd);
     }
 }

@@ -19,6 +19,8 @@ public class BatchImportBillsCommand {
     private Long billGroupId;
     private Byte billSwitch;
     private String targetType;
+    //物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    private Long organizationId;
 
     public Byte getBillSwitch() {
         return billSwitch;
@@ -58,5 +60,13 @@ public class BatchImportBillsCommand {
 
 	public void setTargetType(String targetType) {
 		this.targetType = targetType;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

@@ -1,6 +1,8 @@
 
 package com.everhomes.asset;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -67,11 +70,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
@@ -93,7 +98,6 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.ListServiceModulefunctionsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -102,8 +106,12 @@ import com.everhomes.rest.common.AssetMapContractConfig;
 import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -122,6 +130,7 @@ import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.servicemoduleapp.AssetModuleAppMappingAndConfigsCmd;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
@@ -133,6 +142,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -247,20 +257,12 @@ public class AssetServiceImpl implements AssetService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
-    private CustomerService customerService;
-
-    @Autowired
     private NamespaceResourceService namespaceResourceService;
 
     @Autowired
     private LocaleTemplateProvider localeTemplateProvider;
 
-    @Autowired
-    private ImportFileService importFileService;
 
-    @Autowired
-    private PortalService portalService;
-    
     @Autowired
     private ContentServerService contentServerService;
     
@@ -278,6 +280,12 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
 	private ServiceModuleAppProvider serviceModuleAppProvider;
+	
+    @Autowired
+    protected LocaleStringService localeStringService;
+    
+    @Autowired
+	protected TaskService taskService;
     
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -323,8 +331,14 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
-        //校验查看的权限
-        checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
+        //房源招商新增的映射逻辑
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+            // 转换
+             Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+             cmd.setCategoryId(assetCategoryId);
+         }
+        //物业缴费V6.0（UE优化） 将“ 账单查看、筛选”的权限去掉，因为有此模块权限的用户默认就会有查看和筛选的权限；
+        //checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(), PrivilegeConstants.ASSET_MANAGEMENT_VIEW, cmd.getOrganizationId());
         ListBillsResponse response = new ListBillsResponse();
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
@@ -335,25 +349,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId) {
-//        ListServiceModuleAppsCommand cmd1 = new ListServiceModuleAppsCommand();
-//        cmd1.setActionType((byte)13);
-//        cmd1.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
-//        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
-//        ListServiceModuleAppsResponse res = portalService.listServiceModuleAppsWithConditon(cmd1);
-//        Long appId = null;
-//        if(null != res && res.getServiceModuleApps().size() > 0){
-//            appId = res.getServiceModuleApps().get(0).getId();
-//        }
-//        OrganizationMember member = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(UserContext.getCurrentNamespaceId(), UserContext.currentUserId(), OrganizationType.ENTERPRISE.getCode());
-//        if(member != null && !org.springframework.util.StringUtils.isEmpty(member.getGroupPath())){
-//            Long organizaitonId = Long.valueOf(member.getGroupPath().split("/")[1]);
-//            member.setOrganizationId(organizaitonId);
-//        }
-//        if(!userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), member.getOrganizationId(),priviledgeId , appId, null,communityId )){
-//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-//                    "Insufficient privilege");
-//        }
-
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), currentOrgId, priviledgeId, PrivilegeConstants.ASSET_MODULE_ID, (byte)13, null, null, communityId);
     }
 
@@ -539,7 +534,8 @@ public class AssetServiceImpl implements AssetService {
 //                Integer nameSpaceId = UserContext.getCurrentNamespaceId();
                 Integer nameSpaceId = noticeInfo.getNamespaceId();
                 injectSmsVars(noticeInfo, variables,nameSpaceId);
-                String templateLocale = UserContext.current().getUser().getLocale();
+                //issue-38265 解决“给用户设置自动催缴设置，用户收不到短信提醒”的bug
+                String templateLocale = Locale.SIMPLIFIED_CHINESE.toString();
                 int templateId = SmsTemplateCode.PAYMENT_NOTICE_CODE;
                 boolean smsGo = true;
                 try{
@@ -715,7 +711,10 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
          // set category default is 0 representing the old data
+        // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
         }
@@ -800,7 +799,7 @@ public class AssetServiceImpl implements AssetService {
                     ListBillsDTO dto = listBillsDTOS1.get(i);
                     NoticeInfo info = new NoticeInfo();
                     info.setAppName(appName);
-                    info.setPhoneNums(dto.getNoticeTel());
+                    info.setPhoneNums(String.join(",", dto.getNoticeTelList()));
                     info.setAmountRecevable(dto.getAmountReceivable());
                     info.setAmountOwed(dto.getAmountOwed());
                     info.setDateStr(dto.getDateStr());
@@ -868,7 +867,7 @@ public class AssetServiceImpl implements AssetService {
         handler.modifyBillStatus(cmd);
     }
 
-    @Override
+/*    @Override
     public void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response) {
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
@@ -909,7 +908,7 @@ public class AssetServiceImpl implements AssetService {
             dtos.addAll(listBills(cmd).getListBillsDTOS());
         }        
         exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
-    }
+    }*/
     
     public void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response) {
         if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
@@ -953,6 +952,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void modifyNotSettledBill(ModifyNotSettledBillCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY,cmd.getOrganizationId());
     	assetProvider.modifyNotSettledBill(cmd);
     }
 
@@ -966,6 +966,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public String deleteBill(BillIdCommand cmd) {
+    	checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_DELETE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -1244,6 +1245,26 @@ public class AssetServiceImpl implements AssetService {
                 			item.setAmountReceivedWithoutTax(BigDecimal.ZERO);
                 		}
                 	}
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		//物业缴费V6.0（UE优化) 账单区分数据来源
+                		item.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		item.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		item.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	item.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	item.setCanDelete((byte)0);
+                    	item.setCanModify((byte)0);
+                	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1353,6 +1374,26 @@ public class AssetServiceImpl implements AssetService {
                     if(newBill.getAmountOwed().compareTo(new BigDecimal("0"))==0){
                         newBill.setStatus((byte)1);
                     }
+                    //物业缴费V6.0（UE优化) 账单区分数据来源
+                	if(cmd.getModuleId().equals(PrivilegeConstants.CONTRACT_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.CONTRACT_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0：如果来源于合同，支持删除账单/修改账单的减免增收等配置，不支持删除/修改费项
+                    	newBill.setCanDelete((byte)1);
+                    	newBill.setCanModify((byte)1);
+                	}else if(cmd.getModuleId().equals(PrivilegeConstants.ENERGY_MODULE)) {
+                		newBill.setSourceType(AssetModuleNotifyConstants.ENERGY_MODULE);
+                		newBill.setSourceId(cmd.getCategoryId());
+                    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ENERGY_CODE, "zh_CN");
+                    	newBill.setSourceName(localeString.getText());
+                    	//物业缴费V6.0 ：如果来源于能耗，不支持删除、不支持修改
+                    	newBill.setCanDelete((byte)0);
+                    	newBill.setCanModify((byte)0);
+                	}
+                	//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                	newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
@@ -2123,7 +2164,8 @@ public class AssetServiceImpl implements AssetService {
         return between_days.intValue() + 1;
     }
 
-    private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
+    @SuppressWarnings("unused")
+	private void NaturalMonthHandler(List<PaymentExpectancyDTO> dtos1, FeeRules rule, List<VariableIdAndValue> variableIdAndValueList, String formula, String chargingItemName, Integer billDay, List<PaymentExpectancyDTO> dtos2, ContractProperty property) {
         String propertyName = property.getPropertyName();
         Date dateStrBegin = rule.getDateStrBegin();
         Date dateStrEnd = rule.getDateStrEnd();
@@ -2284,7 +2326,6 @@ public class AssetServiceImpl implements AssetService {
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
         return handler.listBillExpectanciesOnContract(cmd);
-
     }
 
     @Override
@@ -2845,6 +2886,7 @@ public class AssetServiceImpl implements AssetService {
      * 查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
      */
     @Scheduled(cron = "0 0 12 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
     public void autoBillNotice() {
         if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
@@ -2915,7 +2957,7 @@ public class AssetServiceImpl implements AssetService {
                     PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
                     info.setMsgTemplateId(specificConfig.getNoticeMsgId());
                     info.setAppTemplateId(specificConfig.getNoticeAppId());
-                    if(info.getMsgTemplateId() == null || info.getAppTemplateId() == null){
+                    if(info.getMsgTemplateId() == null && info.getAppTemplateId() == null){
                         continue;
                     }
                     List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
@@ -2938,6 +2980,11 @@ public class AssetServiceImpl implements AssetService {
                         Long noticeObjId = obj.getNoticeObjId();
                         String noticeObjType = obj.getNoticeObjType();
                         FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        if(sourceTypeA == null){
+                            LOGGER.error("sourceType faild to fromcode, noticeObjType={},noticeConfigMap.getConfigId={}"
+                                    ,noticeObjType, noticeConfigMap.get(b.getId()).getId());
+                            continue;
+                        }
                         switch (sourceTypeA) {
                             // 具体部门
                             case SOURCE_DEPARTMENT:
@@ -2955,6 +3002,9 @@ public class AssetServiceImpl implements AssetService {
                     //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
                     for(NoticeMemberIdAndContact uid : userIds){
                         try {
+                        	if(uid.getTargetId() == info.getTargetId()){
+                                continue;
+                            }
                             NoticeInfo newInfo = CopyUtils.deepCopy(info);
                             newInfo.setTargetId(uid.getTargetId());
                             newInfo.setPhoneNums(uid.getContactToken());
@@ -2965,6 +3015,7 @@ public class AssetServiceImpl implements AssetService {
                         }
                     }
                     //一个一个发，因为每个账单的变量注入值不一样
+                    LOGGER.info("billIds size should be one, now = {}",billIds.size());
                     NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
                 }
                 LOGGER.info("done");
@@ -3113,7 +3164,7 @@ public class AssetServiceImpl implements AssetService {
             }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
                 hasPay = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
-                hasUploadCertificate = view.getHasView();                
+                hasUploadCertificate = view.getHasView();
             }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
             	hasEnergy = view.getHasView();
             }
@@ -3191,6 +3242,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public BatchImportBillsResponse batchImportBills(BatchImportBillsCommand cmd, MultipartFile file) {
+    	//物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    	checkAssetPriviledgeForPropertyOrg(cmd.getCommunityId(),PrivilegeConstants.ASSET_MANAGEMENT_CREATE,cmd.getOrganizationId());
         AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
         String vender = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vender);
@@ -3790,18 +3843,35 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getOwnerId() == null || cmd.getOwnerId() == -1){
             deCouplingFlag = 0;
             cmd.setOwnerId(cmd.getNamespaceId().longValue());
-            brotherGroupId = assetProvider.createBillGroup(cmd,deCouplingFlag,null);
-            //同步下去
+            brotherGroupId = getBrotherGroupId();
+            //1、先同步下去
             List<Long> allCommunity = getAllCommunity(cmd.getNamespaceId(), false);
             for(int i =0; i < allCommunity.size(); i ++){
                 Long communityId = allCommunity.get(i);
                 cmd.setOwnerId(communityId);
-                assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId);
+                //全部配置要同步到具体项目的时候，首先要判断一下该项目是否解耦了，如果解耦了，则不需要
+            	IsProjectNavigateDefaultCmd isProjectNavigateDefaultCmd = new IsProjectNavigateDefaultCmd();
+                isProjectNavigateDefaultCmd.setOwnerId(cmd.getOwnerId());
+                isProjectNavigateDefaultCmd.setOwnerType("community");
+                isProjectNavigateDefaultCmd.setNamespaceId(cmd.getNamespaceId());
+                isProjectNavigateDefaultCmd.setCategoryId(cmd.getCategoryId());
+                IsProjectNavigateDefaultResp isProjectNavigateDefaultResp = assetProvider.isBillGroupsForJudgeDefault(isProjectNavigateDefaultCmd);
+                if(isProjectNavigateDefaultResp != null && isProjectNavigateDefaultResp.getDefaultStatus().equals((byte)1)) {
+                	assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
+                }
             }
+            //2、再创建全部配置
+            cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            assetProvider.createBillGroup(cmd,deCouplingFlag,null,brotherGroupId);
         }else{
             //去解耦同伴
-            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId);
+            assetProvider.createBillGroup(cmd,deCouplingFlag,brotherGroupId,null);
         }
+    }
+    
+    private Long getBrotherGroupId() {
+    	long nextGroupId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(Tables.EH_PAYMENT_BILL_GROUPS.getClass()));
+    	return nextGroupId;
     }
 
     @Override
@@ -5034,41 +5104,6 @@ public class AssetServiceImpl implements AssetService {
 		return response;
 	}
 	
-	public void exportSettledBillsForEnt(ListBillsCommandForEnt cmd, HttpServletResponse response) {
-       if(cmd.getPageSize()==null||cmd.getPageSize()>5000){
-           cmd.setPageSize(5000);
-       }
-       List<ListBillsDTO> dtos = new ArrayList<>();
-       if(UserContext.getCurrentNamespaceId()==999983){
-           Integer pageSize = cmd.getPageSize();
-           if(pageSize <= 100){
-               dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
-           }
-           Integer hundred = 100;
-           Integer pageAnchor = 100;
-           if(pageSize > 100){
-               while(pageSize > 0){
-                   cmd.setPageSize(hundred);
-                   List<ListBillsDTO> back = listBillsForEnt(cmd).getListBillsDTOS();
-                   if(back.size() > pageAnchor) {
-                       for(int i = 0; i < pageAnchor; i++){
-                           dtos.add(back.get(i));
-                       }
-                       break;
-                   }else{
-                       dtos.addAll(back);
-                   }
-                   pageSize = pageSize - 100;
-                   pageAnchor = pageSize;
-                   cmd.setPageAnchor(cmd.getPageAnchor()==null?2l:cmd.getPageAnchor()+1l);
-               }
-           }
-       }else{
-           dtos.addAll(listBillsForEnt(cmd).getListBillsDTOS());
-       }
-       exportPaymentBillsUtil(dtos, cmd.getBillGroupId(), response, cmd.getNamespaceId(), cmd.getOwnerId(), ServiceModuleConstants.ASSET_MODULE);//导出账单
-    }
-    
     public PublicTransferBillRespForEnt publicTransferBillForEnt(PublicTransferBillCmdForEnt cmd){
 //    	List<BillIdAndAmount> bills = new ArrayList<BillIdAndAmount>();
     	List<PaymentBillRequest> paymentBillRequests = cmd.getBillList();
@@ -5159,200 +5194,6 @@ public class AssetServiceImpl implements AssetService {
         return assetProvider.listBillGroups(cmd.getOwnerId(),cmd.getOwnerType(),null);//对公转账不区分多入口，所以categoryId为null
 	}
 	
-	public void exportPaymentBillsUtil(List<ListBillsDTO> dtos, Long billGroupId, HttpServletResponse response, Integer namespaceId, Long communityId, Long moduleId){
-		
-		Calendar c = newClearedCalendar();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int date = c.get(Calendar.DATE);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        int second = c.get(Calendar.SECOND);
-        String fileName = "bill"+year+month+date+hour+minute+ second;
-        
-        //初始化
-        List<String> propertyNames = new ArrayList<String>();
-        List<String> titleName = new ArrayList<String>();
-        List<Integer> titleSize = new ArrayList<Integer>();
-        propertyNames.add("dateStrBegin");
-        titleName.add("账单开始时间");
-        titleSize.add(20);
-        propertyNames.add("dateStrEnd");
-        titleName.add("账单结束时间");
-        titleSize.add(20);
-        propertyNames.add("targetName");
-        titleName.add("客户名称");
-        titleSize.add(20);
-        propertyNames.add("contractNum");
-        titleName.add("合同编号");
-        titleSize.add(20);
-        propertyNames.add("customerTel");
-        titleName.add("客户手机号");
-        titleSize.add(20);
-        propertyNames.add("noticeTel");
-        titleName.add("催缴手机号");
-        titleSize.add(20);
-        //增加收费项的导出
-        ShowCreateBillDTO webPage = assetProvider.showCreateBill(billGroupId);
-        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
-        for(BillItemDTO billItemDTO : billItemDTOList){
-        	if(billItemDTO.getBillItemId() != null) {
-        		propertyNames.add(billItemDTO.getBillItemId().toString());
-                titleName.add(billItemDTO.getBillItemName()+"(含税)");
-                titleSize.add(20);
-                propertyNames.add(billItemDTO.getBillItemId().toString() + "-withoutTax");
-                titleName.add(billItemDTO.getBillItemName()+"(不含税)");
-                titleSize.add(20);
-                propertyNames.add(billItemDTO.getBillItemId().toString() + "-taxAmount");
-                titleName.add(billItemDTO.getBillItemName()+"税额");
-                titleSize.add(20);
-                //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
-                if(isShowEnergy(namespaceId, communityId, moduleId)) {
-                	//判断该域空间下是否显示用量
-                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
-                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
-                		//eh_payment_charging_items 4:自用水费  7：公摊水费
-                        propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
-                        titleName.add("用量（吨）");
-                        titleSize.add(20);
-                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
-                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
-                		//eh_payment_charging_items 5:自用电费   8：公摊电费
-                		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
-                        titleName.add("用量（度）");
-                        titleSize.add(20);
-    				}
-                }
-				//增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
-                propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
-                titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
-                titleSize.add(30);
-        	}
-        }
-        propertyNames.add("addresses");
-        titleName.add("楼栋/门牌");
-        titleSize.add(20);
-        propertyNames.add("dueDayCount");
-        titleName.add("欠费天数");
-        titleSize.add(20);
-        propertyNames.add("amountExemption");
-        titleName.add("减免金额");
-        titleSize.add(20);
-        propertyNames.add("remarkExemption");
-        titleName.add("减免备注");
-        titleSize.add(20);
-        propertyNames.add("amountSupplement");
-        titleName.add("增收金额");
-        titleSize.add(20);
-        propertyNames.add("remarkSupplement");
-        titleName.add("增收备注");
-        titleSize.add(20);
-        propertyNames.add("invoiceNum");
-        titleName.add("发票单号");
-        titleSize.add(20);
-        List<Map<String, String>> dataList = new ArrayList<>();
-        //组装datalist来确定propertyNames的值
-        for(int i = 0; i < dtos.size(); i++) {
-            ListBillsDTO dto = dtos.get(i);
-            Map<String, String> detail = new HashMap<String, String>();
-            detail.put("dateStrBegin", dto.getDateStrBegin());
-            detail.put("dateStrEnd", dto.getDateStrEnd());
-            detail.put("targetName", dto.getTargetName());
-            detail.put("contractNum", dto.getContractNum());
-            detail.put("customerTel", dto.getCustomerTel());
-            detail.put("noticeTel", dto.getNoticeTel());
-            //导出增加费项列
-            List<BillItemDTO> billItemDTOs = new ArrayList<>();
-            List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
-            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
-            if(dto.getBillId() != null) {
-    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
-    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
-    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
-    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
-    			}
-    		}
-            for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
-            	BigDecimal amountRecivable = BigDecimal.ZERO;
-            	BigDecimal amountRecivableWithoutTax = BigDecimal.ZERO;//导出增加不含税字段
-            	BigDecimal taxAmount = BigDecimal.ZERO;//导出增加税额字段
-            	BigDecimal lateFineAmount = BigDecimal.ZERO;
-            	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
-        		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
-        			//如果费项ID相等
-        			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
-        				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
-        				//if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
-        				//修复issue-34464 新增一条收费项为“租金”的账单，再去修改收费项为“租金1”，再导出，发现金额错位了
-        				if(billItemDTO2.getBillItemName() != null && !billItemDTO2.getBillItemName().startsWith("滞纳金") && billItemDTO2.getBillItemName().contains("滞纳金")){
-                            lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
-        					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
-        					long billId = Long.parseLong(dto.getBillId());
-        					Long chargingItemId = billItemDTO.getBillItemId();
-                        	//根据减免费项配置重新计算待收金额
-                            Boolean isConfigSubtraction = assetProvider.isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
-                            if(isConfigSubtraction) {//如果滞纳金配置了减免费项，那么导出金额置为0
-                            	lateFineAmount = BigDecimal.ZERO;//修复issue-33462
-                            }
-        				}else {
-        					//如果费项是一样的，那么导出的时候，对费项做相加
-            				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
-            				if(billItemDTO2.getAmountReceivableWithoutTax() != null) {
-            					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
-            				}
-            				if(billItemDTO2.getTaxAmount() != null) {
-            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
-            				}
-            				//根据减免费项配置重新计算待收金额
-            				long billId = Long.parseLong(dto.getBillId());
-                            Long charingItemId = billItemDTO.getBillItemId();
-                            Boolean isConfigSubtraction = assetProvider.isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
-                            if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
-                            	amountRecivable = BigDecimal.ZERO;//修复issue-33462
-                            }
-        				}        			
-        				//增加用量
-        				if(billItemDTO2.getEnergyConsume() != null) {
-        					energyConsume = energyConsume.add(new BigDecimal(billItemDTO2.getEnergyConsume()));
-        				}
-        			}
-        		}
-        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
-        		detail.put(billItemDTO.getBillItemId().toString() + "-withoutTax", amountRecivableWithoutTax.toString());
-        		detail.put(billItemDTO.getBillItemId().toString() + "-taxAmount", taxAmount.toString());
-        		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
-        		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
-        		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
-            }
-            detail.put("addresses", dto.getAddresses());
-            detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
-            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
-            if(listBillDetailVO != null) {
-            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
-            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
-            }
-            StringBuffer remarkExemption = new StringBuffer();//减免备注
-            StringBuffer remarkSupplement = new StringBuffer();//增收备注
-            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
-            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
-            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
-                }else{
-                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
-                }
-            }
-            if(remarkExemption.length() != 0) {
-            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
-            }
-            if(remarkSupplement.length() != 0) {
-            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
-            }
-            detail.put("invoiceNum", dto.getInvoiceNum());
-            dataList.add(detail);
-        }
-        ExcelUtils excel = new ExcelUtils(response,fileName,"sheet1");
-        excel.writeExcel(propertyNames,titleName,titleSize,dataList);
-	}
-	
 	public void exportOrdersUtil(List<PaymentOrderBillDTO> dtos, ListPaymentBillCmd cmd, HttpServletResponse response) {
     	try {
 	        Calendar c = newClearedCalendar();
@@ -5422,7 +5263,7 @@ public class AssetServiceImpl implements AssetService {
 		} catch (Exception e) {
 			LOGGER.error("exportOrdersUtil cmd={}, Exception={}", cmd, e);
 		}
-    }	
+    }
 	
 	public ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd) {
 		AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
@@ -5432,6 +5273,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	public void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_MODIFY_BILL_SUBITEM,cmd.getOrganizationId());
 		assetProvider.batchModifyBillSubItem(cmd);
 	}
 	
@@ -5533,10 +5375,12 @@ public class AssetServiceImpl implements AssetService {
     }
 
 	public void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_SETTLED,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillSwitch(cmd);
 	}
 
 	public void batchUpdateBillsToPaid(BatchUpdateBillsToPaidCmd cmd) {
+		checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_TO_PAID,cmd.getOrganizationId());
 		assetProvider.updatePaymentBillStatus(cmd);
 	}
 	
@@ -5625,8 +5469,6 @@ public class AssetServiceImpl implements AssetService {
         }
     }
 	
-	
-
 	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
@@ -5649,7 +5491,7 @@ public class AssetServiceImpl implements AssetService {
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId) {
 		return assetProvider.getBillItemTaxRate(billGroupId, billItemId);
 	}
-
+	
 	public void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd) {
         //1、判断缴费是否已经存在关联合同的记录
         cmd.setSourceType(AssetModuleNotifyConstants.CONTRACT_MODULE);
@@ -5821,4 +5663,300 @@ public class AssetServiceImpl implements AssetService {
 
         return handler;
     }
+
+	public void createChargingItem(CreateChargingItemCommand cmd) {
+		Long communityId = cmd.getOwnerId();
+        Integer namespaceId = cmd.getNamespaceId();
+        List<Long> communityIds = new ArrayList<>();
+		//如果communityId是空或者-1的话，那么会把communityId设置成域空间ID，代表全部
+        if(communityId == null || communityId == -1){
+        	cmd.setOwnerId(cmd.getNamespaceId().longValue());
+            communityIds = getAllCommunity(namespaceId,true);
+        }
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
+        assetProvider.createChargingItem(cmd, communityIds);
+	}
+
+	//对接下载中心的导出账单列表
+	@Override
+	public void exportAssetListByParams(Object cmd) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		Long communityId;
+		String moduleName = "";
+		if (cmd instanceof ListBillsCommand) {
+			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
+			params.put("ListBillsCMD", ListBillsCMD);
+			communityId = ListBillsCMD.getCommunityId();
+			moduleName="缴费";
+		} else if (cmd instanceof ListBillsCommandForEnt) {
+			ListBillsCommandForEnt ListBillsCMDForEnt = (ListBillsCommandForEnt) cmd;
+			params.put("ListBillsCMDForEnt", ListBillsCMDForEnt);
+			communityId = ListBillsCMDForEnt.getOwnerId();
+			moduleName="对公转账";
+		} else {
+			LOGGER.error("exportAssetListByParams is error.");
+			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+		}
+		Community community = communityProvider.findCommunityById(communityId);
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
+		}
+		String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AssetExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+	}
+	
+	//对接下载中心
+	@Override
+    public OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){
+		//公用字段
+		Long communityId;
+		List<ListBillsDTO> dtos ;
+		ListFieldCommand command ;
+		Long billGroupId ;
+		Integer namespaceId;
+		Long categoryId = null;
+		String moduleName = "";
+		taskService.updateTaskProcess(taskId, 10);
+		if (cmd instanceof ListBillsCommand) {
+			//缴费下载
+			ListBillsCommand ListBillsCMD = (ListBillsCommand) cmd;
+			communityId = ListBillsCMD.getCommunityId();
+			ListBillsCMD.setPageSize(100000);
+			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMD.getNamespaceId());
+			dtos = listBills(ListBillsCMD).getListBillsDTOS();
+			command = ConvertHelper.convert(ListBillsCMD, ListFieldCommand.class);
+			command.setModuleName("asset");
+			command.setGroupPath(null);
+			
+			billGroupId = ListBillsCMD.getBillGroupId();
+			categoryId = ListBillsCMD.getCategoryId();
+			moduleName="缴费";
+			
+		} else if (cmd instanceof ListBillsCommandForEnt) {
+			//对公转账下载
+			ListBillsCommandForEnt ListBillsCMDForEnt = (ListBillsCommandForEnt) cmd;
+			communityId = ListBillsCMDForEnt.getOwnerId();
+			ListBillsCMDForEnt.setPageSize(100000);
+			namespaceId = UserContext.getCurrentNamespaceId(ListBillsCMDForEnt.getNamespaceId());
+			dtos = listBillsForEnt(ListBillsCMDForEnt).getListBillsDTOS();
+			command = ConvertHelper.convert(ListBillsCMDForEnt, ListFieldCommand.class);
+			command.setModuleName("asset");
+			command.setGroupPath(null);
+			
+			billGroupId = ListBillsCMDForEnt.getBillGroupId();
+			moduleName="对公转账";
+			
+		} else {
+			LOGGER.error("exportAssetListByParams is error.");
+			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+		}
+		
+		taskService.updateTaskProcess(taskId, 25);
+		
+		//初始化 字段信息
+        List<String> propertyNames = new ArrayList<String>();
+        List<String> titleName = new ArrayList<String>();
+        List<Integer> titleSize = new ArrayList<Integer>();
+        propertyNames.add("dateStrBegin");
+        titleName.add("账单开始时间");
+        titleSize.add(20);
+        propertyNames.add("dateStrEnd");
+        titleName.add("账单结束时间");
+        titleSize.add(20);
+        propertyNames.add("targetName");
+        titleName.add("客户名称");
+        titleSize.add(20);
+        propertyNames.add("contractNum");
+        titleName.add("合同编号");
+        titleSize.add(20);
+        propertyNames.add("customerTel");
+        titleName.add("客户手机号");
+        titleSize.add(20);
+        propertyNames.add("noticeTel");
+        titleName.add("催缴手机号");
+        titleSize.add(20);
+        //增加收费项的导出
+        ShowCreateBillDTO webPage = assetProvider.showCreateBill(billGroupId);
+        List<BillItemDTO> billItemDTOList = webPage.getBillItemDTOList();
+        for(BillItemDTO billItemDTO : billItemDTOList){
+        	if(billItemDTO.getBillItemId() != null) {
+        		propertyNames.add(billItemDTO.getBillItemId().toString());
+                titleName.add(billItemDTO.getBillItemName()+"(含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-withoutTax");
+                titleName.add(billItemDTO.getBillItemName()+"(不含税)");
+                titleSize.add(20);
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "-taxAmount");
+                titleName.add(billItemDTO.getBillItemName()+"税额");
+                titleSize.add(20);
+                //修复issue-34181 执行一些sql页面没有“用量”，但是导入的模板和导出Excel都有“用量”字段
+                if(isShowEnergy(namespaceId, categoryId, ServiceModuleConstants.ASSET_MODULE)) {
+                	//判断该域空间下是否显示用量
+                	if(billItemDTO.getBillItemId().equals(AssetEnergyType.personWaterItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicWaterItem.getCode())) {
+                		//eh_payment_charging_items 4:自用水费  7：公摊水费
+                        propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（吨）");
+                        titleSize.add(20);
+                	}else if (billItemDTO.getBillItemId().equals(AssetEnergyType.personElectricItem.getCode()) 
+                			|| billItemDTO.getBillItemId().equals(AssetEnergyType.publicElectricItem.getCode())) {
+                		//eh_payment_charging_items 5:自用电费   8：公摊电费
+                		propertyNames.add(billItemDTO.getBillItemId().toString() + "-energyConsume");
+                        titleName.add("用量（度）");
+                        titleSize.add(20);
+    				}
+                }
+				//增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+                propertyNames.add(billItemDTO.getBillItemId().toString() + "LateFine");
+                titleName.add(billItemDTO.getBillItemName()+"滞纳金"+"(元)");
+                titleSize.add(30);
+        	}
+        }
+        taskService.updateTaskProcess(taskId, 40);
+        propertyNames.add("addresses");
+        titleName.add("楼栋/门牌");
+        titleSize.add(20);
+        propertyNames.add("dueDayCount");
+        titleName.add("欠费天数");
+        titleSize.add(20);
+        propertyNames.add("amountExemption");
+        titleName.add("减免金额");
+        titleSize.add(20);
+        propertyNames.add("remarkExemption");
+        titleName.add("减免备注");
+        titleSize.add(20);
+        propertyNames.add("amountSupplement");
+        titleName.add("增收金额");
+        titleSize.add(20);
+        propertyNames.add("remarkSupplement");
+        titleName.add("增收备注");
+        titleSize.add(20);
+        propertyNames.add("invoiceNum");
+        titleName.add("发票单号");
+        titleSize.add(20);
+		
+        List<Map<String, String>> dataList = new ArrayList<>();
+        taskService.updateTaskProcess(taskId, 65);
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+            ListBillsDTO dto = dtos.get(i);
+            Map<String, String> detail = new HashMap<String, String>();
+            detail.put("dateStrBegin", dto.getDateStrBegin());
+            detail.put("dateStrEnd", dto.getDateStrEnd());
+            detail.put("targetName", dto.getTargetName());
+            detail.put("contractNum", dto.getContractNum());
+            detail.put("customerTel", dto.getCustomerTel());
+            if (dto.getNoticeTelList() != null) {
+            	detail.put("noticeTel", String.join(",", dto.getNoticeTelList()));
+			}
+            
+            //导出增加费项列
+            List<BillItemDTO> billItemDTOs = new ArrayList<>();
+            List<ExemptionItemDTO> exemptionItemDTOs = new ArrayList<>();
+            ListBillDetailVO listBillDetailVO = new ListBillDetailVO();
+            if(dto.getBillId() != null) {
+    			listBillDetailVO = assetProvider.listBillDetail(Long.parseLong(dto.getBillId()));
+    			if(listBillDetailVO != null && listBillDetailVO.getBillGroupDTO() != null) {
+    				billItemDTOs = listBillDetailVO.getBillGroupDTO().getBillItemDTOList();
+    				exemptionItemDTOs = listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList();
+    			}
+    		}
+            for(BillItemDTO billItemDTO: billItemDTOList){//收费项类型
+            	BigDecimal amountRecivable = BigDecimal.ZERO;
+            	BigDecimal amountRecivableWithoutTax = BigDecimal.ZERO;//导出增加不含税字段
+            	BigDecimal taxAmount = BigDecimal.ZERO;//导出增加税额字段
+            	BigDecimal lateFineAmount = BigDecimal.ZERO;
+            	BigDecimal energyConsume = BigDecimal.ZERO;//增加用量
+        		for(BillItemDTO billItemDTO2 : billItemDTOs) {//实际账单的收费项信息
+        			//如果费项ID相等
+        			if(billItemDTO.getBillItemId() != null && billItemDTO.getBillItemId().equals(billItemDTO2.getChargingItemsId())) {
+        				//如果费项ID相等，并且费项名称相等，那么说明是费项本身，如果不相等，则说明是费项产生的滞纳金
+        				//if(billItemDTO.getBillItemName() != null && billItemDTO.getBillItemName().equals(billItemDTO2.getBillItemName())) {
+        				//修复issue-34464 新增一条收费项为“租金”的账单，再去修改收费项为“租金1”，再导出，发现金额错位了
+        				if(billItemDTO2.getBillItemName() != null && !billItemDTO2.getBillItemName().startsWith("滞纳金") && billItemDTO2.getBillItemName().contains("滞纳金")){
+                            lateFineAmount = lateFineAmount.add(billItemDTO2.getAmountReceivable());
+        					//减免费项的id，存的都是charging_item_id，因为滞纳金是跟着费项走，所以可以通过subtraction_type类型，判断是否减免费项滞纳金
+        					long billId = Long.parseLong(dto.getBillId());
+        					Long chargingItemId = billItemDTO.getBillItemId();
+                        	//根据减免费项配置重新计算待收金额
+                            Boolean isConfigSubtraction = assetProvider.isConfigLateFineSubtraction(billId, chargingItemId);//用于判断该滞纳金是否配置了减免费项
+                            if(isConfigSubtraction) {//如果滞纳金配置了减免费项，那么导出金额置为0
+                            	lateFineAmount = BigDecimal.ZERO;//修复issue-33462
+                            }
+        				}else {
+        					//如果费项是一样的，那么导出的时候，对费项做相加
+            				amountRecivable = amountRecivable.add(billItemDTO2.getAmountReceivable());
+            				if(billItemDTO2.getAmountReceivableWithoutTax() != null) {
+            					amountRecivableWithoutTax = amountRecivableWithoutTax.add(billItemDTO2.getAmountReceivableWithoutTax());//导出增加不含税字段
+            				}
+            				if(billItemDTO2.getTaxAmount() != null) {
+            					taxAmount = taxAmount.add(billItemDTO2.getTaxAmount());//导出增加税额字段 
+            				}
+            				//根据减免费项配置重新计算待收金额
+            				long billId = Long.parseLong(dto.getBillId());
+                            Long charingItemId = billItemDTO.getBillItemId();
+                            Boolean isConfigSubtraction = assetProvider.isConfigItemSubtraction(billId, charingItemId);//用于判断该费项是否配置了减免费项
+                            if(isConfigSubtraction) {//如果费项配置了减免费项，那么导出金额置为0
+                            	amountRecivable = BigDecimal.ZERO;//修复issue-33462
+                            }
+        				}        			
+        				//增加用量
+        				if(billItemDTO2.getEnergyConsume() != null) {
+        					energyConsume = energyConsume.add(new BigDecimal(billItemDTO2.getEnergyConsume()));
+        				}
+        			}
+        		}
+        		detail.put(billItemDTO.getBillItemId().toString(), amountRecivable.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-withoutTax", amountRecivableWithoutTax.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-taxAmount", taxAmount.toString());
+        		detail.put(billItemDTO.getBillItemId().toString() + "-energyConsume", energyConsume.toString());//增加用量
+        		//导出增加收费项对应滞纳金的导出（不管是否产生了滞纳金）
+        		detail.put(billItemDTO.getBillItemId().toString() + "LateFine", lateFineAmount.toString());
+            }
+            detail.put("addresses", dto.getAddresses());
+            detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+            //导出增加减免（总和）、减免备注、增收（总和）、增收备注
+            if(listBillDetailVO != null) {
+            	detail.put("amountExemption", listBillDetailVO.getAmoutExemption() != null ? listBillDetailVO.getAmoutExemption().toString() : "");
+            	detail.put("amountSupplement", listBillDetailVO.getAmountSupplement() != null ? listBillDetailVO.getAmountSupplement().toString() : "");
+            }
+            StringBuffer remarkExemption = new StringBuffer();//减免备注
+            StringBuffer remarkSupplement = new StringBuffer();//增收备注
+            for(ExemptionItemDTO exemptionItemDTO : exemptionItemDTOs) {
+            	if(exemptionItemDTO.getAmount().compareTo(new BigDecimal("0"))==-1) {
+            		remarkExemption = remarkExemption.append(exemptionItemDTO.getRemark() + ",");
+                }else{
+                	remarkSupplement = remarkSupplement.append(exemptionItemDTO.getRemark() + ",");
+                }
+            }
+            if(remarkExemption.length() != 0) {
+            	detail.put("remarkExemption", remarkExemption.substring(0, remarkExemption.length() - 1));
+            }
+            if(remarkSupplement.length() != 0) {
+            	detail.put("remarkSupplement", remarkSupplement.substring(0, remarkSupplement.length() - 1));
+            }
+            detail.put("invoiceNum", dto.getInvoiceNum());
+            dataList.add(detail);
+        }
+		Community community = communityProvider.findCommunityById(communityId);
+		taskService.updateTaskProcess(taskId, 90);
+		if (community == null) {
+			LOGGER.error("Community is not exist.");
+			throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not exist.");
+		}
+		if (dtos != null && dtos.size() > 0) {
+			String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(null, fileName, moduleName+"信息");
+			taskService.updateTaskProcess(taskId, 80);
+			return excelUtils.getOutputStream(propertyNames, titleName, titleSize, dataList);
+		} else {
+			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+		}
+	}
 }

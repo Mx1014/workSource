@@ -180,7 +180,8 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListBillsDTO dto = new ListBillsDTO();
-            dto.setNoticeTel(source.getNoticeTels());
+            //dto.setNoticeTel(source.getNoticeTels());
+            dto.setNoticeTelList(Arrays.asList(source.getNoticeTels().split(",")));
             dto.setOwnerType("community");
             dto.setDateStr(source.getChargePeriod());
             dto.setDateStrBegin(source.getChargePeriod());//为了兼容账单开始时间

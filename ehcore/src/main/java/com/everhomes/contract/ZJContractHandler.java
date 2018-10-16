@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.HTTP;
@@ -36,6 +34,8 @@ import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ChargingVariables;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractChargingItemDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
@@ -761,7 +761,7 @@ public class ZJContractHandler implements ContractService{
     }
 
 	@Override
-	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -832,8 +832,13 @@ public class ZJContractHandler implements ContractService{
 	}
 
 	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

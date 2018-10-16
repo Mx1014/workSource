@@ -36,10 +36,23 @@ public class PostGeneralFormValCommand {
 
 	private Long communityId;
     private Long currentOrganizationId;
+    
+    private Long investmentAdId;
+
+    private Long orgId;
+
+    private Long moduleId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 
+	public Long getInvestmentAdId() {
+		return investmentAdId;
+	}
+
+	public void setInvestmentAdId(Long investmentAdId) {
+		this.investmentAdId = investmentAdId;
+	}
 
 	public Long getCommunityId() {
 		return communityId;
@@ -71,6 +84,14 @@ public class PostGeneralFormValCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 
 	public Long getOwnerId() {
@@ -119,6 +140,14 @@ public class PostGeneralFormValCommand {
 
 	public void setApprovalId(Long approvalId) {
 		this.approvalId = approvalId;
+	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
 	}
 
 	@Override

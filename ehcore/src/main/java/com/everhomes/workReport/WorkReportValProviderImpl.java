@@ -140,6 +140,7 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
             reportVal.setReportType(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TYPE));
             reportVal.setReportTime(r.getValue(Tables.EH_WORK_REPORT_VALS.REPORT_TIME));
             reportVal.setApplierName(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_NAME));
+            reportVal.setApplierAvatar(r.getValue(Tables.EH_WORK_REPORT_VALS.APPLIER_AVATAR));
             reportVal.setReadStatus(r.getValue(Tables.EH_WORK_REPORT_VAL_RECEIVER_MAP.READ_STATUS));
             reportVal.setUpdateTime(r.getValue(Tables.EH_WORK_REPORT_VALS.UPDATE_TIME));
             results.add(reportVal);
@@ -342,10 +343,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void deleteReportValReceiverMsg(Timestamp time) {
+    public void deleteReportValReceiverMsg() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportValReceiverMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(time));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
         query.execute();
     }
 
@@ -392,4 +393,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         return query.fetchInto(WorkReportValReceiverMap.class);
     }
 
+    @Override
+    public List<WorkReportVal> listWorkReportVals(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
+        return query.fetchInto(WorkReportVal.class);
+    }
 }

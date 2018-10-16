@@ -1,5 +1,13 @@
 package com.everhomes.service_agreement.admin;
 
+import com.everhomes.rest.service_agreement.admin.GetProtocolDetailResponse;
+import com.everhomes.rest.service_agreement.admin.GetProtocolTemplateCommand;
+import com.everhomes.rest.service_agreement.admin.GetProtocolCommand;
+import com.everhomes.rest.service_agreement.admin.GetProtocolResponse;
+import com.everhomes.rest.service_agreement.admin.GetProtocolTemplateResponse;
+import com.everhomes.rest.service_agreement.admin.SaveProtocolsCommand;
+import com.everhomes.rest.service_agreement.admin.SaveProtocolsTemplateCommand;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,4 +80,76 @@ public class ServiceAgreementAdminController extends ControllerBase{
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 	}
+
+	/**
+	 * <b>URL: /admin/adminServiceAgreement/saveProtocolTemplate</b>
+	 * <p>保存协议模板</p>
+	 */
+	@RequestMapping("saveProtocolTemplate")
+	@RestReturn(value=String.class)
+	public RestResponse saveProtocolTemplate(SaveProtocolsTemplateCommand cmd) {
+
+		serviceAgreementService.saveProtocolTemplate(cmd);
+		RestResponse response = new RestResponse();
+		setResponseSuccess(response);
+		return response;
+	}
+
+    /**
+     * <b>URL: /admin/adminServiceAgreement/getProtocolTemplate</b>
+     * <p>获取协议模板和变量</p>
+     */
+    @RequestMapping("getProtocolTemplate")
+    @RestReturn(value=GetProtocolTemplateResponse.class)
+    public RestResponse getProtocolTemplate(GetProtocolTemplateCommand cmd) {
+
+        GetProtocolTemplateResponse res = serviceAgreementService.getProtocolTemplate(cmd);
+        RestResponse response = new RestResponse(res);
+        setResponseSuccess(response);
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/adminServiceAgreement/getProtocol</b>
+     * <p>根据域空间ID和类型获取协议</p>
+     */
+    @RequestMapping("getProtocol")
+    @RestReturn(value=GetProtocolResponse.class)
+    public RestResponse getProtocol(GetProtocolCommand cmd) {
+
+        GetProtocolResponse res = serviceAgreementService.getProtocolTemplateDetail(cmd);
+        RestResponse response = new RestResponse(res);
+        setResponseSuccess(response);
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /admin/adminServiceAgreement/saveProtocol</b>
+     * <p>保存协议和变量</p>
+     */
+    @RequestMapping("saveProtocol")
+    @RestReturn(value=String.class)
+    public RestResponse saveProtocol(SaveProtocolsCommand cmd) {
+
+        serviceAgreementService.saveProtocol(cmd);
+        RestResponse response = new RestResponse();
+        setResponseSuccess(response);
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/adminServiceAgreement/getProtocolDetail</b>
+     * <p>根据域空间ID和类型获取协议详情</p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getProtocolDetail")
+    @RestReturn(value=GetProtocolDetailResponse.class)
+    public RestResponse getProtocolDetail(GetProtocolCommand cmd) {
+
+        GetProtocolDetailResponse res = serviceAgreementService.getProtocolDetail(cmd);
+        RestResponse response = new RestResponse(res);
+        setResponseSuccess(response);
+        return response;
+    }
 }

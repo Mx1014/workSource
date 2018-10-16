@@ -57,6 +57,8 @@ public class EnterpriseApplyEntryCommand {
 	private Long contractId;
 
 	private Long addressId;
+	
+	private String customerName;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
@@ -64,6 +66,14 @@ public class EnterpriseApplyEntryCommand {
 	private Long requestFormId;
 
 	private Long categoryId;
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;

@@ -43,4 +43,8 @@ public interface PmsyProvider {
 	PmsyPayer findPmPayersByNameAndContact(String userName, String userContact);
 	
 	List<PmsyOrderItem> ListBillOrderItems(Long...orderIds);
+
+	void updatePmsyOrderItemByOrderId(Long orderId);
+	
+	List<PmsyOrder> findPmsyOrderItemsByOrderId(String billId);
 }

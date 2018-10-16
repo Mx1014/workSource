@@ -8,6 +8,7 @@ import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
 import com.everhomes.rest.remind.SelfRemindDetailActionData;
 import com.everhomes.rest.remind.TrackRemindDetailActionData;
+import com.everhomes.rest.techpark.punch.PunchNotificationActionData;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.rest.workReport.WorkReportIndexActionData;
 
@@ -254,7 +255,7 @@ public enum Router {
      * attendance
      */
     ATTENDANCE_PUNCH(ActionType.PUNCH,
-            "zl://attendance/punch", NoParamActionData.class),
+            "zl://attendance/index", PunchNotificationActionData.class),
 
     ATTENDANCE_PUNCHCLOCK_RECORD(ActionType.PUNCH,
                     "zl://attendance/punchClockRecord", PunchClockRecordData.class),

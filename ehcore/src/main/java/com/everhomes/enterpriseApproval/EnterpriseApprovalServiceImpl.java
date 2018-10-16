@@ -470,12 +470,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (flowCase == null || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(flowCase.getDeleteFlag())) {
             return;
         }
+        flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+        flowCaseProvider.updateFlowCase(flowCase);
+
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
         if (ga == null) {
             return;
         }
-        flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
-        flowCaseProvider.updateFlowCase(flowCase);
 
         GeneralApprovalAttribute attribute = GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute());
         if (GeneralApprovalAttribute.CUSTOMIZE == attribute || GeneralApprovalAttribute.DEFAULT == attribute) {

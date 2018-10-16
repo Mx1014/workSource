@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
  * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
  * <li>targetType:客户类别,参考{@link com.everhomes.rest.asset.AssetTargetType}</li>
  * <li>targetId:客户id</li>
  * <li>targetName:客户名称</li>
@@ -30,6 +31,7 @@ public class CreateGeneralBillCommand {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    private String thirdBillId;
     private String targetType;
     private Long targetId;
     private String targetName;
@@ -128,6 +130,12 @@ public class CreateGeneralBillCommand {
 	}
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
+	}
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
 	}
     
 }

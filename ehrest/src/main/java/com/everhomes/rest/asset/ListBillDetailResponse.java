@@ -30,6 +30,9 @@ import java.util.List;
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
  * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>canDelete:0：不可删除；1：可删除</li>
+ * <li>canModify:0：不可编辑；1：可编辑</li>
  *</ul>
  */
 public class ListBillDetailResponse {
@@ -40,7 +43,7 @@ public class ListBillDetailResponse {
     private String dateStrEnd;
     private String buildingName;
     private String apartmentName;
-    private String noticeTel;
+    //private String noticeTel;
     private String customerTel;
     private String targetName;
     private String targetType;
@@ -49,21 +52,37 @@ public class ListBillDetailResponse {
     private BillGroupDTO billGroupDTO;
     private String contractNum;
     private String invoiceNum;
-    //add by tangcen
     private String certificateNote;
     private Byte billStatus;
 	@ItemType(UploadCertificateDTO.class)
 	private List<UploadCertificateDTO> uploadCertificateDTOList;
 	//新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
+    //催缴手机号码列表
+    private List<String> noticeTelList;
 	
     //新增账单来源信息
     private String sourceType;
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
+    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+    private Byte canDelete;
+    private Byte canModify;
+    //对接统一账单业务线的需求
+    private Integer paymentType;
     
-    public Byte getBillStatus() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Byte getBillStatus() {
 		return billStatus;
 	}
 
@@ -165,14 +184,6 @@ public class ListBillDetailResponse {
         this.apartmentName = apartmentName;
     }
 
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
-    }
-
     public String getTargetName() {
         return targetName;
     }
@@ -255,5 +266,37 @@ public class ListBillDetailResponse {
 
 	public void setConsumeUserId(Long consumeUserId) {
 		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public Byte getCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(Byte canDelete) {
+		this.canDelete = canDelete;
+	}
+
+	public Byte getCanModify() {
+		return canModify;
+	}
+
+	public void setCanModify(Byte canModify) {
+		this.canModify = canModify;
+	}
+
+	public Integer getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Integer paymentType) {
+		this.paymentType = paymentType;
 	}
 }

@@ -1,22 +1,7 @@
 package com.everhomes.rest.contract;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-
 /**
- * <ul>
- *  <li>communtiyName:楼栋名</li>
- *  <li>name:楼栋名</li>
- *  <li>aliasName:楼栋别名</li>
- *  <li>managerName:联系人</li>
- *  <li>contact:联系电话</li>
- *  <li>address:地址</li>
- *  <li>areaSize:占地面积</li>
- *  <li>latitudeLongitude:经纬度</li>
- *  <li>buildingNumber:楼栋编号</li>
- *  <li>trafficDescription:交通说明</li>
- *  <li>trafficDescription:楼栋介绍</li>
- * </ul>
  * Created by jm.ding on 2018/7/9.
  */
 public class ContractExportDetailDTO {
@@ -27,6 +12,13 @@ public class ContractExportDetailDTO {
 	private String contractType;
 	private String customerName;
 	private String customerId;
+	private String buildings;
+	private String apartments;
+	private BigDecimal rent;
+	private String sponsorName;
+	private String syncErrorMsg;
+	private String status;
+	
 	public String getCustomerId() {
 		return customerId;
 	}
@@ -39,11 +31,12 @@ public class ContractExportDetailDTO {
 	public void setApartments(String apartments) {
 		this.apartments = apartments;
 	}
-	private String buildings;
-	private String apartments;
-	private BigDecimal rent;
-	private String syncErrorMsg;
-	private String status;
+	public String getSponsorName() {
+		return sponsorName;
+	}
+	public void setSponsorName(String sponsorName) {
+		this.sponsorName = sponsorName;
+	}
 	public String getContractNumber() {
 		return contractNumber;
 	}

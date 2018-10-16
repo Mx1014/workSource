@@ -108,7 +108,6 @@ public class CalendarRemindScheduleJob extends  QuartzJobBean implements Applica
                         remind.setActRemindTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                         remindProvider.updateRemind(remind); 
                         cancel(remind.getId());
-                        set(remind.getId(), remind.getRemindTime().getTime(), remind);
                     } catch (Exception e) {
                         // 忽略单个错误，以免影响到所有提醒消息的推送
                         LOGGER.error("remindSchedule error,remind = {}", jsonStr , e);

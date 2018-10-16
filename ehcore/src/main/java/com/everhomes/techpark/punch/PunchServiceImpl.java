@@ -1137,8 +1137,8 @@ public class PunchServiceImpl implements PunchService {
         pdl.setRuleType(ptr.getRuleType());
         pdl.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
         //对于已离职和未入职的判断
-        List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/" + companyId, userId);
-        if (organizationMembers == null || organizationMembers.size() == 0) {
+        OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
+        if (memberDetail == null || EmployeeStatus.DISMISSAL == EmployeeStatus.fromCode(memberDetail.getEmployeeStatus())) {
             //找不到就是已离职
             pdl.setStatusList(PunchStatus.RESIGNED.getCode() + "");
             pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());

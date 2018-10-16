@@ -41,6 +41,8 @@ public class CreateCustomerTrackingCommand {
 
 	private Long orgId;
 
+	private Byte customerSource;
+
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -195,6 +197,14 @@ public class CreateCustomerTrackingCommand {
 
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
+	}
+
+	public Byte getCustomerSource() {
+		return customerSource;
+	}
+
+	public void setCustomerSource(Byte customerSource) {
+		this.customerSource = customerSource;
 	}
 
 	@Override

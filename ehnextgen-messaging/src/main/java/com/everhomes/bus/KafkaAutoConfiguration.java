@@ -26,7 +26,9 @@ public class KafkaAutoConfiguration {
             ProducerListener<Object, Object> kafkaProducerListener) {
         KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<Object, Object>(
                 kafkaProducerFactory);
-        if (!"disable".equals(properties.getClientId())) {
+        //如果没有kafka相关配置或者有配置但为disable,那么将不启用kafka
+        if (!"disable".equals(properties.getClientId())
+                && properties.getClientId() != null) {
             kafkaTemplate.setProducerListener(kafkaProducerListener);
             kafkaTemplate.setDefaultTopic(this.properties.getTemplate().getDefaultTopic());
             return kafkaTemplate;

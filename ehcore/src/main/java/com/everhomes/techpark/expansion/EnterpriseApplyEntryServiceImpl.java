@@ -28,6 +28,7 @@ import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -47,6 +48,14 @@ import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
+import com.everhomes.rest.investment.CustomerContactDTO;
+import com.everhomes.rest.investment.CustomerContactType;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.CustomerRequirementAddressDTO;
+import com.everhomes.rest.investment.CustomerRequirementDTO;
+import com.everhomes.rest.investment.InvitedCustomerDTO;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -67,6 +76,8 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
+import com.mysql.fabric.xmlrpc.base.Array;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
@@ -127,6 +138,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private PortalService portalService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private InvitedCustomerService invitedCustomerService;
+	
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd) {
 
@@ -199,7 +213,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//申请记录
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -825,7 +840,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//房源招租权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -981,7 +997,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -1500,7 +1517,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -1756,7 +1774,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public void updateLeasePromotionOrder(UpdateLeasePromotionOrderCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 		if (null == cmd.getId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1834,5 +1853,81 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		this.generalFormProvider = generalFormProvider;
 		this.enterpriseApplyBuildingProvider = enterpriseApplyBuildingProvider;
 		this.localeStringService = localeStringService;
+	}
+
+	@Override
+	public List<Long> transformToCustomer(TransformToCustomerCommand cmd) {
+		List<IntentionCustomerDTO> intentionCustomers = cmd.getIntentionCustomers();
+		
+		Map<String, CreateInvitedCustomerCommand> finalCommandMap = new HashMap<>();
+		for (IntentionCustomerDTO dto : intentionCustomers) {
+			if (finalCommandMap.containsKey(dto.getCustomerName())) {
+				CreateInvitedCustomerCommand cmd2 = finalCommandMap.get(dto.getCustomerName());
+				//企业客户意向房源
+				//TODO 得考虑addressId重复的问题,目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:08
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementDTO requirement = cmd2.getRequirement();
+					List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addresses.add(addressDTO);
+					requirement.setAddresses(addresses);
+				}
+				//企业客户联系人
+				//TODO 得考虑联系人重复的问题，目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:12
+				List<CustomerContactDTO> contacts = cmd2.getContacts();
+				CustomerContactDTO contactDTO = new  CustomerContactDTO();
+				contactDTO.setName(dto.getApplyUserName());
+				contactDTO.setPhoneNumber(dto.getApplyContact());
+				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
+				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				contacts.add(contactDTO);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+			}else {
+				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
+				//企业客户
+				cmd2.setName(dto.getCustomerName());
+				cmd2.setLevelItemId((long)CustomerLevelType.INTENTIONAL_CUSTOMER.getCode());
+				cmd2.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				//企业客户意向房源
+				List<CustomerRequirementAddressDTO> addressDTOs = new ArrayList<>();
+				CustomerRequirementDTO requirementDTO = new CustomerRequirementDTO();
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addressDTOs.add(addressDTO);
+				}
+				cmd2.setRequirement(requirementDTO);
+				requirementDTO.setAddresses(addressDTOs);
+				//企业客户联系人
+				List<CustomerContactDTO> contacts = new ArrayList<>();
+				CustomerContactDTO contactDTO = new  CustomerContactDTO();
+				contactDTO.setName(dto.getApplyUserName());
+				contactDTO.setPhoneNumber(dto.getApplyContact());
+				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
+				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+				contacts.add(contactDTO);
+				cmd2.setContacts(contacts);
+				
+				finalCommandMap.put(dto.getCustomerName(), cmd2);
+				
+				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+			}
+		}
+		
+		List<Long> customerIds = new ArrayList<>(); 
+		Set<String> customerNameSet = finalCommandMap.keySet();
+		for (String customerName : customerNameSet) {
+			CreateInvitedCustomerCommand createInvitedCustomerCommand = finalCommandMap.get(customerName);
+			createInvitedCustomerCommand.setNamespaceId(cmd.getNamespaceId());
+			createInvitedCustomerCommand.setCommunityId(cmd.getCommunityId());
+			createInvitedCustomerCommand.setOrgId(cmd.getOrganizationId());
+			InvitedCustomerDTO invitedCustomer = invitedCustomerService.createInvitedCustomerWithoutAuth(createInvitedCustomerCommand);
+			customerIds.add(invitedCustomer.getId());
+		}
+		return customerIds;
 	}
 }

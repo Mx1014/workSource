@@ -2,11 +2,10 @@
 package com.everhomes.rest.asset;
 
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  *<ul>
@@ -32,13 +31,17 @@ import java.util.List;
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
  * <li>consumeUserId:企业下面的某个人的ID</li>
+ * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
+ * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
+ * <li>canDelete:0：不可删除；1：可删除</li>
+ * <li>canModify:0：不可编辑；1：可编辑</li>
  *</ul>
  */
 public class CreateBillCommand {
 	private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
-    private String noticeTel;
+    //private String noticeTel;
     private String targetName;
     private String targetType;
     private Long targetId;
@@ -50,7 +53,8 @@ public class CreateBillCommand {
     private Byte isSettled;
     private String invoiceNum;
     private Long categoryId;
-    
+    //催缴手机号码列表
+    private List<String> noticeTelList;
     //新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
 
@@ -59,8 +63,24 @@ public class CreateBillCommand {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
+    private String thirdBillId;
+    //物业缴费V6.0 账单、费项表增加是否删除状态字段
+    private Byte deleteFlag;
+    //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+    private Byte canDelete;
+    private Byte canModify;
+    //物业缴费V6.0 将“新增账单”改为“新增账单、批量导入”权限；
+    private Long organizationId;
     
-    public Long getCategoryId() {
+    public List<String> getNoticeTelList() {
+		return noticeTelList;
+	}
+
+	public void setNoticeTelList(List<String> noticeTelList) {
+		this.noticeTelList = noticeTelList;
+	}
+
+	public Long getCategoryId() {
         return categoryId;
     }
 
@@ -193,14 +213,6 @@ public class CreateBillCommand {
         this.billGroupDTO = billGroupDTO;
     }
 
-    public String getNoticeTel() {
-        return noticeTel;
-    }
-
-    public void setNoticeTel(String noticeTel) {
-        this.noticeTel = noticeTel;
-    }
-
     public String getTargetName() {
         return targetName;
     }
@@ -263,6 +275,46 @@ public class CreateBillCommand {
 
 	public void setConsumeUserId(Long consumeUserId) {
 		this.consumeUserId = consumeUserId;
+	}
+
+	public Byte getCanDelete() {
+		return canDelete;
+	}
+
+	public void setCanDelete(Byte canDelete) {
+		this.canDelete = canDelete;
+	}
+
+	public Byte getCanModify() {
+		return canModify;
+	}
+
+	public void setCanModify(Byte canModify) {
+		this.canModify = canModify;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
 	}
 
 }

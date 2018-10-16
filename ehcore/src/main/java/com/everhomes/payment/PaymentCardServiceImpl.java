@@ -15,8 +15,14 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.payment.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -47,42 +53,6 @@ import com.everhomes.payment.taotaogu.NotifyEntity;
 import com.everhomes.payment.taotaogu.TaotaoguTokenCacheItem;
 import com.everhomes.payment.taotaogu.TaotaoguVendorConstant;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.payment.ApplyCardCommand;
-import com.everhomes.rest.payment.CardInfoDTO;
-import com.everhomes.rest.payment.CardIssuerDTO;
-import com.everhomes.rest.payment.CardOrderStatus;
-import com.everhomes.rest.payment.CardRechargeOrderDTO;
-import com.everhomes.rest.payment.CardRechargeStatus;
-import com.everhomes.rest.payment.CardTransactionDTO;
-import com.everhomes.rest.payment.CardTransactionOfMonth;
-import com.everhomes.rest.payment.CardTransactionStatus;
-import com.everhomes.rest.payment.CardUserDTO;
-import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
-import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
-import com.everhomes.rest.payment.GetCardPaidResultCommand;
-import com.everhomes.rest.payment.GetCardPaidResultDTO;
-import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
-import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
-import com.everhomes.rest.payment.ListCardInfoCommand;
-import com.everhomes.rest.payment.ListCardIssuerCommand;
-import com.everhomes.rest.payment.ListCardTransactionsCommand;
-import com.everhomes.rest.payment.ListCardTransactionsResponse;
-import com.everhomes.rest.payment.NotifyEntityCommand;
-import com.everhomes.rest.payment.NotifyEntityDTO;
-import com.everhomes.rest.payment.PaidResultStatus;
-import com.everhomes.rest.payment.PaymentCardErrorCode;
-import com.everhomes.rest.payment.RechargeCardCommand;
-import com.everhomes.rest.payment.ResetCardPasswordCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
-import com.everhomes.rest.payment.SearchCardTransactionsCommand;
-import com.everhomes.rest.payment.SearchCardTransactionsResponse;
-import com.everhomes.rest.payment.SearchCardUsersCommand;
-import com.everhomes.rest.payment.SearchCardUsersResponse;
-import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
-import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
-import com.everhomes.rest.payment.SetCardPasswordCommand;
-import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -105,6 +75,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentCardServiceImpl.class);
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String BIZ_ACCOUNT_PRE = "NS";//账号前缀
     @Autowired
     private PaymentCardProvider paymentCardProvider;
     
@@ -127,6 +98,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	private LocaleStringService localeStringService;
     @Autowired
     private CoordinationProvider coordinationProvider;
+    @Autowired
+	private PaymentCardPayService payService;
+	@Autowired
+	private PaymentCardOrderEmbeddedV2Handler paymentCardOrderEmbeddedV2Handler;
+
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
@@ -162,8 +138,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
 //							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
     		LOGGER.error("Already open card.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Already open card.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 1001,
+					"不能重复绑定");
     	}
     	PaymentCardIssuer cardIssuer = paymentCardProvider.findPaymentCardIssuerById(cmd.getIssuerId());
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(cardIssuer.getVendorName());
@@ -248,17 +224,19 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		preOrderCommand.setOrderType(OrderType.OrderTypeEnum.PAYMENTCARD.getPycode());
 		preOrderCommand.setOrderId(paymentCardRechargeOrder.getId());
 		preOrderCommand.setAmount(cmd.getAmount().multiply(new BigDecimal(100)).longValue());
-
+		preOrderCommand.setCommunityId(cmd.getOwnerId());
 		preOrderCommand.setPayerId(user.getId());
 		preOrderCommand.setNamespaceId(user.getNamespaceId());
-//		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-//				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
-//				UserContext.current().getUser().getLocale(),
-//				"activity roster pay");
-//		preOrderCommand.setSummary(temple);
-		//不再维护
-		//PreOrderDTO callBack = payService.createPreOrder(preOrderCommand);
-		return null;
+
+
+		PreOrderDTO callBack = payService.createPreOrder(preOrderCommand,paymentCardRechargeOrder);
+		return callBack;
+	}
+
+	@Override
+	public void refundOrderV2(Long orderId) {
+		PaymentCardRechargeOrder order = paymentCardProvider.findPaymentCardRechargeOrderById(orderId);
+		payService.refundOrder(order);
 	}
 
 	@Override
@@ -456,7 +434,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+				cmd.getKeyword(),cmd.getStatus(),cmd.getPageAnchor(), pageSize);
 		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardUserDTO.class))
 				.collect(Collectors.toList()));
     	if(list.size() > 0){
@@ -566,7 +544,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		//User user = UserContext.current().getUser();
 		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+				cmd.getKeyword(),cmd.getStatus(),cmd.getPageAnchor(), pageSize);
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -581,15 +559,17 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		Row row = sheet.createRow(0);
 		row.createCell(0).setCellValue("手机号");
 		row.createCell(1).setCellValue("姓名");
-		row.createCell(2).setCellValue("开卡时间");
+		row.createCell(2).setCellValue("最后修改时间");
 		row.createCell(3).setCellValue("卡号");
+		row.createCell(4).setCellValue("状态");
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PaymentCard paymentCard = list.get(i);
 			tempRow.createCell(0).setCellValue(paymentCard.getMobile());
 			tempRow.createCell(1).setCellValue(paymentCard.getUserName());
-			tempRow.createCell(2).setCellValue(datetimeSF.format(paymentCard.getCreateTime()));
+			tempRow.createCell(2).setCellValue(datetimeSF.format(paymentCard.getUpdateTime()));
 			tempRow.createCell(3).setCellValue(paymentCard.getCardNo());
+			tempRow.createCell(4).setCellValue(paymentCard.getStatus() == PaymentCardStatus.ACTIVE.getCode() ? "已绑定" : "已解绑");
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -929,4 +909,70 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     				"ownerType cannot be null.");
         }
     }
+
+	@Override
+	public void payNotify(OrderPaymentNotificationCommand cmd) {
+		if (!PayUtil.verifyCallbackSignature(cmd))
+		throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+				"signature wrong");
+		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
+		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		cmd2.setOrderId(cmd.getOrderId());
+		cmd2.setPaymentType(cmd.getPaymentType());
+		paymentCardOrderEmbeddedV2Handler.paySuccess(cmd2);
+	}
+
+	@Override
+	public void refundNotify(OrderPaymentNotificationCommand cmd) {
+		if (!PayUtil.verifyCallbackSignature(cmd))
+			throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+					"signature wrong");
+		SrvOrderPaymentNotificationCommand cmd2 = new SrvOrderPaymentNotificationCommand();
+		cmd2.setBizOrderNum(cmd.getBizOrderNum());
+		cmd2.setOrderId(cmd.getOrderId());
+		paymentCardOrderEmbeddedV2Handler.refundSuccess(cmd2);
+	}
+
+	@Override
+	public PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd) {
+		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
+		List<PaymentCardIssuerCommunity> hotlines = paymentCardProvider.listPaymentCardIssuerCommunity(cmd.getOwnerId(), cmd.getOwnerType());
+		if (hotlines == null || hotlines.size() == 0)
+			return null;
+		PaymentCardHotlineDTO dto = ConvertHelper.convert(hotlines.get(0),PaymentCardHotlineDTO.class);
+		return dto;
+	}
+
+	@Override
+	public void updateHotline(UpdateHotlineCommand cmd) {
+		checkParam(cmd.getOwnerType(), cmd.getOwnerId());
+		List<PaymentCardIssuerCommunity> hotlines = paymentCardProvider.listPaymentCardIssuerCommunity(cmd.getOwnerId(), cmd.getOwnerType());
+		if (hotlines == null || hotlines.size() == 0)
+			return ;
+		PaymentCardIssuerCommunity hotline = hotlines.get(0);
+		hotline.setHotline(cmd.getHotline());
+		paymentCardProvider.updatePaymentCardIssuerCommunity(hotline);
+	}
+
+	@Override
+	public void freezeCard(FreezeCardCommand cmd) {
+		PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		handler.freezeCard(cmd);
+	}
+
+	@Override
+	public void unbunleCard(Long cardId) {
+		PaymentCard paymentCard = checkPaymentCard(cardId);
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		handler.unbundleCard(paymentCard);
+	}
+
+	@Override
+	public CardInfoDTO getCardInfo(Long cardId) {
+		PaymentCard paymentCard = checkPaymentCard(cardId);
+		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		return handler.getCardInfo(paymentCard);
+	}
+
 }

@@ -32,12 +32,8 @@ public class ThemeServiceImpl implements ThemeService {
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
 
-		String value = configurationProvider.getValue(namespaceId, "theme.color", null);
+		String value = configurationProvider.getValue(namespaceId, "theme.color", "#1E90FE");
 
-		//没有设置则用默认的，默认的也没有则使用"#1E90FF"
-		if(value  == null){
-			value = configurationProvider.getValue(0, "theme.color", "#1E90FF");
-		}
 		ThemeColorDTO dto = new ThemeColorDTO();
 		dto.setValue(value);
 

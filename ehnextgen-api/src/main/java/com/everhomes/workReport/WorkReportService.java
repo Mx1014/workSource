@@ -56,5 +56,7 @@ public interface WorkReportService {
 
     void updateWorkReportReceiverAvatar();
 
+    void updateWorkReportValAvatar();
+
 //    void updateWorkReportReceiverReportId();
 }

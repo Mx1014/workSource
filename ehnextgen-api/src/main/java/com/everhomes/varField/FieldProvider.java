@@ -12,8 +12,10 @@ public interface FieldProvider {
     List<FieldGroup> listFieldGroups(List<Long> ids);
     FieldGroup findFieldGroup(Long id);
     List<FieldGroup> listFieldGroups(String moduleName);
+    List<Long> listFieldGroupRanges(String moduleName,String moduleType);
     Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId);
     List<Field> listFields(List<Long> ids);
+    List<Long> listFieldRanges(String moduleName,String moduleType,String groupPath);
     List<Field> listFields(String moduleName, String groupPath);
 
 
@@ -27,6 +29,7 @@ public interface FieldProvider {
     List<FieldItem> listFieldItems(Long fieldId);
     List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId, Long categoryId);
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId);
+    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId, String moduleName);
     ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
     ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, Long fieldId, String displayName);

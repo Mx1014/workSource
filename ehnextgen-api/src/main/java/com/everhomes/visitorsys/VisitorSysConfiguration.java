@@ -27,10 +27,26 @@ public class VisitorSysConfiguration extends EhVisitorSysConfigurations {
 	}
 
 	public List<VisitorsysApprovalFormItem> getFormConfig() {
+		if (null != formConfig){
+			for (VisitorsysApprovalFormItem config : formConfig){
+				if("invalidTime".equals(config.getFieldName())){
+					formConfig.remove(config);
+					break;
+				}
+			}
+		}
 		return formConfig;
 	}
 
 	public void setFormConfig(List<VisitorsysApprovalFormItem> formConfig) {
+		if (null != formConfig){
+			for (VisitorsysApprovalFormItem config : formConfig){
+				if("invalidTime".equals(config.getFieldName())){
+					formConfig.remove(config);
+					break;
+				}
+			}
+		}
 		this.formConfig = formConfig;
 	}
 

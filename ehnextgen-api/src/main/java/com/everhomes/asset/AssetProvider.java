@@ -15,67 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.order.PaymentAccount;
-import com.everhomes.order.PaymentServiceConfig;
-import com.everhomes.order.PaymentUser;
-import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
-import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
-import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
-import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
-import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
-import com.everhomes.rest.asset.BillDTO;
-import com.everhomes.rest.asset.BillDetailDTO;
-import com.everhomes.rest.asset.BillIdAndAmount;
-import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.ConfigChargingItems;
-import com.everhomes.rest.asset.CreateBillCommand;
-import com.everhomes.rest.asset.CreateBillGroupCommand;
-import com.everhomes.rest.asset.DeleteBillGroupReponse;
-import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
-import com.everhomes.rest.asset.DeleteChargingStandardCommand;
-import com.everhomes.rest.asset.GetChargingStandardCommand;
-import com.everhomes.rest.asset.GetChargingStandardDTO;
-import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
-import com.everhomes.rest.asset.ListAllBillsForClientDTO;
-import com.everhomes.rest.asset.ListAvailableVariablesCommand;
-import com.everhomes.rest.asset.ListAvailableVariablesDTO;
-import com.everhomes.rest.asset.ListBillDetailVO;
-import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
-import com.everhomes.rest.asset.ListBillGroupsDTO;
-import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingItemsDTO;
-import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsCommand;
-import com.everhomes.rest.asset.ListChargingStandardsDTO;
-import com.everhomes.rest.asset.ListLateFineStandardsDTO;
-import com.everhomes.rest.asset.ListPaymentBillCmd;
-import com.everhomes.rest.asset.ModifyBillGroupCommand;
-import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
-import com.everhomes.rest.asset.OwnerIdentityCommand;
-import com.everhomes.rest.asset.PaymentExpectancyDTO;
-import com.everhomes.rest.asset.PaymentOrderBillDTO;
-import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
-import com.everhomes.rest.asset.ShowCreateBillDTO;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
-import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
-import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
-
 /**
  * Created by Wentian on 2017/2/20.
  */
@@ -247,7 +186,7 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId);
+    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId);
 
     void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
 
@@ -432,7 +371,7 @@ public interface AssetProvider {
     IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
     
     IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
+
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -457,7 +396,7 @@ public interface AssetProvider {
     String getProjectNameByBillID(Long billId);
     
     ListBillDetailVO listBillDetailForPaymentForEnt(Long billId, ListPaymentBillCmd cmd);
-        
+    
     ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 	
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -465,7 +404,6 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
-	
 	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
@@ -515,5 +453,6 @@ public interface AssetProvider {
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
-			
+		
+	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }

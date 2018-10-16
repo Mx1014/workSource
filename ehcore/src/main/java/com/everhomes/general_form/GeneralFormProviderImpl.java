@@ -14,11 +14,16 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormFilterUserMapDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormValRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormPrintTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhGeneralFormTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralFormPrintTemplates;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.EhGeneralFormPrintTemplatesRecord;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -32,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -287,13 +293,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId){
+	public void deleteGeneralFormVal(Integer namespaceId, Long moduleId, Long sourceId){
 		try {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 			context.delete(Tables.EH_GENERAL_FORM_VALS)
-					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
-					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.where(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.and(Tables.EH_GENERAL_FORM_VALS.MODULE_ID.eq(moduleId))
+					.and(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
 					.execute();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -339,9 +345,10 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 
 	@Override
-	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long formOriginId, Long formVersion){
+	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
-		EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
+		GeneralFormValRequest generalFormValRequests = new GeneralFormValRequest();
+		//EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
         generalFormValRequests.setOwnerType(ownerType);
@@ -351,6 +358,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		generalFormValRequests.setFormOriginId(formOriginId);
 		generalFormValRequests.setFormVersion(formVersion);
 		generalFormValRequests.setApprovalStatus((byte)0);
+		generalFormValRequests.setInvestmentAdId(investmentAdId);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhGeneralFormValRequestsDao dao = new EhGeneralFormValRequestsDao(context.configuration());
@@ -470,8 +478,8 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return result;
 	}
 
-	
-	@Override 
+
+	@Override
 	public void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion){
 	    DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhGeneralFormFilterUserMap.class));
@@ -495,7 +503,7 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
         this.dbProvider.execute((status) -> {
 
-			
+
 
 			Long id = this.sequenceProvider.getNextSequence(NameMapper
 					.getSequenceDomainFromTablePojo(EhGeneralFormFilterUserMap.class));
@@ -545,9 +553,81 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 
 		obj.setApprovalStatus(status);
 		dao.update(obj);
-
-
 	}
 
 
+
+	@Override
+	public Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhGeneralFormPrintTemplatesRecord.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormPrintTemplates.class));
+		generalFormPrintTemplate.setId(id);
+		generalFormPrintTemplate.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		generalFormPrintTemplate.setCreatorUid(UserContext.currentUserId());
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		dao.insert(generalFormPrintTemplate);
+		return id;
+	}
+
+	@Override
+	public void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readWriteWith(EhGeneralFormPrintTemplates.class));
+		generalFormPrintTemplate.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		generalFormPrintTemplate.setUpdateUid(UserContext.currentUserId());
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		dao.update(generalFormPrintTemplate);
+	}
+
+	@Override
+	public GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhGeneralFormPrintTemplatesDao dao = new EhGeneralFormPrintTemplatesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), GeneralFormPrintTemplate.class);
+	}
+
+	@Override
+	public GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhGeneralFormPrintTemplatesRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES);
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORM_PRINT_TEMPLATES.OWNER_TYPE.eq(ownerType));
+		List<GeneralFormPrintTemplate> results = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, GeneralFormPrintTemplate.class);
+		});
+		if (results != null && results.size() > 0)
+			return results.get(0);
+		return null;
+	}
+
+	@Override
+	public void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG1,transformStatus)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+	}
+
+	@Override
+	public void setInvestmentAdId(Long id, Long investmentAdId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG2,investmentAdId)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+		
+	}
+
+	@Override
+	public List<GeneralFormVal> getGeneralFormValBySourceId(Long sourceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
+		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
+	}
 }

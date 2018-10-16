@@ -16,6 +16,7 @@ import com.everhomes.rest.asset.CreateOrUpdateAssetMappingCmd;
 import com.everhomes.rest.asset.ListBillGroupsDTO;
 import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.NoticeTriggerCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
 import com.everhomes.rest.asset.TestLateFineCommand;
@@ -106,7 +107,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
-	 * <b>URL: /asset/testLateFine</b>
+	 * <b>URL: /test/testLateFine</b>
 	 * @throws ParseException
 	 */
 	@RequestMapping("testLateFine")
@@ -121,7 +122,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <p>仅用于手动测试能耗数据</p>
-	 * <b>URL: /asset/testEnergy</b>
+	 * <b>URL: /test/testEnergy</b>
 	 */
 	@RequestMapping("testEnergy")
 	@RestReturn(value = String.class)
@@ -135,7 +136,7 @@ public class TestAssetController extends ControllerBase {
 
 	/**
 	 * <p>仅用于测试手动测试欠费天数</p>
-	 * <b>URL: /asset/testUpdateBillDueDayCountOnTime</b>
+	 * <b>URL: /test/testUpdateBillDueDayCountOnTime</b>
 	 */
 	@RequestMapping("testUpdateBillDueDayCountOnTime")
 	@RestReturn(value = String.class)
@@ -146,5 +147,19 @@ public class TestAssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /test/noticeTrigger</b>
+	 * <p>启动自动催缴的定时任务</p>
+	 */
+	@RequestMapping("noticeTrigger")
+	public RestResponse noticeTrigger(NoticeTriggerCommand cmd) {
+		assetService.noticeTrigger(cmd.getNamespaceId());
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
 
 }

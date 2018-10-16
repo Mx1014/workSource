@@ -8,6 +8,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
+
 import org.jooq.SortField;
 import org.jooq.TableField;
 
@@ -167,4 +169,6 @@ public interface ParkingProvider {
     List<ParkingSpace> listParkingSpaceByParkingHubsId(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId, Long parkingHubsId);
 
     List<ParkingLot> findParkingLotByIdHash(String parkingLotToken);
+
+	ParkingRechargeOrderDTO parkingRechargeOrdersByOrderNo(long orderNo);
 }

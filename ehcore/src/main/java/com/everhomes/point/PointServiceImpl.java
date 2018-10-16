@@ -310,9 +310,18 @@ public class PointServiceImpl implements PointService {
     public UserTreasureDTO getPointTreasure() {
         UserTreasureDTO point = new UserTreasureDTO();
         point.setCount(0L);
-        //设置积分默认可见
-        point.setStatus(TrueOrFalseFlag.TRUE.getCode());
-        point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+        //设置积分默认不可见
+        point.setStatus(TrueOrFalseFlag.FALSE.getCode());
+        point.setUrlStatus(TrueOrFalseFlag.FALSE.getCode());
+       //可不可见按配置来展示
+        String pointStatus = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "point.show.flag", "");
+        String pointUrlStatus = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "point.url.flag", "");
+       if(StringUtils.isNotBlank(pointStatus)&& pointStatus.equals("1")){
+           point.setStatus(TrueOrFalseFlag.TRUE.getCode());
+       }
+        if(StringUtils.isNotBlank(pointUrlStatus)&& pointUrlStatus.equals("1")){
+            point.setUrlStatus(TrueOrFalseFlag.TRUE.getCode());
+        }
 
         GetUserPointCommand cmd = new GetUserPointCommand();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -322,7 +331,14 @@ public class PointServiceImpl implements PointService {
             return point;
         }
         cmd.setUid(currentUserId);
-        PointScoreDTO dto = pointServiceRPCRest.getUserPoint(cmd);
+        PointScoreDTO dto = null ;
+        //update by huangliangming 远程调时所发生的一切问题不能影响该接口的运行,只当是没取到积分而已.
+        try{
+             dto = pointServiceRPCRest.getUserPoint(cmd);
+        }catch(Exception e){
+            LOGGER.error("something error happen while RPC to point system . e:{}",e);
+        }
+
         if(dto != null){
             point.setCount(dto.getScore());
         }

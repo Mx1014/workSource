@@ -476,7 +476,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/makeArchivesCheckInTime</b>
-     * <p>刷入职时间</p>
+     * <p>刷入职时间 (当版本高于5.8.0后可以删除该接口)</p>
      */
     @RequestMapping("makeArchivesCheckInTime")
     @RestReturn(value = String.class)
@@ -490,7 +490,7 @@ public class ArchivesController extends ControllerBase{
 
     /**
      * <b>URL: /archives/cleanRedundantArchivesDetails</b>
-     * <p>清除人事档案表中的辣鸡数据</p>
+     * <p>清除人事档案表中的辣鸡数据 (当版本高于5.8.0后可以删除该接口)</p>
      */
     @RequestMapping("cleanRedundantArchivesDetails")
     @RestReturn(value = String.class)

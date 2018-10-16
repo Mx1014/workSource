@@ -1,6 +1,8 @@
 package com.everhomes.workReport;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -11,6 +13,8 @@ import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.workReport.*;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.util.RouterBuilder;
@@ -50,6 +54,12 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
 
     @Autowired
     private MessagingService messagingService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkReportMessageServiceImpl.class);
 
@@ -245,23 +255,27 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Scheduled(cron = "0 0/30 * * * ?")
     @Override
     public void workReportRxMessage() {
-        LocalDateTime currentTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
-        Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
-        Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
-        List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(startTime, endTime);
-        if (results.size() == 0)
+        if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
             return;
-        LOGGER.info("The work report Rx message task start!");
-        Map<Long, List<WorkReportValReceiverMsg>> group1 = results.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReceiverUserId));
-        group1.forEach((k1, v1) -> {
-            Map<Long, List<WorkReportValReceiverMsg>> group2 = v1.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReportId));
-            group2.forEach((k2, v2) -> {
-                String content = "截止于" + formatter.format(currentTime)
-                        + "，共接收到" + v2.size() + "条"
-                        + v2.get(0).getReportName() + "（"
-                        + workReportTimeService.displayReportTime(v2.get(0).getReportType(), v2.get(0).getReportTime().getTime()) + "）";
-                sendIndexMessage(content, "汇报情况", "我接收的", v2.get(0).getOrganizationId(), 2L, k1);
+        coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_RX_MSG.getCode()).tryEnter(() -> {
+            LocalDateTime currentTime = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
+            Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
+            Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
+            List<WorkReportValReceiverMsg> results = workReportValProvider.listReportValReceiverMsgByTime(startTime, endTime);
+            if (results.size() == 0)
+                return;
+            LOGGER.info("The work report Rx message task start!");
+            Map<Long, List<WorkReportValReceiverMsg>> group1 = results.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReceiverUserId));
+            group1.forEach((k1, v1) -> {
+                Map<Long, List<WorkReportValReceiverMsg>> group2 = v1.stream().collect(Collectors.groupingBy(WorkReportValReceiverMsg::getReportId));
+                group2.forEach((k2, v2) -> {
+                    String content = "截止于" + formatter.format(currentTime)
+                            + "，共接收到" + v2.size() + "条"
+                            + v2.get(0).getReportName() + "（"
+                            + workReportTimeService.displayReportTime(v2.get(0).getReportType(), v2.get(0).getReportTime().getTime()) + "）";
+                    sendIndexMessage(content, "汇报情况", "我接收的", v2.get(0).getOrganizationId(), 2L, k1);
+                });
             });
         });
         LOGGER.info("The work report Rx message task end!");
@@ -273,8 +287,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      */
     @Scheduled(cron = "0 0 11 * * ?")
     private void deleteWorkReportRxMessage(){
-        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
-        workReportValProvider.deleteReportValReceiverMsg(currentTime);
+        workReportValProvider.deleteReportValReceiverMsg();
     }
 
     /**
@@ -283,24 +296,28 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Scheduled(cron = "0 0/30 * * * ?")
     @Override
     public void workReportAuMessage() {
-        LocalDateTime currentTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
-        Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
-        Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
-        List<WorkReportScopeMsg> results = workReportProvider.listWorkReportScopeMsgByTime(startTime, endTime);
-        if (results.size() == 0)
+        if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
             return;
-        LOGGER.info("The work report Au message task start!");
-        results.forEach(r -> {
-            String content = "可以提交" + r.getReportName() + "（"
-                    + workReportTimeService.displayReportTime(r.getReportType(), r.getReportTime().getTime())
-                    + "）了，截止时间为" + workReportTimeService.formatTime(r.getEndTime().toLocalDateTime());
-            if (r.getScopeIds() != null) {
-                List<Long> scopeIds = JSON.parseArray(r.getScopeIds(), Long.class);
-                scopeIds.forEach(s -> {
-                    sendIndexMessage(content, "汇报填写", "写汇报", r.getOrganizationId(), 0L, s);
-                });
-            }
+        coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_MSG.getCode()).tryEnter(() -> {
+            LocalDateTime currentTime = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年M月d日 HH:mm");
+            Timestamp startTime = Timestamp.valueOf(currentTime.minusMinutes(1));
+            Timestamp endTime = Timestamp.valueOf(currentTime.plusMinutes(1));
+            List<WorkReportScopeMsg> results = workReportProvider.listWorkReportScopeMsgByTime(startTime, endTime);
+            if (results.size() == 0)
+                return;
+            LOGGER.info("The work report Au message task start!");
+            results.forEach(r -> {
+                String content = "可以提交" + r.getReportName() + "（"
+                        + workReportTimeService.displayReportTime(r.getReportType(), r.getReportTime().getTime())
+                        + "）了，截止时间为" + workReportTimeService.formatTime(r.getEndTime().toLocalDateTime());
+                if (r.getScopeIds() != null) {
+                    List<Long> scopeIds = JSON.parseArray(r.getScopeIds(), Long.class);
+                    scopeIds.forEach(s -> {
+                        sendIndexMessage(content, "汇报填写", "写汇报", r.getOrganizationId(), 0L, s);
+                    });
+                }
+            });
         });
         LOGGER.info("The work report Au message task end!");
     }
@@ -312,19 +329,23 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
     @Scheduled(cron = "0 0 5 * * ?")
     @Override
     public void createWorkReportAuMessage() {
-        List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
-            query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
-            query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
-            return query;
+        if (scheduleProvider.getRunningFlag() != RunningFlag.TRUE.getCode())
+            return;
+        coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_BASIC_MSG.getCode()).tryEnter(() -> {
+            List<WorkReport> results = workReportProvider.queryWorkReports(new ListingLocator(), (locator1, query) -> {
+                query.addConditions(Tables.EH_WORK_REPORTS.AUTHOR_MSG_TYPE.eq(ReportAuthorMsgType.YES.getCode()));
+                query.addConditions(Tables.EH_WORK_REPORTS.STATUS.eq(WorkReportStatus.RUNNING.getCode()));
+                return query;
+            });
+            LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+            for (WorkReport r : results) {
+                //  获取汇报时间
+                ReportValiditySettingDTO validitySetting = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
+                ReportMsgSettingDTO auMsgSetting = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
+                Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), time, validitySetting);
+                createWorkReportScopeMsg(r, auMsgSetting, validitySetting, reportTime);
+            }
         });
-        LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
-        for (WorkReport r : results) {
-            //  获取汇报时间
-            ReportValiditySettingDTO validitySetting = JSON.parseObject(r.getValiditySetting(), ReportValiditySettingDTO.class);
-            ReportMsgSettingDTO auMsgSetting = JSON.parseObject(r.getAuthorMsgSeeting(), ReportMsgSettingDTO.class);
-            Timestamp reportTime = workReportTimeService.getReportTime(r.getReportType(), time, validitySetting);
-            createWorkReportScopeMsg(r, auMsgSetting, validitySetting, reportTime);
-        }
     }
 
     @Override
@@ -334,27 +355,20 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
         Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
                 validitySetting.getEndType(), validitySetting.getEndMark(), validitySetting.getEndTime()));
-        //  生成提醒数据
-        WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
-        if (msg != null) {
-            msg.setReminderTime(reminderTime);
-            msg.setReportName(report.getReportName());
-            msg.setEndTime(endTime);
-            msg.setScopeIds(listScopeIds(report));
-            workReportProvider.updateWorkReportScopeMsg(msg);
-        } else {
-            msg = new WorkReportScopeMsg();
-            msg.setNamespaceId(report.getNamespaceId());
-            msg.setOrganizationId(report.getOrganizationId());
-            msg.setReportId(report.getId());
-            msg.setReportName(report.getReportName());
-            msg.setReportType(report.getReportType());
-            msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
-            msg.setReminderTime(reminderTime);
-            msg.setEndTime(endTime);
-            msg.setScopeIds(listScopeIds(report));
-            workReportProvider.createWorkReportScopeMsg(msg);
-        }
+        //  删除已生成提醒数据
+        workReportProvider.deleteWorkReportScopeMsgByReportId(report.getId());
+        // WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
+        WorkReportScopeMsg msg = new WorkReportScopeMsg();
+        msg.setNamespaceId(report.getNamespaceId());
+        msg.setOrganizationId(report.getOrganizationId());
+        msg.setReportId(report.getId());
+        msg.setReportName(report.getReportName());
+        msg.setReportType(report.getReportType());
+        msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
+        msg.setReminderTime(reminderTime);
+        msg.setEndTime(endTime);
+        msg.setScopeIds(listScopeIds(report));
+        workReportProvider.createWorkReportScopeMsg(msg);
         return msg;
     }
 
@@ -381,8 +395,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      */
     @Scheduled(cron = "0 0 12 * * ?")
     private void deleteWorkReportAuMessage(){
-        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
-        workReportProvider.deleteWorkReportScopeMsg(currentTime);
+        workReportProvider.deleteWorkReportScopeMsg();
     }
 
     private void sendIndexMessage(String content, String title, String displayName, Long organizationId, Long tabIndex, Long receiverId){

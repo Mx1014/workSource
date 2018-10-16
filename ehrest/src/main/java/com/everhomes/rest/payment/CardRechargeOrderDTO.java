@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>cardNo: 卡号</li>
  * <li>amount: 金额</li>
  * <li>rechargeTime: 充值时间</li>
- * <li>rechargeStatus:  0:充值失败   1:处理中  2:充值成功 3:处理完成  4:已退款{@link com.everhomes.rest.payment.CardRechargeStatus}</li>
+ * <li>rechargeStatus:  0:充值失败   1:处理中  2:充值成功 3:处理完成  4:退款中 5:已退款{@link com.everhomes.rest.payment.CardRechargeStatus}</li>
  * <li>paidType: 支付方式 10001-支付宝，10002-微信</li>
  * <li>nextPageAnchor: 分页的瞄 </li>
  * </ul>

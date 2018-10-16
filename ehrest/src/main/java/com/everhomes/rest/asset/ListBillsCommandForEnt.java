@@ -1,6 +1,8 @@
 //@formatter:off
 package com.everhomes.rest.asset;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * @author created by yangcx
  * @date 2018年5月22日----上午10:54:38
@@ -35,7 +37,14 @@ public class ListBillsCommandForEnt {
     private Long billGroupId;
     private String billGroupName;
     private Byte billStatus;
+    private Long moduleId;//用于下载中心
     
+	public Long getModuleId() {
+		return moduleId;
+	}
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
@@ -107,6 +116,11 @@ public class ListBillsCommandForEnt {
 	}
 	public void setBillStatus(Byte billStatus) {
 		this.billStatus = billStatus;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 	
 }

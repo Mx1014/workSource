@@ -5,6 +5,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowOperateLogDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowOperateLogsCommand;
 
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,7 @@ public interface FlowEventLogProvider {
 
     List<FlowEventLog> findStepEventLogs(List<Long> flowCaseIdList);
 
-    List<FlowOperateLogDTO> searchOperateLogs(Long moduleId, Long flowCaseId, Long userId, String serviceType, String keyword, Integer pageSize, ListingLocator locator);
+    List<FlowOperateLogDTO> searchOperateLogs(SearchFlowOperateLogsCommand cmd, Integer pageSize, ListingLocator locator);
 
     FlowEventLog isSupervisor(Long userId, FlowCase flowCase);
 

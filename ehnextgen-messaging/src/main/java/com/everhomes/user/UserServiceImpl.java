@@ -6168,7 +6168,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 "{\"ignoreParameters\":[\"token\",\"auth_key\"]}");
         resp.setContentCacheConfig(
                 (ContentCacheConfigDTO) StringHelper.fromJsonString(clientCacheConfig, ContentCacheConfigDTO.class));
-
+        resp.setSecurityPayServer(this.configurationProvider.getValue(namespaceId, ConfigConstants.SECURITY_PAY_SERVER, "https://secpay.zuolin.com"));
         return resp;
     }
 
@@ -6811,8 +6811,19 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
           return null;
       }
 
+    @Override
+    public void updateUserVipLevel(Long userId, Integer vipLevel) {
+        User user = this.userProvider.findUserById(userId);
+        if(user == null){
+            LOGGER.error("Unable to find the user , userId= {}",  userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+        }
+        user.setVipLevel(vipLevel);
+        userProvider.updateUser(user);
+    }
 
-        private Organization checkOrganization(Long organizationId) {
+
+    private Organization checkOrganization(Long organizationId) {
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if(org == null){
                 LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);

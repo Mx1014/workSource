@@ -15,6 +15,7 @@ import java.util.List;
  * <li>ownerType:所属者类型</li>
  * <li>ownerId:所属者ID</li>
  * <li>billGroupId:账单组id</li>
+ * <li>organizationId：当前登陆的企业ID</li>
  *</ul>
  */
 public class BatchUpdateBillsToSettledCmd {
@@ -23,6 +24,8 @@ public class BatchUpdateBillsToSettledCmd {
     private String ownerType;
     private Long ownerId;
     private Long billGroupId;
+    //物业缴费V6.0 新增权限
+    private Long organizationId;
     
 	public List<Long> getBillIdList() {
 		return billIdList;
@@ -53,6 +56,12 @@ public class BatchUpdateBillsToSettledCmd {
 	}
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
     
 }

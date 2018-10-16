@@ -6,6 +6,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.comment.*;
+import com.everhomes.server.schema.tables.pojos.EhWorkReportValComments;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
@@ -66,7 +67,7 @@ public class WorkReportCommentHandler implements CommentHandler {
                 //  return the comment back.
                 CommentDTO dto = new CommentDTO();
                 dto.setCreatorNickName(workReportService.fixUpUserName(comment.getCreatorUserId(), reportVal.getOwnerId()));
-                dto.setCreatorAvatarUrl(workReportService.getUserAvatar(comment.getCreatorUserId()));
+                dto.setCreatorAvatarUrl(contentServerService.parserUri(workReportService.getUserAvatar(comment.getCreatorUserId())));
                 dto.setCreatorUid(comment.getCreatorUserId());
                 dto.setContent(comment.getContent());
                 dto.setContentType(comment.getContentType());
@@ -136,16 +137,16 @@ public class WorkReportCommentHandler implements CommentHandler {
 
             if (results.size() > cmd.getPageSize()) {
                 results.remove(results.size() - 1);
-                nextPageAnchor = Long.valueOf(pageOffset + 1);
+                nextPageAnchor = (long) (pageOffset + 1);
             }
 
-            List<Long> commentIds = results.stream().map(r -> r.getId()).collect(Collectors.toList());
+            List<Long> commentIds = results.stream().map(EhWorkReportValComments::getId).collect(Collectors.toList());
             Map<Long, List<AttachmentDTO>> attachments = listWorkReportValCommentAttachments(namespaceId, commentIds);
             results.forEach(r -> {
                 CommentDTO dto = ConvertHelper.convert(r, CommentDTO.class);
                 dto.setCreatorUid(r.getCreatorUserId());
                 dto.setCreatorNickName(workReportService.fixUpUserName(dto.getCreatorUid(), r.getOwnerId()));
-                dto.setCreatorAvatarUrl(workReportService.getUserAvatar(dto.getCreatorUid()));
+                dto.setCreatorAvatarUrl(contentServerService.parserUri(workReportService.getUserAvatar(dto.getCreatorUid())));
                 dto.setAttachments(attachments.get(dto.getId()));
                 dto.setCreateTime(r.getCreateTime());
                 comments.add(dto);

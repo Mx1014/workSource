@@ -25,9 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -135,11 +133,10 @@ public class WorkReportServiceImpl implements WorkReportService {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //  find the report by id.
         WorkReport report = workReportProvider.getWorkReportById(cmd.getReportId());
-
         if (report == null)
             return null;
-        ReportValiditySettingDTO validity = JSON.parseObject(report.getValiditySetting(), ReportValiditySettingDTO.class);
-        LocalDateTime time = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime time = LocalDateTime.now();
+
         //  update it.
         if (cmd.getReportType() != null)
             report.setReportType(cmd.getReportType());
@@ -162,23 +159,20 @@ public class WorkReportServiceImpl implements WorkReportService {
             return null;
         });
 
-        if (validity == null)
-            validity = cmd.getValiditySetting(); // 新建的汇报没有默认有效时间，故赋予默认值避免空指针.
         if (WorkReportStatus.fromCode(report.getStatus()) == WorkReportStatus.RUNNING) {
-            ReportValiditySettingDTO originValidity = validity;
             //  Enable another thread to update the data.
             ExecutorUtil.submit(() -> {
                 UserContext.setCurrentNamespaceId(namespaceId);
                 //  Make sure that the msg time could be chaned once at the same time.
-                coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_MSG.getCode() + report.getId()).tryEnter(() -> {
+                coordinationProvider.getNamedLock(CoordinationLocks.WORK_REPORT_AU_BASIC_MSG.getCode() + report.getId()).tryEnter(() -> {
 
-                    Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, originValidity);
+                    Timestamp reportTime = workReportTimeService.getReportTime(report.getReportType(), time, cmd.getValiditySetting());
                     //  update the rxMsg
                     if (cmd.getRxMsgSetting() != null)
                         updateWorkReportValReceiverMsg(report, cmd.getRxMsgSetting(), reportTime);
                     //  update the auMsg
                     if (cmd.getAuMsgSetting() != null)
-                        workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), originValidity, reportTime);
+                        workReportMessageService.createWorkReportScopeMsg(report, cmd.getAuMsgSetting(), cmd.getValiditySetting(), reportTime);
                 });
             });
         }
@@ -958,7 +952,7 @@ public class WorkReportServiceImpl implements WorkReportService {
         dto.setApplierUserId(reportVal.getApplierUserId());
         dto.setApplierName(reportVal.getApplierName());
         dto.setApplierDetailId(getUserDetailId(reportVal.getApplierUserId(), reportVal.getOwnerId()));
-        dto.setApplierUserAvatar(getUserAvatar(reportVal.getApplierUserId()));
+        dto.setApplierUserAvatar(contentServerService.parserUri(getUserAvatar(reportVal.getApplierUserId())));
         dto.setCreateTime(reportVal.getCreateTime());
         dto.setReceivers(receivers);
         dto.setUpdateTime(reportVal.getUpdateTime());
@@ -981,6 +975,8 @@ public class WorkReportServiceImpl implements WorkReportService {
     public void syncWorkReportReceiver() {
         List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
         for (WorkReportValReceiverMap r : receivers) {
+            if (r.getOrganizationId() != 0)
+                continue;
             WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
             r.setOrganizationId(val.getOrganizationId());
             workReportValProvider.updateWorkReportValReceiverMap(r);
@@ -993,20 +989,25 @@ public class WorkReportServiceImpl implements WorkReportService {
         for (WorkReportValReceiverMap r : receivers) {
             if (r.getReceiverAvatar() == null)
                 continue;
-            String avatar = r.getReceiverAvatar();
-            String uri = avatar.substring(avatar.indexOf("image") + 6, avatar.lastIndexOf("?"));
-            r.setReceiverAvatar("cs://1/image/" + uri);
+            User user = userProvider.findUserById(r.getReceiverUserId());
+            if (user == null)
+                continue;
+            r.setReceiverAvatar(user.getAvatar());
             workReportValProvider.updateWorkReportValReceiverMap(r);
         }
     }
 
-/*    @Override
-    public void updateWorkReportReceiverReportId(){
-        List<WorkReportValReceiverMap> receivers = workReportValProvider.listWorkReportReceivers();
-        for (WorkReportValReceiverMap r : receivers) {
-            WorkReportVal val = workReportValProvider.getWorkReportValById(r.getReportValId());
-            r.setReportId(val.getReportId());
-            workReportValProvider.updateWorkReportValReceiverMap(r);
+    @Override
+    public void updateWorkReportValAvatar() {
+        List<WorkReportVal> vals = workReportValProvider.listWorkReportVals();
+        for (WorkReportVal v : vals) {
+            User author = userProvider.findUserById(v.getApplierUserId());
+            if (author != null)
+                v.setApplierAvatar(author.getAvatar());
+            List<WorkReportValReceiverMap> res = workReportValProvider.listReportValReceiversByValId(v.getId());
+            if (res != null && res.size() > 0)
+                v.setReceiverAvatar(res.get(0).getReceiverAvatar());
+            workReportValProvider.updateWorkReportVal(v);
         }
-    }*/
+    }
 }

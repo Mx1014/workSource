@@ -936,10 +936,29 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		parentIds.removeAll(menuIds);
 
-		return webMenuProvider.listWebMenuByMenuIds(new ArrayList<>(parentIds));
+		List<WebMenu> parentMenus = webMenuProvider.listWebMenuByMenuIds(new ArrayList<>(parentIds));
+
+		renameMenuFor999930(parentMenus);
+
+		return parentMenus;
 	}
 
 
+
+	public void renameMenuFor999930(List<WebMenu> menus){
+
+		if(!UserContext.getCurrentNamespaceId().equals(999930) || menus == null){
+			return;
+		}
+
+		for (WebMenu menu: menus){
+			if(menu.getName() != null && menu.getName().contains("园区")){
+				String replace = menu.getName().replace("园区", "写字楼");
+				menu.setName(replace);
+			}
+		}
+
+	}
 
 
 	@Override

@@ -395,6 +395,10 @@ public class ParkingServiceImpl implements ParkingService {
 		String ownerType = FlowOwnerType.PARKING.getCode();
 		Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE,
 				FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
+		if (flow == null) {
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_NO_WORK_FLOW_ENABLED,
+					"请启用工作流");
+		}
 		Long flowId = flow.getFlowMainId();
 		Integer requestFlowType = parkingLot.getFlowMode();
 
@@ -751,7 +755,9 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingRechargeOrder.setPrice(cmd.getPrice());
 
 			if (parkingRechargeOrder.getOrderType() == ParkingOrderType.RECHARGE.getCode()) {
+				
 				handler.updateParkingRechargeOrderRate(parkingLot, parkingRechargeOrder);
+
 			}else {
 				//TODO:开卡校验
 				parkingRechargeOrder.setOriginalPrice(cmd.getPrice());
@@ -1061,7 +1067,6 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
-
 		int size = list.size();
 		if(size > 0){
 			response.setOrders(list.stream().map(r -> {
@@ -1069,6 +1074,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 				d.setParkingLotName(parkingLot.getName());
 				d.setContact(parkingLot.getContact());
+				d.setInvoiceFlag(parkingLot.getInvoiceFlag());
 				return d;
 			}).collect(Collectors.toList()));
 			if(size != cmd.getPageSize()){
@@ -1896,7 +1902,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null == flowId) {
 			LOGGER.error("FlowId cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"FlowId cannot be null.");
+					"请先设置工作流.");
 		}
 
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
@@ -3581,16 +3587,30 @@ public class ParkingServiceImpl implements ParkingService {
 	public GetParkingBussnessStatusResponse getParkingBussnessStatus(GetParkingBussnessStatusCommand cmd) {
 		GetParkingBussnessStatusResponse response  = new GetParkingBussnessStatusResponse();
 		List<ParkingFuncDTO> dockingFuncLists = new ArrayList<>();
+		List<ParkingFuncDTO> funcLists = new ArrayList<>();
 		ArrayList<Byte> flowModeList = new ArrayList<>(Arrays.asList((byte) 1, (byte) 2));
 		ParkingLot lot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 		if(lot.getFuncList()!=null && lot.getFuncList().contains("[")){
 			JSONArray array = JSONObject.parseArray(lot.getFuncList());
 			for (Object o : array) {
 				//暂时如此
-				if(ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())){
+				ParkingFuncDTO dto = new ParkingFuncDTO();
+				if (ParkingBusinessType.VIP_PARKING.getCode().equals(o.toString())) {
+					dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
+					dto.setEnableFlag(lot.getVipParkingFlag());
+					funcLists.add(dto);
+					continue;
+				} else if (ParkingBusinessType.USER_NOTICE.getCode().equals(o.toString())){
+					dto.setCode(ParkingBusinessType.USER_NOTICE.getCode());
+					dto.setEnableFlag(lot.getNoticeFlag());
+					funcLists.add(dto);
+					continue;
+				} else if (ParkingBusinessType.INVOICE_APPLY.getCode().equals(o.toString())){
+					dto.setCode(ParkingBusinessType.INVOICE_APPLY.getCode());
+					dto.setEnableFlag(lot.getInvoiceFlag());
+					funcLists.add(dto);
 					continue;
 				}
-				ParkingFuncDTO dto = new ParkingFuncDTO();
 				dto.setCode(o.toString());
 				dto.setEnableFlag(ParkingConfigFlag.NOTSUPPORT.getCode());
 				try {
@@ -3615,12 +3635,12 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 		response.setDockingFuncLists(dockingFuncLists);
+		
 
-		List<ParkingFuncDTO> funcLists = new ArrayList<>();
-		ParkingFuncDTO dto = new ParkingFuncDTO();
-		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
-		dto.setEnableFlag(lot.getVipParkingFlag());
-		funcLists.add(dto);
+//		ParkingFuncDTO dto = new ParkingFuncDTO();
+//		dto.setCode(ParkingBusinessType.VIP_PARKING.getCode());
+//		dto.setEnableFlag(lot.getVipParkingFlag());
+//		funcLists.add(dto);
 		response.setFuncLists(funcLists);
 
 		response.setEnableMonthCard(lot.getMonthCardFlag());
@@ -3643,6 +3663,8 @@ public class ParkingServiceImpl implements ParkingService {
 			if(parkingLot.getFuncList()==null || parkingLot.getFuncList().trim().length()==0){
 				JSONArray array = new JSONArray();
 				array.add(ParkingBusinessType.VIP_PARKING.getCode());
+				array.add(ParkingBusinessType.INVOICE_APPLY.getCode());
+				array.add(ParkingBusinessType.USER_NOTICE.getCode());
 				if(parkingLot.getTempfeeFlag()==1){
 					array.add(ParkingBusinessType.TEMPFEE.getCode());
 				}
@@ -3693,6 +3715,15 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}
 	}
+	@Override
+	public void updateParkingUserNotice(UpdateUserNoticeCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		parkingLot.setId(parkingLot.getId());
+		parkingLot.setSummary(cmd.getSummary());
+		parkingLot.setNoticeContact(cmd.getContact());
+		parkingProvider.updateParkingLot(parkingLot);
+	}
+	
 
 	@Override
 	public void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd) {
