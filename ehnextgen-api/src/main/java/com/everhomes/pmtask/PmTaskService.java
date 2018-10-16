@@ -124,6 +124,8 @@ public interface PmTaskService {
 
 	Object getThirdTaskDetail(HttpServletRequest req);
 
+	Object getThirdCategories(HttpServletRequest req);
+
     List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17);
 
     List<SearchTasksByOrgDTO> searchOrgTasks(SearchOrgTasksCommand cmd);

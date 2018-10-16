@@ -697,6 +697,20 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/queryThirdCategories</b>
+     * <p>获取第三方地址信息</p>
+     */
+    @RequestMapping("queryThirdCategories")
+    @RestReturn(value = String.class)
+    public RestResponse queryThirdCategories(HttpServletRequest req){
+        Object addresses = pmTaskService.getThirdCategories(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
      * <b>URL: /pmtask/syncCategories</b>
      * <p>给不同项目拷贝分类(用后删除)</p>
      */
