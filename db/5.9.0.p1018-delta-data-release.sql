@@ -11,6 +11,9 @@
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
 
+
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
@@ -91,4 +94,26 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+
+
+set @max_id := (select ifnull(max(id), 0) from eh_version_realm);
+set @namespace_id := 999953;
+set @module_name := '服务联盟';
+set @version = '1.0.0';
+INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ((@max_id:=@max_id+1), 'serviceAlliance', NULL, now(), @namespace_id);
+
+set @max_id_2 := (select ifnull(max(id), 0) from eh_version_urls);
+set @home_url := (select `value` from eh_configurations where name = 'home.url');
+set @zip_url := concat(@home_url,'/nar/serviceAlliance/offline/serviceAlliance-1-0-0.zip');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `upgrade_description`, `namespace_id`, `app_name`, `publish_time`, `icon_url`, `version_encoded_value`) VALUES (@max_id_2+1, @max_id, @version, @zip_url, @zip_url, NULL, @namespace_id, @module_name, now(), NULL, 0);
+
+
+update eh_service_modules set action_type = 44, instance_config = replace(instance_config, '}', ',"realm":"serviceAlliance"}') where id = 40500 and instance_config not like '%"realm":%';
+
+update eh_service_module_apps set action_type = 44 where module_id = 40500 and instance_config not like '%"appType":"native"%';
+
+update eh_launch_pad_items set 
+action_data  = replace(action_data, '{"url":"${home.url}/service-alliance-web', concat('{"realm":"serviceAlliance","entryUrl":"', @home_url,'/nar/serviceAlliance')), action_type = 44
+where action_data like '{"url":"${home.url}/service-alliance-web/build/index.html#/home/%' and action_type  = 14;
+
 -- --------------------- SECTION END wanzhihui ------------------------------------------
