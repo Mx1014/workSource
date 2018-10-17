@@ -2830,7 +2830,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 //The door is delete, set it to invalid
                 auth.setStatus(DoorAuthStatus.INVALID.getCode());
                 doorAuthProvider.updateDoorAuth(auth);
-                return null;
+                continue;
             }
             
             //没有二维码读头的门禁不返回二维码,by liuyilin 20180529
@@ -2892,6 +2892,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
            
             }
         LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
+        if (resp.getKeys() == null || resp.getKeys().size() ==0 ){
+        	LOGGER.info(String.format("user{%d} has no valid auth,phone:%d",user.getId(),user.getIdentityNumberTag()));
+        }
         return resp;              
      }
     
