@@ -503,11 +503,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
         	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
 		}
-        //查询发起人id,这样查询有问题，查不出来的，最好直接传id过来
-        User user = userProvider.findUserByAccountName(cmContractData.getContractHeader().getCreateUserName());
-        if (user != null) {
-        	contract.setSponsorUid(user.getId());
-		}
+      //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+        contract.setSponsorUid(cmContractData.getContractHeader().getCreateUserName());
         
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
@@ -636,11 +633,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         if (!"".equals(cmContractData.getContractHeader().getContractAmt()) && cmContractData.getContractHeader().getContractAmt() != null) {
         	contract.setRent(new BigDecimal(cmContractData.getContractHeader().getContractAmt()));
 		}
-        //查询发起人id,这样查询有问题，查不出来的，最好直接传id过来
-        User user = userProvider.findUserByAccountName(cmContractData.getContractHeader().getCreateUserName());
-        if (user != null) {
-        	contract.setSponsorUid(user.getId());
-		}
+        //由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+        contract.setSponsorUid(cmContractData.getContractHeader().getCreateUserName());
 
         EnterpriseCustomer customer = customerProvider.findByNamespaceToken(NamespaceContractType.RUIAN_CM.getCode(), cmContractData.getContractHeader().getAccountID());
         if(customer != null) {
