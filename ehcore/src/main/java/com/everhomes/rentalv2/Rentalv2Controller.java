@@ -4,8 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.oauth2.RequireOAuth2Authentication;
-import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -428,6 +426,24 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/getUserClosestBill</b>
+	 * <p>
+	 * 查找用户最近的使用中 待使用订单
+	 * </p>
+	 */
+	@RequestMapping("getUserClosestBill")
+	@RestReturn(value = GetUserClosestBillResponse.class)
+	public RestResponse getUserClosestBill(@Valid GetUserClosestBillCommand cmd) {
+		GetUserClosestBillResponse getUserClosestBillResponse = null;
+		RestResponse response = new RestResponse(
+				getUserClosestBillResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/listRentalBills</b>
 	 * <p>
