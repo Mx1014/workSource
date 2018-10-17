@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch.recordmapper;
 
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.util.StringHelper;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -72,6 +73,7 @@ public class DailyPunchStatusStatisticsTodayRecordMapper implements RecordMapper
         data.setLeaveEarlyMemberCount(record.getValue("leaveEarlyMemberCount", Integer.class));
         data.setNormalMemberCount(record.getValue("normalMemberCount", Integer.class));
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         return data;
     }
 
