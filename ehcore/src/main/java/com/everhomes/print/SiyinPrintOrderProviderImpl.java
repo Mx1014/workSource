@@ -250,9 +250,9 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 				List<Byte> modes = new ArrayList();
 				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
 				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
-				query = query.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.in(modes));
+				query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.in(modes));
 			} else
-				query = query.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
+				query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.eq(payMode));
 		}
 		if(payType!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAID_TYPE.eq(payType));
