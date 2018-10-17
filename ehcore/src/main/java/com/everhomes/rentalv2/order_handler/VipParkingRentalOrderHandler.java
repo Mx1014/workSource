@@ -234,8 +234,9 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
         }
         try {
             String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
+            returnUrl =String.format(returnUrl, order.getId(), order.getResourceType());
             returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
-            cmd.setReturnUrl(String.format(returnUrl, order.getId(), order.getResourceType()));
+            cmd.setReturnUrl(returnUrl);
         }catch (Exception e){
 
         }
