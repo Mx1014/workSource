@@ -1,9 +1,0 @@
-//
-// EvhPostSentScopeType.h
-//
-
-#define EvhPostSentScopeType_DISCOVERY @"discovery"
-#define EvhPostSentScopeType_GA @"ga"
-
-///////////////////////////////////////////////////////////////////////////////
-
