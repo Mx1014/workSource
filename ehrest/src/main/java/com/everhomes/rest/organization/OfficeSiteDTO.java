@@ -8,19 +8,31 @@ import java.util.List;
 
 /**
  * <ul>
+ *     <li>id: id</li>
  *     <li>siteName: 办公地点名称</li>
  *     <li>communityName: 所属项目名称</li>
- *     <li>organizationApartDTOList: 楼栋和门牌的集合</li>
+ *     <li>communityId: communityId</li>
  *     <li>wholeAddressName: 办公地点名称全称</li>
+ *     <li>siteDtos: siteDtos</li>
  * </ul>
  */
 public class OfficeSiteDTO {
 
+    private Long id;
     private String siteName;
     private String communityName;
     private Long communityId;
     private String wholeAddressName;
     private List<OrganizationApartDTO> siteDtos;
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSiteName() {
         return siteName;
@@ -47,7 +59,7 @@ public class OfficeSiteDTO {
     }
 
     public List<OrganizationApartDTO> getSiteDtos() {
-        if(CollectionUtils.isEmpty(siteDtos)){
+        if (CollectionUtils.isEmpty(siteDtos)) {
             return new ArrayList<OrganizationApartDTO>();
         }
         return siteDtos;

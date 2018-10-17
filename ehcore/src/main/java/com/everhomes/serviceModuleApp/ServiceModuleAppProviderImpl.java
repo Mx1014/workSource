@@ -409,6 +409,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		List<Field<?>> fields = new ArrayList<Field<?>>();
 		fields.addAll(Arrays.asList(fieldArr));
 		fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ID);
 		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId));
 		query.addConditions(Tables.EH_SERVICE_MODULE_APPS.NAMESPACE_ID.eq(namespaceId));
@@ -435,10 +436,12 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		List<ServiceModuleApp> apps = query.fetch().map((r) ->{
 		    ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
 		    try {
-	          String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
-	          if(!StringUtils.isEmpty(name)) {
-	                ap.setName(name);   
-	            }		        
+
+				String name = r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+				if(!StringUtils.isEmpty(name)) {
+					ap.setName(name);
+				}
+				ap.setEntryId(r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ID));
           } catch (IllegalArgumentException ex) {
                 //Ignore this exception
             }
@@ -457,6 +460,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		if(locationType != null || sceneType != null){
 		  fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ENTRY_NAME);
+		  fields.add(Tables.EH_SERVICE_MODULE_ENTRIES.ID);
 		}
 
 		SelectQuery<Record> query = context.select(fields).from(Tables.EH_SERVICE_MODULE_APPS).getQuery();
@@ -498,7 +502,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 
 
-		query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
+		//query.addGroupBy(Tables.EH_SERVICE_MODULE_APPS.ORIGIN_ID);
 
 		List<ServiceModuleApp> apps = query.fetch().map((r) -> {
 			ServiceModuleApp ap = RecordHelper.convert(r, ServiceModuleApp.class);
@@ -508,6 +512,9 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				if(locationType != null || sceneType != null && !StringUtils.isEmpty(name)) {
 					ap.setName(name);
 				}
+
+				ap.setEntryId(r.getValue(Tables.EH_SERVICE_MODULE_ENTRIES.ID));
+
 			} catch (IllegalArgumentException ex) {
 				//Ignore this exception
 			}

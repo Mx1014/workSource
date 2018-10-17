@@ -62,10 +62,7 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.util.UnicodeUtil;
@@ -1663,6 +1660,8 @@ public class PortalServiceImpl implements PortalService {
 						}
 
 						UserContext.setCurrentUser(user);
+						//login为null时，生成url会缺少token
+						UserContext.current().setLogin(new UserLogin());
 						//同步和发布的时候不用预览账号
 						UserContext.current().setPreviewPortalVersionId(null);
 						dbProvider.execute((status) -> {
@@ -2108,7 +2107,7 @@ public class PortalServiceImpl implements PortalService {
 
 						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
 						//填充路由信息
-						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null);
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null);
 						config.setRouterPath(routerInfo.getPath());
 						config.setRouterQuery(routerInfo.getQuery());
 					}

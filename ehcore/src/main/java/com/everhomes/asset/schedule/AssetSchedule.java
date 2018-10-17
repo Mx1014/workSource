@@ -33,6 +33,7 @@ import com.everhomes.asset.PaymentFormula;
 import com.everhomes.asset.PaymentLateFine;
 import com.everhomes.asset.PaymentNoticeConfig;
 import com.everhomes.asset.SettledBillRes;
+import com.everhomes.asset.standard.AssetStandardProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -111,6 +112,9 @@ public class AssetSchedule{
 	
 	@Autowired
     private MessagingService messagingService;
+	
+	@Autowired
+	private AssetStandardProvider assetStandardProvider;
 	
 	/**
 	 * 定时任务：定时将未出账单转成已出账单
@@ -380,7 +384,7 @@ public class AssetSchedule{
                             assetProvider.updatePaymentItem(item);
                         }
                         amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
-                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                        List<PaymentFormula> formulas = assetStandardProvider.getFormulas(item.getLateFineStandardId());
                         if(formulas.size() != 1) {
                             LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
                         }

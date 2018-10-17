@@ -25,7 +25,7 @@ import java.util.List;
  *     <li>status: status  {@link GroupMemberStatus}</li>
  *     <li>workPlatformFlag: 是否开启工作台标志，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>managerFlag: 是否为公司管理员，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
- *     <li>addressSiteDtos: 公司办公点或者家庭对应的园区信息参考{@link AddressSiteDTO}</li>
+ *     <li>addressSiteDtos: 公司办公点或者家庭对应的信息参考{@link AddressSiteDTO}</li>
  *     <li>communityInfoDtos: 所在园区列表 {@link com.everhomes.rest.community.CommunityInfoDTO}</li>
  * </ul>
  */

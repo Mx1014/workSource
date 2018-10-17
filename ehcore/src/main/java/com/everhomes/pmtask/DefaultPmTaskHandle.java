@@ -72,7 +72,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		Category category = categoryProvider.findCategoryById(id);
 		if(null == category) {
         	LOGGER.error("Category not found, categoryId={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
     				"Category not found.");
         }
 		return category;
@@ -81,13 +81,13 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
         	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerId parameter.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
         	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerType parameter.");
         }
 	}
@@ -154,13 +154,13 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		if(null == cmd.getTaskId()) {
 			LOGGER.error("Invalid taskId parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid taskId parameter.");
 		}
 		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
 		if(null == task) {
 			LOGGER.error("PmTask not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"PmTask not found.");
 		}
 		if(null != cmd.getCategoryId()) {
@@ -221,7 +221,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 					return response;
 				}
 				LOGGER.error("Category not found, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
 						"Category not found.");
 			}
 			if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
@@ -304,7 +304,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	private void checkNamespaceId(Integer namespaceId){
 		if(namespaceId == null) {
         	LOGGER.error("Invalid namespaceId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid namespaceId parameter.");
         }
 	}
@@ -453,7 +453,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	private void checkOrganizationId(Long organizationId) {
 		if(null == organizationId) {
         	LOGGER.error("Invalid organizationId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid organizationId parameter.");
         }
 	}

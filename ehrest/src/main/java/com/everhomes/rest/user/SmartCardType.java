@@ -9,7 +9,7 @@ package com.everhomes.rest.user;
  *
  */
 public enum SmartCardType {
-	SMART_CARD_PAY((byte) 1), SMART_CARD_ACLINK((byte) 2);
+	SMART_CARD_PAY((byte) 1),  SMART_CARD_ACLINK((byte) 2);
 	
 	 private byte code;
     

@@ -1,17 +1,6 @@
 // @formatter:off
 package com.everhomes.qrcode;
 
-import java.sql.Timestamp;
-
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -23,8 +12,18 @@ import com.everhomes.server.schema.tables.daos.EhQrcodesDao;
 import com.everhomes.server.schema.tables.pojos.EhQrcodes;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 
+@Deprecated
 @Component
 public class QRCodeProviderImpl implements QRCodeProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(QRCodeProviderImpl.class);

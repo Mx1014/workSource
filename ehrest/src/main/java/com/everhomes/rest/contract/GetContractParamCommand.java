@@ -18,6 +18,15 @@ public class GetContractParamCommand {
     private Long orgId;
     private Byte payorreceiveContractType;
 	private Long categoryId;
+	private Long appId;
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 
 	public Long getCategoryId() {
 		return categoryId;

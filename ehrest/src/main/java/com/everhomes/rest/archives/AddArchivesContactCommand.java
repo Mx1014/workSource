@@ -22,6 +22,7 @@ import java.util.List;
  * <li>updateFlag: 编辑标志: 0-否, 1-是</li>
  * <li>updateDetailId: 编辑人员的id</li>
  * <li>namespaceId: 域空间ID</li>
+ * <li>account: 账号(唯一标识)</li>
  * <li>operateType: 审核类型</li>
  * </ul>
  */
@@ -65,6 +66,9 @@ public class AddArchivesContactCommand {
     private Byte updateFlag;
 	
 	private Long updateDetailId;
+
+    //  组织架构4.6需要添加唯一标识
+    private String account;
 
     private Byte operateType;
 
@@ -201,16 +205,24 @@ public class AddArchivesContactCommand {
         this.updateDetailId = updateDetailId;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public Long getDetailId() {
         return detailId;
     }
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

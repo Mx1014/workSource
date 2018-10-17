@@ -25,6 +25,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -58,6 +59,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -265,6 +268,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private DbProvider dbProvider;
 
 
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+    
     @Autowired
     private ContractBuildingMappingProvider contractBuildingMappingProvider;
 
@@ -7693,6 +7699,30 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(Long detailId, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(String contactToken, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
     public void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd) {
         OrganizationMember member = organizationProvider.findOrganizationMemberById(cmd.getId());
         member.setContactName(cmd.getContactName());
@@ -8367,6 +8397,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
 
@@ -9984,8 +10021,24 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setCommunities(treeDTOs);
         return response;
     }
+    
+    @Override
+    public OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd){
 
+        Organization org = checkOrganization(cmd.getId());
 
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"not exist app namespace mapping");
+		}
+		
+		if(!org.getNamespaceId().equals(appNamespaceMapping.getNamespaceId())){
+			return null;
+		}
+    	return listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag());
+    };
+	
     @Override
     public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
@@ -12288,6 +12341,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
+                else{
+                	//始终都要发消息
+                    organizationMember.setOrganizationId(enterpriseId);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息
+//                    sendMessageForContactApproved(organizationMember);
+                }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
             if (leaveMembers.size() > 0) {
@@ -14111,6 +14170,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     officeSiteDTO.setSiteName(organizationWorkPlaces.getWorkplaceName());
                     officeSiteDTO.setCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                    officeSiteDTO.setId(organizationWorkPlaces.getId());
                     //根据查询到的community_id来查询表eh_communities然后得到所属项目的名称，并且将其封装在对象OfficeSiteDTO中
                     String communityName = organizationProvider.getCommunityNameByCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setCommunityName(communityName);
@@ -14614,7 +14674,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setDtos(dtos);
         return response;
     }
-
+    
     @Override
 	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
@@ -14661,5 +14721,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
+    //	物业组所需获取企业员工的唯一标识符
+    @Override
+    public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(targetId, orgId);
+        if(employee == null)
+            return "";
+        return employee.getAccount();
+    }
 }
 

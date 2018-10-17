@@ -29,12 +29,6 @@ public interface ArchivesService {
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
 
-    void exportArchivesContacts(ListArchivesContactsCommand cmd);
-
-    OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
-
-    void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
-
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
     void addArchivesLog(AddArchivesLogCommand cmd);

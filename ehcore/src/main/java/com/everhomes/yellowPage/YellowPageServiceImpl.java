@@ -1496,8 +1496,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 				return true;
 			} else {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"formId未提取到");
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_SKIP_URL_FORMAT_ERROR, "skip url format error");
 			}
 		}
 		return false;
@@ -2342,8 +2341,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 		} catch (IOException e) {
 			LOGGER.error("Reserver request error, param={}", param, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Reserver request error.");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_QUERY_BIZ_MODULE_FAILED, "get biz module failed");
 		} finally {
 			if (null != response) {
 				try {
@@ -2387,15 +2385,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public void updateServiceAllianceEnterpriseDisplayFlag(UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd) {
 		if (cmd.getId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					" Unknown id = {}", cmd.getId());
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "param not valid");
 		}
 		DisplayFlagType flagType = DisplayFlagType.fromCode(cmd.getDisplayFlag());
 		if (flagType != null) {
 			ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(cmd.getId(), null, null);
-			if (serviceAlliance == null)
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						" Unknown id = {}", cmd.getId());
+			if (serviceAlliance == null) {
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "param not valid");
+			}
 			cmd.setDisplayFlag(flagType.getCode());
 		}
 		yellowPageProvider.updateServiceAlliancesDisplayFlag(cmd.getId(), cmd.getDisplayFlag());
@@ -2406,8 +2403,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
 		List<ServiceAllianceDTO> values = cmd.getValues();
 		if (values == null || values.size() < 2) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"can't change the order, values = {}", values);
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "param not valid");
 		}
 		// 检查数据,并且查询原来的defaultorder，并且按照defaultorder升序生成serviceAlliancesList by
 		// dengs,20170525
@@ -2442,14 +2438,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 				values.stream().map(value -> value.getId()).collect(Collectors.toList()));
 
 		if (values.size() != serviceAllianceList.size()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					" Uknown Ids = {}", values);
+			LOGGER.error("Uknown Ids = {}" , values);
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "param not valid");
 		}
 
 		Collections.sort(serviceAllianceList, (s1, s2) -> {
 			if (s1.getDefaultOrder() - s2.getDefaultOrder() == 0L) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						" repeated service alliance id = {}", s1.getId());
+				LOGGER.error("repeated service alliance id = {}" , s1.getId());
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 			}
 			return s1.getDefaultOrder() > s2.getDefaultOrder() ? 1 : -1;
 		});
@@ -2469,8 +2465,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public GetCategoryIdByEntryIdResponse getCategoryIdByEntryId(GetCategoryIdByEntryIdCommand cmd) {
 		if (cmd.getEntryId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"entryId = null");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_PROVIDER_NOT_FOUND, "alliance provider not exist");
 		}
 		ServiceAllianceCategories category = yellowPageProvider
 				.findCategoryByEntryId(UserContext.getCurrentNamespaceId(), cmd.getEntryId());

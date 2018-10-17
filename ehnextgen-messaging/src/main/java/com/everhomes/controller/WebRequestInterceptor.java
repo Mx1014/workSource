@@ -20,7 +20,9 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.tool.BlutoAccessor;
 import com.everhomes.user.*;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -86,7 +88,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
+    @Autowired
+    private SdkUserService sdkUserService;
+
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
 
     public WebRequestInterceptor() {
     }
@@ -449,7 +455,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
 
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
-        App app = this.appProvider.findAppByKey(appKey);
+        App app = getAppByKey(appKey);
         if (app == null) {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
@@ -467,6 +473,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         String signature = getParamValue(paramMap, "signature");
 
         return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
+    }
+
+    private App getAppByKey(String appKey) {
+        // 给 SDK 调用提供的便捷方式
+        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+            App app = new App();
+            app.setAppKey(appKey);
+            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setName("SDK");
+            app.setId(0L);
+            return app;
+        }
+        return this.appProvider.findAppByKey(appKey);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
@@ -532,6 +551,22 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         context.setLogin(login);
 
         User user = this.userProvider.findUserById(login.getUserId());
+        if (user == null) {
+            //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+            //如果core server和统一用户都没有用户，说明真的没有该用户
+            // add by yanlong.liang 20180928
+            user = ConvertHelper.convert(this.sdkUserService.getUser(login.getUserId()), User.class);
+            this.userProvider.createUserFromUnite(user);
+            UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(login.getUserId()), UserIdentifier.class);
+            if (userIdentifier != null) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifier(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }
         context.setUser(user);
 
         PortalVersionUser portalVersionUserByUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(login.getUserId());

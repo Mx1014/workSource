@@ -65,6 +65,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -534,6 +535,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
    	private ActivityService activityService;
+   	
+   	@Autowired
+   	private AssetChargingItemService assetChargingItemService;
 
     private String queueName = "property-mgr-push";
 
@@ -8485,7 +8489,7 @@ response.setBuildingId(building.getId());//房源的授权价
 			ownerIdentityCommand.setOwnerId(cmd.getCommunityId());
 			ownerIdentityCommand.setOwnerType("community");
 			ownerIdentityCommand.setCategoryId(dtos.get(i).getCategoryId());
-			List<ListChargingItemsDTO> listChargingItem = assetService.listChargingItems(ownerIdentityCommand);
+			List<ListChargingItemsDTO> listChargingItem = assetChargingItemService.listAllChargingItems(ownerIdentityCommand);
 			for (int j = 0; j < listChargingItem.size(); j++) {
 				if (listChargingItem.get(j).getIsSelected() == 1) {
 					chargingItemNameList.put(listChargingItem.get(j).getChargingItemId(),

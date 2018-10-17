@@ -45,6 +45,7 @@ import java.sql.Timestamp;
  * <li>operatorPhone: 审核人电话</li>
  * <li>departmentName: 部门名称</li>
  * <li>operateType: 审核类型，请参考{@link com.everhomes.rest.community.admin.OperateType}</li>
+ * <li>account: 账号(唯一标识)</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -129,6 +130,9 @@ public class OrganizationMemberDTO {
     private String departmentName;
 
     private Byte operateType;
+
+    //  组织架构4.6 公司唯一标识
+    private String account;
 
     public Byte getOperateType() {
         return operateType;
@@ -560,4 +564,11 @@ public class OrganizationMemberDTO {
         this.departmentName = departmentName;
     }
 
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
 }

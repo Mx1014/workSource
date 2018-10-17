@@ -1,17 +1,15 @@
 // @formatter:off
 package com.everhomes.discover;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.everhomes.controller.ControllerBase;
-import com.everhomes.discover.SuppressDiscover;
-import com.everhomes.util.RequireAuthentication;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 
@@ -60,13 +58,13 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             return "api-input";
         }
 
-//        String uri = request.getRequestURI().toString();
-//        int pos = uri.indexOf("/api");
-//        if(uri.substring(pos + 4).length() > 0) {
-//            return "redirect:/api";
-//        }
+      /* String uri = request.getRequestURI().toString();
+       int pos = uri.indexOf("/api");
+       if(uri.substring(pos + 4).length() > 0) {
+           return "redirect:/api";
+       }
         
-//        return "api-react";
+       return "api-react";*/
     }
     
     @SuppressDiscover

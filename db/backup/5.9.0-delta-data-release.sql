@@ -799,7 +799,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 -- AUTHOR: 黄鹏宇
 -- REMARK: 更改group_path编写不规范的问题
 UPDATE eh_var_fields SET group_path = '/1/10/' WHERE group_path = '/1/10';
-UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6
+UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6;
 UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6 AND field_display_name = '客户来源';
 UPDATE eh_var_field_scopes SET group_path = '/1/10/' WHERE group_path = '/1/10' and status = 2;
 

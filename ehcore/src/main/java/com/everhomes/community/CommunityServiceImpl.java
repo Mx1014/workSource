@@ -1885,7 +1885,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId(), cmd.getAppId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -2330,6 +2330,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
+			dto.setIdentityNumber(user.getIdentityNumberTag());
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2444,6 +2445,7 @@ public class CommunityServiceImpl implements CommunityService {
             User user = this.userProvider.findUserById(cmd.getUserId());
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
+                communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
             }
 
             //是否展示会员等级
@@ -2808,7 +2810,7 @@ public class CommunityServiceImpl implements CommunityService {
 				    String[] organizationName = cmd.getOrganizationNames().split(";");
 				    Condition cond = Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[0] + "%");
 				    if (organizationName.length > 1) {
-				        for (int i=1;i<organizationName.length-1;i++) {
+				        for (int i=1;i<organizationName.length;i++) {
 				            cond = cond.or(Tables.EH_ORGANIZATIONS.NAME.like("%" + organizationName[i] + "%"));
                         }
                     }
@@ -3250,8 +3252,17 @@ public class CommunityServiceImpl implements CommunityService {
 		//认证中 = 已认证、认证中 - 已认证
 		int authingCount = memberIds.size() - authCount;
 
+		//未认证用户 userprofile表中的用户-已认证或者认证中的用户
+		List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.RESIDENTIAL.getCode(), null, null);
+
+		//未认证
+		int notAuthCount = 0;
+		if(users != null){
+			notAuthCount = users.size();
+		}
+
 		//全部 = 认证 + 认证中 + 未认证
-		int allCount = authCount + authingCount;
+		int allCount = authCount + authingCount + notAuthCount;
 
         //绑定微信的、男性、女性
         Set<Long> wxMemberIds = new HashSet<>();
@@ -3290,7 +3301,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setCommunityUsers(allCount);
 		resp.setAuthUsers(authCount);
 		resp.setAuthingUsers(authingCount);
-		resp.setWxUserCount(wxCount);
+        resp.setNotAuthUsers(notAuthCount);
+        resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
@@ -3310,12 +3322,18 @@ public class CommunityServiceImpl implements CommunityService {
 		//已认证、认证中的微信微信用户
 		int wxAuthCount = organizationProvider.countUserOrganization(cmd.getNamespaceId(), cmd.getCommunityId(), null, NamespaceUserType.WX.getCode(), null);
 
+        //未认证用户 userprofile表中的用户-已认证或者认证中的用户
+        List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+        if(users == null){
+            users = new ArrayList<>();
+        }
+        int notAuthCount = users.size();
 
 		//认证中 = 已认证、认证中 - 已认证
 		int authingCount = communityUserCount - authCount;
 
 		//总用户 =  已认证 + 认证中 + 未认证
-		int allCount = authCount + authingCount;
+		int allCount = authCount + authingCount + notAuthCount;
 
 
 		//微信用户 = 已认证、认证中的微信微信用户
@@ -3333,7 +3351,8 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setCommunityUsers(allCount);
 		resp.setAuthUsers(authCount);
 		resp.setAuthingUsers(authingCount);
-		resp.setWxUserCount(wxCount);
+        resp.setNotAuthUsers(notAuthCount);
+        resp.setWxUserCount(wxCount);
 		resp.setAppUserCount(allCount - wxCount);
 		resp.setMaleCount(maleCount);
 		resp.setFemaleCount(femaleCount);
@@ -3982,7 +4001,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId(), cmd.getAppId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -4096,8 +4115,8 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
-	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
-        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId, Long appId){
+		return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, appId,null,communityId);
 	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
@@ -4761,7 +4780,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
         CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
-        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId(), cmd.getAppId());
         if (isAuditing) {
             response.setIsAuditing(CheckAuditingType.YES.getCode());
         }else {
@@ -5814,7 +5833,12 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
 
-
+		//管理公司全部项目范围
+		if (cmd.getAllScope() == 1) {
+			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			cmd.setCommunityIds(communityIds);
+		}
+		
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
 
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
