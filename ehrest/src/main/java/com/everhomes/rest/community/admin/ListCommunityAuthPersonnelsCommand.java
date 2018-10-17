@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
  *     <li>identifierToken: 手机号</li>
  *     <li>orgNameKeyword: 公司名称关键字</li>
  *     <li>currentOrgId: 当前用户的组织ID</li>
+ *     <li>appId: appID</li>
  * </ul>
  */
 public class ListCommunityAuthPersonnelsCommand {
@@ -33,6 +34,15 @@ public class ListCommunityAuthPersonnelsCommand {
     private String orgNameKeyword;
 
     private Long currentOrgId;
+    private Long appId;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 
     public Long getCurrentOrgId() {
         return currentOrgId;

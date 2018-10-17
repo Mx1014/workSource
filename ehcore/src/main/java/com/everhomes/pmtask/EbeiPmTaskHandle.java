@@ -255,7 +255,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         } catch (IOException e) {
             LOGGER.error("Pmtask request error, param={}", param, e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                     "Pmtask request error.");
         }finally {
             if (null != response) {
@@ -355,7 +355,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 return dto;
             }
         }
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
     }
 
@@ -376,7 +376,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             }
         }
 
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
 
     }
@@ -426,7 +426,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         if(entity.isSuccess())
             return entity.getData();
 
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
     }
 
@@ -440,7 +440,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         }
         if(null == cmd.getAddressType()){
             LOGGER.error("Invalid addressType parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid addressType parameter.");
         }
         final PmTask task = new PmTask();
@@ -568,7 +568,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         checkOwnerIdAndOwnerType(ownerType, ownerId);
         if(null == taskCategoryId) {
             LOGGER.error("Invalid taskCategoryId parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid taskCategoryId parameter.");
         }
 
@@ -583,13 +583,13 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
         if(null == ownerId) {
             LOGGER.error("Invalid ownerId parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid ownerId parameter.");
         }
 
         if(StringUtils.isBlank(ownerType)) {
             LOGGER.error("Invalid ownerType parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid ownerType parameter.");
         }
     }
@@ -634,7 +634,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         PmTask task = checkPmTask(cmd.getId());
         if(!task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode())){
             LOGGER.error("Task have not been completed, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Task have not been completed.");
         }
         task.setOperatorStar(cmd.getOperatorStar());
@@ -648,7 +648,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private void checkId(Long id){
         if(null == id) {
             LOGGER.error("Invalid id parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid id parameter.");
         }
     }
@@ -657,7 +657,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         PmTask pmTask = pmTaskProvider.findTaskById(id);
         if(null == pmTask) {
             LOGGER.error("PmTask not found, id={}", id);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
                     "PmTask not found.");
         }
         return pmTask;

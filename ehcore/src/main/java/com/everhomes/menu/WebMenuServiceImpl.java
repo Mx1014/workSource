@@ -537,7 +537,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 					ServiceModuleAppDTO appDTO = ConvertHelper.convert(menu.getAppConfig(), ServiceModuleAppDTO.class);
 					menuDto.setAppConfig(appDTO);
 					menuDtos.add(menuDto);
-					break;
 				}
 			}
 		}

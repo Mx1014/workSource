@@ -624,7 +624,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
 			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Invalid MonthCount.");
 		}
 		cmd.setPlateNumber(cmd.getPlateNumber().toUpperCase());
@@ -653,7 +653,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
 			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Invalid MonthCount.");
 		}
 
@@ -877,7 +877,7 @@ public class ParkingServiceImpl implements ParkingService {
 //		}
 		if(!checkOrderRestResponseIsSuccess(createOrderResp)){
 			LOGGER.info("purchaseOrderRestResponse "+createOrderResp);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_UNUSUAL,
 					"preorder failed "+StringHelper.toJsonString(createOrderResp));
 		}
 		PurchaseOrderCommandResponse orderCommandResponse = createOrderResp.getResponse();
@@ -1289,7 +1289,7 @@ public class ParkingServiceImpl implements ParkingService {
 			DownloadUtils.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingCardRequests is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.FAIL_EXPORT_FILE,
 					"exportParkingCardRequests is fail.");
 		}
 
@@ -1339,7 +1339,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if(null == cmd.getExpiredRechargeFlag()){
 			LOGGER.error("ExpiredRechargeFlag cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ExpiredRechargeFlag cannot be null.");
 		}
 
@@ -1370,12 +1370,12 @@ public class ParkingServiceImpl implements ParkingService {
 		Long flowId = cmd.getFlowId();
 		if(null == count) {
 			LOGGER.error("Count cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Count cannot be null.");
 		}
 		if(null == status) {
 			LOGGER.error("Status cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Status cannot be null.");
 		}
 
@@ -1553,37 +1553,37 @@ public class ParkingServiceImpl implements ParkingService {
 	private ParkingLot checkParkingLot(String ownerType, Long ownerId, Long parkingLotId){
 		if(null == ownerId) {
 			LOGGER.error("OwnerId cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"OwnerId cannot be null.");
 		}
 
 		if(StringUtils.isBlank(ownerType)) {
 			LOGGER.error("OwnerType cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"OwnerType cannot be null.");
 		}
 
 		if(null == parkingLotId) {
 			LOGGER.error("ParkingLotId cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ParkingLotId cannot be null.");
 		}
 
 		ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 		if(null == parkingLot) {
 			LOGGER.error("ParkingLot not found, parkingLotId={}", parkingLotId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ParkingLot not found");
 		}
 		// 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
 		if(ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
 			LOGGER.error("OwnerId is not match with parkingLot ownerId, ownerId={}", ownerId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_UNUSUAL,
 					"OwnerId is not match with parkingLot ownerId.");
 		}
 		if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
 			LOGGER.error("OwnerType is not match with parkingLot OwnerType, ownerType={}", ownerType);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_UNUSUAL,
 					"OwnerType is not match with parkingLot OwnerType.");
 		}
 		return parkingLot;
@@ -1592,7 +1592,7 @@ public class ParkingServiceImpl implements ParkingService {
 	private void checkPlateNumber(String plateNumber){
 		if(StringUtils.isBlank(plateNumber)) {
 			LOGGER.error("PlateNumber cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"PlateNumber cannot be null.");
 		}
 	}
@@ -1600,7 +1600,7 @@ public class ParkingServiceImpl implements ParkingService {
 	private void checkOrderToken(String orderToken){
 		if(StringUtils.isBlank(orderToken)) {
 			LOGGER.error("OrderToken cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"OrderToken cannot be null.");
 		}
 	}
@@ -1626,7 +1626,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
 		if(null == code){
 			LOGGER.error("Invalid parameter, orderType not found, orderType={}", orderType);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Invalid parameter, orderType not found");
 		}
 		return String.valueOf(code);
@@ -1696,7 +1696,7 @@ public class ParkingServiceImpl implements ParkingService {
 			DownloadUtils.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.FAIL_EXPORT_FILE,
 					"exportParkingRechageOrders is fail.");
 		}
 
@@ -1708,8 +1708,8 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
 		if(null == order){
 			LOGGER.error("Order not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,
+					ParkingErrorCode.PARAMTER_LOSE,
 					"Order not found");
 		}
 		order.setIsDelete(ParkingOrderDeleteFlag.DELETED.getCode());
@@ -1901,7 +1901,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Long flowId = cmd.getFlowId();
 		if(null == flowId) {
 			LOGGER.error("FlowId cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.NO_WORK_FLOW_ENABLE,
 					"请先设置工作流.");
 		}
 
@@ -2032,7 +2032,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if(null == order) {
 			LOGGER.error("Order not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Order not found.");
 		}
 
@@ -2090,7 +2090,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if(null == flow) {
 			LOGGER.error("Enabled flow not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"Enabled flow not found.");
 		}
 
@@ -2662,7 +2662,7 @@ public class ParkingServiceImpl implements ParkingService {
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingCarVerifications is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.FAIL_EXPORT_FILE,
 					"exportParkingCarVerifications is fail.");
 		}
 	}
@@ -2768,7 +2768,7 @@ public class ParkingServiceImpl implements ParkingService {
 					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
 							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 				}else {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_UNUSUAL,
 							"Not support AUTHORIZED request");
 				}
 			}else if (cmd.getRequestType() == ParkingCarVerificationType.IGNORE_REPEAT_UN_AUTHORIZED.getCode()) {
@@ -2810,7 +2810,7 @@ public class ParkingServiceImpl implements ParkingService {
 					addAttachments(cmd.getAttachments(), UserContext.currentUserId(), verification.getId(),
 							ParkingAttachmentType.PARKING_CAR_VERIFICATION.getCode());
 				}else {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_UNUSUAL,
 							"Not support AUTHORIZED request");
 				}
 			}else {
@@ -2902,7 +2902,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null == parkingSpace) {
 			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ParkingSpace not found.");
 		}
 
@@ -2939,7 +2939,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null == parkingSpace) {
 			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ParkingSpace not found.");
 		}
 
@@ -2955,7 +2955,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 		if (null == parkingSpace) {
 			LOGGER.error("ParkingSpace not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"ParkingSpace not found.");
 		}
 
@@ -3081,7 +3081,7 @@ public class ParkingServiceImpl implements ParkingService {
 			DownloadUtils.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingCardRequests is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.FAIL_EXPORT_FILE,
 					"exportParkingCardRequests is fail.");
 		}
 		return resp;
@@ -3111,7 +3111,7 @@ public class ParkingServiceImpl implements ParkingService {
 		RentalOrder order = rentalv2Provider.findRentalBillById(orderId);
 
 		if (order.getStatus() != SiteBillStatus.IN_USING.getCode()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,ParkingErrorCode.PARAMTER_LOSE,
 					"Invalid parameter");
 		}
 
@@ -3255,7 +3255,7 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getId()!=null){
 			ParkingBusinessPayeeAccount oldPayeeAccount = parkingBusinessPayeeAccountProvider.findParkingBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 						"unknown payaccountid = "+cmd.getId());
 			}
 			ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
@@ -3363,7 +3363,7 @@ public class ParkingServiceImpl implements ParkingService {
 			case COMMUNITY:
 				Community community = communityProvider.findCommunityById(ownerId);
 				if(community==null){
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 							"unknown ownerId "+ownerId);
 				}
 				break;
@@ -3380,7 +3380,7 @@ public class ParkingServiceImpl implements ParkingService {
 	private ParkingOwnerType checkOwnerType(String ownerType) {
 		ParkingOwnerType enumOwnerType = ParkingOwnerType.fromCode(ownerType);
 		if(enumOwnerType==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.PARAMTER_LOSE,
 					"unknown ownerType "+ownerType);
 		}
 		return enumOwnerType;

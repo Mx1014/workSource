@@ -1885,7 +1885,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId(), cmd.getAppId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -4001,7 +4001,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId(), cmd.getAppId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -4115,8 +4115,8 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
-	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
-        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId, Long appId){
+		return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, appId,null,communityId);
 	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
@@ -4780,7 +4780,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
         CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
-        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId(), cmd.getAppId());
         if (isAuditing) {
             response.setIsAuditing(CheckAuditingType.YES.getCode());
         }else {

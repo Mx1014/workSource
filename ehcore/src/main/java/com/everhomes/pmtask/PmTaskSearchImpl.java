@@ -14,9 +14,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.pmtask.PmTaskAppType;
-import com.everhomes.rest.pmtask.PmtaskCreatorType;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -41,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -94,7 +91,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             return b;
         } catch (IOException ex) {
             LOGGER.error("Create pmtask error, taskId={}", task.getId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
     				"Create pmtask error.");
         }
     }
@@ -380,7 +377,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             return doc;
         }catch (Exception ex) {
             LOGGER.error("Pmtask readDoc failed, source={}, id={}", source, idAsStr);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_QUERY_ES_FAIL,
     				"readDoc Exception.");
         }
 

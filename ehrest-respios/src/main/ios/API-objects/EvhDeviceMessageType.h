@@ -1,9 +1,0 @@
-//
-// EvhDeviceMessageType.h
-//
-
-#define EvhDeviceMessageType_SIMPLE @"simple"
-#define EvhDeviceMessageType_Jump @"jump"
-
-///////////////////////////////////////////////////////////////////////////////
-

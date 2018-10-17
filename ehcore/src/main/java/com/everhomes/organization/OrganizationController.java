@@ -5,6 +5,9 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
+import com.everhomes.controller.XssCleaner;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -15,7 +18,6 @@ import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
-import com.everhomes.rest.incubator.ApplyType;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -24,11 +26,8 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FrequencyControl;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -215,6 +213,7 @@ public class OrganizationController extends ControllerBase {
      * <p>政府人员发帖</p>
      */
     //checked
+    @XssExclude
     @RequestMapping("newOrgTopic")
     @RestReturn(value = PostDTO.class)
     public RestResponse newOrgTopic(@Valid NewTopicCommand cmd) {
@@ -1810,4 +1809,14 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/processUserForMember</b>
+     * <p>通过项目id，获取当前项目用户认证的企业列表，</p>
+     */
+    @RequestMapping("processUserForMember")
+    @RestReturn(String.class)
+    public RestResponse processUserForMember(ProcessUserForMemberCommand cmd){
+        organizationService.processUserForMember(cmd.getNamespaceId(),cmd.getIdentifierToken(),cmd.getOwnerId());
+        return new RestResponse();
+    }
 }

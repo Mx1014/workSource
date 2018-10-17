@@ -19,6 +19,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -212,7 +213,12 @@ public class GroupServiceImpl implements GroupService {
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getDescription());
+        cmd.setDescription(content);
+        //敏感词过滤
         filter(cmd);
+
     	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
@@ -572,6 +578,10 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupDTO updateGroup(UpdateGroupCommand cmd) {
         CreateGroupCommand createGroupCommand = ConvertHelper.convert(cmd, CreateGroupCommand.class);
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getDescription());
+        cmd.setDescription(content);
+
         filter(createGroupCommand);
         User operator = UserContext.current().getUser();
         long operatorUid = operator.getId();

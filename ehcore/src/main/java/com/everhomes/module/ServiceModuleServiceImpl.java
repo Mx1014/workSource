@@ -14,6 +14,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
@@ -140,7 +141,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     
     @Autowired
     private PortalService portalService;
-    
+
+    @Autowired
+    private NamespacesService namespacesService;
 
 
     @Override
@@ -977,14 +980,29 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         }
 
-        //获取公司管理的全部项目
-        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+        List<Long> projectIds  = new ArrayList<>();
+
+        //标准版和定制版之分
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+            //获取公司管理的全部项目
+            List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+            if(serviceModuleAppAuthorizations != null){
+                projectIds = serviceModuleAppAuthorizations.stream().map(r -> r.getProjectId()).collect(Collectors.toList());
+            }
+
+        }else {
+            List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+
+            if(communities != null){
+                projectIds = communities.stream().map(r -> r.getId()).collect(Collectors.toList());
+            }
+        }
 
         // 获取到了授权项目
-        if(serviceModuleAppAuthorizations != null && serviceModuleAppAuthorizations.size() >0){
+        if(projectIds != null && projectIds.size() >0){
             List<ProjectDTO> projectDtos = new ArrayList<>();
-            for (ServiceModuleAppAuthorization authorization : serviceModuleAppAuthorizations) {
-                Community community = communityProvider.findCommunityById(authorization.getProjectId());
+            for (Long projectId : projectIds) {
+                Community community = communityProvider.findCommunityById(projectId);
                 if (null == community) {
                     continue;
                 }

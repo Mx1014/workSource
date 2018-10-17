@@ -77,6 +77,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
+import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.PushUsersCommand;
@@ -116,9 +117,14 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
+import com.everhomes.rest.ui.user.BindPhoneCommand;
+import com.everhomes.rest.ui.user.BindPhoneType;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneCommand;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+import com.everhomes.rest.user.admin.UserAppealLogStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
@@ -126,11 +132,16 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
-import com.everhomes.sms.*;
+import com.everhomes.sms.SmsBlackList;
+import com.everhomes.sms.SmsBlackListCreateType;
+import com.everhomes.sms.SmsBlackListProvider;
+import com.everhomes.sms.SmsBlackListStatus;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.collect.Lists;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -144,6 +155,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
@@ -166,7 +178,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -225,6 +236,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private static String ANBANG_CURRENT_USER_URL;
     private static Integer ANBANG_NAMESPACE_ID;
 
+    @Autowired
+    private SdkUserService sdkUserService;
 
     @Autowired
     private DbProvider dbProvider;
@@ -388,11 +401,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	@Autowired
 	private SmartCardKeyProvider smartCardKeyProvider;
 
+    @Autowired
+    private NamespacesService namespacesService;
+
 	private static long stepInSecond = 30;
 
    private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
 
-	private static final String DEVICE_KEY = "device_login";
+    @Autowired
+    private NamespaceProvider namespaceProvider;private static final String DEVICE_KEY = "device_login";
 
 	@Autowired
     private ArchivesService archivesService;
@@ -662,7 +679,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return StringUtils.join(Arrays.asList(keys), ":");
     }
 
-    private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
+    @Override
+    public void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
         String templateScope = SmsTemplateCode.SCOPE;
         int templateId = SmsTemplateCode.VERIFICATION_CODE;
@@ -1080,12 +1098,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "User does not exist");
                 }
             } else {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Unable to locate user");
             }
         }
 
@@ -1094,7 +1112,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
             LOGGER.error("Password does not match for " + userIdentifierToken);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Invalid password");
         }
 
         if (deviceIdentifier != null && deviceIdentifier.isEmpty())
@@ -1280,7 +1298,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = null;
         int nextLoginId = 1;
         if (maxLoginId != null) {
-            for (int i = 1; i <= maxLoginId.intValue(); i++) {
+            for (int i = 1; i <= maxLoginId; i++) {
                 String hkeyLogin = String.valueOf(i);
                 Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
                 UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
@@ -1314,7 +1332,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
                         //found twice, delete all logins
                         accessor.getTemplate().delete(accessor.getBucketName());
-                        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+                        // accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
                         ref.setOldDeviceId("");
                         ref.setNextLoginId(1);
                         ref.setFoundLogin(null);
@@ -1330,7 +1348,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 }
 
                 //check
-                if (foundLogin == null && login.getLoginId() >= nextLoginId) {
+                if (login.getLoginId() >= nextLoginId) {
                     nextLoginId = login.getLoginId() + 1;
                 }
 
@@ -1347,6 +1365,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify) {
+        return createLogin(namespaceId, inUser, deviceIdentifier, pusherIdentify, null);
+    }
+
+    private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify, LoginToken loginToken) {
         Boolean isNew = false;
         User user = null;
         Long impId = null;
@@ -1367,7 +1389,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         // get "index" accessor
         String hkeyIndex = "0";
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
-        Object o = accessor.getMapValueObject(hkeyIndex);
+        // Object o = accessor.getMapValueObject(hkeyIndex);
         LogonRef ref = new LogonRef();
         ref.setNamespaceId(namespaceId);
         ref.setOldDeviceId("");
@@ -1386,6 +1408,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = ref.getFoundLogin();
         if (foundLogin == null) {
             foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
+            // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
+            if (loginToken != null) {
+                foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
+            }
             accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
             isNew = true;
@@ -1532,10 +1558,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     /**
      * 微信端活跃记录
-     * @param loginToken
-     * @param borderId
-     * @param borderSessionId
-     * @return
      */
     @Override
     public void registerWXLoginConnection(HttpServletRequest request) {
@@ -1721,6 +1743,25 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
             return true;
         } else {
+            // 去统一用户那边检查登录状态
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+            com.everhomes.rest.user.user.UserInfo userInfo = null;
+            try {
+                userInfo = sdkUserService.validateToken(tokenString);
+            } catch (Exception e) {
+                // e.printStackTrace();
+            }
+            if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
+                User user = userProvider.findUserById(userInfo.getId());
+                if (user != null) {
+                    LOGGER.info("User service check success, loginToken={}", loginToken);
+                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                    return true;
+                }
+            } else {
+                LOGGER.info("User service check failure, loginToken={}", loginToken);
+            }
+
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }
@@ -4753,12 +4794,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String xqt = "xq.tian@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
-        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        // String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
 
         String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
                 cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
-        handler.sendMail(0, account, wjl, "User Appeal", body);
-        handler.sendMail(0, account, xqt, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, wjl, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, xqt, "User Appeal", body);
         // ------------------------------------------------------------------------
 
         return toUserAppealLogDTO(log);
@@ -6772,16 +6813,32 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 								//创建一个集合List<String>来承载办公地点名称的集合
 								//List<String> siteNameList = Lists.newArrayList();
 								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
-								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
-									//将每一个办公地点名称都保存在集合siteNameList中
-									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
-									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
-									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
-									addressSiteDTO.setCommunityName(community.getName());
-									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
-									addressSiteDTO.setCommunityId(community.getId());
-									addressSiteDtos.add(addressSiteDTO);
-								}
+
+
+                                //定制版没有办公点
+                                if(namespacesService.isStdNamespace(community.getNamespaceId())){
+                                    for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+                                        //将每一个办公地点名称都保存在集合siteNameList中
+                                        //siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+                                        AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                        addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+                                        addressSiteDTO.setCommunityName(community.getName());
+                                        addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                                        addressSiteDTO.setCommunityId(community.getId());
+                                        addressSiteDtos.add(addressSiteDTO);
+                                    }
+                                }else {
+                                    AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                    addressSiteDTO.setCommunityName(community.getName());
+                                    addressSiteDTO.setCommunityId(community.getId());
+                                    if(organizationDetail != null){
+                                        addressSiteDTO.setName(organizationDetail.getAddress());
+                                        addressSiteDTO.setWholeAddressName(organizationDetail.getAddress());
+                                    }
+                                    addressSiteDtos.add(addressSiteDTO);
+
+                                }
+
 
 							}
 
@@ -6937,49 +6994,49 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             smartCardInfo.setSmartCardId(obj.getId());
             smartCardInfo.setSmartCardKey(obj.getCardkey());
-            
+
             List<SmartCardHandler> smartCardhandlers = new ArrayList<SmartCardHandler>();
             SmartCardHandler aclinkCard = new SmartCardHandler();
             aclinkCard.setAppOriginId(41010L);
             aclinkCard.setModuleId(41010L);
-            aclinkCard.setData("test-only");
+            aclinkCard.setData("test-aclink-only");
             aclinkCard.setTitle("公共门禁");
             aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
-            
+
             List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
-            
+
             SmartCardHandlerItem item = new SmartCardHandlerItem();
             item.setTitle("楼层");
             item.setRouterUrl("zl://aclink/index");
             item.setName("aclink-floor");
             item.setDefaultValue("5");
             items.add(item);
-            
+
             item = new SmartCardHandlerItem();
             item.setTitle("VIP");
             item.setRouterUrl("zl://aclink/index");
             item.setName("aclink-vip");
             item.setDefaultValue("VIP3");
             items.add(item);
-            
+
             aclinkCard.setItems(items);
             smartCardhandlers.add(aclinkCard);
             smartCardInfo.setSmartCardHandlers(smartCardhandlers);
             smartCardInfo.setStandaloneHandlers(smartCardhandlers);
-            
+
             List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
             item = new SmartCardHandlerItem();
             item.setTitle("个人钱包");
             item.setRouterUrl("zl://wallet/index");
             item.setName("wallet");
             payItems.add(item);
-            
+
             item = new SmartCardHandlerItem();
             item.setTitle("我的钥匙");
             item.setRouterUrl("zl://aclink/key/index");
             item.setName("key");
             payItems.add(item);
-            
+
             smartCardInfo.setBaseItems(payItems);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("generate totp failed", e);
@@ -6993,52 +7050,120 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return code;
     }
 
-    @Override
-    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+    private Map<Integer, byte[]> getSmartCardSegments(String cardCode, List<Integer> segOrders) {
+    	byte[] code = Base64.getDecoder().decode(cardCode);
+    	int i = 0, len, typ;
+    	byte[] b = new byte[2];
+    	Map<Integer, byte[]> segments = new HashMap<Integer, byte[]>();
+    	while(i+3 < code.length) {
+			b[0] = code[i+1];
+			b[1] = code[i+2];
+			len = DataUtil.byteToShort(b);
+			if(i+3+len > code.length) {
+				break;
+			}
+			typ = (int)code[i];
+			if(segOrders != null) {
+				segOrders.add(typ);
+			}
+
+			i += 3;
+			byte[] seg = new byte[len];
+			System.arraycopy(code, i, seg, 0, i+len);
+			segments.put(new Integer(typ), seg);
+			i += len;
+    	}
+
+    	return segments;
+    }
+
+    private boolean payCodeVerify(String payCode) throws InvalidKeyException, NoSuchAlgorithmException {
         TimeBasedOneTimePasswordGenerator totp;
-        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
-        resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
         int validWindow = 1;
 
+        totp = getTotp();
+        Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
+        String randomUid = payCode.substring(0, 9);
+        String totpCode = payCode.substring(9, 17);
+        Long uid = Long.parseLong(randomUid);
+        Long totpCodeInt = Long.parseLong(totpCode);
+        uid = (uid ^ totpCodeInt);
+        List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
+        if(cards != null) {
+            int j;
+            for(j = 0; j < cards.size(); j++) {
+                SmartCardKey card = cards.get(j);
+                for(long i = -validWindow; i <= validWindow; i++) {
+                    int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
+                    if(code == totpCodeInt) {
+                        return true;
+                    }
+                }
+            }
+
+            if(j < cards.size()) {
+                for(j = j+1; j < cards.size(); j++) {
+                    //invalid the old one
+                    SmartCardKey card = cards.get(j);
+                    if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                        card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                        smartCardKeyProvider.updateSmartCardKey(card);
+                    }
+                }
+            }
+
+        }
+
+        return false;
+    }
+
+    @Override
+    public SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd) {
+    	SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+    	String payCode = cmd.getCardCode().substring(1);
+
+      try {
+			if(payCodeVerify(payCode)) {
+				resp.getVerifyResults().add("PayOK");
+			} else {
+				resp.getVerifyResults().add("ERROR");
+			}
+		} catch (InvalidKeyException | NoSuchAlgorithmException e) {
+			LOGGER.error("generate totp failed", e);
+		}
+
+      return resp;
+    }
+
+    @Override
+    public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+
         try {
-            totp = getTotp();
-            Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
-            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 18) {
+            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 20) {
                 return resp;
             }
 
-            String randomUid = cmd.getCardCode().substring(1, 10);
-            String totpCode = cmd.getCardCode().substring(10, 18);
-            Long uid = Long.parseLong(randomUid);
-            Long totpCodeInt = Long.parseLong(totpCode);
-            uid = (uid ^ totpCodeInt);
-            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
-            if(cards != null) {
+            List<Integer> orders = new ArrayList<Integer>();
+            Map<Integer, byte[]> segs = getSmartCardSegments(cmd.getCardCode(), orders);
+            byte[] paySeg = segs.getOrDefault(new Integer(SmartCardType.SMART_CARD_PAY.getCode()), null);
+            if(paySeg == null) {
+            	return resp;
+            }
 
-                int j;
-                OUTLOOP:
-                for(j = 0; j < cards.size(); j++) {
-                    SmartCardKey card = cards.get(j);
-                    for(long i = -validWindow; i <= validWindow; i++) {
-                        int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
-                        if(code == totpCodeInt) {
-                            resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
-                            break OUTLOOP;
-                        }
-                    }
-                }
+            String payCode = new String(paySeg);
+            if(payCodeVerify(payCode)) {
+            	resp.getVerifyResults().add("OK");
+            } else {
+            	resp.getVerifyResults().add("ERROR");
+            }
 
-                if(j < cards.size()) {
-                    for(j = j+1; j < cards.size(); j++) {
-                        //invalid the old one
-                        SmartCardKey card = cards.get(j);
-                        if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
-                            card.setStatus(TrueOrFalseFlag.FALSE.getCode());
-                            smartCardKeyProvider.updateSmartCardKey(card);
-                        }
-                    }
-                }
-
+            byte[] aclinkSeg = segs.getOrDefault(SmartCardType.SMART_CARD_ACLINK.getCode(), null);
+            String aclinkCode = new String(aclinkSeg);
+            if(aclinkCode == "test-aclink-only") {
+            	resp.getVerifyResults().add("OK");
+            } else {
+            	resp.getVerifyResults().add("ERROR");
             }
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -7070,8 +7195,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 s2 = s1;
             }
 
-            resp.setQrCode("1" + s2 + String.valueOf(topt));
-
+            String val = s2 + String.valueOf(topt);
+            byte[] cardCode = new byte[val.length() + 3];
+            cardCode[0] = SmartCardType.SMART_CARD_PAY.getCode();
+            cardCode[1] = 0x0;
+            cardCode[2] = 0x17;
+            resp.setQrCode(org.apache.commons.codec.binary.Base64.encodeBase64String(cardCode));
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
@@ -7248,5 +7377,111 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             return org;
         }
 
+    /*******************统一用户同步数据**********************/
+    @KafkaListener(id="syncCreateUser", topicPattern = "user-create-event")
+    public void syncCreateUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+        }
+    }
+
+    @KafkaListener(id="syncUpdateUser", topicPattern = "user-update-event")
+    public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.updateUserFromUnite(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.updateUserFromUnite(user);
+            }
+        }
+    }
+
+    @KafkaListener(id="syncDeleteUser", topicPattern = "user-delete-event")
+    public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }
+
+    }
+
+    @KafkaListener(id="syncCreateUserIdentifier", topicPattern = "userIdentifier-create-event")
+    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }
+
+    }
+
+    @KafkaListener(id="syncUpdateUserIdentifier", topicPattern = "userIdentifier-update-event")
+    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
+            }
+        }
+    }
+
+    @KafkaListener(id="userKickoffMessage", topicPattern = "user.kickoff")
+    public void userKickoffMessage(ConsumerRecord<?, String> record) {
+        UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
+        kickoffLoginByDevice(newLogin);
+    }
+    /*********************同步数据 END************************/
 
 }
