@@ -1386,6 +1386,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
 			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+			if(serviceModule != null){
+				dto.setModuleName(serviceModule.getName());
+			}
 			dtos.add(dto);
 		}
 
