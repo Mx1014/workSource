@@ -18,7 +18,6 @@ import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.punch.ClockCode;
 import com.everhomes.rest.techpark.punch.CreateType;
 import com.everhomes.rest.techpark.punch.DateStatus;
-import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
@@ -34,8 +33,46 @@ import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchDayLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionApprovalsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchExceptionRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchGeopointsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchGoOutLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchHolidaysDao;
+import com.everhomes.server.schema.tables.daos.EhPunchLocationRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchLogsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchNotificationsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchOvertimeRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchRuleOwnerMapDao;
+import com.everhomes.server.schema.tables.daos.EhPunchRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchSpecialDaysDao;
+import com.everhomes.server.schema.tables.daos.EhPunchStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchTimeIntervalsDao;
+import com.everhomes.server.schema.tables.daos.EhPunchTimeRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWifiRulesDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWifisDao;
+import com.everhomes.server.schema.tables.daos.EhPunchWorkdayRulesDao;
+import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals;
+import com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests;
+import com.everhomes.server.schema.tables.pojos.EhPunchGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhPunchGoOutLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchHolidays;
+import com.everhomes.server.schema.tables.pojos.EhPunchLocationRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchLogs;
+import com.everhomes.server.schema.tables.pojos.EhPunchNotifications;
+import com.everhomes.server.schema.tables.pojos.EhPunchOvertimeRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchRuleOwnerMap;
+import com.everhomes.server.schema.tables.pojos.EhPunchRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchSpecialDays;
+import com.everhomes.server.schema.tables.pojos.EhPunchStatistics;
+import com.everhomes.server.schema.tables.pojos.EhPunchTimeIntervals;
+import com.everhomes.server.schema.tables.pojos.EhPunchTimeRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchWifiRules;
+import com.everhomes.server.schema.tables.pojos.EhPunchWifis;
+import com.everhomes.server.schema.tables.pojos.EhPunchWorkday;
+import com.everhomes.server.schema.tables.pojos.EhPunchWorkdayRules;
 import com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord;
@@ -71,12 +108,31 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
+import org.jooq.DeleteWhereStep;
+import org.jooq.InsertQuery;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record11;
+import org.jooq.Record14;
+import org.jooq.Record18;
+import org.jooq.Record2;
+import org.jooq.Record3;
+import org.jooq.Record5;
+import org.jooq.Record6;
+import org.jooq.Record8;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectHavingStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.UpdateConditionStep;
+import org.jooq.UpdateQuery;
 import org.jooq.impl.DSL;
-import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3799,7 +3855,7 @@ public class PunchProviderImpl implements PunchProvider {
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
         			break;
                 case UN_ARRIVED:
-        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode())));
         			break;
         		case ABSENT:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()))
@@ -3813,7 +3869,7 @@ public class PunchProviderImpl implements PunchProvider {
                     condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)));
                     break;
                 case ARRIVED:
-                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.NO.getCode()));
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.gt(0)));
                     break;
                 case GO_OUT:
                     condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_PUNCH_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
@@ -3961,7 +4017,7 @@ public class PunchProviderImpl implements PunchProvider {
         SelectJoinStep<Record14<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L), 1).otherwise(0).sum().as("shouldArrivedMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.ne((byte) 1)), 1).otherwise(0).sum().as("actArrivedMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.gt(0)), 1).otherwise(0).sum().as("actArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),

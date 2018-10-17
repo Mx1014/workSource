@@ -189,7 +189,6 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -206,7 +205,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.common.cli.CliToolConfig.Cmd;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -223,7 +221,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -6581,6 +6578,7 @@ public class PunchServiceImpl implements PunchService {
                     punchDayLog.setPunchTimesPerDay(ptr.getPunchTimesPerDay());
                     punchDayLog.setTimeRuleId(ptr.getId());
                     punchDayLog.setTimeRuleName(ptr.getName());
+                    punchDayLog.setAbsentFlag(NormalFlag.YES.getCode());
                 } else if (ptr != null && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                     punchDayLog.setStatusList(String.valueOf(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode()));
                 } else {
