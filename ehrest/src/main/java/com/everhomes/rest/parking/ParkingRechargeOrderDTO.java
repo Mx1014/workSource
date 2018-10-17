@@ -45,6 +45,7 @@ import com.everhomes.util.StringHelper;
  * <li>invoiceName: 发票名称</li>
  * <li>paySource: 缴费来源， 参考{@link com.everhomes.rest.parking.ParkingPaySourceType}</li>
  * <li>payMode : 支付类型，全部则为空，参考 {@link com.everhomes.rest.print.PrintPayType}</li>
+ * <li>invoiceStatus:开发票状态 0 =发票未开，2发票已开</li>
  * </ul>
  */
 public class ParkingRechargeOrderDTO {
