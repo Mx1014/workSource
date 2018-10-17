@@ -217,7 +217,7 @@
         <dependency>
             <groupId>com.everhomes.user</groupId>
             <artifactId>user-rest-sdk</artifactId>
-            <version>unite-user-SNAPSHOT</version>
+            <version>${ehuser-sdk.version}</version>
         </dependency>
     </dependencies>
 

@@ -1,13 +1,14 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
--- AUTHOR:梁燕龙 20181016
--- REMARK:统一用户上线操作.
--- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539678631
 
 -- AUTHOR:xq.tian 20181016
 -- REMARK:网关及注册中心部署.
 -- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539677844
+
+-- AUTHOR:梁燕龙 20181016
+-- REMARK:统一用户上线操作.
+-- DESCRIPTION：http://s.a.com/docs/faq/baseline-21539678631
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
