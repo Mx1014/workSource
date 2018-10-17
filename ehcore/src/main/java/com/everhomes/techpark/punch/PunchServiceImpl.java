@@ -6568,6 +6568,7 @@ public class PunchServiceImpl implements PunchService {
             punchDayLog.setDeviceChangeFlag(NormalFlag.NO.getCode());
             punchDayLog.setPunchCount(0);
             punchDayLog.setPunchTimesPerDay((byte) 0);
+            punchDayLog.setGoOutPunchFlag(punchProvider.processGoOutPunchFlag(punchDayLog.getPunchDate(), memberDetail.getTargetId()));
             punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             punchDayLog.setAbsentFlag(NormalFlag.NO.getCode());
             punchDayLog.setNormalFlag(NormalFlag.YES.getCode());
