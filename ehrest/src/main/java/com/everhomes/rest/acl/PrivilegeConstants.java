@@ -389,9 +389,15 @@ public interface PrivilegeConstants {
     long VISITORSYS_DEV_MANAGEMENT = 4180041840L;//设备管理权限
     long VISITORSYS_MODILE_MAMAGEMENT = 4180041850L;//移动端管理权限
 
+    // ------- 企业访客权限 --------
+    long VISITORSYS_BOOKING_MANAGEMENT_ENT = 5210052110L;//预约管理权限
+    long VISITORSYS_VISITOR_MANAGEMENT_ENT = 5210052120L;//访客管理权限
+    long VISITORSYS_DEV_MANAGEMENT_ENT = 5210052130L;//设备管理权限
+    long VISITORSYS_MODILE_MAMAGEMENT_ENT = 5210052140L;//移动端管理权限
+
     // -----------用户认证-------------
     long AUTHENTIFICATION_LIST_VIEW = 42007; //查看用户认证列表
-    long AUTHENTIFICATION_AUDITING = 42008;; // 审核权限
+    long AUTHENTIFICATION_AUDITING = 42008; // 审核权限
     // ----------用户认证 END----------------
 
     // 停车缴费权限常量
