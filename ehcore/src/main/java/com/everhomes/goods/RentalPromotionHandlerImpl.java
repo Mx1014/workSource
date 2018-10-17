@@ -33,7 +33,7 @@ public class RentalPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl
             Long resourceTypeId = Long.valueOf(cmd.getGoodTagInfo().getTag1Key());
             Long communityId = Long.valueOf(cmd.getGoodTagInfo().getTag2Key());
             ListingLocator locator = new ListingLocator();
-            List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(resourceTypeId, null, locator, null, null, null, communityId);
+            List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(resourceTypeId, null, locator, Integer.MAX_VALUE, null, null, communityId);
             if (rentalSites != null && rentalSites.size() > 0){
                 for (RentalResource rentalSite : rentalSites) {
                     GoodTagInfo good = ConvertHelper.convert(cmd.getGoodTagInfo(), GoodTagInfo.class);
