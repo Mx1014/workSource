@@ -382,6 +382,10 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		return null;
 	}
 
+	@Override
+	public Object getThirdProjects(HttpServletRequest req) {
+		return null;
+	}
 	//	@Override
 //	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 //		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());

@@ -42,5 +42,6 @@ public interface PmTaskHandle {
 	Object getThirdTaskDetail(HttpServletRequest req);
 
 	Object getThirdCategories(HttpServletRequest req);
+	Object getThirdProjects(HttpServletRequest req);
 
 }
