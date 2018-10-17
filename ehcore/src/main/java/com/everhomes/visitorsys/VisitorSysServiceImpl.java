@@ -809,6 +809,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             String templateLocale = UserContext.current().getUser().getLocale();
             smsProvider.sendSms(visitor.getNamespaceId(), visitor.getVisitorPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_INVT_INVITATION_LETTER, templateLocale, variables);
         }
+        LOGGER.info("visitorsys sms has send,phone={}",visitor.getVisitorPhone());
     }
 
     /**
@@ -2364,7 +2365,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         //设置门禁相关的二维码，门禁的id
         checkDoorGuard(configuration,visitor);
-        visitor.setSendSmsFlag(null);
+//        visitor.setSendSmsFlag(null);
     }
 
     /**
