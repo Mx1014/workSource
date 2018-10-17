@@ -180,6 +180,7 @@ import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ExportAllCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ExportBatchCommunityUsersCommand;
+import com.everhomes.rest.community.admin.GetOrgIdByCommunityIdCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
 import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
@@ -193,6 +194,7 @@ import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.community.admin.OperateType;
+import com.everhomes.rest.community.admin.OrgDTO;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.QryCommunityUserAllByUserIdCommand;
@@ -6266,6 +6268,15 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setDtos(dtos);
 
 		return response;
+	}
+
+	@Override
+	public OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+		OrgDTO dto = new OrgDTO();
+		dto.setId(currentOrganizationId);
+		return dto;
 	}
 
 }
