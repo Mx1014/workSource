@@ -106,7 +106,9 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     public void afterAllAppPulish(ServiceModuleApp app){
     	for (AssetSourceTypeEnum e : AssetSourceTypeEnum.values()) {
     		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(e.getSourceType());
-			generalBillHandler.createOrUpdateAssetModuleAppMapping(app);
+    		if(generalBillHandler != null) {
+    			generalBillHandler.createOrUpdateAssetModuleAppMapping(app);
+    		}
     	}
     }
 }

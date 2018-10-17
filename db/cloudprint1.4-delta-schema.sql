@@ -82,7 +82,7 @@ ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '�
 -- AUTHOR: 郑思挺 20181011
 -- REMARK： 资源预约3.7.1
 ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL DEFAULT 'normal' COMMENT '支付类型 ' ;
-ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(255) NULL AFTER `pay_info`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(1024) NULL AFTER `pay_info`;
 ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `pay_url`;
 ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
 ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
