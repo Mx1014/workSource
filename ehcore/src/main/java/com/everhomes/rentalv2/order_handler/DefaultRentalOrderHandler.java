@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,8 +115,13 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         ServiceModuleApp app = rentalCommonService.getServiceMoudleAppByResourceTypeId(order.getResourceTypeId());
         payerInfo.setAppId(app.getOriginId());
         cmd.setPayerInfo(payerInfo);
-        String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
-        cmd.setReturnUrl(String.format(returnUrl,order.getId(),order.getResourceType()));
+        try {
+            String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
+            returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
+            cmd.setReturnUrl(String.format(returnUrl, order.getId(), order.getResourceType()));
+        }catch (Exception e){
+
+        }
 
         cmd.setGoodsName(app.getName());
         //设置账单参数

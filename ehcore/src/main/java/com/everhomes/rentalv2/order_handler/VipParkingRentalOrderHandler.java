@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -231,8 +232,13 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
             cmd.setPayerInfo(payerInfo);
             cmd.setGoodsName(app.getName());
         }
-        String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
-        cmd.setReturnUrl(String.format(returnUrl,order.getId(),order.getResourceType()));
+        try {
+            String returnUrl = "zl://resource-reservation/detail?orderId=%s&resourceType=%s";
+            returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
+            cmd.setReturnUrl(String.format(returnUrl, order.getId(), order.getResourceType()));
+        }catch (Exception e){
+
+        }
 
         //设置账单参数
         CreateGeneralBillInfo createBillInfo = new CreateGeneralBillInfo();
