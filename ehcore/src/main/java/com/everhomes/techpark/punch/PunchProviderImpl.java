@@ -16,6 +16,7 @@ import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.punch.ClockCode;
+import com.everhomes.rest.techpark.punch.CreateType;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.ExtDTO;
@@ -277,6 +278,9 @@ public class PunchProviderImpl implements PunchProvider {
         }
 
         punchLog.setId(id);
+        if(punchLog.getCreateType() == null){
+        	punchLog.setCreateType(CreateType.NORMAL_PUNCH.getCode());
+        }
         EhPunchLogsRecord record = ConvertHelper.convert(punchLog,
                 EhPunchLogsRecord.class);
         InsertQuery<EhPunchLogsRecord> query = context
