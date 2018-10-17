@@ -2233,7 +2233,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
-					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", StringHelper.toJsonString(cmd), order);
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Order amount is not equal to payAmount");
 				}
@@ -2285,7 +2285,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		//加一个开关，方便在beta环境测试
 		boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 		if (!flag) {
-			if (0 != order.getOrderTotalFee().compareTo(payAmount.subtract(couponAmount))) {
+			if (0 != order.getOrderTotalFee().compareTo(payAmount.add(couponAmount))) {
 				return false;
 			}
 		}

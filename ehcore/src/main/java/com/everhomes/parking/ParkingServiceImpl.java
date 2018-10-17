@@ -4009,7 +4009,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		String generalOrderId = order.getGeneralOrderId();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
-		String Url = homeurl + "/app/appinvoice?businessOrderNumber=" + generalOrderId;
+		String Url = homeurl + "/app/appinvoice?businessOrderNumber=" + generalOrderId + "#/invoice-application";
 		try {
 			Url =URLEncoder.encode(Url, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
