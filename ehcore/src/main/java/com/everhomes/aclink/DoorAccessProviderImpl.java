@@ -2,22 +2,17 @@ package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.everhomes.rest.aclink.*;
-import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
 import org.jooq.*;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -363,9 +358,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
         List<ActiveDoorByFirmwareDTO> dtos = new ArrayList<ActiveDoorByFirmwareDTO>();
         SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
-                ,Tables.EH_DOOR_ACCESS.FIRMWARE_NAME.as("firmware"))
+                ,t.FIRMWARE_NAME.as("firmware"))
                 .from(t)
-                .groupBy(t.DOOR_TYPE);
+                .groupBy(t.FIRMWARE_NAME);
         groupBy.fetch().map((r) -> {
             ActiveDoorByFirmwareDTO dto = new ActiveDoorByFirmwareDTO();
             dto.setFirmware(r.value2());
@@ -374,7 +369,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             return null;
         });
 
-        return null;
+        return dtos;
     }
 
     @Override
@@ -400,8 +395,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                 .groupBy(t4.NAME);
         groupBy.fetch().map((r) -> {
             ActiveDoorByPlaceDTO dto = new ActiveDoorByPlaceDTO();
-            dto.setProvince(r.value2());
-            dto.setActiveDoorNumber(r.value1());
+            dto.setName(r.value2());
+            dto.setValue(r.value1());
             dtos.add(dto);
             return null;
         });

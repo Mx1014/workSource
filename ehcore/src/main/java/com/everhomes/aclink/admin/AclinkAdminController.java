@@ -636,10 +636,9 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("deleteFirmware")
-    @RestReturn(value=String.class)
+    @RestReturn(value=AclinkFirmwareNew.class)
     public RestResponse deleteFirmware (@Valid DeleteFirmwareCommand cmd){
-        doorAccessService.deleteFirmware(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.deleteFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -667,8 +666,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("deleteFirmwarePackage")
     @RestReturn(value=FirmwarePackageDTO.class)
     public RestResponse deleteFirmwarePackage (@Valid DeleteFirmwarePackageCommand cmd){
-        doorAccessService.deleteFirmwarePackage(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.deleteFirmwarePackage(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

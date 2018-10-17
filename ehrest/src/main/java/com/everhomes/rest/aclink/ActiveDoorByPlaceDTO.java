@@ -5,27 +5,27 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>province: 省份名</li>
- * <li>activeDoorNumber：已激活门禁数</li>
+ * <li>value：已激活门禁数</li>
  * </ul>
  */
 public class ActiveDoorByPlaceDTO {
-    private String province;
-    private Integer activeDoorNumber;
+    private String name;
+    private Integer value;
 
-    public String getProvince() {
-        return province;
+    public String getName() {
+        return name;
     }
 
-    public void setProvince(String province) {
-        this.province = province;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Integer getActiveDoorNumber() {
-        return activeDoorNumber;
+    public Integer getValue() {
+        return value;
     }
 
-    public void setActiveDoorNumber(Integer activeDoorNumber) {
-        this.activeDoorNumber = activeDoorNumber;
+    public void setValue(Integer value) {
+        this.value = value;
     }
 
     @Override

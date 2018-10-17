@@ -63,7 +63,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     }
     //add by liqingyan
     @Override
-    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})
+    @Caching(evict={@CacheEvict(value="aclinkFirmwareNewMax", key="'fix'")})
     public Long createFirmwareNew(AclinkFirmwareNew obj){
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFirmwareNew.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmwareNew.class));
@@ -78,7 +78,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     @Override
     @Caching(evict = {@CacheEvict(value = "aclinkFirmwarePackageMax", key = "'fix'")})
     public Long createFirmwarePackage(AclinkFirmwarePackage obj){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmwarePackage.class));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFirmware.class));
         obj.setId(id);
         Long l2 = DateHelper.currentGMTTime().getTime();
@@ -91,41 +91,51 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     @Override
     @Caching(evict = {@CacheEvict(value = "aclinkFirmwarePackageMax", key = "'fix'")})
     public Long updateFirmwarePackage (AclinkFirmwarePackage obj){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmwarePackage.class));
         EhAclinkFirmwarePackageDao dao = new EhAclinkFirmwarePackageDao(context.configuration());
         dao.update(obj);
         return null;
     }
+
+    @Override
+    @Caching(evict = {@CacheEvict(value = "aclinkFirmwareNewMax", key = "'fix'")})
+    public Long updateFirmwareNew (AclinkFirmwareNew obj)  {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmwareNew.class));
+        EhAclinkFirmwareNewDao dao = new EhAclinkFirmwareNewDao(context.configuration());
+        dao.update(obj);
+        return null;
+    }
+
     @Override
     public AclinkFirmwarePackage findPackageById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhAclinkFirmwarePackageDao dao = new EhAclinkFirmwarePackageDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), AclinkFirmwarePackage.class);
     }
-
+    @Override
+    public AclinkFirmwareNew findFirmwareById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkFirmwareNewDao dao = new EhAclinkFirmwareNewDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), AclinkFirmwareNew.class);
+    }
 
 //add by liqingyan
     @Override
-    public List<FirmwarePackageDTO> listFirmwarePackage (ListingLocator locator, int count, ListFirmwarePackageCommand cmd){
+    public List<FirmwarePackageDTO> listFirmwarePackage (CrossShardListingLocator locator, int count, ListFirmwarePackageCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAclinkFirmwarePackage.class));
         SelectQuery<EhAclinkFirmwarePackageRecord> query = context.selectQuery(Tables.EH_ACLINK_FIRMWARE_PACKAGE);
         query.addConditions(Tables.EH_ACLINK_FIRMWARE_PACKAGE.STATUS.eq((byte)1));
         query.addConditions(Tables.EH_ACLINK_FIRMWARE_PACKAGE.TYPE.eq(cmd.getType()));
-
+        if(null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ACLINK_FIRMWARE_PACKAGE.ID.ge(locator.getAnchor()));
+        }
         if (count > 0){
             query.addLimit(count + 1);
         }
+
         List<FirmwarePackageDTO> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, FirmwarePackageDTO.class);
+             return ConvertHelper.convert(r, FirmwarePackageDTO.class);
         });
-
-        if(count > 0 && objs.size() > count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
-            objs.remove(objs.size() - 1);
-        } else {
-            locator.setAnchor(null);
-        }
-
         return objs;
     }
 

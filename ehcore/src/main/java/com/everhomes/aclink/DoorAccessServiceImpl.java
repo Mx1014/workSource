@@ -5314,9 +5314,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-	    return null;
+        Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(pageAnchor);
+        ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
+        List<FirmwarePackageDTO> dtos = aclinkFirmwareProvider.listFirmwarePackage(locator, count, cmd);
+        if(count > 0 && dtos.size() > count) {
+            Long anchor = dtos.get(dtos.size() - 1).getId();
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+            dtos.remove(dtos.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
     }
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
@@ -5362,21 +5374,30 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return (AclinkFirmwareNew)ConvertHelper.convert(firmware, AclinkFirmwareNew.class);
     }
     @Override
-    public void deleteFirmware (DeleteFirmwareCommand cmd){
-
-
+    public AclinkFirmwareNew deleteFirmware (DeleteFirmwareCommand cmd){
+        AclinkFirmwareNew firmware = aclinkFirmwareProvider.findFirmwareById(cmd.getId());
+        firmware.setStatus((byte)0);
+        aclinkFirmwareProvider.updateFirmwareNew(firmware);
+        return (AclinkFirmwareNew)ConvertHelper.convert(firmware, AclinkFirmwareNew.class);
     }
+
     @Override
     public ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd){
-        ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
 	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
-        ListingLocator locator = new CrossShardListingLocator();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(pageAnchor);
+        ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
         List<FirmwarePackageDTO> dtos = aclinkFirmwareProvider.listFirmwarePackage(locator, count, cmd);
-        pageAnchor = dtos.get(dtos.size()).getId();
+        if(count > 0 && dtos.size() > count) {
+            Long anchor = dtos.get(dtos.size() - 1).getId();
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+            dtos.remove(dtos.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
         resp.setDtos(dtos);
-        resp.setNextPageAnchor(pageAnchor);
+        resp.setNextPageAnchor(locator.getAnchor());
 	    return resp;
     }
 

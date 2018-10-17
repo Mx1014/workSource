@@ -2,6 +2,7 @@ package com.everhomes.aclink;
 
 import java.util.List;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.aclink.FirmwarePackageDTO;
@@ -28,8 +29,12 @@ public interface AclinkFirmwareProvider {
 
     AclinkFirmwarePackage findPackageById(Long id);
 
-    List<FirmwarePackageDTO> listFirmwarePackage (ListingLocator locator, int count, ListFirmwarePackageCommand cmd);
+    List<FirmwarePackageDTO> listFirmwarePackage (CrossShardListingLocator locator, int count, ListFirmwarePackageCommand cmd);
 
     Long createFirmwareNew(AclinkFirmwareNew obj);
+
+    Long updateFirmwareNew (AclinkFirmwareNew obj);
+
+    AclinkFirmwareNew findFirmwareById(Long id);
 
 }

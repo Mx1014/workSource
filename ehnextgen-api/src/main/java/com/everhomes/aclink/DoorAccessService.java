@@ -187,7 +187,7 @@ public interface DoorAccessService {
 
     AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd);
 
-    void deleteFirmware (DeleteFirmwareCommand cmd);
+    AclinkFirmwareNew deleteFirmware (DeleteFirmwareCommand cmd);
     //add by liqingyan
     ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
     //add by liqingyan

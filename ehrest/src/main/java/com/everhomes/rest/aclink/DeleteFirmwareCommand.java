@@ -8,14 +8,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteFirmwareCommand {
-    private Long firmwareId;
+    private Long id;
 
-    public Long getFirmwareId() {
-        return firmwareId;
+    public Long getId() {
+        return id;
     }
 
-    public void setFirmwareId(Long firmwareId) {
-        this.firmwareId = firmwareId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

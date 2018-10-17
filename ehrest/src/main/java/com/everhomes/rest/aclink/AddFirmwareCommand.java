@@ -28,7 +28,7 @@ public class AddFirmwareCommand {
     private Long bluetoothId;
     private String wifiName;
     private Long wifiId;
-    private Timestamp createTime;
+//    private Timestamp createTime;
     private Byte status;
 
     public Long getId() {
@@ -103,13 +103,13 @@ public class AddFirmwareCommand {
         this.wifiId = wifiId;
     }
 
-    public Timestamp getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Timestamp createTime) {
-        this.createTime = createTime;
-    }
+//    public Timestamp getCreateTime() {
+//        return createTime;
+//    }
+//
+//    public void setCreateTime(Timestamp createTime) {
+//        this.createTime = createTime;
+//    }
 
     public Byte getStatus() {
         return status;

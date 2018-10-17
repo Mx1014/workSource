@@ -7,22 +7,16 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * <ul>获取固件列表
+ * <ul>获取门禁固件包列表
  * <li> nextPageAnchor: 下一页锚点 </li>
- * <li> firmware: 固件列表，参考{@link com.everhomes.rest.aclink.DoorFirmwareDTO}</li>
- * <li> bluetooth: 蓝牙列表，参考{@link com.everhomes.rest.aclink.DoorBluetoothDTO}</li>
- * <li> wifi: wifi列表，参考{@link com.everhomes.rest.aclink.DoorWifiDTO}</li>
+ * <li> dtos: 门禁固件包列表，参考{@link FirmwarePackageDTO}</li>
  * </ul>
  */
-
 public class ListFirmwareResponse {
     private Long nextPageAnchor;
-    @ItemType(DoorFirmwareDTO.class)
-    private List<DoorFirmwareDTO> firmware;
-    @ItemType(DoorBluetoothDTO.class)
-    private List<DoorBluetoothDTO> bluetooth;
-    @ItemType(DoorWifiDTO.class)
-    private List<DoorWifiDTO> wifi;
+
+    @ItemType(AclinkFirmwareNew.class)
+    private List<AclinkFirmwareNew> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -32,28 +26,12 @@ public class ListFirmwareResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<DoorFirmwareDTO> getFirmware() {
-        return firmware;
+    public List<FirmwarePackageDTO> getDtos() {
+        return dtos;
     }
 
-    public void setFirmware(List<DoorFirmwareDTO> firmware) {
-        this.firmware = firmware;
-    }
-
-    public List<DoorBluetoothDTO> getBluetooth() {
-        return bluetooth;
-    }
-
-    public void setBluetooth(List<DoorBluetoothDTO> bluetooth) {
-        this.bluetooth = bluetooth;
-    }
-
-    public List<DoorWifiDTO> getWifi() {
-        return wifi;
-    }
-
-    public void setWifi(List<DoorWifiDTO> wifi) {
-        this.wifi = wifi;
+    public void setDtos(List<FirmwarePackageDTO> dtos) {
+        this.dtos = dtos;
     }
 
     @Override
