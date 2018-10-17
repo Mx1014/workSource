@@ -6,31 +6,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>invoiceDetailUrl : 发票详情url</li>
- * <li>invoiceOpenUrl：申请开票Url</li>
+ * <li>invoiceUrl : 发票详情url</li>
  * </ul>
  */
 public class GetInvoiceUrlResponse {
-    private String invoiceDetailUrl;
-    private String invoiceOpenUrl;
+    private String invoiceUrl;
 
-	public String getInvoiceDetailUrl() {
-		return invoiceDetailUrl;
+
+	public String getInvoiceUrl() {
+		return invoiceUrl;
 	}
 
 
-	public void setInvoiceDetailUrl(String invoiceDetailUrl) {
-		this.invoiceDetailUrl = invoiceDetailUrl;
-	}
 
-
-	public String getInvoiceOpenUrl() {
-		return invoiceOpenUrl;
-	}
-
-
-	public void setInvoiceOpenUrl(String invoiceOpenUrl) {
-		this.invoiceOpenUrl = invoiceOpenUrl;
+	public void setInvoiceUrl(String invoiceUrl) {
+		this.invoiceUrl = invoiceUrl;
 	}
 
 

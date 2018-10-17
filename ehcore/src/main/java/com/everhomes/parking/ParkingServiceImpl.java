@@ -4009,15 +4009,18 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		String generalOrderId = order.getGeneralOrderId();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
-		String openUrl = homeurl + "/promotion/app/appinvoice?businessOrderNumber=" + generalOrderId + "#/invoice-application";
-		String detailUrl = homeurl + "/promotion/app/appinvoice?businessOrderNumber=" + generalOrderId + "#/invoice-detail/2";
+		String invoiceUrl = null;
+		if (order.getInvoiceStatus() == 0 && order.getInvoiceStatus() == null ){
+			invoiceUrl = homeurl + "/promotion/app/appinvoice?businessOrderNumber=" + generalOrderId + "#/invoice-application";
+		} else {
+			invoiceUrl = homeurl + "/promotion/app/appinvoice?businessOrderNumber=" + generalOrderId + "#/invoice-detail/2";
+		}
 		try {
-			detailUrl =URLEncoder.encode(detailUrl, "UTF-8");
+			invoiceUrl =URLEncoder.encode(invoiceUrl, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		response.setInvoiceDetailUrl(detailUrl);
-		response.setInvoiceOpenUrl(openUrl);
+		response.setInvoiceUrl(invoiceUrl);
 		return response;
 	}
 }
