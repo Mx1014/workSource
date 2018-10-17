@@ -428,6 +428,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -6988,6 +6989,27 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 				listDto.add(tempDto);
 			});
 		}
+		//将所有获取不到企业名称的数据合为一个。
+		Integer size = listDto.size();
+		if (!CollectionUtils.isEmpty(listDto)) {
+            Iterator<StatisticsOrganizationDTO> iterator = listDto.iterator();
+            Integer anotherPeopleCount = 0;
+            Integer anotherActivityCount = 0;
+            while (iterator.hasNext()) {
+                StatisticsOrganizationDTO dto = iterator.next();
+                if (StringUtils.isEmpty(dto.getOrgName())) {
+                    anotherPeopleCount += dto.getSignPeopleCount();
+                    anotherActivityCount += dto.getSignActivityCount();
+                    iterator.remove();
+                }
+            }
+            if (size > listDto.size()) {
+                StatisticsOrganizationDTO anotherDto = new StatisticsOrganizationDTO();
+                anotherDto.setSignPeopleCount(anotherPeopleCount);
+                anotherDto.setSignActivityCount(anotherActivityCount);
+                listDto.add(anotherDto);
+            }
+        }
 		response.setList(listDto);
 		return response;
 	}
