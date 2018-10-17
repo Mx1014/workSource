@@ -69,6 +69,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 
 
 		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
+		BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
@@ -81,13 +82,12 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 
 			if (!flag) {
-				if (0 != order.getPrice().compareTo(payAmount)) {
+				if (0 != order.getPrice().compareTo(payAmount.add(couponAmount))) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 							"Order amount is not equal to payAmount.");
 				}
 			}
-
 			Long payTime = System.currentTimeMillis();
 			Timestamp payTimeStamp = new Timestamp(payTime);
 
