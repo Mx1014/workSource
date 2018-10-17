@@ -201,13 +201,13 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
 
             if(cmSyncObject != null) {
-                currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
-                totalPage = Integer.valueOf(cmSyncObject.getTotalpage());
-                pageOffset = String.valueOf(currentPage + 1);
-                cmSyncObjects.add(cmSyncObject);
-                syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
+                
                 if(SUCCESS_CODE.equals(cmSyncObject.getErrorCode())) {
-
+                	currentPage = Integer.valueOf(cmSyncObject.getCurrentpage());
+                    totalPage = Integer.valueOf(cmSyncObject.getTotalpage());
+                    pageOffset = String.valueOf(currentPage + 1);
+                    cmSyncObjects.add(cmSyncObject);
+                    syncData(cmSyncObject, DataType.CONTRACT.getCode(), communityIdentifier);
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     Date now = new Date(System.currentTimeMillis());
                     String nowStr = sdf.format(now);
@@ -220,7 +220,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
                 }else{
                     LOGGER.error("sync from RuiAnCM error: {}", cmSyncObject.getErrorCode());
-
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, Integer.valueOf(cmSyncObject.getErrorCode()), cmSyncObject.getErrordetails());
                 }
             }else{
                 LOGGER.error("sync data from RuiAnCM is fail" );
