@@ -3770,7 +3770,7 @@ public class PunchProviderImpl implements PunchProvider {
             step.limit(offset, pageSize);
         List<PunchDayLog> result = new ArrayList<PunchDayLog>();
         step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.PUNCH_ORGANIZATION_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PunchDayLog.class));
             return null;
         });
@@ -3863,7 +3863,7 @@ public class PunchProviderImpl implements PunchProvider {
 	        step.limit(offset, pageSize);
 	        List<PunchStatistic> result = new ArrayList<>();
 	        step.where(condition)
-	                .orderBy(Tables.EH_PUNCH_STATISTICS.PUNCH_ORG_NAME.desc(), Tables.EH_PUNCH_STATISTICS.USER_ID.desc()).fetch().map((r) -> {
+	                .orderBy(Tables.EH_PUNCH_STATISTICS.PUNCH_ORG_NAME.asc(), Tables.EH_PUNCH_STATISTICS.USER_ID.asc()).fetch().map((r) -> {
 	            result.add(ConvertHelper.convert(r, PunchStatistic.class));
 	            return null;
 	        });
@@ -4178,7 +4178,7 @@ public class PunchProviderImpl implements PunchProvider {
         condition = getPDLStatusItemTypeCondition(itemType, condition);
 
         List<PunchDayLog> result = step.where(condition)
-                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map(new PunchDayLogRecordMapper());
+                .orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(), Tables.EH_PUNCH_DAY_LOGS.PUNCH_ORGANIZATION_ID.asc(), Tables.EH_PUNCH_DAY_LOGS.USER_ID.asc()).fetch().map(new PunchDayLogRecordMapper());
         if (result == null || result.isEmpty())
             return null;
         return result;
