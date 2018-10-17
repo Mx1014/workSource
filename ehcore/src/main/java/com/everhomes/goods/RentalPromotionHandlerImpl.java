@@ -2,6 +2,7 @@ package com.everhomes.goods;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rentalv2.RentalResource;
 import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
@@ -31,7 +32,8 @@ public class RentalPromotionHandlerImpl extends DefaultGoodsPromotionHandlerImpl
         if (cmd.getGoodTagInfo() != null){
             Long resourceTypeId = Long.valueOf(cmd.getGoodTagInfo().getTag1Key());
             Long communityId = Long.valueOf(cmd.getGoodTagInfo().getTag2Key());
-            List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(resourceTypeId, null, null, null, null, null, communityId);
+            ListingLocator locator = new ListingLocator();
+            List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(resourceTypeId, null, locator, null, null, null, communityId);
             if (rentalSites != null && rentalSites.size() > 0){
                 for (RentalResource rentalSite : rentalSites) {
                     GoodTagInfo good = ConvertHelper.convert(cmd.getGoodTagInfo(), GoodTagInfo.class);
