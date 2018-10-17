@@ -12,6 +12,8 @@ import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.user.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +28,7 @@ import java.util.List;
  */
 @Component(RentalOrderHandler.RENTAL_ORDER_HANDLER_PREFIX + "default")
 public class DefaultRentalOrderHandler implements RentalOrderHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RentalOrderHandler.class);
     @Autowired
     private Rentalv2Provider rentalv2Provider;
     @Autowired
@@ -121,7 +123,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
             returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
             cmd.setReturnUrl(returnUrl);
         }catch (Exception e){
-
+            LOGGER.error("encode url error",e);
         }
 
         cmd.setGoodsName(app.getName());
