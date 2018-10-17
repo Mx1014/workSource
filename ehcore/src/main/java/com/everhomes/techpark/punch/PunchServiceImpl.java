@@ -6312,7 +6312,23 @@ public class PunchServiceImpl implements PunchService {
             }
             //循环刷所有员工
             for (OrganizationMemberDetails memberDetail : memberDetails) { 
-            	punchDayLogInitialize(memberDetail, orgId, punCalendar);
+            	if (memberDetail == null) {
+                    return;
+                }
+                try {
+                    String punchDate = dateSF.get().format(punCalendar.getTime());
+                    PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndDetailId(memberDetail.getId(), orgId, punchDate);
+                     
+                    PunchRule pr = getPunchRuleByDetailId(memberDetail.getNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), orgId, memberDetail.getId());
+                    if (memberDetail.getTargetId() == null || memberDetail.getTargetId().equals(0L) || pr == null) {
+                        // 用户未激活和没有设置考勤规则，因此不存在打卡记录和请假等申请记录，所以日报统计只有一些基础数据
+                        initPunchDayLog4UntrackOrUnPunchRuleOrganizationMember(memberDetail, orgId, pr, punchDate);
+                    } else {
+                        this.refreshPunchDayLog(memberDetail, punCalendar);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("refresh day log and month stat Wrong [{}] detailId is {} owner id is {}", memberDetail.getContactName(), memberDetail.getId(), orgId, e);
+                }
             } 
         } catch (Exception e) {
 
