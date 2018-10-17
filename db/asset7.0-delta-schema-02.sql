@@ -850,4 +850,9 @@ ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) CO
 -- REMARK: 用户增加会员等级信息。
 ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等级文本';
 
+
+-- AUTHOR: 马世亨
+-- REMARK: 访客办公地点表  20181001
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
 -- end
