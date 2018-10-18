@@ -8,8 +8,30 @@ import java.util.List;
 public class ActivityDetailDTO {
 
     private Integer Code ;//返回状态
-    private ActivityModel Data;//返回数据
+    private ActivityDetailModel Data;//返回数据
     private String Message ;//返回状态描述
 
+    public Integer getCode() {
+        return Code;
+    }
 
+    public void setCode(Integer code) {
+        Code = code;
+    }
+
+    public ActivityDetailModel getData() {
+        return Data;
+    }
+
+    public void setData(ActivityDetailModel data) {
+        Data = data;
+    }
+
+    public String getMessage() {
+        return Message;
+    }
+
+    public void setMessage(String message) {
+        Message = message;
+    }
 }
