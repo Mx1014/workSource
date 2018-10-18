@@ -15,8 +15,8 @@ import java.util.List;
 public class ListFirmwareResponse {
     private Long nextPageAnchor;
 
-    @ItemType(AclinkFirmwareNew.class)
-    private List<AclinkFirmwareNew> dtos;
+    @ItemType(FirmwareNewDTO.class)
+    private List<FirmwareNewDTO> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -26,11 +26,11 @@ public class ListFirmwareResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<FirmwarePackageDTO> getDtos() {
+    public List<FirmwareNewDTO> getDtos() {
         return dtos;
     }
 
-    public void setDtos(List<FirmwarePackageDTO> dtos) {
+    public void setDtos(List<FirmwareNewDTO> dtos) {
         this.dtos = dtos;
     }
 

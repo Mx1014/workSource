@@ -15,8 +15,8 @@ import java.util.List;
 public class ListDoorTypeResponse {
     private Long nextPageAnchor;
 
-    @ItemType(DoorAccessDTO.class)
-    private List<DoorAccessDTO> doors;
+    @ItemType(AclinkDeviceDTO.class)
+    private List<AclinkDeviceDTO> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -26,12 +26,12 @@ public class ListDoorTypeResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<DoorAccessDTO> getDoors() {
-        return doors;
+    public List<AclinkDeviceDTO> getDtos() {
+        return dtos;
     }
 
-    public void setDoors(List<DoorAccessDTO> doors) {
-        this.doors = doors;
+    public void setDtos(List<AclinkDeviceDTO> dtos) {
+        this.dtos = dtos;
     }
 
     @Override

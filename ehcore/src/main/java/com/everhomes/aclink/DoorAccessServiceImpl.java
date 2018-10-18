@@ -5309,18 +5309,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd){
-        return null;
-    }
-    @Override
-    public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long pageAnchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
+        Long anchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(pageAnchor);
-        ListFirmwarePackageResponse resp = new ListFirmwarePackageResponse();
-        List<FirmwarePackageDTO> dtos = aclinkFirmwareProvider.listFirmwarePackage(locator, count, cmd);
+        locator.setAnchor(anchor);
+        ListDoorTypeResponse resp = new ListDoorTypeResponse();
+        List<AclinkDeviceDTO> dtos = aclinkFirmwareProvider.listFirmwareDevice(locator, count, cmd);
         if(count > 0 && dtos.size() > count) {
-            Long anchor = dtos.get(dtos.size() - 1).getId();
             locator.setAnchor(dtos.get(dtos.size() - 1).getId());
             dtos.remove(dtos.size() - 1);
         } else {
@@ -5330,6 +5325,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
+
+    @Override
+    public ListFirmwareResponse listFirmware (ListFirmwareCommand cmd){
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(anchor);
+        ListFirmwareResponse resp = new ListFirmwareResponse();
+        List<FirmwareNewDTO> dtos = aclinkFirmwareProvider.listFirmwareNew(locator, count, cmd);
+        if(count > 0 && dtos.size() > count) {
+            locator.setAnchor(dtos.get(dtos.size() - 1).getId());
+            dtos.remove(dtos.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+	    return resp;
+    }
+
+
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
         DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
@@ -5363,7 +5379,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     }
     @Override
-    public void changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
+    public AclinkDevice changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
+        AclinkDevice dto = aclinkFirmwareProvider.findDeviceById(cmd.getId());
+        dto.setFirmware(cmd.getFirmware());
+        dto.setFirmwareId(cmd.getFirmwareId());
+        aclinkFirmwareProvider.updateAclinkDevice(dto);
+        return (AclinkDevice)ConvertHelper.convert(dto,AclinkDevice.class);
 
     }
     @Override

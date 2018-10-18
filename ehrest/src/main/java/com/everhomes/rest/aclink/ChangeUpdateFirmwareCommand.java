@@ -11,24 +11,24 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ChangeUpdateFirmwareCommand {
-    private Byte doorType;
-    private String firmwareName;
+    private Long id;
+    private String firmware;
     private Long firmwareId;
 
-    public Byte getDoorType() {
-        return doorType;
+    public Long getId() {
+        return id;
     }
 
-    public void setDoorType(Byte doorType) {
-        this.doorType = doorType;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getFirmwareName() {
-        return firmwareName;
+    public String getFirmware() {
+        return firmware;
     }
 
-    public void setFirmwareName(String firmwareName) {
-        this.firmwareName = firmwareName;
+    public void setFirmware(String firmware) {
+        this.firmware = firmware;
     }
 
     public Long getFirmwareId() {

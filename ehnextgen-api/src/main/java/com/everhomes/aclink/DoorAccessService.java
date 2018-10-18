@@ -183,7 +183,7 @@ public interface DoorAccessService {
 
     void deleteDoorManagement (AddDoorManagementCommand cmd);
 
-    void changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
+    AclinkDevice changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
 
     AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd);
 
