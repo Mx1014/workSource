@@ -141,7 +141,7 @@ public class KetuoMybayParkingVendorHandler extends KetuoParkingVendorHandler {
 		long tempTime = calendar.getTimeInMillis();
 		Timestamp tempStart = new Timestamp(tempTime);
 		String startTime = Utils.dateToStr(tempStart, Utils.DateStyle.DATE_TIME);
-		Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(tempTime, order.getMonthCount().intValue());
+		Timestamp tempEnd = Utils.getTimestampByAddDistanceMonthV2(tempTime, order.getMonthCount().intValue());
 		String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
 
 		param.put("cardName", "");

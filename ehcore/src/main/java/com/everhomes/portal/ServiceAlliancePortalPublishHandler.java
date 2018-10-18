@@ -161,10 +161,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		serviceAllianceCategories.setDeleteUid(user.getId());
 		serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
 
+
 		long id = this.sequenceProvider
 				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
 		serviceAllianceCategories.setId(id);
 		serviceAllianceCategories.setEntryId(generateEntryId(namespaceId, id));
+		serviceAllianceCategories.setType(id);
 		yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
 		ServiceAlliances serviceAlliances = new ServiceAlliances();
