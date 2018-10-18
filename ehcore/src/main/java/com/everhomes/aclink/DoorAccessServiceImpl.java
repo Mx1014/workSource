@@ -5600,4 +5600,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
+		// TODO Auto-generated method stub
+		return 1;
+	}
 }
