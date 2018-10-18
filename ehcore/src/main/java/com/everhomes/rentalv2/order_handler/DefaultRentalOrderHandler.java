@@ -7,6 +7,7 @@ import com.everhomes.parking.ParkingSpace;
 import com.everhomes.rentalv2.*;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
@@ -154,7 +155,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         goodDTO.setPrice(order.getPayTotalMoney());
         goodDTO.setGoodDescription(order.getUseDetail());
         goodDTO.setServeApplyName(communityProvider.findCommunityById(order.getCommunityId()).getName()+"-"+app.getName());
-        goodDTO.setServeType("资源预订");
+        goodDTO.setServeType("40400");
         goodDTO.setTag1(order.getResourceTypeId().toString());
         goodDTO.setTag2(order.getCommunityId().toString());
         goodDTO.setGoodTag(order.getRentalResourceId().toString());
