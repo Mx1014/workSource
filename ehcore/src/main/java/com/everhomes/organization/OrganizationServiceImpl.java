@@ -2043,7 +2043,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
