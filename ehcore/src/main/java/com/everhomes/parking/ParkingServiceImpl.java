@@ -668,7 +668,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"Invalid MonthCount.");
 		}
 		cmd.setPlateNumber(cmd.getPlateNumber().toUpperCase());
-		return (CreateParkingGeneralOrderResponse) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V2);
+		return (CreateParkingGeneralOrderResponse) createGeneralOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), ActivityRosterPayVersionFlag.V3);
 	}
 	
 	@Override
@@ -4007,15 +4007,15 @@ public class ParkingServiceImpl implements ParkingService {
 	public GetInvoiceUrlResponse getInvoiceUrl (GetInvoiceUrlCommand cmd){
 		String homeurl = configProvider.getValue("home.url", "");
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
-		String generalOrderId = order.getBizOrderNo();
+		String bizOrderNo = order.getBizOrderNo();
 		GetInvoiceUrlResponse response = new GetInvoiceUrlResponse();
 		String invoiceUrl = null;
 		if (order.getInvoiceStatus() == null) {
-			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + generalOrderId + "#/invoice-application";
+			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + bizOrderNo + "#/invoice-application";
 		} else if (order.getInvoiceStatus() == 0 ) {
-			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + generalOrderId + "#/invoice-application";
+			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + bizOrderNo + "#/invoice-application";
 		} else {
-			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + generalOrderId + "#/invoice-detail/2";
+			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + bizOrderNo + "#/invoice-detail/2";
 		}
 		response.setInvoiceUrl(invoiceUrl);
 		return response;
