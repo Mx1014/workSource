@@ -255,4 +255,6 @@ public interface AssetService {
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
 	void setDoorAccessParam(SetDoorAccessParamCommand cmd);
 	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
+	//djm 门禁定时任务
+	void meterAutoReading(Boolean createPlanFlag);
 }

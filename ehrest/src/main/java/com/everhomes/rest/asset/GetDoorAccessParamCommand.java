@@ -19,7 +19,16 @@ public class GetDoorAccessParamCommand {
     private String ownerType;
     private Long orgId;
     private Long categoryId;
+    private Long appId;
     
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
