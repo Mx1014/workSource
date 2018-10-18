@@ -504,7 +504,7 @@ public interface OrganizationProvider {
 
     Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+    List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId);
 
     List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
 

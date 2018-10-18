@@ -81,7 +81,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR: 严军
 -- REMARK: 客户端处理方式
-update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100,40730);
+update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100,40730,41200);
 
 
 -- AUTHOR: 严军
