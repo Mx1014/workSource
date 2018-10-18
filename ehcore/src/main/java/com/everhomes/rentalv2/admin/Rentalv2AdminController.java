@@ -8,7 +8,6 @@ import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
-import com.everhomes.rest.rentalv2.admin.ListRentalBillsByOrdIdCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -292,8 +291,6 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
 
 	
 	/**
@@ -343,7 +340,55 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /rental/admin/getStructureList</b>
+	 * <p>
+	 * 查询资源的基础设施
+	 * </p>
+	 */
+	@RequestMapping("getStructureList")
+	@RestReturn(value = GetStructureListResponse.class)
+	public RestResponse getStructureList(@Valid GetStructureListAdminCommand cmd) {
+		//GetItemListCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateStructure</b>
+	 * <p>
+	 * 更新资源的基础设施
+	 * </p>
+	 */
+	@RequestMapping("updateStructure")
+	@RestReturn(value = String.class)
+	public RestResponse updateStructure(@Valid UpdateStructureAdminCommand cmd) {
+		//rentalService.updateItem(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateStructures</b>
+	 * <p>
+	 *	批量更新structures
+	 * </p>
+	 */
+	@RequestMapping("updateStructures")
+	@RestReturn(value = String.class)
+	public RestResponse updateStructures(@Valid UpdateStructuresAdminCommand cmd) {
+		//rentalService.updateItems(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 	/**
 	 * <b>URL: /rental/admin/addRentalSiteRules</b>
