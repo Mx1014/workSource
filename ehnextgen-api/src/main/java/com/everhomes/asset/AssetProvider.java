@@ -451,5 +451,6 @@ public interface AssetProvider {
 	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
 	AssetDooraccessParam findDoorAccessParamById(Long id);
 	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
+	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor);
 		
 }

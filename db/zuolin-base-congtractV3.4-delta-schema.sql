@@ -35,6 +35,26 @@ CREATE TABLE `eh_asset_dooraccess_params` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='缴费对接门禁表';
 
+-- AUTHOR: djm
+-- REMARK: 对接门禁
+CREATE TABLE `eh_asset_dooraccess_logs` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` INT(11) DEFAULT NULL,
+  `project_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '项目id', 
+  `project_type` VARCHAR(64) NOT NULL,
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '普通公司,企业的id,用户id',  
+  `owner_type` VARCHAR(64) NOT NULL,
+  `org_id` bigint(20) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+  `dooraccess_status` tinyint(4) DEFAULT NULL  COMMENT '该项目下门禁的状态',
+  `category_id` BIGINT COMMENT 'asset category id',
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `operator_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='缴费对接门禁表门禁记录表';
+
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
 ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;

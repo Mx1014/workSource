@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -62,9 +63,14 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.contract.ContractServiceImpl;
+import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.energy.EnergyAutoReadHandler;
+import com.everhomes.energy.EnergyMeter;
+import com.everhomes.energy.EnergyMeterReadingLog;
+import com.everhomes.energy.EnergyMeterTask;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -102,6 +108,8 @@ import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractTemplateDTO;
 import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
 import com.everhomes.rest.contract.ListContractTemplatesResponse;
+import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyTaskStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -111,6 +119,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.organization.ListPMOrganizationsCommand;
+import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -125,6 +135,8 @@ import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserNotificationTemplateCode;
 import com.everhomes.rest.varField.ListFieldCommand;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhContractCategories;
@@ -273,6 +285,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     DoorAccessProvider doorAccessProvider;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -4972,7 +4987,14 @@ public class AssetServiceImpl implements AssetService {
 
 	@Override
 	public ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd) {
+		
 		List<AssetDooraccessParam> list = assetProvider.listDooraccessParams(cmd);
+		
+		if (list.size() < 1 && cmd.getOrgId() != null) {
+			cmd.setOwnerId(null);
+			list = assetProvider.listDooraccessParams(cmd);
+		}
+		
 		ListDoorAccessParamResponse response = new ListDoorAccessParamResponse();
 		if (list.size() > 0) {
 			List<DoorAccessParamDTO> resultList = list.stream().map((c) -> {
@@ -4983,4 +5005,160 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return response;
 	}
+
+	/**
+	 * djm
+	 * 缴费欠费，对接门禁
+	 */
+	@Override
+	public void meterAutoReading(Boolean createPlansFlag) {
+		LOGGER.debug("starting auto reading manual...");
+        readMeterRemote(createPlansFlag,null);
+        LOGGER.debug("ending auto reading manual...");
+	}
+	
+    private void readMeterRemote(Boolean createPlansFlag,Long communityId) {
+    	//双机判断
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            LOGGER.info("read energy meter reading ...");
+           	//获得账单,分页一次最多10000个，防止内存不够
+               int pageSize = 10000;
+               long pageAnchor = 1l;
+               SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+               Date today = new Date();
+               coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+               	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+               	Long nextPageAnchor = 0l;
+                   while(nextPageAnchor != null){
+                       SettledBillRes res = assetProvider.getAssetDoorAccessBills(pageSize,pageAnchor);
+                       List<PaymentBills> bills = res.getBills();
+                       
+                       //更新账单
+					for (PaymentBills bill : bills) {
+						String dueDayDeadline = bill.getDueDayDeadline();
+						Long ownerId = bill.getOwnerId();
+						Long targetId = bill.getTargetId();
+						
+						//获取管理公司id
+						ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
+				        cmd.setNamespaceId(bill.getNamespaceId());
+				        ListPMOrganizationsResponse listPMOrganizationsResponse = organizationService.listPMOrganizations(cmd);
+				        Long currentOrgId = null;
+				        try{
+				            currentOrgId = listPMOrganizationsResponse.getDtos().get(0).getId();
+				        }catch (ArrayIndexOutOfBoundsException e){
+				        	
+				        }
+						
+						//先去查询设置的参数
+						GetDoorAccessParamCommand getDoorAccessParamCommand = new GetDoorAccessParamCommand();
+						getDoorAccessParamCommand.setNamespaceId(bill.getNamespaceId());
+						getDoorAccessParamCommand.setCategoryId(bill.getCategoryId());
+						getDoorAccessParamCommand.setOrgId(currentOrgId);
+						getDoorAccessParamCommand.setOwnerId(ownerId);
+						getDoorAccessParamCommand.setOwnerType(bill.getOwnerType());
+						ListDoorAccessParamResponse listDoorAccessParamResponse = getDoorAccessParam(getDoorAccessParamCommand);
+						List<DoorAccessParamDTO> listDoorAccessParam = listDoorAccessParamResponse.getDoorAccessParamDTOs();
+						DoorAccessParamDTO DoorAccessParam =null;
+						if (listDoorAccessParam != null) {
+							DoorAccessParam = listDoorAccessParam.get(0);
+						}else {
+							continue;
+						}
+						
+						
+						try {
+							Date deadline = yyyyMMdd.parse(dueDayDeadline);
+							Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
+
+							if (dueDayCount.compareTo(DoorAccessParam.getFreezeDays()) >= 0) {
+								//欠费时间大于等于设置的时间，禁用门禁
+								//项目id,公司id,状态，管理公司id
+								
+								dueDayCount = null;
+							}
+
+							//assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);// 更新账单欠费天数
+						} catch (Exception e) {
+							continue;
+						}
+					}
+                       nextPageAnchor = res.getNextPageAnchor();
+                   }
+               });
+           
+            /*List<EnergyMeter> meters = new ArrayList<>();
+            if (communityId != null) {
+                meters = meterProvider.listAutoReadingMetersByCommunityId(communityId);
+            } else {
+                meters = meterProvider.listAutoReadingMeters();
+            }
+            if (meters != null && meters.size() > 0) {
+                meters.forEach((meter) -> {
+                    String serverUrl = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.server", "");
+                    String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
+                    String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
+                    EnergyAutoReadHandler handler = null;
+                    if (meter.getNamespaceId() == 999961) {
+                         handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
+                    }
+                    if (handler != null) {
+                        try {
+                            String meterReading = handler.readMeterautomatically(meter.getMeterNumber(), serverUrl, publicKey, clientId);
+                            LOGGER.info("energy auto reading meter meterId={},meterNumber={}, Reading={}", meter.getId(), meter.getMeterNumber(), meterReading);
+                            //parser
+                            Map<String, String> result = getRemoteReadingDataMap(meterReading,meter.getId(),meter.getMeterNumber());
+                            //log
+                            EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            EnergyMeterReadingLog log = new EnergyMeterReadingLog();
+                            log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                            log.setReading(new BigDecimal(result.get("this_read")));
+                            if (task != null) {
+                                log.setTaskId(task.getId());
+                                task.setReading(log.getReading());
+                                task.setStatus(EnergyTaskStatus.READ.getCode());
+                                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            }
+                            log.setCommunityId(meter.getCommunityId());
+                            log.setMeterId(meter.getId());
+                            log.setNamespaceId(meter.getNamespaceId());
+                            log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            log.setOperatorId(UserContext.currentUserId());
+                            if (meter.getLastReading() != null &&
+                                    new BigDecimal(result.get("this_read")).subtract(meter.getLastReading()).intValue() < 0) {
+                                log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                            } else {
+                                log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                            }
+                            dbProvider.execute(r -> {
+                                meterReadingLogProvider.createEnergyMeterReadingLog(log);
+                                if (task != null) {
+                                    energyMeterTaskProvider.updateEnergyMeterTask(task);
+                                    energyMeterTaskSearcher.feedDoc(task);
+                                }
+                                meter.setLastReading(log.getReading());
+                                meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
+                                meterProvider.updateEnergyMeter(meter);
+                                return true;
+                            });
+                            readingLogSearcher.feedDoc(log);
+                            meterSearcher.feedDoc(meter);
+                        } catch (Exception e) {
+                            LOGGER.error("read energy meter reading  error...", e);
+                            sendErrorMessage(e);
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+            LOGGER.info("read energy meter reading  end...");
+
+            if(createPlansFlag){
+                LOGGER.info("starting create  auto  meter plans ...");
+                createMonthAutoPlans(meters);
+                LOGGER.info("ending create  auto  meter plans ...");
+            }*/
+        }
+    }
 }

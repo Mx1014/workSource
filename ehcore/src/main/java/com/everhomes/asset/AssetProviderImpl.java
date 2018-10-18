@@ -5808,12 +5808,33 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 			cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
 		}
 
-		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
+		query.orderBy(t1.CREATE_TIME.desc());
 
 		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
 				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
 
 		return assetDooraccessParams;
 	}
-
+	
+	@Override
+    public SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor) {
+        Long pageOffset = (pageAnchor - 1 ) * pageSize;
+        SettledBillRes res = new SettledBillRes();
+        List<PaymentBills> paymentBills = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
+                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
+                .and(Tables.EH_PAYMENT_BILLS.DUE_DAY_COUNT.isNotNull())
+                .groupBy(Tables.EH_PAYMENT_BILLS.TARGET_ID)
+                .limit(pageOffset.intValue(), pageSize+1)
+                .fetchInto(PaymentBills.class);
+        if(paymentBills.size() > pageSize){
+            res.setNextPageAnchor(pageAnchor+1);
+            paymentBills.remove(paymentBills.size()-1);
+        }else{
+            res.setNextPageAnchor(null);
+        }
+        res.setBills(paymentBills);
+        return res;
+    }
 }
