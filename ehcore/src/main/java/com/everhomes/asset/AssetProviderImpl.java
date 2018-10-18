@@ -2423,6 +2423,12 @@ public class AssetProviderImpl implements AssetProvider {
                 for(int i = 0; i < list1.size() ; i++) {
                     BillItemDTO dto = list1.get(i);
                     Long billItemId = dto.getBillItemId();
+                    //如果费项ID不为空，那么是更新操作
+                	BigDecimal var1 = dto.getAmountReceivable();
+                    //减免项不覆盖收费项目的收付，暂时
+                    var1 = DecimalUtils.negativeValueFilte(var1);
+                    BigDecimal var2 = dto.getAmountReceivableWithoutTax();
+                    var2 = DecimalUtils.negativeValueFilte(var2);
                     //如果费项ID是空，那么是新增
                     if(billItemId == null) {
                     	long currentBillItemSeq = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
@@ -2434,9 +2440,6 @@ public class AssetProviderImpl implements AssetProvider {
                         item.setAddressId(dto.getAddressId());
                         item.setBuildingName(dto.getBuildingName());
                         item.setApartmentName(dto.getApartmentName());
-                        BigDecimal var1 = dto.getAmountReceivable();
-                        //减免项不覆盖收费项目的收付，暂时
-                        var1 = DecimalUtils.negativeValueFilte(var1);
                         item.setAmountOwed(var1);
                         item.setAmountReceivable(var1);
                         item.setAmountReceived(new BigDecimal("0"));
@@ -2466,8 +2469,6 @@ public class AssetProviderImpl implements AssetProvider {
                         }
                         item.setTargetName(targetName);
                         item.setEnergyConsume(dto.getEnergyConsume());//增加用量
-                        BigDecimal var2 = dto.getAmountReceivableWithoutTax();
-                        var2 = DecimalUtils.negativeValueFilte(var2);
                         item.setAmountOwedWithoutTax(var2);//增加待收（不含税）
                         item.setAmountReceivableWithoutTax(var2);//增加应收（不含税）
                         item.setAmountReceivedWithoutTax(new BigDecimal("0"));//增加已收（不含税）
@@ -2487,13 +2488,16 @@ public class AssetProviderImpl implements AssetProvider {
                     	EhPaymentBillItemsDao billItemsDao = new EhPaymentBillItemsDao(context.configuration());
                     	billItemsDao.insert(item);
                     }else {
-                    	//如果费项ID不为空，那么是更新操作
                     	context.update(Tables.EH_PAYMENT_BILL_ITEMS)
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.VALID.getCode())//物业缴费V6.0 账单、费项表增加是否删除状态字段
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEMS_ID, dto.getChargingItemsId())
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.CHARGING_ITEM_NAME, dto.getBillItemName())
-	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE, dto.getAmountReceivable())
-	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX, dto.getAmountReceivableWithoutTax())
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE, var1)
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED, var1)
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED, new BigDecimal("0"))
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVABLE_WITHOUT_TAX, var2)
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_OWED_WITHOUT_TAX, var2)
+	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.AMOUNT_RECEIVED_WITHOUT_TAX, new BigDecimal("0"))
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.TAX_AMOUNT, dto.getTaxAmount())
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.BUILDING_NAME, dto.getBuildingName())
 	                    	.set(Tables.EH_PAYMENT_BILL_ITEMS.APARTMENT_NAME, dto.getApartmentName())
