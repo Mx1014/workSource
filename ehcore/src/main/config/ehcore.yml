@@ -177,7 +177,7 @@ spring.kafka:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
   consumer:
-    group-id: ehcore-group
+    group-id: ${spring.application.name}-group
     auto-offset-reset: earliest
     enable-auto-commit: true
     auto-commit-interval: 100
@@ -196,4 +196,4 @@ eurekacli:
   instance-id: ${server.address}:${spring.application.name}:${server.port}
 
 # 配置 xssFilter 的开关
-xss.enabled: false
+xss.enabled: true

@@ -81,7 +81,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR: 严军
 -- REMARK: 客户端处理方式
-update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100);
+update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100,40730,41200);
 
 
 -- AUTHOR: 严军
@@ -116,7 +116,7 @@ update eh_service_modules set client_handler_type = 2 WHERE id = 43000;
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'user', '100020', 'zh_CN', '用户名或密码错误');
-	
+
 -- AUTHOR: 缪洲 20181008
 -- REMARK: issue-38650 增加error消息模板
 INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10034', 'zh_CN', '接口参数缺失');
