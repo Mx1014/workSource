@@ -59,6 +59,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.openapi.Contract;
@@ -421,6 +422,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ServiceModuleService serviceModuleService;
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+    private NamespacesService namespacesService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -2043,7 +2047,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
@@ -12341,9 +12345,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
-                else{//始终都要发消息
+                else{
+                	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                    sendMessageForContactApproved(organizationMember);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息
+//                    sendMessageForContactApproved(organizationMember);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
@@ -14567,7 +14573,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         OrganizationDTO dto = null;
 
-        if(UserContext.getCurrentNamespaceId() == 2){
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
             //标准版
             ServiceModuleAppAuthorization serviceModuleAppAuthorization = serviceModuleAppAuthorizationService.findServiceModuleAppAuthorization(cmd.getProjectId(), cmd.getAppId());
             if(serviceModuleAppAuthorization != null){

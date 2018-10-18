@@ -186,12 +186,14 @@ spring.kafka:
 
 server:
   port: 8080
+  # 这个配置是本机的 ip, 并且配置了这个后, 只能通过这个 ip 才能访问 API
+  # 如果nginx访问出现错误请修改nginx配置文件中的localhost为这里的ip地址
   address: ${INET_ADDRESS}
 
 eurekacli:
-  enabled: true
+  enabled: false
   service-url: ${EUREKA_SERVICE_URL}
   instance-id: ${server.address}:${spring.application.name}:${server.port}
 
 # 配置 xssFilter 的开关
-xss.enabled: false
+xss.enabled: true

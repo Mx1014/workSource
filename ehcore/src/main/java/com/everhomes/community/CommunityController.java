@@ -724,4 +724,20 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /community/getOrgIdByCommunityId</b>
+     * <p>通过园区id（communityId）获得其管理公司的id（OrgId）</p>
+     */
+    @RequestMapping("getOrgIdByCommunityId")
+    @RestReturn(value=OrgDTO.class)
+    public RestResponse getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+    	OrgDTO result = communityService.getOrgIdByCommunityId(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }

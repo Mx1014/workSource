@@ -6835,6 +6835,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                         addressSiteDTO.setName(organizationDetail.getAddress());
                                         addressSiteDTO.setWholeAddressName(organizationDetail.getAddress());
                                     }
+                                    addressSiteDtos.add(addressSiteDTO);
 
                                 }
 
