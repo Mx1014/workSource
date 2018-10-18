@@ -2629,6 +2629,7 @@ public class ParkingServiceImpl implements ParkingService {
 			ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
 			dto.setParkingLotName(parkingLot.getName());
 			dto.setContact(parkingLot.getContact());
+			dto.setInvoiceFlag(parkingLot.getInvoiceFlag());
 
 			RestResponse response = new RestResponse(dto);
 			response.setErrorCode(ErrorCodes.SUCCESS);
