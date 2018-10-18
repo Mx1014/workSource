@@ -200,4 +200,6 @@ public interface CommunityService {
 
 	void caculateAllBuildingArea();
 
+	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
+
 }

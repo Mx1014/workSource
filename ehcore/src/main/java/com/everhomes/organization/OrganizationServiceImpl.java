@@ -2043,7 +2043,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
@@ -12341,9 +12341,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
-                else{//始终都要发消息
+                else{
+                	//始终都要发消息
                     organizationMember.setOrganizationId(enterpriseId);
-                    sendMessageForContactApproved(organizationMember);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息
+//                    sendMessageForContactApproved(organizationMember);
                 }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428

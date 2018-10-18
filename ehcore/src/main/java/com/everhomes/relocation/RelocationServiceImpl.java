@@ -265,7 +265,7 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
 		if (null == orgRequest) {
 			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(RelocationErrorCode.SCOPE, RelocationErrorCode.ERROR_INVALID_PARAMETER,
 					"OrganizationCommunityRequest not found.");
 		}
 		request.setOwnerId(orgRequest.getCommunityId());

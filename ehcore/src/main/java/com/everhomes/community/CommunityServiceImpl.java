@@ -180,6 +180,7 @@ import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ExportAllCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ExportBatchCommunityUsersCommand;
+import com.everhomes.rest.community.admin.GetOrgIdByCommunityIdCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
 import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
@@ -193,6 +194,7 @@ import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.community.admin.OperateType;
+import com.everhomes.rest.community.admin.OrgDTO;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.QryCommunityUserAllByUserIdCommand;
@@ -1885,7 +1887,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId(), cmd.getAppId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -4001,7 +4003,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId(), cmd.getAppId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -4115,8 +4117,8 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
-	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
-        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId, Long appId){
+		return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, appId,null,communityId);
 	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
@@ -4780,7 +4782,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
         CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
-        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId(), cmd.getAppId());
         if (isAuditing) {
             response.setIsAuditing(CheckAuditingType.YES.getCode());
         }else {
@@ -6266,6 +6268,15 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setDtos(dtos);
 
 		return response;
+	}
+
+	@Override
+	public OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+		OrgDTO dto = new OrgDTO();
+		dto.setId(currentOrganizationId);
+		return dto;
 	}
 
 }

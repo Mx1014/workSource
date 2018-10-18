@@ -1,9 +1,0 @@
-//
-// EvhPmBillEntityType.h
-//
-
-#define EvhPmBillEntityType_ADDRESS @"address"
-#define EvhPmBillEntityType_COMPANY @"company"
-
-///////////////////////////////////////////////////////////////////////////////
-

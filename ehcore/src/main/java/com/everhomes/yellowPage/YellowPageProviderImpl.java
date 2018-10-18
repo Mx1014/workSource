@@ -518,6 +518,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
     	if (null != ownerId) {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+    	} else {
+        	if (ServiceAllianceBelongType.ORGANAIZATION.getCode().equals(ownerType)) {
+        		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(-1L));
+        	}
     	}
 
         //topic
@@ -608,8 +612,13 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         
-        if(ownerId != null && ownerId != 0L)
+        if(ownerId != null && ownerId != 0L) {
         	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        } else {
+        	if (ServiceAllianceBelongType.ORGANAIZATION.getCode().equals(ownerType) && null == ownerId) {
+        		condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(-1L));
+        	}
+        }
 
     	if (!StringUtils.isEmpty(ownerType) )
     		condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
