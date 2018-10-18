@@ -451,9 +451,10 @@ public interface AssetProvider {
 	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
 	AssetDooraccessParam findDoorAccessParamById(Long id);
 	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
-	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor);
+	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status);
 	Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
+	PaymentBillOrder getPaymentBillOrderByBillId(String billId);
 		
 }

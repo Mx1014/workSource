@@ -59,6 +59,7 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.asset.AddOrModifyRuleForBillGroupCommand;
 import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillStatusType;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetItemFineType;
@@ -5819,15 +5820,15 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 	}
 	
 	@Override
-    public SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor) {
+    public SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status) {
         Long pageOffset = (pageAnchor - 1 ) * pageSize;
         SettledBillRes res = new SettledBillRes();
         List<PaymentBills> paymentBills = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
                 .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
-                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
+                .and(Tables.EH_PAYMENT_BILLS.STATUS.eq(status))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
                 .and(Tables.EH_PAYMENT_BILLS.DUE_DAY_COUNT.isNotNull())
-                .groupBy(Tables.EH_PAYMENT_BILLS.TARGET_ID)
+                .and(Tables.EH_PAYMENT_BILLS.TARGET_ID.isNotNull())
                 .limit(pageOffset.intValue(), pageSize+1)
                 .fetchInto(PaymentBills.class);
         if(paymentBills.size() > pageSize){
@@ -5858,8 +5859,14 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 
 	@Override
 	public void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
-		// TODO Auto-generated method stub
-		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class, assetDooraccessLog.getId()));
+		EhAssetDooraccessLogsDao dao = new EhAssetDooraccessLogsDao(context.configuration());
+
+        assetDooraccessLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        assetDooraccessLog.setOperatorUid(UserContext.currentUserId());
+        
+		dao.update(assetDooraccessLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetDooraccessLogs.class, assetDooraccessLog.getId());
 	}
 	@Override
 	public AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog) {
@@ -5885,6 +5892,27 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 			return assetDooraccessParams.get(0);
 		}
 		
+		return null;
+	}
+	
+	@Override
+	public PaymentBillOrder getPaymentBillOrderByBillId(String billId) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPaymentBillOrders.class));
+		com.everhomes.server.schema.tables.EhPaymentBillOrders t1 = Tables.EH_PAYMENT_BILL_ORDERS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+
+		Condition cond = t1.BILL_ID.eq(billId);
+		cond = cond.and(t1.PAYMENT_STATUS.eq((int)AssetBillStatusType.PAID.getCode()));
+		
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<PaymentBillOrder> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), PaymentBillOrder.class));
+
+		if (assetDooraccessParams != null && assetDooraccessParams.size()>0) {
+			return assetDooraccessParams.get(0);
+		}
 		return null;
 	}
 }
