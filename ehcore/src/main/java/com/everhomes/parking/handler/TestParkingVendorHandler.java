@@ -65,6 +65,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setCardNumber("");
 			parkingCardDTO.setPlateOwnerPhone("12345679812");
 			parkingCardDTO.setIsValid(true);
+			parkingCardDTO.setCardTypeId("普通月卡");
 
 			resultList.add(parkingCardDTO);
 		}
