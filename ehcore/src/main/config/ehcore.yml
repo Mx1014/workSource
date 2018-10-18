@@ -196,4 +196,4 @@ eurekacli:
   instance-id: ${server.address}:${spring.application.name}:${server.port}
 
 # 配置 xssFilter 的开关
-xss.enabled: false
+xss.enabled: true

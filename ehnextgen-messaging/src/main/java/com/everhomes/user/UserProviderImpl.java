@@ -15,7 +15,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
@@ -25,11 +24,6 @@ import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.user.*;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
@@ -39,12 +33,8 @@ import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import com.everhomes.util.*;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-import com.everhomes.util.MapReduceCallback;
-import com.everhomes.util.RecordHelper;
-import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -389,7 +379,7 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
-            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
             @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
     @Override
@@ -407,7 +397,7 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
-            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
             @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
     @Override
@@ -423,7 +413,7 @@ public class UserProviderImpl implements UserProvider {
     }
 
     @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
-            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
             @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
             @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
     @Override
