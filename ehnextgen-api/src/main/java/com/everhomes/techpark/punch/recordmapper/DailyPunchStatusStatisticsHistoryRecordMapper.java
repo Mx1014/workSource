@@ -19,17 +19,18 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.FORGOT_PUNCH)
     private Integer forgotPunchMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.NORMAL)
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+    
+    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.NORMAL)
     private Integer normalMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.CHECKING)
+    @PunchStatusStatisticsItem(defaultOrder = 7, type = PunchStatusStatisticsItemType.CHECKING)
     private Integer checkingMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 7, type = PunchStatusStatisticsItemType.REST)
+    @PunchStatusStatisticsItem(defaultOrder = 8, type = PunchStatusStatisticsItemType.REST)
     private Integer restMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 8, type = PunchStatusStatisticsItemType.GO_OUT)
-    private Integer goOutPunchDayCount;
     
     public Integer getBelateMemberCount() {
         return belateMemberCount;

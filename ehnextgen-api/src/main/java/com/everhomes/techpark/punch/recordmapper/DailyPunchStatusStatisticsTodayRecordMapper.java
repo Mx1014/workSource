@@ -16,14 +16,15 @@ public class DailyPunchStatusStatisticsTodayRecordMapper implements RecordMapper
     @PunchStatusStatisticsItem(defaultOrder = 3, type = PunchStatusStatisticsItemType.LEAVE_EARLY)
     private Integer leaveEarlyMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.NORMAL)
+    @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+    
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.NORMAL)
     private Integer normalMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.REST)
+    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.REST)
     private Integer restMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.GO_OUT)
-    private Integer goOutPunchDayCount;
 
     public Integer getUnArrivedMemberCount() {
         return unArrivedMemberCount;

@@ -18,11 +18,11 @@ public class MonthlyPunchStatusStatisticsRecordMapper implements RecordMapper<Re
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.FORGOT_PUNCH)
     private Integer forgotPunchMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.NORMAL)
-    private Integer normalMemberCount;
-
-    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.GO_OUT)
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.GO_OUT)
     private Integer goOutPunchDayCount;
+
+    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.NORMAL)
+    private Integer normalMemberCount;
 
     public Integer getBelateMemberCount() {
         return belateMemberCount;

@@ -6550,7 +6550,10 @@ public class PunchServiceImpl implements PunchService {
             punchProvider.deletePunchDayLogByDateAndDetailId(memberDetail.getId(), ownerId, punCalendar);
 
             Long deptId = organizationService.getDepartmentByDetailIdAndOrgId(memberDetail.getId(), memberDetail.getOrganizationId());
-            PunchDayLog punchDayLog = new PunchDayLog();
+            PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndDetailId( memberDetail.getId(), ownerId, punCalendar);
+            if(punchDayLog == null){
+            	punchDayLog = new PunchDayLog();
+            }
             punchDayLog.setEnterpriseId(ownerId);
             punchDayLog.setDetailId(memberDetail.getId());
             punchDayLog.setUserId(memberDetail.getTargetId());
@@ -6590,7 +6593,11 @@ public class PunchServiceImpl implements PunchService {
             punchDayLog.setCreatorUid(0L);
             punchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             punchDayLog.setSplitDateTime(new Timestamp(punchDayLog.getPunchDate().getTime() + ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME));
-            punchProvider.createPunchDayLog(punchDayLog);
+            if(punchDayLog.getId() == null){
+            	punchProvider.createPunchDayLog(punchDayLog);
+            }else{
+            	punchProvider.updatePunchDayLog(punchDayLog);
+            }
             return null;
         });
     }
@@ -11574,10 +11581,15 @@ public class PunchServiceImpl implements PunchService {
             if (null != memberDetail) {
                 PunchDayLog newPdl = new PunchDayLog();
                 Calendar punCalendar = Calendar.getInstance();
-                punCalendar.setTime(log.getPunchDate());
-                PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndUserId(log.getUserId(),
-                        log.getOrganizationId(), dateSF.get().format(punCalendar.getTime()));
-                refreshPunchDayLog(memberDetail, punchDayLog, punCalendar, newPdl);
+                punCalendar.setTime(log.getPunchDate());  
+                PunchRule pr = getPunchRuleByDetailId(memberDetail.getNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), log.getOrganizationId(), memberDetail.getId());
+                if (pr == null) {
+                    // 用户未激活和没有设置考勤规则，因此不存在打卡记录和请假等申请记录，所以日报统计只有一些基础数据
+                    String punchDate = dateSF.get().format(log.getPunchDate());
+                    initPunchDayLog4UntrackOrUnPunchRuleOrganizationMember(memberDetail, log.getOrganizationId(), pr, punchDate);
+                } else {
+                    this.refreshPunchDayLog(memberDetail, punCalendar);
+                }
             }
         } catch (Exception e) {
         }
