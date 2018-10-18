@@ -183,11 +183,11 @@ public interface DoorAccessService {
 
     void deleteDoorManagement (AddDoorManagementCommand cmd);
 
-    AclinkDevice changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
+    AclinkDeviceDTO changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
 
-    AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd);
+    FirmwareNewDTO addFirmware (AddFirmwareCommand cmd);
 
-    AclinkFirmwareNew deleteFirmware (DeleteFirmwareCommand cmd);
+    FirmwareNewDTO deleteFirmware (DeleteFirmwareCommand cmd);
     //add by liqingyan
     ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
     //add by liqingyan

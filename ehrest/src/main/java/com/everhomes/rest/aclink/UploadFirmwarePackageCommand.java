@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
+ * <li>id:固件程序id</li>
  * <li>name:程序名称</li>
  * <li>downloadUrl:固件程序url</li>
  * <li>type:固件程序类型 0：蓝牙 1：wifi</li>

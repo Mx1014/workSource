@@ -596,10 +596,9 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("changeUpdateFirmware")
-    @RestReturn(value=String.class)
+    @RestReturn(value=AclinkDeviceDTO.class)
     public RestResponse changeUpdateFirmware (@Valid ChangeUpdateFirmwareCommand cmd){
-        doorAccessService.changeUpdateFirmware(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.changeUpdateFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -623,7 +622,7 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("addFirmware")
-    @RestReturn(value=AclinkFirmwareNew.class)
+    @RestReturn(value=FirmwareNewDTO.class)
     public RestResponse addFirmware (@Valid AddFirmwareCommand cmd){
         RestResponse response = new RestResponse(doorAccessService.addFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -636,7 +635,7 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("deleteFirmware")
-    @RestReturn(value=AclinkFirmwareNew.class)
+    @RestReturn(value=FirmwareNewDTO.class)
     public RestResponse deleteFirmware (@Valid DeleteFirmwareCommand cmd){
         RestResponse response = new RestResponse(doorAccessService.deleteFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

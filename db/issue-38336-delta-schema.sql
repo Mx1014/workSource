@@ -658,6 +658,7 @@ CREATE TABLE `eh_aclink_device` (
 	`firmware` VARCHAR(128) DEFAULT NULL COMMENT '固件名称',
 	`firmware_id` bigint(20),
 	`update` TINYINT(4) DEFAULT NULL COMMENT '默认升级 0：不支持 1：支持',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
 	`status` tinyint(4) DEFAULT 1 COMMENT '状态 0：失效 1：有效',
   	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁设备类型';

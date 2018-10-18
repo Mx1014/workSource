@@ -24,6 +24,7 @@ public class AclinkDeviceDTO {
     private Long firmwareId;
     private Byte update;
     private Byte status;
+    private Timestamp createtime;
 
     public Long getId() {
         return id;
@@ -120,8 +121,16 @@ public class AclinkDeviceDTO {
     public void setStatus(Byte status) {
         this.status = status;
     }
-    
-	@Override
+
+    public Timestamp getCreatetime() {
+        return createtime;
+    }
+
+    public void setCreatetime(Timestamp createtime) {
+        this.createtime = createtime;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

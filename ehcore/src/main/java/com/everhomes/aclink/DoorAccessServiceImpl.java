@@ -5379,27 +5379,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     }
     @Override
-    public AclinkDevice changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
+    public AclinkDeviceDTO changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
         AclinkDevice dto = aclinkFirmwareProvider.findDeviceById(cmd.getId());
         dto.setFirmware(cmd.getFirmware());
         dto.setFirmwareId(cmd.getFirmwareId());
         aclinkFirmwareProvider.updateAclinkDevice(dto);
-        return (AclinkDevice)ConvertHelper.convert(dto,AclinkDevice.class);
+        return (AclinkDeviceDTO)ConvertHelper.convert(dto,AclinkDeviceDTO.class);
 
     }
     @Override
-    public AclinkFirmwareNew addFirmware (AddFirmwareCommand cmd){
-	    AclinkFirmwareNew firmware = (AclinkFirmwareNew) ConvertHelper.convert(cmd,AclinkFirmwareNew.class);
+    public FirmwareNewDTO addFirmware (AddFirmwareCommand cmd){
+        AclinkFirmwareNew firmware = (AclinkFirmwareNew) ConvertHelper.convert(cmd,AclinkFirmwareNew.class);
         firmware.setStatus((byte)1);
         aclinkFirmwareProvider.createFirmwareNew(firmware);
-        return (AclinkFirmwareNew)ConvertHelper.convert(firmware, AclinkFirmwareNew.class);
+        return (FirmwareNewDTO)ConvertHelper.convert(firmware, FirmwareNewDTO.class);
     }
     @Override
-    public AclinkFirmwareNew deleteFirmware (DeleteFirmwareCommand cmd){
+    public FirmwareNewDTO deleteFirmware (DeleteFirmwareCommand cmd){
         AclinkFirmwareNew firmware = aclinkFirmwareProvider.findFirmwareById(cmd.getId());
         firmware.setStatus((byte)0);
         aclinkFirmwareProvider.updateFirmwareNew(firmware);
-        return (AclinkFirmwareNew)ConvertHelper.convert(firmware, AclinkFirmwareNew.class);
+        return (FirmwareNewDTO)ConvertHelper.convert(firmware, FirmwareNewDTO.class);
     }
 
     @Override
@@ -5431,7 +5431,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public FirmwarePackageDTO deleteFirmwarePackage(DeleteFirmwarePackageCommand cmd){
-	            AclinkFirmwarePackage pkg = aclinkFirmwareProvider.findPackageById(cmd.getId());
+	    AclinkFirmwarePackage pkg = aclinkFirmwareProvider.findPackageById(cmd.getId());
         pkg.setStatus(((byte)0));
         aclinkFirmwareProvider.updateFirmwarePackage(pkg);
         return (FirmwarePackageDTO)ConvertHelper.convert(pkg, FirmwarePackageDTO.class);
