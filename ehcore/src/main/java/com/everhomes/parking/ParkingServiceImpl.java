@@ -4017,11 +4017,6 @@ public class ParkingServiceImpl implements ParkingService {
 		} else {
 			invoiceUrl = homeurl + "/promotion/app-invoice?businessOrderNumber=" + generalOrderId + "#/invoice-detail/2";
 		}
-		try {
-			invoiceUrl =URLEncoder.encode(invoiceUrl, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
 		response.setInvoiceUrl(invoiceUrl);
 		return response;
 	}
