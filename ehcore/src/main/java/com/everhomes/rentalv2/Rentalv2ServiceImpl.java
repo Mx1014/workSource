@@ -1197,6 +1197,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//为了降低运算量 在筛选过程前筛一遍 降低资源个数
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, Integer.MAX_VALUE, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
+		filteRentalSites(rentalSites,cmd);
 		siteIds = rentalSites.stream().map(RentalResource::getId).collect(Collectors.toList());
 		siteIds = filteRentalSitesByTime(siteIds,cmd);
         rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
@@ -1244,6 +1245,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 
 		return response;
+	}
+
+	private void filteRentalSites(List<RentalResource> resources,FindRentalSitesCommand cmd){
+		if (resources == null || resources.size()==0)
+			return;
+		if (cmd.getPeopleSpecLeast() != null)
+			resources = resources.stream().filter(r->r.getPeopleSpec() == null || r.getPeopleSpec()>=cmd.getPeopleSpecLeast()).collect(Collectors.toList());
+		if (cmd.getPeopleSpecMost() != null)
+			resources = resources.stream().filter(r->r.getPeopleSpec() == null || r.getPeopleSpec()<=cmd.getPeopleSpecMost()).collect(Collectors.toList());
+		if (cmd.getStructureList() != null && cmd.getStructureList().size() > 0)
+			resources = resources.stream().filter(r->{
+				List<RentalStructure> rentalStructures = rentalv2Provider
+							.listRentalStructures(RuleSourceType.RESOURCE.getCode(), r.getId(), cmd.getResourceType(), null, null);
+				if (rentalStructures == null)
+					return false;
+				List<Long> templateIds = rentalStructures.stream().map(RentalStructure::getTemplateId).collect(Collectors.toList());
+				for (Long id : cmd.getStructureList())
+					if (!templateIds.contains(id))
+						return false;
+				return true;
+			}).collect(Collectors.toList());
 	}
 
 	private List<Long> filteRentalSitesByTime(List<Long> siteIds,FindRentalSitesCommand cmd){
@@ -1419,7 +1441,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 			}
 		}
-
+		//基础设施
+		List<RentalStructure> rentalStructures = rentalv2Provider
+				.listRentalStructures(RuleSourceType.RESOURCE.getCode(), rentalSite.getId(), rentalSite.getResourceType(), null, null);
+		if (rentalStructures != null && rentalStructures.size() > 0){
+			rSiteDTO.setStructures(new ArrayList<>());
+			for (RentalStructure rst : rentalStructures) {
+				SiteStructureDTO dto = convertStructure2DTO(rst);
+				rSiteDTO.getStructures().add(dto);
+			}
+		}
 		//范围
 		List<RentalSiteRange> owners = this.rentalv2Provider.findRentalSiteOwnersBySiteId(rentalSite.getResourceType(),
 				rentalSite.getId());
@@ -1810,17 +1841,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	private SiteItemDTO convertItem2DTO(RentalItem item) {
 		SiteItemDTO siteItemDTO = ConvertHelper.convert(item, SiteItemDTO.class);
-//		if(item.getItemType().equals(RentalItemType.SALE.getCode())){
-//			//售卖型的要计算售卖数量su
-//			Integer sumInteger = this.rentalv2Provider.countRentalSiteItemSoldCount(item.getId());
-//			siteItemDTO.setSoldCount(sumInteger);
-//			siteItemDTO.setCounts(item.getCounts()-sumInteger);
-//		}
+
 		siteItemDTO.setItemName(item.getName());
 		siteItemDTO.setItemPrice(item.getPrice());
 		siteItemDTO.setDescription(item.getDescription());
 		siteItemDTO.setImgUrl(this.contentServerService.parserUri(siteItemDTO.getImgUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 		return siteItemDTO;
+	}
+
+	private SiteStructureDTO convertStructure2DTO(RentalStructure structure){
+		SiteStructureDTO structureDTO = ConvertHelper.convert(structure,SiteStructureDTO.class);
+		structureDTO.setIconUrl(this.contentServerService.parserUri(structureDTO.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+		return structureDTO;
 	}
 
 	@Override
@@ -9190,5 +9222,54 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
 		    result = result.replaceAll("-","~");//弱智需求。。
 		return result;
+	}
+
+	@Override
+	public GetStructureListResponse getStructureList(GetStructureListAdminCommand cmd) {
+
+		if (StringUtils.isBlank(cmd.getResourceType())) {
+			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
+		}
+
+		if (cmd.getSourceType().equals(RuleSourceType.DEFAULT.getCode())) {
+			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getResourceType(), cmd.getResourceTypeId(), cmd.getSourceType(), cmd.getSourceId());
+			if (rule == null)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"cannot find default rule");
+			cmd.setSourceId(rule.getId());
+		}
+
+		GetStructureListResponse response = new GetStructureListResponse();
+		response.setSiteStructures(new ArrayList<>());
+		List<RentalStructure> rentalStructures = rentalv2Provider
+				.listRentalStructures(cmd.getSourceType(), cmd.getSourceId(), cmd.getResourceType(), null, null);
+		for (RentalStructure rst : rentalStructures) {
+			SiteStructureDTO dto = convertStructure2DTO(rst);
+			response.getSiteStructures().add(dto);
+		}
+		return response;
+	}
+
+	@Override
+	public void updateStructure(UpdateStructureAdminCommand cmd) {
+		RentalStructure rentalStructure = rentalv2Provider.getRentalStructureById(cmd.getId());
+		if (rentalStructure == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cannot find structure");
+		rentalStructure.setDisplayName(cmd.getDisplayName());
+		rentalStructure.setIconUri(cmd.getIconUri());
+		rentalStructure.setIsSurport(cmd.getIsSurport());
+		rentalStructure.setDefaultOrder(cmd.getDefaultOrder());
+		rentalv2Provider.updateRentalStructure(rentalStructure);
+	}
+
+	@Override
+	public void updateStructures(UpdateStructuresAdminCommand cmd) {
+		List<SiteStructureDTO> structures = cmd.getStructures();
+		for (SiteStructureDTO dto:structures){
+			UpdateStructureAdminCommand cmd2 = ConvertHelper.convert(dto,UpdateStructureAdminCommand.class);
+			updateStructure(cmd2);
+		}
 	}
 }

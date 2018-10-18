@@ -216,6 +216,12 @@ public interface Rentalv2Service {
 
 	GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd);
 
+	GetStructureListResponse getStructureList(GetStructureListAdminCommand cmd);
+
+	void updateStructure(UpdateStructureAdminCommand cmd);
+
+	void updateStructures(UpdateStructuresAdminCommand cmd);
+
 	void test();
 
 }

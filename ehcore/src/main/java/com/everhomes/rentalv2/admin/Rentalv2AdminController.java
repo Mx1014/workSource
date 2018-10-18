@@ -350,8 +350,8 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getStructureList")
 	@RestReturn(value = GetStructureListResponse.class)
 	public RestResponse getStructureList(@Valid GetStructureListAdminCommand cmd) {
-		//GetItemListCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
-		RestResponse response = new RestResponse();
+		GetStructureListResponse getStructureListResponse =  rentalService.getStructureList(cmd);
+		RestResponse response = new RestResponse(getStructureListResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -366,7 +366,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateStructure")
 	@RestReturn(value = String.class)
 	public RestResponse updateStructure(@Valid UpdateStructureAdminCommand cmd) {
-		//rentalService.updateItem(cmd);
+		rentalService.updateStructure(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -382,7 +382,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("updateStructures")
 	@RestReturn(value = String.class)
 	public RestResponse updateStructures(@Valid UpdateStructuresAdminCommand cmd) {
-		//rentalService.updateItems(cmd);
+		rentalService.updateStructures(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
