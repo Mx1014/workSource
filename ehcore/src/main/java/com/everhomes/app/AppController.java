@@ -4,6 +4,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.*;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +55,21 @@ public class AppController extends ControllerBase {
             return new RestResponse("YES");
         }
         return new RestResponse("NO");
+    }
+
+    /**
+     * <p>根据appkey获取app</p>
+     * <b>/appkey/findApp</b>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("findApp")
+    @RestReturn(value=AppDTO.class)
+    public RestResponse findApp(@Valid GetAppCommand cmd) {
+
+        App app = appService.find(cmd.getRealAppKey());
+
+        return new RestResponse(ConvertHelper.convert(app, AppDTO.class));
     }
 
     /**

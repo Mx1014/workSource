@@ -215,7 +215,9 @@ public class RestCallTemplate {
             }
 
             HttpErrorEntity errorEntity = new HttpErrorEntity<>(errorObj, headers, result.getStatusCode());
-            restErrorHandler.error(errorEntity);// should throw some exception
+            if (restErrorHandler != null) {
+                restErrorHandler.error(errorEntity);// should throw some exception
+            }
         }
         // 全部返回String, 再转一遍
         if (responseType == String.class) {

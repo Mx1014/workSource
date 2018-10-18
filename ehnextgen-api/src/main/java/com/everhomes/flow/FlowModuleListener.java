@@ -128,8 +128,10 @@ public interface FlowModuleListener {
     }
 
     /**
-     * 从工作流任务详情界面触发二维码扫描
+     * 从工作流任务详情界面触发二维码扫描.
+     * <b>已经废弃，请勿使用</b>
      */
+    @Deprecated
     default void onScanQRCode(FlowCase flowCase, QRCodeDTO qrCode, Long currentUserId) { }
 
     /**

@@ -20,6 +20,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -297,6 +298,10 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
+        //敏感词过滤
         filterWords(cmd);
 
 
@@ -5464,6 +5469,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
 
         User user = UserContext.current().getUser();
         Long userId = user.getId();
