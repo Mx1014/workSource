@@ -78,6 +78,12 @@ import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.launchpadbase.AppContext;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.organization.*;
+
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -96,6 +102,9 @@ import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
@@ -535,7 +544,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskSearch.deleteById(task.getId());
 
 			LOGGER.error("Update pmTask elasticsearch error, task={}", task);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
 					"Update pmTask elasticsearch error.");
 		}
 	}
@@ -760,12 +769,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			String requestorName = cmd.getRequestorName();
 			if(StringUtils.isBlank(requestorPhone)){
 				LOGGER.error("RequestorPhone cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorPhone cannot be null.");
 			}
 			if(StringUtils.isBlank(requestorName)){
 				LOGGER.error("RequestorName cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorName cannot be null.");
 			}
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
@@ -859,12 +868,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
 			LOGGER.error("RequestorPhone cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorPhone cannot be null.");
 		}
 		if(StringUtils.isBlank(requestorName)){
 			LOGGER.error("RequestorName cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
@@ -1225,7 +1234,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			baos.flush();  
 		} catch (IOException e) {
 			LOGGER.error("ExportTasks is fail, cmd={}");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"ExportTasks is fail.");
 		}  
 		// 打开一个新的输入流  
@@ -1619,7 +1628,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkNamespaceId(Integer namespaceId){
 		if(namespaceId == null) {
         	LOGGER.error("Invalid namespaceId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid namespaceId parameter.");
         }
 	}
@@ -1627,7 +1636,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkId(Long id){
 		if(null == id) {
         	LOGGER.error("Invalid id parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid id parameter.");
         }
 	}
@@ -1636,7 +1645,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Category category = categoryProvider.findCategoryById(id);
 		if(null == category) {
         	LOGGER.error("Category not found, categoryId={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Category not found.");
         }
 		return category;
@@ -1653,13 +1662,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
         	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerId parameter.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
         	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerType parameter.");
         }
 	}
@@ -1668,7 +1677,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask pmTask = pmTaskProvider.findTaskById(id);
 		if(null == pmTask) {
         	LOGGER.error("PmTask not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTask not found.");
         }
 		return pmTask;
@@ -1678,7 +1687,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskLog pmTaskLog = pmTaskProvider.findTaskLogById(id);
 		if(null == pmTaskLog) {
         	LOGGER.error("PmTaskLog not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTaskLog not found.");
         }
 		return pmTaskLog;
@@ -1914,7 +1923,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOperateType(Byte operateType) {
 		if (null == operateType) {
         	LOGGER.error("Invalid operateType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid operateType parameter.");
         }
 		
@@ -1923,7 +1932,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOrganizationId(Long organizationId) {
 		if (null == organizationId) {
         	LOGGER.error("Invalid organizationId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid organizationId parameter.");
         }
 	}
@@ -2214,58 +2223,68 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public ListOrganizationCommunityBySceneTokenResponse listOrganizationCommunityBySceneToken(ListOrganizationCommunityBySceneTokenCommand cmd) {
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != cmd.getSceneToken()) {
-			User user = UserContext.current().getUser();
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-		}
-		if (sceneTokenDTO==null)
-			return null;
+//		SceneTokenDTO sceneTokenDTO = null;
+//		if (null != cmd.getSceneToken()) {
+//			User user = UserContext.current().getUser();
+//			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//		}
+//		if (sceneTokenDTO==null)
+//			return null;
 		ListOrganizationCommunityBySceneTokenResponse response = new ListOrganizationCommunityBySceneTokenResponse();
-		SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
+		//SceneType sceneType = SceneType.fromCode(sceneTokenDTO.getScene());
 		List<Community> communities = new ArrayList<>();
 		List<CommunityDTO> result = new ArrayList<>();
-		Community community = null;
-		switch (sceneType) {
-			case DEFAULT:
-			case PARK_TOURIST:
-			case ENTERPRISE_NOAUTH:
-				community = communityProvider.findCommunityById(sceneTokenDTO.getEntityId());
-				if (community != null)
-					communities.add(community);
 
-				break;
-			case FAMILY:
-				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+		//TODO 标准版没有场景的概念，直接使用园区类型
+		AppContext appContext = UserContext.current().getAppContext();
 
-				if (family != null) {
-					community = communityProvider.findCommunityById(family.getCommunityId());
-				} else {
-					if (LOGGER.isWarnEnabled()) {
-						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
-					}
-				}
-				if (community != null) {
-					communities.add(community);
-				}
-
-				break;
-			case PM_ADMIN:// 无小区ID
-				communities.addAll(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()));
-				break;
-			case ENTERPRISE: // 增加两场景，与园区企业保持一致
-				List<OrganizationDTO> organizationDTOS = organizationService.listUserRelateOrganizations(
-						UserContext.getCurrentNamespaceId(),UserContext.currentUserId(),OrganizationGroupType.ENTERPRISE);
-
-				communities.addAll(organizationDTOS.stream().map(r->{
-					Community co = communityProvider.findCommunityById(r.getCommunityId());
-					return co;
-				}).collect(Collectors.toList()));
-				break;
-			default:
-				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
-				break;
+		Community community = communityProvider.findCommunityById(appContext.getCommunityId());
+		if (community != null){
+			communities.add(community);
 		}
+
+
+//		Community community = null;
+//		switch (sceneType) {
+//			case DEFAULT:
+//			case PARK_TOURIST:
+//			case ENTERPRISE_NOAUTH:
+//				community = communityProvider.findCommunityById(sceneTokenDTO.getEntityId());
+//				if (community != null)
+//					communities.add(community);
+//
+//				break;
+//			case FAMILY:
+//				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDTO.getEntityId());
+//
+//				if (family != null) {
+//					community = communityProvider.findCommunityById(family.getCommunityId());
+//				} else {
+//					if (LOGGER.isWarnEnabled()) {
+//						LOGGER.warn("Family not found, sceneToken=" + sceneTokenDTO);
+//					}
+//				}
+//				if (community != null) {
+//					communities.add(community);
+//				}
+//
+//				break;
+//			case PM_ADMIN:// 无小区ID
+//				communities.addAll(communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId()));
+//				break;
+//			case ENTERPRISE: // 增加两场景，与园区企业保持一致
+//				List<OrganizationDTO> organizationDTOS = organizationService.listUserRelateOrganizations(
+//						UserContext.getCurrentNamespaceId(),UserContext.currentUserId(),OrganizationGroupType.ENTERPRISE);
+//
+//				communities.addAll(organizationDTOS.stream().map(r->{
+//					Community co = communityProvider.findCommunityById(r.getCommunityId());
+//					return co;
+//				}).collect(Collectors.toList()));
+//				break;
+//			default:
+//				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDTO);
+//				break;
+//		}
 		communities.forEach(r->{
 			result.add(ConvertHelper.convert(r, CommunityDTO.class));
 		});
@@ -2342,7 +2361,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(organizationList != null && organizationList.size() > 0) {
 				organizationList.forEach(f -> {
 					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
-						if(f.getCommunityId().equals(communityId))
+						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
 							organizations.add(f);
 					}
 
@@ -2403,7 +2422,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("Export pmTask excel failed.", e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"Export pmTask excel failed.");
 		}try {
 			out.close();
@@ -2442,27 +2461,41 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
 		if(null == cmd.getAppId()) {
 			LOGGER.error("Invalid appId parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid appId parameter.");
 		}
 		String colName = "pmtask.hide.represent.";
 		colName += cmd.getAppId().toString();
 		response.setIfHide(configProvider.getIntValue(namespaceId,colName,0));
 
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != cmd.getSceneToken()) {
-			User user = UserContext.current().getUser();
+//		SceneTokenDTO sceneTokenDTO = null;
+//		if (null != cmd.getSceneToken()) {
+//			User user = UserContext.current().getUser();
 
 
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-		}
-		Integer ifAdmain = 1;
-		if (sceneTokenDTO != null) {
-			String scene = sceneTokenDTO.getScene();
-			if (SceneType.PM_ADMIN.getCode().equals(scene))
-				ifAdmain = 0;
-		}
+//			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//		}
+//		Integer ifAdmain = 1;
+//		if (sceneTokenDTO != null) {
+//			String scene = sceneTokenDTO.getScene();
+//			if (SceneType.PM_ADMIN.getCode().equals(scene))
+//				ifAdmain = 0;
+//		}
+
+		colName = "pmtask.hide.represent.app";
+		colName += cmd.getAppId().toString();
+		response.setIfAppHide(configProvider.getIntValue(namespaceId, colName , 0));
+
+		colName = "pmtask.hide.represent.bg";
+		colName += cmd.getAppId().toString();
+		response.setIfBgHide(configProvider.getIntValue(namespaceId, colName , 0));
+
+
+		//去除场景，按照普通用户显示
+		Integer ifAdmain = 0;
 		response.setIfHide(response.getIfHide()|ifAdmain);
+		response.setIfAppHide(response.getIfAppHide()|ifAdmain);
+		response.setIfBgHide(response.getIfBgHide()|ifAdmain);
 		return response;
 	}
 
@@ -2570,7 +2603,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHistoryAddress pmTaskHistoryAddress = pmTaskProvider.findTaskHistoryAddressById(cmd.getId());
 		if (null == pmTaskHistoryAddress) {
 			LOGGER.error("PmTaskHistoryAddress not found, id={}", cmd.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 					"PmTaskHistoryAddress not found.");
 		}
 		pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.INACTIVE.getCode());
@@ -2582,7 +2615,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
 
@@ -3201,7 +3234,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer exportType = cmd.getExportType();
 		if(null == exportType){
 			LOGGER.error("ExportType cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"ExportType cannot be null.");
 		}
 
@@ -3318,7 +3351,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
 		if(null == cmd.getId() && (null == cmd.getNamespaceId() && null == cmd.getOwnerId())){
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
 		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
@@ -3506,7 +3539,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListBusinessUsersCommand cmdPay = new ListBusinessUsersCommand();
 		if(null == cmd.getOrganizationId()){
 			LOGGER.error("Invalid OrganizationId, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid OrganizationId.");
 		}
 		// 给支付系统的bizUserId的形式：EhOrganizations1037001
@@ -3714,7 +3747,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());
@@ -3975,7 +4008,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskOrder paymentBillOrder = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
 		if(paymentBillOrder == null){
 			LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"can not find order record");
 		}
 
@@ -4037,7 +4070,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());

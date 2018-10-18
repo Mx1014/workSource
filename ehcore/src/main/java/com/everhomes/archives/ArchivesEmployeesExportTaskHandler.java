@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @Component
-public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandler{
+public class ArchivesEmployeesExportTaskHandler implements FileDownloadTaskHandler {
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;

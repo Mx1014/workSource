@@ -16,6 +16,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -98,7 +99,9 @@ public class FlowProviderImpl implements FlowProvider {
             query.addConditions(t.ID.lt(locator.getAnchor()));
         }
 
-        query.addLimit(count);
+        if (count > 0) {
+            query.addLimit(count + 1);
+        }
         query.addOrderBy(t.ID.desc());
 
         LOGGER.debug("query flow sql: {}", query.getSQL(true));
@@ -107,13 +110,15 @@ public class FlowProviderImpl implements FlowProvider {
             return RecordHelper.convert(r, Flow.class);
         });
 
-        if (objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        List<Flow> list = query.fetch().map((r) -> RecordHelper.convert(r, Flow.class));
+
+        if (list.size() > count && count > 0) {
+            locator.setAnchor(list.get(list.size() - 1).getId());
+            list.remove(list.size() - 1);
         } else {
             locator.setAnchor(null);
         }
-
-        return objs;
+        return list;
     }
 
     private void prepareObj(Flow obj) {
@@ -246,6 +251,11 @@ public class FlowProviderImpl implements FlowProvider {
         if (cmd.getProjectType() != null) {
             query.addConditions(t.PROJECT_TYPE.eq(cmd.getProjectType()));
         }
+        //多管理公司
+        if (cmd.getOrgId() != null) {
+            query.addConditions(t.ORGANIZATION_ID.eq(cmd.getOrgId()));
+        }
+
         query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
     }
 
@@ -299,8 +309,12 @@ public class FlowProviderImpl implements FlowProvider {
             if (moduleType != null) {
                 query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
             }
-            query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
-            query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
+            if (ownerId != null) {
+                query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
+            }
+            if (StringUtils.isNotBlank(ownerType)) {
+                query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
+            }
             query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
             query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0L));
             query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
@@ -312,6 +326,25 @@ public class FlowProviderImpl implements FlowProvider {
             return flows.get(0);
         }
         return null;
+    }
+
+    @Override
+    public List<Flow> listConfigFlowByCond(Integer namespaceId, String moduleType, Long moduleId, String projectType, Long projectId, String ownerType, Long ownerId) {
+        return this.queryFlows(new ListingLocator(), -1, (locator, query) -> {
+            com.everhomes.server.schema.tables.EhFlows t = Tables.EH_FLOWS;
+            query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            if (moduleType != null) {
+                query.addConditions(t.MODULE_TYPE.eq(moduleType));
+            }
+            query.addConditions(t.MODULE_ID.eq(moduleId));
+            query.addConditions(t.PROJECT_TYPE.eq(projectType));
+            query.addConditions(t.PROJECT_ID.eq(projectId));
+            query.addConditions(t.OWNER_TYPE.eq(ownerType));
+            query.addConditions(t.OWNER_ID.eq(ownerId));
+            query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
+            query.addConditions(t.FLOW_MAIN_ID.eq(0L));
+            return query;
+        });
     }
 
     @Override

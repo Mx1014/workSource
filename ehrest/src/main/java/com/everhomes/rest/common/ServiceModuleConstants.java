@@ -38,4 +38,6 @@ public interface ServiceModuleConstants {
 	long PAYMENT_CARD_MODULE = 41200L;
     
 
+    long OFFICE_CUBICLE = 40200L; //工位预订
+
 }

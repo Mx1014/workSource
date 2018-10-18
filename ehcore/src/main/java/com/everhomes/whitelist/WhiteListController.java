@@ -18,7 +18,7 @@ import java.util.List;
 @RestDoc(value="WhiteList controller", site="whiteList")
 @RestController
 @RequestMapping("/whitelist")
-public class WhiteListController extends ControllerBase{
+public class WhiteListController extends ControllerBase {
 
     @Autowired
     private WhiteListSerivce whiteListSerivce;

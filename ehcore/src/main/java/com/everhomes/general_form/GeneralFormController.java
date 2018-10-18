@@ -209,6 +209,61 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /general_form/enableProjectCustomize</b>
+	 * <p> 启用表单自定义 </p>
+	 */
+	@RequestMapping("enableProjectCustomize")
+	@RestReturn(value=String.class)
+	public RestResponse enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+		generalFormService.enableProjectCustomize(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/disableProjectCustomize</b>
+	 * <p> 禁用表单自定义 </p>
+	 */
+	@RequestMapping("disableProjectCustomize")
+	@RestReturn(value = String.class)
+	public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+		generalFormService.disableProjectCustomize(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/getProjectCustomize</b>
+	 * <p> 获取自定义配置属性 </p>
+	 */
+	@RequestMapping("getProjectCustomize")
+	@RestReturn(value = String.class)
+	public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+		Byte flag = generalFormService.getProjectCustomize(cmd);
+		RestResponse response = new RestResponse(flag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/doFormMirror</b>
+	 * <p> 复制表单 </p>
+	 */
+	@RequestMapping("doFormMirror")
+	@RestReturn(value = String.class)
+	public RestResponse doFormMirror(@Valid DoFormMirrorCommand cmd) {
+		generalFormService.doFormMirror(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 
 

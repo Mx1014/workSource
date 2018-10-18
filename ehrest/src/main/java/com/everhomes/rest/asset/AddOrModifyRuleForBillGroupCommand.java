@@ -21,6 +21,7 @@ import java.util.List;
  * <li>area_size_type:计费面积类型,1：合同面积；2.建筑面积；3：使用面积；4：出租面积</li>
  * <li>billItemMonthOffset:收费项产生时间偏离当前月的月数， 若是费用周期最后一天，则不填即可</li>
  * <li>billItemDayOffset:收费项产生时间偏离当前月的日数，若是费用周期最后一天，不填即可，周期最后一天为default值</li>
+ * <li>organizationId:管理公司id</li>
  *</ul>
  */
 public class AddOrModifyRuleForBillGroupCommand {
@@ -44,6 +45,9 @@ public class AddOrModifyRuleForBillGroupCommand {
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
+
+    private Long organizationId;
+    private Long appId;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -153,6 +157,22 @@ public class AddOrModifyRuleForBillGroupCommand {
 
     public void setVariables(List<ChargingItemVariable> variables) {
         this.variables = variables;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public AddOrModifyRuleForBillGroupCommand() {

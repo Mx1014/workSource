@@ -12,9 +12,11 @@ public interface AllianceTagProvider {
 	void updateAllianceTag(AllianceTag headTag);
 
 	List<AllianceTag> getAllianceParentTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
-			Long type);
+			String ownerType, Long ownerId, Long type);
 
 	List<AllianceTag> getAllianceChildTagList(Integer namespaceId, Long type, Long id);
 	
 	List<AllianceTag> listAllianceTags(Integer pageSize, ListingLocator locator, ListingQueryBuilderCallback callback);
+
+	void deleteProjectTags(Long projectId, Long type);
 }

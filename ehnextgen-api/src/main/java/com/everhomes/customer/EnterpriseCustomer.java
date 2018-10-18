@@ -21,12 +21,17 @@ public class EnterpriseCustomer extends EhEnterpriseCustomers {
 
     private String ownerType;
 
+
     public List<AttachmentDescriptor> getBanner() {
         return banner;
     }
 
     public void setBanner(List<AttachmentDescriptor> banner) {
         this.banner = banner;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
     public Long getOwnerId() {

@@ -30,6 +30,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -39,6 +40,7 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -49,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -640,6 +641,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 					"Invalid paramter of size error: null ");
 	}
 
+	private void checkOwnerTypeOwnerId(String ownerType,Long ownerId){
+		if(null == ownerType || null == ownerId){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of ownerType ownerId: null ");
+		}
+	}
+
+	private void checkOrgId(Long orgId){
+		if(null == orgId){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid paramter of orgId: null ");
+		}
+	}
+
 	private void sendMessage(OfficeCubicleSpace space,OfficeCubicleOrder order) {
 		// 发消息 +推送
 
@@ -872,7 +887,8 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(namespaceId==null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,pageAnchor,pageSize+1);
+		checkOrgId(cmd.getOrgId());
+		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,cmd.getOrgId(),cmd.getOwnerType(),cmd.getOwnerId(),pageAnchor,pageSize+1);
 
 		if (null == cities || cities.size()==0)
 			return null;
@@ -910,6 +926,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	@Override
 	public void createOrUpdateCity(CreateOrUpdateCityCommand cmd) {
 		checkCityName(cmd.getProvinceName(),cmd.getCityName());
+		checkOrgId(cmd.getOrgId());
 		if(cmd.getId()!=null){
 			OfficeCubicleCity officeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityById(cmd.getId());
 			if(officeCubicleCity==null){
@@ -919,10 +936,23 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			officeCubicleCity.setCityName(cmd.getCityName());
 			officeCubicleCity.setProvinceName(cmd.getProvinceName());
 			officeCubicleCity.setIconUri(cmd.getIconUri());
+			officeCubicleCity.setOrgId(cmd.getOrgId());
 			officeCubicleCity.setStatus((byte)2);
+			if(StringUtils.isNotEmpty(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+				officeCubicleCity.setOwnerType(cmd.getOwnerType());
+				officeCubicleCity.setOwnerId(cmd.getOwnerId());
+			}
 			officeCubicleCityProvider.updateOfficeCubicleCity(officeCubicleCity);
 		}else{
-			OfficeCubicleCity oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+			OfficeCubicleCity oldOfficeCubicleCity = null;
+			if(StringUtils.isNotEmpty(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+			}else{
+				oldOfficeCubicleCity = officeCubicleCityProvider.findOfficeCubicleCityByProvinceAndCity(cmd.getProvinceName(), cmd.getCityName(), UserContext.getCurrentNamespaceId());
+				if(oldOfficeCubicleCity != null && (StringUtils.isNotEmpty(oldOfficeCubicleCity.getOwnerType()) || null != oldOfficeCubicleCity.getOwnerId())){
+					oldOfficeCubicleCity = null;
+				}
+			}
 			if(oldOfficeCubicleCity!=null){
 				throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_EXIST_CITY,
 						"城市已存在，不能重复添加");
@@ -983,5 +1013,97 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
 		}
 		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
+	}
+
+	@Override
+	public ListCitiesResponse copyCities(CopyCitiesCommand cmd) {
+
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if (null != config && config.getCustomizeFlag().equals(TrueOrFalseFlag.TRUE.getCode())){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_AlREADY_CUSTOMIZE_CONFIG,
+					"Already customize config");
+		}
+
+		List<OfficeCubicleCity> generalCities = officeCubicleCityProvider.listOfficeCubicleCityByOrgId(cmd.getOrgId());
+
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if(null != cities){
+			cities.stream().forEach(r ->{
+				officeCubicleCityProvider.deleteOfficeCubicleCity(r.getId());
+			});
+		}
+		if(null != generalCities){
+			generalCities.stream().forEach(r ->{
+				r.setOwnerType(cmd.getOwnerType());
+				r.setOwnerId(cmd.getOwnerId());
+				officeCubicleCityProvider.createOfficeCubicleCity(r);
+			});
+		}
+		ListCitiesCommand listcmd = new ListCitiesCommand();
+		listcmd.setOwnerType(cmd.getOwnerType());
+		listcmd.setOwnerId(cmd.getOwnerId());
+		listcmd.setOrgId(cmd.getOrgId());
+		ListCitiesResponse response = this.listCities(listcmd);
+
+		config.setCustomizeFlag(TrueOrFalseFlag.TRUE.getCode());
+		officeCubicleProvider.updateConfig(config);
+
+		return response;
+	}
+
+	@Override
+	public ListCitiesResponse removeCustomizedCities(CopyCitiesCommand cmd) {
+
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+
+		if (null != config && config.getCustomizeFlag().equals(TrueOrFalseFlag.FALSE.getCode())){
+			throw RuntimeErrorException.errorWith(OfficeCubicleErrorCode.SCOPE, OfficeCubicleErrorCode.ERROR_AlREADY_GENERAL_CONFIG,
+					"Already general config");
+		}
+
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCityByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		if(null != cities){
+			cities.stream().forEach(r -> {
+				officeCubicleCityProvider.deleteOfficeCubicleCity(r.getId());
+			});
+		}
+		ListCitiesCommand listcmd = new ListCitiesCommand();
+		listcmd.setOrgId(cmd.getOrgId());
+		ListCitiesResponse response = this.listCities(listcmd);
+
+		config.setCustomizeFlag(TrueOrFalseFlag.FALSE.getCode());
+		officeCubicleProvider.updateConfig(config);
+
+		return response;
+	}
+
+	@Override
+	public Byte getProjectCustomize(GetCustomizeCommand cmd) {
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		OfficeCubicleConfig config = officeCubicleProvider.findConfigByOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
+		if(null != config){
+			return config.getCustomizeFlag();
+		}else{
+			config = new OfficeCubicleConfig();
+			config.setOwnerId(cmd.getOwnerId());
+			config.setOwnerType(cmd.getOwnerType());
+			config.setOrgId(cmd.getOrgId());
+			config.setNamespaceId(UserContext.getCurrentNamespaceId());
+			config.setCustomizeFlag(TrueOrFalseFlag.FALSE.getCode());
+			officeCubicleProvider.createConfig(config);
+		}
+		return config.getCustomizeFlag();
+	}
+
+	@Override
+	public Byte getCurrentProjectOnlyFlag(GetCurrentProjectOnlyFlagCommand cmd) {
+		String currentProjectOnly = configurationProvider.getValue(cmd.getNamespaceId(),"officecubicle.currentProjectOnly","0");
+		return Byte.valueOf(currentProjectOnly);
 	}
 }

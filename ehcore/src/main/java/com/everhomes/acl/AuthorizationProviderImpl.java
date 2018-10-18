@@ -291,6 +291,57 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<Tuple<Long, String>> getAuthorizationAppModuleIdsByTargetWithTypes(List<Target> targets, List<String> types) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Tuple<Long,String>> result = new ArrayList<>();
+		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE_APP.getCode());
+		cond = cond.and(Tables.EH_AUTHORIZATIONS.MODULE_CONTROL_TYPE.in(types));
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			result.add(new Tuple<Long,String>(r.getModuleAppId(), r.getModuleControlType()));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public List<Tuple<Long, String>> getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(List<Target> targets, List<String> types, List<Long> configIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		TableLike t1 = Tables.EH_AUTHORIZATIONS.as("t1");
+		TableLike t2 = Tables.EH_AUTHORIZATION_CONTROL_CONFIGS.as("t2");
+		List<Tuple<Long,String>> result = new ArrayList<>();
+		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("control_id").eq(t2.field("control_id")));
+		Condition cond = t1.field("auth_type").eq(EntityType.SERVICE_MODULE_APP.getCode());
+		cond = cond.and(t1.field("module_control_type").in(types));
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = t1.field("target_type").eq(target.getTargetType()).and(t1.field("target_id").eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(t1.field("target_type").eq(target.getTargetType()).and(t1.field("target_id").eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds)).or(t2.field("control_id").eq(0)));
+		cond = cond.and(t2_condition);
+		step.where(cond).fetch().map((r) -> {
+			result.add(new Tuple<Long,String>((Long)r.getValue(t1.field("module_app_id")), (String)r.getValue(t1.field("module_control_type"))));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		if(null != pageSize)

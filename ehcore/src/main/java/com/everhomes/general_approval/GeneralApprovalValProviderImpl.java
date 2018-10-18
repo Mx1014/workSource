@@ -135,7 +135,7 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
 	        result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
 	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(flowCaseId))
                     .and(Tables.EH_GENERAL_APPROVAL_VALS.FORM_ORIGIN_ID.eq(formOriginId))
-                    .and(Tables.EH_GENERAL_APPROVAL_VALS.FORM_VERSION.eq(formVersion))
+                    // .and(Tables.EH_GENERAL_APPROVAL_VALS.FORM_VERSION.eq(formVersion))
                     .and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
 	            .fetchAny().map((r) -> ConvertHelper.convert(r, GeneralApprovalVal.class));
 

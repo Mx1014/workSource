@@ -145,6 +145,7 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 			auth.setValidFromMs(r.getValue(Tables.EH_DOOR_AUTH.VALID_FROM_MS));
 			auth.setNickname(r.getValue(Tables.EH_DOOR_AUTH.NICKNAME));
 			auth.setPhone(r.getValue(Tables.EH_DOOR_AUTH.PHONE));
+			auth.setCreateTime(r.getValue(Tables.EH_DOOR_AUTH.CREATE_TIME));
 			//左邻门禁,取二维码字符串
 			auth.setLocalAuthKey(r.getValue(Tables.EH_DOOR_AUTH.STRING_TAG6));
 			listPhotos.add(photo);
@@ -176,6 +177,21 @@ public class FaceRecognitionPhotoProviderImpl implements FaceRecognitionPhotoPro
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhFaceRecognitionPhotosDao dao = new EhFaceRecognitionPhotosDao(context.configuration());
         dao.update(listPhotos.toArray(new FaceRecognitionPhoto[listPhotos.size()]));
+	}
+
+	@Override
+	public FaceRecognitionPhoto findPhotoByAuthId(Long authId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFaceRecognitionPhotos.class));
+
+		SelectQuery<EhFaceRecognitionPhotosRecord> query = context.selectQuery(Tables.EH_FACE_RECOGNITION_PHOTOS);
+		query.addConditions(Tables.EH_FACE_RECOGNITION_PHOTOS.AUTH_ID.eq(authId));
+		query.addOrderBy(Tables.EH_FACE_RECOGNITION_PHOTOS.ID.desc());
+		query.addLimit(1);
+
+		List<FaceRecognitionPhoto> objs = query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, FaceRecognitionPhoto.class);
+		});
+		return objs != null && objs.size() > 0 ? objs.get(0) : null;
 	}
 	
 }

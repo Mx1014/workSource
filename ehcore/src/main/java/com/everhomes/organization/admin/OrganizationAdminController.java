@@ -31,11 +31,14 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
@@ -45,6 +48,7 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
@@ -59,7 +63,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -413,6 +419,37 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createEnterprise(@Valid CreateEnterpriseCommand cmd) {
         cmd.setCheckPrivilege(true);
         organizationService.createEnterprise(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/org/createStandardEnterprise</b>
+     * <p>创建企业（标准版）</p>
+     */
+    @RequestMapping("createStandardEnterprise")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse createStandardEnterprise(@Valid CreateEnterpriseStandardCommand cmd) {
+//        cmd.setCheckPrivilege(true);
+        OrganizationDTO organizationDTO = organizationService.createStandardEnterprise(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/org/createSettledEnterprise</b>
+     * <p>添加入驻企业（标准版）</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("createSettledEnterprise")
+    @RestReturn(value = String.class)
+    public RestResponse createSettledEnterprise(CreateSettledEnterpriseCommand cmd){
+        organizationService.createSettledEnterprise(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

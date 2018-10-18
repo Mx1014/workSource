@@ -5,30 +5,7 @@ import java.util.List;
 
 import com.everhomes.address.Address;
 import com.everhomes.group.GroupMember;
-import com.everhomes.rest.family.ApproveMemberCommand;
-import com.everhomes.rest.family.BatchApproveMemberCommand;
-import com.everhomes.rest.family.BatchRejectMemberCommand;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.family.FamilyMemberDTO;
-import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
-import com.everhomes.rest.family.GetFamilyCommand;
-import com.everhomes.rest.family.GetOwningFamilyByIdCommand;
-import com.everhomes.rest.family.JoinFamilyCommand;
-import com.everhomes.rest.family.LeaveFamilyCommand;
-import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
-import com.everhomes.rest.family.ListFamilyRequestsCommand;
-import com.everhomes.rest.family.ListFamilyRequestsCommandResponse;
-import com.everhomes.rest.family.ListNearbyNeighborUserCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommand;
-import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
-import com.everhomes.rest.family.ListOwningFamilyMembersCommand;
-import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
-import com.everhomes.rest.family.NeighborUserDTO;
-import com.everhomes.rest.family.RejectMemberCommand;
-import com.everhomes.rest.family.RevokeMemberCommand;
-import com.everhomes.rest.family.SetCurrentFamilyCommand;
-import com.everhomes.rest.family.TestLockAquiringCommand;
-import com.everhomes.rest.family.UpdateFamilyInfoCommand;
+import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.user.User;
@@ -97,4 +74,6 @@ public interface FamilyService {
      *                                    这几项信息使用逗号分隔
      */
 	public void testLockAquiring(TestLockAquiringCommand cmd);
+
+    ListUserFamilyByCommunityIdResponse listUserFamilyByCommunityId(ListUserFamilyByCommunityIdCommand cmd);
 }

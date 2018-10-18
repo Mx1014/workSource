@@ -85,6 +85,7 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	// 升级平台包版本到1.0.x，springboot版本也被升级，需要补充接口，
     // 以下isReady()和setWriteListener()接口的实现是抄自支付系统中的kelven实现 by lqs 20180516
+    @Override
     public boolean isReady() {
         return true;
     }

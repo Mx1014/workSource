@@ -65,6 +65,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -321,6 +322,68 @@ import java.util.regex.Pattern;
 
 //import org.apache.commons.lang.StringUtils;
 
+import net.greghaines.jesque.Job;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
  */
@@ -456,24 +519,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
    	@Autowired
     private ScheduleProvider scheduleProvider;
-   	
-   	@Autowired
+    @Autowired
    	private ContractBuildingMappingProvider contractBuildingMappingProvider;
-   	
    	@Autowired
    	private PushMessageLogService pushMessageLogService;
-   	
+
    	@Autowired
 	protected LocaleStringService localeStringService;
-   	
+
    	@Autowired
 	protected TaskService taskService;
-   	
+
    	@Autowired
 	private AssetService assetService;
 
    	@Autowired
    	private ActivityService activityService;
+   	
+   	@Autowired
+   	private AssetChargingItemService assetChargingItemService;
 
     private String queueName = "property-mgr-push";
 
@@ -647,7 +711,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(organizationId, null, cmd.getPageOffset(), pageSize);
         commandResponse.setMembers(entityResultList.stream()
-                .map(r -> {
+				.map(r->{
                     PropertyMemberDTO dto = ConvertHelper.convert(r, PropertyMemberDTO.class);
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
@@ -657,7 +721,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                             dto.setCommunityName(community.getName());
                         }
                     }
-                    return dto;
+					return dto;
                 }).collect(Collectors.toList()));
         commandResponse.setPageCount(pageCount);
         return commandResponse;
@@ -707,7 +771,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         List<CommunityAddressMapping> entityResultList = propertyMgrProvider.listCommunityAddressMappings(organizationId, cmd.getPageOffset(), pageSize);
         commandResponse.setMembers(entityResultList.stream()
-                .map(r -> {
+				.map(r->{
                     PropAddressMappingDTO dto = ConvertHelper.convert(r, PropAddressMappingDTO.class);
                     Address address = addressProvider.findAddressById(dto.getAddressId());
                     if (address != null)
@@ -743,7 +807,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         int pageCount = getPageCount(totalCount, pageSize);
         List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
         commandResponse.setMembers(entityResultList.stream()
-                .map(r -> {
+				.map(r->{
                     PropBillDTO dto = ConvertHelper.convert(r, PropBillDTO.class);
                     List<CommunityPmBillItem> itemList = propertyMgrProvider.listCommunityPmBillItems(dto.getId());
                     List<PropBillItemDTO> itemDtoList = new ArrayList<PropBillItemDTO>();
@@ -825,6 +889,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     }
 
     /**
+	 *
      * @param topicId
      * @param userId   维修人员id
      * @param owerId   业主id
@@ -1335,7 +1400,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void sendNotice(SendNoticeCommand cmd) {
 
-       // this.checkCommunityIdIsNull(cmd.getCommunityId()); 
+       // this.checkCommunityIdIsNull(cmd.getCommunityId());
 
 		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1381,7 +1446,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 cmd.getNamespaceId()
         );
 
-               
+
         jesqueClientFactory.getClientPool().enqueue(queueName, job);*/
 
         //更换推送方式 add by huangliangming 20180723
@@ -1412,11 +1477,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (sendNoticeMode == SendNoticeMode.NAMESPACE) {
             sendNoticeToNamespaceUser(cmd);
-        } 
+        }
          //添加按项目推送的维度 20180712
         else if(sendNoticeMode == SendNoticeMode.COMMUNITY){
         	sendNoticeToCommunitsUser(cmd);
-        	
+
         }
         //按号码推送
         else if(sendNoticeMode == SendNoticeMode.MOBILE){
@@ -1448,7 +1513,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
         } while (locator.getAnchor() != null);
     }
-    
+
     /**
      * 按项目推送
      * @param cmd
@@ -2438,11 +2503,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             //房源所在楼层
             address.setApartmentFloor(cmd.getApartmentFloor());
             address.setIsFutureApartment((byte)0);
-            
+
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getCategoryItemId());
                 if (item != null) {
                     address.setCategoryItemName(item.getItemDisplayName());
                 }
@@ -2451,7 +2516,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getSourceItemId() != null) {
                 address.setSourceItemId(cmd.getSourceItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getSourceItemId());
                 if (item != null) {
                     address.setSourceItemName(item.getItemDisplayName());
                 }
@@ -2466,7 +2531,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setCommunityName(community.getName());
             address.setBuildingName(building.getName());
             address.setBuildingId(building.getId());
-        	
+
         	address.setAreaSize(cmd.getAreaSize());
             address.setBuildArea(cmd.getBuildArea());
             address.setRentArea(cmd.getRentArea());
@@ -2478,7 +2543,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getCategoryItemId() != null) {
                 address.setCategoryItemId(cmd.getCategoryItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCategoryItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getOwnerId(),cmd.getCommunityId(), cmd.getCategoryItemId());
                 if (item != null) {
                     address.setCategoryItemName(item.getItemDisplayName());
                 }
@@ -2487,7 +2552,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             if (cmd.getSourceItemId() != null) {
                 address.setSourceItemId(cmd.getSourceItemId());
 //				ScopeFieldItem item = fieldProvider.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getSourceItemId());
-                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getCommunityId(), cmd.getSourceItemId());
+                ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getSourceItemId());
                 if (item != null) {
                     address.setSourceItemName(item.getItemDisplayName());
                 }
@@ -2495,12 +2560,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setDecorateStatus(cmd.getDecorateStatus());
             address.setOrientation(cmd.getOrientation());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-        
+
             addressProvider.updateAddress(address);
         } else {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
         }
-        
+
         //添加房源、小区、机构的对应关系，房源的具体状态存在eh_organization_address_mappings表中
         insertOrganizationAddressMapping(organizationId, community, address, cmd.getStatus());
 
@@ -2602,7 +2667,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		building.setAreaSize(buildingAreaSize - oldAddressAreaSize + areaSize);
 		Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
 		community.setAreaSize(communityAreaSize - oldAddressAreaSize + areaSize);
-		address.setAreaSize(cmd.getAreaSize());
+
+             address.setAreaSize(cmd.getAreaSize());
         //公摊面积
 		Double sharedArea = cmd.getSharedArea() == null ? 0.0 : cmd.getSharedArea();
         Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
@@ -2636,6 +2702,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         community.setChargeArea(communityChargeArea - oldAddressChargeArea + chargeArea);
         address.setChargeArea(cmd.getChargeArea());
         //可招租面积
+
         Double freeArea = cmd.getFreeArea() == null ? 0.0 : cmd.getFreeArea();
         Double buildingFreeArea = building.getFreeArea() == null ? 0.0 : building.getFreeArea();
         Double oldAddressFreeArea = address.getFreeArea() == null ? 0.0 : address.getFreeArea();
@@ -2646,7 +2713,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (cmd.getCategoryItemId() != null) {
             address.setCategoryItemId(cmd.getCategoryItemId());
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), cmd.getOwnerId(),address.getCommunityId(), cmd.getCategoryItemId());
             if (item != null) {
                 address.setCategoryItemName(item.getItemDisplayName());
             }
@@ -2654,7 +2721,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (cmd.getSourceItemId() != null) {
             address.setSourceItemId(cmd.getSourceItemId());
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(), address.getCommunityId(), cmd.getSourceItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(address.getNamespaceId(),cmd.getOwnerId(), address.getCommunityId(), cmd.getSourceItemId());
             if (item != null) {
                 address.setSourceItemName(item.getItemDisplayName());
             }
@@ -2703,11 +2770,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
         }
         response.setCommunityType(community.getCommunityType());
-        
+
         AddressArrangement arrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
 		for (AddressArrangement addressArrangement : arrangements) {
-			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class);
 			if (originalIds.contains(cmd.getId().toString())) {
 				arrangement = addressArrangement;
 				break;
@@ -2724,7 +2791,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}
 			}
 		}
-        
+
         Contract latestEndDateContract = findLatestEndDateContract(cmd.getId());
         if (latestEndDateContract!=null) {
         	response.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
@@ -2741,7 +2808,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         	response.setEnterpriseCustomerInvolved((byte)1);
         } else {
 			response.setEnterpriseCustomerInvolved((byte)0);
-		} 
+		}
         //关联的个人客户
         List<OrganizationOwnerDTO> individualCustomerList = getApartmentRelatedIndividualCustomers(address.getNamespaceId(), address.getId());
         if (individualCustomerList!=null && individualCustomerList.size()>0) {
@@ -2752,9 +2819,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //设置所在楼宇的楼层数
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         response.setBuildingFloorNumber(building.getFloorNumber());
-        response.setBuildingId(building.getId());
-
-        //房源的授权价
+response.setBuildingId(building.getId());//房源的授权价
         AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
         if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null) {
         	String chargingItemName = PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc();
@@ -2763,7 +2828,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
         return response;
     }
-    
+
     private List<OrganizationOwnerDTO> getApartmentRelatedIndividualCustomers(Integer namespaceId, Long addressId) {
     	List<OrganizationOwnerDTO> individualCustomerList = new ArrayList<>();
     	List<OrganizationOwnerAddress> organizationOwnerAddressesMappings = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(namespaceId, addressId);
@@ -2776,7 +2841,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	                organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
 	                individualCustomerList.add(organizationOwnerDTO);
 	            }
-			} 
+			}
 	    }
 	    return individualCustomerList;
 	}
@@ -2825,7 +2890,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         	Iterator<Contract> iterator = contracts.iterator();
             while (iterator.hasNext()) {
     			Contract contract = (Contract) iterator.next();
-    			if (ContractStatus.INACTIVE.equals(ContractStatus.fromStatus(contract.getStatus())) 
+    			if (ContractStatus.INACTIVE.equals(ContractStatus.fromStatus(contract.getStatus()))
             			|| ContractStatus.APPROVE_NOT_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))
             			|| ContractStatus.EXPIRED.equals(ContractStatus.fromStatus(contract.getStatus()))
             			|| ContractStatus.HISTORY.equals(ContractStatus.fromStatus(contract.getStatus()))
@@ -2863,7 +2928,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         return organizationOwnerDTO;
     }
-    
+
     @Override
     public void deleteApartment(DeleteApartmentCommand cmd) {
         Address address = addressProvider.findAddressById(cmd.getId());
@@ -2886,14 +2951,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         AddressArrangement arrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(cmd.getId());
 		for (AddressArrangement addressArrangement : arrangements) {
-			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class);
 			if (originalIds.contains(cmd.getId().toString())) {
 				arrangement = addressArrangement;
 				break;
 			}
 		}
 		if (arrangement != null) {
-			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 			List<Contract> contractsRelatedWithFutureApartment = new ArrayList<>();
 			for (String id : targetIds) {
 				contractsRelatedWithFutureApartment.addAll(contractProvider.listContractByAddressId(Long.parseLong(id)));
@@ -2918,7 +2983,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			//删除房源时，要删除关联的拆分合并计划
 			addressProvider.deleteAddressArrangement(arrangement.getId());
 		}
-        
+
         address.setStatus(AddressAdminStatus.INACTIVE.getCode());
         addressProvider.updateAddress(address);
         //删除房源的状态记录
@@ -2929,7 +2994,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //addressProvider.updateOrganizationOwnerAddress(address.getId());
         //删除房源与企业客户的关联关系
         //enterpriseCustomerProvider.deleteCustomerEntryInfoByAddessId(cmd.getId());
-        
+
         //门牌对应的楼栋和园区的sharedArea chargeArea buildArea rentArea都要减去相应的值 by xiongying 20170815
         Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
@@ -2977,6 +3042,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
+		//删除门牌
+		//// TODO: 2018/5/11
+		addressProvider.deleteAddressById(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
@@ -3043,7 +3111,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             		AddressArrangement addressArrangement = null;
             		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(apartment.getId());
             		for (AddressArrangement arrangement : arrangements) {
-            			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+            			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
             			if (originalIds.contains(apartment.getId().toString())) {
             				addressArrangement = arrangement;
             				break;
@@ -3057,7 +3125,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             		AddressArrangement addressArrangement = null;
             		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(apartment.getId());
             		for (AddressArrangement arrangement : arrangements) {
-            			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+            			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
             			if (targetIds.contains(apartment.getId().toString())) {
             				addressArrangement = arrangement;
             				break;
@@ -3066,7 +3134,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					if (addressArrangement != null) {
             			apartment.setRelatedArrangementBeginDate(addressArrangement.getDateBegin().getTime());
 					}
-				}		
+				}
 			}
             response.setApartments(apartments);
         }
@@ -3077,32 +3145,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public ListPropApartmentsResponse listNewPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
 		//检查参数
 		checkListPropApartmentByKeywordParamters(cmd);
-		
+
 		//取得门牌列表
 		List<ApartmentDTO> aptList = addressService.listApartmentsByKeyword(cmd).second();
-		
+
 		//门牌转化成门牌id列表
 		List<Long> aptIdList = aptList.stream().map(a->a.getAddressId()).collect(Collectors.toList());
-		
+
 		//处理family
 		Map<Long, Family> familyMap = familyProvider.mapFamilyByAddressIds(aptIdList);
-		
+
 		//处理每个门牌入住的人数
 		Map<Long, Integer> ownerCountMap = propertyMgrProvider.mapOrganizationOwnerCountByAddressIds(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), aptIdList);
-		
+
 		//处理小区地址关联表
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
 //		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList, cmd.getLivingStatus());
 
 		//判断是否欠费
 		Map<Long, Byte> billOwedMap = mapBillOwedFlag(aptIdList);
-		
+
 		//门牌转化成要返回的列表
-		List<PropFamilyDTO> resultList = aptList.stream().map(apartmentDTO->convertToPropFamilyDTO(cmd, apartmentDTO, familyMap, ownerCountMap, 
+		List<PropFamilyDTO> resultList = aptList.stream().map(apartmentDTO->convertToPropFamilyDTO(cmd, apartmentDTO, familyMap, ownerCountMap,
 				communityAddressMappingMap, billOwedMap)).collect(Collectors.toList());
-		
+
 		PropAptStatisticDTO statistics = getStatistics(resultList);
-		
+
 		ListPropApartmentsResponse response = ConvertHelper.convert(statistics, ListPropApartmentsResponse.class);
 		List<PropFamilyDTO>  filterData = new ArrayList<>();
 		for(PropFamilyDTO dto : resultList){
@@ -3171,7 +3239,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	                continue;
 				}
 			}
-			
+
 			//房源预定相关
 			dto.setReservationInvolved((byte)0);
 			if(AddressLivingStatus.OCCUPIED.getCode() == dto.getLivingStatus()){
@@ -3181,13 +3249,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 					dto.setReservationId(reservations.get(0).getId());
 				}
 			}
-			
+
 			//房源拆分合并相关
 			dto.setArrangementInvolved((byte)0);
 			AddressArrangement arrangement = null;
 			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(dto.getAddressId());
 			for (AddressArrangement addressArrangement : arrangements) {
-				List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class); 
+				List<String> originalIds = (List<String>)StringHelper.fromJsonString(addressArrangement.getOriginalId(), ArrayList.class);
 				if (originalIds.contains(dto.getAddressId().toString())) {
 					arrangement = addressArrangement;
 					break;
@@ -3201,7 +3269,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 		return response;
 	}
-	
+
 	private PropAptStatisticDTO getStatistics(List<PropFamilyDTO> resultList) {
 		PropAptStatisticDTO statistics = new PropAptStatisticDTO();
 		int userCount = 0;
@@ -3218,7 +3286,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
 			userCount += propFamilyDTO.getMemberCount();
 		}
-		
+
 		statistics.setDefaultCount(map.get(AddressMappingStatus.DEFAULT.getCode()));
 		statistics.setLiveCount(map.get(AddressMappingStatus.LIVING.getCode()));
 		statistics.setRentCount(map.get(AddressMappingStatus.RENT.getCode()));
@@ -3230,7 +3298,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
 		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());
-		
+
 		return statistics;
 	}
 
@@ -3247,7 +3315,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		dto.setChargeArea(apartmentDTO.getChargeArea());
 		dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 		dto.setApartmentFloor(apartmentDTO.getApartmentFloor());
-		
+
 		//设置家庭信息
 		setFamilyInfo(dto, familyMap);
 		//设置门牌入住的人数
@@ -3256,7 +3324,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
 		//设置公寓是否欠费
 		setOwedFlag(dto, billOwedMap);
-		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
+//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
 		Contract latestEndDateContract = findLatestEndDateContract(addressId);
 		if (latestEndDateContract!=null) {
 			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
@@ -3272,7 +3340,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 //			AddressArrangement addressArrangement = null;
 //			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
 //			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class); 
+//    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 //    			if (targetIds.contains(addressId.toString())) {
 //    				addressArrangement = arrangement;
 //    				break;
@@ -3285,7 +3353,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 //			AddressArrangement addressArrangement = null;
 //			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
 //			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+//    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
 //    			if (originalIds.contains(addressId.toString())) {
 //    				addressArrangement = arrangement;
 //    				break;
@@ -3299,7 +3367,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		AddressArrangement addressArrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
 		for (AddressArrangement arrangement : arrangements) {
-			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class); 
+			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
 			if (originalIds.contains(addressId.toString())) {
 				addressArrangement = arrangement;
 				break;
@@ -3368,7 +3436,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	//判断是否欠费
 	private Map<Long, Byte> mapBillOwedFlag(List<Long> addressIds) {
-		Map<Long, Byte> map = new HashMap<>(); 
+		Map<Long, Byte> map = new HashMap<>();
 		Map<Long, CommunityPmBill> billMap =  propertyMgrProvider.mapNewestBillByAddressIds(addressIds);
 		if (!billMap.isEmpty()) {
 			List<Long> billIds = billMap.entrySet().stream().map(r->r.getValue().getId()).collect(Collectors.toList());
@@ -3387,7 +3455,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 		return map;
 	}
-	
+
 	@Override
 	public List<PropFamilyDTO> listPropApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
 		// 优化门牌性能，by tt, 20170428
@@ -6073,13 +6141,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                 dto.setApartment(address.getApartmentName());
                 dto.setChargeArea(address.getChargeArea());
                 dto.setOrientation(address.getOrientation());
-               
+
                 if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
                 	dto.setAddressExists((byte)1);
 				}else {
 					dto.setAddressExists((byte)0);
 				}
-                
+
                 if (address.getLivingStatus() == null) {
                     CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
                     if (mapping != null) {
@@ -7948,7 +8016,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public List<ListReservationsDTO> findReservations(FindReservationsCommand cmd) {
 		List<ListReservationsDTO> result = new ArrayList<>();
-		
+
 		List<PmResourceReservation> reservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.fromCode(cmd.getStatus()));
 		for(PmResourceReservation r : reservations){
         	ListReservationsDTO dto = new ListReservationsDTO();
@@ -7986,7 +8054,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
 					ContractErrorCode.ERROR_ADDRESS_PROPERTIES_IS_EXIST, "AddressProperties is already exist!");
 		}
-		
+
 		propertyMgrProvider.createAuthorizePrice(addressProperties);
 	}
 
@@ -8141,25 +8209,25 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			} else {
 				chargingItemNames = "暂无可选费项，请设置后再试";
 			}
-			
+
 			excelUtils.setNeedTitleRemark(true).setTitleRemark(
-							"填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" 
+							"填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n"
 							+ "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n"
-							+ "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" 
+							+ "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n"
 							+ "3、请不要随意复制单元格，这样会破坏字段规则校验。\n"
-							+ "4、带有星号（*）的红色字段为必填项。\n" 
-							+ "5、楼栋名称相同的情况下，门牌不允许重复，重复只算一条。\n" 
-							+ "6、状态可填项：待租、待售、出租、已售、自用、其他。\n" 
-							+ "7、费项名称可选项为： "+chargingItemNames+  "。\n" 
-							+ "8、周期可选项为：按月、按季、按年、按天。\n" 
-							+ "9、面积只允许填写数字，非数字将导致对应行导入失败\n" 
-							+ "10、导入系统已存在的门牌，将按照导入的门牌更新系统的门牌信息。\n" 
+							+ "4、带有星号（*）的红色字段为必填项。\n"
+							+ "5、楼栋名称相同的情况下，门牌不允许重复，重复只算一条。\n"
+							+ "6、状态可填项：待租、待售、出租、已售、自用、其他。\n"
+							+ "7、费项名称可选项为： "+chargingItemNames+  "。\n"
+							+ "8、周期可选项为：按月、按季、按年、按天。\n"
+							+ "9、面积只允许填写数字，非数字将导致对应行导入失败\n"
+							+ "10、导入系统已存在的门牌，将按照导入的门牌更新系统的门牌信息。\n"
 							+ "\n",
 					(short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
 
 			String[] propertyNames = { "apartmentName", "livingStatus", "chargeArea", "chargingItemsName",
 					"authorizePrice", "apartmentAuthorizeType", "namespaceAddressType", "namespaceAddressToken" };
-			
+
 			String[] titleNames = { "*房源", "*状态", "收费面积", "费项名称", "授权价", "周期", "第三方来源", "第三方标识" };
 			int[] titleSizes = { 20, 20, 20, 20, 20, 20, 20, 20 };
 
@@ -8168,7 +8236,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-	
+
 	private List<ExportApartmentsAuthorizePriceDTO> filterExportApartmentsInBuildingDTO(List<ExportApartmentsAuthorizePriceDTO> data, ListPropApartmentsByKeywordCommand cmd) {
 		List<ExportApartmentsAuthorizePriceDTO> filterData = new ArrayList<>();
 		for (ExportApartmentsAuthorizePriceDTO dto : data) {
@@ -8335,7 +8403,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		if (!StringUtils.isEmpty(data.getChargingItemsName())) {
 			apartmentAuthorizeType = AuthorizePriceType.fromDesc(data.getApartmentAuthorizeType()).getCode();
 		}
-		
+
 		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
 
 		if (addressProperties == null) {
@@ -8353,7 +8421,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			if (apartmentAuthorizeType != null) {
 				addressProperties.setApartmentAuthorizeType(apartmentAuthorizeType);
 			}
-			
+
 			propertyMgrProvider.createAuthorizePrice(addressProperties);
 		} else {
 			if (chargingItemId != null) {
@@ -8388,7 +8456,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 		return list;
 	}
-	
+
 	private String trim(String string) {
 		if (string != null) {
 			return string.trim();
@@ -8398,7 +8466,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public ListSignupInfoByOrganizationIdResponse listApartmentActivity(ListApartmentActivityCommand cmd) {
 		ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
-		
+
 		ListApartmentEnterpriseCustomersCommand cmd2 = new ListApartmentEnterpriseCustomersCommand();
 		cmd2.setAddressId(cmd.getAddressId());
 		List<EnterpriseCustomerDTO> enterpriseCustomers = addressService.listApartmentEnterpriseCustomers(cmd2);
@@ -8421,7 +8489,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			ownerIdentityCommand.setOwnerId(cmd.getCommunityId());
 			ownerIdentityCommand.setOwnerType("community");
 			ownerIdentityCommand.setCategoryId(dtos.get(i).getCategoryId());
-			List<ListChargingItemsDTO> listChargingItem = assetService.listChargingItems(ownerIdentityCommand);
+			List<ListChargingItemsDTO> listChargingItem = assetChargingItemService.listAllChargingItems(ownerIdentityCommand);
 			for (int j = 0; j < listChargingItem.size(); j++) {
 				if (listChargingItem.get(j).getIsSelected() == 1) {
 					chargingItemNameList.put(listChargingItem.get(j).getChargingItemId(),
@@ -8439,12 +8507,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 		return result;
 	}
-	
+
 	public List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd) {
 		List<Address> addresses = addressProvider.findActiveApartmentsByBuildingId(cmd.getBuildingId());
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
-		
+
 		List<Address> filterData = new ArrayList<>();
 		for(Address address : addresses){
 			filterData.add(address);
@@ -8457,14 +8525,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				}
 			}
 		}
-		
+
 		List<ApartmentBriefInfoDTO> apartments = filterData.stream().map(a->{
 			ApartmentBriefInfoDTO dto = new ApartmentBriefInfoDTO();
 			dto.setId(a.getId());
 			dto.setApartmentName(a.getApartmentName());
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		return apartments;
 	}
 }

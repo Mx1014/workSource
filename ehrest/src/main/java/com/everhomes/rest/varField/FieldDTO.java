@@ -7,19 +7,19 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 域下的字段id，新加进去的没有</li>
- *     <li>namespaceId: 域空间id</li>
- *     <li>moduleName: 字段所属的模块类型名</li>
- *     <li>groupId: 在系统里所属的字段组id</li>
- *     <li>groupPath: 在系统里所属的字段组path</li>
- *     <li>fieldId: 在系统里的字段id</li>
- *     <li>fieldDisplayName: 字段显示名</li>
- *     <li>fieldName: 字段名，数据库中的名字</li>
- *     <li>fieldType: 字段类型枚举型，参考{@link com.everhomes.rest.varField.FieldType}</li>
- *     <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段组件类型枚举型，参考{@link FieldParamType}</li>
- *     <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
- *     <li>defaultOrder: 顺序</li>
- *     <li>items: 字段选择项 参考{@link FieldItemDTO}</li>
+ * <li>id: 域下的字段id，新加进去的没有</li>
+ * <li>namespaceId: 域空间id</li>
+ * <li>moduleName: 字段所属的模块类型名</li>
+ * <li>groupId: 在系统里所属的字段组id</li>
+ * <li>groupPath: 在系统里所属的字段组path</li>
+ * <li>fieldId: 在系统里的字段id</li>
+ * <li>fieldDisplayName: 字段显示名</li>
+ * <li>fieldName: 字段名，数据库中的名字</li>
+ * <li>fieldType: 字段类型枚举型，参考{@link com.everhomes.rest.varField.FieldType}</li>
+ * <li>fieldParam: 字段描述，json 如：{fieldParamType: "file", length: 9}，字段组件类型枚举型，参考{@link FieldParamType}</li>
+ * <li>mandatoryFlag: 是否必填 0: 否; 1: 是</li>
+ * <li>defaultOrder: 顺序</li>
+ * <li>items: 字段选择项 参考{@link FieldItemDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/8/1.
  */
@@ -53,6 +53,8 @@ public class FieldDTO {
     private List<FieldItemDTO> items;
 
     private String dateFormat;
+
+    private Long ownerId;
 
     public String getDateFormat() {
         return dateFormat;
@@ -164,6 +166,15 @@ public class FieldDTO {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

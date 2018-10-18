@@ -11,6 +11,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.openapi.GetOrgCheckInDataCommand;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
@@ -148,7 +149,7 @@ public interface UserService {
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
-
+    void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode);
     /**
      * 判断是否登录
      * @return
@@ -343,12 +344,26 @@ public interface UserService {
     Byte isUserAuth();
 
     UserDTO getUserFromPhone(FindUserByPhoneCommand cmd);
-    
+
     void sendVerficationCode4Point(Integer namespaceId, UserDTO user, Integer regionCode, HttpServletRequest request) ;
 
     PointCheckVCDTO pointCheckVerificationCode(PointCheckVerificationCodeCommand cmd) ;
 
     void registerWXLoginConnection(HttpServletRequest request);
+
+    ListAddressUsersResponse listAddressUsers(ListAddressUsersCommand cmd);
+    GetUserConfigAfterStartupResponse getUserConfigAfterStartup(
+            GetUserConfigAfterStartupCommand cmd);
+    SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd);
+    GenerateSmartCardCodeResponse generateSmartCardCode(
+            GenerateSmartCardCodeCommand cmd);
+
+    /**
+     * 根据userId来查询用户信息的方法
+     * @param cmd
+     * @return
+     */
+    UserDTO findUserInfoByUserId(UserCouponsCommand cmd);
 
 
     /**
@@ -358,5 +373,8 @@ public interface UserService {
      */
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 
-    void updateUserVipLevel(Long userId, Integer vipLevel);
+    void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText);
+
+    SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
+
 }

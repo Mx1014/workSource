@@ -1,7 +1,5 @@
 package com.everhomes.rest.archives;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>CHECK_IN((byte) 0): 入职</li>

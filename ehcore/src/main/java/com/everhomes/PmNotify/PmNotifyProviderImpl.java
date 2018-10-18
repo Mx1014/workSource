@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.records.EhPmNotifyConfigurationsRecord
 import com.everhomes.server.schema.tables.records.EhPmNotifyRecordsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
     }
 
     @Override
-    public List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId) {
+    public List<PmNotifyConfigurations> listScopePmNotifyConfigurations(String ownerType, Byte scopeType, Long scopeId,Long targetId,String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<PmNotifyConfigurations> result  = new ArrayList<PmNotifyConfigurations>();
@@ -83,6 +84,12 @@ public class PmNotifyProviderImpl implements PmNotifyProvider {
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.SCOPE_ID.eq(scopeId));
         query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
+        if (targetId != null) {
+            query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.TARGET_ID.eq(targetId));
+        }
+        if (StringUtils.isNotBlank(targetType)) {
+            query.addConditions(Tables.EH_PM_NOTIFY_CONFIGURATIONS.TARGET_TYPE.eq(targetType));
+        }
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, PmNotifyConfigurations.class));
             return null;

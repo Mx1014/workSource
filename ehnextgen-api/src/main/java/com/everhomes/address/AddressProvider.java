@@ -21,6 +21,12 @@ public interface AddressProvider {
     void updateAddress(Address address);
     void deleteAddress(Address address);
     void deleteAddressById(long id);
+
+    /**
+     * 根据addressId来查询eh_addresses表中对应的楼栋和门牌信息
+     * @param id
+     * @return
+     */
     Address findAddressById(long id);
 
     Address findGroupAddress(Long groupId);
@@ -77,6 +83,27 @@ public interface AddressProvider {
     List<AddressAttachment> listAddressAttachments(Long addressId);
 
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
+
+    /**
+     * 根据门牌地址Id集合addressIds进行批量删除门牌地址
+     * @param addressIds
+     */
+    void betchDisclaimAddress(List<Long> addressIds);
+
+    /**
+     * 根据id的集合来批量的查询eh_addresses表中信息
+     * @param ids
+     * @return
+     */
+    List<Address> findAddressByIds(List<Long> ids,Integer namespaceId);
+
+    /**
+     * 根据buildingName和CommunityId来查询eh_addersses表中的门牌的数量
+     * @param buildingName
+     * @param communityId
+     * @return
+     */
+    int getApartmentCountByBuildNameAndCommunityId(String buildingName,Long communityId);
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
     ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId);

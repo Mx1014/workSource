@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>appId: appId</li>
  *     <li>actionType: actionType</li>
  *     <li>actionData: actionData</li>
  *     <li>appName: appName</li>
@@ -11,9 +12,18 @@ import com.everhomes.util.StringHelper;
  */
 public class BannerTargetHandleResult {
 
+    private Long appId;
     private Byte actionType;
     private String actionData;
     private String appName;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 
     public Byte getActionType() {
         return actionType;

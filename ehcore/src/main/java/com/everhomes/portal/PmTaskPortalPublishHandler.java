@@ -52,6 +52,8 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
         Byte agentSwitch = pmTaskInstanceConfig.getAgentSwitch();
         Byte feeModel = pmTaskInstanceConfig.getFeeModel();
+        Byte appAgentSwitch = pmTaskInstanceConfig.getAppAgentSwitch();
+        Byte bgAgentSwitch =pmTaskInstanceConfig.getBgAgentSwitch();
         if(null == taskCategoryId){
             if(999983 == namespaceId)
                 taskCategoryId = 1L;
@@ -63,6 +65,14 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
             agentSwitch = (byte)1;
             pmTaskInstanceConfig.setAgentSwitch(agentSwitch);
         }
+        if(null == appAgentSwitch){
+            appAgentSwitch = agentSwitch;
+            pmTaskInstanceConfig.setAppAgentSwitch(appAgentSwitch);
+        }
+        if(null == bgAgentSwitch){
+            bgAgentSwitch = agentSwitch;
+            pmTaskInstanceConfig.setBgAgentSwitch(bgAgentSwitch);
+        }
         if(null == feeModel){
             feeModel = (byte)0;
             pmTaskInstanceConfig.setFeeModel(feeModel);
@@ -72,6 +82,18 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
         } else if (1 == agentSwitch.byteValue()){
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+        }
+
+        if(0 == appAgentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + taskCategoryId.toString(),1);
+        } else if (1 == appAgentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + taskCategoryId.toString(),0);
+        }
+
+        if(0 == bgAgentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + taskCategoryId.toString(),1);
+        } else if (1 == bgAgentSwitch.byteValue()){
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + taskCategoryId.toString(),0);
         }
         configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
         return StringHelper.toJsonString(pmTaskInstanceConfig);
@@ -139,7 +161,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //    }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
         return instanceConfig;
     }
 

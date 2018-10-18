@@ -3,6 +3,7 @@ package com.everhomes.forum;
 
 import javax.validation.Valid;
 
+import com.everhomes.controller.XssExclude;
 import com.everhomes.rest.forum.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +59,7 @@ public class ForumController extends ControllerBase {
      * <b>URL: /forum/newTopic</b>
      * <p>创建新帖</p>
      */
+    @XssExclude
     @RequestMapping("newTopic")
     @RestReturn(value=PostDTO.class)
     public RestResponse newTopic(@Valid NewTopicCommand cmd) {

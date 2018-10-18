@@ -143,6 +143,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        } else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+            // this scope should never user organization id
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("targetId", cmd.getTargetIds()));
         }
 
 

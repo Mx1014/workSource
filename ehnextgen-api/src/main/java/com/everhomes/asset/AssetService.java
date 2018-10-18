@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -12,51 +13,52 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-
-import java.io.OutputStream;
+import com.everhomes.util.Tuple;
 
 /**
  * Created by Administrator on 2017/2/20.
  */
 public interface AssetService {
 
-	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
-
+//	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
+//
 	ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
-
-	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
-
-	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
-
-	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
-
+//
+//	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
+//
+//	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+//
+//	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
+//
 	AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
-
-	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
-
-	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
-
-	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
-
-	void deleteBill(DeleteBillCommand cmd);
-
-	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
-
+//
+//	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
+//
+//	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
+//
+//	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
+//
+//	void deleteBill(DeleteBillCommand cmd);
+//
+//	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
+//
 	Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
-
-	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
-
+//
+//	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
+//
 	AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
-
+//
 	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+	
+	//=============================================================================
+	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
+	//=============================================================================
 
 	ListBillsResponse listBills(ListBillsCommand cmd);
 
@@ -64,15 +66,7 @@ public interface AssetService {
 
 	void selectNotice(SelectedNoticeCommand cmd);
 
-	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
-
-	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
-
-	List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
-
-	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
 	ListBillsDTO createBill(CreateBillCommand cmd);
 
@@ -85,8 +79,6 @@ public interface AssetService {
 	void modifyBillStatus(BillIdCommand cmd);
 
 	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
-
-	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
 	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -119,36 +111,14 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void configChargingItems(ConfigChargingItemsCommand cmd);
-
-	void createChargingStandard(CreateChargingStandardCommand cmd);
-
-	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
-
-	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
-
+	
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
-
-	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
-
-	void createBillGroup(CreateBillGroupCommand cmd);
-
-	void modifyBillGroup(ModifyBillGroupCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
 	ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-	void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
-
 	DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
-
-	DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -163,12 +133,6 @@ public interface AssetService {
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
-
-	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
-
-	List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
-
-	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
@@ -192,7 +156,7 @@ public interface AssetService {
     
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
-    void noticeTrigger(Integer namespaceId);
+//    void noticeTrigger(Integer namespaceId);
     
     List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
     
@@ -229,13 +193,11 @@ public interface AssetService {
     
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
-	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-	
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
-	void testLateFine(TestLateFineCommand cmd);
+//	void testLateFine(TestLateFineCommand cmd);
 	
 	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
 
@@ -251,7 +213,7 @@ public interface AssetService {
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
-	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+//	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
@@ -277,4 +239,14 @@ public interface AssetService {
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
+	
+	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
+	
+	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
+	
+	void checkNullProhibit(String name , Object object);
+	
+	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
+	
+	AssetVendorHandler getAssetVendorHandler(String vendorName);
 }

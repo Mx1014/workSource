@@ -1,8 +1,10 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -27,6 +29,8 @@ public class ListQualitySpecificationsCommand {
 	private Byte scopeCode;
 	
 	private Long scopeId;
+	@ItemType(Long.class)
+	private List<Long> scopeIds;
 	
 	private Long parentId;
 	
@@ -108,6 +112,14 @@ public class ListQualitySpecificationsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public List<Long> getScopeIds() {
+		return scopeIds;
+	}
+
+	public void setScopeIds(List<Long> scopeIds) {
+		this.scopeIds = scopeIds;
 	}
 
 	@Override

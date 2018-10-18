@@ -25,23 +25,25 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.message.MessageRecordDto;
-import com.everhomes.rest.message.MessageRecordStatus;
-import com.everhomes.rest.messaging.ChannelType;
 import com.everhomes.rest.messaging.BlockingEventCommand;
 import com.everhomes.rest.messaging.GetSercetKeyForScanCommand;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
+import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
+import com.everhomes.rest.ui.user.BindPhoneCommand;
 import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneCommand;
+import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneResponse;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.sdk.LogonInfoCommand;
+import com.everhomes.rest.user.sdk.UserLogonInfo;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -56,18 +58,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -362,6 +359,47 @@ public class UserController extends ControllerBase {
 		return new RestResponse(cmdResponse);
 	}
 
+	/**
+	 * <b>URL: /user/setUserDefaultCommunity</b>
+	 * <p>设置用户默认园区</p>
+	 */
+	@RequestMapping("setUserDefaultCommunity")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse setUserDefaultCommunity(@Valid SetUserDefaultCommunityCommand cmd) {
+
+        userService.setDefaultCommunity(cmd.getUserId(), cmd.getNamespaceId());
+
+		return new RestResponse();
+	}
+
+    /**
+     * <b>URL: /user/setUserDefaultCommunity</b>
+     * <p>设置微信用户默认园区</p>
+     */
+    @RequestMapping("setUserDefaultCommunityForWx")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse setUserDefaultCommunityForWx(@Valid SetUserDefaultCommunityCommand cmd) {
+
+        userService.setDefaultCommunityForWx(cmd.getUserId(), cmd.getNamespaceId());
+
+        return new RestResponse();
+    }
+
+    /**
+     * <b>URL: /user/updateUserCurrentCommunityToProfile</b>
+     * <p>设置微信用户默认园区</p>
+     */
+    @RequestMapping("updateUserCurrentCommunityToProfile")
+    @RequireAuthentication(false)
+    @RestReturn(String.class)
+    public RestResponse updateUserCurrentCommunityToProfile(@Valid SetUserCurrentCommunityCommand cmd) {
+
+        userService.updateUserCurrentCommunityToProfile(cmd.getUserId(), cmd.getCommunityId(), cmd.getNamespaceId());
+
+        return new RestResponse();
+    }
 	/**
 	 * <b>URL: /user/verifyAndLogonByIdentifier</b>
 	 * <p>通过用户标识验证并登录</p>
@@ -755,6 +793,24 @@ public class UserController extends ControllerBase {
 		return response;
 	}
 
+    /**
+     * <b>URL: /user/listBorderAndContent</b>
+     * <p>获取borderServer地址</p>
+     * @return OK
+     */
+    @RequestMapping("listBorderAndContent")
+    @RestReturn(ListBorderAndContentResponse.class)
+    public RestResponse listBorderAndContent() {
+
+        List<String> strings = this.listAllBorderAccessPoints();
+        ListBorderAndContentResponse res = new ListBorderAndContentResponse();
+        res.setBorders(strings);
+        res.setContentUrl(contentServerService.getContentServer());
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	private List<String> listAllBorderAccessPoints() {
 		List<Border> borders = this.borderProvider.listAllBorders();
 		return borders.stream().map((Border border) -> {
@@ -1542,7 +1598,69 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp; 
     }
+
+    /**
+     * <b>URL: /user/getUserConfigAfterStartup</b>
+     * <p>启动之后，去统一的接口拿用户相关的配置信息</p>
+     * @return {@link GetUserConfigAfterStartupResponse}
+     */
+    @RequestMapping("getUserConfigAfterStartup")
+    @RestReturn(GetUserConfigAfterStartupResponse.class)
+    public RestResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
+        GetUserConfigAfterStartupResponse obj = userService.getUserConfigAfterStartup(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /user/smartCardVerify</b>
+     * <p>校验用户的 TOTP 是否合法 </p>
+     * @return {@link SmartCardVerifyResponse}
+     */
+    @RequestMapping("smartCardVerify")
+    @RequireAuthentication(false)
+    @RestReturn(SmartCardVerifyResponse.class)
+    public RestResponse smartCardVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse obj = userService.smartCardVerify(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
     
+    /**
+     * <b>URL: /user/smartCardVerify</b>
+     * <p>校验用户的 TOTP 是否合法 </p>
+     * @return {@link SmartCardVerifyResponse}
+     */
+    @RequestMapping("smartCardBarcodeVerify")
+    @RequireAuthentication(false)
+    @RestReturn(SmartCardVerifyResponse.class)
+    public RestResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd) {
+        SmartCardVerifyResponse obj = userService.smartCardBarcodeVerify(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /user/generateSmartCardCode</b>
+     * <p>测试 TOTP 的生成结果</p>
+     * @return {@link GenerateSmartCardCodeResponse}
+     */
+    @RequestMapping("generateSmartCardCode")
+    @RestReturn(GenerateSmartCardCodeResponse.class)
+    public RestResponse generateOneCardCode(GenerateSmartCardCodeCommand cmd) {
+        GenerateSmartCardCodeResponse obj = userService.generateSmartCardCode(cmd);
+        RestResponse resp = new RestResponse(obj);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
     /**
      * <b>URL: /user/genAppKey</b>
      * <p>test</p>
@@ -1638,14 +1756,14 @@ public class UserController extends ControllerBase {
 	@RequestMapping("getUserByPhone")
 	@RestReturn(UserDTO.class)
 	public RestResponse getUserByPhone(FindUserByPhoneCommand cmd){
-		
+
 		RestResponse resp = new RestResponse(userService.getUserFromPhone(cmd));
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;
-     
+
     }
-	
+
 	/**
 	 * <b>URL: /user/sendVerificationCodeByPhone</b>
 	 * <p>给目标手机发送验证码接口</p>
@@ -1665,10 +1783,10 @@ public class UserController extends ControllerBase {
 
 		this.userService.sendVerficationCode4Point(cmd.getNamespaceId(), user, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
-     
+
     }
-	
-	
+
+
 	/**
 	 * <b>URL: /user/pointCheckVerificationCode</b>
 	 * <p>积分校验验证码接口</p>
@@ -1683,10 +1801,26 @@ public class UserController extends ControllerBase {
 		resp.setErrorCode(ErrorCodes.SUCCESS);
 		resp.setErrorDescription("OK");
 		return resp;
-     
+
     }
-	
-	
+
+
+	/**
+	 * <b>URL: /user/listUserAddress</b>
+	 * <p>根据用户域空间场景获取用户相关的地址列表</p>
+	 */
+	@RequestMapping("listUserAddress")
+	@RestReturn(value=ListAddressUsersResponse.class)
+	public RestResponse listAddressUsers(ListAddressUsersCommand cmd) {
+		//List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
+		ListAddressUsersResponse res = userService.listAddressUsers(cmd);
+
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /user/isUserAuth</b>
 	 * <p>判断用户是否为认证用户</p>
@@ -1716,4 +1850,25 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+	/**
+	 * <b>URL: /rpcapi/user/logonInfo</b>
+	 * <p>获取登录信息</p>
+	 */
+	@RequestMapping("logonInfo")
+	@RestReturn(UserLogonInfo.class)
+	public RestResponse resendVerificationCode(@Valid LogonInfoCommand cmd) {
+		// xxx
+		return new RestResponse("OK");
+	}
+
+    /**
+     * <b>URL: /user/logonInfo</b>
+     * <p>获取登录信息</p>
+     */
+    @RequestMapping("sendVerificationCodeSms")
+    @RestReturn(String.class)
+    public RestResponse sendVerificationCodeSms(@Valid SendVerificationCodeCommand cmd) {
+        this.userService.sendVerificationCodeSms(cmd.getNamespaceId(), cmd.getPhoneNumber(), cmd.getCode());
+		return new RestResponse("OK");
+    }
 }
