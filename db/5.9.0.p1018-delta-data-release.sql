@@ -111,7 +111,7 @@ INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url
 
 update eh_service_modules set action_type = 44, instance_config = replace(instance_config, '}', ',"realm":"serviceAlliance"}') where id = 40500 and instance_config not like '%"realm":%';
 
-update eh_service_module_apps set action_type = 44 where module_id = 40500 and instance_config not like '%"appType":"native"%';
+update eh_service_module_apps set action_type = 44, instance_config = replace(instance_config, '}', ',"realm":"serviceAlliance"}') where module_id = 40500 and instance_config not like '%"appType":"native"%' and instance_config not like '%"realm":%';
 
 update eh_launch_pad_items set 
 action_data  = replace(action_data, '{"url":"${home.url}/service-alliance-web', concat('{"realm":"serviceAlliance","entryUrl":"', @home_url,'/nar/serviceAlliance')), action_type = 44
