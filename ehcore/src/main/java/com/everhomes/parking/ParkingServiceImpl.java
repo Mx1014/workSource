@@ -954,7 +954,12 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		if(rechargeType == ParkingRechargeType.MONTHLY){
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			String sdate = sdf.format(order.getEndPeriod());
+			String sdate = null;
+			if (order.getEndPeriod() == null){
+				sdate = sdf.format(new Date());
+			} else {
+				sdate =  sdf.format(order.getEndPeriod());
+			}
 			e = new OrderDescriptionEntity();
 			e.setKey("当前有效期");
 			e.setValue(sdate);
