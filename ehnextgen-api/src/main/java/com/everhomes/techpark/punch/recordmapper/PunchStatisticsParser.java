@@ -37,10 +37,8 @@ public interface PunchStatisticsParser {
                 PunchStatusStatisticsItemDTO item = new PunchStatusStatisticsItemDTO();
                 item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
-                if(PunchStatusStatisticsItemType.NORMAL != annotation.type()){
-                    item.setNum(value != null ? (int) value : 0);
-                    item.setUnit(annotation.type().getUnit());
-                }
+                item.setNum(value != null ? (int) value : 0);
+                item.setUnit(annotation.type().getUnit());
                 items.put(annotation.defaultOrder(), item);
             }
         } catch (IllegalAccessException e) {

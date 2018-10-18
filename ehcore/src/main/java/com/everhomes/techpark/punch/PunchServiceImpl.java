@@ -10674,9 +10674,13 @@ public class PunchServiceImpl implements PunchService {
         if(pdls != null && pdls.size() > 0){
             for(PunchDayLog pdl : pdls){
                 PunchMemberDTO dto = convertPDLToPunchMemberDTO(pdl);
-                dto.setStatisticsUnit(itemType ==null ? null : itemType.getUnit());
-                dto.setStatisticsCount(getPunchStatisticCountByItemType(pdl, itemType));
-
+                if(PunchStatusStatisticsItemType.NORMAL == itemType){
+                	dto.setStatisticsCount(null);
+                	dto.setStatisticsUnit(null);
+                }else{
+	                dto.setStatisticsUnit(itemType ==null ? null : itemType.getUnit());
+	                dto.setStatisticsCount(getPunchStatisticCountByItemType(pdl, itemType));
+                }
                 results.add(dto);
             }
         }
@@ -10865,7 +10869,8 @@ public class PunchServiceImpl implements PunchService {
 		        			dto.setStatisticsCount(statistic.getLeaveEarlyCount());
 		        			break;
 		        		case NORMAL:
-		        			dto.setStatisticsCount(1);
+		        			dto.setStatisticsCount(null);
+		        			dto.setStatisticsUnit(null);
 		        			break;
 		        		case REST:
 		        			dto.setStatisticsCount(statistic.getRestDayCount());
