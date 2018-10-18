@@ -939,8 +939,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setCode(ArchivesLocaleStringCode.ERROR_NAME_TOO_LONG);
             return true;
         }
-//        if (!Pattern.matches("^[\\u4E00-\\u9FA5 A-Za-z0-9_\\n]+$", contactName)) {
-        if (!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z]+[\\u4E00-\\u9FA5 ·A-Za-z]*[\\u4E00-\\u9FA5A-Za-z]+$", contactName)) {
+        if (!Pattern.matches("^[\\u4E00-\\u9FA5 A-Za-z0-9_\\n]+$", contactName)) {
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
@@ -985,7 +984,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     private <T> boolean checkArchivesContactEnName(ImportFileResultLog<T> log, T data, String contactEnName) {
         if (!StringUtils.isEmpty(contactEnName)) {
-            if (!Pattern.matches("^[a-zA-Z0-9_\\-.]+$", contactEnName)) {
+            if (!Pattern.matches("^[a-zA-Z0-9_ \\-.]+$", contactEnName)) {
                 LOGGER.warn("Contact EnName wrong format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Contact EnName wrong format");
