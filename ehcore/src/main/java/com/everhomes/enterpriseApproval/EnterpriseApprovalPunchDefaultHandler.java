@@ -214,19 +214,25 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		return request;
 	}
 
-	private void refreshPunchDayLog(FlowCase flowCase, GeneralApproval ga,
-			PunchExceptionRequest request) {
-		try{
-			PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
-			if (pr != null) {
+	private void refreshPunchDayLog(FlowCase flowCase, GeneralApproval ga, PunchExceptionRequest request) {
+		try {
+			if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
+				PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
+				if (pr != null) {
+					Calendar punCalendar = Calendar.getInstance();
+					punCalendar.setTime(request.getBeginTime());
+					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punCalendar.setTime(request.getEndTime());
+					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+				}
+			} else if (GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH) {
 				Calendar punCalendar = Calendar.getInstance();
-				punCalendar.setTime(request.getBeginTime());
-				Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-				punCalendar.setTime(request.getEndTime());
-				Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-				punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+				punCalendar.setTime(request.getPunchDate());
+				OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(request.getUserId(), request.getEnterpriseId());
+				punchService.refreshPunchDayLog(memberDetail, punCalendar);
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			LOGGER.error("flow case create refreshPunchDayLog error ", e);
 		}
 	}

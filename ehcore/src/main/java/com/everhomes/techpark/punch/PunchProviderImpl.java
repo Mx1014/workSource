@@ -3855,8 +3855,8 @@ public class PunchProviderImpl implements PunchProvider {
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
         			break;
                 case UN_ARRIVED:
-        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode())));
-        			break;
+                    condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.eq(0)));
+                    break;
         		case ABSENT:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()))
         				.and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
@@ -4018,7 +4018,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L), 1).otherwise(0).sum().as("shouldArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.gt(0)), 1).otherwise(0).sum().as("actArrivedMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.eq(0)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
