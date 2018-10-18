@@ -517,9 +517,9 @@ public class CustomerServiceImpl implements CustomerService {
 //        }
     }
 
-    private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, String customerNumber, String customerName) {
+    private void checkEnterpriseCustomerNumberUnique(Long id, Integer namespaceId, Long communityId, String customerNumber, String customerName) {
         if (StringUtils.isNotBlank(customerNumber)) {
-            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, customerNumber);
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndNumber(namespaceId, communityId, customerNumber);
             if (customers != null && customers.size() > 0) {
                 if (id != null) {
                     for (EnterpriseCustomer customer : customers) {
@@ -534,7 +534,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         if (StringUtils.isNotBlank(customerName)) {
-            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customerName);
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, communityId, customerName);
             if (customers != null && customers.size() > 0) {
                 if (id != null) {
                     for (EnterpriseCustomer customer : customers) {
@@ -636,7 +636,7 @@ public class CustomerServiceImpl implements CustomerService {
     public EnterpriseCustomerDTO createEnterpriseCustomer(CreateEnterpriseCustomerCommand cmd) {
         checkPrivilege(cmd.getNamespaceId());
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_CREATE, cmd.getOrgId(), cmd.getCommunityId());
-        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
+        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setOwnerId(cmd.getOrgId());
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
@@ -700,7 +700,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public EnterpriseCustomerDTO createEnterpriseCustomerOutAuth(CreateEnterpriseCustomerCommand cmd) {
-        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
+        checkEnterpriseCustomerNumberUnique(null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if (cmd.getCorpEntryDate() != null) {
@@ -1178,7 +1178,7 @@ public class CustomerServiceImpl implements CustomerService {
                         "Insufficient privilege");
             }
         }
-        checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCustomerNumber(), cmd.getName());
+        checkEnterpriseCustomerNumberUnique(customer.getId(), customer.getNamespaceId(), cmd.getCommunityId(), cmd.getCustomerNumber(), cmd.getName());
         EnterpriseCustomer updateCustomer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
 
         updateCustomer.setNamespaceId(customer.getNamespaceId());
@@ -1495,7 +1495,7 @@ public class CustomerServiceImpl implements CustomerService {
                 errorDataLogs.add(log);
                 continue;
             }
-            List<EnterpriseCustomer> enterpriseCustomers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd.getNamespaceId(), str.getName());
+            List<EnterpriseCustomer> enterpriseCustomers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd.getNamespaceId(), cmd.getCommunityId(), str.getName());
             if (enterpriseCustomers != null && enterpriseCustomers.size() > 0) {
                 LOGGER.error("enterpirse customer name is already exist, data = {}", str);
                 log.setData(str);
@@ -4516,7 +4516,7 @@ public class CustomerServiceImpl implements CustomerService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if (customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());

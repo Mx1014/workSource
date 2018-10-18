@@ -475,9 +475,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                             Address address = addressProvider.findAddressById(r.getAddressId());
                             if(address != null){
                                 if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
                                 }else{
-                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName());
                                     r.setAddressArea(address.getBuildArea());
                                 }
                             }else{

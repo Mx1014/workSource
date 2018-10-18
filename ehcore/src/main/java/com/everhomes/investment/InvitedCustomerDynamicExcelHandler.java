@@ -894,7 +894,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setGeohash(geohash);
             }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
                         updateEnterpriseCustomer(customer, enterpriseCustomer, customerContactString, trackerUidString, channelContactString);
