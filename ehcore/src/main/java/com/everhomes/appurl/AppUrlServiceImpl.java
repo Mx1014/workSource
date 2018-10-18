@@ -3,6 +3,8 @@ package com.everhomes.appurl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.user.OSType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,9 @@ public class AppUrlServiceImpl implements AppUrlService {
 	@Autowired
     private ContentServerService contentServerService;
 
+	@Autowired
+    private ConfigurationProvider configurationProvider;
+
 	@Override
 	public AppUrlDTO getAppInfo(GetAppInfoCommand cmd) {
 		
@@ -44,6 +49,14 @@ public class AppUrlServiceImpl implements AppUrlService {
 		}
 		AppUrlDTO dto = ConvertHelper.convert(appUrls, AppUrlDTO.class);
 		dto.setLogoUrl(null);
+		if (OSType.Android.getCode().equals(cmd.getOsType())) {
+		    if (StringUtils.isBlank(appUrls.getDownloadUrl())) {
+		        if (!StringUtils.isBlank(appUrls.getPackageName())) {
+		            String prefix = this.configurationProvider.getValue("app.share.download.prefix","https://apk.zuolin.com/apk/");
+		            dto.setDownloadUrl(prefix + appUrls.getPackageName());
+                }
+            }
+        }
 
 		if (StringUtils.isBlank(dto.getDownloadUrl())) {
 		    dto.setDownloadUrl(null);
@@ -86,6 +99,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 				
 				AppUrls bo = ConvertHelper.convert(uc, AppUrls.class);
 				bo.setThemeColor(cmd.getThemeColor());
+				bo.setPackageName(o.getPackageName());
 				if(bo.getId() != null){//存在ID则走更新路线
 					appUrlProvider.updateAppInfo(bo);
 				}else{//走新增路线
@@ -121,6 +135,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 			dto.setId(o.getId());
 			dto.setOsType(o.getOsType());
 			dto.setDownloadUrl(o.getDownloadUrl());
+			dto.setPackageName(o.getPackageName());
 			returnDTO.getDtos().add(dto);
 			
 			returnDTO.setDescription(o.getDescription());
