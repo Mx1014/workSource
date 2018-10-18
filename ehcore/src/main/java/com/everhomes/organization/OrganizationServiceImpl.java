@@ -13982,7 +13982,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.debug("listUnderOrganizations start, i ={}, orgs = {}, namespaceId = {}, list={}" , i, orgs, namespaceId, list);
         if (orgs == null) {
             //:todo 第一次进入
-            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByActualName(list[0], null, null, namespaceId);
             LOGGER.debug("listUnderOrganizations oneStep" + orgs_0.toString());
             if (orgs_0 != null) {
                 return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
@@ -14001,7 +14001,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {
-                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByActualName(list[i], null, r.getId(), namespaceId);
                 LOGGER.debug("listUnderOrganizations twoStep" + orgs_1.toString());
                 if (orgs_1 != null && orgs_1.size() > 0) {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
