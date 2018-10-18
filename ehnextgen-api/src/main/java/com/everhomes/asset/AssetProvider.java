@@ -452,5 +452,8 @@ public interface AssetProvider {
 	AssetDooraccessParam findDoorAccessParamById(Long id);
 	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
 	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor);
+	Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
 		
 }

@@ -4973,14 +4973,14 @@ public class AssetServiceImpl implements AssetService {
 			assetDooraccessParam = assetProvider.findDoorAccessParamById(cmd.getId());
 			assetDooraccessParam.setFreezeDays(cmd.getFreezeDays());
 			assetDooraccessParam.setUnfreezeDays(cmd.getUnfreezeDays());
-			if (cmd.getOwnerId() != null) {
+			/*if (cmd.getOwnerId() != null) {
 				assetDooraccessParam.setOrgId(null);
-			}
+			}*/
 			assetProvider.updateDoorAccessParam(assetDooraccessParam);
 		} else {
-			if (cmd.getOwnerId() != null) {
+			/*if (cmd.getOwnerId() != null) {
 				assetDooraccessParam.setOrgId(null);
-			}
+			}*/
 			assetProvider.createDoorAccessParam(assetDooraccessParam);
 		}
 	}
@@ -5038,23 +5038,12 @@ public class AssetServiceImpl implements AssetService {
 						String dueDayDeadline = bill.getDueDayDeadline();
 						Long ownerId = bill.getOwnerId();
 						Long targetId = bill.getTargetId();
-						
-						//获取管理公司id
-						ListPMOrganizationsCommand cmd = new ListPMOrganizationsCommand();
-				        cmd.setNamespaceId(bill.getNamespaceId());
-				        ListPMOrganizationsResponse listPMOrganizationsResponse = organizationService.listPMOrganizations(cmd);
-				        Long currentOrgId = null;
-				        try{
-				            currentOrgId = listPMOrganizationsResponse.getDtos().get(0).getId();
-				        }catch (ArrayIndexOutOfBoundsException e){
-				        	
-				        }
+						String targetType = bill.getTargetType();
 						
 						//先去查询设置的参数
 						GetDoorAccessParamCommand getDoorAccessParamCommand = new GetDoorAccessParamCommand();
 						getDoorAccessParamCommand.setNamespaceId(bill.getNamespaceId());
 						getDoorAccessParamCommand.setCategoryId(bill.getCategoryId());
-						getDoorAccessParamCommand.setOrgId(currentOrgId);
 						getDoorAccessParamCommand.setOwnerId(ownerId);
 						getDoorAccessParamCommand.setOwnerType(bill.getOwnerType());
 						ListDoorAccessParamResponse listDoorAccessParamResponse = getDoorAccessParam(getDoorAccessParamCommand);
@@ -5066,6 +5055,26 @@ public class AssetServiceImpl implements AssetService {
 							continue;
 						}
 						
+						//查询logs获取那些公司门禁已经关闭
+						//禁门禁之前记录下
+						AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(getDoorAccessParamCommand, AssetDooraccessLog.class);
+						assetDooraccessLog.setProjectId(ownerId);
+						assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+						if ("eh_organization".equals(targetType)) {
+							assetDooraccessLog.setOwnerId(targetId);
+							assetDooraccessLog.setOwnerType(targetType);
+						}else if ("eh_user".equals(targetType)) {
+							assetDooraccessLog.setOwnerId(targetId);
+							assetDooraccessLog.setOwnerType(targetType);
+						}
+						assetDooraccessLog.setOrgId(DoorAccessParam.getOrgId());
+						assetDooraccessLog.setDooraccessStatus((byte)1);//已禁用
+						//查询该企业是否已经禁用了门禁，为空是还没有禁用门禁，不为空，已存在，已禁用，跳过 
+						//过滤，发起过的关闭的公司
+						AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
+						if (existDooraccessLog != null) {
+							continue;
+						}
 						
 						try {
 							Date deadline = yyyyMMdd.parse(dueDayDeadline);
@@ -5073,11 +5082,25 @@ public class AssetServiceImpl implements AssetService {
 
 							if (dueDayCount.compareTo(DoorAccessParam.getFreezeDays()) >= 0) {
 								//欠费时间大于等于设置的时间，禁用门禁
-								//项目id,公司id,状态，管理公司id
+								//项目id,状态，管理公司id ,公司id, 类型 调用门禁接口
+								
+								
+								
+								assetDooraccessLog.setDooraccessStatus((byte)1);//禁用门禁
+								assetProvider.createDoorAccessLog(assetDooraccessLog);
+								
+								
+								
 								
 								dueDayCount = null;
+								
+								
+								
+								/*//门禁结果返回，更新log表 0关闭，1成功
+								
+								assetDooraccessLog.setDooraccessStatus((byte)1);
+								assetProvider.updateDoorAccessLog(assetDooraccessLog);*/
 							}
-
 							//assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);// 更新账单欠费天数
 						} catch (Exception e) {
 							continue;
@@ -5086,79 +5109,6 @@ public class AssetServiceImpl implements AssetService {
                        nextPageAnchor = res.getNextPageAnchor();
                    }
                });
-           
-            /*List<EnergyMeter> meters = new ArrayList<>();
-            if (communityId != null) {
-                meters = meterProvider.listAutoReadingMetersByCommunityId(communityId);
-            } else {
-                meters = meterProvider.listAutoReadingMeters();
-            }
-            if (meters != null && meters.size() > 0) {
-                meters.forEach((meter) -> {
-                    String serverUrl = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.server", "");
-                    String publicKey = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.publicKey", "");
-                    String clientId = configurationProvider.getValue(meter.getNamespaceId(), "energy.meter.thirdparty.client.id", "");
-                    EnergyAutoReadHandler handler = null;
-                    if (meter.getNamespaceId() == 999961) {
-                         handler = PlatformContext.getComponent(EnergyAutoReadHandler.AUTO_PREFIX + EnergyAutoReadHandler.ZHI_FU_HUI);
-                    }
-                    if (handler != null) {
-                        try {
-                            String meterReading = handler.readMeterautomatically(meter.getMeterNumber(), serverUrl, publicKey, clientId);
-                            LOGGER.info("energy auto reading meter meterId={},meterNumber={}, Reading={}", meter.getId(), meter.getMeterNumber(), meterReading);
-                            //parser
-                            Map<String, String> result = getRemoteReadingDataMap(meterReading,meter.getId(),meter.getMeterNumber());
-                            //log
-                            EnergyMeterTask task = energyMeterTaskProvider.findEnergyMeterTaskByMeterId(meter.getId(), new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            EnergyMeterReadingLog log = new EnergyMeterReadingLog();
-                            log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                            log.setReading(new BigDecimal(result.get("this_read")));
-                            if (task != null) {
-                                log.setTaskId(task.getId());
-                                task.setReading(log.getReading());
-                                task.setStatus(EnergyTaskStatus.READ.getCode());
-                                task.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            }
-                            log.setCommunityId(meter.getCommunityId());
-                            log.setMeterId(meter.getId());
-                            log.setNamespaceId(meter.getNamespaceId());
-                            log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            log.setOperatorId(UserContext.currentUserId());
-                            if (meter.getLastReading() != null &&
-                                    new BigDecimal(result.get("this_read")).subtract(meter.getLastReading()).intValue() < 0) {
-                                log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
-                            } else {
-                                log.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
-                            }
-                            dbProvider.execute(r -> {
-                                meterReadingLogProvider.createEnergyMeterReadingLog(log);
-                                if (task != null) {
-                                    energyMeterTaskProvider.updateEnergyMeterTask(task);
-                                    energyMeterTaskSearcher.feedDoc(task);
-                                }
-                                meter.setLastReading(log.getReading());
-                                meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
-                                meterProvider.updateEnergyMeter(meter);
-                                return true;
-                            });
-                            readingLogSearcher.feedDoc(log);
-                            meterSearcher.feedDoc(meter);
-                        } catch (Exception e) {
-                            LOGGER.error("read energy meter reading  error...", e);
-                            sendErrorMessage(e);
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-            }
-            LOGGER.info("read energy meter reading  end...");
-
-            if(createPlansFlag){
-                LOGGER.info("starting create  auto  meter plans ...");
-                createMonthAutoPlans(meters);
-                LOGGER.info("ending create  auto  meter plans ...");
-            }*/
         }
     }
 }

@@ -46,7 +46,7 @@ CREATE TABLE `eh_asset_dooraccess_logs` (
   `owner_type` VARCHAR(64) NOT NULL,
   `org_id` bigint(20) DEFAULT NULL,
   `status` tinyint(4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
-  `dooraccess_status` tinyint(4) DEFAULT NULL  COMMENT '该项目下门禁的状态',
+  `dooraccess_status` tinyint(4) DEFAULT NULL  COMMENT '该项目下门禁的状态 1:发起禁用门禁 ',
   `category_id` BIGINT COMMENT 'asset category id',
   `creator_uid` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,

@@ -132,6 +132,7 @@ import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetDooraccessLogs;
 import com.everhomes.server.schema.tables.EhAssetDooraccessParams;
 import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
@@ -159,6 +160,7 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhAssetDooraccessLogsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
@@ -5837,4 +5839,52 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
         res.setBills(paymentBills);
         return res;
     }
+
+	@Override
+	public Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
+		long id = this.dbProvider.allocPojoRecordId(EhAssetDooraccessLogs.class);
+		assetDooraccessLog.setId(id);
+		assetDooraccessLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessLog.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+		assetDooraccessLog.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class, id));
+        EhAssetDooraccessLogsDao dao = new EhAssetDooraccessLogsDao(context.configuration());
+        dao.insert(assetDooraccessLog);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetDooraccessLogs.class, null);
+        
+        return id;
+	}
+
+	@Override
+	public void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class));
+		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+
+		Condition cond = t1.NAMESPACE_ID.eq(assetDooraccessLog.getNamespaceId());
+		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.CATEGORY_ID.eq(assetDooraccessLog.getCategoryId()));
+		cond = cond.and(t1.OWNER_ID.eq(assetDooraccessLog.getOwnerId()));
+		cond = cond.and(t1.OWNER_TYPE.eq(assetDooraccessLog.getOwnerType()));
+		cond = cond.and(t1.DOORACCESS_STATUS.eq(assetDooraccessLog.getDooraccessStatus()));
+		cond = cond.and(t1.PROJECT_ID.eq(assetDooraccessLog.getProjectId()));
+		
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<AssetDooraccessLog> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessLog.class));
+
+		if (assetDooraccessParams != null && assetDooraccessParams.size()>0) {
+			return assetDooraccessParams.get(0);
+		}
+		
+		return null;
+	}
 }
