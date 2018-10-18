@@ -872,7 +872,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
-		ServiceAllianceCategories mainCag = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+		ServiceAllianceCategories mainCag = allianceStandardService.queryServiceAllianceCategoryTopic(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
 		if (null != mainCag) {
 			response.setSkipType(mainCag.getSkipType());
 		}
