@@ -6491,9 +6491,6 @@ public class PunchServiceImpl implements PunchService {
         try {
             String punchDate = dateSF.get().format(punCalendar.getTime());
             PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDateAndDetailId(memberDetail.getId(), ownerId, punchDate);
-            if (punchDayLog != null) {
-                return;
-            }
             PunchRule pr = getPunchRuleByDetailId(memberDetail.getNamespaceId(), PunchOwnerType.ORGANIZATION.getCode(), ownerId, memberDetail.getId());
             if (memberDetail.getTargetId() == null || memberDetail.getTargetId().equals(0L) || pr == null) {
                 // 用户未激活和没有设置考勤规则，因此不存在打卡记录和请假等申请记录，所以日报统计只有一些基础数据
