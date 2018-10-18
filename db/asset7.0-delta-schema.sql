@@ -23,27 +23,6 @@ CREATE TABLE `eh_payment_bill_statistic_community` (
   `due_day_count` BIGINT COMMENT '欠费天数', 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='项目-时间段（月份）统计结果集表';
--- REMARK: 账单表增删改触发器---》更新项目-时间段（月份）统计结果集表数据
-DELIMITER $
-create trigger eh_payment_bill_statistic_community_uTrigger after update 
-on eh_payment_bills for each row
-begin
-	-- 更新账单之后统计（删除账单目前是逻辑删除，其实也是更新）
-	update eh_payment_bill_statistic_community 
-    set amount_receivable = IFNULL(amount_receivable,0) + (IFNULL(NEW.amount_receivable,0) - IFNULL(OLD.amount_receivable,0)),
-    amount_receivable_without_tax = IFNULL(amount_receivable_without_tax,0) + (IFNULL(NEW.amount_receivable_without_tax,0) - IFNULL(OLD.amount_receivable_without_tax,0)),
-    amount_owed = IFNULL(amount_owed,0) + (IFNULL(NEW.amount_owed,0) - IFNULL(OLD.amount_owed,0));
-end;
 
-DELIMITER $
-create trigger eh_payment_bill_statistic_community_iTrigger after insert 
-on eh_payment_bills for each row
-begin
-	-- 插入新账单之后统计逻辑
-	
-end;
-
-
- 
  
   
