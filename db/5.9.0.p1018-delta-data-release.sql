@@ -95,7 +95,8 @@
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
 
-
+-- AUTHOR:黄明波
+-- REMARK:服务联盟离线应用化 issue-39394
 set @max_id := (select ifnull(max(id), 0) from eh_version_realm);
 set @namespace_id := 999953;
 set @module_name := '服务联盟';
