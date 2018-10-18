@@ -5602,8 +5602,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
-	public int updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
+	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
+		UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
 		// TODO Auto-generated method stub
-		return 1;
+		rsp.setErrorCode(200);
+		rsp.setMsg("success");
+		return rsp;
 	}
 }
