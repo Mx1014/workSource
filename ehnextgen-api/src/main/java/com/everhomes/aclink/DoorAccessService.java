@@ -193,5 +193,10 @@ public interface DoorAccessService {
 	void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
 	OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+	
+	/**
+	 * 常规授权,授权/取消权限,园区下的所有门禁,单个用户/企业下的所有用户,1成功,0失败 
+	 */
+	public int updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd);
 
 }
