@@ -217,12 +217,23 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	private ServiceAllianceCategories getMainCategorys(Long type, Long organizationId) {
-		return yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
+		ServiceAllianceCategories sc = yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
+		if (null != sc) {
+			return sc;
+		}
+		
+		return yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), null, type);
 	}
 
 	private ServiceAlliances getGeneralMainConfig(Long type, Long organizationId) {
-		return yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(),
+		ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, type);
+		if (null != sa) {
+			return sa;
+		}
+		
+		return yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(),
+				null, type);
 	}
 
 	private void copyMainConfigToProject(Long type, Long projectId, Long organizationId) {
@@ -297,6 +308,23 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		// 根据园区查询，可以再查询通用配置
 		Long orgId = getOrgIdByTypeAndProjectId(type, ownerId);
 		return null == orgId ? null : getGeneralMainConfig(type, orgId);
+	}
+	
+	@Override
+	public ServiceAllianceCategories queryServiceAllianceCategoryTopic(String ownerType, Long ownerId, Long type) {
+
+		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			return getMainCategorys(type, ownerId);
+		}
+		
+		ServiceAllianceCategories sc = yellowPageProvider.findMainCategory(ownerType, ownerId, type);
+		if (null != sc) {
+			return sc;
+		}
+
+		// 根据园区查询，可以再查询通用配置
+		Long orgId = getOrgIdByTypeAndProjectId(type, ownerId);
+		return null == orgId ? null : getMainCategorys(type, orgId);
 	}
 
 	private Long getOrgIdByTypeAndProjectId(Long type, Long projectId) {

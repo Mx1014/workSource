@@ -26,4 +26,6 @@ public interface AllianceStandardService {
 
 	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
 			String ownerType, Long ownerId, Long organizationId, Long type);
+
+	ServiceAllianceCategories queryServiceAllianceCategoryTopic(String ownerType, Long ownerId, Long type);
 }
