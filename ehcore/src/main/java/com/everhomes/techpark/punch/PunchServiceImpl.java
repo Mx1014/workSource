@@ -189,6 +189,7 @@ import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -221,6 +222,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11341,11 +11343,23 @@ public class PunchServiceImpl implements PunchService {
                 SimpleDateFormat weekDF = new SimpleDateFormat("EEE", Locale.SIMPLIFIED_CHINESE);
                 dto.setTitle(dayDF.format(r.getPunchDate()) + dateUnit + weekDF.format(r.getPunchDate()));
             	PunchLog pLog = punchProvider.findPunchLog(r.getEnterpriseId(), r.getUserId(), r.getPunchDate(), r.getPunchType(), r.getPunchIntervalNo());
+            	Long ruleTime = 0L;
             	if(null != pLog){
-            		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-            		dto.setDescription(localeStringService.getLocalizedString(PunchConstants.PUNCH_PUNCHTYPE_SCOPE, String.valueOf(r.getPunchType()), PunchConstants.locale, "")
-            				+ " " + ruleTimeToString(pLog.getRuleTime()));
+            		ruleTime = pLog.getRuleTime(); 
+            	}else{
+                    PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), r.getEnterpriseId(), r.getUserId());
+            		PunchTimeRule ptr = null;
+                    if (null != pr) {
+                        ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, r.getPunchDate(), r.getUserId());
+                    } 
+            		ruleTime = findRuleTime(ptr, r.getPunchType(), r.getPunchIntervalNo());
             	}
+            	if(ruleTime == null){
+            		ruleTime = 0L;
+            	}
+            	SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+        		dto.setDescription(localeStringService.getLocalizedString(PunchConstants.PUNCH_PUNCHTYPE_SCOPE, String.valueOf(r.getPunchType()), PunchConstants.locale, "")
+        				+ " " + ruleTimeToString(ruleTime));
                 break;
             default:
                 break;
