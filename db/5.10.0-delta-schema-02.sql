@@ -783,7 +783,7 @@ CREATE TABLE `eh_user_app_flags` (
 
 -- AUTHOR: xq.tian
 -- REMARK: 漏掉的工作流表, 需要删除原来的表重建
--- DROP TABLE IF EXISTS `eh_flow_scripts`;
+DROP TABLE IF EXISTS `eh_flow_scripts`;
 CREATE TABLE `eh_flow_scripts` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
