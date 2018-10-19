@@ -8,6 +8,7 @@ public class TagDTO {
 	
 	private String id;
 	private String name;
+	private String serveApplyName;
 	private List<TagDTO> tags;
 	
 	public String getId() {
@@ -36,5 +37,13 @@ public class TagDTO {
 	}
 	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
+	}
+
+	public String getServeApplyName() {
+		return serveApplyName;
+	}
+
+	public void setServeApplyName(String serveApplyName) {
+		this.serveApplyName = serveApplyName;
 	}
 }
