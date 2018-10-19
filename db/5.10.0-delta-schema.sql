@@ -36,6 +36,20 @@ ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) N
 -- REMARK: 服务联盟通用配置修复
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `origin_category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '原默认配置的服务类型id，如果是项目配置新增的，通常就是当前记录id' ;
 
+CREATE TABLE `eh_alliance_config_state` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL,
+	`type` BIGINT(20) NOT NULL,
+	`owner_type` BIGINT(20) NOT NULL COMMENT 'community/organaization',
+	`owner_id` BIGINT(20) NOT NULL COMMENT 'community为项目id， organaization为公司id',
+	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-取默认配置 1-取自定义配置。当owner_type为organization时，该值必定为1。',
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `u_eh_prefix` (`type`, `owner_type`, `owner_id`)
+)
+COMMENT='储存应用不同项目下的配置情况。'
+ENGINE=InnoDB
+;
+
 -- AUTHOR: 梁燕龙
 -- REMARK: 用户认证审核权限配置表
 CREATE TABLE `eh_user_authentication_organizations`(
