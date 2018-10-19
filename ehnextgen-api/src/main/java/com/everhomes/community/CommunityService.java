@@ -33,6 +33,8 @@ public interface CommunityService {
 
     CommunityDTO getCommunityById(GetCommunityByIdCommand cmd);
 
+	CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd);
+
     CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
 
 	ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd);
