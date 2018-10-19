@@ -962,6 +962,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
 
 
+        dynamicCustomers.forEach(r -> {
+            customerSearcher.feedDoc(r.getCustomer());
+        });
+
+
         long startUpdateSyncCustomerTime = System.currentTimeMillis();
         LOGGER.debug("updateCustomer and syncElastic is start : {} " , startUpdateSyncCustomerTime);
         List<EhEnterpriseCustomers> updateCustomers = new ArrayList<>();
