@@ -30,6 +30,9 @@ public interface PropertyErrorCode {
 	int ERROR_INSUFFICIENT_PRIVILEGE = 119;//用户权限不足
 	int ERROR_ORGANIZATION_OWNER_BEHAVIOR_NOT_EXIST = 120;//入驻信息不存在
 	int ERROR_ATTACHMENT_NOT_EXIST = 121;//附件不存在
+	int ERROR_EXCEL_DATA_FORMAT = 122;//excel数据格式不正确
+	int ERROR_CHARGING_ITEM_NOT_EXIST = 123;//计费项不存在
+	int ERROR_CREATE_RESERVATION_FAILURE = 124;//创建预约计划失败
 	
 
 }

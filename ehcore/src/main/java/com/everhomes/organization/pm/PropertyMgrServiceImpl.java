@@ -7252,7 +7252,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             return task;
         } else {
             LOGGER.error("excel data format is not correct.rowCount=" + resultList);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXCEL_DATA_FORMAT,
                     "excel data format is not correct");
         }
     }
@@ -7649,7 +7649,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     private void invalidParameterException(String name, Object param) {
         LOGGER.error("Invalid parameter {} [ {} ].", name, param);
-        throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                 "Invalid parameter %s [ %s ].", name, param);
     }
 
@@ -7662,7 +7662,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             result.stream().map(r -> r.getPropertyPath().toString() + " [ " + r.getInvalidValue() + " ]")
                     .reduce((i, a) -> i + ", " + a).ifPresent(r -> {
                 LOGGER.error("Invalid parameter {}", r);
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
         }
     }
@@ -7670,7 +7670,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd) {
         if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameter");
         }
         EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
         Long requestId = cmd.getRequestId();  //表示那条记录的id
@@ -7724,7 +7724,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		DefaultChargingItem item = defaultChargingItemProvider.findById(id);
 		if(item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
 			LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CHARGING_ITEM_NOT_EXIST,
 					"DefaultChargingItem id is not exist or active.");
 		}
 		return item;
@@ -7770,7 +7770,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
 		for(PmResourceReservation r : existReservations){
 			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), start, end)){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "in this period of time, there had been" +
+				throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CREATE_RESERVATION_FAILURE, "in this period of time, there had been" +
 						"valid reservations exist");
 			}
 		}
@@ -7796,7 +7796,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			//int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
         	int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
 			if(effectedRow != 1){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+				throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CREATE_RESERVATION_FAILURE, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
 			}
 			propertyMgrProvider.insertResourceReservation(resourceReservation);
@@ -8037,7 +8037,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public void setAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (cmd.getNamespaceId() == null || cmd.getCommunityId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -8097,7 +8097,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public AuthorizePriceDTO authorizePriceDetail(AuthorizePriceCommand cmd) {
 		if (cmd.getId() == null || cmd.getNamespaceId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8108,7 +8108,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public void updateAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8131,7 +8131,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public void deleteAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8306,7 +8306,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	private List<ImportFileResultLog<ImportAuthorizePriceDataDTO>> importApartment(List<ImportAuthorizePriceDataDTO> datas, Long userId, ImportAddressCommand cmd) {
 		if (null == cmd.getCommunityId() || cmd.getBuildingId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
