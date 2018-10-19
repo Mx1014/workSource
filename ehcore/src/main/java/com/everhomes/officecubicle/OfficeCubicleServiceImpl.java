@@ -549,7 +549,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 //		根据项目查询
 		int pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider,999999);
-		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),0L,pageSize);
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),Long.MAX_VALUE,pageSize);
 		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
 		
 		return cities.stream().map(r->{
