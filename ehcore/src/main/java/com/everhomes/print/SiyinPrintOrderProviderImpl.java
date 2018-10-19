@@ -246,9 +246,9 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		
 		if(payMode!=null){
-			if (payMode == GorderPayType.ENTERPRISE_PAID.getCode()){
+			if (payMode == GorderPayType.ENTERPRISE_PAY.getCode()){
 				List<Byte> modes = new ArrayList();
-				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
+				modes.add(GorderPayType.ENTERPRISE_PAID.getCode());
 				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.in(modes));
 			} else
