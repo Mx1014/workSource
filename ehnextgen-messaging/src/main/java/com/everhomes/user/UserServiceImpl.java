@@ -7490,6 +7490,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         kickoffService.kickoff(namespaceId.intValue(), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
     }
-    /*********************同步数据 END************************/
 
+    @KafkaListener(topics = "user-device-kickoff")
+    public void userDeviceKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-device-kickoff ] {}", record.value());
+
+        UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
+        kickoffLoginByDevice(newLogin);
+    }
 }
