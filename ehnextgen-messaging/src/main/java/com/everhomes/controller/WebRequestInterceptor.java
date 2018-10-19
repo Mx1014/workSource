@@ -191,9 +191,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
 //                    }
                     if (this.isInnerSignLogon(request)) {
+                        LOGGER.debug("this is inner sign logon before");
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                        LOGGER.debug("this is inner sign logon, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -210,6 +212,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
+                        LOGGER.debug("check request signature success, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -226,6 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     setupUserContext(token);
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    LOGGER.debug("token check success, setup user context: {}, uid={}", token, String.valueOf(UserContext.current().getUser().getId()));
                 }
 
             } else {

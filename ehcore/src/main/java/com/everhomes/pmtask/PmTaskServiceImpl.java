@@ -2974,7 +2974,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
-        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>7)
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>9)
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
 					"Illegal stateId");
 		PmTask task = list.get(0);
@@ -2997,6 +2997,8 @@ public class PmTaskServiceImpl implements PmTaskService {
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case HANGING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break; //待单中
+					case REVIEWED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break; //已回访
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
 				task.setStatus(flowCaseStatus);
