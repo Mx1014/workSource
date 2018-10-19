@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.user.OSType;
+import com.everhomes.user.UserContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,8 @@ public class AppUrlServiceImpl implements AppUrlService {
         if (StringUtils.isBlank(dto.getDescription())) {
 		    dto.setDescription("立即下载"+dto.getName());
         }
+        String homrUrl = this.configurationProvider.getValue("home.url","");
+		dto.setLinkUrl(homrUrl + "/app-share/build/index.html?ns=" + UserContext.getCurrentNamespaceId() +"#/");
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{
