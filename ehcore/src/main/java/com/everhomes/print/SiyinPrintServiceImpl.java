@@ -697,7 +697,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		baseInfo.setPaymentMerchantId(merchantId);
 		baseInfo.setGoods(buildGoods(cmd, order, merchantId));
 		baseInfo.setTotalAmount(order.getOrderTotalFee());
-		 String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.siyinprint", "/siyinprint/notifySiyinprintOrderPaymentV2"); 
+		 String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.siyinprint", "/siyinprint/notifySiyinprintOrderPaymentV2");
 		baseInfo.setCallBackUrl(backUrl);
 		baseInfo.setOrderTitle(app.getName());
 		baseInfo.setPaySourceType(SourceType.PC.getCode());
@@ -2256,11 +2256,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                 case 7:
                 case 9:
                 case 21: 
+                	LOGGER.info("微信支付");
                 	order.setPaidType(VendorType.WEI_XIN.getCode());
                 	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
-                case 29: order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
+                case 29: 
+                	LOGGER.info("企业支付");
+                	order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
                 default: 
+                	LOGGER.info("支付宝支付");
                 	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
                 	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
                 	break;
