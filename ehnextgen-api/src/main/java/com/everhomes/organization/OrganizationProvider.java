@@ -987,4 +987,14 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
+
+	//用户认证审核
+	Long createUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+	void updateUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+    UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId, Long communityId);
+
+    List<Long> listOrganizationIdFromUserAuthenticationOrganization(Long communityId, Integer namespaceId, Byte authFlag);
+    //用户认证审核end
 }

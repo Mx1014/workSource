@@ -52,6 +52,7 @@ import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.warehouse.Status;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserOrganizations;
@@ -6992,4 +6993,51 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return userProvider.findUserTargetById(userId);
 	}
+
+    @Override
+    public Long createUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserAuthenticationOrganizations.class));
+
+        userAuthenticationOrganization.setId(id);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserAuthenticationOrganizations.class));
+        EhUserAuthenticationOrganizationsDao dao = new EhUserAuthenticationOrganizationsDao(context.configuration());
+        dao.insert(userAuthenticationOrganization);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserAuthenticationOrganizations.class, id);
+        return id;
+    }
+
+    @Override
+    public void updateUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUserAuthenticationOrganizations.class));
+        EhUserAuthenticationOrganizationsDao dao = new EhUserAuthenticationOrganizationsDao(context.configuration());
+        dao.update(userAuthenticationOrganization);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserAuthenticationOrganizations.class, userAuthenticationOrganization.getId());
+    }
+
+    @Override
+    public UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId, Long communityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        UserAuthenticationOrganization userAuthenticationOrganization = context.select().from(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS)
+                .where(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()))
+                .fetchAnyInto(UserAuthenticationOrganization.class);
+        return userAuthenticationOrganization;
+    }
+
+    @Override
+    public List<Long> listOrganizationIdFromUserAuthenticationOrganization(Long communityId, Integer namespaceId, Byte authFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> targetIdList = context.select(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.ORGANIZATION_ID)
+                .from(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS).where(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.AUTH_FLAG.eq(authFlag))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()))
+                .fetchInto(Long.class);
+        return targetIdList;
+    }
 }
