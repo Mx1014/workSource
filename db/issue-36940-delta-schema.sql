@@ -3,6 +3,7 @@
 CREATE TABLE `eh_user_authentication_organizations`(
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL  COMMENT '域空间ID',
+  `community_id` BIGINT NOT NULL COMMENT '项目ID',
   `organization_id` BIGINT NOT NULL COMMENT '企业ID',
   `creator_uid` BIGINT NOT NULL COMMENT 'assignment creator uid',
   `create_time` DATETIME COMMENT 'record create time',
