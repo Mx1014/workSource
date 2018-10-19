@@ -2263,6 +2263,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                 case 29: 
                 	LOGGER.info("企业支付");
                 	order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
+                	break;
                 default: 
                 	LOGGER.info("支付宝支付");
                 	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
