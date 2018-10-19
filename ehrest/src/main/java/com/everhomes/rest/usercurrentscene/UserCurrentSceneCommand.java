@@ -19,6 +19,15 @@ public class UserCurrentSceneCommand {
     private Integer namespaceId;
     private Long communityId ;
     private Byte communityType ;
+    private String token ;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public Long getId() {
         return id;
