@@ -3,8 +3,7 @@ package com.everhomes.activity.ruian;
 import com.everhomes.activity.ActivityServiceImpl;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.ruian.ActivityCategoryList;
-import com.everhomes.rest.activity.ruian.ActivityCategoryModel;
+import com.everhomes.rest.activity.ruian.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -55,9 +54,79 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
             return resultObject.getData();
         }
-        List<ActivityCategoryModel>  returnList = new ArrayList<ActivityCategoryModel>();
-        return returnList;
+        return new ArrayList<ActivityCategoryModel>();
     }
 
+    /**
+     * 获取活动列表
+     * @param namespaceId 域空间ＩＤ
+     * @param activityCategoryID　　一级分类ＩＤ
+     * @param activitySubCategoryID　二级分类　ＩＤ
+     * @param state　状态
+     * @param pageSize
+     * @param pageIndex
+     * @return
+     */
+    @Override
+    public List<ActivityModel> getActivityList(Integer namespaceId, Long activityCategoryID, Long activitySubCategoryID, Byte state, Integer pageSize, Integer pageIndex) {
+        namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+        String url = configProvider.getValue(namespaceId,"activity.butt.url.getactivitylist", "") ;
+        if(StringUtils.isBlank(url)){
+            LOGGER.error("the config activity.butt.url.getactivitylist is null .");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_URL_NOTEXIST, "the config activity.butt.url.getactivitylist is null ." );
+        }
 
+        JSONObject object = new JSONObject();
+        if(activityCategoryID != null){
+            object.put("ActivityCategoryID",activityCategoryID);
+        }
+        if(activitySubCategoryID != null){
+            object.put("ActivitySubCategoryID",activitySubCategoryID);
+        }
+        if(state != null){
+            object.put("State",state);
+        }
+        if(pageSize != null){
+            object.put("PageSize",pageSize);
+        }
+        if(pageIndex != null){
+            object.put("PageIndex",pageIndex);
+        }
+        String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
+        //解析结果
+        ActivityModelList resultObject = (ActivityModelList) StringHelper.fromJsonString(result,ActivityModelList.class);
+        if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
+            return resultObject.getData();
+        }
+        return new ArrayList<ActivityModel>();
+    }
+
+    /**
+     * 获取活动详情
+     * @param namespaceId
+     * @param activityId
+     * @return
+     */
+    @Override
+    public ActivityDetailModel getActivityDetail(Integer namespaceId,Long activityId) {
+        namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
+        String url = configProvider.getValue(namespaceId,"activity.butt.url.getactivity ", "") ;
+        if(StringUtils.isBlank(url)){
+            LOGGER.error("the config activity.butt.url.getactivity  is null .");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_URL_NOTEXIST, "the config activity.butt.url.getactivity  is null ." );
+        }
+        JSONObject object = new JSONObject();
+        if(activityId != null){
+            object.put("ActivityID",activityId);
+        }
+        String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
+        //解析结果
+        ActivityDetailDTO resultObject = (ActivityDetailDTO) StringHelper.fromJsonString(result,ActivityDetailDTO.class);
+        if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
+            return resultObject.getData();
+        }
+        return null;
+    }
 }
