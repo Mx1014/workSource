@@ -5879,8 +5879,14 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
 		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
 		cond = cond.and(t1.CATEGORY_ID.eq(assetDooraccessLog.getCategoryId()));
 		cond = cond.and(t1.OWNER_ID.eq(assetDooraccessLog.getOwnerId()));
-		cond = cond.and(t1.OWNER_TYPE.eq(assetDooraccessLog.getOwnerType()));
-		cond = cond.and(t1.DOORACCESS_STATUS.eq(assetDooraccessLog.getDooraccessStatus()));
+		
+		if(assetDooraccessLog.getDooraccessStatus() != null) {
+			cond = cond.and(t1.DOORACCESS_STATUS.eq(assetDooraccessLog.getDooraccessStatus()));
+		}
+		if(assetDooraccessLog.getOwnerType() != null) {
+			cond = cond.and(t1.OWNER_TYPE.eq(assetDooraccessLog.getOwnerType()));
+		}
+		
 		cond = cond.and(t1.PROJECT_ID.eq(assetDooraccessLog.getProjectId()));
 		
 		query.orderBy(t1.CREATE_TIME.desc());

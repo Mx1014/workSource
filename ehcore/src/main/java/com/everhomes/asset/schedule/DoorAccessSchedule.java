@@ -45,7 +45,8 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
 	//定时任务时间
-	static final String cronExpression = "0/10 * *  * * ?";
+	//static final String cronExpression = "0/10 * *  * * ?";
+	static final String cronExpression = "0 0/10 *  * * ?";
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {

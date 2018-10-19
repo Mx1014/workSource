@@ -16,7 +16,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -46,7 +45,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -69,10 +67,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.energy.EnergyAutoReadHandler;
-import com.everhomes.energy.EnergyMeter;
-import com.everhomes.energy.EnergyMeterReadingLog;
-import com.everhomes.energy.EnergyMeterTask;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -87,7 +81,6 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
@@ -111,11 +104,6 @@ import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractTemplateDTO;
-import com.everhomes.rest.contract.ContractTemplateDeleteStatus;
-import com.everhomes.rest.contract.ListContractTemplatesResponse;
-import com.everhomes.rest.energy.EnergyCommonStatus;
-import com.everhomes.rest.energy.EnergyTaskStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -125,8 +113,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.organization.ListPMOrganizationsCommand;
-import com.everhomes.rest.organization.ListPMOrganizationsResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -145,15 +131,12 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
 import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
 import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
 import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
@@ -175,7 +158,6 @@ import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 //import com.everhomes.contract.ContractService;
 
@@ -264,9 +246,6 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private ContractProvider contractProvider;
-
-    @Autowired
-    private ContractServiceImpl contractService;
 
     @Autowired
     private ServiceModuleService serviceModuleService;
@@ -5051,7 +5030,6 @@ public class AssetServiceImpl implements AssetService {
 
 					// 更新账单
 					for (PaymentBills bill : bills) {
-						// String dueDayDeadline = bill.getDueDayDeadline();
 						Long ownerId = bill.getOwnerId();
 						Long targetId = null;
 						String targetType = bill.getTargetType();
@@ -5094,7 +5072,9 @@ public class AssetServiceImpl implements AssetService {
 						assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
 						assetDooraccessLog.setOwnerId(targetId);
 						assetDooraccessLog.setOwnerType(targetType);
-						assetDooraccessLog.setOrgId(DoorAccessParam.getOrgId());
+						if (DoorAccessParam != null) {
+							assetDooraccessLog.setOrgId(DoorAccessParam.getOrgId());
+						}
 						assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 已禁用
 						// 查询该企业是否已经禁用了门禁，为空是还没有禁用门禁，不为空，已存在，已禁用，跳过
 						// 过滤，发起过的关闭的公司
@@ -5130,23 +5110,17 @@ public class AssetServiceImpl implements AssetService {
 										UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunityResponse = doorAccessService
 												.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
-										/*
-										 * assetDooraccessLog.
-										 * setDooraccessStatus(DoorAuthStatus.
-										 * VALID.getCode());// 禁用门禁
-										 * assetProvider.createDoorAccessLog(
-										 * assetDooraccessLog);
-										 */
 										assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());
 										existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 
+										// 更新门禁为开启
 										// 更新门禁为开启
 										if (existDooraccessLog == null) {
 											assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 											assetProvider.createDoorAccessLog(assetDooraccessLog);
 										} else {
-											assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
-											assetProvider.updateDoorAccessLog(assetDooraccessLog);
+											existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
+											assetProvider.updateDoorAccessLog(existDooraccessLog);
 										}
 									}
 								}
@@ -5155,7 +5129,9 @@ public class AssetServiceImpl implements AssetService {
 								UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
 
 								updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
-								updateFormalAuthByCommunityCommand.setOperateOrgId(DoorAccessParam.getOrgId());
+								if (DoorAccessParam != null) {
+									updateFormalAuthByCommunityCommand.setOperateOrgId(DoorAccessParam.getOrgId());
+								}
 								updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
 								updateFormalAuthByCommunityCommand.setTargetId(targetId);
 								updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
@@ -5167,11 +5143,12 @@ public class AssetServiceImpl implements AssetService {
 								existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 
 								// 更新门禁为开启
-								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 								if (existDooraccessLog == null) {
+									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 									assetProvider.createDoorAccessLog(assetDooraccessLog);
 								} else {
-									assetProvider.updateDoorAccessLog(assetDooraccessLog);
+									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
+									assetProvider.updateDoorAccessLog(existDooraccessLog);
 								}
 							}
 						} catch (Exception e) {
@@ -5269,19 +5246,18 @@ public class AssetServiceImpl implements AssetService {
 								UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunityResponse = doorAccessService
 										.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
-								/*assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
-								assetProvider.createDoorAccessLog(assetDooraccessLog);*/
-								
 								//原来的门禁开启状态，欠费后更新门禁状态，不存在则新增
 								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());
 								existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 								
 								//更新门禁为开启
-								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
+								
 								if (existDooraccessLog == null) {
+									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
 									assetProvider.createDoorAccessLog(assetDooraccessLog);
 								}else {
-									assetProvider.updateDoorAccessLog(assetDooraccessLog);
+									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
+									assetProvider.updateDoorAccessLog(existDooraccessLog);
 								}
 							}
 						} catch (Exception e) {
@@ -5292,5 +5268,18 @@ public class AssetServiceImpl implements AssetService {
 				}
 			});
 		}
+	}
+
+	@Override
+	public AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd) {
+		AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(cmd, AssetDooraccessLog.class);
+		assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+		AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
+		if (existDooraccessLog.getDooraccessStatus() == 0) {
+			existDooraccessLog.setMsg("该企业或公司门禁处于全部关闭");
+		} else {
+			existDooraccessLog.setMsg("该企业或公司门禁处于开启状态");
+		}
+		return existDooraccessLog;
 	}
 }

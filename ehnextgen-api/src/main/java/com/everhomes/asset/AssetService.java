@@ -257,4 +257,5 @@ public interface AssetService {
 	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
 	//djm 门禁定时任务
 	void meterAutoReading(Boolean createPlanFlag);
+	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
 }

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
@@ -25,12 +24,8 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.CreateFormalAuthBatchCommand;
-import com.everhomes.rest.aclink.ListDoorAccessLiteResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.ContractParamDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -58,9 +53,6 @@ public class AssetController extends ControllerBase {
 	@Autowired
 	private AssetAppService assetAppService;
 	
-	@Autowired
-    private DoorAccessService doorAccessService;
-
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
 //	 * <b>URL: /asset/listAssetBillTemplate</b>
@@ -1565,5 +1557,27 @@ public class AssetController extends ControllerBase {
     @RestReturn(value=ListDoorAccessParamResponse.class)
     public RestResponse createAuthBatch(@Valid GetDoorAccessParamCommand cmd) {
         return new RestResponse(assetService.getDoorAccessParam(cmd));
+    }
+    /**
+     * <p>对接门禁：定时任务手动</p>
+     * <b>URL: /asset/excuteDoorAccessSchedule</b>
+     */
+    @RequestMapping("excuteDoorAccessSchedule")
+    @RestReturn(value=String.class)
+    public RestResponse excuteDoorAccessSchedule() {
+    	assetService.meterAutoReading(true);
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    /**
+     * <p>对接门禁：查询公司门禁状态</p>
+     * <b>URL: /asset/getDoorAccessInfo</b>
+     */
+    @RequestMapping("getDoorAccessInfo")
+    @RestReturn(value=AssetDooraccessLog.class)
+    public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
+    	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
 }
