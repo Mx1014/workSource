@@ -149,7 +149,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			request.setStatus(ApprovalStatus.REJECTION.getCode());
 			punchProvider.updatePunchExceptionRequest(request);
 		}
-
+		refreshPunchDayLog(flowCase, ga, request);
 		String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(code), UserContext.current().getUser().getLocale(), "");
 		// 返还假期余额
 		updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) 1, description);

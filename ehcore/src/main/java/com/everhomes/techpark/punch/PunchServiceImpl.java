@@ -1129,7 +1129,7 @@ public class PunchServiceImpl implements PunchService {
         newPunchDayLog.setSplitDateTime(new Timestamp(punchDate.getTime() + (ptr.getDaySplitTimeLong() != null ? ptr.getDaySplitTimeLong() : ONE_DAY_MS + PunchConstants.DEFAULT_SPLIT_TIME)));
         newPunchDayLog.setTimeRuleName(ptr.getName());
         newPunchDayLog.setTimeRuleId(ptr.getId());
-
+        newPunchDayLog.setRestFlag(NormalFlag.NO.getCode());
         //没有规则就是没有排班,就是非工作日
         pdl.setTimeRuleId(ptr.getId());
         pdl.setTimeRuleName(ptr.getName());
@@ -1425,9 +1425,11 @@ public class PunchServiceImpl implements PunchService {
         if (ptr != null && ptr.getId() == 0) {
             if (NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                 pdl.setStatusList(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode() + "");
+                punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             } else {
                 punchDayLog.setTimeRuleId(0L);
                 punchDayLog.setTimeRuleName("休息");
+                punchDayLog.setRestFlag(NormalFlag.YES.getCode());
                 pdl.setStatusList(PunchStatus.NOTWORKDAY.getCode() + "");
             }
         }
@@ -10588,11 +10590,6 @@ public class PunchServiceImpl implements PunchService {
             if (StringUtils.isNotBlank(pdl.getApprovalStatusList())) {
                 statusList[0] = pdl.getApprovalStatusList();
             }
-        }
-        if (pdl.getTimeRuleId() == null || pdl.getTimeRuleId() == 0) {
-            pdl.setRestFlag(NormalFlag.YES.getCode());
-        } else {
-            pdl.setRestFlag(NormalFlag.NO.getCode());
         }
         pdl.setAbsentFlag(isAbsence(statusList));
         pdl.setNormalFlag(isFullNormal(statusList));
