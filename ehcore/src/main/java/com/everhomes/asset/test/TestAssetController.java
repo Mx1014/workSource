@@ -79,5 +79,18 @@ public class TestAssetController extends ControllerBase {
 		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
+	
+	/**
+	 * <b>URL: /test/statisticBillByCommunity</b>
+	 * <p>启动项目-时间段（月份）统计结果集的定时任务</p>
+	 */
+	@RequestMapping("statisticBillByCommunity")
+	public RestResponse statisticBillByCommunity() {
+		assetSchedule.statisticBillByCommunity();
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 }

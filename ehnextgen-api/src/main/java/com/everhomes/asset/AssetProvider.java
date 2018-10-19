@@ -50,6 +50,7 @@ import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.statistic.BillsDateStrDTO;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
@@ -446,5 +447,14 @@ public interface AssetProvider {
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
-		
+	
+	/**
+	 * 取出eh_payment_bills表中dateStr（年月）
+	 */
+	List<BillsDateStrDTO> getPaymentBillsDatrStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_community表中dateStr（年月）
+	 */
+	List<BillsDateStrDTO> getStatisticDatrStr();
 }
