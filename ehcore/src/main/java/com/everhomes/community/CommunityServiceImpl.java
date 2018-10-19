@@ -841,6 +841,20 @@ public class CommunityServiceImpl implements CommunityService {
 		return communityDTO;
 	}
 
+	@Override
+	public CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd) {
+		if(cmd.getId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter");
+		}
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if (community == null) {
+            return null;
+        }
+        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+        return communityDTO;
+	}
+
 
 	@Override
 	public CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd) {
