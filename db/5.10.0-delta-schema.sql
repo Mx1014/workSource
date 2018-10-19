@@ -40,7 +40,7 @@ CREATE TABLE `eh_alliance_config_state` (
 	`id` BIGINT(20) NOT NULL,
 	`namespace_id` INT(11) NOT NULL,
 	`type` BIGINT(20) NOT NULL,
-	`owner_type` BIGINT(20) NOT NULL COMMENT 'community/organaization',
+	`owner_type` VARCHAR(20) NOT NULL COMMENT 'community/organaization',
 	`owner_id` BIGINT(20) NOT NULL COMMENT 'community为项目id， organaization为公司id',
 	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-取默认配置 1-取自定义配置。当owner_type为organization时，该值必定为1。',
 	PRIMARY KEY (`id`),
