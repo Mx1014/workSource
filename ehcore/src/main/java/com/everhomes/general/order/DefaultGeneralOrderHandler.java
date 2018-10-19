@@ -170,7 +170,7 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
 		payerInfo.setOrganizationId(info.getOrganizationId()); // 左邻公司
 		LOGGER.info("user target ID : "  + UserContext.currentUserId());
-		OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+		OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(),info.getOrganizationId());
 		LOGGER.info("user source ID : "  + detail.getId());
 		payerInfo.setUserId(detail.getId());
 		payerInfo.setAppId(info.getAppOriginId());
