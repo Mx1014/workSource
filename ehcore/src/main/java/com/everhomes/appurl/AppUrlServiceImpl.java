@@ -61,6 +61,9 @@ public class AppUrlServiceImpl implements AppUrlService {
 		if (StringUtils.isBlank(dto.getDownloadUrl())) {
 		    dto.setDownloadUrl(null);
         }
+        if (StringUtils.isBlank(dto.getDescription())) {
+		    dto.setDescription("立即下载"+dto.getName());
+        }
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{

@@ -51,6 +51,7 @@ public class AppUrlController extends ControllerBase {
      * <b>URL: /appUrl/getAppInfoByNamespaceId</b>
      * <p>通过namespaceId 查询appurl信息</p>
      */
+	@RequireAuthentication(false)
 	@RequestMapping("getAppInfoByNamespaceId")
     @RestReturn(value=AppInfoByNamespaceIdDTO.class)
 	public RestResponse getAppInfoByNamespaceId(GetAppInfoCommand cmd) {
