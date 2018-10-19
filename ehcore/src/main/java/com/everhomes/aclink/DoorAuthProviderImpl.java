@@ -540,6 +540,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 .where(condition).groupBy(DSL.date(Tables.EH_DOOR_AUTH.CREATE_TIME).as("d"));
 
 //        LOGGER.info("statistics: " + groupBy);
+
         groupBy.fetch().map((r) -> {
                     AuthVisitorStasticDTO dto = new AuthVisitorStasticDTO();
                     dto.setCount(Long.parseLong(r.getValue("c").toString()));

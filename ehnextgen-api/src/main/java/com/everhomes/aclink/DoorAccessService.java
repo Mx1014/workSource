@@ -96,6 +96,8 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
+    //20180914 add by liqingyan
+    CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd);
 
     void test();
 
@@ -120,6 +122,14 @@ public interface DoorAccessService {
     DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
+//add by liqingyan
+    void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
+//add by liqingyan
+    DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd);
+
+    DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd);
+
+    TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd);
 
     String checkAllDoorAuthList();
 
