@@ -1184,6 +1184,9 @@ public class CustomerServiceImpl implements CustomerService {
         updateCustomer.setNamespaceId(customer.getNamespaceId());
         updateCustomer.setOwnerId(cmd.getOrgId());
         updateCustomer.setCommunityId(customer.getCommunityId());
+        if(cmd.getTransCommunityId() != null && cmd.getTransCommunityId() != 0){
+            updateCustomer.setCommunityId(cmd.getTransCommunityId());
+        }
         updateCustomer.setOrganizationId(customer.getOrganizationId());
         updateCustomer.setCreateTime(customer.getCreateTime());
         updateCustomer.setCreatorUid(customer.getCreatorUid());

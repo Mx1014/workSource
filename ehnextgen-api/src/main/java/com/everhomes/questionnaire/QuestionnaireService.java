@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import com.everhomes.rest.organization.OrganizationAndDetailDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.questionnaire.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface QuestionnaireService {
 
@@ -49,4 +52,6 @@ public interface QuestionnaireService {
     void reScopeQuesionnaireRanges(ReScopeQuesionnaireRangesCommand cmd);
 
 	void reSendQuesionnaireMessages();
+
+	List<OrganizationAndDetailDTO> listRangeOrgs(ListRangeOrgsCommand cmd);
 }
