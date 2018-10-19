@@ -7484,11 +7484,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         LOGGER.debug("received message [ user-kickoff ] {}", record.value());
 
         @SuppressWarnings("unchecked")
-        Map<String, String> dataMap = (Map<String, String>) StringHelper.fromJsonString(record.value(), Map.class);
-        String namespaceId = dataMap.get("namespaceId");
-        String loginToken = dataMap.get("loginToken");
+        Map<String, Object> dataMap = (Map<String, Object>) StringHelper.fromJsonString(record.value(), Map.class);
+        Double namespaceId = (Double) dataMap.get("namespaceId");
+        String loginToken = (String) dataMap.get("loginToken");
 
-        kickoffService.kickoff(Integer.valueOf(namespaceId), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
+        kickoffService.kickoff(namespaceId.intValue(), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
     }
     /*********************同步数据 END************************/
 
