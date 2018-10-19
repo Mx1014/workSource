@@ -40,6 +40,10 @@ public interface DoorAccessProvider {
     List<ActiveDoorByFirmwareDTO> queryDoorAccessByFirmware(DoorStatisticEhCommand cmd);
 
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlace(DoorStatisticEhCommand cmd);
+//add bu liqingyan
+    List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<DoorAccessDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
+    DoorAccess findDoorAccessById(Long id);
+
+    Long updateDoorAccessNew (DoorAccess obj);
 }

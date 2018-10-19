@@ -8,14 +8,14 @@ import com.everhomes.util.StringHelper;
  * <li>doorId：门禁Id</li>
  * <li>doorName：要修改的门禁名称</li>
  * <li>doorAddress：门禁地址</li>
- * <li>doorExplain：门禁说明</li>
+ * <li>doorDescription：门禁说明</li>
  * </ul>
  */
 public class ChangeDoorNameCommand {
     private Long doorId;
     private String name;
     private String doorAddress;
-    private String doorExplain;
+    private String doorDescription;
 
     public Long getDoorId() {
         return doorId;
@@ -41,12 +41,12 @@ public class ChangeDoorNameCommand {
         this.doorAddress = doorAddress;
     }
 
-    public String getDoorExplain() {
-        return doorExplain;
+    public String getDoorDescription() {
+        return doorDescription;
     }
 
-    public void setDoorExplain(String doorExplain) {
-        this.doorExplain = doorExplain;
+    public void setDoorDescription(String doorDescription) {
+        this.doorDescription = doorDescription;
     }
 
     @Override

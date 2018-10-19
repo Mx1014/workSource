@@ -15,8 +15,8 @@ import java.util.List;
 public class ListDoorAccessEhResponse {
     private Long nextPageAnchor;
 
-    @ItemType(DoorAccessDTO.class)
-    private List<DoorAccessDTO> doors;
+    @ItemType(DoorAccessNewDTO.class)
+    private List<DoorAccessNewDTO> doors;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -26,11 +26,11 @@ public class ListDoorAccessEhResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<DoorAccessDTO> getDoors() {
+    public List<DoorAccessNewDTO> getDoors() {
         return doors;
     }
 
-    public void setDoors(List<DoorAccessDTO> doors) {
+    public void setDoors(List<DoorAccessNewDTO> doors) {
         this.doors = doors;
     }
 

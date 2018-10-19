@@ -79,15 +79,6 @@ public class DoorAccessDTO {
     private Integer maxDuration;
     private Integer maxCount;
     private Integer defualtInvalidDuration;
-    private Integer namespaceId;
-
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
 
     public Byte getEnableDuration() {
 		return enableDuration;

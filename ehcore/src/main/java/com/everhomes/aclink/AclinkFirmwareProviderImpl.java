@@ -139,6 +139,9 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
         if(null != cmd.getType()){
             query.addConditions(Tables.EH_ACLINK_DEVICE.TYPE.eq(cmd.getType()));
         }
+        if(null != cmd.getFirmwareId()){
+            query.addConditions(Tables.EH_ACLINK_DEVICE.FIRMWARE_ID.eq(cmd.getFirmwareId()));
+        }
         query.addOrderBy(Tables.EH_ACLINK_DEVICE.ID);
         if(null != locator.getAnchor()) {
             query.addConditions(Tables.EH_ACLINK_DEVICE.ID.ge(locator.getAnchor()));
@@ -180,6 +183,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     public List<FirmwareNewDTO> listFirmwareNew (CrossShardListingLocator locator, int count, ListFirmwareCommand cmd){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhAclinkFirmwareNewRecord> query = context.selectQuery(Tables.EH_ACLINK_FIRMWARE_NEW);
+//        query.addJoin(Tables.EH_ACLINK_DEVICE,Tables.EH_ACLINK_FIRMWARE_NEW.ID.eq(Tables.EH_ACLINK_DEVICE.FIRMWARE_ID));
         query.addConditions(Tables.EH_ACLINK_FIRMWARE_NEW.STATUS.eq((byte)1));
         query.addOrderBy(Tables.EH_ACLINK_FIRMWARE_NEW.ID);
         if(null != locator.getAnchor()) {
@@ -188,10 +192,12 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
         if (count > 0){
             query.addLimit(count + 1);
         }
-        List<FirmwareNewDTO> dto = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, FirmwareNewDTO.class);
+        List<FirmwareNewDTO> objs = query.fetch().map((r) -> {
+            FirmwareNewDTO dto = ConvertHelper.convert(r, FirmwareNewDTO.class);
+//            dto.setDevice(r.getValue(Tables.EH_ACLINK_DEVICE.NAME));
+            return dto;
         });
-        return dto;
+        return objs;
     }
 
 

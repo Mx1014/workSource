@@ -24,6 +24,15 @@ public class FirmwareNewDTO {
     private Long wifiId;
     private Timestamp createTime;
     private Byte status;
+//    private String device;
+
+//    public String getDevice() {
+//        return device;
+//    }
+//
+//    public void setDevice(String device) {
+//        this.device = device;
+//    }
 
     public Long getId() {
         return id;

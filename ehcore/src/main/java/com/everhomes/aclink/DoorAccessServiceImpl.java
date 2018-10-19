@@ -5275,7 +5275,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<DoorAccessDTO> dtos = doorAccessProvider.listDoorAccessEh(locator, count, new ListingQueryBuilderCallback() {
+        List<DoorAccessNewDTO> dtos = doorAccessProvider.listDoorAccessEh(locator, count, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                                                                 SelectQuery<? extends Record> query) {
@@ -5288,20 +5288,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 }
-                if(cmd.getNamespaceName() != null){
-                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
+//                if(cmd.getNamespaceName() != null){
+//                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
+//                }
+//                if(cmd.getDoorType() != null) {
+//                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+//
+//                }
+                if(cmd.getDeviceId() != null){
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DEVICE_ID.eq(cmd.getDeviceId()));
                 }
-                if(cmd.getDoorType() != null) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
-
-                }
-                if(cmd.getDoor() != null) {
+                if(cmd.getDoor() != null && !cmd.getDoor().isEmpty()) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like(cmd.getDoor() + "%")
                             .or(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like(cmd.getDoor()+"%")));
                 }
+                if(cmd.getBluetoothMAC() != null && !cmd.getBluetoothMAC().isEmpty()){
+                    query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getBluetoothMAC()+ "%"));
+                }
                 return query;
             }
-
         });
         resp.setDoors(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
@@ -5364,11 +5369,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
-        }
-
+        DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(cmd.getDoorId());
+        doorAccess.setName(cmd.getName());
+        doorAccess.setAddress(cmd.getDoorAddress());
+        doorAccess.setDescription(cmd.getDoorDescription());
+        doorAccessProvider.updateDoorAccessNew(doorAccess);
     }
     @Override
     public void addDoorManagement(AddDoorManagementCommand cmd){
@@ -5455,25 +5460,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add by liqingyan
     @Override
     public Long deleteDoorAccessEh(Long doorAccessId){
-        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
-            @Override
-            public DoorAccess doInTransaction(TransactionStatus arg0) {
-                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
-
-                if(doorAcc != null) {
-                    doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
-                    doorAccessProvider.updateDoorAccess(doorAcc);
-                    return doorAcc;
-                }
-
-                return null;
-            }
-        });
-
-        if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
-        }
-
+        DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(doorAccessId);
+        doorAccess.setStatus((byte)2);
+        doorAccessProvider.updateDoorAccessNew(doorAccess);
         return doorAccess.getId();
     }
 }

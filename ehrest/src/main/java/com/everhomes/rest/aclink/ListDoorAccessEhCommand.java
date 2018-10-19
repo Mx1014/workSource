@@ -17,7 +17,6 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListDoorAccessEhCommand {
-    private Long moduleId;
 
     private Long pageAnchor;
 
@@ -39,12 +38,14 @@ public class ListDoorAccessEhCommand {
 
     private String bluetoothMAC;
 
-    public Long getModuleId() {
-        return moduleId;
+    private Long deviceId;
+
+    public Long getDeviceId() {
+        return deviceId;
     }
 
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 
     public Integer getPageSize() {

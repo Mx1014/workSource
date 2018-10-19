@@ -405,27 +405,64 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
 
     @Override
-    public List<DoorAccessDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback){
+    public List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_DOOR_ACCESS);
+        query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.eq((byte)1));
+        query.addJoin(com.everhomes.schema.Tables.EH_NAMESPACES, JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(com.everhomes.schema.Tables.EH_NAMESPACES.ID));
+        query.addJoin(Tables.EH_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, Tables.EH_DOOR_ACCESS.OWNER_ID.eq(Tables.EH_COMMUNITIES.ID));
+        query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_DOOR_ACCESS.OWNER_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+        query.addJoin(Tables.EH_USERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_DOOR_ACCESS.CREATOR_USER_ID.eq(Tables.EH_USERS.ID));
+
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
         if (count > 0){
             query.addLimit(count + 1);
         }
-        List<DoorAccessDTO> objs = query.fetch().map((r) -> {
-            DoorAccessDTO dto = ConvertHelper.convert(r, DoorAccessDTO.class);
-            dto.setNamespaceId(r.getValue(Tables.EH_DOOR_ACCESS.NAMESPACE_ID));
+        List<DoorAccessNewDTO> objs = query.fetch().map((r) -> {
+            DoorAccessNewDTO dto = ConvertHelper.convert(r, DoorAccessNewDTO.class);
+//            dto.setNamespaceId(r.getValue(Tables.EH_DOOR_ACCESS.NAMESPACE_ID));
+            dto.setId(r.getValue(t.ID));
+            dto.setName(r.getValue(t.NAME));
+            dto.setDisplayName(r.getValue(t.DISPLAY_NAME));
+            dto.setDeviceName(r.getValue(t.DEVICE_NAME));
+            dto.setFirmwareName(r.getValue(t.FIRMWARE_NAME));
+            dto.setNamespaceId(r.getValue(t.NAMESPACE_ID));
+            dto.setOwnerType(r.getValue(t.OWNER_TYPE));
+            dto.setOwnerId(r.getValue(t.OWNER_ID));
+            dto.setDescription(r.getValue(t.DESCRIPTION));
+            dto.setAddress(r.getValue(t.ADDRESS));
+            dto.setHardwareId(r.getValue(t.HARDWARE_ID));
+            dto.setCreateTime(r.getValue(t.CREATE_TIME));
+            dto.setCreatorUserName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            dto.setNamespaceName(r.getValue(com.everhomes.schema.Tables.EH_NAMESPACES.NAME));
+            dto.setCommunityName(r.getValue(Tables.EH_COMMUNITIES.NAME));
+            dto.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
             return dto;
         });
-        if(count > 0 && objs.size() > count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
-            objs.remove(objs.size() - 1);
-        } else {
-            locator.setAnchor(null);
-        }
+//        if(count > 0 && objs.size() > count) {
+//            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+//            objs.remove(objs.size() - 1);
+//        } else {
+//            locator.setAnchor(null);
+//        }
         return objs;
+    }
+    @Override
+    public DoorAccess findDoorAccessById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), DoorAccess.class);
+    }
+
+    @Override
+    public Long updateDoorAccessNew (DoorAccess obj){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
+        dao.update(obj);
+        return null;
     }
 
 }
