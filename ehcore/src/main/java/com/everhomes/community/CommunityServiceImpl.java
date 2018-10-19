@@ -4028,19 +4028,18 @@ public class CommunityServiceImpl implements CommunityService {
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
-        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())) {
-            List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(cmd.getCommunityId(),
-                    UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
-            if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
-                if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
-                    for (Long orgId : noAuthOrganizationIds) {
-                        if (orgIds.contains(orgId)) {
-                            orgIds.remove(orgId);
-                        }
+        List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(cmd.getCommunityId(),
+                UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())
+                && !CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+            if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
+                for (Long orgId : noAuthOrganizationIds) {
+                    if (orgIds.contains(orgId)) {
+                        orgIds.remove(orgId);
                     }
-                }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
-                    orgIds = noAuthOrganizationIds;
                 }
+            }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
+                orgIds = noAuthOrganizationIds;
             }
         }
 		LOGGER.debug("orgIds is：" + orgIds);
@@ -4118,6 +4117,12 @@ public class CommunityServiceImpl implements CommunityService {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
                         dto.setOrganizationName(organization.getName());
+                    }
+                }
+                dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId())) {
+				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
                     }
                 }
                 if (dto.getNickName() == null || dto.getNickName().isEmpty()) {
