@@ -246,8 +246,11 @@ VALUES (@privilege_id:=@privilege_id+1, '52140', '0', 5210052140, '移动端管�
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+
+-- AUTHOR: xq.tian
+-- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
+DELETE FROM eh_namespaces WHERE id=2;
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 
