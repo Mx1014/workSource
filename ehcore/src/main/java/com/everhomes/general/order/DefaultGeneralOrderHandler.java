@@ -17,6 +17,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.print.SiyinPrintServiceImpl;
@@ -168,7 +169,8 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
 		payerInfo.setOrganizationId(info.getOrganizationId()); // 左邻公司
-		payerInfo.setUserId(UserContext.currentUserId());
+		OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+		payerInfo.setUserId(detail.getId());
 		payerInfo.setAppId(info.getAppOriginId());
 		orderCmd.setPayerInfo(payerInfo);
 	}
