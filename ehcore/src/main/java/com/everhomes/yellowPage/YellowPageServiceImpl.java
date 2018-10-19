@@ -1325,7 +1325,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		//设置属性为当前项目可见时，range参数有可能为空，这里设置成当前项目id
 		if (StringUtils.isEmpty(cmd.getRange())) {
-			cmd.setRange(cmd.getOwnerId() + "");
+			serviceAlliance.setRange(cmd.getOwnerId() + "");
 		}
 
 		dbProvider.execute(r -> {
