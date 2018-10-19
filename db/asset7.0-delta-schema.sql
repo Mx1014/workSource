@@ -19,7 +19,7 @@ CREATE TABLE `eh_payment_bill_statistic_community` (
   `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
   `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
   `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
-  `creat_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='项目-时间段（月份）统计结果集表';

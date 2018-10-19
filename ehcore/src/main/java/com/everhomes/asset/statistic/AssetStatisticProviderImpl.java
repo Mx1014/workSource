@@ -1,5 +1,6 @@
 package com.everhomes.asset.statistic;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
@@ -38,19 +40,6 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
  
-    private DSLContext getReadOnlyContext(){
-        return this.dbProvider.getDslContext(AccessSpec.readOnly());
-    }
-    
-    private DSLContext getReadWriteContext(){
-        return this.dbProvider.getDslContext(AccessSpec.readWrite());
-    }
-    
-    @SuppressWarnings("rawtypes")
-	private Long getNextSequence(Class clz){
-        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(clz));
-    }
-
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//1、根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -83,8 +72,15 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	dto.setAmountSupplement(f.getValue(DSL.sum(r.AMOUNT_SUPPLEMENT)));
         	dto.setDueDayCount(f.getValue(DSL.sum(r.DUE_DAY_COUNT)));
         	dto.setNoticeTimes(f.getValue(DSL.sum(r.NOTICE_TIMES)));
-        	
         	//收缴率=已收含税金额/应收含税金额
+        	BigDecimal amountReceived = BigDecimal.ZERO;
+        	BigDecimal amountReceivable = BigDecimal.ZERO;
+        	amountReceived = f.getValue(DSL.sum(r.AMOUNT_RECEIVED));
+        	amountReceivable = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE));
+        	BigDecimal collectionRate = amountReceived.divide(amountReceivable);
+        	dto.setCollectionRate(collectionRate);
+        	
+        	statisticCommunityDao.insert(dto);
             return null;
         });
 		
