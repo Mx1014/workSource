@@ -109,4 +109,12 @@ public class PunchConstants {
 	public static final String NEXT_DAY ="nextDay";
 	public static final String PUNCH_CREATE_TYPE ="punch.create.type";
 	public static final String PUNCH_CREATE_MSG ="punch.create";
+	
+
+	/**单位 scope*/
+	public static final String UNIT_SCOPE ="oa.unit";
+	/**次*/
+	public static final String UNIT_TIME ="2";
+	/**天*/
+	public static final String UNIT_DAY ="1";
 }

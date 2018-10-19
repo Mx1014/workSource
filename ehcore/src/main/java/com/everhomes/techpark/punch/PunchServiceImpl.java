@@ -11053,6 +11053,7 @@ public class PunchServiceImpl implements PunchService {
             for(PunchDayLog pdl : pdls){
                 PunchMemberDTO dto = convertPDLToPunchMemberDTO(pdl);
                 dto.setStatisticsCount(getPunchStatisticCountByItemType(pdl, itemType));
+                dto.setStatisticsUnit(localeStringService.getLocalizedString(PunchConstants.UNIT_SCOPE, PunchConstants.UNIT_TIME, PunchConstants.locale, "次"));
                 results.add(dto);
             }
         }
@@ -11081,6 +11082,7 @@ public class PunchServiceImpl implements PunchService {
             for(PunchStatistic statistic : punchStatistics){
                 PunchMemberDTO dto = convertPSToPunchMemberDTO(statistic);
                 dto.setStatisticsCount(getPunchStatisticCountByItemType(statistic, itemType));
+                dto.setStatisticsUnit(localeStringService.getLocalizedString(PunchConstants.UNIT_SCOPE, PunchConstants.UNIT_TIME, PunchConstants.locale, "次"));
                 results.add(dto);
             }
         }
