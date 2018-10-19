@@ -402,7 +402,31 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         });
         return dtos;
     }
-
+    @Override
+    public List<ActiveDoorByPlaceDTO> queryDoorAccessByPlaceNew (DoorStatisticEhCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        com.everhomes.server.schema.tables.EhRegions t1 = Tables.EH_REGIONS.as("t1");
+        com.everhomes.server.schema.tables.EhRegions t2 = Tables.EH_REGIONS.as("t2");
+        List<ActiveDoorByPlaceDTO> dtos = new ArrayList<ActiveDoorByPlaceDTO>();
+        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
+                ,t2.NAME.as("province"))
+                .from(t)
+                .leftOuterJoin(t1)
+//                .on(t1.ID.eq(t.CITY_ID))
+                .on(t1.ID.eq(Long.parseLong((t.CITY_ID).toString())))
+                .leftOuterJoin(t2)
+                .on(t2.ID.eq(t1.PARENT_ID))
+                .groupBy(t2.NAME);
+        groupBy.fetch().map((r) -> {
+            ActiveDoorByPlaceDTO place = new ActiveDoorByPlaceDTO();
+            place.setName(r.value2());
+            place.setValue(r.value1());
+            dtos.add(place);
+            return null;
+        });
+        return dtos;
+    }
 
     @Override
     public List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback){

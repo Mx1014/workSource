@@ -643,7 +643,7 @@ ALTER TABLE `eh_door_access` ADD COLUMN `firmware_id` bigint(20) DEFAULT NULL CO
 ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件名';
 ALTER TABLE `eh_door_access` ADD COLUMN `device_id` bigint(20) DEFAULT NULL COMMENT '门禁设备类型id';
 ALTER TABLE `eh_door_access` ADD COLUMN `device_name` VARCHAR(128) DEFAULT NULL COMMENT '门禁设备固件名';
-ALTER TABLE `eh_door_access` ADD COLUMN `city_id` int(11) DEFAULT NULL COMMENT '城市id';
+ALTER TABLE `eh_door_access` ADD COLUMN `city_id` bigint(20) DEFAULT NULL COMMENT '城市id';
 ALTER TABLE `eh_door_access` ADD COLUMN `province` VARCHAR(64) DEFAULT NULL COMMENT '省份名';
 
 CREATE TABLE `eh_aclink_device` (

@@ -4291,7 +4291,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     cmd.setEndTime(DateHelper.parseDataString(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT+:08:00"), cmd.getEndTime()),"yyyy-MM-dd").getTime() + 24*60*60*1000);
                     query.addConditions(Tables.EH_ACLINK_LOGS.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
                 }
-                //query.addConditions(Tables.EH_ACLINK_LOGS.LOG_TIME.between(cmd.getStartTime(), cmd.getEndTime()));
                 return query;
             }
             
