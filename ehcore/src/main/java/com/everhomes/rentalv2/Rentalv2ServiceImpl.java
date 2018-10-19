@@ -6333,7 +6333,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (halfTimeIntervals.size()>1 && halfTimeIntervals.get(1).getName() == null)
 			halfTimeIntervals.get(1).setName("下午");
 		if (halfTimeIntervals.size()>2 && halfTimeIntervals.get(2).getName() == null)
-			halfTimeIntervals.get(1).setName("晚上");
+			halfTimeIntervals.get(2).setName("晚上");
 	}
 
 	private void calculateAvailableCount(RentalSiteRulesDTO dto, RentalResource rs, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
