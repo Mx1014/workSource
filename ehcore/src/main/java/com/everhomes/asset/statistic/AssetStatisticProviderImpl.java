@@ -1,8 +1,7 @@
 package com.everhomes.asset.statistic;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Timestamp;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -12,19 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBills;
-import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticCommunityDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity;
+import com.everhomes.util.DateHelper;
 /**
  * @author created by ycx
  * @date 下午3:52:18
@@ -59,31 +56,47 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addConditions(r.SWITCH.eq((byte)1));//只统计已出账单的已缴和未缴费用
         query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         query.fetch().map(f -> {
+        	BigDecimal amountReceivable = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE));
+        	BigDecimal amountReceived = f.getValue(DSL.sum(r.AMOUNT_RECEIVED));
+        	BigDecimal amountOwed = f.getValue(DSL.sum(r.AMOUNT_OWED));
+        	BigDecimal amountReceivableWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE_WITHOUT_TAX));
+        	BigDecimal amountReceivedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVED_WITHOUT_TAX));
+        	BigDecimal amountOwedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_OWED_WITHOUT_TAX));
+        	BigDecimal taxAmount = f.getValue(DSL.sum(r.TAX_AMOUNT));
+        	BigDecimal amountExemption = f.getValue(DSL.sum(r.AMOUNT_EXEMPTION));
+        	BigDecimal amountSupplement = f.getValue(DSL.sum(r.AMOUNT_SUPPLEMENT));
+        	BigDecimal dueDayCount = f.getValue(DSL.sum(r.DUE_DAY_COUNT));
+        	BigDecimal noticeTimes = f.getValue(DSL.sum(r.NOTICE_TIMES));
+        	
         	long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity.class));
         	dto.setId(nextSequence);
-        	dto.setAmountReceivable(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE)));
-        	dto.setAmountReceived(f.getValue(DSL.sum(r.AMOUNT_RECEIVED)));
-        	dto.setAmountOwed(f.getValue(DSL.sum(r.AMOUNT_OWED)));
-        	dto.setAmountReceivableWithoutTax(f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE_WITHOUT_TAX)));
-        	dto.setAmountReceivedWithoutTax(f.getValue(DSL.sum(r.AMOUNT_RECEIVED_WITHOUT_TAX)));
-        	dto.setAmountOwedWithoutTax(f.getValue(DSL.sum(r.AMOUNT_OWED_WITHOUT_TAX)));
-        	dto.setTaxAmount(f.getValue(DSL.sum(r.TAX_AMOUNT)));
-        	dto.setAmountExemption(f.getValue(DSL.sum(r.AMOUNT_EXEMPTION)));
-        	dto.setAmountSupplement(f.getValue(DSL.sum(r.AMOUNT_SUPPLEMENT)));
-        	dto.setDueDayCount(f.getValue(DSL.sum(r.DUE_DAY_COUNT)));
-        	dto.setNoticeTimes(f.getValue(DSL.sum(r.NOTICE_TIMES)));
+        	dto.setNamespaceId(namespaceId);
+        	dto.setOwnerId(ownerId);
+        	dto.setOwnerType(ownerType);
+        	dto.setDateStr(dateStr);
+        	dto.setAmountReceivable(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
+        	dto.setAmountReceived(amountReceived != null ? amountReceived : BigDecimal.ZERO);
+        	dto.setAmountOwed(amountOwed != null ? amountOwed : BigDecimal.ZERO);
+        	dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax : BigDecimal.ZERO);
+        	dto.setAmountReceivedWithoutTax(amountReceivedWithoutTax != null ? amountReceivedWithoutTax : BigDecimal.ZERO);
+        	dto.setAmountOwedWithoutTax(amountOwedWithoutTax != null ? amountOwedWithoutTax : BigDecimal.ZERO);
+        	dto.setTaxAmount(taxAmount != null ? taxAmount : BigDecimal.ZERO);
+        	dto.setAmountExemption(amountExemption != null ? amountExemption : BigDecimal.ZERO);
+        	dto.setAmountSupplement(amountSupplement != null ? amountSupplement : BigDecimal.ZERO);
+        	dto.setDueDayCount(dueDayCount != null ? dueDayCount : BigDecimal.ZERO);
+        	dto.setNoticeTimes(noticeTimes != null ? noticeTimes : BigDecimal.ZERO);
         	//收缴率=已收含税金额/应收含税金额
-        	BigDecimal amountReceived = BigDecimal.ZERO;
-        	BigDecimal amountReceivable = BigDecimal.ZERO;
-        	amountReceived = f.getValue(DSL.sum(r.AMOUNT_RECEIVED));
-        	amountReceivable = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE));
-        	BigDecimal collectionRate = amountReceived.divide(amountReceivable);
+        	BigDecimal collectionRate = BigDecimal.ZERO;
+        	if(amountReceived != null && amountReceivable != null) {
+        		collectionRate = amountReceived.divide(amountReceivable);
+        	}
         	dto.setCollectionRate(collectionRate);
         	
+        	dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        	dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	statisticCommunityDao.insert(dto);
             return null;
         });
-		
 	}
     
     
