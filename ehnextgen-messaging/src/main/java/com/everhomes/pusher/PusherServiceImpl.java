@@ -168,7 +168,15 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     public void setup() {
 //        workerPoolFactory.getWorkerPool().addQueue(queueName);
     }
-    
+
+    /**
+     * 创建一个全新的，让旧的自动回收掉
+     */
+    @Override
+    public void flushHttp2ClientMaps(){
+        this.http2ClientMaps = new ConcurrentHashMap<String, ApnsClient>();
+    }
+
     @Override
     public ApnsService getApnsService(String partner) {       
         ApnsService service = this.certMaps.get(partner);
@@ -404,6 +412,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 			    if(client != null ){
 			    	//3.消息推送(回应消息暂无地方存放)				   
 				    		client.addPush(notif);
+                           LOGGER.info(client.toString());
 				    		//无队列模式，方便定位问题调试，提交的时候记得注掉（与上一语句互斥）
 			    	//NotificationResponse result =	client.push(notif);
 				    if(LOGGER.isDebugEnabled()) {
@@ -733,8 +742,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 
     /**
      * add by huanglm 建立与APNs的http2连接
-     * @param namespaceId
-     * @param identify
      * @return
      */
     public ApnsClient getApnsClient(UserLogin destLogin) {   
@@ -788,6 +795,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	    	//优先从http2ClientMaps 中   取，如没有再创建新的连接
 	        ApnsClient client = this.http2ClientMaps.get(bundleId);
 	        if(client != null ){
+                LOGGER.info("use map client .client{}",client.toString());
 	        	return client;
 	        }
         		

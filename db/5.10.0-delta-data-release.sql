@@ -81,7 +81,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- AUTHOR: 严军
 -- REMARK: 客户端处理方式
-update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100);
+update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100,40730,41200);
 
 
 -- AUTHOR: 严军
@@ -116,7 +116,7 @@ update eh_service_modules set client_handler_type = 2 WHERE id = 43000;
 SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'user', '100020', 'zh_CN', '用户名或密码错误');
-	
+
 -- AUTHOR: 缪洲 20181008
 -- REMARK: issue-38650 增加error消息模板
 INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10034', 'zh_CN', '接口参数缺失');
@@ -246,8 +246,11 @@ VALUES (@privilege_id:=@privilege_id+1, '52140', '0', 5210052140, '移动端管�
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
--- AUTHOR:
--- REMARK:
+
+-- AUTHOR: xq.tian
+-- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
+DELETE FROM eh_namespaces WHERE id=2;
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 

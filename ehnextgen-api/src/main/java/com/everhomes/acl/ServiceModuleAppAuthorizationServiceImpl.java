@@ -5,6 +5,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
@@ -18,9 +19,11 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -59,9 +62,16 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Autowired
     private PortalService portalService;
+    
+    @Autowired
+    private NamespacesService namespacesService ;
 
     @Override
     public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
+    	if(!namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())) {
+    		return true;
+    	}
+    	
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {

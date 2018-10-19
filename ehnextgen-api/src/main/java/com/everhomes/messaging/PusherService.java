@@ -21,4 +21,5 @@ public interface PusherService {
      * 停止bundleId对应的连接端，add by huanglm
      */
     void  stophttp2Client(String bundleId);
+    void flushHttp2ClientMaps();
 }

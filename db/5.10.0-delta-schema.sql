@@ -31,3 +31,33 @@ ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
 -- end
+
+-- AUTHOR: 黄明波
+-- REMARK: 服务联盟通用配置修复
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `origin_category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '原默认配置的服务类型id，如果是项目配置新增的，通常就是当前记录id' ;
+
+CREATE TABLE `eh_alliance_config_state` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL,
+	`type` BIGINT(20) NOT NULL,
+	`owner_type` VARCHAR(20) NOT NULL COMMENT 'community/organaization',
+	`owner_id` BIGINT(20) NOT NULL COMMENT 'community为项目id， organaization为公司id',
+	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-取默认配置 1-取自定义配置。当owner_type为organization时，该值必定为1。',
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `u_eh_prefix` (`type`, `owner_type`, `owner_id`)
+)
+COMMENT='储存应用不同项目下的配置情况。'
+ENGINE=InnoDB
+;
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户认证审核权限配置表
+CREATE TABLE `eh_user_authentication_organizations`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL  COMMENT '域空间ID',
+  `organization_id` BIGINT NOT NULL COMMENT '企业ID',
+  `creator_uid` BIGINT NOT NULL COMMENT 'assignment creator uid',
+  `create_time` DATETIME COMMENT 'record create time',
+
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '用户认证审核权限配置表';

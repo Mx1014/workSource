@@ -85,8 +85,8 @@ import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CommunityInfoDTO;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -117,14 +117,9 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.BindPhoneCommand;
-import com.everhomes.rest.ui.user.BindPhoneType;
 import com.everhomes.rest.ui.user.*;
-import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneCommand;
-import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
-import com.everhomes.rest.user.admin.UserAppealLogStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
@@ -132,15 +127,10 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
-import com.everhomes.sms.SmsBlackList;
-import com.everhomes.sms.SmsBlackListCreateType;
-import com.everhomes.sms.SmsBlackListProvider;
-import com.everhomes.sms.SmsBlackListStatus;
-import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.*;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.collect.Lists;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -1408,13 +1398,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = ref.getFoundLogin();
         if (foundLogin == null) {
             foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
-            // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
-            if (loginToken != null) {
-                foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
-            }
             accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
             isNew = true;
+        }
+
+        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
+        // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
+        if (loginToken != null) {
+            foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
+            foundLogin.setLoginId(loginToken.getLoginId());
+            hkeyLogin = String.valueOf(loginToken.getLoginId());
         }
 
         foundLogin.setImpersonationId(impId);
@@ -1422,7 +1417,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
         foundLogin.setPusherIdentify(pusherIdentify);
         foundLogin.setAppVersion(appVersion);
-        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
         Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
         LOGGER.debug("createLogin|hId = " + hkeyLogin);
         accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
@@ -7378,8 +7373,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
     /*******************统一用户同步数据**********************/
-    @KafkaListener(id="syncCreateUser", topicPattern = "user-create-event")
+    @KafkaListener(topics = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-create-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
@@ -7405,8 +7401,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="syncUpdateUser", topicPattern = "user-update-event")
+    @KafkaListener(topics = "user-update-event")
+    // @KafkaListener(topics = "user-update-event")
     public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-update-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
@@ -7420,8 +7418,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="syncDeleteUser", topicPattern = "user-delete-event")
+    @KafkaListener(topics = "user-delete-event")
     public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
@@ -7436,8 +7435,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(id="syncCreateUserIdentifier", topicPattern = "userIdentifier-create-event")
+    @KafkaListener(topics = "userIdentifier-create-event")
     public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
@@ -7462,8 +7462,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(id="syncUpdateUserIdentifier", topicPattern = "userIdentifier-update-event")
+    @KafkaListener(topics = "userIdentifier-update-event")
+    // @KafkaListener(topics = "userIdentifier-update-event")
     public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
         Namespace namespace = this.namespaceProvider.findNamespaceById(2);
         if (namespace != null) {
@@ -7477,11 +7479,23 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="userKickoffMessage", topicPattern = "user.kickoff")
+    @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-kickoff ] {}", record.value());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> dataMap = (Map<String, Object>) StringHelper.fromJsonString(record.value(), Map.class);
+        Double namespaceId = (Double) dataMap.get("namespaceId");
+        String loginToken = (String) dataMap.get("loginToken");
+
+        kickoffService.kickoff(namespaceId.intValue(), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
+    }
+
+    @KafkaListener(topics = "user-device-kickoff")
+    public void userDeviceKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-device-kickoff ] {}", record.value());
+
         UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
         kickoffLoginByDevice(newLogin);
     }
-    /*********************同步数据 END************************/
-
 }

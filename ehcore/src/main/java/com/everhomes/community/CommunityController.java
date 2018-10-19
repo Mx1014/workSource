@@ -738,6 +738,22 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
+
+    /**
+     * <b>URL: /community/getCommunityForSdkById</b>
+     * <p>根据园区ID获取园区信息</p>
+     */
+    @RequestMapping("getCommunityForSdkById")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityForSdkById(GetCommunityByIdCommand cmd, HttpServletRequest request, HttpServletResponse paramResponse) {
+        CommunityDTO community = this.communityService.getCommunityForSdkById(cmd);
+
+        RestResponse response =  new RestResponse();
+
+        response.setResponseObject(community);
+
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
