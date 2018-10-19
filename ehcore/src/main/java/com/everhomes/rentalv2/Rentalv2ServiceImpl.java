@@ -1222,6 +1222,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, sceneTokenDTO, true);
+			if (cmd.getShowTimeStart() != null){
+                rSiteDTO.setEnableTimeRanges(getEnableTimeRanges(rentalSite,cmd.getShowTimeStart(),cmd.getShowTimeEnd()));
+            }
 			//退款提示
 			RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
 					rentalSite.getResourceType(), rentalSite.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rentalSite.getId());
@@ -1246,6 +1249,88 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		return response;
 	}
+
+	private List<RangeDTO> getEnableTimeRanges(RentalResource rentalSite, Long showTimeStart, Long showTimeEnd){
+        //根据节假日
+        List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
+                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+        Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
+        LocalDateTime startTime = new java.util.Date(showTimeStart).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime endTime = new java.util.Date(showTimeEnd).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
+        endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
+        if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+            return new ArrayList<>();
+        if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+            return new ArrayList<>();
+
+        SegmentTree segmentTree = new SegmentTree();
+
+        //查看格子被关闭
+        List<RentalCell> rentalCells = rentalv2Provider.findCellClosedByTimeInterval(rentalSite.getResourceType(), rentalSite.getId(), showTimeStart, showTimeEnd);
+        if (rentalCells != null && rentalCells.size() > 0)
+            for (RentalCell cell : rentalCells)
+                if (cell.getBeginTime() != null && cell.getEndTime() != null)
+                    segmentTree.putSegment(cell.getBeginTime().getTime(),cell.getEndTime().getTime(),1);
+
+
+        //不允许预约的时间
+        RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
+                rentalSite.getResourceType(), rentalSite.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rentalSite.getId());
+        Long now = new java.util.Date().getTime();
+        //至多提前时间
+        if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
+            Long time = now + rule.getRentalStartTime();
+            if (time < showTimeEnd) {
+                segmentTree.putSegment(time,showTimeEnd,1);
+            }
+        }
+        //至少提前时间
+        if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
+            Long time = now + rule.getRentalEndTime();
+            if (time > showTimeStart) {
+                segmentTree.putSegment(showTimeStart,time,1);
+            }
+        }
+        //是否有格子被预约
+        List<RentalOrder> rentalOrders = rentalv2Provider.listActiveBillsByInterval(rentalSite.getId(), showTimeStart, showTimeEnd);
+        if (rentalOrders != null && rentalOrders.size()>0) {
+            for (RentalOrder order:rentalOrders)
+                segmentTree.putSegment(order.getStartTime().getTime(),order.getEndTime().getTime(),1);
+
+        }
+
+        //按小时预约开放时间段
+        List<RentalTimeInterval> timeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rentalSite.getResourceType(),
+                EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
+        if (timeIntervals != null && timeIntervals.size() > 0){
+            SegmentTree tree2 = new SegmentTree();
+            for (RentalTimeInterval timeInterval : timeIntervals) {
+                Double start = timeInterval.getBeginTime() * 3600 * 1000;
+                Double end = timeInterval.getEndTime() * 3600 * 1000;
+                tree2.putSegment(start.longValue(),end.longValue(),1);
+            }
+            List<SegmentNode> zeroConverNodes = tree2.getZeroConverNodes(0, 24 * 3600 * 1000);
+            for (SegmentNode node : zeroConverNodes){
+                segmentTree.putSegment(showTimeStart + node.getLborder(),showTimeStart + node.getRborder(),1);
+            }
+        }
+
+        List<SegmentNode> zeroConverNodes = segmentTree.getZeroConverNodes(showTimeStart, showTimeEnd);
+        //合并时间段
+        for (int i = zeroConverNodes.size() - 1;i > 0;i--){
+            if (zeroConverNodes.get(i).getLborder() == zeroConverNodes.get(i - 1).getRborder()){
+                zeroConverNodes.get(i - 1).setRborder(zeroConverNodes.get(i).getRborder());
+                zeroConverNodes.remove(i);
+            }
+        }
+        return zeroConverNodes.stream().map(r->{
+            RangeDTO dto = new RangeDTO();
+            dto.setRangeStart(r.getLborder());
+            dto.setRangeEnd(r.getRborder());
+            return dto;
+        }).collect(Collectors.toList());
+    }
 
 	private void filteRentalSites(List<RentalResource> resources,FindRentalSitesCommand cmd){
 		if (resources == null || resources.size()==0)
