@@ -31,3 +31,7 @@ ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
 -- end
+
+-- AUTHOR: 黄明波
+-- REMARK: 服务联盟通用配置修复
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `origin_category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '原默认配置的服务类型id，如果是项目配置新增的，通常就是当前记录id' ;
