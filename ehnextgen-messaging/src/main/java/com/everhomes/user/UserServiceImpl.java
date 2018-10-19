@@ -1398,13 +1398,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = ref.getFoundLogin();
         if (foundLogin == null) {
             foundLogin = new UserLogin(namespaceId, user.getId(), ref.getNextLoginId(), deviceIdentifier, pusherIdentify, appVersion);
-            // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
-            if (loginToken != null) {
-                foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
-            }
             accessor.putMapValueObject(hkeyIndex, ref.getNextLoginId());
 
             isNew = true;
+        }
+
+        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
+        // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
+        if (loginToken != null) {
+            foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
+            foundLogin.setLoginId(loginToken.getLoginId());
+            hkeyLogin = String.valueOf(loginToken.getLoginId());
         }
 
         foundLogin.setImpersonationId(impId);
@@ -1412,7 +1417,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
         foundLogin.setPusherIdentify(pusherIdentify);
         foundLogin.setAppVersion(appVersion);
-        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
         Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
         LOGGER.debug("createLogin|hId = " + hkeyLogin);
         accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
@@ -7368,7 +7373,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
 
     /*******************统一用户同步数据**********************/
-    @KafkaListener(id="syncCreateUser", topicPattern = "user-create-event")
+    @KafkaListener(topics = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-create-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
@@ -7396,7 +7401,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="syncUpdateUser", topicPattern = "user-update-event")
+    @KafkaListener(topics = "user-update-event")
+    // @KafkaListener(topics = "user-update-event")
     public void syncUpdateUser(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-update-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
@@ -7412,7 +7418,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="syncDeleteUser", topicPattern = "user-delete-event")
+    @KafkaListener(topics = "user-delete-event")
     public void syncDeleteUser(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-delete-event ] {}", record.value());
         User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
@@ -7429,7 +7435,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(id="syncCreateUserIdentifier", topicPattern = "userIdentifier-create-event")
+    @KafkaListener(topics = "userIdentifier-create-event")
     public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
@@ -7456,7 +7462,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     }
 
-    @KafkaListener(id="syncUpdateUserIdentifier", topicPattern = "userIdentifier-update-event")
+    @KafkaListener(topics = "userIdentifier-update-event")
+    // @KafkaListener(topics = "userIdentifier-update-event")
     public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
         UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
@@ -7472,9 +7479,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    @KafkaListener(id="userKickoffMessage", topicPattern = "user.kickoff")
+    @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
-        LOGGER.debug("received message [ user.kickoff ] {}", record.value());
+        LOGGER.debug("received message [ user-kickoff ] {}", record.value());
         UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
         kickoffLoginByDevice(newLogin);
     }

@@ -33,7 +33,7 @@ public class XssFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        final Set<String> xssExcludeUriSet = ControllerBase.getRestMethodList("", "")
+        final Set<String> xssExcludeUriSet = new ArrayList<>(ControllerBase.getRestMethodList("", ""))
                 .stream()
                 .map(r -> (ExtendRestMethod) r)
                 .filter(r -> r.getXssExclude() != null)
