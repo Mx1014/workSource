@@ -239,6 +239,9 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES (@privilege_id:=@privilege_id+1, '52140', '0', 5210052140, '移动端管理权限', '0', now());
 -- end
 
+-- xq.tian 2018-10-19
+-- 驳回按钮的默认跟踪
+UPDATE eh_locale_strings SET text='任务已被 ${text_tracker_curr_operator_name} 驳回' WHERE scope='flow' AND code='20005';
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 

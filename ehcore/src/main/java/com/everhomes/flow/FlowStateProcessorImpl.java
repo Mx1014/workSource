@@ -969,8 +969,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 
                 tracker = new FlowEventLog();
                 Map<String, Object> templateMap = new HashMap<>();
-                if (ctx.getOperator() != null) {
-                    templateMap.put("applierName", ctx.getOperator().getNickName());
+                UserInfo operator = ctx.getOperator();
+                if (operator != null) {
+                    flowService.fixupUserInfoInContext(ctx, operator);
+                    templateMap.put("applierName", operator.getNickName());
                 }
 
                 tracker.setLogContent(flowService.getStepMessageTemplate(fromStep, FlowCaseStatus.ABSORTED, ctx.getCurrentEvent(), templateMap));
