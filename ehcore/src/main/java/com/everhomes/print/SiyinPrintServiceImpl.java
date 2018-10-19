@@ -2237,7 +2237,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Order amount is not equal to payAmount");
 				}
-				
+				LOGGER.info("paymentType : " + cmd.getPaymentType());
+				LOGGER.info("call point api start");
 				//用户积分
 				LocalEventBus.publish(event -> {
 					LocalEventContext context = new LocalEventContext();
@@ -2249,7 +2250,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					event.setEntityId(order.getId());
 					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
 				});
-				
+				LOGGER.info("call point api end");
 	            switch (cmd.getPaymentType()){
                 case 1:
                 case 7:
