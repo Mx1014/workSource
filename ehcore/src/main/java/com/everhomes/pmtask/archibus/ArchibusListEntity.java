@@ -2,12 +2,14 @@ package com.everhomes.pmtask.archibus;
 
 import com.everhomes.util.StringHelper;
 
-public class ArchibusEntity<T> {
+import java.util.List;
+
+public class ArchibusListEntity<T> {
 
     private Integer code;
     private Long st;
     private String msg;
-    private T data;
+    private List<T> data;
 
     public Integer getCode() {
         return code;
@@ -33,11 +35,11 @@ public class ArchibusEntity<T> {
         this.msg = msg;
     }
 
-    public T getData() {
+    public List<T> getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 

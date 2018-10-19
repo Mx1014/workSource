@@ -1,14 +1,9 @@
-package com.everhomes.pmtask;
+package com.everhomes.pmtask.archibus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.pmtask.archibus.*;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import com.everhomes.pmtask.ArchibusPmTaskHandle;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
@@ -16,10 +11,9 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ARCHIBUS)
-public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
+public class ArchibusTest {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ArchibusPmTaskHandle.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ArchibusTest.class);
 
     public static final String THIRDURL = "http://www.xboxad.com:8080/archibus/webServices/fmWork?wsdl";
 
@@ -33,7 +27,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             locator.setFmWorkDataServiceImplPortEndpointAddress(THIRDURL);
 
             try {
-                    service = locator.getFmWorkDataServiceImplPort();
+                service = locator.getFmWorkDataServiceImplPort();
             } catch (ServiceException e) {
                 e.printStackTrace();
             }
@@ -43,34 +37,17 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         return service;
     }
 
-    private CloseableHttpClient httpclient = null;
-
-    // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
-    // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
-    //@PostConstruct
-    public void init() {
-        httpclient = HttpClients.createDefault();
-    }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if(contextRefreshedEvent.getApplicationContext().getParent() == null) {
-            init();
-        }
-    }
-
-    @Override
-    public Object getThirdAddress(HttpServletRequest req) {
+    public Object getThirdAddress(Map<String,String> req) {
 
         try {
 
             FmWorkDataService service = getService();
-            String pk = req.getParameter("projectId");
-            if(!"resourcesType3".equals(req.getParameter("resourcesType"))){
-                pk = req.getParameter("parentId");
+            String pk = req.get("projectId");
+            if(!"resourcesType3".equals(req.get("resourcesType"))){
+                pk = req.get("parentId");
             }
             LOGGER.debug(pk);
-            String json = service.getResources(req.getParameter("projectId"),pk,req.getParameter("resourcesType"));
+            String json = service.getResources(req.get("projectId"),pk,req.get("resourcesType"));
             ArchibusListEntity<ArchibusResource> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusResource>>(){});
             if(!result.isSuccess()){
 //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
@@ -87,13 +64,12 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         return null;
     }
 
-    @Override
-    public Object getThirdCategories(HttpServletRequest req) {
+    public Object getThirdCategories(Map<String,String> req) {
 
         FmWorkDataService service = getService();
         String json = "";
         try {
-            json = service.getEventServiceType(req.getParameter("project_id"),req.getParameter("record_type"));
+            json = service.getEventServiceType(req.get("project_id"),req.get("record_type"));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -108,15 +84,14 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     }
 
-    @Override
-    public Object getThirdProjects(HttpServletRequest req){
+    public Object getThirdProjects(Map<String,String> req){
         try {
             FmWorkDataService service = getService();
 
             String json = service.areaInfo();
             ArchibusListEntity<ArchibusArea> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusArea>>(){});
             if(!result.isSuccess()){
-    //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+                //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
             }
 
             String areaId = "";
@@ -138,22 +113,21 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         return null;
     }
 
-//    @Override
     public Object createThirdTask(Map<String,String> req) {
         FmWorkDataService service = getService();
         String json = "";
         try {
-            service.submitEvent(pk_crop, req.get("request_source"), req.get("user_id"), req.get("project_id"),
+            json = service.submitEvent(pk_crop, req.get("request_source"), req.get("user_id"), req.get("project_id"),
                     req.get("service_id"), req.get("record_type"), req.get("remarks"), req.get("contack"),
                     req.get("telephone"), req.get("location"), req.get("order_date"), req.get("order_time"));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        LOGGER.debug(json);
         ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
         if(!result.isSuccess()){
 //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
         }
-
         return result.getData();
     }
 
@@ -176,9 +150,9 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     }
 
     public static void main(String[] args) {
-        ArchibusPmTaskHandle bean = new ArchibusPmTaskHandle();
+        ArchibusTest bean = new ArchibusTest();
         Map<String,String> params = new HashMap<>();
-        bean.getUsers();
+//        bean.getUsers();
 //        楼栋
 //        params.put("projectId","YZ8600PEK01GMWYGMYJY");
 //        params.put("parentId","YZ8600PEK01GMWYGMYJY");
@@ -194,21 +168,20 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 //        bean.getThirdAddress(params);
 //        查类型
 //        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-//        params.put("record_type","1");
+//        params.put("record_type","4");
 //        bean.getThirdCategories(params);
 //      下单
-//        params.put("request_source","taskSource7");
-//        params.put("user_id","");
-//        params.put("project_id","");
-//        params.put("service_id","");
-//        params.put("record_type","");
-//        params.put("remarks","");
-//        params.put("contack","");
-//        params.put("telephone","");
-//        params.put("location","");
-//        params.put("order_date","");
-//        params.put("order_time","");
-//        bean.createThirdTask(params);
+        params.put("request_source","taskSource4");
+        params.put("user_id","000000201807220FERQP");
+        params.put("project_id","YZ8600PEK01GMWYGMYJY");
+        params.put("service_id","0000002017110205VF4D");
+        params.put("record_type","4");
+        params.put("remarks","报修");
+        params.put("contack","tom");
+        params.put("telephone","15010499864");
+        params.put("location","深圳");
+        params.put("order_date","2018-11-17");
+        params.put("order_time","FAST");
+        bean.createThirdTask(params);
     }
-
 }
