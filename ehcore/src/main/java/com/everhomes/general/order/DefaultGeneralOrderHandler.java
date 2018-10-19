@@ -169,7 +169,9 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		PayerInfoDTO payerInfo = new PayerInfoDTO();
 		payerInfo.setNamespaceId(UserContext.getCurrentNamespaceId());
 		payerInfo.setOrganizationId(info.getOrganizationId()); // 左邻公司
+		LOGGER.info("user target ID : "  + UserContext.currentUserId());
 		OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId());
+		LOGGER.info("user source ID : "  + detail.getId());
 		payerInfo.setUserId(detail.getId());
 		payerInfo.setAppId(info.getAppOriginId());
 		orderCmd.setPayerInfo(payerInfo);

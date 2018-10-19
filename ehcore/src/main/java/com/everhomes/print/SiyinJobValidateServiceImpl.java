@@ -93,7 +93,6 @@ public class SiyinJobValidateServiceImpl {
 	private OrganizationService organizationService;
 	
 	
-	//给一个flag,方便beta测试
 	private Long PRINT_UNPAID_NOTIFY_TIME = 30 * 1000L;
 	private Long PRINT_UNPAID_MESSAGE_TIME = 60 * 1000L;
 	/**
@@ -223,7 +222,7 @@ public class SiyinJobValidateServiceImpl {
 		scheduleProvider.scheduleSimpleJob(
 				"siyinprintnotify" +order.getId(),
 				"sendNotify" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_NOTIFY_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + unpaidNotifyTime),
 				SiyinPrintNotifyJob.class,
 				notifyMap
 		);
@@ -234,7 +233,7 @@ public class SiyinJobValidateServiceImpl {
 		scheduleProvider.scheduleSimpleJob(
 				"siyinprintmessage" +order.getId(),
 				"sendMessage" + order.getId(),
-				new java.util.Date(order.getCreateTime().getTime() + PRINT_UNPAID_MESSAGE_TIME),
+				new java.util.Date(order.getCreateTime().getTime() + unpaidMessageTime),
 				SiyinPrintMessageJob.class,
 				messageMap
 		);
