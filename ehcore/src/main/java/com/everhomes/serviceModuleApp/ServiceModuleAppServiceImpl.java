@@ -709,18 +709,25 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				routerLocationType = entry.getLocationType();
 				routerSceneType = entry.getSceneType();
 			}
+
+			//优先使用entryIcon
+			if(!StringUtils.isEmpty(entry.getIconUri())){
+				String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+				appDTO.setIconUrl(url);
+			}else {
+				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+				if(profile != null && profile.getIconUri() != null){
+					String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+					appDTO.setIconUrl(url);
+				}
+			}
+
 		}
 
 		//填充路由信息
 		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType);
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
-
-		ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
-		if(profile != null && profile.getIconUri() != null){
-			String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
-			appDTO.setIconUrl(url);
-		}
 
 		return appDTO;
 	}
@@ -976,6 +983,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 							if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
 								appCommunityConfigDto.setDisplayName(entry.getEntryName());
 							}
+
+							if(!StringUtils.isEmpty(entry.getIconUri())){
+								String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+								appCommunityConfigDto.setIconUrl(url);
+							}
+
 
 							tempConfigDtos.add(appCommunityConfigDto);
 						}
