@@ -268,8 +268,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 			appOriginIds = appIds;
 		}
 
-		//TODO 1.对authAppIds遍历的时候有点慢，然后发现这段代码只对标准版有用（原因见下TODO 3），现在用标准版域空间框起来。
-		//TODO 2.listUserRelatedProjectByModuleId涉及权限，等敢哥优化吧
+		//TODO 1.对authAppIds遍历的时候调用listUserRelatedProjectByModuleId涉及权限有点慢，
+		//TODO 2.然后发现这段代码只对标准版有用（原因见下TODO 3），现在用标准版域空间框起来。
 
 		if(UserContext.getCurrentNamespaceId() == 2){
 			//这里需要优化，需要缓存
@@ -284,15 +284,24 @@ public class WebMenuServiceImpl implements WebMenuService {
 			for(Long authAppId : authAppIds) {
 				ServiceModuleApp app = communityAppMap.get(authAppId);
 				if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
-					//如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
-					ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
-					relatedProjectCmd.setAppId(authAppId);
-					relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-					relatedProjectCmd.setOrganizationId(organizationId);
-					List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-					if(projects != null && projects.size() > 0) {
+
+					//TODO 4.这段代码有点坑，特别慢。感觉他想要查询的是这个公司在这个应用下有权限的项目。换成了TODO 5的代码。权限有问题的话找敢哥。
+//					//如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
+//					ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+//					relatedProjectCmd.setAppId(authAppId);
+//					relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+//					relatedProjectCmd.setOrganizationId(organizationId);
+//					List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+//					if(projects != null && projects.size() > 0) {
+//						authAppIdsWithoutZeroProjects.add(authAppId);
+//					}
+
+					//TODO 5.直接用标准版授权的代码，因为外面已经被标准框起来了。
+					List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, authAppId);
+					if(authorizations != null && authorizations.size() > 0) {
 						authAppIdsWithoutZeroProjects.add(authAppId);
 					}
+
 				} else {
 
 					//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
@@ -305,7 +314,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 				}
 			}
 
-			//TODO 3.原来下面这句话使用标准版域空间框起来，因此推理上面整段代码都可以用标准版域空间框起来。
+			//TODO 3.下面这句话原来是用标准版域空间框起来，因此推理上面整段代码都可以用标准版域空间框起来。
 			// 取下交集
 			appOriginIds.retainAll(authAppIdsWithoutZeroProjects);
 		}

@@ -354,7 +354,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		organizationAppProvider.updateOrganizationApp(orgapp);
 
 		//删除该公司的所有授权
-		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), orgapp.getOrgId(), orgapp.getAppOriginId());
+		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(orgapp.getOrgId(), orgapp.getAppOriginId());
 
 		//删除应用广场配置
 		List<OrganizationCommunity> orgcommunities = organizationProvider.listOrganizationCommunities(orgapp.getOrgId());
