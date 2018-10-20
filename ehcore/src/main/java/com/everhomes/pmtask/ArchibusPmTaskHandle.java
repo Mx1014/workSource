@@ -25,6 +25,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     public static final String pk_crop = "GMFW";
 
+    public static final Integer perg_size = 1;
+
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
 
@@ -126,7 +128,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
                 }
             }
 
-            String json1 = service.getProjectInfo(areaId);
+            String json1 = service.getProjectInfo(req.getParameter("areaId"));
             ArchibusListEntity<ArchibusProject> result1 = JSONObject.parseObject(json1,new TypeReference<ArchibusListEntity<ArchibusProject>>(){});
 
             if(result1.isSuccess()){
@@ -138,24 +140,61 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         return null;
     }
 
-//    @Override
-    public Object createThirdTask(Map<String,String> req) {
+    @Override
+    public Object createThirdTask(HttpServletRequest req) {
         FmWorkDataService service = getService();
         String json = "";
         try {
-            service.submitEvent(pk_crop, req.get("request_source"), req.get("user_id"), req.get("project_id"),
-                    req.get("service_id"), req.get("record_type"), req.get("remarks"), req.get("contack"),
-                    req.get("telephone"), req.get("location"), req.get("order_date"), req.get("order_time"));
+            service.submitEvent(pk_crop, req.getParameter("request_source"), req.getParameter("user_id"), req.getParameter("project_id"),
+                    req.getParameter("service_id"), req.getParameter("record_type"), req.getParameter("remarks"), req.getParameter("contack"),
+                    req.getParameter("telephone"), req.getParameter("location"), req.getParameter("order_date"), req.getParameter("order_time"));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        LOGGER.debug(json);
         ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
         if(!result.isSuccess()){
 //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
         }
-
         return result.getData();
     }
+
+    @Override
+    public Object listThirdTasks(HttpServletRequest req) {
+        FmWorkDataService service = getService();
+        String json = "";
+        try {
+            json = service.eventList(req.getParameter("user_id"), req.getParameter("project_id"), req.getParameter("order_type"),
+                    req.getParameter("record_type"), Integer.valueOf(req.getParameter("page_num")), perg_size);
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        ArchibusListEntity<ArchibusTask> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusTask>>(){});
+        if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+        }
+        return result.getData();
+    }
+
+    @Override
+    public Object getThirdTaskDetail(HttpServletRequest req) {
+        FmWorkDataService service = getService();
+        String json = "";
+        try {
+            json = service.eventDetails(req.getParameter("order_id"));
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        ArchibusEntity<ArchibusTaskDetail> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusTaskDetail>>(){});
+        if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+        }
+        return result.getData();
+    }
+
+
 
     private Object getUsers(){
         FmWorkDataService service = getService();

@@ -19,6 +19,9 @@ public class ArchibusTest {
 
     public static final String pk_crop = "GMFW";
 
+    public static final Integer perg_size = 1;
+
+
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
 
@@ -131,6 +134,39 @@ public class ArchibusTest {
         return result.getData();
     }
 
+    public Object listThirdTasks(Map<String,String> req) {
+        FmWorkDataService service = getService();
+        String json = "";
+        try {
+            json = service.eventList(req.get("user_id"), req.get("project_id"), req.get("order_type"),
+                    req.get("record_type"), Integer.valueOf(req.get("page_num")), perg_size);
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        ArchibusListEntity<ArchibusTask> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusTask>>(){});
+        if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+        }
+        return result.getData();
+    }
+
+    public Object getThirdTaskDetail(Map<String,String> req) {
+        FmWorkDataService service = getService();
+        String json = "";
+        try {
+            json = service.eventDetails(req.get("order_id"));
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        ArchibusEntity<ArchibusTaskDetail> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusTaskDetail>>(){});
+        if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+        }
+        return result.getData();
+    }
+
     private Object getUsers(){
         FmWorkDataService service = getService();
         String json = "";
@@ -171,17 +207,28 @@ public class ArchibusTest {
 //        params.put("record_type","4");
 //        bean.getThirdCategories(params);
 //      下单
-        params.put("request_source","taskSource4");
-        params.put("user_id","000000201807220FERQP");
-        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-        params.put("service_id","0000002017110205VF4D");
-        params.put("record_type","4");
-        params.put("remarks","报修");
-        params.put("contack","tom");
-        params.put("telephone","15010499864");
-        params.put("location","深圳");
-        params.put("order_date","2018-11-17");
-        params.put("order_time","FAST");
-        bean.createThirdTask(params);
+//        params.put("request_source","taskSource4");
+//        params.put("user_id","000000201807220FERQP");
+//        params.put("project_id","YZ8600PEK01GMWYGMYJY");
+//        params.put("service_id","0000002017110205VF4D");
+//        params.put("record_type","4");
+//        params.put("remarks","报修");
+//        params.put("contack","tom");
+//        params.put("telephone","15010499864");
+//        params.put("location","深圳");
+//        params.put("order_date","2018-11-17");
+//        params.put("order_time","FAST");
+//        bean.createThirdTask(params);
+//      查询列表
+//        params.put("user_id","000000201807220FERQP");
+//        params.put("project_id","YZ8600PEK01GMWYGMYJY");
+//        params.put("order_type","1");
+//        params.put("record_type","5");
+//        params.put("page_num","1");
+//        bean.listThirdTasks(params);
+//      查询明细
+        params.put("order_id","000000201810180AUEUM");
+        bean.getThirdTaskDetail(params);
+
     }
 }
