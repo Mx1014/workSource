@@ -21,16 +21,16 @@ public class UserCurrentSceneDTO {
     private Integer namespaceId;
     private Long communityId ;
     private Byte communityType ;
-    private String token ;
+    private String signToken ;
     private Timestamp createTime;
     private Timestamp updateTime;
 
-    public String getToken() {
-        return token;
+    public String getSignToken() {
+        return signToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setSignToken(String signToken) {
+        this.signToken = signToken;
     }
 
     public Long getId() {
