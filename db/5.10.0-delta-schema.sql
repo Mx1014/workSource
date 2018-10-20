@@ -61,3 +61,15 @@ CREATE TABLE `eh_user_authentication_organizations`(
 
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '用户认证审核权限配置表';
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 场景记录表添加字段
+ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
+
+
+-- AUTHOR: 严军
+-- REMARK: 授权表加索引
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;

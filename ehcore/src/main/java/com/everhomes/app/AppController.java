@@ -49,6 +49,9 @@ public class AppController extends ControllerBase {
             }
         }
 
+        if (app == null) {
+            return new RestResponse("NO");
+        }
         // 之前是否授权过
         boolean isGranted = appService.isGrantedApp(app, UserContext.currentUserId());
         if (isGranted) {
