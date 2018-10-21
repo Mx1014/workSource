@@ -2,6 +2,7 @@ package com.everhomes.asset.statistic;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -29,8 +30,6 @@ import com.everhomes.util.DateHelper;
 @Component
 public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AssetStatisticProviderImpl.class);
-
     @Autowired
     private DbProvider dbProvider;
     
@@ -38,9 +37,56 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     private SequenceProvider sequenceProvider;
  
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
-		//1、根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
+		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPaymentBillStatisticCommunityDao statisticCommunityDao = new EhPaymentBillStatisticCommunityDao(context.configuration());
+		EhPaymentBillStatisticCommunity dto = statisticByCommnunity(namespaceId, ownerId, ownerType, dateStr);
+        statisticCommunityDao.insert(dto);
+	}
+
+	public boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
+			String beforeDateStr) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> fetch = dslContext.select(Tables.EH_PAYMENT_BILLS.ID)
+                .from(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_PAYMENT_BILLS.DATE_STR.eq(dateStr))
+                .and(DSL.cast(Tables.EH_PAYMENT_BILLS.UPDATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")
+                		.or(DSL.cast(Tables.EH_PAYMENT_BILLS.CREAT_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")))
+                .fetch(Tables.EH_PAYMENT_BILLS.ID);
+        if(fetch.size() > 0) return true;
+        return false;
+	}
+
+	public void updateStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
+		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
+		EhPaymentBillStatisticCommunity dto = statisticByCommnunity(namespaceId, ownerId, ownerType, dateStr);
+		context.update(statistic)
+		    .set(statistic.AMOUNT_RECEIVABLE, dto.getAmountReceivable())
+		    .set(statistic.AMOUNT_RECEIVED, dto.getAmountReceived())
+		    .set(statistic.AMOUNT_OWED, dto.getAmountOwed())
+		    .set(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX, dto.getAmountReceivableWithoutTax())
+		    .set(statistic.AMOUNT_RECEIVED_WITHOUT_TAX, dto.getAmountReceivedWithoutTax())
+		    .set(statistic.AMOUNT_OWED_WITHOUT_TAX, dto.getAmountOwedWithoutTax())
+		    .set(statistic.TAX_AMOUNT, dto.getTaxAmount())
+		    .set(statistic.AMOUNT_EXEMPTION, dto.getAmountExemption())
+		    .set(statistic.AMOUNT_SUPPLEMENT, dto.getAmountSupplement())
+		    .set(statistic.DUE_DAY_COUNT, dto.getDueDayCount())
+		    .set(statistic.NOTICE_TIMES, dto.getNoticeTimes())
+		    .where(statistic.NAMESPACE_ID.eq(namespaceId))
+		    .and(statistic.OWNER_ID.eq(ownerId))
+		    .and(statistic.OWNER_TYPE.eq(ownerType))
+		    .and(statistic.DATE_STR.eq(dateStr))
+		    .execute();
+	}
+    
+	public EhPaymentBillStatisticCommunity statisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
+		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPaymentBillStatisticCommunity dto = new EhPaymentBillStatisticCommunity();
         EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
         SelectQuery<Record> query = context.selectQuery();
@@ -85,22 +131,25 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	dto.setAmountSupplement(amountSupplement != null ? amountSupplement : BigDecimal.ZERO);
         	dto.setDueDayCount(dueDayCount != null ? dueDayCount : BigDecimal.ZERO);
         	dto.setNoticeTimes(noticeTimes != null ? noticeTimes : BigDecimal.ZERO);
-        	//收缴率=已收含税金额/应收含税金额
+        	//收缴率=已收含税金额/应收含税金额  
         	BigDecimal collectionRate = BigDecimal.ZERO;
-        	if(amountReceived != null && amountReceivable != null) {
-        		collectionRate = amountReceived.divide(amountReceivable);
+        	//如果应收含税金额为0，那么收缴率是100
+        	if(amountReceivable == null || amountReceivable.equals(BigDecimal.ZERO)) {
+        		collectionRate = new BigDecimal("100");
+        	}else {
+        		if(amountReceived != null) {
+            		collectionRate = amountReceived.divide(amountReceivable).multiply(new BigDecimal("100"));
+            	}else {
+            		collectionRate = BigDecimal.ZERO;
+            	}
         	}
         	dto.setCollectionRate(collectionRate);
-        	
         	dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        	statisticCommunityDao.insert(dto);
-            return null;
+        	return null;
         });
+        return dto;
 	}
-    
-    
-    
     
     
 }
