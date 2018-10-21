@@ -462,11 +462,10 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     }
 
     @Override
-    public void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId) {
+    public void removeAllCommunityAppAuthorizations(Long ownerId, Long appId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
                 return query;
