@@ -19,6 +19,18 @@ public interface AssetStatisticProvider {
 
 	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
 			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
+
+	/**
+	 * 提供给资产那边做统计的接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
 	
 	
 }

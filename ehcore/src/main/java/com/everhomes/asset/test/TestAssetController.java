@@ -1,17 +1,22 @@
 package com.everhomes.asset.test;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.schedule.AssetSchedule;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
@@ -23,6 +28,9 @@ public class TestAssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetSchedule assetSchedule;
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 	
 	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
@@ -88,6 +96,20 @@ public class TestAssetController extends ControllerBase {
 	public RestResponse statisticBillByCommunity() {
 		assetSchedule.statisticBillByCommunity();
 		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
+	 * <b>URL: /test/listBillStatisticByCommunityForProperty</b>
+	 * <p>提供给资产那边做统计的接口</p>
+	 */
+	@RequestMapping("listBillStatisticByCommunityForProperty")
+	public RestResponse listBillStatisticByCommunityForProperty(ListBillStatisticByCommunityCmd cmd) {
+		List<ListBillStatisticByCommunityDTO> list = assetStatisticService.listBillStatisticByCommunityForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerIdList() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		RestResponse restResponse = new RestResponse(list);
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		restResponse.setErrorDescription("OK");
 		return restResponse;

@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
+ * <li>namespaceId: 域空间</li>
+ * <li>ownerType: 所属项目类型</li>
+ * <li>ownerId: 所属项目ID</li>
  * <li>projectName:项目名称</li>
  * <li>projectClassify:项目分类</li>
  * <li>addressCount:楼宇总数</li>
@@ -24,6 +27,9 @@ import java.math.BigDecimal;
  *</ul>
  */
 public class ListBillStatisticByCommunityDTO {
+	private Integer namespaceId;
+	private Long ownerId;
+	private String ownerType;
     private String projectName;
     private String projectClassify;
     private Long addressCount;
@@ -136,6 +142,24 @@ public class ListBillStatisticByCommunityDTO {
 	}
 	public void setCollectionRate(BigDecimal collectionRate) {
 		this.collectionRate = collectionRate;
+	}
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
     
     

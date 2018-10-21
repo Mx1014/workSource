@@ -20,6 +20,22 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	@Autowired
 	private AssetStatisticProvider assetStatisticProvider;
 	
+	/**
+	 * 提供给资产那边做统计的接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
+			String ownerType, String dateStrBegin, String dateStrEnd) {
+        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunityForProperty(
+        		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return list;
+	}
+	
 	public ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
 		ListBillStatisticByCommunityResponse response = new ListBillStatisticByCommunityResponse();
 		Long pageAnchor = cmd.getPageAnchor();

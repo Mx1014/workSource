@@ -1,7 +1,10 @@
 
 package com.everhomes.asset.statistic;
 
+import java.util.List;
+
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
 
 /**
@@ -11,7 +14,18 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
 public interface AssetStatisticService {
 
 	ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
-	
+
+	/**
+	 * 提供给资产那边做统计的接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
+			String ownerType, String dateStrBegin, String dateStrEnd);
 	
 	
 }
