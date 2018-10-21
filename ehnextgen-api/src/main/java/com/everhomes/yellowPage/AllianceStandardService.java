@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
 import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
@@ -22,10 +23,17 @@ public interface AllianceStandardService {
 	
 	GetSelfDefinedStateResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd);
 
-	ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type);
-
-	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
+	List<ServiceAllianceCategories> listChildCategoriesByAdmin(CrossShardListingLocator locator, Integer pageSize,
 			String ownerType, Long ownerId, Long organizationId, Long type);
 
-	ServiceAllianceCategories queryServiceAllianceCategoryTopic(String ownerType, Long ownerId, Long type);
+	ServiceAllianceCategories queryHomePageCategoryByAdmin(String ownerType, Long ownerId, Long type);
+
+	ServiceAllianceCategories queryHomePageCategoryByScene(Long type, Long projectId);
+
+	ServiceAllianceCategories createHomePageCategory(String ownerType, Long ownerId, Long type);
+
+	List<ServiceAllianceCategories> listChildCategoriesByScene(CrossShardListingLocator locator, Integer pageSize,
+			String ownerType, Long ownerId, Long organizationId, Long type);
+
+	void updateHomePageCategorysByPublish(ServiceAllianceInstanceConfig config, String name);
 }

@@ -83,6 +83,8 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.AllianceStandardService;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageUtils;
@@ -132,6 +134,9 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	AllianceStandardService allianceStandardService;
 	
 	
 
@@ -356,9 +361,9 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 
 		String allianceName = null;
 		if (null != type) {
-			ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(null, null, type);
-			if (null != sa) {
-				allianceName = sa.getName();
+			ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(type, ownerId);
+			if (null != sc) {
+				allianceName = sc.getName();
 			}
 		}
 
