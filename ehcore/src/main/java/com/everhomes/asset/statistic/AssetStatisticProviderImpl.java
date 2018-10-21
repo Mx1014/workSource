@@ -160,8 +160,8 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     	return collectionRate;
 	}
 
-	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer namespaceId,
-			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
+			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
@@ -182,6 +182,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
         }
         query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
+        query.addLimit(pageOffSet,pageSize+1);
         query.fetch().map(f -> {
         	ListBillStatisticByCommunityDTO dto = new ListBillStatisticByCommunityDTO();
         	//TODO 调用资产的接口获取资产相关的统计数据

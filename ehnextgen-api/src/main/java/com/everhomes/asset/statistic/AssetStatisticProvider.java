@@ -17,8 +17,8 @@ public interface AssetStatisticProvider {
 
 	void updateStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr);
 
-	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer namespaceId, List<Long> ownerIdList,
-			String ownerType, String dateStrBegin, String dateStrEnd);
+	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
+			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
 	
 	
 }

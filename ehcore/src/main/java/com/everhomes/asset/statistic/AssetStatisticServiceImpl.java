@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
 
 /**
  * @author created by ycx
@@ -18,10 +19,29 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	
 	@Autowired
 	private AssetStatisticProvider assetStatisticProvider;
-
-	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
-		return assetStatisticProvider.listBillStatisticByCommunity(cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),
-				cmd.getDateStrBegin(), cmd.getDateStrEnd());
+	
+	public ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityResponse response = new ListBillStatisticByCommunityResponse();
+		Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        //卸货完毕
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunity(pageOffSet, pageSize, 
+        		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
+		response.setListBillStatisticByCommunityDTOs(list);
+		return response;
 	}
 	
 	

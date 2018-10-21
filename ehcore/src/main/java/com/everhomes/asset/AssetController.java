@@ -28,6 +28,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -1546,10 +1547,10 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/listBillStatisticByCommunity</b>
 	 */
 	@RequestMapping("listBillStatisticByCommunity")
-	@RestReturn(value = ListBillStatisticByCommunityDTO.class, collection = true)
+	@RestReturn(value = ListBillStatisticByCommunityResponse.class)
 	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
-		List<ListBillStatisticByCommunityDTO> list = assetStatisticService.listBillStatisticByCommunity(cmd);
-		RestResponse response = new RestResponse(list);
+		ListBillStatisticByCommunityResponse res = assetStatisticService.listBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;

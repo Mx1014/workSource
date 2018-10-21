@@ -1,10 +1,8 @@
 
 package com.everhomes.asset.statistic;
 
-import java.util.List;
-
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
 
 /**
  * @author created by ycx
@@ -12,7 +10,7 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
  */
 public interface AssetStatisticService {
 
-	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
+	ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
 	
 	
 	
