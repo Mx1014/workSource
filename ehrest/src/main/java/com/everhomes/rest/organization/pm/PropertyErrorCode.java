@@ -33,6 +33,10 @@ public interface PropertyErrorCode {
 	int ERROR_EXCEL_DATA_FORMAT = 122;//excel数据格式不正确
 	int ERROR_CHARGING_ITEM_NOT_EXIST = 123;//计费项不存在
 	int ERROR_CREATE_RESERVATION_FAILURE = 124;//创建预约计划失败
+	int ERROR_REGION_NOT_EXIST = 125;//区域数据不存在
+	int ERROR_ARRANGEMENT_NOT_EXIST = 126;//拆分合并计划不存在
+	int ERROR_USER_NOT_EXIST = 127;//用户不存在
+	int ERROR_EXPORT_FILE_FAILURE = 128;//导出文件失败
 	
 
 }

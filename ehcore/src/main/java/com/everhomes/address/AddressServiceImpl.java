@@ -201,6 +201,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnersByAddressCommand;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -406,12 +407,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
     public SuggestCommunityDTO suggestCommunity(SuggestCommunityCommand cmd) {
         int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         if (cmd.getRegionId() == null || cmd.getName() == null || cmd.getName().isEmpty())
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "Invalid parameter, regionId and name should not be null or empty");
 
         Region region = this.regionProvider.findRegionById(cmd.getRegionId());
         if (region == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST,
                     "Invalid regionId parameter, could not find the region");
         Community community = new Community();
         byte scopeCode = region.getScopeCode();
@@ -1276,7 +1277,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if (community == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_COMMUNITY_NOT_EXIST,
                     "Invalid communityId");
         User user = UserContext.current().getUser();
         long userId = user.getId();
@@ -1720,13 +1721,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 //事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目
                 txImportCommunity(user, communityList);
             } else {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+                throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                         "can not to import the community.parse file error.");
             }
             long endTime = System.currentTimeMillis();
             LOGGER.info("success to import address ,elapse=" + (endTime - startTime));
         } catch (IOException e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                     "can not to import the community.io error.");
         }
     }
@@ -1816,13 +1817,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
                 //事务原子操作。1,导入小区和小区点经纬度  2,导入小区物业条目
                 txImportAddress(user, cityList, areaList, dataList);
             } else {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+                throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                         "can not to import the community.parse file error.");
             }
             long endTime = System.currentTimeMillis();
             LOGGER.info("success to import address ,elapse=" + (endTime - startTime));
         } catch (IOException e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                     "can not to import the community.IOException.");
         }
 
@@ -3380,7 +3381,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	public void updateAddressArrangement(UpdateAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
 		if (arrangement == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ARRANGEMENT_NOT_EXIST,
                     "the addressArrangement does not exist!");
 		}
 		if (cmd.getDateBegin()!=null && formatTime(cmd.getDateBegin()) != arrangement.getDateBegin()) {
@@ -3396,7 +3397,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			for (ArrangementApartmentDTO dto : apartments) {
 				Address address = addressProvider.findAddressById(dto.getAddressId());
 				if (address == null) {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST,
 		                    "the address does not exist!");
 				}
 				if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
@@ -3640,7 +3641,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	        Community community = communityProvider.findCommunityById(communityId);
 	        if (community == null) {
 	            LOGGER.error("Unable to find the community");
-	            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_COMMUNITY_NOT_EXIST,
 	                    "Unable to find the community.");
 	        }
 	        return community;
