@@ -785,6 +785,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param visitor
      */
     private void sendVisitorSms(VisitorSysVisitor visitor, VisitorsysFlagType sendSmsFlag) {
+        LOGGER.info("visitorsys sms is sending,visitor={}",visitor.toString());
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         if(visitor.getVisitorPhone()==null){
             throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
@@ -809,7 +810,6 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             String templateLocale = UserContext.current().getUser().getLocale();
             smsProvider.sendSms(visitor.getNamespaceId(), visitor.getVisitorPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.VISITORSYS_INVT_INVITATION_LETTER, templateLocale, variables);
         }
-        LOGGER.info("visitorsys sms has send,phone={}",visitor.getVisitorPhone());
     }
 
     /**

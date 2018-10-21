@@ -34,8 +34,9 @@ public interface EnterpriseCustomerProvider {
     EnterpriseCustomer findByOrganizationId(Long organizationId);
     EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, Long communityId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
-    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, Long communityId, String number);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);
     Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);

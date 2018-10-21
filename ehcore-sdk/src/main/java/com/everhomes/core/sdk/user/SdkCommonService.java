@@ -90,7 +90,7 @@ public class SdkCommonService extends NsDispatcher {
         cmd.setId(id);
         return dispatcher(namecpaceId, sdkClient -> {
             GetCommunityByIdRestResponse responseBase =
-                    sdkClient.restCall("post", "/evh/community/get", cmd, GetCommunityByIdRestResponse.class);
+                    sdkClient.restCall("post", "/evh/community/getCommunityForSdkById", cmd, GetCommunityByIdRestResponse.class);
             return responseBase.getResponse();
         });
     }

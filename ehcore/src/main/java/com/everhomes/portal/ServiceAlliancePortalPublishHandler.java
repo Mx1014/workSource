@@ -148,52 +148,47 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		return url.toString();
 	}
 
-    private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name){
-        User user = UserContext.current().getUser();
-        ServiceAllianceCategories serviceAllianceCategories = new ServiceAllianceCategories();
-        serviceAllianceCategories.setName(name);
-        serviceAllianceCategories.setNamespaceId(namespaceId);
-        serviceAllianceCategories.setParentId(0L);
-        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM",null,null,new CrossShardListingLocator(), 10);
-//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-//        if(null != communities && communities.size() > 0){
-        if(null != organizations && organizations.size() > 0){
-//            Community community = communities.get(0);
-        	Organization organization = organizations.get(0);
-            serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
-            serviceAllianceCategories.setOwnerId(organization.getId());
-            serviceAllianceCategories.setCreatorUid(user.getId());
-            serviceAllianceCategories.setDeleteUid(user.getId());
-            serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
+	private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name) {
+		
+		User user = UserContext.current().getUser();
+		ServiceAllianceCategories serviceAllianceCategories = new ServiceAllianceCategories();
+		serviceAllianceCategories.setName(name);
+		serviceAllianceCategories.setNamespaceId(namespaceId);
+		serviceAllianceCategories.setParentId(0L);
+		serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+		serviceAllianceCategories.setOwnerId(-1L);
+		serviceAllianceCategories.setCreatorUid(user.getId());
+		serviceAllianceCategories.setDeleteUid(user.getId());
+		serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
 
-            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
-            serviceAllianceCategories.setId(id);
-            serviceAllianceCategories.setEntryId(generateEntryId(namespaceId,id));
-            yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
-            ServiceAlliances serviceAlliances = new ServiceAlliances();
-            serviceAlliances.setParentId(0L);
-            serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
-            serviceAlliances.setOwnerId(organization.getId());
-            serviceAlliances.setName(name);
-            serviceAlliances.setDisplayName(name);
-            serviceAlliances.setType(serviceAllianceCategories.getId());
-            serviceAlliances.setStatus(YellowPageStatus.ACTIVE.getCode());
-            serviceAlliances.setAddress("");
-            serviceAlliances.setSupportType((byte)0);
-            serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
-            yellowPageProvider.createServiceAlliances(serviceAlliances);
-            
-            boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
-            if(iscreateMenuScope){
-            	createMenuScope(namespaceId,serviceAllianceCategories.getEntryId(),serviceAllianceCategories.getName());
-            }
-        }else{
-            LOGGER.error("namespace not pm. namespaceId = {}", namespaceId);
-        }
+		long id = this.sequenceProvider
+				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
+		serviceAllianceCategories.setId(id);
+		serviceAllianceCategories.setEntryId(generateEntryId(namespaceId, id));
+		serviceAllianceCategories.setType(id);
+		yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
-        return serviceAllianceCategories;
-    }
+		ServiceAlliances serviceAlliances = new ServiceAlliances();
+		serviceAlliances.setParentId(0L);
+		serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+		serviceAlliances.setOwnerId(-1L);
+		serviceAlliances.setName(name);
+		serviceAlliances.setDisplayName(name);
+		serviceAlliances.setType(serviceAllianceCategories.getId());
+		serviceAlliances.setStatus(YellowPageStatus.ACTIVE.getCode());
+		serviceAlliances.setAddress("");
+		serviceAlliances.setSupportType((byte) 0);
+		serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
+		yellowPageProvider.createServiceAlliances(serviceAlliances);
+
+		boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
+		if (iscreateMenuScope) {
+			createMenuScope(namespaceId, serviceAllianceCategories.getEntryId(), serviceAllianceCategories.getName());
+		}
+
+		return serviceAllianceCategories;
+	}
 
     private void createMenuScope(Integer namespaceId, Integer entryId, String name) {
 		if(entryId == null || namespaceId == null){

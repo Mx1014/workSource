@@ -33,6 +33,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Null;
 
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -3090,6 +3091,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             }
             //门牌转化成门牌id列表
             List<Long> aptIdList = aptList.stream().map(a -> a.getId()).collect(Collectors.toList());
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
             //处理小区地址关联表
             Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
             LOGGER.info("listApartments communityAddressMappingMap: {}", communityAddressMappingMap);
@@ -3101,6 +3103,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
                     } else {
                         apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
                     }
+                }
+                if(community != null) {
+                    apt.setCommunityName(community.getName());
+                    apt.setCommunityId(community.getId());
                 }
                 apartments.add(apt);
             });
@@ -8534,4 +8540,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 		return apartments;
 	}
+
+	@Override
+    public OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd){
+	    CommunityPmOwner owner;
+        owner = propertyMgrProvider.findOrganizationOwnerByContactToken(cmd.getContactToken(), cmd.getNamespaceId());
+	    if(owner == null || owner.getId() == null){
+	        owner = propertyMgrProvider.findOrganizationOwnerByContactExtraTels("\"" + cmd.getContactToken() + "\"", cmd.getNamespaceId());
+        }
+
+        if (owner != null) {
+            return convertOwnerToDTO(owner);
+        } else {
+            LOGGER.error("The organization owner contactToken {} is not exist.", cmd.getContactToken());
+            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                    "The organization owner %s is not exist.", cmd.getContactToken());
+        }
+
+    }
+
+
 }

@@ -217,7 +217,21 @@ public class PusherController extends ControllerBase {
         RestResponse response = new RestResponse(msgs);
         return response;
     }
-    
+
+
+    /**
+     * <b>URL: /pusher/flushApnsClientCache</b>
+     * <p>在数据库修改推送证书的时候要清掉内在中的旧推送客户端对象</p>
+     */
+    @RequestMapping("flushApnsClientCache")
+    @RestReturn(value=String.class)
+    public RestResponse flushApnsClientCache() {
+        pusherService.flushHttp2ClientMaps();
+        RestResponse response = new RestResponse();
+        return response;
+    }
+
+
     private List<String> listAllBorderAccessPoints() {
         List<Border> borders = this.borderProvider.listAllBorders();
         return borders.stream().map((Border border) -> {

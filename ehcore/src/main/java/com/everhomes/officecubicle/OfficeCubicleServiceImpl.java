@@ -40,6 +40,7 @@ import com.everhomes.rest.officecubicle.*;
 import com.everhomes.rest.officecubicle.admin.*;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -78,10 +79,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 
 /**
  * 工位预定service实现
@@ -548,9 +545,11 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
+		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId);
+//		根据项目查询
+		int pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider,999999);
+		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),Long.MAX_VALUE,pageSize);
 		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
 		
 		return cities.stream().map(r->{

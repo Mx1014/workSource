@@ -647,7 +647,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateServiceAllianceCategory(UpdateServiceAllianceCategoryCommand cmd) {
-		ServiceAllianceCategories parent = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+		ServiceAllianceCategories parent = allianceStandardService.queryServiceAllianceCategoryTopic(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
 		if (null == parent) {
 			LOGGER.error("wrong parentId. parentId = " + cmd.getParentId());
 			throwError(YellowPageServiceErrorCode.ERROR_CATEGORY_NOT_FOUNT, "parent category not found!");
@@ -830,7 +830,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
-
 		ServiceAlliances sa = allianceStandardService.queryServiceAllianceTopic(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType());
 		if (null == sa) {
 			LOGGER.error("can not find the topic community ID = " + cmd.getOwnerId() + "; and type = " + cmd.getType());
@@ -873,7 +872,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
-		ServiceAllianceCategories mainCag = yellowPageProvider.findMainCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+		ServiceAllianceCategories mainCag = allianceStandardService.queryServiceAllianceCategoryTopic(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
 		if (null != mainCag) {
 			response.setSkipType(mainCag.getSkipType());
 		}
@@ -1326,7 +1325,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		//设置属性为当前项目可见时，range参数有可能为空，这里设置成当前项目id
 		if (StringUtils.isEmpty(cmd.getRange())) {
-			cmd.setRange(cmd.getOwnerId() + "");
+			serviceAlliance.setRange(cmd.getOwnerId() + "");
 		}
 
 		dbProvider.execute(r -> {
