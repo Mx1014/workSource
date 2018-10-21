@@ -587,12 +587,14 @@ public class AssetSchedule{
      * 2、取出eh_payment_bill_statistic_community表中dateStr（年月）
      * 3、比较eh_payment_bills表中dateStr（年月） 与 eh_payment_bill_statistic_community表中的dateStr（年月）
      * 	 1）如果eh_payment_bill_statistic_community表中没有对应的年月，那么需要创建该年月的统计结果集记录；
-     * 	 2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
+     * 	 2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间或者createTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
      */
     public void statisticBillByCommunity() {
     	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
-    		SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
-            Date today = new Date();
+            Calendar c = newClearedCalendar();
+            c.add(Calendar.DAY_OF_MONTH, -1);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String beforeDateStr = sdf.format(c.getTime());
             coordinationProvider.getNamedLock(CoordinationLocks.STATISTIC_BILL_BY_COMMUNITY.getCode()).tryEnter(() -> {
             	//1、取出eh_payment_bills表中dateStr（年月）
             	List<BillsDateStrDTO> billsDateStrDTOList = assetProvider.getPaymentBillsDatrStr();   
@@ -621,13 +623,16 @@ public class AssetSchedule{
             	statisticDateStrDTOListClone2.addAll(statisticDateStrDTOList);
             	//eh_payment_bills 与  eh_payment_bill_statistic_community 的交集
             	billsDateStrDTOListClone2.retainAll(statisticDateStrDTOListClone2);
-            	for(BillsDateStrDTO billsDateStrDTO : billsDateStrDTOListClone) {
-            		//2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
-            		
-            		
-            		
+            	for(BillsDateStrDTO billsDateStrDTO : billsDateStrDTOListClone2) {
+            		//2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间或者createTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
+            		boolean isNeedRefreshStatistic = assetStatisticProvider.checkIsNeedRefreshStatistic(billsDateStrDTO.getNamespaceId(), 
+            				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr(),
+            				beforeDateStr);
+            		if(isNeedRefreshStatistic) {
+            			assetStatisticProvider.updateStatisticByCommnunity(billsDateStrDTO.getNamespaceId(), 
+                				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr());
+            		}
             	}
-            	
        
             });
        }
