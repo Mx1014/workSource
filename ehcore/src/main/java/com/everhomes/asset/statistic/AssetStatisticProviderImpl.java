@@ -85,13 +85,19 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	dto.setAmountSupplement(amountSupplement != null ? amountSupplement : BigDecimal.ZERO);
         	dto.setDueDayCount(dueDayCount != null ? dueDayCount : BigDecimal.ZERO);
         	dto.setNoticeTimes(noticeTimes != null ? noticeTimes : BigDecimal.ZERO);
-        	//收缴率=已收含税金额/应收含税金额
+        	//收缴率=已收含税金额/应收含税金额  
         	BigDecimal collectionRate = BigDecimal.ZERO;
-        	if(amountReceived != null && amountReceivable != null) {
-        		collectionRate = amountReceived.divide(amountReceivable);
+        	//如果应收含税金额为0，那么收缴率是100
+        	if(amountReceivable == null || amountReceivable.equals(BigDecimal.ZERO)) {
+        		collectionRate = new BigDecimal("100");
+        	}else {
+        		if(amountReceived != null) {
+            		collectionRate = amountReceived.divide(amountReceivable).multiply(new BigDecimal("100"));
+            	}else {
+            		collectionRate = BigDecimal.ZERO;
+            	}
         	}
         	dto.setCollectionRate(collectionRate);
-        	
         	dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	statisticCommunityDao.insert(dto);
