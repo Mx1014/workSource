@@ -168,10 +168,14 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			state.setNamespaceId(UserContext.getCurrentNamespaceId());
 			state.setType(type);
 			state.setProjectId(projectId);
+			state.setStatus(code);
+			allianceConfigStateProvider.createAllianceConfigState(state);
+			return;
 		}
 		
 		state.setStatus(code);
-		allianceConfigStateProvider.createAllianceConfigState(state);
+		allianceConfigStateProvider.updateAllianceConfigState(state);
+		
 	}
 
 	private void copyAllianceTagsToProject(Long type, Long projectId, Long organizationId) {

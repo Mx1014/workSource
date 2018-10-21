@@ -266,32 +266,71 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		com.everhomes.server.schema.tables.EhServiceAlliances ALLIANCES = Tables.EH_SERVICE_ALLIANCES;
 		com.everhomes.server.schema.tables.EhAllianceTag TAGS = Tables.EH_ALLIANCE_TAG;
 		com.everhomes.server.schema.tables.EhAllianceTagVals TAG_VAL = Tables.EH_ALLIANCE_TAG_VALS;
+		com.everhomes.server.schema.tables.EhAllianceServiceCategoryMatch MATCH = Tables.EH_ALLIANCE_SERVICE_CATEGORY_MATCH;
 		
 		
         SelectQuery<Record> query = context.selectQuery();;
          
         query.addSelect(ALLIANCES.fields());
         
-		if (CollectionUtils.isEmpty(childTagIds)) {
-
+		if (CollectionUtils.isEmpty(childTagIds) && null == categoryId) {
 			query.addFrom(ALLIANCES);
-			
 		} else {
+			
+			Table<Record> tmpFrom = null;
+			if (!CollectionUtils.isEmpty(childTagIds)) {
+				tmpFrom = ALLIANCES
+						.leftOuterJoin(TAG_VAL).on( //连接关联表，获取改服务关联的标签记录
+								TAG_VAL.OWNER_ID.eq(ALLIANCES.ID)
+								.and(TAG_VAL.TAG_ID.in(childTagIds))
+								)
+						.leftOuterJoin(TAGS).on( //连接该表是为了获取标签状态，以过滤被删掉的标签
+								TAGS.ID.eq(TAG_VAL.TAG_ID));
+				
+				if (null != categoryId) {
+					query.addSelect(MATCH.CATEGORY_ID);
+					tmpFrom = tmpFrom.leftOuterJoin(MATCH).on(
+							MATCH.OWNER_TYPE.eq(ownerType)
+							.and(MATCH.OWNER_ID.eq(ownerId))
+							.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
+							.and(MATCH.CATEGORY_ID.eq(categoryId))
+							);
+				}
+			}
+			
+			if (null != categoryId) {
+				query.addSelect(MATCH.CATEGORY_ID);
+				tmpFrom = ALLIANCES.leftOuterJoin(MATCH).on(
+						MATCH.OWNER_TYPE.eq(ownerType)
+						.and(MATCH.OWNER_ID.eq(ownerId))
+						.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
+						.and(MATCH.CATEGORY_ID.eq(categoryId))
+						);
+				
+				if (!CollectionUtils.isEmpty(childTagIds)) {
+					tmpFrom = tmpFrom
+							.leftOuterJoin(TAG_VAL).on( //连接关联表，获取改服务关联的标签记录
+									TAG_VAL.OWNER_ID.eq(ALLIANCES.ID)
+									.and(TAG_VAL.TAG_ID.in(childTagIds))
+									)
+							.leftOuterJoin(TAGS).on( //连接该表是为了获取标签状态，以过滤被删掉的标签
+									TAGS.ID.eq(TAG_VAL.TAG_ID));
+				}
+			}
+			
 
-			query.addFrom(ALLIANCES
-					.leftOuterJoin(TAG_VAL).on( //连接关联表，获取改服务关联的标签记录
-							TAG_VAL.OWNER_ID.eq(ALLIANCES.ID)
-							.and(TAG_VAL.TAG_ID.in(childTagIds))
-							)
-					.leftOuterJoin(TAGS).on( //连接该表是为了获取标签状态，以过滤被删掉的标签
-							TAGS.ID.eq(TAG_VAL.TAG_ID))
-					);
+		    query.addFrom(tmpFrom);
 
 			// 过滤被删掉的标签
-			query.addConditions(TAGS.ID.isNotNull().and(TAGS.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())));
-			
-			query.addGroupBy(ALLIANCES.ID);
-			query.addHaving(ALLIANCES.ID.count().eq(childTagIds.size())); //获取到的标签个数要与传入的个数一样，才能说明该服务关联的标签和搜索的标签完全一致。
+		    if (!CollectionUtils.isEmpty(childTagIds)) {
+				query.addConditions(TAGS.ID.isNotNull().and(TAGS.DELETE_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())));
+				query.addGroupBy(ALLIANCES.ID);
+				query.addHaving(ALLIANCES.ID.count().eq(childTagIds.size())); //获取到的标签个数要与传入的个数一样，才能说明该服务关联的标签和搜索的标签完全一致。
+		    }
+		    
+		    if (null != categoryId) {
+		    	query.addConditions(MATCH.ID.isNotNull());
+		    }
 		}
         
         if (isByScene) {
@@ -1403,8 +1442,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public void updateMainCategorysByType(Long type, Byte enableComment, Byte enableProvider, String name) {
-		// TODO Auto-generated method stub
-		
+		UpdateQuery<EhServiceAllianceCategoriesRecord> updateQuery = readWriteContext().updateQuery(SA_TYPE_TABLE);
+		updateQuery.addValue(SA_TYPE_TABLE.NAME, name);
+		updateQuery.addValue(SA_TYPE_TABLE.PATH, name);
+		updateQuery.addValue(SA_TYPE_TABLE.ENABLE_COMMENT, enableComment);
+		updateQuery.addValue(SA_TYPE_TABLE.ENABLE_PROVIDER, enableProvider);
+		updateQuery.addConditions(SA_TYPE_TABLE.TYPE.eq(type));
+		updateQuery.addConditions(SA_TYPE_TABLE.PARENT_ID.eq(0L));
+		updateQuery.addConditions(SA_TYPE_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+		updateQuery.execute();
 	}
 
 }

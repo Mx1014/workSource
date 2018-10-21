@@ -897,7 +897,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		locator.setAnchor(cmd.getNextPageAnchor());
 
 		List<ServiceAlliances> sas = null;
-		List<Long> childTagIds = buildSearchChildTagIds(cmd.getParentId(), cmd.getTagItems()); //根据输入的筛选item，转成实际的tagId
+//		List<Long> childTagIds = buildSearchChildTagIds(cmd.getParentId(), cmd.getTagItems()); //根据输入的筛选item，转成实际的tagId
+		List<Long> childTagIds = Arrays.asList(1L);
 		final ServiceAllianceSourceRequestType sourceRequestType = ServiceAllianceSourceRequestType
 				.fromCode(cmd.getSourceRequestType());
 		// 如果为CLIENT，或者空值，认为是客户端
