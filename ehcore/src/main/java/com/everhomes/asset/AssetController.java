@@ -17,6 +17,7 @@ import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -25,6 +26,8 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -52,6 +55,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetAppService assetAppService;
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -1534,4 +1540,20 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
     }
+    
+    /**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目</p>
+	 * <b>URL: /asset/listBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunity")
+	@RestReturn(value = ListBillStatisticByCommunityDTO.class, collection = true)
+	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		List<ListBillStatisticByCommunityDTO> list = assetStatisticService.listBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse(list);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	
 }

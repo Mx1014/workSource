@@ -2,14 +2,13 @@ package com.everhomes.asset.statistic;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +16,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBills;
@@ -132,23 +132,94 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	dto.setDueDayCount(dueDayCount != null ? dueDayCount : BigDecimal.ZERO);
         	dto.setNoticeTimes(noticeTimes != null ? noticeTimes : BigDecimal.ZERO);
         	//收缴率=已收含税金额/应收含税金额  
-        	BigDecimal collectionRate = BigDecimal.ZERO;
-        	//如果应收含税金额为0，那么收缴率是100
-        	if(amountReceivable == null || amountReceivable.equals(BigDecimal.ZERO)) {
-        		collectionRate = new BigDecimal("100");
-        	}else {
-        		if(amountReceived != null) {
-            		collectionRate = amountReceived.divide(amountReceivable).multiply(new BigDecimal("100"));
-            	}else {
-            		collectionRate = BigDecimal.ZERO;
-            	}
-        	}
+        	BigDecimal collectionRate = calculateCollecionRate(amountReceivableWithoutTax, amountReceivedWithoutTax);
         	dto.setCollectionRate(collectionRate);
         	dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         	return null;
         });
         return dto;
+	}
+	
+	/**
+	 * 计算收缴率
+	 * 收缴率=已收含税金额/应收含税金额  
+	 */
+	private BigDecimal calculateCollecionRate(BigDecimal amountReceivable, BigDecimal amountReceived) {
+		BigDecimal collectionRate = BigDecimal.ZERO;
+    	//如果应收含税金额为0，那么收缴率是100
+    	if(amountReceivable == null || amountReceivable.compareTo(BigDecimal.ZERO) == 0) {
+    		collectionRate = new BigDecimal("100");
+    	}else {
+    		if(amountReceived != null) {
+        		collectionRate = amountReceived.divide(amountReceivable).multiply(new BigDecimal("100"));
+        	}else {
+        		collectionRate = BigDecimal.ZERO;
+        	}
+    	}
+    	return collectionRate;
+	}
+
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(statistic);
+        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, 
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
+        		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
+        		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
+        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(statistic.OWNER_ID.in(ownerIdList));
+        query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
+        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
+        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
+        query.fetch().map(f -> {
+        	ListBillStatisticByCommunityDTO dto = new ListBillStatisticByCommunityDTO();
+        	//TODO 调用资产的接口获取资产相关的统计数据
+//        	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
+//        	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
+//        	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+        	
+        	BigDecimal amountReceivable = f.getValue(DSL.sum(statistic.AMOUNT_RECEIVABLE));
+        	BigDecimal amountReceived = f.getValue(DSL.sum(statistic.AMOUNT_RECEIVED));
+        	BigDecimal amountOwed = f.getValue(DSL.sum(statistic.AMOUNT_OWED));
+        	BigDecimal amountReceivableWithoutTax = f.getValue(DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX));
+        	BigDecimal amountReceivedWithoutTax = f.getValue(DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX));
+        	BigDecimal amountOwedWithoutTax = f.getValue(DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX));
+        	BigDecimal taxAmount = f.getValue(DSL.sum(statistic.TAX_AMOUNT));
+        	BigDecimal amountExemption = f.getValue(DSL.sum(statistic.AMOUNT_EXEMPTION));
+        	BigDecimal amountSupplement = f.getValue(DSL.sum(statistic.AMOUNT_SUPPLEMENT));
+        	BigDecimal dueDayCount = f.getValue(DSL.sum(statistic.DUE_DAY_COUNT));
+        	BigDecimal noticeTimes = f.getValue(DSL.sum(statistic.NOTICE_TIMES));
+        	
+        	dto.setAmountReceivable(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
+        	dto.setAmountReceived(amountReceived != null ? amountReceived : BigDecimal.ZERO);
+        	dto.setAmountOwed(amountOwed != null ? amountOwed : BigDecimal.ZERO);
+        	dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax : BigDecimal.ZERO);
+        	dto.setAmountReceivedWithoutTax(amountReceivedWithoutTax != null ? amountReceivedWithoutTax : BigDecimal.ZERO);
+        	dto.setAmountOwedWithoutTax(amountOwedWithoutTax != null ? amountOwedWithoutTax : BigDecimal.ZERO);
+        	dto.setTaxAmount(taxAmount != null ? taxAmount : BigDecimal.ZERO);
+        	dto.setAmountExemption(amountExemption != null ? amountExemption : BigDecimal.ZERO);
+        	dto.setAmountSupplement(amountSupplement != null ? amountSupplement : BigDecimal.ZERO);
+        	dto.setDueDayCount(dueDayCount != null ? dueDayCount : BigDecimal.ZERO);
+        	dto.setNoticeTimes(noticeTimes != null ? noticeTimes : BigDecimal.ZERO);
+        	//收缴率=已收含税金额/应收含税金额  
+        	BigDecimal collectionRate = calculateCollecionRate(amountReceivableWithoutTax, amountReceivedWithoutTax);
+        	dto.setCollectionRate(collectionRate);
+        	
+        	list.add(dto);
+        	return null;
+        });
+		return list;
 	}
     
     

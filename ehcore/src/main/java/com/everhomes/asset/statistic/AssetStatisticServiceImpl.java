@@ -1,12 +1,13 @@
 
 package com.everhomes.asset.statistic;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.db.DbProvider;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 
 /**
  * @author created by ycx
@@ -14,13 +15,14 @@ import com.everhomes.db.DbProvider;
  */
 @Component
 public class AssetStatisticServiceImpl implements AssetStatisticService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AssetStatisticServiceImpl.class);
 	
 	@Autowired
-	private DbProvider dbProvider;
-	
-	
-	
+	private AssetStatisticProvider assetStatisticProvider;
+
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		return assetStatisticProvider.listBillStatisticByCommunity(cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),
+				cmd.getDateStrBegin(), cmd.getDateStrEnd());
+	}
 	
 	
 }
