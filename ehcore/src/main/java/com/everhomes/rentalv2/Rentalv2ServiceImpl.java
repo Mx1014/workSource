@@ -2413,6 +2413,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (bill.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 &&
 				bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())){
 			changeRentalOrderStatus(bill,SiteBillStatus.SUCCESS.getCode(),true);
+			//工作流自动进到下一节点
+			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(bill.getId(), REFER_TYPE, moduleId);
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			flowService.processAutoStep(stepDTO);
 			return null;
 		}
 		return buildCommonOrderDTO(bill);
@@ -2499,6 +2511,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0){
 			changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+			//工作流自动进到下一节点
+			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			flowService.processAutoStep(stepDTO);
 			return null;
 		}
 		PreOrderDTO preOrderDTO = buildPreOrderDTO(order, cmd.getClientAppName(), cmd.getPaymentType());
@@ -2554,18 +2578,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		if (SiteBillStatus.SUCCESS.getCode() == status){
 			onOrderSuccess(order);
-			//工作流自动进到下一节点
-			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
-			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
-			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
-			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-			stepDTO.setFlowCaseId(flowCase.getId());
-			stepDTO.setFlowMainId(flowCase.getFlowMainId());
-			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-			stepDTO.setFlowVersion(flowCase.getFlowVersion());
-			stepDTO.setStepCount(flowCase.getStepCount());
-			flowService.processAutoStep(stepDTO);
 		}
 
 
@@ -4412,19 +4424,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		} else if (PayMode.ONLINE_PAY.getCode() == order.getPayMode()) {
-
-			//创建哑工作流
-			GeneralModuleInfo gm = new GeneralModuleInfo();
-			gm.setModuleId(Rentalv2Controller.moduleId);
-			gm.setModuleType(moduleType);
-			gm.setNamespaceId(order.getNamespaceId());
-			gm.setOwnerId(ownerId);
-			gm.setOwnerType(ownerType);
-			gm.setProjectId(order.getCommunityId());
-			gm.setProjectType(EntityType.COMMUNITY.getCode());
-			gm.setOrganizationId(cmd.getCurrentOrganizationId());
-			return flowService.createDumpFlowCase(gm, cmd);
 		}
 		return null;
 	}

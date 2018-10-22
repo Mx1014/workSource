@@ -306,6 +306,20 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
 
+-- 资产管理系统
+UPDATE eh_web_menus set parent_id = 15000000, sort_num = 25 WHERE id = 20000000;
+UPDATE eh_web_menus set parent_id = 15000000, sort_num = 5 WHERE id = 21000000;
+UPDATE eh_web_menus set parent_id = 15000000, sort_num = 90 WHERE id = 22000000;
+UPDATE eh_web_menus SET path = replace(path, '/11000000/', '/15000000/') WHERE parent_id in (20000000, 21000000, 22000000) OR id in (20000000, 21000000, 22000000);
+UPDATE eh_web_menus SET `status` = 0 WHERE id = 11000000;
+UPDATE eh_web_menus SET `status` = 0 WHERE id = 23020000;
+UPDATE eh_web_menus set parent_id = 25000000, sort_num = 30 WHERE id = 16050000;
+UPDATE eh_web_menus SET path = replace(path, '/26000000/', '/25000000/') WHERE parent_id = 16050000 OR id = 16050000;
+UPDATE eh_web_menus SET `status` = 0 WHERE id = 26000000;
+UPDATE eh_web_menus SET `name` = '资管物业业务' WHERE id = 25000000;
+UPDATE eh_web_menus set `name` = '园区运营业务' WHERE id = 16000000;
+UPDATE eh_web_menus set `name` = '企业办公业务' WHERE id = 23000000;
+UPDATE eh_web_menus set `name` = '统计分析业务' WHERE id = 27000000;
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------

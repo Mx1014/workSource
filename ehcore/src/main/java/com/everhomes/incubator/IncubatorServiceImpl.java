@@ -8,6 +8,8 @@ import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.Task;
@@ -74,6 +76,9 @@ public class IncubatorServiceImpl implements IncubatorService {
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Override
 	public ListIncubatorApplyResponse listIncubatorApply(ListIncubatorApplyCommand cmd) {
@@ -237,29 +242,42 @@ public class IncubatorServiceImpl implements IncubatorService {
 		incubatorApply.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
 
-		dbProvider.execute((status)->{
+		coordinationProvider.getNamedLock(CoordinationLocks.PORTAL_PUBLISH.getCode() + user.getId()).enter(()->{
 
 
-			if(cmd.getParentId() == null){
-				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
-				incubatorApply.setId(id);
-				incubatorApply.setRootId(id);
-			}else {
-				IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
-				incubatorApply.setRootId(parent.getRootId());
+			IncubatorApply sameApply = incubatorProvider.findSameApply(incubatorApply);
 
-				//产品要求删除取消的，为了保证数据结构，设置新记录的parentid为grandfather的id
-				if(ApproveStatus.fromCode(parent.getApproveStatus()) == ApproveStatus.WAIT){
-					incubatorApply.setParentId(parent.getParentId());
-					incubatorProvider.deleteIncubatorApplyById(parent.getId());
-				}
+			if(sameApply != null){
+				LOGGER.error("repeat apply, see you apply history.");
+				throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_REPEAT_APPLY,
+						"repeat apply, see you apply history.");
 			}
 
-			incubatorProvider.createIncubatorApply(incubatorApply);
+			dbProvider.execute((status)->{
 
-			//保存附件
-			saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
-			saveAttachment(cmd.getPlanBookAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+				if(cmd.getParentId() == null){
+					long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhIncubatorApplies.class));
+					incubatorApply.setId(id);
+					incubatorApply.setRootId(id);
+				}else {
+					IncubatorApply parent = incubatorProvider.findIncubatorApplyById(cmd.getParentId());
+					incubatorApply.setRootId(parent.getRootId());
+
+					//产品要求删除取消的，为了保证数据结构，设置新记录的parentid为grandfather的id
+					if(ApproveStatus.fromCode(parent.getApproveStatus()) == ApproveStatus.WAIT){
+						incubatorApply.setParentId(parent.getParentId());
+						incubatorProvider.deleteIncubatorApplyById(parent.getId());
+					}
+				}
+
+				incubatorProvider.createIncubatorApply(incubatorApply);
+
+				//保存附件
+				saveAttachment(cmd.getBusinessLicenceAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.BUSINESS_LICENCE.getCode());
+				saveAttachment(cmd.getPlanBookAttachments(), incubatorApply.getId(), user.getId(), IncubatorApplyAttachmentType.PLAN_BOOK.getCode());
+
+				return null;
+			});
 
 			return null;
 		});

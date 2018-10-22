@@ -43,8 +43,10 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.statistics.event.StatEventCommonStatus;
 import com.everhomes.rest.statistics.event.StatEventLogDTO;
+import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.IdNameDTO;
 import com.everhomes.rest.yellowPage.ListServiceNamesCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
 import com.everhomes.rest.yellowPage.stat.ClickStatDetailDTO;
@@ -83,6 +85,10 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.yellowPage.AllianceConfigState;
+import com.everhomes.yellowPage.AllianceConfigStateProvider;
+import com.everhomes.yellowPage.AllianceStandardService;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageUtils;
@@ -132,6 +138,11 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	AllianceStandardService allianceStandardService;
+	@Autowired
+	private AllianceConfigStateProvider allianceConfigStateProvider;
 	
 	
 
@@ -342,11 +353,24 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 		// 校验权限
 		checkPrivilege(PrivilegeType.USER_BEHAVIOUR_STAT, cmd.getCurrentPMId(), cmd.getAppId(),
 				cmd.getCurrentProjectId());
-
-		List<IdNameDTO> dtos = yellowPageProvider.listServiceTypeNames(cmd.getType());
-		if (null != dtos && dtos.size() > 1) {
-			dtos = dtos.stream().filter(r -> !r.getId().equals(cmd.getType())).collect(Collectors.toList());
+		
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerType())) {
+			AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(),ownerId);
+			if (allianceStandardService.isDisableSelfConfig(state)) {
+				ownerId = allianceStandardService.getOrgIdByTypeAndProjectId(cmd.getType(), ownerId);
+				ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
+			}
 		}
+
+		List<IdNameDTO> dtos = yellowPageProvider.listServiceTypeNames(ownerType, ownerId,  cmd.getType());
+		if (null != dtos && dtos.size() > 1) {
+			return dtos.stream().filter(r -> !r.getParentId().equals(0L)).collect(Collectors.toList());
+		}
+		
+		
+		
 
 		return dtos;
 	}
@@ -356,9 +380,9 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 
 		String allianceName = null;
 		if (null != type) {
-			ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(null, null, type);
-			if (null != sa) {
-				allianceName = sa.getName();
+			ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(type, ownerId);
+			if (null != sc) {
+				allianceName = sc.getName();
 			}
 		}
 

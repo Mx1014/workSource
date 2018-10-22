@@ -25,8 +25,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerType;
@@ -48,8 +46,6 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.asset.AppAssetCategory;
-import com.everhomes.asset.AssetExportHandler;
 import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
@@ -101,6 +97,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalService;
 import com.everhomes.requisition.Requisition;
 import com.everhomes.requisition.RequisitionProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -138,9 +135,10 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationServiceUser;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.portal.ContractInstanceConfig;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.varField.FieldDTO;
@@ -150,7 +148,6 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -174,45 +171,7 @@ import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.parser.Entity;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component(ContractService.CONTRACT_PREFIX + "")
 public class ContractServiceImpl implements ContractService, ApplicationListener<ContextRefreshedEvent> {
@@ -349,7 +308,7 @@ public class ContractServiceImpl implements ContractService, ApplicationListener
 	protected TaskService taskService;
 	
 	@Autowired
-	private ServiceModuleAppProvider serviceModuleAppProvider;
+    private PortalService portalService;
 
 	@Autowired
 	private AssetGroupProvider assetGroupProvider;
@@ -2106,7 +2065,7 @@ long assetCategoryId = 0l;
 		if (cmd.getCommunityId() == null) {
 			param.setOwnerId(cmd.getOrgId());
 		}
-		param.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//		param.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId(),null);
@@ -3860,24 +3819,21 @@ long assetCategoryId = 0l;
 	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
 		// 查询应用列表
 		List<ContractCategoryListDTO> dtos = new ArrayList<ContractCategoryListDTO>();
-		//1、根据域空间ID查询出所有的合同应用eh_contract_categories
-		List<ContractCategory> appContractCategorieList = contractProvider.listContractAppCategory(cmd.getNamespaceId());
-		for(ContractCategory appContractCategory : appContractCategorieList) {
-			//2、根据categoryId查询eh_service_module_apps表的custom_tag，取出应用名称
-			Long categoryId = appContractCategory.getId();
+		ListServiceModuleAppsCommand lerviceModuleAppsCmd = new ListServiceModuleAppsCommand();
+		lerviceModuleAppsCmd.setNamespaceId(cmd.getNamespaceId());
+		lerviceModuleAppsCmd.setModuleId(ServiceModuleConstants.CONTRACT_MODULE);
+		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(lerviceModuleAppsCmd);
+		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+		for(ServiceModuleAppDTO appContractCategory : serviceModuleApps) {
+			ContractInstanceConfig map = (ContractInstanceConfig) StringHelper.fromJsonString(appContractCategory.getInstanceConfig(), ContractInstanceConfig.class);
 			ContractCategoryListDTO dto = new ContractCategoryListDTO();
-			dto.setCategoryId(categoryId);
-			dto.setContractApplicationScene(appContractCategory.getContractApplicationScene());
-			if(categoryId != null) {
-				ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleApp(
-						cmd.getNamespaceId(), null, ServiceModuleConstants.CONTRACT_MODULE, categoryId.toString());
-				if(serviceModuleApp != null) {
-					dto.setName(serviceModuleApp.getName());
-					dtos.add(dto);//只有categoryId，没有合同应用名称，说明该合同应用已在公共平台那边删除
-				}
-			}
+			dto.setCategoryId(map.getCategoryId());
+			dto.setContractApplicationScene(map.getContractApplicationScene());
+			dto.setName(appContractCategory.getName());
+			dtos.add(dto);
 		}
 		return dtos;
+
 		
 	}
 

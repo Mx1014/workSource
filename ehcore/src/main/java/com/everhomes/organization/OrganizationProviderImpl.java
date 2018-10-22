@@ -3802,7 +3802,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId) {
+    public List listOrganizationByName(String name, List<String> groupTypes, Long parentId, Integer namespaceId, Long enterpriseId) {
         List<Organization> result = new ArrayList<Organization>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -3812,8 +3812,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (parentId != null) {
             query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
         }
-        if (groupType != null) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+        if (groupTypes != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
         }
         if (enterpriseId != null) {
             query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + enterpriseId + "%"));
