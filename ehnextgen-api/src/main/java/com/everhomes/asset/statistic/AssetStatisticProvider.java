@@ -12,13 +12,15 @@ public interface AssetStatisticProvider {
 
 	void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr);
 	
-	void createStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
-			String buildingName);
+	void createStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr,String buildingName);
 
-	boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
-			String beforeDateStr);
-
+	boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,String beforeDateStr);
+			
+	boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,String buildingName, String beforeDateStr);
+			
 	void updateStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr);
+	
+	void updateStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr,String buildingName);
 
 	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
 			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
@@ -41,5 +43,7 @@ public interface AssetStatisticProvider {
 	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
 
+	
+	
 
 }

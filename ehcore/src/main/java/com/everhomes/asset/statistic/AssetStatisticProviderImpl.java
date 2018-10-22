@@ -17,7 +17,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -76,18 +75,48 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		statisticBuildingDao.insert(dto);
 	}
 
+	/**
+	 * 项目维度
+	 */
 	public boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
 			String beforeDateStr) {
 		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> fetch = dslContext.select(Tables.EH_PAYMENT_BILLS.ID)
-                .from(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
-                .and(Tables.EH_PAYMENT_BILLS.DATE_STR.eq(dateStr))
-                .and(DSL.cast(Tables.EH_PAYMENT_BILLS.UPDATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")
-                		.or(DSL.cast(Tables.EH_PAYMENT_BILLS.CREAT_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")))
-                .fetch(Tables.EH_PAYMENT_BILLS.ID);
+		EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+        List<Long> fetch = dslContext.select(r.ID)
+                .from(r)
+                .where(r.NAMESPACE_ID.eq(namespaceId))
+                .and(r.OWNER_ID.eq(ownerId))
+                .and(r.OWNER_TYPE.eq(ownerType))
+                .and(r.DATE_STR.eq(dateStr))
+                .and(DSL.cast(r.UPDATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")
+                		.or(DSL.cast(r.CREAT_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")))
+                .fetch(r.ID);
+        if(fetch.size() > 0) return true;
+        return false;
+	}
+	
+	/**
+	 * 楼宇维度
+	 */
+	public boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
+			String buildingName, String beforeDateStr) {
+        DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems r = Tables.EH_PAYMENT_BILL_ITEMS.as("r");
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        List<Long> fetch = dslContext.select(r.ID)
+                .from(r)
+                .leftOuterJoin(bills)
+                .on(r.BILL_ID.eq(bills.ID))
+                .where(r.NAMESPACE_ID.eq(namespaceId))
+                .and(r.OWNER_ID.eq(ownerId))
+                .and(r.OWNER_TYPE.eq(ownerType))
+                .and(r.DATE_STR.eq(dateStr))
+                .and(r.BUILDING_NAME.eq(buildingName))
+                .and(DSL.cast(r.UPDATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")
+                		.or(DSL.cast(r.CREATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00"))
+                		.or(DSL.cast(bills.UPDATE_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00"))
+                		.or(DSL.cast(bills.CREAT_TIME, String.class).greaterOrEqual(beforeDateStr + " 00:00:00")))
+                .fetch(r.ID);
         if(fetch.size() > 0) return true;
         return false;
 	}
@@ -107,6 +136,28 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		    .set(statistic.TAX_AMOUNT, dto.getTaxAmount())
 		    .set(statistic.AMOUNT_EXEMPTION, dto.getAmountExemption())
 		    .set(statistic.AMOUNT_SUPPLEMENT, dto.getAmountSupplement())
+		    .set(statistic.DUE_DAY_COUNT, dto.getDueDayCount())
+		    .set(statistic.NOTICE_TIMES, dto.getNoticeTimes())
+		    .where(statistic.NAMESPACE_ID.eq(namespaceId))
+		    .and(statistic.OWNER_ID.eq(ownerId))
+		    .and(statistic.OWNER_TYPE.eq(ownerType))
+		    .and(statistic.DATE_STR.eq(dateStr))
+		    .execute();
+	}
+	
+	public void updateStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr, String buildingName) {
+		//根据namespaceId、ownerId、ownerType、dateStr、buildingName统计楼宇报表
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding statistic = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("statistic");
+		EhPaymentBillStatisticBuilding dto = statisticByBuilding(namespaceId, ownerId, ownerType, dateStr, buildingName);
+		context.update(statistic)
+		    .set(statistic.AMOUNT_RECEIVABLE, dto.getAmountReceivable())
+		    .set(statistic.AMOUNT_RECEIVED, dto.getAmountReceived())
+		    .set(statistic.AMOUNT_OWED, dto.getAmountOwed())
+		    .set(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX, dto.getAmountReceivableWithoutTax())
+		    .set(statistic.AMOUNT_RECEIVED_WITHOUT_TAX, dto.getAmountReceivedWithoutTax())
+		    .set(statistic.AMOUNT_OWED_WITHOUT_TAX, dto.getAmountOwedWithoutTax())
+		    .set(statistic.TAX_AMOUNT, dto.getTaxAmount())
 		    .set(statistic.DUE_DAY_COUNT, dto.getDueDayCount())
 		    .set(statistic.NOTICE_TIMES, dto.getNoticeTimes())
 		    .where(statistic.NAMESPACE_ID.eq(namespaceId))
@@ -139,8 +190,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         return dto;
 	}
 	
-	public EhPaymentBillStatisticBuilding statisticByBuilding(Integer namespaceId, Long ownerId, String ownerType,
-			String dateStr, String buildingName) {
+	public EhPaymentBillStatisticBuilding statisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr, String buildingName) {
 		//根据namespaceId、ownerId、ownerType、dateStr、buildingName统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPaymentBillStatisticBuilding dto = new EhPaymentBillStatisticBuilding();
@@ -464,7 +514,6 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         });
         return response[0];
 	}
-
 	
     
     

@@ -683,23 +683,24 @@ public class AssetSchedule{
             				billsDateStrDTO.getBuildingName());
             	}
             	
-            	//2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
-//            	List<BuildingStatisticParam> billsDateStrDTOListClone2 = new ArrayList<BuildingStatisticParam>();
-//            	billsDateStrDTOListClone2.addAll(billsDateStrDTOList);
-//            	List<BuildingStatisticParam> statisticDateStrDTOListClone2 = new ArrayList<BuildingStatisticParam>();
-//            	statisticDateStrDTOListClone2.addAll(statisticDateStrDTOList);
-//            	//eh_payment_bills 与  eh_payment_bill_statistic_community 的交集
-//            	billsDateStrDTOListClone2.retainAll(statisticDateStrDTOListClone2);
-//            	for(BuildingStatisticParam billsDateStrDTO : billsDateStrDTOListClone2) {
-//            		//2）如果eh_payment_bill_statistic_community表中有对应的年月，那么需要校验eh_payment_bills表中账单数据的updateTime时间或者createTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
-//            		boolean isNeedRefreshStatistic = assetStatisticProvider.checkIsNeedRefreshStatistic(billsDateStrDTO.getNamespaceId(), 
-//            				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr(),
-//            				beforeDateStr);
-//            		if(isNeedRefreshStatistic) {
-//            			assetStatisticProvider.updateStatisticByCommnunity(billsDateStrDTO.getNamespaceId(), 
-//                				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr());
-//            		}
-//            	}
+            	//2）如果eh_payment_bill_statistic_building表中有对应的年月，那么需要校验eh_payment_bill_items表中数据的updateTime时间或者createTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
+            	List<BuildingStatisticParam> billsDateStrDTOListClone2 = new ArrayList<BuildingStatisticParam>();
+            	billsDateStrDTOListClone2.addAll(billsDateStrDTOList);
+            	List<BuildingStatisticParam> statisticDateStrDTOListClone2 = new ArrayList<BuildingStatisticParam>();
+            	statisticDateStrDTOListClone2.addAll(statisticDateStrDTOList);
+            	//eh_payment_bill_items 与  eh_payment_bill_statistic_building 的交集
+            	billsDateStrDTOListClone2.retainAll(statisticDateStrDTOListClone2);
+            	for(BuildingStatisticParam billsDateStrDTO : billsDateStrDTOListClone2) {
+            		//2）如果eh_payment_bill_statistic_building表中有对应的年月，那么需要校验eh_payment_bill_items表中数据的updateTime时间或者createTime时间，如果大于n-1天，那么该年月的统计结果集应该重新计算；
+            		boolean isNeedRefreshStatistic = assetStatisticProvider.checkIsNeedRefreshStatistic(billsDateStrDTO.getNamespaceId(), 
+            				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr(), 
+            				billsDateStrDTO.getBuildingName(), beforeDateStr);
+            		if(isNeedRefreshStatistic) {
+            			assetStatisticProvider.updateStatisticByBuilding(billsDateStrDTO.getNamespaceId(), 
+                				billsDateStrDTO.getOwnerId(), billsDateStrDTO.getOwnerType(), billsDateStrDTO.getDateStr(),
+                				billsDateStrDTO.getBuildingName());
+            		}
+            	}
             });
        }
     }
