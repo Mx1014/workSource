@@ -522,7 +522,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (cmd.getParkingLotId() != null) {
             ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
             if (parkingLot != null) {
-                parkingLots.add(parkingLot);
+//                parkingLots.add(parkingLot);
+            	checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
             }
         } else {
             parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());

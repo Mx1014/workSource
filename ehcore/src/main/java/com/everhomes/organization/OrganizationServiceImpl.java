@@ -13148,7 +13148,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Organization not found.");
         }
 
-        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()) + 1;
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
@@ -13163,6 +13163,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         int size = list.size();
         if (size > 0) {
+
+            if (size != pageSize) {
+                response.setNextPageAnchor(null);
+            } else {
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+                list.remove(list.size() - 1);
+            }
+            
             response.setRequests(list.stream().map(r -> {
                 ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
                 dto.setParentName(organization.getName());
@@ -13190,11 +13198,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return dto;
             }).collect(Collectors.toList()));
 
-            if (size != pageSize) {
-                response.setNextPageAnchor(null);
-            } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
-            }
         }
         return response;
     }

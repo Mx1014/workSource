@@ -175,7 +175,18 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategoriesAdmin")
 	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
 	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategoriesAdmin(cmd));
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByAdmin(cmd));
+	}
+    
+    /**
+	 * <b>URL: /yellowPage/listServiceAllianceCategoriesByScene</b>
+	 * <p> 列出服务联盟类型，前端使用 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listServiceAllianceCategoriesByScene")
+	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
+	public RestResponse listServiceAllianceCategoriesByScene(ListServiceAllianceCategoriesCommand cmd) {
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByScene(cmd));
 	}
 
     /**
@@ -208,13 +219,27 @@ public class YellowPageController  extends ControllerBase {
 
     /**
    	 * <b>URL: /yellowPage/getServiceAlliance</b>
-   	 * <p> 服务联盟首页 </p>
+   	 * <p> 客户端/前端获取服务联盟首页 </p>
    	 */
     @RequireAuthentication(false)
     @RequestMapping("getServiceAlliance")
     @RestReturn(value=ServiceAllianceDTO.class)
     public RestResponse getServiceAlliance(@Valid GetServiceAllianceCommand cmd) {
-    	ServiceAllianceDTO res = this.yellowPageService.getServiceAlliance(cmd);
+    	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceByScene(cmd);
+    	 RestResponse response = new RestResponse(res);
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/getServiceAllianceAdmin</b>
+   	 * <p> 后台获取服务联盟首页 </p>
+   	 */
+    @RequestMapping("getServiceAllianceAdmin")
+    @RestReturn(value=ServiceAllianceDTO.class)
+    public RestResponse getServiceAllianceAdmin(@Valid GetServiceAllianceCommand cmd) {
+    	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceByAdmin(cmd);
     	 RestResponse response = new RestResponse(res);
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");
@@ -918,7 +943,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
 	 * <b>URL: /yellowPage/listServiceTypeNames</b>
-	 * <p> 获取所有服务名称 </p>
+	 * <p> 获取所有服务类型名称 </p>
 	 */
 	@RequestMapping("listServiceTypeNames")
     @RestReturn(value = IdNameDTO.class, collection = true)
