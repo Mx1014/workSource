@@ -1,4 +1,21 @@
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸用户映射表 20181001
+DROP TABLE IF EXISTS `eh_pm_task_archibus_user_mapping`;
+CREATE TABLE `eh_pm_task_archibus_user_mapping` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
 
+  `archibus_uid` VARCHAR(64) DEFAULT NULL COMMENT '国贸用户Id',
+  `user_id` bigint DEFAULT 0 COMMENT '用户Id',
+  `identifier_token` varchar(128) DEFAULT NULL COMMENT '用户手机号',
+  `create_time` datetime DEFAULT NOW(),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业保修国贸对接用户映射表';
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
