@@ -279,29 +279,27 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
         SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(statistic);
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, 
+        query.addSelect(Tables.EH_COMMUNITIES.ID.as("communityId"), Tables.EH_COMMUNITIES.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
         		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
         		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
         		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
         		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(statistic.OWNER_ID.in(ownerIdList));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
+        query.addFrom(Tables.EH_COMMUNITIES); //为了兼容没有统计结果的查询
+		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_COMMUNITIES.ID.eq(statistic.OWNER_ID));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ownerIdList));
+        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
+        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
+        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
         }
         query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
         query.fetch().map(f -> {
         	ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillStatisticCommunity(f, statistic);
         	ListBillStatisticByCommunityDTO dto  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
-        	dto.setNamespaceId(f.getValue(statistic.NAMESPACE_ID));
-        	dto.setOwnerId(f.getValue(statistic.OWNER_ID));
-        	dto.setOwnerType(f.getValue(statistic.OWNER_TYPE));
         	list.add(dto);
         	return null;
         });
@@ -316,7 +314,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(statistic);
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, 
+        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID.as("communityId"), statistic.OWNER_TYPE, 
         		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
         		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
         		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
@@ -350,7 +348,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(statistic);
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, 
+        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID.as("communityId"), statistic.OWNER_TYPE, 
         		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
         		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
         		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
@@ -366,10 +364,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         }
         query.fetch().map(f -> {
         	ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillStatisticCommunity(f, statistic);
-        	response[0] = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
-        	response[0].setNamespaceId(f.getValue(statistic.NAMESPACE_ID));
-        	response[0].setOwnerId(f.getValue(statistic.OWNER_ID));
-        	response[0].setOwnerType(f.getValue(statistic.OWNER_TYPE));
+        	response[0]  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
         	return null;
         });
         return response[0];
