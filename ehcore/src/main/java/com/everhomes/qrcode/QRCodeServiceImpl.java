@@ -157,7 +157,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         if (!StringUtils.isBlank(qrcodeDto.getActionData())) {
             activityQRCodeDTO = (ActivityQRCodeDTO)StringHelper.fromJsonString(qrcodeDto.getActionData(), ActivityQRCodeDTO.class);
         }
-        url += "activity/build/index.html#/checkIn?forumId=%s&topicId=%s&activityId=%s&namespaceId=%s&wechatSignup=%s&categoryId=%s";
+        url += "activity/build/index.html#/checkIn?authFlag=0&forumId=%s&topicId=%s&activityId=%s&namespaceId=%s&wechatSignup=%s&categoryId=%s";
         url = String.format(url, activityQRCodeDTO.getForumId(), activityQRCodeDTO.getTopicId(), activityQRCodeDTO.getActivityId(),
                 UserContext.getCurrentNamespaceId(), activityQRCodeDTO.getWechatSignup(),activityQRCodeDTO.getCategoryId());
         qrcodeDto.setUrl(url);
