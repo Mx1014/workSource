@@ -965,7 +965,8 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
             Long targetId, Long organizationId);
-    
+    OrganizationMemberDetails findOrganizationMemberDetailsByEmail(String email, Long organizationId);
+
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);
  /**

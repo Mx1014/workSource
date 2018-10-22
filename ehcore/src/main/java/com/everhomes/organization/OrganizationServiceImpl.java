@@ -12928,6 +12928,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        //用户认证邮箱认证时，校验邮箱是否已经被认证.
+        OrganizationMemberDetails details = this.organizationProvider.findOrganizationMemberDetailsByEmail(cmd.getEmail(), cmd.getOrganizationId());
+        if (details != null) {
+            LOGGER.error("email is exists, email ={}", cmd.getEmail());
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_IS_EXISTS,
+                    "email is exists, email ={}",cmd.getEmail());
+        }
         VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
         dto.setUserId(userId);
         dto.setEnterpriseId(cmd.getOrganizationId());
