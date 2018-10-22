@@ -547,4 +547,9 @@ public interface PropertyMgrProvider {
 
 	AddressProperties findAddressPropertiesByApartmentId(Community community, Long buildingId, Long address);
 
+	CommunityPmOwner findOrganizationOwnerByContactToken(String contactToken, Integer namespaceId);
+
+	CommunityPmOwner findOrganizationOwnerByContactExtraTels(String contactToken, Integer namespaceId);
+
+
 }

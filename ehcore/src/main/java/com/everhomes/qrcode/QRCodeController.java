@@ -5,11 +5,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.common.FlowCaseDetailActionData;
-import com.everhomes.rest.common.Router;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
-import com.everhomes.rest.qrcode.*;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +24,13 @@ import javax.validation.Valid;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
 
+/**
+ * 该 Controller 已经废弃, 代码移到统一用户服务器
+ */
+@Deprecated
 @RestController
 @RequestMapping("/qrcode")
 public class QRCodeController extends ControllerBase {
@@ -127,33 +128,5 @@ public class QRCodeController extends ControllerBase {
         }          
 
         return null;
-    }
-
-    /**
-     * <b>URL: /qrcode/test/getFlowCaseQRCode</b>
-     * <p>获取flowCase二维码字符串</p>
-     */
-    @RequestMapping("/test/getFlowCaseQRCode")
-    @RestReturn(value=String.class)
-    public RestResponse getFlowCaseQRCode(@Valid GetFlowCaseDetailByIdCommand cmd) {
-        FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
-        actionData.setFlowCaseId(cmd.getFlowCaseId());
-        actionData.setModuleId(40500L);
-        actionData.setFlowUserType(FlowUserType.APPLIER.getCode());
-        String build = RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
-
-        NewQRCodeCommand codeCommand = new NewQRCodeCommand();
-        codeCommand.setRouteUri(build);
-        codeCommand.setHandler(QRCodeHandler.FLOW.getCode());
-
-        QRCodeDTO qrCode = qrcodeService.createQRCode(codeCommand);
-
-        String url = Base64.getEncoder().encodeToString(qrCode.getUrl().getBytes(Charset.forName("utf-8")));
-        qrCode.setUrl(url);
-
-        RestResponse response = new RestResponse(qrCode);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
     }
 }

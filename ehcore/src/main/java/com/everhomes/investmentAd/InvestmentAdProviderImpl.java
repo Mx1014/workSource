@@ -146,6 +146,9 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		if (cmd.getCommunityId()!=null) {
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
+		if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.COMMUNITY_ID.in(cmd.getCommunityIds()));
+		}
 		if (cmd.getInvestmentStatus()!=null) {
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.INVESTMENT_STATUS.eq(cmd.getInvestmentStatus()));
 		}

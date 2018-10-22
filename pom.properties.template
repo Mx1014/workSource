@@ -93,3 +93,5 @@ pay-sdk.version=5.8.0-SNAPSHOT
 sensitive-word.version=1.2.0
 
 spring-kafka.version=1.2.2.RELEASE
+
+ehuser-sdk.version=5.10.0-SNAPSHOT

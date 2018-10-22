@@ -646,65 +646,65 @@ public class FieldServiceImpl implements FieldService {
                         //                if (scopeItems != null && scopeItems.size() < 1) {
 //                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), cmd.getCommunityId(), null);
 //    			}
-                        }
                     }
-                    //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
+                }
+                //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
                 /*if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
                 if (scopeItems != null && scopeItems.size() < 1) {
                 	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), null, null);
     			}*/
-                    //查询表单初始化的数据
+                //查询表单初始化的数据
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
-                        }
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
                     }
+                }
 
-                } else {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+            } else {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
+                    //                if (scopeItems != null && scopeItems.size() < 1) {
+//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        }
                     }
+                }
 //    			}
-                }
-
-                Map<Long, ScopeFieldItem> fieldItems = scopeItems;
-                if (fields != null && fields.size() > 0) {
-                    List<FieldDTO> dtos = new ArrayList<>();
-                    fields.forEach(field -> {
-                        FieldDTO dto = dtoMap.get(field.getId());
-                        dto.setFieldType(field.getFieldType());
-                        dto.setFieldName(field.getName());
-                        if (fieldItems != null && fieldItems.size() > 0) {
-                            List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
-                            fieldItems.forEach((id, item) -> {
-                                if (field.getId().equals(item.getFieldId())) {
-                                    FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
-                                    items.add(fieldItem);
-                                }
-                            });
-                            //按default order排序
-                            items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
-                            // service alliance and activity expand items ,we add expand item flag for it
-                            addExpandItems(dto, items);
-                            dto.setItems(items);
-                        }
-                        dtos.add(dto);
-                    });
-                    dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
-                    //按default order排序
-                    dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
-                    return dtos;
-                }
+            }
+            Map<Long, ScopeFieldItem> fieldItems = scopeItems;
+            if (fields != null && fields.size() > 0) {
+                List<FieldDTO> dtos = new ArrayList<>();
+                fields.forEach(field -> {
+                    FieldDTO dto = dtoMap.get(field.getId());
+                    dto.setFieldType(field.getFieldType());
+                    dto.setFieldName(field.getName());
+                    if (fieldItems != null && fieldItems.size() > 0) {
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        fieldItems.forEach((id, item) -> {
+                            if (field.getId().equals(item.getFieldId())) {
+                                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                                items.add(fieldItem);
+                            }
+                        });
+                        //按default order排序
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items);
+                        dto.setItems(items);
+                    }
+                    dtos.add(dto);
+                });
+                dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
+                //按default order排序
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
+                return dtos;
+            }
         }
+
         return null;
     }
 

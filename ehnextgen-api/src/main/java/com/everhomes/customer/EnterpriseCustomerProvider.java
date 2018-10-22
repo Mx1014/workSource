@@ -12,9 +12,11 @@ import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
 import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,14 +26,17 @@ import java.util.Set;
  */
 public interface EnterpriseCustomerProvider {
     void createEnterpriseCustomer(EnterpriseCustomer customer);
+    void createEnterpriseCustomers(Collection<EhEnterpriseCustomers> customers);
     void updateEnterpriseCustomer(EnterpriseCustomer customer);
+    void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers);
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
     EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, Long communityId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
-    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, Long communityId, String number);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);
     Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
@@ -145,6 +150,8 @@ public interface EnterpriseCustomerProvider {
 	List<CustomerTrackingPlan> listCustomerTrackingPlans(Long customerId);
 	
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType);
+	void saveCustomerEvents(int i, List<EhEnterpriseCustomers> customers, Byte deviceType);
+
 	void saveCustomerEvent(int i, EnterpriseCustomer customer, EnterpriseCustomer exist,Byte deviceType, String moduleName);
 	List<CustomerEvent> listCustomerEvents(Long customerId);
 	

@@ -1150,6 +1150,9 @@ public class AddressProviderImpl implements AddressProvider {
 		if (cmd.getCommunityId() != null) {
 			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
+		if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.in(cmd.getCommunityIds()));
+		}
 		if (!org.springframework.util.StringUtils.isEmpty(cmd.getBuildingName())) {
 			query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
 		}

@@ -216,6 +216,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         try {
             cmd2.setCheckAuthFlag(null);
             cmd2.setModuleName("investment_promotion");
+            if (cmd.getTransCommunityId() != null && cmd.getTransCommunityId() != 0) {
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd2.getNamespaceId(), cmd.getTransCommunityId(), cmd2.getName());
+                if(customers.size() > 0){
+                    LOGGER.error("the community you want to change has already existed ");
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
+                            "the community you want to change has already existed");
+                }
+                cmd2.setCommunityId(cmd.getTransCommunityId());
+                cmd2.setTransCommunityId(cmd.getTransCommunityId());
+            }
             customerDTO = customerService.updateEnterpriseCustomer(cmd2);
         }catch (RuntimeErrorException e){
             LOGGER.error(e.getMessage());
@@ -475,10 +485,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                             Address address = addressProvider.findAddressById(r.getAddressId());
                             if(address != null){
                                 if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
-                                }else{
-                                    r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                                    r.setCommunityId(address.getCommunityId());
+                                    r.setCommunityName(address.getCommunityName());
                                     r.setAddressArea(address.getBuildArea());
+                                }else{
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressArea(address.getBuildArea());
+                                    r.setCommunityId(address.getCommunityId());
+                                    r.setCommunityName(address.getCommunityName());
                                 }
                             }else{
                                 dtos.remove(r);
@@ -523,10 +538,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
                     if(address != null){
                         if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                            addressDTO.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
 
                         }else{
-                            addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
+                            addressDTO.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName());
                             addressDTO.setAddressArea(address.getRentArea());
                         }
                     }

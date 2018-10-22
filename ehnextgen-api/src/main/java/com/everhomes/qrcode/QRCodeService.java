@@ -5,6 +5,7 @@ import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 
+@Deprecated
 public interface QRCodeService {
 
     QRCodeDTO createQRCode(NewQRCodeCommand cmd);
@@ -13,6 +14,6 @@ public interface QRCodeService {
 
     QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd);
 
-    QRCodeDTO getQRCodeInfoById(String qrid, String extraInfo);
+    QRCodeDTO getQRCodeInfoById(String qrid, String source);
 
 }

@@ -66,15 +66,7 @@ public interface AssetService {
 
 	void selectNotice(SelectedNoticeCommand cmd);
 
-	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
-
-	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
-
-	List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
-
-	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
 	ListBillsDTO createBill(CreateBillCommand cmd);
 
@@ -87,8 +79,6 @@ public interface AssetService {
 	void modifyBillStatus(BillIdCommand cmd);
 
 	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
-
-	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
 	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -121,36 +111,14 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-
-	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void configChargingItems(ConfigChargingItemsCommand cmd);
-
-	void createChargingStandard(CreateChargingStandardCommand cmd);
-
-	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
-
-	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
-
+	
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
-
-	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
-
-	void createBillGroup(CreateBillGroupCommand cmd);
-
-	void modifyBillGroup(ModifyBillGroupCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
 	ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-	void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
-
 	DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
-
-	DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -165,12 +133,6 @@ public interface AssetService {
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
-
-	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
-
-	List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
-
-	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
@@ -231,8 +193,6 @@ public interface AssetService {
     
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
-	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-	
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
@@ -281,4 +241,12 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 	
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
+	
+	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
+	
+	void checkNullProhibit(String name , Object object);
+	
+	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
+	
+	AssetVendorHandler getAssetVendorHandler(String vendorName);
 }

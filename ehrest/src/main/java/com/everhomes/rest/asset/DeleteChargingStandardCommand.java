@@ -10,6 +10,9 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
  * <li>chargingStandardId: 收费标准id</li>
+ * <li>organizationId:管理公司ID</li>
+ * <li>appId:应用ID</li>
+ * <li>allScope:标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
  *</ul>
  */
 public class DeleteChargingStandardCommand {
@@ -21,6 +24,10 @@ public class DeleteChargingStandardCommand {
     private Long chargingStandardId;
     private Integer namespaceId;
     private Long categoryId;
+    
+    private Long organizationId;
+    private Long appId;
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     @Override
     public String toString() {
@@ -69,5 +76,29 @@ public class DeleteChargingStandardCommand {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
 	}
 }

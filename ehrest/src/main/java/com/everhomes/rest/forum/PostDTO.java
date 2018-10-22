@@ -213,6 +213,16 @@ public class PostDTO {
         this.creatorFlag = creatorFlag;
     }
 
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Integer getMinQuantity() {
         return minQuantity;
     }

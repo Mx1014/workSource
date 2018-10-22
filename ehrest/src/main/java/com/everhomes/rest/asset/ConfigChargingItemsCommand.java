@@ -17,6 +17,7 @@ import java.util.List;
  * <li>chargingItemConfigs:收费id和新名字的集合</li>
  * <li>categoryId: genus crist</li>
  * <li>organizationId: 管理公司id</li>
+ * <li>allScope: 标准版增加的allScope参数，true：默认/全部，false：具体项目</li>
  *</ul>
  */
 public class ConfigChargingItemsCommand {
@@ -28,6 +29,7 @@ public class ConfigChargingItemsCommand {
     private Long categoryId;
     private Long organizationId;
     private Long appId;
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     public Long getCategoryId() {
         return categoryId;
@@ -90,4 +92,12 @@ public class ConfigChargingItemsCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
+	}
 }

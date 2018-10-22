@@ -27,6 +27,7 @@ public interface RegionService {
      */
     void updateRegionCode(RegionCodeDTO dto);
 
+    RegionDTO findRegionById(GetRegionCommand cmd);
 
     RegionTreeResponse regionTree(RegionTreeCommand cmd);
 }

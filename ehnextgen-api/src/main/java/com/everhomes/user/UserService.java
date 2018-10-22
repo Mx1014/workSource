@@ -18,10 +18,12 @@ import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.*;
+
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
@@ -147,7 +149,7 @@ public interface UserService {
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
-
+    void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode);
     /**
      * 判断是否登录
      * @return
@@ -371,5 +373,8 @@ public interface UserService {
      */
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 
-    void updateUserVipLevel(Long userId, Integer vipLevel);
+    void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText);
+
+    SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
+
 }

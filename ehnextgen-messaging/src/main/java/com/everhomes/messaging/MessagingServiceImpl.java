@@ -292,10 +292,46 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
     private void routeMessageForWechat(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
                                        MessageDTO message, int deliveryOption){
 
-        //for test
-        //weChatMessageService.sendTemplateMessage();
+        List<Long> userIds = new ArrayList<>();
+
+        for(MessageChannel channel: message.getChannels()){
+
+            if(ChannelType.fromCode(channel.getChannelType()) == ChannelType.USER){
+                userIds.add(Long.parseLong(channel.getChannelToken()));
+            }
+        }
+
+        String url = null;
+        String title = null;
+        if(message.getMeta() != null ){
+            Map meta = message.getMeta();
+
+            if("message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
+                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
+                if(routerMetaObject != null){
+                    url = routerToUrl(routerMetaObject.getUrl());
+                }
+            }
+
+            title = (String)meta.get(MessageMetaConstant.MESSAGE_SUBJECT);
+        }
+
+        weChatMessageService.sendTemplateMessage(userIds, title, message.getBody(), url);
     }
 
+
+    private String routerToUrl(String router){
+
+        if(router == null){
+            return null;
+        }
+
+        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+
+        router = router.replace("zl:/", "");
+
+        return homeUrl + router;
+    }
 
     /**
      * 客户端消息

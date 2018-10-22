@@ -2948,7 +2948,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null, null, null);
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
 		}
@@ -3049,7 +3049,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null, null, null);
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
 		}
@@ -3237,7 +3237,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				}
 
 				//填充路由信息
-				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path);
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null);
 				dto.setRouterPath(routerInfo.getPath());
 				dto.setRouterQuery(routerInfo.getQuery());
 			}

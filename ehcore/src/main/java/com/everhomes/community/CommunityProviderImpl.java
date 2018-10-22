@@ -2082,5 +2082,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 				});
 		return result;
 	}
+	
+	@Override
+	public Long getOrganizationIdByCommunityId(Long communityId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+					  .from(Tables.EH_ORGANIZATION_COMMUNITIES)
+					  .where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
+					  .fetchAnyInto(Long.class);
+	}
 
 }

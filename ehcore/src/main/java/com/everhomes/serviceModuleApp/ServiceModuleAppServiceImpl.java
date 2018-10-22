@@ -354,7 +354,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		organizationAppProvider.updateOrganizationApp(orgapp);
 
 		//删除该公司的所有授权
-		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(UserContext.getCurrentNamespaceId(), orgapp.getOrgId(), orgapp.getAppOriginId());
+		serviceModuleAppAuthorizationService.removeAllCommunityAppAuthorizations(orgapp.getOrgId(), orgapp.getAppOriginId());
 
 		//删除应用广场配置
 		List<OrganizationCommunity> orgcommunities = organizationProvider.listOrganizationCommunities(orgapp.getOrgId());
@@ -485,7 +485,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			Card cardConfig = (Card)StringHelper.fromJsonString(cmd.getInstanceConfig(), Card.class);
 			if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.OA){
 				appType = ServiceModuleAppType.OA.getCode();
-				sceneType = ServiceModuleSceneType.CLIENT.getCode();
+				//sceneType = ServiceModuleSceneType.CLIENT.getCode();
 
 				installFlag = true;
 			} else if(ServiceModuleAppType.fromCode(cardConfig.getAppType()) == ServiceModuleAppType.COMMUNITY){
@@ -510,7 +510,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleApp> apps = new ArrayList<>();
 		if(installFlag) {
-			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, null);
+			apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, OrganizationAppStatus.ENABLE.getCode(), null);
 		}else if(manageFlag){
 			apps = serviceModuleAppProvider.listManageServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType);
 		}else if(userAppFlag){
@@ -551,7 +551,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
-		List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), null, null);
+		List<ServiceModuleApp> tempApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, ServiceModuleLocationType.MOBILE_COMMUNITY.getCode(), ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
 		if(tempApps != null && tempApps.size() > 0) {
 
 			//用户是否启用自定义配置
@@ -616,7 +616,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		allDto.setModuleId(-10000L);
 		allDto.setClientHandlerType((byte)0);
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode());
+		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode(), null, null);
 		allDto.setRouterPath(routerInfo.getPath());
 		allDto.setRouterQuery(routerInfo.getQuery());
 
@@ -700,29 +700,56 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		app.setInstanceConfig(launchPadService.refreshActionData(app.getInstanceConfig()));
 
+
+		Byte routerLocationType = null;
+		Byte routerSceneType = null;
+		if(app.getEntryId() != null){
+			ServiceModuleEntry entry = serviceModuleEntryProvider.findById(app.getEntryId());
+			if(entry != null){
+				routerLocationType = entry.getLocationType();
+				routerSceneType = entry.getSceneType();
+			}
+
+			//优先使用entryIcon
+			if(!StringUtils.isEmpty(entry.getIconUri())){
+				String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+				appDTO.setIconUrl(url);
+			}else {
+				ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
+				if(profile != null && profile.getIconUri() != null){
+					String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
+					appDTO.setIconUrl(url);
+				}
+			}
+
+		}
+
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null);
+		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType);
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
-
-		ServiceModuleAppProfile profile = serviceModuleAppProfileProvider.findServiceModuleAppProfileByOriginId(app.getOriginId());
-		if(profile != null && profile.getIconUri() != null){
-			String url = contentServerService.parserUri(profile.getIconUri(), ServiceModuleAppDTO.class.getSimpleName(), app.getId());
-			appDTO.setIconUrl(url);
-		}
 
 		return appDTO;
 	}
 
 	@Override
-	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path){
+	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path, Byte locationType, Byte sceneType){
 
 		if(StringUtils.isEmpty(path)){
 			path = "/index";
 		}
 
 		String query = "appId=" + appId;
-		try {
+
+        if(locationType != null){
+            query = query + "&locationType=" + locationType;
+        }
+
+        if(sceneType != null){
+            query = query + "&sceneType=" + sceneType;
+        }
+
+        try {
 			// 加上默认的参数appId和displayName
 			query = query + "&displayName=" + URLEncoder.encode(title, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -952,6 +979,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 				for (AppCommunityConfigDTO appCommunityConfigDto: dtos){
 					for (ServiceModuleEntry entry: serviceModuleEntries){
 						if(entry.getModuleId().equals(appCommunityConfigDto.getModuleId())){
+
+							if(StringUtils.isEmpty(appCommunityConfigDto.getDisplayName())){
+								appCommunityConfigDto.setDisplayName(entry.getEntryName());
+							}
+
+							if(!StringUtils.isEmpty(entry.getIconUri())){
+								String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getName(), entry.getId());
+								appCommunityConfigDto.setIconUrl(url);
+							}
+
+
 							tempConfigDtos.add(appCommunityConfigDto);
 						}
 					}
@@ -1231,7 +1269,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			LaunchPadCategoryDTO dto = ConvertHelper.convert(appCategory, LaunchPadCategoryDTO.class);
 
-			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, null, appCategory.getId());
+			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
 
 			List<AppDTO> appDtos = toAppDtos(communityId, orgId, sceneType, apps);
 

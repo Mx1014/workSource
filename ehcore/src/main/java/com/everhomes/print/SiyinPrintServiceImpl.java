@@ -1,6 +1,72 @@
 // @formatter:off
 package com.everhomes.print;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.*;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.http.HttpUtils;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.paySDK.PayUtil;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.qrcode.QRCodeController;
+import com.everhomes.qrcode.QRCodeService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.gorder.order.BusinessPayerType;
+import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.gorder.order.OrderErrorCode;
+import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.print.*;
+import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
+import com.everhomes.rest.qrcode.NewQRCodeCommand;
+import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeHandler;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.everhomes.util.xml.XMLToJSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,86 +80,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.alibaba.fastjson.JSONArray;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.pay.order.CreateOrderCommand;
-import com.everhomes.pay.order.OrderCommandResponse;
-import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.pay.order.SourceType;
-import com.everhomes.paySDK.PayUtil;
-import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.asset.TargetDTO;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.order.*;
-import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
-import com.everhomes.rest.print.*;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bus.BusBridgeProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
-import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.DbProvider;
-import com.everhomes.gorder.sdk.order.GeneralOrderService;
-import com.everhomes.http.HttpUtils;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.order.OrderUtil;
 //import com.everhomes.order.PayService;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.qrcode.QRCodeController;
-import com.everhomes.qrcode.QRCodeService;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalOrderHandler;
-import com.everhomes.rentalv2.Rentalv2AccountProvider;
-import com.everhomes.rentalv2.Rentalv2PayService;
-import com.everhomes.rentalv2.Rentalv2Provider;
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
-import com.everhomes.rest.qrcode.NewQRCodeCommand;
-import com.everhomes.rest.qrcode.QRCodeDTO;
-import com.everhomes.rest.qrcode.QRCodeHandler;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.xml.XMLToJSON;
-import com.google.gson.JsonObject;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 
@@ -274,7 +261,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(printOwnerType == PrintOwnerType.ENTERPRISE){
 			List<OrganizationCommunity> list = organizationProvider.listOrganizationCommunities(ownerId);
 			if(list == null || list.size() == 0){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, organizationId = {}, have empty community",ownerType);
+				LOGGER.error("Invalid parameters, organizationId = {}, have empty community",ownerType);
+				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 			}
 			list.forEach(r -> {
 				ownerIdList.add(r.getCommunityId());
@@ -308,7 +296,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public ListPrintUserOrganizationsResponse listPrintUserOrganizations(ListPrintUserOrganizationsCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if(cmd.getCreatorUid() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, creatorUid = null");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
 		User user = new User();
@@ -394,7 +382,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
+			throwError(PrintErrorCode.ERROR_UNPAID_ORDER_EXIST, "have unpaid orders");
 		}
 
 		RestResponse printResponse = new RestResponse();
@@ -443,7 +431,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		PrintLogonStatusType statusType = checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId());
 		if(statusType == PrintLogonStatusType.HAVE_UNPAID_ORDER){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
+			throwError(PrintErrorCode.ERROR_UNPAID_ORDER_EXIST, "have unpaid orders");
 		}
 		
 		//做计数
@@ -619,7 +607,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //		List<SiyinPrintBusinessPayeeAccount> payeeAccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null,namespaceId,
 //				order.getOwnerType(), order.getOwnerId());
 //		if(payeeAccounts==null || payeeAccounts.size()==0){
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 //					"未设置收款方账号");
 //		}
 //		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
@@ -641,7 +629,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 //		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
 //		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
 //			LOGGER.info("purchaseOrder "+purchaseOrder);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 //					"preorder failed "+ StringHelper.toJsonString(purchaseOrder));
 //		}
 //		OrderCommandResponse response = purchaseOrder.getResponse();
@@ -878,7 +866,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		//解锁打印机之前检查是否存在未支付订单。
 		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
 		if(PrintLogonStatusType.HAVE_UNPAID_ORDER == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
+			throwError(PrintErrorCode.ERROR_UNPAID_ORDER_EXIST, "Have unpaid order");
 		}
 //		return unlockPrinter(cmd,false);
 		return unlockByOauthLogin(cmd);
@@ -890,8 +878,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		QRCodeDTO dto = qrcodeService.getQRCodeInfoById(cmd.getQrid(), null);
 		if(dto==null){
 			LOGGER.error("QRCodeDTO is null, qrid = "+cmd.getQrid());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "QRCodeDTO is null, qrid = "+cmd.getQrid());
-		
+			throwError(PrintErrorCode.ERROR_QRCODE_INVALID, "QRCode invalid");
 		}
 		String loginAccount = user.getId().toString()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
 		params.put("user_name", loginAccount);
@@ -908,11 +895,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			String result = HttpUtils.post(url, params, 30);
 			if(!result.equals("OK")){
 				LOGGER.error("siyin api:"+url+"request failed : "+result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" request failed, message = "+result);
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 			}
 		} catch (IOException e) {
 			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, url+" return exception, message = "+e.getMessage());
+			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 		}
 		
 		UnlockPrinterResponse response = new UnlockPrinterResponse();
@@ -1002,11 +989,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private SiyinPrintOrder checkPrintOrder(Long orderId) {
 		SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
 		if(order == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown orderId = "+orderId);
+			throwError(PrintErrorCode.ERROR_ORDER_NOT_EXIST, "order not exist");
 		}
 		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
 		if(orderStatus == PrintOrderStatusType.PAID){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have paid orderId = "+orderId);
+			throwError(PrintErrorCode.ERROR_ORDER_IS_PAYED, "order have paid");
 		}
 		return order;
 	}
@@ -1022,8 +1009,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			}
 		});
 		if(!tuple.second()){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_LOCK_FAILED,
-					"paid error, can not lock order, id = "+orderId);
+			LOGGER.error("paid error, can not lock order, id = "+orderId);
+			throwError(PrintErrorCode.ERROR_LOCK_ORDER_FAILED, "order lock failed");
 		}
 		return tuple.first();
 	}
@@ -1051,7 +1038,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(cmd.getReaderName());
         if(printer == null){
         	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",cmd.getReaderName());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
+        	throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
         }
         Integer namespaceId = cmd.getNamespaceId();
         if(namespaceId == null){
@@ -1097,11 +1084,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				String siyinCode = getSiyinCode(result);
 				if(!siyinCode.equals("OK")){
 					LOGGER.error("siyin api:"+url+"request failed : "+result);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+					throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 				}
 			} catch (IOException e) {
 				LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 			}
 			return null;
 		}
@@ -1135,11 +1122,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			String siyinCode = getSiyinCode(result);
 			if(!siyinCode.equals("OK")){
 				LOGGER.error("siyin api:/console/loginListener request failed, result = {} ",result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/loginListener return failed, result = "+result);
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 			}
 		} catch (IOException e) {
 			LOGGER.error("siyin api:/console/loginListener request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/loginListener return exception, message = "+e.getMessage());
+			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 		}
          	
          return getSiyinData(result);
@@ -1153,18 +1140,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         Map<String, String> params = new HashMap<>();
         params.put("reader_name", readerName);
         params.put("action", "QueryModule");
-        String result;
+        String result = null;
 		try {
 			result = HttpUtils.post(siyinUrl + "/console/mfpModuleManager", params, 30);
 			String siyinCode = getSiyinCode(result);
 			if(!siyinCode.equals("OK")){
 				LOGGER.error("siyin api:/console/mfpModuleManager request failed, result = {} ",result);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/mfpModuleManager return failed, result = "+result);
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 			}
 		} catch (IOException e) {
 			LOGGER.error("siyin api:/console/mfpModuleManager request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/mfpModuleManager return exception, message = "+e.getMessage());
-			
+			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "third response error");
 		}
 		  
 		return getSiyinData(result);
@@ -1177,14 +1163,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			StringBuffer stringBuffer = new StringBuffer();
 			LOGGER.error(stringBuffer.append("Invalid parameters, operatorId=").append(userId).append(",ownerType=")
 					.append(ownerType).append(",ownerId=").append(ownerId).toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, ownerType = "+ ownerType +"; ownerId = "+ ownerId + ". ");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		PrintOwnerType printOwnerType = PrintOwnerType.fromCode(ownerType);
 		if(printOwnerType == null){
 			Long userId = UserContext.current().getUser().getId();
 			StringBuffer stringBuffer = new StringBuffer();
 			LOGGER.error(stringBuffer.append("Invalid owner type, operatorId=").append(userId).append(", ownerType=").append(ownerType).toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, Unknown ownerType = "+ ownerType+". ");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		return printOwnerType;
 	}
@@ -1346,7 +1332,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		// TODO Auto-generated method stub
 		if(paperSizePriceDTO == null){
 			paperSizePriceDTO = new PrintSettingPaperSizePriceDTO();
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
+//			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
 		}
 		paperSizePriceDTO.setAthreePrice(checkPrice(paperSizePriceDTO.getAthreePrice()));
 		paperSizePriceDTO.setAfourPrice(checkPrice(paperSizePriceDTO.getAfourPrice()));
@@ -1416,13 +1402,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		if(colorTypeDTO.getBlackWhitePrice().compareTo(BigDecimal.ZERO) < 0)
 		{
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, blackWhitePrice = " + colorTypeDTO.getBlackWhitePrice());
+			LOGGER.error("Invalid parameters, blackWhitePrice = " + colorTypeDTO.getBlackWhitePrice());
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		if(colorTypeDTO.getColorPrice()== null){
 			colorTypeDTO.setColorPrice(new BigDecimal(0));
 		}
 		if(colorTypeDTO.getColorPrice().compareTo(BigDecimal.ZERO) < 0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, colorPrice = " + colorTypeDTO.getBlackWhitePrice());
+			LOGGER.error("Invalid parameters, colorPrice = " + colorTypeDTO.getBlackWhitePrice());
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		return colorTypeDTO;
 	}
@@ -1485,7 +1473,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		 Matcher matcher = emailregex.matcher(email);    
 		 boolean isMatched = matcher.matches();   
 		 if(!isMatched){
-			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, email format error, email = "+email);
+			 LOGGER.error("Invalid parameters, email format error, email = "+email);
+			 throwError(PrintErrorCode.ERROR_EMAIL_FORMAT_ERROR, "Invalid email");
 		 }
 	}
 
@@ -1586,18 +1575,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 						continue readerLoop;
 					}else{
 						LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+						throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
 					}
 				}else if(siyinCode!=null){
 					addjobs(list,result,printer);
 				}else{
 					LOGGER.error("siyin api:/console/cardListener request failed, result = {} ",result);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return failed, result = "+result);
+					throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
 				}
 			} catch (IOException e) {
 				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
-				
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
 			}
 		}
 		return list;
@@ -1649,7 +1637,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				String result = HttpUtils.post(siyinUrl + "/console/cardListener", params, 30);
 			} catch (IOException e) {
 				LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/cardListener return exception, message = "+e.getMessage());
+				throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
 			}
 		});
 	}
@@ -1683,7 +1671,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		for (ListQueueJobsDTO job : jobs) {
 			if(job.getJobId() == null || job.getReaderName() == null){
 				LOGGER.error("jobs data error");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, " job = "+job);
+				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 			}
 		}
 	}
@@ -1705,7 +1693,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			String result = HttpUtils.post(siyinUrl + "/console/jobHandler", params, 30);
 		} catch (IOException e) {
 			LOGGER.error("siyin api:/console/cardListener request exception : "+e.getMessage());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/jobHandler return exception, message = "+e.getMessage());
+			throwError(PrintErrorCode.ERROR_THIRD_RESPONSE_ERROR, "error third response");
 		}
 	
 	}
@@ -1720,20 +1708,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		nQRCmd.setDescription("cloud print");
 		nQRCmd.setExtra(cmd.getData());
 		nQRCmd.setHandler(QRCodeHandler.PRINT.getCode());
-		RestResponse restResponse = qrController.newQRCode(nQRCmd);
-		if(restResponse.getErrorCode() == 200){
-			GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
-			QRCodeDTO dto = (QRCodeDTO)restResponse.getResponseObject();
-			gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
-			gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
-			gQRcmd.setQrid(dto.getQrid());
-			try {
-				qrController.getQRCodeImage(gQRcmd, req, rps);
-			} catch (Exception e) {
-				LOGGER.error("e",e);
-			}
-		}else{
-			LOGGER.error("create qrcode error "+restResponse);
+
+		QRCodeDTO dto = qrcodeService.createQRCode(nQRCmd);
+
+		GetQRCodeImageCommand gQRcmd = new GetQRCodeImageCommand();
+		gQRcmd.setHeight(cmd.getHeight()==null?300:cmd.getHeight());
+		gQRcmd.setWidth(cmd.getWidth()==null?300:cmd.getWidth());
+		gQRcmd.setQrid(dto.getQrid());
+		try {
+			qrController.getQRCodeImage(gQRcmd, req, rps);
+		} catch (Exception e) {
+			LOGGER.error("e",e);
 		}
 	}
 
@@ -1742,7 +1727,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		GetPrintQrcodeCommand cmd = new GetPrintQrcodeCommand();
 		Object object = req.getParameter("data");
 		if(object==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "unknow param data=null");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		cmd.setData(object.toString());
 		Object width = req.getParameter("width");
@@ -1754,16 +1739,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return cmd;
 	}
 
-
-	public void mfpLogNotification(String jobData, HttpServletResponse response) {
-		try {
-			if(siyinJobValidateServiceImpl.mfpLogNotification(jobData)){
-				response.getOutputStream().write("OK".getBytes());
-				return ;
-			}
-			response.getOutputStream().write("FAIL".getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public void mfpLogNotification(MfpLogNotificationCommand cmd) {
+		boolean isOk = siyinJobValidateServiceImpl.mfpLogNotification(cmd.getJobData());
+		if (!isOk) {
+			LOGGER.error("jobData:"+cmd.getJobData());
 		}
 	}
 
@@ -1807,8 +1787,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(cmd.getId()!=null){
 			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"unknown payaccountid = "+cmd.getId());
+				LOGGER.error("unknown payaccountid = "+cmd.getId());
+				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 			}
 			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
 			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
@@ -1853,8 +1833,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
 			LOGGER.error("processStat Excel error");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+			throwError(PrintErrorCode.ERROR_EXPORT_EXCEL_FAILED, "export excel failed");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -1896,27 +1875,25 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public void initPayeeAccount(MultipartFile[] files) {
 		User user = UserContext.current().getUser();
 		if(user.getId()!=1){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"error person, must system user 1");
+			LOGGER.error("error person, must system user 1");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 		JSONArray accounts = getNewsFromExcel(files);
 		if(accounts==null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"error json");
+			throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 		}
 
 		for (Object object : accounts) {
 			JSONObject account = JSONObject.parseObject(object.toString());
 			if(account==null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"error account");
+				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
 			}
-			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty namespaceId");}
-			String ownerType = account.getString("ownerType");if(ownerType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerType");}
-			Long ownerId = account.getLong("ownerId");if(ownerId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty ownerId");}
+			Integer namespaceId = account.getInteger("namespaceId"); if(namespaceId==null){throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");}
+			String ownerType = account.getString("ownerType");if(ownerType==null){throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");}
+			Long ownerId = account.getLong("ownerId");if(ownerId==null){throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");}
 			List<SiyinPrintBusinessPayeeAccount> oldaccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null, namespaceId,ownerType, ownerId);
-			Long payeeId = account.getLong("payeeId");if(payeeId==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeId");}
-			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"empty payeeUserType");}
+			Long payeeId = account.getLong("payeeId");if(payeeId==null){throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");}
+			String payeeUserType = account.getString("payeeUserType");if(payeeUserType==null){throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");}
 			if(oldaccounts!=null && oldaccounts.size()>0){
 				SiyinPrintBusinessPayeeAccount payeeAccount = oldaccounts.get(0);
 				payeeAccount.setPayeeId(payeeId);
@@ -1957,7 +1934,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
-		mfpLogNotification(StringHelper.toJsonString(cmd),response);
+		
+		try {
+			response.getOutputStream().write("OK".getBytes());
+		} catch (IOException e) {
+			LOGGER.info("return ok failed");
+		}
+		
+		MfpLogNotificationCommand cmd2 = new MfpLogNotificationCommand();
+		cmd2.setJobData(StringHelper.toJsonString(cmd));
+		mfpLogNotification(cmd2);
 	}
 
 
@@ -2005,8 +1991,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				if (!flag) {
 					if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
 						LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-								"Order amount is not equal to payAmount.");
+						throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
 					}
 				}
 				Long payTime = System.currentTimeMillis();
@@ -2037,5 +2022,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public String getSiyinServerUrl() {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
 				PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+	}
+    
+	public static void throwError(int errorCode, String errorMsg) {
+		throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
 	}
 }

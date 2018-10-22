@@ -20,6 +20,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -297,6 +298,10 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
+        //敏感词过滤
         filterWords(cmd);
 
 
@@ -1061,7 +1066,10 @@ public class ForumServiceImpl implements ForumService {
             if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
             }
-            
+            // 如果content为NULL，返回空字符串，防止前端获取不到content报错，影响展示 add by yanlong.liang 20181010
+            if (postDto.getContent() == null) {
+                postDto.setContent("");
+            }
             return postDto;
 //            post = this.forumProvider.findPostById(postId);
 //            this.forumProvider.populatePostAttachments(post);
@@ -5464,6 +5472,9 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getContent());
+        cmd.setContent(content);
 
         User user = UserContext.current().getUser();
         Long userId = user.getId();

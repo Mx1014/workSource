@@ -2345,4 +2345,44 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 
 		return result[0];
 	}
+
+	@Override
+	public CommunityPmOwner findOrganizationOwnerByContactToken(String contactToken, Integer namespaceId){
+		final CommunityPmOwner[] result = new CommunityPmOwner[1];
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq((byte)1));
+
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, CommunityPmOwner.class);
+			return null;
+		});
+
+		return result[0];
+	}
+
+	@Override
+	public CommunityPmOwner findOrganizationOwnerByContactExtraTels(String contactToken, Integer namespaceId){
+		final CommunityPmOwner[] result = new CommunityPmOwner[1];
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, CommunityPmOwner.class);
+			return null;
+		});
+
+		return result[0];
+	}
+
+
 }

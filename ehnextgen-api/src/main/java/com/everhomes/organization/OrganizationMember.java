@@ -45,6 +45,9 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private String contactShortToken;
 
+    //  组织架构4.6 公司唯一标识
+    private String account;
+
     public OrganizationMember() {
     }
     public java.lang.String getNickName() {
@@ -193,6 +196,14 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     public void setContactShortToken(String contactShortToken) {
         this.contactShortToken = contactShortToken;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     @Override
