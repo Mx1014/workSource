@@ -348,6 +348,29 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         checkWxAuthIsBindPhoneRestResponse.setErrorDescription("OK");
         return checkWxAuthIsBindPhoneRestResponse;
     }
+
+    /**
+     * <b>URL: /wxauth/redirect</b>
+     * <p>统一用户重定向时，先重定向到这里，然后core server再重定向到目标url</p>
+     */
+    @RequestMapping("redirect")
+    @RestReturn(String.class)
+    public void redirect(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, String> params = getRequestParams(request);
+
+        String redirectUrl = params.get("callbackUrl");
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("redirect url to {}", redirectUrl);
+        }
+        redirectByWx(response,redirectUrl);
+    }
+
+
+
+
+
+
+
     private List<String> listAllBorderAccessPoints() {
         List<Border> borders = this.borderProvider.listAllBorders();
         return borders.stream().map((Border border) -> {

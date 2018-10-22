@@ -960,6 +960,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
+        query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));
         if(cmd.getBuildingName() != null){
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
         }
