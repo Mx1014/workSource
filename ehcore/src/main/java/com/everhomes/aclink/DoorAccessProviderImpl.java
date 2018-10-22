@@ -331,14 +331,43 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         });
         return dtos;
     }
+
+    @Override
+    public List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespaceNew(DoorStatisticEhCommand cmd){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
+        com.everhomes.schema.tables.EhNamespaces t3 = com.everhomes.schema.Tables.EH_NAMESPACES.as("t3");
+        List<ActiveDoorByNamespaceDTO> dtos = new ArrayList<ActiveDoorByNamespaceDTO>();
+        SelectHavingStep<Record3<Integer,String,Byte>> groupBy1 = context.select(t.ID.count().as("num"),
+                (t3.NAME).as("namespace"), (t.OWNER_TYPE).as("type"))
+                .from(t)
+                .leftOuterJoin(t3)
+                .on(t3.ID.eq(t.NAMESPACE_ID))
+                .groupBy(t.OWNER_TYPE,t3.NAME);
+        groupBy1.fetch().map((r) -> {
+            ActiveDoorByNamespaceDTO dto = new ActiveDoorByNamespaceDTO();
+            dto.setActiveDoorNumber(r.value1());
+            dto.setNamespaceName(r.value2());
+            dto.setOwnerType(r.value3());
+            dtos.add(dto);
+            return null;
+        });
+        return dtos;
+    }
+
+
+
+
+
+
     @Override
     public List<ActiveDoorByEquipmentDTO> queryDoorAccessByEquipment(DoorStatisticEhCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS.as("t");
 
         List<ActiveDoorByEquipmentDTO> dtos = new ArrayList<ActiveDoorByEquipmentDTO>();
-        SelectHavingStep<Record2<Integer,Byte>> groupBy = context.select(t.ID.count().as("num")
-                ,t.DOOR_TYPE.as("type"))
+        SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
+                ,t.DEVICE_NAME.as("type"))
                 .from(t)
                 .groupBy(t.DOOR_TYPE);
         groupBy.fetch().map((r) -> {
@@ -413,8 +442,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                 ,t2.NAME.as("province"))
                 .from(t)
                 .leftOuterJoin(t1)
-//                .on(t1.ID.eq(t.CITY_ID))
-                .on(t1.ID.eq(Long.parseLong((t.CITY_ID).toString())))
+                .on(t1.ID.eq(t.CITY_ID))
+//                .on(t1.ID.eq(Long.parseLong((t.CITY_ID).toString())))
                 .leftOuterJoin(t2)
                 .on(t2.ID.eq(t1.PARENT_ID))
                 .groupBy(t2.NAME);

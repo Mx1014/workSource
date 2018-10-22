@@ -10,12 +10,22 @@ import java.sql.Timestamp;
  * <li>id：设备类型id</li>
  * <li>firmwareName：固件名称</li>
  * <li>firmwareId：固件id</li>
+ * <li>update: 0：非默认升级 1：默认升级</li>
  * </ul>
  */
 public class UpdateFirmwareDTO {
     private Long id;
     private String firmware;
     private Long firmwareId;
+    private Byte update;
+
+    public Byte getUpdate() {
+        return update;
+    }
+
+    public void setUpdate(Byte update) {
+        this.update = update;
+    }
 
     public Long getId() {
         return id;

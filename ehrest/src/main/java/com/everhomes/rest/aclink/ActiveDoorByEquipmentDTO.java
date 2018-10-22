@@ -8,15 +8,15 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ActiveDoorByEquipmentDTO {
-    private Byte equipment;
+    private String equipment;
 
     private Integer activeDoorNumber;
 
-    public Byte getEquipment() {
+    public String getEquipment() {
         return equipment;
     }
 
-    public void setEquipment(Byte equipment) {
+    public void setEquipment(String equipment) {
         this.equipment = equipment;
     }
 

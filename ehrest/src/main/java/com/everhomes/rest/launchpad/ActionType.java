@@ -80,8 +80,7 @@ public enum ActionType {
       CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63),
       ACTIVITY_DETAIL((byte)64),GENERAL_APPROVAL((byte)65), ACTIVITY_ENROLL_DETAIL((byte)65),SWITCH_SCENE((byte)66),
     COMMUNITY_MAP((byte)67),WORK_REPORT((byte)68),FILE_MANAGEMENT((byte)69),NOTICE((byte)70), INCUBATORAPPLY((byte) 71), FIXED_ASSET((byte) 72), CALENDAR_REMIND((byte) 73),
-    PAYSLIP((byte) 74), MEETING_OA((byte) 75), PARK_BUS((byte) 77),ANNOUNCEMENT_DETAIL((byte)78);
-
+    PAYSLIP((byte) 74), MEETING_OA((byte) 75), PARK_BUS((byte) 77),PUBLIC_ACLINK((byte)78),ENTERPRISE_ACLINK((byte)79), ANNOUNCEMENT_DETAIL((byte) 80);
 
     private byte code;
     private String url;

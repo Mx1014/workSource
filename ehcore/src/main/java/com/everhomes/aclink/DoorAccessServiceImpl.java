@@ -5514,13 +5514,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd){
         DoorStatisticEhResponse resp = new DoorStatisticEhResponse();
-        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlace(cmd);
+        List<ActiveDoorByPlaceDTO> dto1 = doorAccessProvider.queryDoorAccessByPlaceNew(cmd);
         resp.setDto1(dto1);
         List<ActiveDoorByFirmwareDTO> dto2 = doorAccessProvider.queryDoorAccessByFirmware(cmd);
         resp.setDto2(dto2);
         List<ActiveDoorByEquipmentDTO> dto3 = doorAccessProvider.queryDoorAccessByEquipment(cmd);
         resp.setDto3(dto3);
-        List<ActiveDoorByNamespaceDTO> dto4 = doorAccessProvider.queryDoorAccessByNamespace(cmd);
+        List<ActiveDoorByNamespaceDTO> dto4 = doorAccessProvider.queryDoorAccessByNamespaceNew(cmd);
         resp.setDto4(dto4);
         List<AclinkUseByNamespaceDTO> dto5 = null;
         resp.setDto5(dto5);
@@ -5547,13 +5547,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
         ChangeUpdateFirmwareResponse resp = new ChangeUpdateFirmwareResponse();
 	    for(UpdateFirmwareDTO cmds:cmd.getDto()) {
-            AclinkDevice device = aclinkFirmwareProvider.findDeviceById(cmds.getId());
-            device.setFirmware(cmds.getFirmware());
-            device.setFirmwareId(cmds.getFirmwareId());
-            aclinkFirmwareProvider.updateAclinkDevice(device);
-            resp.getDtos().add((ConvertHelper.convert(device,AclinkDeviceDTO.class)));
+	        if(cmds.getId() != null) {
+                AclinkDevice device = aclinkFirmwareProvider.findDeviceById(cmds.getId());
+                device.setFirmware(cmds.getFirmware());
+                device.setFirmwareId(cmds.getFirmwareId());
+                device.setUpdate(cmds.getUpdate());
+                aclinkFirmwareProvider.updateAclinkDevice(device);
+            }
+//            resp.getDtos().add((ConvertHelper.convert(device,AclinkDeviceDTO.class)));
         }
-        return resp;
+        return null;
     }
     @Override
     public FirmwareNewDTO addFirmware (AddFirmwareCommand cmd){
