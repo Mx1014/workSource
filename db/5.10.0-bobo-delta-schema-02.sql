@@ -885,6 +885,7 @@ CREATE TABLE `eh_alliance_service_category_match` (
 	`owner_id` BIGINT(20) NOT NULL,
 	`service_id` BIGINT(20) NOT NULL COMMENT '服务id',
 	`category_id` BIGINT(20) NOT NULL COMMENT '服务类型id',
+	`category_name` VARCHAR(64) NOT NULL COMMENT '服务类型名称',
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
 	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
 	PRIMARY KEY (`id`),
