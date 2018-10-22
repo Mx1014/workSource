@@ -3974,10 +3974,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
-                if(null == organizationDetail) {
-                    continue;
+                tempSimpleOrgDTO.setDisplayName(tempSimpleOrgDTO.getName());
+                if(null != organizationDetail) {
+                	// #39544 企业客户未认证，则企业没有 organization detail
+                	tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 }
-                tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
+                
                 //物业或业委增加小区Id和小区name信息
                 if(org.getOrganizationType() != null){
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
