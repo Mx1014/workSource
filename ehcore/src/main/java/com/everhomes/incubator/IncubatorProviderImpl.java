@@ -305,7 +305,7 @@ public class IncubatorProviderImpl implements IncubatorProvider {
 
 
         if(incubatorApply.getCreateTime() != null){
-            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.ge(new Timestamp(incubatorApply.getCreateTime().getTime() - 20*1000)));
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.ge(new Timestamp(incubatorApply.getCreateTime().getTime() - 10*1000)));
         }
 
         query.addLimit(1);
