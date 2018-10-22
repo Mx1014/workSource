@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
@@ -207,6 +208,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     	//收缴率=已收含税金额/应收含税金额  
     	BigDecimal collectionRate = calculateCollecionRate(amountReceivable, amountReceived);
     	dto.setCollectionRate(collectionRate);
+    	dto.setNamespaceId(f.getValue(r.NAMESPACE_ID));
+    	dto.setOwnerId(f.getValue("communityId", Long.class));
+    	dto.setOwnerType(f.getValue(r.OWNER_TYPE));
 		return dto;
 	}
 	
@@ -234,24 +238,25 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
 			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(statistic);
+		SelectQuery<Record> query = context.selectQuery();
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
+        query.addSelect(Tables.EH_COMMUNITIES.ID.as("communityId"), Tables.EH_COMMUNITIES.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
         		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
         		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
         		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
         		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(statistic.OWNER_ID.in(ownerIdList));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
+        query.addFrom(Tables.EH_COMMUNITIES); //为了兼容没有统计结果的查询
+		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_COMMUNITIES.ID.eq(statistic.OWNER_ID));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ownerIdList));
+        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
+        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
+        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
         }
         query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
         query.addLimit(pageOffSet,pageSize+1);
