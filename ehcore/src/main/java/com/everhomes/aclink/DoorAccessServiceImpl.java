@@ -5474,7 +5474,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd){
-        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+	    int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = cmd.getPageAnchor() == null? 0 : cmd.getPageAnchor();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(anchor);

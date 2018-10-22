@@ -273,7 +273,19 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
-    
+    //门禁v3.0.2 add by liqingyan
+    /**
+     * <b>URL: /admin/aclink/createTempAuth</b>
+     * <p>创建临时授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createTempAuth")
+    @RestReturn(value=String.class)
+    public RestResponse createTempAuth (@Valid CreateTempAuthCommand cmd){
+        return null;
+    }
+
+
     /**
      * 
      * <b>URL: /admin/aclink/listDoorAccessGroup</b>
