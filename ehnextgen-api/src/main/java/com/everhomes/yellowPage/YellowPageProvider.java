@@ -167,4 +167,7 @@ public interface YellowPageProvider {
 
 
 	void updateMainCategorysByType(Long type, Byte enableComment, Byte enableProvider, String name);
+
+
+	List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
 }

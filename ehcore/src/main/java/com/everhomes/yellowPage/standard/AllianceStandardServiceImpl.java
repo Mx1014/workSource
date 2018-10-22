@@ -81,6 +81,9 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	@Autowired
 	ServiceModuleAppProvider serviceModuleAppProvider;
 	
+	@Autowired
+	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
+	
 	
 	
 	@Override
@@ -142,13 +145,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 
 	private void deleteProjectCategories(Long type, Long projectId) {
 		yellowPageProvider.deleteProjectCategories(projectId, type);
-	}
-
-	private void deleteProjectMainConfig(Long type, Long projectId) {
-		yellowPageProvider.deleteProjectMainConfig(projectId, type);
-		
-		//删除图片 attachements ，可以不删
-		
+		serviceCategoryMatchProvider.deleteMathes(ServiceAllianceBelongType.COMMUNITY.getCode(), projectId, type);
 	}
 
 	// 创建自定义配置 包括主页样式，服务样式，筛选列表，表单，工作流
@@ -157,23 +154,30 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			updateAllianceConfigState(state, type, projectId, SelfDefinedState.ENABLE.getCode());
 			copyCategorysConfigToProject(type, projectId, organizationId);
 			copyAllianceTagsToProject(type, projectId, organizationId);
+			copyAllianceCategoryMathToProject(type, projectId, organizationId);
 			return null;
 		});
 	}
 
-	private void updateAllianceConfigState(AllianceConfigState state,  Long type, Long projectId, byte code) {
+	private void copyAllianceCategoryMathToProject(Long type, Long projectId, Long organizationId) {
+		
+		
+		
+	}
+
+	private void updateAllianceConfigState(AllianceConfigState state,  Long type, Long projectId, byte status) {
 		
 		if (null == state) {
 			state =  new AllianceConfigState();
 			state.setNamespaceId(UserContext.getCurrentNamespaceId());
 			state.setType(type);
 			state.setProjectId(projectId);
-			state.setStatus(code);
+			state.setStatus(status);
 			allianceConfigStateProvider.createAllianceConfigState(state);
 			return;
 		}
 		
-		state.setStatus(code);
+		state.setStatus(status);
 		allianceConfigStateProvider.updateAllianceConfigState(state);
 		
 	}
@@ -203,6 +207,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	private void copyCategorysConfigToProject(Long type, Long projectId, Long organizationId) {
+		
+		Map<Long, ServiceAllianceCategories> oldAndNewCategoryMatch = new HashMap<>();
 
 		// 获取主样式配置
 		ServiceAllianceCategories currentMainCag = yellowPageProvider
@@ -211,19 +217,56 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST,
 					"service alliance main category not exist");
 		}
-
+		
 		ServiceAllianceCategories newMainCag = copyMainCategorysConfigToProject(currentMainCag, projectId); // 复制主样式
-		copyChildCategorysConfigToProject(currentMainCag.getId(), newMainCag.getId(), projectId); // 子样式复制
+		oldAndNewCategoryMatch.put(currentMainCag.getId(), newMainCag);
+		
+		copyChildCategorysConfigToProject(currentMainCag.getId(), newMainCag.getId(), projectId, oldAndNewCategoryMatch); // 子样式复制
+		
+		//添加到关联表中
+		createServiceCategoryMath(projectId, organizationId, type, oldAndNewCategoryMatch);
+		
 	}
 
 
-	private void copyChildCategorysConfigToProject(Long oldParentId, Long newParentId, Long projectId) {
+	private void createServiceCategoryMath(Long projectId, Long organizationId, Long type, Map<Long, ServiceAllianceCategories> oldAndNewCaIdMatch) {
+		
+		if (oldAndNewCaIdMatch.isEmpty()) {
+			return;
+		}
+		
+		//找到所有
+		List<ServiceCategoryMatch> mathes = serviceCategoryMatchProvider.listMatches(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
+		if (CollectionUtils.isEmpty(mathes)) {
+			return;
+		}
+		
+		for (ServiceCategoryMatch match : mathes) {
+			ServiceAllianceCategories newCa= oldAndNewCaIdMatch.get(match.getCategoryId());
+			if (null != newCa) {
+				ServiceCategoryMatch tmp = new ServiceCategoryMatch();
+				tmp.setNamespaceId(UserContext.getCurrentNamespaceId());
+				tmp.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+				tmp.setOwnerId(projectId);
+				tmp.setServiceId(match.getServiceId());
+				tmp.setCategoryId(newCa.getId());
+				tmp.setCategoryName(newCa.getName());
+				tmp.setType(type);
+				serviceCategoryMatchProvider.createMatch(tmp);
+			}
+		}
+		
+	}
+
+	private void copyChildCategorysConfigToProject(Long oldParentId, Long newParentId, Long projectId, Map<Long, ServiceAllianceCategories> oldAndNewCaIdMatch) {
 		List<ServiceAllianceCategories> childCags = getChildCategorys(oldParentId);
 		for (ServiceAllianceCategories child : childCags) {
+			Long oldCaId = child.getId();
 			child.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
 			child.setOwnerId(projectId);
 			child.setParentId(newParentId);
 			yellowPageProvider.createCategory(child);
+			oldAndNewCaIdMatch.put(oldCaId, child);
 		}
 	}
 
@@ -330,7 +373,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		return serviceAllianceCategories;
 	}
 	
-	private Long getOrgIdByTypeAndProjectId(Long type, Long projectId) {
+	@Override
+	public Long getOrgIdByTypeAndProjectId(Long type, Long projectId) {
 
 		// 根据type获取相应的appId
 		ServiceModuleApp targetApp = getModuleAppByType(UserContext.getCurrentNamespaceId(), type);
@@ -406,11 +450,13 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
 	
-	private boolean isDisableSelfConfig(AllianceConfigState state) {
+	@Override
+	public boolean isDisableSelfConfig(AllianceConfigState state) {
 		return null == state || SelfDefinedState.DISABLE.getCode() == state.getStatus();
 	}
 	
-	private boolean isEnableSelfConfig(AllianceConfigState state) {
+	@Override
+	public boolean isEnableSelfConfig(AllianceConfigState state) {
 		return null != state && SelfDefinedState.ENABLE.getCode() == state.getStatus();
 	}
 
@@ -423,4 +469,14 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		yellowPageProvider.updateMainCategorysByType(config.getType(), config.getEnableComment(), config.getEnableProvider(), name);
 	}
 
+	@Override
+	public ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId) {
+		return serviceCategoryMatchProvider.findMatch(ownerType, ownerId, type, serviceId);
+	}
+	
+	@Override
+	public void updateMatchCategoryName(Long type, Long categoryId, String categoryName) {
+		serviceCategoryMatchProvider.updateMatchCategoryName(type, categoryId, categoryName);
+	}
+	
 }

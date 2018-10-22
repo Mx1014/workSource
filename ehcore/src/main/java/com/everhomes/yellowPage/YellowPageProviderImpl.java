@@ -288,7 +288,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 								TAGS.ID.eq(TAG_VAL.TAG_ID));
 				
 				if (null != categoryId) {
-					query.addSelect(MATCH.CATEGORY_ID);
 					tmpFrom = tmpFrom.leftOuterJoin(MATCH).on(
 							MATCH.OWNER_TYPE.eq(ownerType)
 							.and(MATCH.OWNER_ID.eq(ownerId))
@@ -299,7 +298,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			}
 			
 			if (null != categoryId) {
-				query.addSelect(MATCH.CATEGORY_ID);
 				tmpFrom = ALLIANCES.leftOuterJoin(MATCH).on(
 						MATCH.OWNER_TYPE.eq(ownerType)
 						.and(MATCH.OWNER_ID.eq(ownerId))
@@ -1451,6 +1449,27 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		updateQuery.addConditions(SA_TYPE_TABLE.PARENT_ID.eq(0L));
 		updateQuery.addConditions(SA_TYPE_TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 		updateQuery.execute();
+	}
+
+
+	@Override
+	public List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
+		return readOnlyContext()
+		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME, SA_TYPE_TABLE.PARENT_ID)
+		.from(SA_TYPE_TABLE)
+		.where(
+				 SA_TYPE_TABLE.OWNER_ID.eq(ownerId)
+				.and(SA_TYPE_TABLE.OWNER_TYPE.eq(ownerType))
+				.and(SA_TYPE_TABLE.TYPE.eq(type))
+				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
+		.fetch()
+		.map(r->{
+			IdNameDTO dto = new IdNameDTO();
+			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
+			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
+			dto.setParentId(r.getValue(SA_TYPE_TABLE.PARENT_ID));
+			return dto;
+		});
 	}
 
 }

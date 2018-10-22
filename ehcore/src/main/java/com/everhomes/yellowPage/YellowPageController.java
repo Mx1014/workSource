@@ -943,7 +943,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
 	 * <b>URL: /yellowPage/listServiceTypeNames</b>
-	 * <p> 获取所有服务名称 </p>
+	 * <p> 获取所有服务类型名称 </p>
 	 */
 	@RequestMapping("listServiceTypeNames")
     @RestReturn(value = IdNameDTO.class, collection = true)
