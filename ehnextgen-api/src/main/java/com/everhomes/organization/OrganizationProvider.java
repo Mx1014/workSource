@@ -994,8 +994,8 @@ public interface OrganizationProvider {
 
 	void updateUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
 
-    UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId, Long communityId);
+    UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId);
 
-    List<Long> listOrganizationIdFromUserAuthenticationOrganization(Long communityId, Integer namespaceId, Byte authFlag);
+    List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag);
     //用户认证审核end
 }

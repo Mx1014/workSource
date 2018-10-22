@@ -10045,7 +10045,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public UserAuthenticationOrganizationDTO createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd) {
-        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId(), cmd.getCommunityId());
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
         if (existsAuth != null) {
             existsAuth.setStatus(Status.INACTIVE.getCode());
             this.organizationProvider.updateUserAuthenticationOrganization(existsAuth);
@@ -10061,7 +10061,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public UserAuthenticationOrganizationDTO getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd) {
-        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId(), cmd.getCommunityId());
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
         if (existsAuth != null) {
             return ConvertHelper.convert(existsAuth, UserAuthenticationOrganizationDTO.class);
         }else {

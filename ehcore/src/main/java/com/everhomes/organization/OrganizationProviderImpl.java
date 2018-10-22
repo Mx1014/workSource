@@ -7029,23 +7029,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId, Long communityId) {
+    public UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         UserAuthenticationOrganization userAuthenticationOrganization = context.select().from(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS)
                 .where(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()))
                 .fetchAnyInto(UserAuthenticationOrganization.class);
         return userAuthenticationOrganization;
     }
 
     @Override
-    public List<Long> listOrganizationIdFromUserAuthenticationOrganization(Long communityId, Integer namespaceId, Byte authFlag) {
+    public List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<Long> targetIdList = context.select(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.ORGANIZATION_ID)
                 .from(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS).where(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.ORGANIZATION_ID.in(orgIds))
                 .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.AUTH_FLAG.eq(authFlag))
                 .and(Tables.EH_USER_AUTHENTICATION_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()))
                 .fetchInto(Long.class);
