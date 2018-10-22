@@ -306,11 +306,16 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
 
--- AUTHOR:黄鹏宇
+-- AUTHOR:黄鹏宇 2018年10月22日
 -- REMARK:将计划任务中的拜访时间改为计划时间
 update eh_var_fields set display_name = '计划时间' where display_name='拜访时间' and group_id = 20;
 update eh_var_field_scopes set field_display_name = '计划时间' where field_display_name='拜访时间' and group_id = 20;
 
+
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:更改module表中的client_handler_type类型为外部链接
+update eh_service_modules set client_handler_type = 2 where id = 25000;
+update eh_service_modules set client_handler_type = 2 where id = 150020;
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
