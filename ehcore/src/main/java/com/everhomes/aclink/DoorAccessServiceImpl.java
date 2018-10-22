@@ -5544,13 +5544,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     }
     @Override
-    public AclinkDeviceDTO changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
-        AclinkDevice dto = aclinkFirmwareProvider.findDeviceById(cmd.getId());
-        dto.setFirmware(cmd.getFirmware());
-        dto.setFirmwareId(cmd.getFirmwareId());
-        aclinkFirmwareProvider.updateAclinkDevice(dto);
-        return (AclinkDeviceDTO)ConvertHelper.convert(dto,AclinkDeviceDTO.class);
-
+    public ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
+        ChangeUpdateFirmwareResponse resp = new ChangeUpdateFirmwareResponse();
+	    for(UpdateFirmwareDTO cmds:cmd.getDto()) {
+            AclinkDevice device = aclinkFirmwareProvider.findDeviceById(cmds.getId());
+            device.setFirmware(cmds.getFirmware());
+            device.setFirmwareId(cmds.getFirmwareId());
+            aclinkFirmwareProvider.updateAclinkDevice(device);
+            resp.getDtos().add((ConvertHelper.convert(device,AclinkDeviceDTO.class)));
+        }
+        return resp;
     }
     @Override
     public FirmwareNewDTO addFirmware (AddFirmwareCommand cmd){
@@ -5640,6 +5643,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         else rsp.setPrivilegeType(Boolean.FALSE);
         return rsp;
-
+    }
+    //add bu liqingyan 添加临时授权
+    @Override
+    public DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd){
+	    return null;
     }
 }

@@ -206,6 +206,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
             condition = condition.and(t.OWNER_ID.eq(cmd.getOwnerId()));
         }
         Condition condition1 = t1.ID.isNotNull();
+        condition1 = condition1.and(t1.STATUS.eq((byte)1));
         if(cmd.getOwnerType() != null){
             condition1 = condition1.and(t1.OWNER_TYPE.eq(cmd.getOwnerType()));
         }

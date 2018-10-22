@@ -8,13 +8,15 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>firmwareName:固件名称</li>
- * <li>firmwareRevision:固件版本</li>
- * <li>firmwareId:固件编号</li>
- * <li>firmwareDescription:固件描述</li>
- * <li>bluetooth:蓝牙设备</li>
- * <li>wifi:Wi-fi设备</li>
- * <li>adaptableDoor:适用设备</li>
+ * <li>name:固件名称</li>
+ * <li>version:固件版本</li>
+ * <li>number:固件编号</li>
+ * <li>description:固件描述</li>
+ * <li>bluetoothId:蓝牙id</li>
+ * <li>bluetoothName:蓝牙名称</li>
+ * <li>wifiId:Wi-fi id</li>
+ * <li>wifiName:Wi-fi名称</li>
+ * <li>status: 状态 0 失效 1 有效</li>
  *
  * </ul>
  */

@@ -193,7 +193,7 @@ public interface DoorAccessService {
 
     void deleteDoorManagement (AddDoorManagementCommand cmd);
 
-    AclinkDeviceDTO changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
+    ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
 
     FirmwareNewDTO addFirmware (AddFirmwareCommand cmd);
 
@@ -222,4 +222,6 @@ public interface DoorAccessService {
     ListFirmwareResponse listFirmware (ListFirmwareCommand cmd);
     //add by liqingyan
     DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
+
+    DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd);
 }
