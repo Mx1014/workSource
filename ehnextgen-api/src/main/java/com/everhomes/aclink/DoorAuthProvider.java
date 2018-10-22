@@ -3,8 +3,14 @@ package com.everhomes.aclink;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.aclink.AclinkAuthDTO;
 import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
 import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
+import com.everhomes.rest.aclink.DoorAuthLiteDTO;
+import com.everhomes.rest.aclink.ListAuthsByLevelandLocationCommand;
+import com.everhomes.rest.aclink.ListFormalAuthCommand;
+import com.everhomes.rest.aclink.QueryValidDoorAuthForeverCommand;
 import com.everhomes.user.User;
 
 import java.util.List;
@@ -21,7 +27,7 @@ public interface DoorAuthProvider {
 
     DoorAuth getDoorAuthById(Long id);
 
-    DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId);
+//    DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId);
 
     DoorAuth queryValidDoorAuthForever(Long doorId, Long userId);
 
@@ -31,24 +37,35 @@ public interface DoorAuthProvider {
 
     List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count);
 
-    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, Byte rightRemote, String driver, int count);
+    List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, ListAuthsByLevelandLocationCommand qryCmd, Byte rightRemote, int count);
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 
     DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte rightOpen, Byte rightVisitor, Byte rightRemote);
+    
+    /**
+     * 查单个对象的永久有效权限
+     */
+    DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte licenseeType);
 
     List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status,
             int count);
 
-    List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count);
+    /**
+     * 查用户及其所属组织的所有有效权限
+     */
+    List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, ListAuthsByLevelandLocationCommand qryCmd, int count);
 
     AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd);
 
 	void updateDoorAuth(List<DoorAuth> objs);
 
+	/**
+	 * 查用户授权,不包括所属组织的授权
+	 */
 	List<DoorAuth> queryValidDoorAuths(ListingLocator locator, Long userId,
 			Long ownerId, Byte ownerType, int count);
-
+	
     List<User> listDoorAuthByOrganizationId(Long organizationId, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize);
 
     List<User> listDoorAuthByIsAuth(Byte isAuth, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize, Integer namespaceId);
@@ -100,4 +117,33 @@ public interface DoorAuthProvider {
 
 
     List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
+
+	List<AclinkAuthDTO> listFormalAuth(CrossShardListingLocator locator, Integer pageSize, ListFormalAuthCommand cmd);
+
+	void createDoorAuthBatch(List<DoorAuth> cAuths);
+
+	void updateDoorAuthBatch(List<DoorAuth> uAuths);
+
+	void createDoorAuthLogBatch(List<DoorAuthLog> logs);
+
+	List<OrganizationMember> getOrganizationMemberByUserId(Long id);
+
+	/**
+	 * 查用户及其所属组织的权限,及门禁相关信息
+	 */
+	List<DoorAuthLiteDTO> listAuthsByLevelandLocation(CrossShardListingLocator locator, Integer count, ListAuthsByLevelandLocationCommand qryCmd);
+
+	/**
+	 * 查用户及其所属组织的权限
+	 */
+	List<DoorAuth> queryDoorAuthAllLicensee(ListingLocator locator, int count,
+			ListingQueryBuilderCallback queryBuilderCallback);
+	
+	/**
+	 * 查用户及其所属组织的有效常规权限
+	 */
+	DoorAuth queryValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd);
+
+	List<DoorAuth> listValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd);
+
 }

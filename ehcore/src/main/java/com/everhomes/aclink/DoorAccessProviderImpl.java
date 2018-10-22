@@ -8,6 +8,8 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,13 +18,28 @@ import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
+import org.jooq.SelectQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessGroupRelDTO;
+import com.everhomes.rest.aclink.DoorAccessLiteDTO;
+import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
+import com.everhomes.rest.aclink.DoorAccessType;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.records.EhDoorAccessRecord;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -34,12 +51,6 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     @Autowired
     private DbProvider dbProvider;
 
-    @Autowired
-    private ShardingProvider shardingProvider;
-
-    @Autowired
-    private SequenceProvider sequenceProvider;
-    
     @Autowired
     private AclinkServerProvider aclinkServerProvider;
 
@@ -520,5 +531,148 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         dao.update(obj);
         return null;
     }
+
+	@Override
+	public List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd) {
+		final List<DoorAccessDTO> objs = new ArrayList<DoorAccessDTO>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+
+            locator.setShardIterator(shardIterator);
+        }
+
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhDoorAccessRecord> query = context.selectQuery(Tables.EH_DOOR_ACCESS);
+
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+            if(cmd.getName() != null) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like("%" + cmd.getName() + "%"));
+            }
+            if(cmd.getDisplayName() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.DISPLAY_NAME.like("%" + cmd.getDisplayName() + "%"));
+            }
+            if(cmd.getHardwareId() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like("%" + cmd.getHardwareId() + "%"));
+            }
+            
+            query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+            
+            if(cmd.getGroupId() == null) {
+                //Select door access only
+                Condition cond = Tables.EH_DOOR_ACCESS.GROUPID.ne(0l)
+                .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
+                        .and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_ZL_GROUP.getCode())));
+                query.addConditions(cond);
+            } else if(cmd.getGroupId().equals(-1l)) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
+            } else if(!cmd.getGroupId().equals(0l)) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
+            }
+            //else select all include groups
+            
+            if(cmd.getDoorType() != null) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+            }else{
+            	//不传doorType,过滤掉巴士门禁 by liuyilin 20180614
+            	query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_BUS.getCode()));
+            }
+            if(cmd.getServerId() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID.eq(cmd.getServerId()));
+            }
+            if(cmd.getLinkStatus() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.LINK_STATUS.eq(cmd.getLinkStatus()));
+            }
+            if(locator.getAnchor() != null){
+            	query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
+            }
+                
+            query.addOrderBy(Tables.EH_DOOR_ACCESS.ID.asc());
+            int count = cmd.getPageSize();
+            if(count >0){
+            	query.addLimit(count + 1);
+            }
+            
+            query.fetch().map((r) -> {
+            	DoorAccessDTO dto =ConvertHelper.convert(r, DoorAccessDTO.class);
+            	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+                objs.add(dto);
+                return null;
+            });
+
+            if(count>0 && objs.size() > count) {
+                locator.setAnchor(objs.get(objs.size() - 1).getId());
+                objs.remove(objs.size() - 1);
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+
+        });
+        objs.removeAll(Collections.singleton(null));
+        return objs;
+	}
+
+	@Override
+	public List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
+			ListDoorAccessGroupCommand cmd) {
+		List<DoorAccessGroupRelDTO> listDoorGroupRel = new ArrayList<DoorAccessGroupRelDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+
+		Condition con = Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode());
+		if(cmd.getOwnerId() != null && cmd.getOwnerType() != null){
+			con = con.and(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId())).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+		}
+		if (cmd.getDoorType() != null) {
+			con = con.and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+		} else {
+			// 不传doorType,过滤掉巴士门禁 by liuyilin 20180614
+			con = con.and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ne(DoorAccessType.ACLINK_BUS.getCode()));
+		}
+		SelectOffsetStep<Record> step = context.select().from(Tables.EH_DOOR_ACCESS)
+				.leftOuterJoin(Tables.EH_ACLINK_GROUP).on(Tables.EH_DOOR_ACCESS.GROUPID.eq(Tables.EH_ACLINK_GROUP.ID).and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ZLACLINK_WIFI_2.getCode())))
+				.where(con)
+				//TODO locator 
+				.orderBy(Tables.EH_DOOR_ACCESS.CREATE_TIME.desc()).limit(count > 0? count : 999999);
+		
+		HashMap<Long, DoorAccessGroupRelDTO> groupRelMap = new HashMap<Long, DoorAccessGroupRelDTO>();
+        step.fetch().map((r) -> {
+        	DoorAccessGroupRelDTO groupDto = new DoorAccessGroupRelDTO();
+        	DoorAccessLiteDTO doorDto = new DoorAccessLiteDTO();
+        	doorDto.setId(r.getValue(Tables.EH_DOOR_ACCESS.ID));
+        	doorDto.setDisplayName(r.getValue(Tables.EH_DOOR_ACCESS.DISPLAY_NAME));
+        	doorDto.setName(r.getValue(Tables.EH_DOOR_ACCESS.NAME));
+        	doorDto.setCreateTime(r.getValue(Tables.EH_DOOR_ACCESS.CREATE_TIME));
+        	doorDto.setDoorType(r.getValue(Tables.EH_DOOR_ACCESS.DOOR_TYPE));
+        	doorDto.setVersion(r.getValue(Tables.EH_DOOR_ACCESS.FIRMWARE_VERSION));
+        	if(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID) == 0L || r.getValue(Tables.EH_DOOR_ACCESS.DOOR_TYPE) != DoorAccessType.ZLACLINK_WIFI_2.getCode()){
+        		if(groupRelMap.get(0L) != null){
+        			groupDto = groupRelMap.get(0L);
+        		}else{
+        			groupDto.setGroupId(0L);
+        			groupDto.setDoors(new ArrayList<DoorAccessLiteDTO>());
+        			listDoorGroupRel.add(groupDto);
+        			groupRelMap.put(0L, groupDto);
+        		}
+        	}else if(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID) != 0L && r.getValue(Tables.EH_DOOR_ACCESS.DOOR_TYPE) != DoorAccessType.ZLACLINK_WIFI_2.getCode()){
+        		return null;
+        	}else{
+        		if(groupRelMap.get(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID)) != null){
+        			groupDto = groupRelMap.get(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+        		}else{
+        			groupDto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
+        			groupDto.setGroupName(r.getValue(Tables.EH_ACLINK_GROUP.NAME));
+        			groupDto.setDoors(new ArrayList<DoorAccessLiteDTO>());
+        			listDoorGroupRel.add(groupDto);
+        			groupRelMap.put(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID), groupDto);
+        		}
+        	}
+        	groupDto.getDoors().add(doorDto);
+            return null;
+        });
+		return listDoorGroupRel;
+	}
 
 }

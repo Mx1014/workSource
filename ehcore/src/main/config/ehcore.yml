@@ -161,27 +161,3 @@ nashorn.class.includes:
 #pay.secretKey: zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==
 #pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
 #pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
-
-spring:
-    application:
-        name: ehcore
-
-# kafka
-spring.kafka:
-  client-id: ehcore # 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable
-  bootstrap-servers: localhost:9092
-  properties:
-    request.timeout.ms: 20000
-  producer:
-    retries: 0
-    batch-size: 16384
-    buffer-memory: 33554432
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.apache.kafka.common.serialization.StringSerializer
-  consumer:
-    group-id: ehcore-group
-    auto-offset-reset: earliest
-    enable-auto-commit: true
-    auto-commit-interval: 100
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.apache.kafka.common.serialization.StringSerializer

@@ -494,7 +494,7 @@ public class UserActivityController extends ControllerBase {
     @RestReturn(value = String.class )
     public RestResponse updateShakeOpenDoor(@Valid UpdateShakeOpenDoorCommand cmd) {
     	
-		this.userActivityService.updateShakeOpenDoor(cmd.getShakeOpenDoor());
+		this.userActivityService.updateShakeOpenDoor(cmd);
     	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");

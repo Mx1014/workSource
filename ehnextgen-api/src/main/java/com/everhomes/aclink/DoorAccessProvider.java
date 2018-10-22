@@ -6,6 +6,11 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessGroupRelDTO;
+import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 
 public interface DoorAccessProvider {
 
@@ -50,4 +55,9 @@ public interface DoorAccessProvider {
     DoorAccess findDoorAccessById(Long id);
 
     Long updateDoorAccessNew (DoorAccess obj);
+	
+	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd);
+
+	List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
+			ListDoorAccessGroupCommand cmd);
 }
