@@ -6020,7 +6020,7 @@ public class GroupServiceImpl implements GroupService {
 		});
 
 		// 发送推荐帖
-        recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
+         recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 
         // 审核group成功事件
         LocalEventBus.publish(event -> {
