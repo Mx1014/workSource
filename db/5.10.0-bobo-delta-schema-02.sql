@@ -880,6 +880,7 @@ ENGINE=InnoDB
 CREATE TABLE `eh_alliance_service_category_match` (
 	`id` BIGINT(20) NOT NULL,
 	`namespace_id` INT(11) NOT NULL,
+        `type` BIGINT(20) NOT NULL,
 	`owner_type` VARCHAR(20) NOT NULL,
 	`owner_id` BIGINT(20) NOT NULL,
 	`service_id` BIGINT(20) NOT NULL COMMENT '服务id',
