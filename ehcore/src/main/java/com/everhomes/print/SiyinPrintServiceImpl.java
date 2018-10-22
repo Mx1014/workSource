@@ -2237,7 +2237,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"Order amount is not equal to payAmount");
 				}
-				LOGGER.info("paymentType : " + cmd.getPaymentType());
 				LOGGER.info("call point api start");
 				//用户积分
 				LocalEventBus.publish(event -> {
@@ -2251,25 +2250,28 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
 				});
 				LOGGER.info("call point api end");
-	            switch (cmd.getPaymentType()){
-                case 1:
-                case 7:
-                case 9:
-                case 21: 
-                	LOGGER.info("微信支付");
-                	order.setPaidType(VendorType.WEI_XIN.getCode());
-                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
-                	break;
-                case 29: 
-                	LOGGER.info("企业支付");
-                	order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
-                	break;
-                default: 
-                	LOGGER.info("支付宝支付");
-                	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
-                	break;
-            }
+				if (cmd.getPaymentType() != null){
+					LOGGER.info("paymentType : " + cmd.getPaymentType());
+		            switch (cmd.getPaymentType()){
+	                case 1:
+	                case 7:
+	                case 9:
+	                case 21: 
+	                	LOGGER.info("微信支付");
+	                	order.setPaidType(VendorType.WEI_XIN.getCode());
+	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+	                	break;
+	                case 29: 
+	                	LOGGER.info("企业支付");
+	                	order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+	                	break;
+	                default: 
+	                	LOGGER.info("支付宝支付");
+	                	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+	                	break;
+		            }
+				}
 				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}
