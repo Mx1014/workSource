@@ -3,6 +3,10 @@ package com.everhomes.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
@@ -15,7 +19,9 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 public interface AssetStatisticService {
 
 	ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
-
+	
+	ListBillStatisticByBuildingResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd);
+	
 	/**
 	 * 提供给资产获取“缴费信息汇总表-项目”列表接口
 	 * @param namespaceId
@@ -29,6 +35,8 @@ public interface AssetStatisticService {
 			String ownerType, String dateStrBegin, String dateStrEnd);
 
 	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd);
+	
+	ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd);
 
 	/**
 	 * 提供给资产获取“缴费信息汇总表-项目-合计”列表接口
@@ -41,6 +49,6 @@ public interface AssetStatisticService {
 	 */
 	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
-	
+
 	
 }

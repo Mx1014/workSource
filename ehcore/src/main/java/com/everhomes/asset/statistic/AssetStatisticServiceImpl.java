@@ -6,6 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
@@ -21,11 +25,11 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	@Autowired
 	private AssetStatisticProvider assetStatisticProvider;
 	
+	//项目维度
 	public ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
 		ListBillStatisticByCommunityResponse response = new ListBillStatisticByCommunityResponse();
 		Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
-        //卸货完毕
         if (pageAnchor == null || pageAnchor < 1l) {
             pageAnchor = 0l;
         }
@@ -42,6 +46,31 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
             list.remove(list.size()-1);
         }
 		response.setListBillStatisticByCommunityDTOs(list);
+		return response;
+	}
+	
+	//楼宇维度
+	public ListBillStatisticByBuildingResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse response = new ListBillStatisticByBuildingResponse();
+		Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        List<ListBillStatisticByBuildingDTO> list = assetStatisticProvider.listBillStatisticByBuilding(pageOffSet, pageSize, 
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingNameList());
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
+		response.setListBillStatisticByBuildingDTOs(list);
 		return response;
 	}
 	
@@ -66,6 +95,13 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
         		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
 		return dto;
 	}
+	
+	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotal(
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingNameList());
+		return dto;
+	}
 
 	/**
 	 * 提供给资产获取“缴费信息汇总表-项目-合计”列表接口
@@ -82,6 +118,10 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
 		return dto;
 	}
+
+	
+
+	
 	
 	
 }

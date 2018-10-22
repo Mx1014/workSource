@@ -26,6 +26,10 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
@@ -1558,6 +1562,20 @@ public class AssetController extends ControllerBase {
 	}
 	
 	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("listBillStatisticByBuilding")
+	@RestReturn(value = ListBillStatisticByBuildingResponse.class)
+	public RestResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse res = assetStatisticService.listBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
 	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-合计</p>
 	 * <b>URL: /asset/listBillStatisticByCommunityTotal</b>
 	 */
@@ -1565,6 +1583,20 @@ public class AssetController extends ControllerBase {
 	@RestReturn(value = ListBillStatisticByCommunityDTO.class)
 	public RestResponse listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
 		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-合计</p>
+	 * <b>URL: /asset/listBillStatisticByBuildingTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByBuildingTotal")
+	@RestReturn(value = ListBillStatisticByBuildingDTO.class)
+	public RestResponse listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticService.listBillStatisticByBuildingTotal(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
