@@ -2065,7 +2065,7 @@ long assetCategoryId = 0l;
 		if (cmd.getCommunityId() == null) {
 			param.setOwnerId(cmd.getOrgId());
 		}
-		param.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//		param.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 		param.setContractNumberRulejson(contractNumberRulejson);
 		param.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		ContractParam communityExist = contractProvider.findContractParamByCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getPayorreceiveContractType(),cmd.getOrgId(), cmd.getCategoryId(),null);

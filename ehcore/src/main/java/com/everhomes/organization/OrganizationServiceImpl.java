@@ -206,6 +206,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -3974,10 +3975,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
-                if(null == organizationDetail) {
-                    continue;
+                tempSimpleOrgDTO.setDisplayName(tempSimpleOrgDTO.getName());
+                if(null != organizationDetail) {
+                	// #39544 企业客户未认证，则企业没有 organization detail
+                	tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 }
-                tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
+                
                 //物业或业委增加小区Id和小区name信息
                 if(org.getOrganizationType() != null){
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
@@ -6855,17 +6858,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/部门岗位
+        //:todo 部门/部门岗位 +2018年10月22日增加公司搜索
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(),  Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.ENTERPRISE.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 部门岗位
         ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
         cmd_3.setName(cmd.getKeywords());
         cmd_3.setNamespaceId(namespaceId);
-        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 岗位
         ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();
@@ -13148,7 +13151,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Organization not found.");
         }
 
-        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()) + 1;
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
@@ -13163,6 +13166,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         int size = list.size();
         if (size > 0) {
+
+            if (size != pageSize) {
+                response.setNextPageAnchor(null);
+            } else {
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+                list.remove(list.size() - 1);
+            }
+            
             response.setRequests(list.stream().map(r -> {
                 ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
                 dto.setParentName(organization.getName());
@@ -13190,11 +13201,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return dto;
             }).collect(Collectors.toList()));
 
-            if (size != pageSize) {
-                response.setNextPageAnchor(null);
-            } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
-            }
         }
         return response;
     }
