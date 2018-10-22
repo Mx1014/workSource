@@ -4424,19 +4424,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cmd.setFlowMainId(flow.getFlowMainId());
 			cmd.setFlowVersion(flow.getFlowVersion());
 			return flowService.createFlowCase(cmd);
-		} else if (PayMode.ONLINE_PAY.getCode() == order.getPayMode()) {
-
-			//创建哑工作流
-			GeneralModuleInfo gm = new GeneralModuleInfo();
-			gm.setModuleId(Rentalv2Controller.moduleId);
-			gm.setModuleType(moduleType);
-			gm.setNamespaceId(order.getNamespaceId());
-			gm.setOwnerId(ownerId);
-			gm.setOwnerType(ownerType);
-			gm.setProjectId(order.getCommunityId());
-			gm.setProjectType(EntityType.COMMUNITY.getCode());
-			gm.setOrganizationId(cmd.getCurrentOrganizationId());
-			return flowService.createDumpFlowCase(gm, cmd);
 		}
 		return null;
 	}
