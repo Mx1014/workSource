@@ -206,6 +206,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -6857,17 +6858,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/部门岗位
+        //:todo 部门/部门岗位 +2018年10月22日增加公司搜索
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(),  Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.ENTERPRISE.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 部门岗位
         ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
         cmd_3.setName(cmd.getKeywords());
         cmd_3.setNamespaceId(namespaceId);
-        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 岗位
         ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();

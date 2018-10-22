@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li> destination: 输出终端 1：客户端 2：浏览器</li>
  *  <li> pageAnchor: 锚点</li>
  *  <li> pageSize: 每页大小</li>
+ *  <li> sourceRequestType: 0-客户端/浏览器请求 其他-后台请求</li>
  * </ul>
  */
 public class ListServiceAllianceCategoriesCommand {
@@ -28,7 +29,9 @@ public class ListServiceAllianceCategoriesCommand {
 	private Long pageAnchor;
 
 	private Integer pageSize;
-
+	
+	private Byte sourceRequestType;
+	
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -88,5 +91,13 @@ public class ListServiceAllianceCategoriesCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getSourceRequestType() {
+		return sourceRequestType;
+	}
+
+	public void setSourceRequestType(Byte sourceRequestType) {
+		this.sourceRequestType = sourceRequestType;
 	}
 }
