@@ -42,7 +42,7 @@ public class CreateApartmentCommand {
 	private String orientation;
 	private Double freeArea;
 	private String apartmentFloor;
-private BigDecimal apartmentRent;
+	private BigDecimal apartmentRent;
 	private Byte apartmentRentType;
 
 	public BigDecimal getApartmentRent() {
