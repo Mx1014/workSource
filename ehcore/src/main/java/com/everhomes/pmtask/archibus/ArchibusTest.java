@@ -204,9 +204,8 @@ public class ArchibusTest {
 //        bean.getThirdAddress(params);
 //        查类型
 //        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-        params.put("project_id","YZ8600PEK05JRGYJRJRG");
-        params.put("record_type","4");
-        bean.getThirdCategories(params);
+//        params.put("record_type","4");
+//        bean.getThirdCategories(params);
 //      下单
 //        params.put("request_source","taskSource4");
 //        params.put("user_id","000000201807220FERQP");

@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.pmtask.archibus.*;
@@ -32,19 +33,16 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
-
         if(service == null){
             FmWorkDataServiceImplServiceLocator locator = new FmWorkDataServiceImplServiceLocator();
             locator.setFmWorkDataServiceImplPortEndpointAddress(THIRDURL);
-
             try {
-                    service = locator.getFmWorkDataServiceImplPort();
+                service = locator.getFmWorkDataServiceImplPort();
             } catch (ServiceException e) {
-                e.printStackTrace();
+                LOGGER.error("archibus web service init fail",e);
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_SERVICE_INIT_FAIL,"archibus web service init fail");
             }
-
         }
-
         return service;
     }
 
@@ -66,51 +64,41 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     @Override
     public Object getThirdAddress(HttpServletRequest req) {
-
-        try {
-
-            FmWorkDataService service = getService();
-            String pk = req.getParameter("projectId");
-            if(!"resourcesType3".equals(req.getParameter("resourcesType"))){
-                pk = req.getParameter("parentId");
-            }
-            LOGGER.debug(pk);
-            String json = service.getResources(req.getParameter("projectId"),pk,req.getParameter("resourcesType"));
-            ArchibusListEntity<ArchibusResource> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusResource>>(){});
-            if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
-            }
-
-            LOGGER.debug(json);
-
-            return  result.getData();
-
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        FmWorkDataService service = getService();
+        String pk = req.getParameter("projectId");
+        if(!"resourcesType3".equals(req.getParameter("resourcesType"))){
+            pk = req.getParameter("parentId");
         }
-
-        return null;
+        String json;
+        try {
+            json = service.getResources(req.getParameter("projectId"),pk,req.getParameter("resourcesType"));
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            LOGGER.error("getResources fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"getResources fail,params={}",req.getParameterMap());
+        }
+        ArchibusListEntity<ArchibusResource> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusResource>>(){});
+        if(!result.isSuccess()){
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+        }
+        return result.getData();
     }
 
     @Override
     public Object getThirdCategories(HttpServletRequest req) {
-
         FmWorkDataService service = getService();
-        String json = "";
+        String json;
         try {
             json = service.getEventServiceType(req.getParameter("project_id"),req.getParameter("record_type"));
+            LOGGER.debug(json);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"getEventServiceType fail,params={}",req.getParameterMap());
         }
         ArchibusListEntity<ArchibusCategory> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusCategory>>(){});
         if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
         }
-
-        LOGGER.debug(json);
-
-        return  result.getData();
-
+        return result.getData();
     }
 
     @Override
@@ -121,7 +109,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             String json = service.areaInfo();
             ArchibusListEntity<ArchibusArea> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusArea>>(){});
             if(!result.isSuccess()){
-    //                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
             }
 
             String areaId = "";
@@ -138,7 +126,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
                 return result1.getData();
             }
         } catch (RemoteException e) {
-            e.printStackTrace();
+            LOGGER.error("getProjectInfo fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"getProjectInfo fail,params={}",req.getParameterMap());
         }
         return null;
     }
@@ -156,12 +145,13 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
                     req.getParameter("service_id"), req.getParameter("record_type"), req.getParameter("remarks"), req.getParameter("contack"),
                     req.getParameter("telephone"), req.getParameter("location"), req.getParameter("order_date"), req.getParameter("order_time"));
         } catch (RemoteException e) {
-            e.printStackTrace();
+            LOGGER.error("getProjectInfo fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"getProjectInfo fail,params={}",req.getParameterMap());
         }
         LOGGER.debug(json);
         ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
         if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
         }
         return result.getData();
     }
@@ -176,11 +166,12 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
                     req.getParameter("record_type"), Integer.valueOf(req.getParameter("page_num")), perg_size);
             LOGGER.debug(json);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            LOGGER.error("eventList fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"eventList fail,params={}",req.getParameterMap());
         }
         ArchibusListEntity<ArchibusTask> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusTask>>(){});
         if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
         }
         return result.getData();
     }
@@ -193,13 +184,52 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             json = service.eventDetails(req.getParameter("order_id"));
             LOGGER.debug(json);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            LOGGER.error("eventDetails fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"eventDetails fail,params={}",req.getParameterMap());
         }
         ArchibusEntity<ArchibusTaskDetail> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusTaskDetail>>(){});
         if(!result.isSuccess()){
-//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.Error_)
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
         }
         return result.getData();
+    }
+
+    @Override
+    public Object createThirdEvaluation(HttpServletRequest req) {
+        FmWorkDataService service = getService();
+        String json;
+        try {
+            json = service.submitEventEvaluation(req.getParameter("order_id"),req.getParameter("remarks"),req.getParameter("level"),
+                    req.getParameter("level2"),req.getParameter("level3"),req.getParameter("level4"),"","");
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            LOGGER.error("submitEventEvaluation fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"submitEventEvaluation fail,params={}",req.getParameterMap());
+        }
+        ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
+        if(!result.isSuccess()){
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+        }
+        return result.getData();
+    }
+
+    @Override
+    public Object getThirdEvaluation(HttpServletRequest req) {
+        FmWorkDataService service = getService();
+        String json;
+        try {
+            json = service.eventEvaluationDetails(req.getParameter("order_id"));
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            LOGGER.error("eventEvaluationDetails fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"eventEvaluationDetails fail,params={}",req.getParameterMap());
+        }
+        ArchibusEntity<ArchibusEvaluation> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<ArchibusEvaluation>>(){});
+        if(!result.isSuccess()){
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+        }
+        return result.getData();
+
     }
 
     private PmTaskArchibusUserMapping getUser(String phone){
@@ -213,14 +243,14 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     private Object getThirdUsers(String dateTime,String userId){
         FmWorkDataService service = getService();
-        String json = "";
+        String json;
         try {
             json = service.userInfo(dateTime,userId);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            LOGGER.error("userInfo fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"userInfo fail");
         }
         ArchibusListEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<JSONObject>>(){});
-
         if(!result.isSuccess()){
             return null;
         }
@@ -241,41 +271,4 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             }
         }
     }
-
-    public static void main(String[] args) {
-        ArchibusPmTaskHandle bean = new ArchibusPmTaskHandle();
-        Map<String,String> params = new HashMap<>();
-        bean.getThirdUsers("","");
-//        楼栋
-//        params.put("projectId","YZ8600PEK01GMWYGMYJY");
-//        params.put("parentId","YZ8600PEK01GMWYGMYJY");
-//        params.put("resourcesType","resourcesType3");
-//        楼层
-//        params.put("projectId","YZ8600PEK01GMWYGMYJY");
-//        params.put("parentId","YZ8600PEK01GMWYGMYJY001002SX");
-//        params.put("resourcesType","resourcesType5");
-//        房间
-//        params.put("projectId","YZ8600PEK01GMWYGMYJY");
-//        params.put("parentId","YZ8600PEK01GMWYGMYJY001002SX002");
-//        params.put("resourcesType","resourcesType6");
-//        bean.getThirdAddress(params);
-//        查类型
-//        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-//        params.put("record_type","1");
-//        bean.getThirdCategories(params);
-//      下单
-//        params.put("request_source","taskSource7");
-//        params.put("user_id","");
-//        params.put("project_id","");
-//        params.put("service_id","");
-//        params.put("record_type","");
-//        params.put("remarks","");
-//        params.put("contack","");
-//        params.put("telephone","");
-//        params.put("location","");
-//        params.put("order_date","");
-//        params.put("order_time","");
-//        bean.createThirdTask(params);
-    }
-
 }
