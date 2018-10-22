@@ -103,7 +103,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /test/listBillStatisticByCommunityForProperty</b>
-	 * <p>提供给资产那边做项目统计的接口</p>
+	 * <p>提供给资产获取“缴费信息汇总表-项目”列表接口</p>
 	 */
 	@RequestMapping("listBillStatisticByCommunityForProperty")
 	public RestResponse listBillStatisticByCommunityForProperty(ListBillStatisticByCommunityCmd cmd) {
@@ -115,7 +115,19 @@ public class TestAssetController extends ControllerBase {
 		return restResponse;
 	}
 
-	
+	/**
+	 * <b>URL: /test/listBillStatisticByCommunityTotalForProperty</b>
+	 * <p>提供给资产获取“缴费信息汇总表-项目-合计”列表接口</p>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotalForProperty")
+	public RestResponse listBillStatisticByCommunityTotalForProperty(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotalForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerIdList() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 	
 	
 }

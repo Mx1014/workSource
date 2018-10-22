@@ -21,22 +21,6 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	@Autowired
 	private AssetStatisticProvider assetStatisticProvider;
 	
-	/**
-	 * 提供给资产那边做项目统计的接口
-	 * @param namespaceId
-	 * @param ownerIdList
-	 * @param ownerType
-	 * @param dateStrBegin
-	 * @param dateStrEnd
-	 * @return
-	 */
-	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
-			String ownerType, String dateStrBegin, String dateStrEnd) {
-        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunityForProperty(
-        		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
-		return list;
-	}
-	
 	public ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
 		ListBillStatisticByCommunityResponse response = new ListBillStatisticByCommunityResponse();
 		Long pageAnchor = cmd.getPageAnchor();
@@ -60,10 +44,42 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		response.setListBillStatisticByCommunityDTOs(list);
 		return response;
 	}
+	
+	/**
+	 * 提供给资产获取“缴费信息汇总表-项目”列表接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
+			String ownerType, String dateStrBegin, String dateStrEnd) {
+        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunityForProperty(
+        		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return list;
+	}
 
 	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
 		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotal(
         		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		return dto;
+	}
+
+	/**
+	 * 提供给资产获取“缴费信息汇总表-项目-合计”列表接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotalForProperty(
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
 		return dto;
 	}
 	
