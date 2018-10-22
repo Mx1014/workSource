@@ -592,6 +592,8 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.fetch().map(f -> {
         	ListBillStatisticByBuildingDTO convertDTO = convertEhPaymentBillItemsStatisticBuilding(f, statistic);
         	response[0] = ConvertHelper.convert(convertDTO, ListBillStatisticByBuildingDTO.class);
+        	response[0].setOwnerId(f.getValue(statistic.OWNER_ID));
+        	response[0].setOwnerType(f.getValue(statistic.OWNER_TYPE));
         	return null;
         });
     	//TODO 调用资产的接口获取资产相关的统计数据
