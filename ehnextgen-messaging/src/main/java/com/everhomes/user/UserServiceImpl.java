@@ -7482,9 +7482,20 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @KafkaListener(topics = "user-kickoff")
     public void userKickoffMessage(ConsumerRecord<?, String> record) {
         LOGGER.debug("received message [ user-kickoff ] {}", record.value());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> dataMap = (Map<String, Object>) StringHelper.fromJsonString(record.value(), Map.class);
+        Double namespaceId = (Double) dataMap.get("namespaceId");
+        String loginToken = (String) dataMap.get("loginToken");
+
+        kickoffService.kickoff(namespaceId.intValue(), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
+    }
+
+    @KafkaListener(topics = "user-device-kickoff")
+    public void userDeviceKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-device-kickoff ] {}", record.value());
+
         UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
         kickoffLoginByDevice(newLogin);
     }
-    /*********************同步数据 END************************/
-
 }

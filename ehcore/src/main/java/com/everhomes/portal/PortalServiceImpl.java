@@ -2292,6 +2292,7 @@ public class PortalServiceImpl implements PortalService {
 			LaunchPadItem item = ConvertHelper.convert(portalItem, LaunchPadItem.class);
 			item.setItemLabel(portalItem.getLabel());
 			item.setItemName(portalItem.getName());
+			item.setAppId(AppConstants.APPID_DEFAULT);
 			if(PortalItemActionType.fromCode(portalItem.getActionType()) == PortalItemActionType.LAYOUT){
 				setItemLayoutActionData(item, portalItem.getActionData());
 				item.setAccessControlType(AccessControlType.ALL.getCode());
@@ -2299,7 +2300,6 @@ public class PortalServiceImpl implements PortalService {
 				setItemModuleAppActionData(item, portalItem.getActionData());
 			}
 
-			item.setAppId(AppConstants.APPID_DEFAULT);
 			item.setGroupId(itemGroup.getId());
 			item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			item.setMinVersion(1L);

@@ -1,5 +1,6 @@
 package com.everhomes.bus;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.PartitionInfo;
@@ -74,6 +75,26 @@ public class NoopKafkaTemplate extends KafkaTemplate {
 
     @Override
     public ListenableFuture<SendResult> send(String topic, Object key, Object data) {
+        return new ListenableFutureTask<SendResult>(() -> {return null;});
+    }
+
+    @Override
+    public ListenableFuture<SendResult> sendDefault(int partition, Object key, Object data) {
+        return new ListenableFutureTask<SendResult>(() -> {return null;});
+    }
+
+    @Override
+    public ListenableFuture<SendResult> send(String topic, int partition, Object data) {
+        return new ListenableFutureTask<SendResult>(() -> {return null;});
+    }
+
+    @Override
+    public ListenableFuture<SendResult> send(String topic, int partition, Object key, Object data) {
+        return new ListenableFutureTask<SendResult>(() -> {return null;});
+    }
+
+    @Override
+    protected ListenableFuture<SendResult> doSend(ProducerRecord producerRecord) {
         return new ListenableFutureTask<SendResult>(() -> {return null;});
     }
 

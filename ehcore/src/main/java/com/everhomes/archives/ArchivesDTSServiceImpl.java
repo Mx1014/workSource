@@ -209,13 +209,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         if (checkArchivesContactToken(log, data, data.getContactToken()))
             return log;
         OrganizationMemberDetails contact = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, data.getContactToken());
-
+        String realContactToken = getRealContactToken(data.getContactToken().trim(), ArchivesParameter.CONTACT_TOKEN);
         //  姓名校验
         if (checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
         //  账号校验
-        if (checkArchivesAccount(log, data, data.getAccount(), data.getContactToken()))
+        if (checkArchivesAccount(log, data, data.getAccount(), realContactToken))
             return log;
         if (contact != null)
             if (checkArchivesAccount(log, data, data.getAccount(), contact))
@@ -230,7 +230,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return log;
 
         //  工作邮箱
-        if (checkArchivesWorkEmail(log, data, data.getContactToken(), data.getWorkEmail(), organizationId))
+        if (checkArchivesWorkEmail(log, data, realContactToken, data.getWorkEmail(), organizationId))
             return log;
 
         //  部门
@@ -247,7 +247,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     private boolean saveContactsInfo(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         //  1.设置信息
-        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, data.getContactToken().trim(), null);
+        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN), null);
         if(null != employee){
         	addCommand.setUpdateDetailId(employee.getDetailId());
         }
