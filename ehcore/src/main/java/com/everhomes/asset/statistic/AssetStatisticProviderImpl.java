@@ -17,12 +17,15 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.statistic.BillsDateStrDTO;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhPaymentBills;
+import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticBuildingDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticCommunityDao;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticBuilding;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -44,7 +47,33 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPaymentBillStatisticCommunityDao statisticCommunityDao = new EhPaymentBillStatisticCommunityDao(context.configuration());
 		EhPaymentBillStatisticCommunity dto = statisticByCommnunity(namespaceId, ownerId, ownerType, dateStr);
+		long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity.class));
+        dto.setId(nextSequence);
+        dto.setNamespaceId(namespaceId);
+        dto.setOwnerId(ownerId);
+        dto.setOwnerType(ownerType);
+        dto.setDateStr(dateStr);
+        dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         statisticCommunityDao.insert(dto);
+	}
+	
+	public void createStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr,String buildingName) {
+		//根据namespaceId、ownerId、ownerType、dateStr、buildingName统计楼宇相关数据
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillStatisticBuildingDao statisticBuildingDao = new EhPaymentBillStatisticBuildingDao(context.configuration());
+		EhPaymentBillStatisticBuilding dto = statisticByBuilding(namespaceId, ownerId, ownerType, dateStr, buildingName);
+		long nextSequence = this.sequenceProvider.getNextSequence(
+				NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticBuilding.class));
+        dto.setId(nextSequence);
+        dto.setNamespaceId(namespaceId);
+        dto.setOwnerId(ownerId);
+        dto.setOwnerType(ownerType);
+        dto.setDateStr(dateStr);
+        dto.setBuildingName(buildingName);
+        dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		statisticBuildingDao.insert(dto);
 	}
 
 	public boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
@@ -107,14 +136,32 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBills(query, r);
         dto  = ConvertHelper.convert(convertDTO, EhPaymentBillStatisticCommunity.class);
-        long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity.class));
-        dto.setId(nextSequence);
-        dto.setNamespaceId(namespaceId);
-        dto.setOwnerId(ownerId);
-        dto.setOwnerType(ownerType);
-        dto.setDateStr(dateStr);
-        dto.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dto.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        return dto;
+	}
+	
+	public EhPaymentBillStatisticBuilding statisticByBuilding(Integer namespaceId, Long ownerId, String ownerType,
+			String dateStr, String buildingName) {
+		//根据namespaceId、ownerId、ownerType、dateStr、buildingName统计账单相关数据
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillStatisticBuilding dto = new EhPaymentBillStatisticBuilding();
+        EhPaymentBillItems r = Tables.EH_PAYMENT_BILL_ITEMS.as("r");
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+        SelectQuery<Record> query = context.selectQuery();
+        //先查询出相关数据，把计算的过程放在代码层，减轻数据库的压力
+        query.addSelect(r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_OWED,
+        		r.AMOUNT_RECEIVABLE_WITHOUT_TAX, r.AMOUNT_RECEIVED_WITHOUT_TAX, r.AMOUNT_OWED_WITHOUT_TAX,
+        		r.TAX_AMOUNT, bills.DUE_DAY_COUNT.as("dueDayCount"), bills.NOTICE_TIMES.as("noticeTimes"));
+        query.addFrom(r);
+		query.addJoin(bills, JoinType.LEFT_OUTER_JOIN, r.BILL_ID.eq(bills.ID));
+        query.addConditions(r.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(r.OWNER_ID.eq(ownerId));
+        query.addConditions(r.OWNER_TYPE.eq(ownerType));
+        query.addConditions(r.DATE_STR.eq(dateStr));
+        query.addConditions(r.BUILDING_NAME.eq(buildingName));
+        query.addConditions(bills.SWITCH.eq((byte)1));//只统计已出账单的已缴和未缴费用
+        query.addConditions(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+        ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillItems(query, r);
+        dto  = ConvertHelper.convert(convertDTO, EhPaymentBillStatisticBuilding.class);
         return dto;
 	}
 	
@@ -171,6 +218,54 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     	dto.setTaxAmount(taxAmountFinal[0] != null ? taxAmountFinal[0] : BigDecimal.ZERO);
     	dto.setAmountExemption(amountExemptionFinal[0] != null ? amountExemptionFinal[0] : BigDecimal.ZERO);
     	dto.setAmountSupplement(amountSupplementFinal[0] != null ? amountSupplementFinal[0] : BigDecimal.ZERO);
+    	dto.setDueDayCount(dueDayCountFinal[0] != null ? dueDayCountFinal[0] : BigDecimal.ZERO);
+    	dto.setNoticeTimes(noticeTimesFinal[0] != null ? noticeTimesFinal[0] : BigDecimal.ZERO);
+    	dto.setCollectionRate(collectionRate);
+		return dto;
+	}
+	
+	private ListBillStatisticByCommunityDTO convertEhPaymentBillItems(SelectQuery<Record> query, EhPaymentBillItems r) {
+		ListBillStatisticByCommunityDTO dto = new ListBillStatisticByCommunityDTO();
+		final BigDecimal[] amountReceivableFinal = {BigDecimal.ZERO};
+		final BigDecimal[] amountReceivedFinal = {BigDecimal.ZERO};
+		final BigDecimal[] amountOwedFinal = {BigDecimal.ZERO};
+		final BigDecimal[] amountReceivableWithoutTaxFinal = {BigDecimal.ZERO};
+		final BigDecimal[] amountReceivedWithoutTaxFinal = {BigDecimal.ZERO};
+		final BigDecimal[] amountOwedWithoutTaxFinal = {BigDecimal.ZERO};
+		final BigDecimal[] taxAmountFinal = {BigDecimal.ZERO};
+		final BigDecimal[] dueDayCountFinal = {BigDecimal.ZERO};
+		final BigDecimal[] noticeTimesFinal = {BigDecimal.ZERO};
+		query.fetch().map(f -> {
+			BigDecimal amountReceivable = f.getValue(r.AMOUNT_RECEIVABLE);
+	    	BigDecimal amountReceived = f.getValue(r.AMOUNT_RECEIVED);
+	    	BigDecimal amountOwed = f.getValue(r.AMOUNT_OWED);
+	    	BigDecimal amountReceivableWithoutTax = f.getValue(r.AMOUNT_RECEIVABLE_WITHOUT_TAX);
+	    	BigDecimal amountReceivedWithoutTax = f.getValue(r.AMOUNT_RECEIVED_WITHOUT_TAX);
+	    	BigDecimal amountOwedWithoutTax = f.getValue(r.AMOUNT_OWED_WITHOUT_TAX);
+	    	BigDecimal taxAmount = f.getValue(r.TAX_AMOUNT);
+	    	Long dueDayCount = f.getValue("dueDayCount", Long.class);
+	    	Integer noticeTimes = f.getValue("noticeTimes", Integer.class);
+        	
+	    	amountReceivableFinal[0] = amountReceivableFinal[0].add(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
+	    	amountReceivedFinal[0] = amountReceivedFinal[0].add(amountReceived != null ? amountReceived : BigDecimal.ZERO);
+	    	amountOwedFinal[0] = amountOwedFinal[0].add(amountOwed != null ? amountOwed : BigDecimal.ZERO);
+	    	amountReceivableWithoutTaxFinal[0] = amountReceivableWithoutTaxFinal[0].add(amountReceivableWithoutTax != null ? amountReceivableWithoutTax : BigDecimal.ZERO);
+	    	amountReceivedWithoutTaxFinal[0] = amountReceivedWithoutTaxFinal[0].add(amountReceivedWithoutTax != null ? amountReceivedWithoutTax : BigDecimal.ZERO);
+	    	amountOwedWithoutTaxFinal[0] = amountOwedWithoutTaxFinal[0].add(amountOwedWithoutTax != null ? amountOwedWithoutTax : BigDecimal.ZERO);
+	    	taxAmountFinal[0] = taxAmountFinal[0].add(taxAmount != null ? taxAmount : BigDecimal.ZERO);
+	    	dueDayCountFinal[0] = dueDayCountFinal[0].add(dueDayCount != null ? new BigDecimal(dueDayCount) : BigDecimal.ZERO);
+	    	noticeTimesFinal[0] = noticeTimesFinal[0].add(noticeTimes != null ? new BigDecimal(noticeTimes) : BigDecimal.ZERO);
+        	return null;
+        });
+		//收缴率=已收含税金额/应收含税金额  
+    	BigDecimal collectionRate = calculateCollecionRate(amountReceivableFinal[0] , amountReceivedFinal[0]);
+    	dto.setAmountReceivable(amountReceivableFinal[0] != null ? amountReceivableFinal[0] : BigDecimal.ZERO);
+    	dto.setAmountReceived(amountReceivedFinal[0] != null ? amountReceivedFinal[0] : BigDecimal.ZERO);
+    	dto.setAmountOwed(amountOwedFinal[0] != null ? amountOwedFinal[0] : BigDecimal.ZERO);
+    	dto.setAmountReceivableWithoutTax(amountReceivableWithoutTaxFinal[0] != null ? amountReceivableWithoutTaxFinal[0] : BigDecimal.ZERO);
+    	dto.setAmountReceivedWithoutTax(amountReceivedWithoutTaxFinal[0] != null ? amountReceivedWithoutTaxFinal[0] : BigDecimal.ZERO);
+    	dto.setAmountOwedWithoutTax(amountOwedWithoutTaxFinal[0] != null ? amountOwedWithoutTaxFinal[0] : BigDecimal.ZERO);
+    	dto.setTaxAmount(taxAmountFinal[0] != null ? taxAmountFinal[0] : BigDecimal.ZERO);
     	dto.setDueDayCount(dueDayCountFinal[0] != null ? dueDayCountFinal[0] : BigDecimal.ZERO);
     	dto.setNoticeTimes(noticeTimesFinal[0] != null ? noticeTimesFinal[0] : BigDecimal.ZERO);
     	dto.setCollectionRate(collectionRate);
@@ -369,6 +464,8 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         });
         return response[0];
 	}
+
+	
     
     
 }

@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>dateStr: 账期，格式为2018-06</li>
  *</ul>
  */
-public class BillsDateStrDTO implements Cloneable{
+public class CommunityStatisticParam implements Cloneable{
 	private Integer namespaceId;
 	private Long ownerId;
 	private String ownerType;
@@ -50,9 +50,9 @@ public class BillsDateStrDTO implements Cloneable{
 	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BillsDateStrDTO)) return false;
+        if (!(o instanceof CommunityStatisticParam)) return false;
 
-        BillsDateStrDTO that = (BillsDateStrDTO) o;
+        CommunityStatisticParam that = (CommunityStatisticParam) o;
 
         if (getNamespaceId() != null ? !getNamespaceId().equals(that.getNamespaceId()) : that.getNamespaceId() != null)
             return false;

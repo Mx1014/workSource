@@ -42,8 +42,6 @@ CREATE TABLE `eh_payment_bill_statistic_building` (
   `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
   `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
   `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
-  `amount_exemption` DECIMAL(10,2) COMMENT 'amount reduced',
-  `amount_supplement` DECIMAL(10,2) COMMENT 'amount increased',  
   `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
   `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
   `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',

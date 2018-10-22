@@ -11,6 +11,9 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 public interface AssetStatisticProvider {
 
 	void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr);
+	
+	void createStatisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
+			String buildingName);
 
 	boolean checkIsNeedRefreshStatistic(Integer namespaceId, Long ownerId, String ownerType, String dateStr,
 			String beforeDateStr);
@@ -37,6 +40,6 @@ public interface AssetStatisticProvider {
 
 	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
-	
-	
+
+
 }

@@ -50,7 +50,8 @@ import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.rest.asset.statistic.BillsDateStrDTO;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
@@ -451,10 +452,20 @@ public interface AssetProvider {
 	/**
 	 * 取出eh_payment_bills表中dateStr（年月）
 	 */
-	List<BillsDateStrDTO> getPaymentBillsDatrStr();
+	List<CommunityStatisticParam> getPaymentBillsDateStr();
 	
 	/**
 	 * 取出eh_payment_bill_statistic_community表中dateStr（年月）
 	 */
-	List<BillsDateStrDTO> getStatisticDatrStr();
+	List<CommunityStatisticParam> getStatisticCommunityDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_items表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getPaymentBillItemsDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_building表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getStatisticBuildingDateStr();
 }

@@ -99,7 +99,8 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.rest.asset.statistic.BillsDateStrDTO;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -116,6 +117,7 @@ import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding;
 import com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
@@ -5712,23 +5714,43 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
         return dto;
     }
 
-	public List<BillsDateStrDTO> getPaymentBillsDatrStr() {
+	public List<CommunityStatisticParam> getPaymentBillsDateStr() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
-        List<BillsDateStrDTO> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
 				.from(t)
 				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
-				.fetchInto(BillsDateStrDTO.class);
+				.fetchInto(CommunityStatisticParam.class);
 		return list;
 	}
 
-	public List<BillsDateStrDTO> getStatisticDatrStr() {
+	public List<CommunityStatisticParam> getStatisticCommunityDateStr() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBillStatisticCommunity t = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("t");
-        List<BillsDateStrDTO> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
 				.from(t)
 				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
-				.fetchInto(BillsDateStrDTO.class);
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getPaymentBillItemsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getStatisticBuildingDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticBuilding t = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
 		return list;
 	}
 	

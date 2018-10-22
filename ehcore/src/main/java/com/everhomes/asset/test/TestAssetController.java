@@ -102,6 +102,19 @@ public class TestAssetController extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /test/statisticBillByBuilding</b>
+	 * <p>启动楼宇-时间段（月份）统计结果集的定时任务</p>
+	 */
+	@RequestMapping("statisticBillByBuilding")
+	public RestResponse statisticBillByBuilding() {
+		assetSchedule.statisticBillByBuilding();
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
 	 * <b>URL: /test/listBillStatisticByCommunityForProperty</b>
 	 * <p>提供给资产获取“缴费信息汇总表-项目”列表接口</p>
 	 */
