@@ -65,11 +65,10 @@ public interface YellowPageProvider {
 	void createServiceAllianceAttachments(ServiceAllianceAttachment attachment);
 	void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId);
 	
-	ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type);
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, CategoryAdminStatus status, List<Byte> displayDestination, boolean queryAllChilds);
+	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, List<Byte> displayDestination, boolean queryAllChilds);
 
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
@@ -165,4 +164,10 @@ public interface YellowPageProvider {
 	void deleteProjectCategories(Long projectId, Long type);
 
 	List<ServiceAllianceCategories> listChildCategories(Long parentId);
+
+
+	void updateMainCategorysByType(Long type, Byte enableComment, Byte enableProvider, String name);
+
+
+	List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
 }
