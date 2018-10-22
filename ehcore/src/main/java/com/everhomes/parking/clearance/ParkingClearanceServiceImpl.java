@@ -361,7 +361,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         ParkingClearanceLog log = new ParkingClearanceLog();
         log.setNamespaceId(cmd.getNamespaceId());
         log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-        if(configurationProvider.getBooleanValue("parking.zijing.directcompleted",true)) {
+        if(configurationProvider.getBooleanValue("parking.zijing.directcompleted",false)) {
             log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
         }
         log.setParkingLotId(cmd.getParkingLotId());
