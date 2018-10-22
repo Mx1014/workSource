@@ -20,6 +20,8 @@ import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+
 /**
  * 已经废弃，请使用 {@link com.everhomes.user.sdk.SdkQRCodeService}
  */
@@ -27,9 +29,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class QRCodeServiceImpl implements QRCodeService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(QRCodeServiceImpl.class);
+
     @Autowired
     private SdkQRCodeService sdkDelegate;
 
+    @Autowired
+    private QRCodeListenerManager qrCodeListenerManager;
+
+    @Autowired
+    private QRCodeProvider qrcodeProvider;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
     @Override
     public QRCodeDTO createQRCode(NewQRCodeCommand cmd) {
         com.everhomes.rest.user.qrcode.NewQRCodeCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.user.qrcode.NewQRCodeCommand.class);
@@ -75,7 +87,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         GetQRCodeInfoCommand cmd = new GetQRCodeInfoCommand();
         cmd.setQrid(qrid);
         cmd.setSource(source);
-        return this.getQRCodeInfo(cmd);
         User operator = UserContext.current().getUser();
         Long operatorId = -1L;
         if(operator != null) {
