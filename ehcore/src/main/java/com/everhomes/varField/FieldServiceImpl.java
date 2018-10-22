@@ -1397,7 +1397,7 @@ public class FieldServiceImpl implements FieldService {
         PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
         Long ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
         PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
-        String  ownerType = (String)dtoDes.getReadMethod().invoke(dto);
+        String  ownerType = dtoDes.getReadMethod().invoke(dto).toString();
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd;
         if(fieldName.equals("customerContact") || fieldName.equals("channelContact")){
