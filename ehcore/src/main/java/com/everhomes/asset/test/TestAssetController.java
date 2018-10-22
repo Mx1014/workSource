@@ -103,7 +103,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /test/listBillStatisticByCommunityForProperty</b>
-	 * <p>提供给资产那边做统计的接口</p>
+	 * <p>提供给资产那边做项目统计的接口</p>
 	 */
 	@RequestMapping("listBillStatisticByCommunityForProperty")
 	public RestResponse listBillStatisticByCommunityForProperty(ListBillStatisticByCommunityCmd cmd) {
@@ -115,4 +115,7 @@ public class TestAssetController extends ControllerBase {
 		return restResponse;
 	}
 
+	
+	
+	
 }

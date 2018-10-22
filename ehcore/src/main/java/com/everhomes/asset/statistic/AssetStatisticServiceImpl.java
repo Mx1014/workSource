@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 
 /**
  * @author created by ycx
@@ -21,7 +22,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	private AssetStatisticProvider assetStatisticProvider;
 	
 	/**
-	 * 提供给资产那边做统计的接口
+	 * 提供给资产那边做项目统计的接口
 	 * @param namespaceId
 	 * @param ownerIdList
 	 * @param ownerType
@@ -58,6 +59,12 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
         }
 		response.setListBillStatisticByCommunityDTOs(list);
 		return response;
+	}
+
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotal(
+        		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		return dto;
 	}
 	
 	

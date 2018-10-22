@@ -29,6 +29,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -1543,7 +1544,7 @@ public class AssetController extends ControllerBase {
     }
     
     /**
-	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目</p>
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-分页数据</p>
 	 * <b>URL: /asset/listBillStatisticByCommunity</b>
 	 */
 	@RequestMapping("listBillStatisticByCommunity")
@@ -1551,6 +1552,20 @@ public class AssetController extends ControllerBase {
 	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
 		ListBillStatisticByCommunityResponse res = assetStatisticService.listBillStatisticByCommunity(cmd);
 		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-合计</p>
+	 * <b>URL: /asset/listBillStatisticByCommunityTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotal")
+	@RestReturn(value = ListBillStatisticByCommunityDTO.class)
+	public RestResponse listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotal(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;

@@ -31,6 +31,9 @@ public interface AssetStatisticProvider {
 	 */
 	List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
+
+	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(Integer namespaceId, List<Long> ownerIdList,
+			String ownerType, String dateStrBegin, String dateStrEnd);
 	
 	
 }
