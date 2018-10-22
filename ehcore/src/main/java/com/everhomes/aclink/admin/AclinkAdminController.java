@@ -21,7 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.xml.transform.Result;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 @RestDoc(value="Aclink Admin controller", site="core")
@@ -64,6 +66,37 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse listDoorAccessByOwnerId(@Valid QueryDoorAccessAdminCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchDoorAccessByAdmin(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/listDoorAccess</b>
+     * <p>获取门禁列表 lite版</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorAccess")
+    @RestReturn(value=ListDoorAccessLiteResponse.class)
+    public RestResponse listDoorAccessByOwnerIdLite(@Valid QueryDoorAccessAdminCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessByOwnerIdLite(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/getDoorAccessById</b>
+     * <p>根据id获取单个门禁详情</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("getDoorAccessById")
+    @RestReturn(value=DoorAccessDTO.class)
+    public RestResponse getDoorAccessById(@Valid GetDoorAccessByIdCommand cmd) {
+    	RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.getDoorAccessById(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -125,6 +158,56 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse exportAclinkUsersXls(@Valid ListAclinkUserCommand cmd, HttpServletResponse httpResponse) {
         doorAccessService.exportAclinkUsersXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/listFormalAuth</b>
+     * <p>正式授权列表,能远程开门必须要有常规开门的权限</p>
+     * @return
+     */
+    @RequestMapping("listFormalAuth")
+    @RestReturn(value=ListFormalAuthResponse.class)
+    public RestResponse listFormalAuth(@Valid ListFormalAuthCommand cmd) {
+    	//TODO 
+        RestResponse response = new RestResponse(doorAccessService.listFormalAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK"); 
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/updateAuthBatch</b>
+     * <p>批量更新(正式)授权</p>
+     * @return
+     */
+    @RequestMapping("updateAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse updateAuthBatch(@Valid UpdateAuthBatchCommand cmd) {
+//        cmd.setIsOpenAuth((byte)0);
+    	//TODO 
+    	doorAccessService.updateAuthBatch(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createFormalAuthBatch</b>
+     * <p>批量创建(正式)授权</p>
+     * @return
+     */
+    @RequestMapping("createFormalAuthBatch")
+    @RestReturn(value=String.class)
+    public RestResponse createAuthBatch(@Valid CreateFormalAuthBatchCommand cmd) {
+    	doorAccessService.createFormalAuthBatch(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -299,6 +382,84 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
+    }
+    
+    
+    /**
+     * <b>URL: /admin/aclink/listAccessGroupRel</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listAccessGroupRel")
+    @RestReturn(value=ListAccessGroupRelResponse.class)
+    public RestResponse listDoorGroup(@Valid ListDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorGroupRel(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/getTempAuthSettings</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("getTempAuthSettings")
+    @RestReturn(value=GetTempAuthSettingsResponse.class)
+    public RestResponse getTempAuthSettings(@Valid GetTempAuthSettingsCommand cmd) {
+//    	Map<String, String> resMap = new HashMap<>();
+//    	resMap.put("TESTKEY", "testvalue");
+    	GetTempAuthSettingsResponse rsp = new GetTempAuthSettingsResponse();
+//    	rsp.setConfigs(resMap);
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/setTempAuthSettings</b>
+     * <p>获取门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("setTempAuthSettings")
+    @RestReturn(value=String.class)
+    public RestResponse setTempAuthSettings(@Valid SetTempAuthSettingsCommand cmd) {
+//    	Map<String, String> resMap = new HashMap<>();
+//    	resMap.put("TESTKEY", "testvalue");
+//    	rsp.setConfigs(resMap);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/updateAccessGroupRel</b>
+     * <p>更新门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("updateAccessGroupRel")
+    @RestReturn(value=String.class)
+    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/createAccessGroupRel</b>
+     * <p>新增门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("createAccessGroupRel")
+    @RestReturn(value=String.class)
+    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**
@@ -922,7 +1083,7 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/aclink/generateMarchUUID</b>
-     * <p>生成唯一配对码 </p>
+     * <p>生成唯一配对码  门禁3.0已经不用该接口</p>
      * @return
      */
     @RequestMapping("generateMarchUUID")
@@ -964,7 +1125,7 @@ public class AclinkAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/aclink/queryServerRelations</b>
-     * <p>根据本地服务器查询关联设备</p>
+     * <p>根据本地服务器及门禁查询关联设备</p>
      * @return
      */
     @RequestMapping("queryServerRelations")
@@ -1021,6 +1182,22 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/aclink/updateCameraIpadBatch</b>
+     * <p>批量更新摄像头及ipad关联关系 </p>
+     * @return
+     */
+    @RequestMapping("updateCameraIpadBatch")
+    @RestReturn(value=String.class)
+    public RestResponse updateCameraIpadBatch(UpdateCameraIpadBatchCommand cmd){
+    	aclinkServerService.updateCameraIpadBatch(cmd);
+    	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
      * <b>URL: /admin/aclink/listLocalCameras</b>
      * <p>获取内网摄像头列表 </p>
      * @return
@@ -1030,7 +1207,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse listLocalCameras(ListLocalCamerasCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(locator,cmd.getOwnerId(),cmd.getOwnerType(),null,null,null,null,cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(ConvertHelper.convert(cmd, ListLocalCamerasCommand.class)));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1046,7 +1223,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse queryLocalCameras(QueryAclinkCamerasCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(locator,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getServerId(),cmd.getDoorAccessId(),cmd.getEnterStatus(),cmd.getLinkStatus(),cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkCameraService.listLocalCameras(ConvertHelper.convert(cmd, ListLocalCamerasCommand.class)));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1104,7 +1281,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse listLocalIpad(ListLocalIpadCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),null,null,null,null,null,null,cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1120,7 +1297,7 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse queryLocalIpads(QueryAclinkIpadCommand cmd){
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
-    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,cmd.getOwnerId(),cmd.getOwnerType(),cmd.getServerId(),cmd.getDoorAccessId(),cmd.getEnterStatus(),cmd.getLinkStatus(),cmd.getStatus(),null,cmd.getPageSize()));
+    	RestResponse response = new RestResponse(aclinkIpadService.listLocalIpads(locator,ConvertHelper.convert(cmd, ListLocalIpadCommand.class)));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1131,10 +1308,12 @@ public class AclinkAdminController extends ControllerBase {
      * <p>新增内网ipad</p>
      */
     @RequestMapping("createLocalIpad")
-    @RestReturn(value=String.class)
+    @RestReturn(value=CreateLocalIpadResponse.class)
     public RestResponse addLocalIpad(CreateLocalIpadCommand cmd){
-    	aclinkIpadService.createLocalIpad(cmd);
-    	RestResponse response = new RestResponse();
+    	CreateMarchUUIDCommand cmd1 = new CreateMarchUUIDCommand();
+    	cmd1.setUuidType((byte) 1);
+    	cmd.setUuid(aclinkServerService.generateUUID(cmd1));
+    	RestResponse response = new RestResponse(aclinkIpadService.createLocalIpad(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1153,6 +1332,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/setIpadLogo</b>
+     * <p>删除内网ipad</p>
+     */
+    //TODO
+//    @RequestMapping("setIpadLogo")
+//    @RestReturn(value=String.class)
+//    public RestResponse setIpadLogo(SetIpadLogoCommand cmd){
+//    	aclinkIpadService.deleteLocalIpad(cmd.getId());
+//    	RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /admin/aclink/deleteLocalIpad</b>
@@ -1329,6 +1523,22 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createVisitorBatch</b>
+     * <p>批量授权访客 </p>
+     * @return
+     */
+    @RequestMapping("createVisitorBatch")
+    @RestReturn(value=String.class)
+    public RestResponse createVisitorBatch(CreateVisitorBatchCommand cmd){
+    	RestResponse response = new RestResponse();
+    	doorAccessService.createVisitorBatch(cmd);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     //20180914 add by liqingyan
     /**
      * <b>URL: /admin/aclink/checkMobilePrivilege</b>
@@ -1342,5 +1552,5 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }    
 }

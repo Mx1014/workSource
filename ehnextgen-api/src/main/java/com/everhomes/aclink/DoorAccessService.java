@@ -99,7 +99,7 @@ public interface DoorAccessService {
     //20180914 add by liqingyan
     CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd);
 
-    void test();
+//    void test();
 
     DoorAuth getLinglingDoorAuthByUuid(String uuid);
 
@@ -151,7 +151,7 @@ public interface DoorAccessService {
     
     void deleteDoorAuthLevel(Long id);
     
-    String faceTest();
+//    String faceTest();
 
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
@@ -182,6 +182,18 @@ public interface DoorAccessService {
 	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 
 	public void updateAccessType(Long doorId, byte doorType);
+
+	public ListZLDoorAccessResponse listDoorAccessMacByApp();
+
+	public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd);
+
+	public void createVisitorBatch(CreateVisitorBatchCommand cmd);
+
+	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd);
+
+	public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd);
+
+	public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd);
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
     //add by liqingyan
@@ -224,4 +236,17 @@ public interface DoorAccessService {
     DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
 
     DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd);
+//门禁v3.0.1
+	public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
+
+	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
+
+	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
+
+	public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
+
+	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
+
+	public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
+
 }

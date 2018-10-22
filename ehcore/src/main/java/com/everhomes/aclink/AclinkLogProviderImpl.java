@@ -96,6 +96,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         
         //暂过滤掉物理按键开门的日志, by liuyilin 20180625
         query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
+        query.addJoin(Tables.EH_DOOR_AUTH, Tables.EH_ACLINK_LOGS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID));
         
         if (count > 0){
         	query.addLimit(count + 1);
