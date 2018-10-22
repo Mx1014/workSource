@@ -40,6 +40,8 @@ CREATE TABLE `eh_alliance_config_state` (
 	`type` BIGINT(20) NOT NULL,
 	`project_id` BIGINT(20) NOT NULL COMMENT 'community为项目id， organaization为公司id',
 	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-取默认配置 1-取自定义配置。当owner_type为organization时，该值必定为1。',
+	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
 	PRIMARY KEY (`id`),
 	INDEX `u_eh_prefix` (`type`, `project_id`)
 )
@@ -51,10 +53,14 @@ ENGINE=InnoDB
 CREATE TABLE `eh_alliance_service_category_match` (
 	`id` BIGINT(20) NOT NULL,
 	`namespace_id` INT(11) NOT NULL,
+        `type` BIGINT(20) NOT NULL,
 	`owner_type` VARCHAR(20) NOT NULL,
 	`owner_id` BIGINT(20) NOT NULL,
 	`service_id` BIGINT(20) NOT NULL COMMENT '服务id',
 	`category_id` BIGINT(20) NOT NULL COMMENT '服务类型id',
+	`category_name` VARCHAR(64) NOT NULL COMMENT '服务类型名称',
+	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `u_eh_service_category` (`service_id`, `category_id`)
 )
@@ -62,6 +68,9 @@ COMMENT='服务与服务类型的匹配表，生成/删除项目配置后需要�
 ENGINE=InnoDB
 ;
 
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
 
 
 

@@ -1,6 +1,8 @@
 package com.everhomes.yellowPage.standard;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +29,16 @@ import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.AllianceConfigState;
+import com.everhomes.yellowPage.AllianceConfigStateProvider;
 import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.AllianceTagProvider;
 import com.everhomes.yellowPage.ServiceAllianceAttachment;
@@ -42,9 +49,11 @@ import com.everhomes.yellowPage.YellowPageService;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 
 @Component
-public class AllianceStandardServiceImpl implements AllianceStandardService {
+public class AllianceStandardServiceImpl implements AllianceStandardService { 
 
 	private static final long ALLIANCE_MODULE_ID = 40500L;
 
@@ -55,9 +64,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private YellowPageProvider yellowPageProvider;
 
 	@Autowired
-	private ServiceModuleService serviceModuleService;
-
-	@Autowired
 	private OrganizationService organizationService;
 	
 	@Autowired
@@ -65,6 +71,19 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	
 	@Autowired
 	private AllianceTagProvider allianceTagProvider;
+	
+	@Autowired
+	private AllianceConfigStateProvider allianceConfigStateProvider;
+	
+	@Autowired
+	PortalVersionProvider portalVersionProvider;
+	
+	@Autowired
+	ServiceModuleAppProvider serviceModuleAppProvider;
+	
+	@Autowired
+	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
+	
 	
 	
 	@Override
@@ -88,31 +107,32 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_TYPE_NOT_VALID, "alliance type is not valid");
 		}
 
-		SelfDefinedState state = getSelfDefinedState(cmd.getType(), cmd.getProjectId());
+		AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(), cmd.getProjectId());;
 		if (enable) {
 			// 如果需要开启，而且当前是关闭状态，才进行创建
-			if (SelfDefinedState.DISABLE == state) {
-				createSelfDefinedConfig(cmd.getType(), cmd.getProjectId(), cmd.getCurrentPMId());
+			if (isDisableSelfConfig(state)) {
+				createSelfDefinedConfig(state, cmd.getType(), cmd.getProjectId(), cmd.getCurrentPMId());
 			}
 			return;
 		}
 		
-		if (SelfDefinedState.ENABLE == state) {
+		if (isEnableSelfConfig(state)) {
 			// 关闭时删除所有该项目下的所有自定义配置
-			deleteSelfDefinedConfig(cmd.getType(), cmd.getProjectId());
+			deleteSelfDefinedConfig(state, cmd.getType(), cmd.getProjectId());
 		}
 	}
 
-	private void deleteSelfDefinedConfig(Long type, Long projectId) {
+	private void deleteSelfDefinedConfig(AllianceConfigState state, Long type, Long projectId) {
 		dbProvider.execute(r -> {
-			// 删除主配置
-			deleteProjectMainConfig(type, projectId);
 			
 			// 删除主样式
 			deleteProjectCategories(type,projectId);
 		
 			// 删除tag
 			deleteProjectTags(type,projectId);
+			
+			// 更新配置状态
+			updateAllianceConfigState(state, type, projectId, SelfDefinedState.DISABLE.getCode());
 			
 			return null;
 		});
@@ -125,23 +145,41 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 
 	private void deleteProjectCategories(Long type, Long projectId) {
 		yellowPageProvider.deleteProjectCategories(projectId, type);
-	}
-
-	private void deleteProjectMainConfig(Long type, Long projectId) {
-		yellowPageProvider.deleteProjectMainConfig(projectId, type);
-		
-		//删除图片 attachements ，可以不删
-		
+		serviceCategoryMatchProvider.deleteMathes(ServiceAllianceBelongType.COMMUNITY.getCode(), projectId, type);
 	}
 
 	// 创建自定义配置 包括主页样式，服务样式，筛选列表，表单，工作流
-	private void createSelfDefinedConfig(Long type, Long projectId, Long organizationId) {
+	private void createSelfDefinedConfig(AllianceConfigState state, Long type, Long projectId, Long organizationId) {
 		dbProvider.execute(r -> {
-			copyMainConfigToProject(type, projectId, organizationId);
+			updateAllianceConfigState(state, type, projectId, SelfDefinedState.ENABLE.getCode());
 			copyCategorysConfigToProject(type, projectId, organizationId);
 			copyAllianceTagsToProject(type, projectId, organizationId);
+			copyAllianceCategoryMathToProject(type, projectId, organizationId);
 			return null;
 		});
+	}
+
+	private void copyAllianceCategoryMathToProject(Long type, Long projectId, Long organizationId) {
+		
+		
+		
+	}
+
+	private void updateAllianceConfigState(AllianceConfigState state,  Long type, Long projectId, byte status) {
+		
+		if (null == state) {
+			state =  new AllianceConfigState();
+			state.setNamespaceId(UserContext.getCurrentNamespaceId());
+			state.setType(type);
+			state.setProjectId(projectId);
+			state.setStatus(status);
+			allianceConfigStateProvider.createAllianceConfigState(state);
+			return;
+		}
+		
+		state.setStatus(status);
+		allianceConfigStateProvider.updateAllianceConfigState(state);
+		
 	}
 
 	private void copyAllianceTagsToProject(Long type, Long projectId, Long organizationId) {
@@ -169,26 +207,66 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	private void copyCategorysConfigToProject(Long type, Long projectId, Long organizationId) {
+		
+		Map<Long, ServiceAllianceCategories> oldAndNewCategoryMatch = new HashMap<>();
 
 		// 获取主样式配置
-		ServiceAllianceCategories currentMainCag = getMainCategorys(type, organizationId);
+		ServiceAllianceCategories currentMainCag = yellowPageProvider
+				.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
 		if (null == currentMainCag) {
 			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST,
 					"service alliance main category not exist");
 		}
-
+		
 		ServiceAllianceCategories newMainCag = copyMainCategorysConfigToProject(currentMainCag, projectId); // 复制主样式
-		copyChildCategorysConfigToProject(currentMainCag.getId(), newMainCag.getId(), projectId); // 子样式复制
+		oldAndNewCategoryMatch.put(currentMainCag.getId(), newMainCag);
+		
+		copyChildCategorysConfigToProject(currentMainCag.getId(), newMainCag.getId(), projectId, oldAndNewCategoryMatch); // 子样式复制
+		
+		//添加到关联表中
+		createServiceCategoryMath(projectId, organizationId, type, oldAndNewCategoryMatch);
+		
 	}
 
 
-	private void copyChildCategorysConfigToProject(Long oldParentId, Long newParentId, Long projectId) {
+	private void createServiceCategoryMath(Long projectId, Long organizationId, Long type, Map<Long, ServiceAllianceCategories> oldAndNewCaIdMatch) {
+		
+		if (oldAndNewCaIdMatch.isEmpty()) {
+			return;
+		}
+		
+		//找到所有
+		List<ServiceCategoryMatch> mathes = serviceCategoryMatchProvider.listMatches(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
+		if (CollectionUtils.isEmpty(mathes)) {
+			return;
+		}
+		
+		for (ServiceCategoryMatch match : mathes) {
+			ServiceAllianceCategories newCa= oldAndNewCaIdMatch.get(match.getCategoryId());
+			if (null != newCa) {
+				ServiceCategoryMatch tmp = new ServiceCategoryMatch();
+				tmp.setNamespaceId(UserContext.getCurrentNamespaceId());
+				tmp.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+				tmp.setOwnerId(projectId);
+				tmp.setServiceId(match.getServiceId());
+				tmp.setCategoryId(newCa.getId());
+				tmp.setCategoryName(newCa.getName());
+				tmp.setType(type);
+				serviceCategoryMatchProvider.createMatch(tmp);
+			}
+		}
+		
+	}
+
+	private void copyChildCategorysConfigToProject(Long oldParentId, Long newParentId, Long projectId, Map<Long, ServiceAllianceCategories> oldAndNewCaIdMatch) {
 		List<ServiceAllianceCategories> childCags = getChildCategorys(oldParentId);
 		for (ServiceAllianceCategories child : childCags) {
+			Long oldCaId = child.getId();
 			child.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
 			child.setOwnerId(projectId);
 			child.setParentId(newParentId);
 			yellowPageProvider.createCategory(child);
+			oldAndNewCaIdMatch.put(oldCaId, child);
 		}
 	}
 
@@ -216,40 +294,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		return newMainCag;
 	}
 
-	private ServiceAllianceCategories getMainCategorys(Long type, Long organizationId) {
-		ServiceAllianceCategories sc = yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
-		if (null != sc) {
-			return sc;
-		}
-		
-		return yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), null, type);
-	}
-
-	private ServiceAlliances getGeneralMainConfig(Long type, Long organizationId) {
-		ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(),
-				organizationId, type);
-		if (null != sa) {
-			return sa;
-		}
-		
-		return yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(),
-				null, type);
-	}
-
-	private void copyMainConfigToProject(Long type, Long projectId, Long organizationId) {
-		ServiceAlliances mainSa = getGeneralMainConfig(type, organizationId);
-		if (null == mainSa) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_MAIN_CONFIG_NOT_EXIST,
-					"service alliance main general config not exist");
-		}
-
-		//创建主配置
-		mainSa.setId(null);
-		mainSa.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
-		mainSa.setOwnerId(projectId);
-		yellowPageProvider.createServiceAlliances(mainSa);
-	}
-
 	@Override
 	public void disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
 		updateSelfDefinedConfig(cmd, false);
@@ -262,17 +306,10 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			throwError(YellowPageServiceErrorCode.ERROR_OWNER_TYPE_NOT_COMMUNITY, "owner type should be 'community'");
 		}
 
-		SelfDefinedState state = getSelfDefinedState(cmd.getType(), cmd.getProjectId());
+		AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(), cmd.getProjectId());
 		GetSelfDefinedStateResponse resp = new GetSelfDefinedStateResponse();
-		resp.setIsOpen(state.getCode());
+		resp.setIsOpen(state == null ? SelfDefinedState.DISABLE.getCode() : state.getStatus());
 		return resp;
-	}
-
-	private SelfDefinedState getSelfDefinedState(Long type, Long projectId) {
-		ServiceAlliances sa = yellowPageProvider
-				.queryServiceAllianceTopic(ServiceAllianceBelongType.COMMUNITY.getCode(), projectId, type);
-
-		return null == sa ? SelfDefinedState.DISABLE : SelfDefinedState.ENABLE;
 	}
 
 	private boolean isIdValid(Long id) {
@@ -294,69 +331,60 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	@Override
-	public ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type) {
-
-		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			return getGeneralMainConfig(type, ownerId);
-		}
-
-		ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(ownerType, ownerId, type);
-		if (null != sa) {
-			return sa;
-		}
-
-		// 根据园区查询，可以再查询通用配置
-		Long orgId = getOrgIdByTypeAndProjectId(type, ownerId);
-		return null == orgId ? null : getGeneralMainConfig(type, orgId);
+	public ServiceAllianceCategories queryHomePageCategoryByAdmin(String ownerType, Long ownerId, Long type) {
+		return yellowPageProvider.findMainCategory(ownerType, ownerId, type);
 	}
 	
 	@Override
-	public ServiceAllianceCategories queryServiceAllianceCategoryTopic(String ownerType, Long ownerId, Long type) {
+	public ServiceAllianceCategories queryHomePageCategoryByScene(Long type, Long projectId) {
 
-		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			return getMainCategorys(type, ownerId);
-		}
-		
-		ServiceAllianceCategories sc = yellowPageProvider.findMainCategory(ownerType, ownerId, type);
-		if (null != sc) {
-			return sc;
+		// 查看当前项目下配置状态
+		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, projectId);
+		if (isEnableSelfConfig(state)) {
+			return yellowPageProvider.findMainCategory(ServiceAllianceBelongType.COMMUNITY.getCode(), projectId, type);
 		}
 
 		// 根据园区查询，可以再查询通用配置
-		Long orgId = getOrgIdByTypeAndProjectId(type, ownerId);
-		return null == orgId ? null : getMainCategorys(type, orgId);
+		Long orgId = getOrgIdByTypeAndProjectId(type, projectId);
+		return null == orgId ? null
+				: yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), orgId, type);
 	}
-
-	private Long getOrgIdByTypeAndProjectId(Long type, Long projectId) {
+	
+	@Override
+	public ServiceAllianceCategories createHomePageCategory(String ownerType, Long ownerId, Long type) {
+		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
+			if (isDisableSelfConfig(state)) {
+				throwError(YellowPageServiceErrorCode.ERROR_SELF_CONFIG_NOT_ENABLE, "you should enbale self config first");
+			}
+		}
+		
+		// 根据type获取基础数据
+		ServiceAllianceCategories baseCa = getAllianceTypeBaseCategory(type);
+		if (null == baseCa) {
+			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_MAIN_CONFIG_NOT_EXIST, "service alliance main general config not exist");
+		}
+		
+		ServiceAllianceCategories serviceAllianceCategories = ConvertHelper.convert(baseCa, ServiceAllianceCategories.class);
+		serviceAllianceCategories.setOwnerType(ownerType);
+		serviceAllianceCategories.setOwnerId(ownerId);
+		yellowPageProvider.createCategory(serviceAllianceCategories);
+		
+		return serviceAllianceCategories;
+	}
+	
+	@Override
+	public Long getOrgIdByTypeAndProjectId(Long type, Long projectId) {
 
 		// 根据type获取相应的appId
-		List<ServiceModuleAppDTO> dtos = serviceModuleService.getModuleApps(UserContext.getCurrentNamespaceId(),
-				ALLIANCE_MODULE_ID);
-		if (CollectionUtils.isEmpty(dtos)) {
-			return null;
-		}
-
-		ServiceModuleAppDTO targetAppDto = null;
-		for (ServiceModuleAppDTO dto : dtos) {
-			if (StringUtils.isEmpty(dto.getInstanceConfig())) {
-				continue;
-			}
-
-			ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
-					.fromJsonString(dto.getInstanceConfig(), ServiceAllianceInstanceConfig.class);
-			if (type.equals(config.getType())) {
-				targetAppDto = dto;
-				break;
-			}
-		}
-
-		if (null == targetAppDto) {
+		ServiceModuleApp targetApp = getModuleAppByType(UserContext.getCurrentNamespaceId(), type);
+		if (null == targetApp) {
 			return null;
 		}
 
 		// 获取到管理公司
 		GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
-		cmd.setAppId(targetAppDto.getOriginId());
+		cmd.setAppId(targetApp.getOriginId());
 		cmd.setProjectId(projectId);
 		OrganizationDTO orgDto = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
 		if (null == orgDto) {
@@ -366,32 +394,89 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		return null == orgDto ? null : orgDto.getId();
 	}
 	
+	private ServiceModuleApp getModuleAppByType(Integer namespaceId, Long type) {
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+		Long versionId = releaseVersion == null ? null : releaseVersion.getId();
+		return serviceModuleAppProvider.findServiceModuleApp(namespaceId, versionId, ALLIANCE_MODULE_ID, "" + type);
+	}
+	
 	@Override
-	public List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize,
+	public List<ServiceAllianceCategories> listChildCategoriesByAdmin(CrossShardListingLocator locator, Integer pageSize,
 			String ownerType, Long ownerId, Long organizationId, Long type) {
 		boolean isQueryChild = true;
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		// 获取配置
 		List<ServiceAllianceCategories> cags = yellowPageProvider.listCategories(locator, pageSize, ownerType, ownerId,
-				namespaceId, null, type, CategoryAdminStatus.ACTIVE, null, isQueryChild);
+				namespaceId, null, type, null, isQueryChild);
 		if (!CollectionUtils.isEmpty(cags)) {
 			return cags;
 		}
 
-		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			
-			if (null == organizationId) {
-				organizationId = getOrgIdByTypeAndProjectId(type, ownerId);
-			}
-			
-			return yellowPageProvider.listCategories(locator, pageSize,
-					ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, namespaceId, null, type,
-					CategoryAdminStatus.ACTIVE, null, isQueryChild);
+		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			return null;
 		}
 
-		//如果都没获取到返回空
-		return null;
+		// 查看当前项目下配置状态
+		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
+		if (isEnableSelfConfig(state)) {
+			return null;
+		}
+
+		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
+				organizationId, namespaceId, null, type, null, isQueryChild);
+	}
+	
+	@Override
+	public List<ServiceAllianceCategories> listChildCategoriesByScene(CrossShardListingLocator locator, Integer pageSize,
+			String ownerType, Long ownerId, Long organizationId, Long type) {
+		boolean isQueryChild = true;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			throwError(YellowPageServiceErrorCode.ERROR_OWNER_TYPE_NOT_COMMUNITY, "ownerType must be community");
+		}
+
+		// 查看当前项目下配置状态
+		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
+		if (isEnableSelfConfig(state)) {
+			return yellowPageProvider.listCategories(locator, pageSize, ownerType, organizationId, namespaceId, null,
+					type, null, isQueryChild);
+		}
+
+		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
+				organizationId, namespaceId, null, type, null, isQueryChild);
+	}
+	
+	@Override
+	public boolean isDisableSelfConfig(AllianceConfigState state) {
+		return null == state || SelfDefinedState.DISABLE.getCode() == state.getStatus();
+	}
+	
+	@Override
+	public boolean isEnableSelfConfig(AllianceConfigState state) {
+		return null != state && SelfDefinedState.ENABLE.getCode() == state.getStatus();
 	}
 
+	private ServiceAllianceCategories getAllianceTypeBaseCategory(Long type) {
+		return yellowPageProvider.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), -1L, type);
+	}
+
+	@Override
+	public void updateHomePageCategorysByPublish(ServiceAllianceInstanceConfig config, String name) {
+		yellowPageProvider.updateMainCategorysByType(config.getType(), config.getEnableComment(), config.getEnableProvider(), name);
+	}
+
+	@Override
+	public ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId) {
+		return serviceCategoryMatchProvider.findMatch(ownerType, ownerId, type, serviceId);
+	}
+	
+	@Override
+	public void updateMatchCategoryName(Long type, Long categoryId, String categoryName) {
+		serviceCategoryMatchProvider.updateMatchCategoryName(type, categoryId, categoryName);
+	}
+	
 }
