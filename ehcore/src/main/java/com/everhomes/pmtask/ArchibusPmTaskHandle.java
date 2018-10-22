@@ -3,6 +3,8 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.pmtask.archibus.*;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ARCHIBUS)
@@ -145,7 +148,11 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         FmWorkDataService service = getService();
         String json = "";
         try {
-            service.submitEvent(pk_crop, req.getParameter("request_source"), req.getParameter("user_id"), req.getParameter("project_id"),
+            PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
+            if(user == null){
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
+            }
+            service.submitEvent(pk_crop, req.getParameter("request_source"), user.getArchibusUid(), req.getParameter("project_id"),
                     req.getParameter("service_id"), req.getParameter("record_type"), req.getParameter("remarks"), req.getParameter("contack"),
                     req.getParameter("telephone"), req.getParameter("location"), req.getParameter("order_date"), req.getParameter("order_time"));
         } catch (RemoteException e) {
@@ -164,6 +171,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         FmWorkDataService service = getService();
         String json = "";
         try {
+            getUser(req.getParameter("user_id"));
             json = service.eventList(req.getParameter("user_id"), req.getParameter("project_id"), req.getParameter("order_type"),
                     req.getParameter("record_type"), Integer.valueOf(req.getParameter("page_num")), perg_size);
             LOGGER.debug(json);
@@ -194,13 +202,20 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         return result.getData();
     }
 
+    private PmTaskArchibusUserMapping getUser(String phone){
+        PmTaskArchibusUserMapping user = pmTaskProvider.findArchibusUserbyPhone(phone);
+        if(user == null){
+            syncArchibusUser();
+            user = pmTaskProvider.findArchibusUserbyPhone(phone);
+        }
+        return user;
+    }
 
-
-    private Object getUsers(){
+    private Object getThirdUsers(String dateTime,String userId){
         FmWorkDataService service = getService();
         String json = "";
         try {
-            json = service.userInfo("","");
+            json = service.userInfo(dateTime,userId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -211,13 +226,26 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         }
         LOGGER.debug(json);
         return result.getData();
+    }
 
+    public void syncArchibusUser(){
+        List<JSONObject> users = (List<JSONObject>) getThirdUsers("","");
+        for (JSONObject user : users) {
+            String archibusUid = user.getString("pk_user");
+            PmTaskArchibusUserMapping localuser = pmTaskProvider.findArchibusUserbyArchibusId(archibusUid);
+            if(localuser == null){
+                PmTaskArchibusUserMapping newuser = new PmTaskArchibusUserMapping();
+                newuser.setIdentifierToken(user.getString("phone"));
+                newuser.setArchibusUid(archibusUid);
+                pmTaskProvider.createArchibusUser(newuser);
+            }
+        }
     }
 
     public static void main(String[] args) {
         ArchibusPmTaskHandle bean = new ArchibusPmTaskHandle();
         Map<String,String> params = new HashMap<>();
-        bean.getUsers();
+        bean.getThirdUsers("","");
 //        楼栋
 //        params.put("projectId","YZ8600PEK01GMWYGMYJY");
 //        params.put("parentId","YZ8600PEK01GMWYGMYJY");

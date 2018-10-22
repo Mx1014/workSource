@@ -92,4 +92,11 @@ public interface PmTaskProvider {
 
 	void deletePmTaskOrder(Long id);
 
+//	国贸对接用户映射表
+	void createArchibusUser(PmTaskArchibusUserMapping bean);
+	void updateArchibusUser(PmTaskArchibusUserMapping bean);
+	void deleteArchibusUser(Long id);
+	PmTaskArchibusUserMapping findArchibusUserbyPhone(String phoneNum);
+	PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid);
+
 }

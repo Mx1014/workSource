@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskOrderDetails;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskOrders;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskConfigs;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
@@ -30,11 +28,6 @@ import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskHistoryAddresses;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
-import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskHistoryAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
@@ -683,5 +676,48 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
 		dao.deleteById(id);
+	}
+
+	@Override
+	public void createArchibusUser(PmTaskArchibusUserMapping bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskArchibusUserMapping.class));
+		bean.setId(id);
+		bean.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(bean);
+	}
+
+	@Override
+	public void updateArchibusUser(PmTaskArchibusUserMapping bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		bean.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(bean);
+	}
+
+	@Override
+	public void deleteArchibusUser(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public PmTaskArchibusUserMapping findArchibusUserbyPhone(String phoneNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskArchibusUserMapping.class));
+		SelectQuery<EhPmTaskArchibusUserMappingRecord> query = context.selectQuery(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING);
+		query.addConditions(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING.IDENTIFIER_TOKEN.eq(phoneNum));
+		PmTaskArchibusUserMapping result = query.fetchOneInto(PmTaskArchibusUserMapping.class);
+		return result;
+	}
+
+	@Override
+	public PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskArchibusUserMapping.class));
+		SelectQuery<EhPmTaskArchibusUserMappingRecord> query = context.selectQuery(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING);
+		query.addConditions(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING.ARCHIBUS_UID.eq(archibusUid));
+		PmTaskArchibusUserMapping result = query.fetchOneInto(PmTaskArchibusUserMapping.class);
+		return result;
 	}
 }

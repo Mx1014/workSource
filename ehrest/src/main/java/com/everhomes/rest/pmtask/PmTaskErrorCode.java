@@ -46,4 +46,5 @@ public interface PmTaskErrorCode {
     int ERROR_REMOTE_INVOKE_FAIL = 10024;//第三方返回失败
     int ERROR_INVALD_PARAMS = 10025;//接口参数异常
 
+    int ERROR_USER_NOT_FOUND = 10026;
 }

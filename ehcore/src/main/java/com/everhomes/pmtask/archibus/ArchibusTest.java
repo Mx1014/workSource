@@ -188,7 +188,7 @@ public class ArchibusTest {
     public static void main(String[] args) {
         ArchibusTest bean = new ArchibusTest();
         Map<String,String> params = new HashMap<>();
-//        bean.getUsers();
+        bean.getUsers();
 //        楼栋
 //        params.put("projectId","YZ8600PEK01GMWYGMYJY");
 //        params.put("parentId","YZ8600PEK01GMWYGMYJY");
@@ -204,8 +204,9 @@ public class ArchibusTest {
 //        bean.getThirdAddress(params);
 //        查类型
 //        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-//        params.put("record_type","4");
-//        bean.getThirdCategories(params);
+        params.put("project_id","YZ8600PEK05JRGYJRJRG");
+        params.put("record_type","4");
+        bean.getThirdCategories(params);
 //      下单
 //        params.put("request_source","taskSource4");
 //        params.put("user_id","000000201807220FERQP");
@@ -227,8 +228,8 @@ public class ArchibusTest {
 //        params.put("page_num","1");
 //        bean.listThirdTasks(params);
 //      查询明细
-        params.put("order_id","000000201810180AUEUM");
-        bean.getThirdTaskDetail(params);
+//        params.put("order_id","000000201810180AUEUM");
+//        bean.getThirdTaskDetail(params);
 
     }
 }
