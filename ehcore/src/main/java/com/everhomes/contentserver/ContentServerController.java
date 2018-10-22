@@ -222,10 +222,12 @@ public class ContentServerController extends ControllerBase {
      * <p>解析图片 uri</p>
      */
     @RequestMapping("parseSharedUri")
-    @RestReturn(value = String.class)
+    @RestReturn(value = CsFileLocationDTO.class)
     public RestResponse parseURI(@Valid ParseURICommand cmd) {
         String url = contentService.parseSharedUri(cmd.getUri());
-        RestResponse response = new RestResponse(url);
+        CsFileLocationDTO dto = new CsFileLocationDTO();
+        dto.setUrl(url);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
