@@ -464,6 +464,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_DOOR_ACCESS);
         query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.eq((byte)1));
+        if(null != locator.getAnchor()){
+            query.addConditions(Tables.EH_DOOR_ACCESS.ID.ge(locator.getAnchor()));
+        }
         query.addJoin(com.everhomes.schema.Tables.EH_NAMESPACES, JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(com.everhomes.schema.Tables.EH_NAMESPACES.ID));
         query.addJoin(Tables.EH_COMMUNITIES, JoinType.LEFT_OUTER_JOIN, Tables.EH_DOOR_ACCESS.OWNER_ID.eq(Tables.EH_COMMUNITIES.ID));
         query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_DOOR_ACCESS.OWNER_ID.eq(Tables.EH_ORGANIZATIONS.ID));
@@ -495,12 +498,12 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             dto.setOrganizationName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
             return dto;
         });
-//        if(count > 0 && objs.size() > count) {
-//            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
-//            objs.remove(objs.size() - 1);
-//        } else {
-//            locator.setAnchor(null);
-//        }
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+            objs.remove(objs.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
         return objs;
     }
     @Override
