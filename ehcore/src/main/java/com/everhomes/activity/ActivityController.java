@@ -267,6 +267,7 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("checkin")
     @RestReturn(value=ActivityDTO.class)
+    @RequireAuthentication(false)
     public RestResponse checkin(@Valid ActivityCheckinCommand cmd) {
         ActivityDTO result = activityService.checkin(cmd);
         RestResponse response = new RestResponse();

@@ -3179,6 +3179,11 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
     @Override
     public ActivityDTO checkin(ActivityCheckinCommand cmd) {
         User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("user do not login!");
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_USER_NOT_LOGIN, "user do not login ");
+        }
         Activity activity = activityProvider.findActivityById(cmd.getActivityId());
         if (activity == null) {
             LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
