@@ -19,11 +19,13 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.archives.ListArchivesContactsCommand;
 import com.everhomes.rest.archives.ListArchivesContactsResponse;
 import com.everhomes.rest.archives.OpenListArchivesContactsCommand;
 import com.everhomes.rest.openapi.techpark.CustomerResponse;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.GetArchivesContactCommand;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListAllTreeOrganizationsCommand;
 import com.everhomes.rest.organization.OpenListAllChildrenOrganizationsCommand;
@@ -82,6 +84,19 @@ public class OrganizationOpenController extends ControllerBase {
 		UserContext.setCurrentNamespaceId(appNamespaceMapping.getNamespaceId());
         ListArchivesContactsResponse res = archivesService.listArchivesContacts(ConvertHelper.convert(cmd, ListArchivesContactsCommand.class));
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+    /**
+     * <b>URL: /openapi/org/getArchivesContact</b>
+     * <p>获取员工基础信息</p>
+     */
+    @RequestMapping("getArchivesContact")
+    @RestReturn(value = ArchivesContactDTO.class)
+    public RestResponse getArchivesContact(@Valid GetArchivesContactCommand cmd) {
+        RestResponse response = new RestResponse(archivesService.getArchivesContact(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

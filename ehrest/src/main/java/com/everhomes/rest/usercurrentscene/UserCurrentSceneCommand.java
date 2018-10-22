@@ -19,6 +19,15 @@ public class UserCurrentSceneCommand {
     private Integer namespaceId;
     private Long communityId ;
     private Byte communityType ;
+    private String signToken ;
+
+    public String getSignToken() {
+        return signToken;
+    }
+
+    public void setSignToken(String signToken) {
+        this.signToken = signToken;
+    }
 
     public Long getId() {
         return id;

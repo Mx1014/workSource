@@ -248,6 +248,7 @@ import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -491,7 +492,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunity(UpdateCommunityAdminCommand cmd) {
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
@@ -522,13 +523,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Region city = regionProvider.findRegionById(cmd.getCityId());
 		if(city == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid cityId parameter,city is not found.");
 		}
 
 		Region area = regionProvider.findRegionById(cmd.getAreaId());
 		if(area == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid areaId parameter,area is not found.");
 		}
 		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
@@ -3501,7 +3502,7 @@ public class CommunityServiceImpl implements CommunityService {
 		//如果左邻域下也没有就抛出异常
 		LOGGER.error(
 				"Invalid region, operatorId=" + userId + ", path=" + path);
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 				"Invalid region");
 	}
 
@@ -3594,8 +3595,8 @@ public class CommunityServiceImpl implements CommunityService {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
 			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_PARSE_FILE, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -3622,7 +3623,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return list;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXCEL_DATA_FORMAT,
 				"excel data format is not correct");
 	}
 
@@ -4137,12 +4138,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
 		if(null == cmd.getUserId() )
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid userid parameter");
 		User user = userProvider.findUserById(cmd.getUserId());
 
 		if(null == user)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_USER_NOT_EXIST,
 					"Invalid userid parameter: no this user");
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 
@@ -4642,13 +4643,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateBuildingOrder(UpdateBuildingOrderCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		if (null == cmd.getExchangeId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid exchangeId parameter in the command");
 		}
 		Building building = communityProvider.findBuildingById(cmd.getId());
@@ -4656,14 +4657,14 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if (null == building) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 		if (null == exchangeBuilding) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 
