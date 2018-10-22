@@ -256,7 +256,11 @@ public interface Rentalv2Provider {
 
 	List<RentalStructure> listRentalStructures(String sourceType,Long sourceId,String resourceType,ListingLocator locator, Integer pageSize);
 
+	List<RentalStructureTemplate> listRentalStructureTemplates();
+
 	RentalStructure getRentalStructureById(Long id);
+
+	void createRentalStructure(RentalStructure rentalStructure);
 
 	void updateRentalStructure(RentalStructure rentalStructure);
 }

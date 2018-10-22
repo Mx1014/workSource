@@ -349,6 +349,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				createRentalConfigAttachment(cmd.getAttachments(), rule.getId(), EhRentalv2DefaultRules.class.getSimpleName(), cmd.getResourceType());
 				//items
 				addItems(cmd.getSiteItems(), rule.getId(), RuleSourceType.DEFAULT.getCode(), cmd.getResourceType());
+				//structure
+                createRentalStructures(cmd.getStructures(),cmd.getResourceType(),rule.getId(), RuleSourceType.DEFAULT.getCode());
 
 			} else if (cmd.getSourceType().equals(RuleSourceType.RESOURCE.getCode())) {
 
@@ -376,6 +378,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				createRentalConfigAttachment(cmd.getAttachments(), rule.getSourceId(), EhRentalv2Resources.class.getSimpleName(), cmd.getResourceType());
 				//items
 				addItems(cmd.getSiteItems(), rule.getSourceId(), RuleSourceType.RESOURCE.getCode(), cmd.getResourceType());
+				//structure
+                createRentalStructures(cmd.getStructures(),cmd.getResourceType(),rule.getSourceId(), RuleSourceType.RESOURCE.getCode());
 			}
 
 			if (null != cmd.getRefundStrategy() && cmd.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
@@ -387,6 +391,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			return null;
 		});
 	}
+
+	private void createRentalStructures(List<SiteStructureDTO> structures,String resourceType, Long sourceId, String sourceType){
+        if (structures != null)
+            this.dbProvider.execute((TransactionStatus status) -> {
+                structures.stream().forEach(r -> {
+                    RentalStructure structure = new RentalStructure();
+                    structure.setResourceType(resourceType);
+                    structure.setSourceId(sourceId);
+                    structure.setSourceType(sourceType);
+                   this.rentalv2Provider.createRentalStructure(structure);
+                });
+                return null;
+            });
+    }
 
 	private void createPriceRules(String resourceType, PriceRuleType priceRuleType, Long ruleId, List<PriceRuleDTO> priceRules) {
 
@@ -591,6 +609,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			SiteItemDTO dto = convertItem2DTO(rsi);
 			response.getSiteItems().add(dto);
 		}
+		//基础设施
+        response.setStructures(new ArrayList<>());
+		List<RentalStructure> structures = rentalv2Provider.listRentalStructures(rule.getSourceType(),id,
+                rule.getResourceType(),null,null);
+		for (RentalStructure structure : structures){
+            SiteStructureDTO dto = convertStructure2DTO(structure);
+		    response.getStructures().add(dto);
+        }
+
 //		populateRentalRule(response, ruleType, id);
 
 		return response;
@@ -693,10 +720,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		addCmd.setRefundStrategies(createRefundDefaultRules());
 		addCmd.setOvertimeStrategy(RentalOrderStrategy.CUSTOM.getCode());
 		addCmd.setOvertimeStrategies(createOverTimeDefaultRules());
+		addCmd.setStructures(createStructuresDefaultRules());
 
 		this.addRule(addCmd);
 
 	}
+
+	private List<SiteStructureDTO> createStructuresDefaultRules(){
+        List<RentalStructureTemplate> templates = this.rentalv2Provider.listRentalStructureTemplates();
+        return templates.stream().map(r->{
+            SiteStructureDTO dto = new SiteStructureDTO();
+            dto.setDefaultOrder(r.getDefaultOrder());
+            dto.setDisplayName(r.getDisplayName());
+            dto.setIconUri(r.getIconUri());
+            dto.setIsSurport((byte)1);
+            dto.setName(r.getName());
+            dto.setTemplateId(r.getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
 
 	private List<RentalOrderRuleDTO> createRefundDefaultRules() {
 

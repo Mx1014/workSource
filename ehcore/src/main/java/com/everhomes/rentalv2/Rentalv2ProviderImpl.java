@@ -2742,10 +2742,33 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
+	public List<RentalStructureTemplate> listRentalStructureTemplates() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURE_TEMPLATE);
+		return step.fetch().map(r->ConvertHelper.convert(r,RentalStructureTemplate.class));
+	}
+
+	@Override
 	public RentalStructure getRentalStructureById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURES);
 		return step.where(Tables.EH_RENTALV2_STRUCTURES.ID.eq(id)).fetchAny().map(r->ConvertHelper.convert(r,RentalStructure.class));
+	}
+
+	@Override
+	public void createRentalStructure(RentalStructure rentalStructure) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Structures.class));
+		rentalStructure.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2StructuresRecord record = ConvertHelper.convert(rentalStructure,
+				EhRentalv2StructuresRecord.class);
+		InsertQuery<EhRentalv2StructuresRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_STRUCTURES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, RentalStructure.class,
+				null);
 	}
 
 	@Override

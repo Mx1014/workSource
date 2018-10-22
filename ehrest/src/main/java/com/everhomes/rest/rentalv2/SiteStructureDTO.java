@@ -2,12 +2,16 @@ package com.everhomes.rest.rentalv2;
 
 public class SiteStructureDTO {
     private Long id;
+    private Long templateId;
+    private String sourceType;
+    private Long sourceId;
     private String name;
     private String displayName;
     private String iconUri;
     private String iconUrl;
     private Byte   isSurport;
     private Long defaultOrder;
+    private String resourceType;
 
     public Long getId() {
         return id;
@@ -63,5 +67,37 @@ public class SiteStructureDTO {
 
     public void setDefaultOrder(Long defaultOrder) {
         this.defaultOrder = defaultOrder;
+    }
+
+    public Long getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
     }
 }
