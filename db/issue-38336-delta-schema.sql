@@ -689,7 +689,4 @@ CREATE TABLE `eh_aclink_firmware_package` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件程序表';
 
-CREATE TABLE `eh_aclink_firmware_new` (
 
-
-)

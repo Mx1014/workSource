@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * <ul>获取门禁列表
  * <li> nextPageAnchor: 下一页锚点 </li>
- * <li> doors: 门禁设备列表，参考{@link com.everhomes.rest.aclink.DoorAccessDTO}</li>
+ * <li> doors: 门禁设备列表，参考{@link com.everhomes.rest.aclink.DoorAccessNewDTO}</li>
  * </ul>
  */
 public class ListDoorAccessEhResponse {

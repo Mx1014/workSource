@@ -7,7 +7,23 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>defualtInvalidDuration:按次开门授权默认有效期</li>
+ * <li>id:门禁id</li>
+ * <li>namespaceId:域空间id</li>
+ * <li>namespaceName: 域空间名</li>
+ * <li>hardwareId: 蓝牙mac地址</li>
+ * <li>name: 门禁名称</li>
+ * <li>displayName: 门禁标识</li>
+ * <li>deviceName: 设备类型</li>
+ * <li>firmwareName: 固件版本</li>
+ * <li>description: 门禁说明</li>
+ * <li>address: 门禁位置</li>
+ * <li>creatorUserId: 添加人id</li>
+ * <li>creatorUserName: 添加人名字</li>
+ * <li>ownerId:门禁所属组织的Id</li>
+ * <li>ownerType:所属功能 0：公共门禁 1：企业门禁</li>
+ * <li>communityName: 所属企业名称（园区名称）</li>
+ * <li>organizationName: 所属企业名称（公司名称）</li>
+ * <li>createTime: 创建时间</li>
  * </ul>
  * @author janson
  *

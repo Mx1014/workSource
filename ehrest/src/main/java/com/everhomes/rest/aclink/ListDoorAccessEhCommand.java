@@ -5,14 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>moduleId：模块Id</li>
  * <li>pageSize：每页大小</li>
  * <li>pageAnchor：锚点</li>
  * <li>ownerId: 所属企业id</li>
+ * <li>ownerName: 所属企业</li>
  * <li>ownerType: 所属功能类型(null全部，0公共门禁，1企业门禁)</li>
  * <li>namespaceId: 所属域空间id</li>
- * <li>door: 门禁设备</li>
- * <li>doorType:门禁类型{@link: com.everhomes.rest.aclink.DoorAccessType}</li>
+ * <li>namespaceName: 所属域空间</li>
+ * <li>deviceId: 门禁设备id</li>
  * <li>bluetoothMAC: 蓝牙MAC</li>
  * </ul>
  */
