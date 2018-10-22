@@ -308,7 +308,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 
 		AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(), cmd.getProjectId());
 		GetSelfDefinedStateResponse resp = new GetSelfDefinedStateResponse();
-		resp.setIsOpen(state.getStatus());
+		resp.setIsOpen(state == null ? SelfDefinedState.DISABLE.getCode() : state.getStatus());
 		return resp;
 	}
 
