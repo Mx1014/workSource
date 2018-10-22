@@ -3014,6 +3014,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        //issue-39640 新签合同，签约“前海金融管理学院”资产重复出现多条
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
