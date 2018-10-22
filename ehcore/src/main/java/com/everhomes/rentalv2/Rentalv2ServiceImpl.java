@@ -2661,6 +2661,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
+	public void offlinePayOrder(OfflinePayOrderCommand cmd) {
+		RentalOrder order = rentalv2Provider.findRentalBillById(cmd.getOrderId());
+		if (null == order) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "RentalOrder not found");
+		}
+		order.setVendorType(VendorType.OFFLINE.getCode());
+		rentalv2Provider.updateRentalBill(order);
+		changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+	}
+
+	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag) {
 	    //防止二次进入
         if (order.getStatus().equals(status))

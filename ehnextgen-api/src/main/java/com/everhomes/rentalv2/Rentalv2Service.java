@@ -150,6 +150,8 @@ public interface Rentalv2Service {
 
 	PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd);
 
+	void offlinePayOrder(OfflinePayOrderCommand cmd);
+
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
 
 

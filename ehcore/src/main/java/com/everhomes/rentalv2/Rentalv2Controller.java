@@ -346,6 +346,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/offlinePayOrder</b>
+	 * <p>
+	 * 线下支付确认
+	 * </p>
+	 */
+	@RequestMapping("offlinePayOrder")
+	@RestReturn(value = String.class)
+	public RestResponse offlinePayOrder(OfflinePayOrderCommand cmd) {
+		rentalService.offlinePayOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/changeRentalBillPayInfo</b>
 	 * <p>
 	 * 修改订单信息
