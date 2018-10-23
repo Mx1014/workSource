@@ -70,7 +70,6 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
         RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
 
-//			RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
         if(null == rs)
             return;
 

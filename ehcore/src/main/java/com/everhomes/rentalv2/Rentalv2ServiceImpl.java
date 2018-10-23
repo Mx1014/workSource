@@ -4201,6 +4201,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(order.getResourceType());
 		dbProvider.execute((TransactionStatus status) -> {
+            RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 			//如果是预约成功，则要判断是否退款，否则将订单置为已取消
 			if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
 				if (null != order.getRefundStrategy() && order.getRefundStrategy() != RentalOrderStrategy.NONE.getCode()
@@ -4223,12 +4224,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				} else
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
-
+				    messageHandler.cancelOrderWithoutPaySendMessage(order);
 			} else if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 				//如果不需要退款，直接状态为已取消
 				order.setStatus(SiteBillStatus.FAIL.getCode());
-                RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
                 messageHandler.cancelOrderWithoutPaySendMessage(order);
 
 			} else {
