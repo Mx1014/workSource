@@ -309,7 +309,13 @@ public class RequisitionServiceImpl implements RequisitionService{
     public Long getRunningRequisitionFlow(GetRunningRequisitionFlowCommand cmd){
         Flow flow = flowService.getEnabledFlow(cmd.getNamespaceId(), cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(), cmd.getModuleType(), cmd.getOwnerId(), cmd.getOwnerType());
         if(flow != null){
-            return flow.getId();
+            if(flow.getOrganizationId().equals(cmd.getOrgId())){
+                return flow.getId();
+            }else{
+                LOGGER.error("the flow Id can not find");
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
+                        RequistionErrorCodes.ERROR_FORM_PARAM, "the flow Id can not find");
+            }
         }else{
             LOGGER.error("the flow Id can not find");
             throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE,
