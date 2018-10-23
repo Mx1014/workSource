@@ -2,6 +2,8 @@
 package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
@@ -1362,4 +1364,22 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
         return query.fetch().stream().map(r -> ConvertHelper.convert(r,DoorAuth.class)).collect(Collectors.toList());
     }
+
+	@Override
+	public void createDoorAuthLogBatch(List<DoorAuthLog> logs) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthLogsDao dao = new EhDoorAuthLogsDao(context.configuration());
+		List<EhDoorAuthLogs> list = new ArrayList<>();
+		long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuthLogs.class), logs.size());
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		for(DoorAuthLog log : logs){
+			log.setId(id++);
+			log.setCreateTime(now);
+			list.add(ConvertHelper.convert(log, EhDoorAuthLogs.class));
+		}
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhDoorAuthLogs.class, null);
+	}
+    
+    
 }

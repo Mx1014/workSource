@@ -1,6 +1,8 @@
 package com.everhomes.aclink;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
@@ -321,4 +323,16 @@ public class DoorAuthLevelProviderImpl implements DoorAuthLevelProvider {
         
         return resp;
     }
+
+	@Override
+	public void updateDoorAuthLevelBatch(List<DoorAuthLevel> ulevels) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthLevelDao dao = new EhDoorAuthLevelDao(context.configuration());
+		List<EhDoorAuthLevel> list = new ArrayList<>();
+		for(DoorAuthLevel auth : ulevels){
+			list.add(ConvertHelper.convert(auth, EhDoorAuthLevel.class));
+		}
+		dao.update(list);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhDoorAuthLevel.class, null);
+	}
 }

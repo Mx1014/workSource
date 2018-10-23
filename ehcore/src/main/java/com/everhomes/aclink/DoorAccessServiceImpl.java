@@ -1,6 +1,54 @@
 // @formatter:off
 package com.everhomes.aclink;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.Security;
+import java.sql.Timestamp;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -16,8 +64,17 @@ import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.huarun.*;
-import com.everhomes.aclink.lingling.*;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
+import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
+import com.everhomes.aclink.huarun.AclinkSimpleQRCodeInvitation;
+import com.everhomes.aclink.lingling.AclinkLinglingDevice;
+import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
+import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
+import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
+import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.aclink.uclbrt.UclbrtHttpClient;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -59,7 +116,13 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
-import com.everhomes.organization.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
@@ -67,10 +130,17 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationManagerDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
@@ -86,57 +156,22 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
-import com.everhomes.util.excel.ExcelUtils; 
-import com.google.gson.JsonArray;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.PinYinHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
-import com.google.gson.JsonArray;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.hibernate.boot.model.naming.Identifier;
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.Security;
-import java.sql.Timestamp;
-import java.text.Format;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
@@ -5602,9 +5637,127 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
+	//仅修改status,各种权限记录不变,不新增授权记录
 	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
 		UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
-		// TODO Auto-generated method stub
+		//TODO 暂无自动授权设置,门禁3.0需加上
+		List<DoorAccess> doors = doorAccessProvider.listDoorAccessByOwnerId(new CrossShardListingLocator(), cmd.getCommunityId(), DoorAccessOwnerType.COMMUNITY, 0);
+		if(doors.size() == 0){
+			rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND);
+			rsp.setMsg("doorAccess not found");
+			return rsp;
+		}
+		List<DoorAuth> auths = new ArrayList<>();
+		if (cmd.getTargetType() == 0) {
+			//单个用户(小区场景)
+			auths = doorAuthProvider.queryDoorAuth(new ListingLocator(), 0, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(cmd.getTargetId()));
+//					query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getCommunityId()).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+					//TODO 园区班车是否除外?
+					//TODO 临时授权?
+					
+					return query;
+				}
+			});
+		}else if(cmd.getTargetType() == 1){
+			//公司场景
+			//修改自动授权设置
+			List<DoorAuthLevel> authLevels = doorAuthLevelProvider.queryDoorAuthLevels(new ListingLocator(), 1000, new ListingQueryBuilderCallback() {
+	            @Override
+	            public SelectQuery<? extends Record> buildCondition(
+	                    ListingLocator locator, SelectQuery<? extends Record> query) {
+	                query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(cmd.getTargetId()));
+	                query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE.eq(DoorAuthLevelType.ENTERPRISE.getCode()));
+	                return query;
+	            }
+	        });
+			if(authLevels != null && authLevels.size() > 0){
+				for(DoorAuthLevel level : authLevels){
+					level.setStatus(cmd.getStatus());
+				}
+				doorAuthLevelProvider.updateDoorAuthLevelBatch(authLevels);
+			}
+			
+			//修改权限
+			List<OrganizationMember> users = organizationProvider.listOrganizationMembers(cmd.getTargetId(),null);
+			List<Long> userIds = new ArrayList<Long>();
+			if(users == null || users.size() == 0){
+				rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_USER_NOT_FOUND);
+				rsp.setMsg("user not found");
+				return rsp;
+			}
+			for(OrganizationMember user: users){
+				userIds.add(user.getTargetId());
+			}
+			auths = doorAuthProvider.queryDoorAuth(new ListingLocator(), 0, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.in(userIds));
+//					query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getCommunityId()).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+					//TODO 园区班车是否除外?
+					//TODO 临时授权?
+					return query;
+				}
+			});
+		}
+		
+		if(auths.size() == 0){
+			rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR);
+			rsp.setMsg("auth not found");
+			return rsp;
+		}
+		
+		for(DoorAuth auth : auths){
+			auth.setStatus(cmd.getStatus());
+		}
+		doorAuthProvider.updateDoorAuth(auths);
+		
+		//授权日志
+		List<DoorAuthLog> logs = new ArrayList<DoorAuthLog>();
+    	if(auths != null && auths.size() > 0){
+    		for(DoorAuth doorAuth : auths){
+    			DoorAuthLog log = new DoorAuthLog();
+    			log.setDoorId(doorAuth.getDoorId());
+    			log.setUserId(doorAuth.getUserId());
+    			log.setRightContent(doorAuth.getRightOpen() + "," + doorAuth.getRightVisitor() + "," + doorAuth.getRightRemote());
+    			if(UserContext.current().getUser() != null) {
+    				log.setCreateUid(UserContext.current().getUser().getId());	
+    			} else {
+    				log.setCreateUid(doorAuth.getUserId());
+    			}
+    			
+    			String discription = "";
+    			if(doorAuth.getRightOpen() > 0){
+    				discription += "授权开门权限";
+    			}else{
+    				discription += "<font color=\"red\">取消授权开门权限</font>";
+    			}
+    			
+    			if(doorAuth.getRightVisitor() > 0){
+    				discription += "<br>授权访客授权权限";
+    			}else{
+    				discription += "<br><font color=\"red\">取消授权访客授权权限</font>";
+    			}
+    			
+    			if(doorAuth.getRightRemote() > 0){
+    				discription += "<br>授权远程开门权限";
+    			}else{
+    				discription += "<br><font color=\"red\">取消授权远程开门权限</font>";
+    			}
+    			log.setDiscription(discription);
+    			logs.add(log);
+    		}
+    		doorAuthProvider.createDoorAuthLogBatch(logs);
+    	}
+		
 		rsp.setErrorCode(200);
 		rsp.setMsg("success");
 		return rsp;

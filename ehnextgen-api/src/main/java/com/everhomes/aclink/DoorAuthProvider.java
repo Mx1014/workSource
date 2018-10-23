@@ -100,4 +100,6 @@ public interface DoorAuthProvider {
 
 
     List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
+    
+    void createDoorAuthLogBatch(List<DoorAuthLog> logs);
 }
