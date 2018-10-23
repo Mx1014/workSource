@@ -2260,7 +2260,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         
-        List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(locator, cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), count);
+        List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(locator, cmd, count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         long now = DateHelper.currentGMTTime().getTime();
         for(DoorAuth auth : auths) {
@@ -5533,7 +5533,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
                 }
-//                if(cmd.getNamespaceName() != null){
+//                if(cmd.getNamespaceName() != null && !cmd.getNamespaceName().isEmpty()){
 //                    query.addConditions(com.everhomes.schema.Tables.EH_NAMESPACES.NAME.eq(cmd.getNamespaceName()));
 //                }
 //                if(cmd.getDoorType() != null) {

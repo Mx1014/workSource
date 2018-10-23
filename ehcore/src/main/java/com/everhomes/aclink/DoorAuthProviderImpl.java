@@ -209,6 +209,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
+        //根据userId查询userName add by liqingyan
+        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
         if(locator.getAnchor() != null && locator.getAnchor() != 0) {
             query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
@@ -473,7 +475,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
+    public List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, SearchDoorAuthCommand cmd, int count) {
 
         return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
@@ -481,25 +483,33 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
 
-                if(status != null) {
+                if(cmd.getStatus() != null) {
                 	Long now = DateHelper.currentGMTTime().getTime();
-                    if(status.equals(DoorAuthStatus.INVALID.getCode())) {
+                    if(cmd.getStatus().equals(DoorAuthStatus.INVALID.getCode())) {
 //                       query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
-						query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status).or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now)
+						query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(cmd.getStatus()).or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now)
 								.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.le(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     } else {
-						query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)).and((Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 0))
+						query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(cmd.getStatus())).and((Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 0))
 								.or(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.isNull())
 										.or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.gt(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
                     }
                 }
 
-                if(doorId != null) {
-                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                if(cmd.getDoorId() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
                 }
 
-                if(keyword != null) {
-                    query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));
+                if(cmd.getKeyword() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(cmd.getKeyword()+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(cmd.getKeyword()+"%")));
+                }
+                //添加按照createTime查询和按照创建人查询 add by liqingyan
+                if(cmd.getCreateTimeStart() != null && cmd.getCreateTimeEnd() != null){
+                    query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.between(cmd.getCreateTimeStart(),cmd.getCreateTimeEnd()));
+                }
+
+                if(cmd.getUserId() != null){
+                    query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(cmd.getUserId()));
                 }
 
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));

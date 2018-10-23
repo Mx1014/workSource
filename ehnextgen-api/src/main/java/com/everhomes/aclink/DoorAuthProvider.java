@@ -4,13 +4,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.aclink.AclinkAuthDTO;
-import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
-import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
-import com.everhomes.rest.aclink.DoorAuthLiteDTO;
-import com.everhomes.rest.aclink.ListAuthsByLevelandLocationCommand;
-import com.everhomes.rest.aclink.ListFormalAuthCommand;
-import com.everhomes.rest.aclink.QueryValidDoorAuthForeverCommand;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.user.User;
 
 import java.util.List;
@@ -48,7 +42,7 @@ public interface DoorAuthProvider {
      */
     DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte licenseeType);
 
-    List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status,
+    List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, SearchDoorAuthCommand cmd,
             int count);
 
     /**

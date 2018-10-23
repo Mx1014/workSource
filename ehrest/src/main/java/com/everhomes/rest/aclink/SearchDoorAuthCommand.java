@@ -5,6 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
  * <li>doorId: 门禁id</li>
@@ -21,13 +23,43 @@ public class SearchDoorAuthCommand {
     private Long doorId;
     
     private Integer pageSize;
-    
+
+    private Timestamp createTimeStart;
+
+    private Timestamp createTimeEnd;
+
+    private Long userId;
+
 //    @NotNull
 //    private Integer namespaceId;
     
     private String keyword;
     
     private Byte status;
+
+    public Timestamp getCreateTimeStart() {
+        return createTimeStart;
+    }
+
+    public void setCreateTimeStart(Timestamp createTimeStart) {
+        this.createTimeStart = createTimeStart;
+    }
+
+    public Timestamp getCreateTimeEnd() {
+        return createTimeEnd;
+    }
+
+    public void setCreateTimeEnd(Timestamp createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;

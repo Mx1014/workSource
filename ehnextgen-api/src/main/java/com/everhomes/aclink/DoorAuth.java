@@ -11,6 +11,12 @@ public class DoorAuth extends EhDoorAuth {
      */
     private static final long serialVersionUID = 8693100396412528058L;
 
+    //创建人姓名 add by liqingyan
+
+    private  String userName;
+
+    public String getUserName;
+
     public String getLinglingId(String linglingId) {
         return AclinkAuthCustomField.AUTH_LINGLING_ID.getStringValue(this);
     }

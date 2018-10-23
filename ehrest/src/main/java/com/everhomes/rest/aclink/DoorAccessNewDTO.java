@@ -13,6 +13,7 @@ import java.sql.Timestamp;
  * <li>hardwareId: 蓝牙mac地址</li>
  * <li>name: 门禁名称</li>
  * <li>displayName: 门禁标识</li>
+ * <li>deviceId:设备类型id</li>
  * <li>deviceName: 设备类型</li>
  * <li>firmwareName: 固件版本</li>
  * <li>description: 门禁说明</li>
