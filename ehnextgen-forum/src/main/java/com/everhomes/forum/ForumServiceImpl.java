@@ -5863,11 +5863,13 @@ public class ForumServiceImpl implements ForumService {
         String handlerEnd = "park_tourist";
         if (sceneType != null) {
             handlerEnd = sceneToken.getScene();
+        }else {
+            sceneToken = null;
         }
         String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + handlerEnd;
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
-            filterList = handler.getTopicQueryFilters(user, null);
+            filterList = handler.getTopicQueryFilters(user, sceneToken);
         } else {
             LOGGER.error("No handler found for post quering filter, cmd={}, appContext={}, handlerName={}", cmd, appContext, handlerName);
         }
