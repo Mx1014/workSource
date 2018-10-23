@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>detail : 详情</li>
  * <li>orderNo : 订单编号</li>
  * <li>email : 发件邮件</li>
+ * <li>payMode : 支付类型</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -34,6 +35,7 @@ public class PrintOrderDTO {
 	private String detail;
 	private Long orderNo;
 	private String email;
+	private String payMode;
 	public String getEmail() {
 		return email;
 	}
@@ -95,6 +97,12 @@ public class PrintOrderDTO {
 		this.orderNo = orderNo;
 	}
 
+	public String getPayMode() {
+		return payMode;
+	}
+	public void setPayMode(String payMode) {
+		this.payMode = payMode;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

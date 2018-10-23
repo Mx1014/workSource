@@ -256,6 +256,7 @@ public class SiYinPrintController extends ControllerBase {
 	     return response;
 	 }
 	 
+	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintUnpaidOrder</b>
 	  * <p>15.查询是否存在未支付订单</p>
@@ -495,7 +496,7 @@ public class SiYinPrintController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /siyinprint/payPrintGeneralOrder</b>
-	 * <p>统一订单支付</p>
+	 * <p>22.统一订单支付</p>
 	 */
 	@RequestMapping("payPrintGeneralOrder")
 	@RestReturn(value=PayPrintGeneralOrderResponse.class)
@@ -505,4 +506,18 @@ public class SiYinPrintController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	 /**
+	  * <b>URL: /siyinprint/getPrintOrders</b>
+	  * <p>23.根据orderNo查询订单</p>
+	  */
+	 @RequestMapping("getPrintOrders")
+	 @RestReturn(value=GetPrintOrdersResponse.class)
+	 public RestResponse getPrintOrders(GetPrintOrdersCommand cmd) {
+		
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintOrders(cmd));
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
 }

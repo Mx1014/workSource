@@ -525,6 +525,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
+	public GetPrintOrdersResponse getPrintOrders(GetPrintOrdersCommand cmd) {
+		
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+			
+		SiyinPrintOrder printOrder = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(cmd.getOrderNo());
+		
+		GetPrintOrdersResponse response = new GetPrintOrdersResponse();
+		if(printOrder == null)
+			return response;
+		response.setPrintOrder(ConvertHelper.convert(printOrder, PrintOrderDTO.class));
+		return response;
+	}
+
+	
+	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		GetPrintUnpaidOrderResponse r = new GetPrintUnpaidOrderResponse();
@@ -2250,8 +2265,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
 				});
 				LOGGER.info("call point api end");
-				if (cmd.getPaymentType() != null){
-					LOGGER.info("paymentType : " + cmd.getPaymentType());
+				if (cmd.getPaymentStatus() != null){
 		            switch (cmd.getPaymentType()){
 	                case 1:
 	                case 7:

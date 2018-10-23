@@ -85,4 +85,6 @@ public interface SiyinPrintService {
 	void updatePrintOrder(SiyinPrintOrder order, String payOrderNo);
 
 	PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd);
+
+	GetPrintOrdersResponse getPrintOrders(GetPrintOrdersCommand cmd);
 }
