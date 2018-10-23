@@ -15,7 +15,6 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
@@ -153,6 +152,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
+            builder.field("partyAId", contract.getPartyAId());
+            builder.field("depositStatus", contract.getDepositStatus());
             if(contract.getPaymentFlag() == null){
                 builder.field("paymentFlag", 0);
             }else{
@@ -328,6 +329,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(cmd.getCategoryId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
+        
+        if(cmd.getOrgId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("partyAId", cmd.getOrgId()));
+        }
+        if(cmd.getDepositStatus() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("depositStatus", cmd.getDepositStatus()));
+        }
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
@@ -408,6 +417,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		        if (contractCategory != null) {
 		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
+		        if (contract.getDepositStatus() != null) {
+					dto.setDepositStatus(contract.getDepositStatus());
+				}
+		        
                 dtos.add(dto);
             });
         }
