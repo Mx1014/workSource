@@ -45,12 +45,19 @@ public class SearchContractCommand {
     private Long orgId;
     private Long addressId;
     private Long buildingId;
-    
     private Long categoryId;
-
     private Long taskId;
+    private Long pageNumber;
 
-    public Long getCategoryId() {
+    public Long getPageNumber() {
+		return pageNumber;
+	}
+
+	public void setPageNumber(Long pageNumber) {
+		this.pageNumber = pageNumber;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 

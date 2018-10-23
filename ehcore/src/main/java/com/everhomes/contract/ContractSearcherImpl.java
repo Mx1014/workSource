@@ -313,8 +313,16 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
+        Long pageNumber = 1l;
+        //cmd.setPageNumber(pageNumber);
+        
+        //传入的变为页码 pageNumber
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
+        }
+        
+        if(cmd.getPageNumber() != null) {
+        	pageNumber = cmd.getPageNumber();
         }
         
         if(cmd.getCategoryId() != null) {
@@ -322,7 +330,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         }
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        
+        //builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize + 1);
+        builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize);
+        
         builder.setQuery(qb);
         if(cmd.getSortField() != null && cmd.getSortType() != null) {
             if(cmd.getSortType() == 0) {
@@ -334,6 +345,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.addSort("updateTime", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
+        Long totalHits = rsp.getHits().getTotalHits();
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("ContractSearcherImpl query builder: {}, rsp: {}", builder, rsp);
@@ -341,10 +353,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         List<Long> ids = getIds(rsp);
         ListContractsResponse response = new ListContractsResponse();
 
-        if(ids.size() > pageSize) {
+        response.setTotalNum(totalHits);
+        /*if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
-        }
+        }*/
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
