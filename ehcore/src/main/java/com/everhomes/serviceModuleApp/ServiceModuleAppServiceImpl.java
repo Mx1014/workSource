@@ -729,6 +729,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
 
+		if(!StringUtils.isEmpty(serviceModule.getHost())){
+			String router = "zl://" + serviceModule.getHost() + "/" + routerInfo.getPath() + "?" + routerInfo.getQuery();
+			appDTO.setRouter(router);
+		}
+
 		return appDTO;
 	}
 

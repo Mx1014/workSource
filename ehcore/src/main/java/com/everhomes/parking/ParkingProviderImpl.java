@@ -457,9 +457,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != rechargeType)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
         if(null != startDate)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
         if(null != endDate)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.lt(endDate));
         if(paySource !=null){
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_SOURCE.eq(paySource));
 		}

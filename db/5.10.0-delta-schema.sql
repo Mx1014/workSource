@@ -97,3 +97,6 @@ ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
 ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
 ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
 ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
+
+-- 模块增加模块路由host
+ALTER TABLE `eh_service_modules` ADD COLUMN `host`  varchar(255) NULL;

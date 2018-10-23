@@ -5826,8 +5826,8 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
 
         //标准版没有场景
-        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        //SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         
       //检查游客是否能继续访问此场景 by xiongying 20161009
         //userService.checkUserScene(sceneType);
@@ -5859,8 +5859,12 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Unsupported post filter type, cmd={}, appContext={}", cmd, appContext);
             return filterList;
         }
-        
-        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + "park_tourist";
+        //兼容旧版本
+        String handlerEnd = "park_tourist";
+        if (sceneType != null) {
+            handlerEnd = sceneToken.getScene();
+        }
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + handlerEnd;
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
             filterList = handler.getTopicQueryFilters(user, null);
