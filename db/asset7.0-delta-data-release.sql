@@ -1,6 +1,11 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+
+-- AUTHOR:唐岑2018年10月23日14:29:41
+-- REMARK:添加资产报表定时配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('schedule.property.task.time', '0 30 2 * * ?', '资产报表定时任务', '0', NULL, '1');
+
 -- AUTHOR: 杨崇鑫 20181023
 -- REMARK: 新增“资产报表中心”模块和菜单
 set @module_id=230000; -- 模块Id（运维分配的）
@@ -17,5 +22,3 @@ INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `
 
 
 -- --------------------- SECTION END ---------------------------------------------------------
-
-

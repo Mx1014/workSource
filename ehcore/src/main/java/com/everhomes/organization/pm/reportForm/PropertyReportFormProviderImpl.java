@@ -35,22 +35,5 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		dao.insert(communityStatistics);
 	}
 
-	
-	public void batchAddBuildingStatistics2(Collection<BuildingStatistics> values) {
-		EhPropertyStatisticBuildingDao dao = new EhPropertyStatisticBuildingDao();
-		
-	}
-
-	@Override
-	public void batchAddCommunityStatics(Collection<CommunityStatistics> values) {
-		
-		
-	}
-
-	@Override
-	public void batchAddBuildingStatistics(Collection<BuildingStatistics> values) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }
