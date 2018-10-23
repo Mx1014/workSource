@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * communityCount:总计时用于统计园区的数目
+ * @author steve
+ *
+ */
 public class CommunityBriefStaticsDTO {
 	
 	private Long communityId;
@@ -47,6 +52,4 @@ public class CommunityBriefStaticsDTO {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	
-
 }
