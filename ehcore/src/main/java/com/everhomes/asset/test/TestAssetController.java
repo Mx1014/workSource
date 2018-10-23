@@ -92,7 +92,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /test/statisticBillByCommunity</b>
-	 * <p>启动项目-时间段（月份）统计结果集的定时任务</p>
+	 * <p>启动"缴费信息汇总表-项目"统计结果集的定时任务</p>
 	 */
 	@RequestMapping("statisticBillByCommunity")
 	public RestResponse statisticBillByCommunity() {
@@ -105,7 +105,7 @@ public class TestAssetController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /test/statisticBillByBuilding</b>
-	 * <p>启动楼宇-时间段（月份）统计结果集的定时任务</p>
+	 * <p>启动"缴费信息汇总表-楼宇"统计结果集的定时任务</p>
 	 */
 	@RequestMapping("statisticBillByBuilding")
 	public RestResponse statisticBillByBuilding() {

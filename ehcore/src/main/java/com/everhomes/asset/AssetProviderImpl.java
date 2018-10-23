@@ -2094,7 +2094,7 @@ public class AssetProviderImpl implements AssetProvider {
         return null;
     }
 
-    private String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
+    public String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
         List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
                 .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))

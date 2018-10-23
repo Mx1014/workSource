@@ -468,4 +468,16 @@ public interface AssetProvider {
 	 * 取出eh_payment_bill_statistic_building表中dateStr（年月）
 	 */
 	List<BuildingStatisticParam> getStatisticBuildingDateStr();
+	
+	/**
+	 * 获取费项的备注名称
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param chargingItemId
+	 * @param categoryId
+	 * @return
+	 */
+	String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId,
+			Long categoryId);
 }

@@ -5,12 +5,17 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
+ * <li>count: 合计总数</li>
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 所属项目类型</li>
  * <li>ownerId: 所属项目ID</li>
- * <li>buildingName: 楼宇名称</li>
- * <li>addressCount:房源总数</li>
+ * <li>addressName:楼宇房源名称</li>
  * <li>areaSize:建筑面积</li>
+ * <li>targetName:客户名称</li>
+ * <li>noticeTel:催缴手机号码</li>
+ * <li>dateStrBegin:账单开始时间</li>
+ * <li>dateStrEnd:账单结束时间</li>
+ * <li>projectChargingItemName:收费项目备注名称</li>
  * <li>amountReceivable:应收含税</li>
  * <li>amountReceivableWithoutTax:应收不含税</li>
  * <li>taxAmount:税额</li>
@@ -23,16 +28,20 @@ import java.math.BigDecimal;
  * <li>dueDayCount:欠费天数</li>
  * <li>noticeTimes:催缴次数</li>
  * <li>collectionRate:收缴率</li>
- * <li>buildingName: 楼宇名称</li>
  *</ul>
  */
-public class ListBillStatisticByBuildingDTO {
+public class ListBillStatisticByAddressDTO {
+	private BigDecimal count;
 	private Integer namespaceId;
 	private Long ownerId;
 	private String ownerType;
-	private String buildingName;
-    private Integer addressCount;
+	private String addressName;
     private BigDecimal areaSize;
+    private String targetName;
+    private String noticeTel;
+    private String dateStrBegin;
+    private String dateStrEnd;
+    private String projectChargingItemName;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceivableWithoutTax;
     private BigDecimal taxAmount;
@@ -45,6 +54,7 @@ public class ListBillStatisticByBuildingDTO {
     private BigDecimal dueDayCount;
     private BigDecimal noticeTimes;
     private BigDecimal collectionRate;
+    
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -63,17 +73,11 @@ public class ListBillStatisticByBuildingDTO {
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
-	public String getBuildingName() {
-		return buildingName;
+	public String getAddressName() {
+		return addressName;
 	}
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-	public Integer getAddressCount() {
-		return addressCount;
-	}
-	public void setAddressCount(Integer addressCount) {
-		this.addressCount = addressCount;
+	public void setAddressName(String addressName) {
+		this.addressName = addressName;
 	}
 	public BigDecimal getAreaSize() {
 		return areaSize;
@@ -153,7 +157,41 @@ public class ListBillStatisticByBuildingDTO {
 	public void setCollectionRate(BigDecimal collectionRate) {
 		this.collectionRate = collectionRate;
 	}
+	public String getTargetName() {
+		return targetName;
+	}
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+	public String getNoticeTel() {
+		return noticeTel;
+	}
+	public void setNoticeTel(String noticeTel) {
+		this.noticeTel = noticeTel;
+	}
+	public String getDateStrBegin() {
+		return dateStrBegin;
+	}
+	public void setDateStrBegin(String dateStrBegin) {
+		this.dateStrBegin = dateStrBegin;
+	}
+	public String getDateStrEnd() {
+		return dateStrEnd;
+	}
+	public void setDateStrEnd(String dateStrEnd) {
+		this.dateStrEnd = dateStrEnd;
+	}
+	public String getProjectChargingItemName() {
+		return projectChargingItemName;
+	}
+	public void setProjectChargingItemName(String projectChargingItemName) {
+		this.projectChargingItemName = projectChargingItemName;
+	}
+	public BigDecimal getCount() {
+		return count;
+	}
+	public void setCount(BigDecimal count) {
+		this.count = count;
+	}
     
-	
-    	
 }

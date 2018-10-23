@@ -3,6 +3,10 @@ package com.everhomes.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
@@ -76,5 +80,10 @@ public interface AssetStatisticService {
 	ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
 			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList);
 
+	ListBillStatisticByAddressResponse listBillStatisticByAddress(ListBillStatisticByAddressCmd cmd);
+
+	ListBillStatisticByAddressDTO listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd);
+
+	
 	
 }
