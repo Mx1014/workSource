@@ -232,7 +232,7 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		Building building = communityProvider.findBuildingById(buildingId);
 		
 		buildingStatistics.setNamespaceId(building.getNamespaceId());
-		//buildingStatistics.setCommunityId(building.getCommunityId());
+		buildingStatistics.setCommunityId(building.getCommunityId());
 		buildingStatistics.setBuildingId(buildingId);
 		buildingStatistics.setBuildingName(building.getName());
 		
