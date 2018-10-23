@@ -359,6 +359,7 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         Map<String, String> params = getRequestParams(request);
 
         String redirectUrl = params.get("callbackUrl");
+        redirectUrl = URLDecoder.decode(redirectUrl, "UTF8");
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("redirect url to {}", redirectUrl);
         }
