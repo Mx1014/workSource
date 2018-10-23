@@ -4715,8 +4715,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//发消息给管理员
 		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 		handler.addOrderSendMessage(order);
-
-		//发短信在对接支付的handler  RentalOrderEmbeddedHandler //TODO:看是否需要移到这里
+		//发短信 推送给用户
+		handler.sendRentalSuccessSms(order);
 
 		//预约成功 授权门禁
 		RentalResource rentalResource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());

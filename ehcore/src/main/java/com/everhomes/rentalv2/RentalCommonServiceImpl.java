@@ -128,7 +128,7 @@ public class RentalCommonServiceImpl {
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         LOGGER.debug("messageDTO : {}", messageDto);
-        // 发消息 +推送
+        // 推送
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }

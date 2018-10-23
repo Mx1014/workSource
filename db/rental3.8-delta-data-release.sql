@@ -48,3 +48,5 @@ INSERT INTO `eh_rentalv2_structures` (`id`, `template_id`, `source_type`, `sourc
 select @id := @id + 1,8,source_type,source_id,'麦克风','麦克风','',1,8,'default' from  eh_rentalv2_default_rules where source_type = 'resource_rule' and resource_type = 'default';
 INSERT INTO `eh_rentalv2_structures` (`id`, `template_id`, `source_type`, `source_id`, `name`, `display_name`, `icon_uri`, `is_surport`, `default_order`, `resource_type`)
 select @id := @id + 1,8,source_type,id,'麦克风','麦克风','',1,8,'default' from  eh_rentalv2_default_rules where source_type = 'default_rule' and resource_type = 'default';
+
+update eh_locale_templates set text = '您已完成支付，成功预约${useTime}的${resourceName}，请按照预约的时段使用资源，感谢您的使用。' where `scope` = 'rental.notification' and `code` = 5;

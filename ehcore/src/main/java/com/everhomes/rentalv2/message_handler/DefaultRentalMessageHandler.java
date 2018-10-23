@@ -93,23 +93,27 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void sendRentalSuccessSms(RentalOrder order){
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useTime", order.getUseDetail());
+        map.put("resourceName", order.getResourceName());
+        rentalCommonService.sendMessageCode(order.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+        //发消息
+        String templateScope = SmsTemplateCode.SCOPE;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
 
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
-        if(null == userIdentifier){
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+        smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+                IdentifierType.MOBILE.getCode());
+        if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-        }else{
-
-            String templateScope = SmsTemplateCode.SCOPE;
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
-            smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail());
-
-            int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
-
-            String templateLocale = RentalNotificationTemplateCode.locale;
-
-            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId,
-                    templateLocale, variables);
-
+        } else {
+            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+                    templateId, templateLocale, variables);
         }
     }
 

@@ -90,7 +90,7 @@ public interface SmsTemplateCode {
     int APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE = 38;
     int APPLY_ENTRY_COMPLETED_CODE = 39;
 
-    //资源预约短信
+    //资源预约短信(工作流模板)
     int RENTAL_PROCESSING_NODE_CODE = 40;
     int RENTAL_PROCESSING_NODE_SUPERVISE_CODE = 41;
 
