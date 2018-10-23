@@ -52,3 +52,6 @@ select @id := @id + 1,8,source_type,id,'麦克风','麦克风','',1,8,'default' 
 update eh_locale_templates set text = '您已成功预约了${resourceName}，使用时间：${useTime}。如需取消，请在预订开始时间前取消，感谢您的使用。' where `scope` = 'rental.notification' and `code` = 5;
 update eh_locale_templates set text = '您已成功预约了${resourceName}，预订时间：${useTime}，订单编号：${orderNum}。如需取消，请在预订开始时间前取消，感谢您的使用。${aclink}' where `scope` = 'sms.default' and `code` = 30;
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '24', 'zh_CN', '用户取消订单推送消息', '您预约的${useDetail}已成功取消，期待下次为您服务。', '0');
+update eh_locale_templates set text = '由于您未在规定时间内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 14;
+update eh_locale_templates set text = '由于您未在规定时间内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。' where `scope` = 'sms.default' and `code` = 58;
+

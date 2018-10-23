@@ -179,4 +179,5 @@ public interface SmsTemplateCode {
     int DECORATION_MOTIFY_REFUND = 82;//修改退费信息后，短信提醒租户和装修公司负责人 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修押金退费信息有更新，请前往APP查看详情。
 
 
+
 }

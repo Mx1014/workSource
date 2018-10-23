@@ -87,7 +87,11 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void sendOrderOverTimeMessage(RentalOrder rentalBill) {
-
+        String useDetail = rentalBill.getUseDetail();
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        //给预约人推送消息
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map, RentalNotificationTemplateCode.UNPAID_ORDER_OVER_TIME);
     }
 
     @Override
@@ -125,6 +129,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("useDetail", rentalBill.getUseDetail());
         rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+
+        int templateId = SmsTemplateCode.UNPAID_ORDER_OVER_TIME;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
     }
 
     @Override
