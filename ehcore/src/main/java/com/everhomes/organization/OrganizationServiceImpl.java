@@ -8410,6 +8410,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
         UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
         this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
