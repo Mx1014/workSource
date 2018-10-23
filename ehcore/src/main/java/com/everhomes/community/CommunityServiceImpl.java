@@ -49,6 +49,7 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
@@ -288,6 +289,7 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -311,6 +313,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -445,6 +448,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
 	private TaskService taskService;
+    
+    @Autowired
+    private NamespacesService namespacesService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -6238,7 +6244,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		final List<Long> projectIds = new ArrayList<>();
 
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			//标准版
 			List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getOrgId(), cmd.getAppId());
 

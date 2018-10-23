@@ -709,6 +709,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setCreatorUid(user.getId());
 		Long now = System.currentTimeMillis();
 		parkingRechargeOrder.setCreateTime(new Timestamp(now));
+		parkingRechargeOrder.setRechargeTime(new Timestamp(now));
 
 		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
 		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
@@ -2309,7 +2310,7 @@ public class ParkingServiceImpl implements ParkingService {
 					cmd, refundOrderRestResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFUND_ERROR,
-					"bill refund error");
+					"网络出错，服务连接失败");
 		}
 		order.setStatus(ParkingRechargeOrderStatus.REFUNDING.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
