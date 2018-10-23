@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerIdList: 所属项目id列表</li>
  * <li>dateStrBegin: 账期范围</li>
  * <li>dateStrEnd: 账期范围</li>
+ * <li>exportFileNamePrefix: 导出的文件名前缀</li>
  *</ul>
  */
 public class ListBillStatisticByCommunityCmd{
@@ -22,6 +23,8 @@ public class ListBillStatisticByCommunityCmd{
 	private List<Long> ownerIdList;
 	private String dateStrBegin;
 	private String dateStrEnd;
+	
+	private String exportFileNamePrefix;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -64,6 +67,12 @@ public class ListBillStatisticByCommunityCmd{
 	}
 	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
+	}
+	public String getExportFileNamePrefix() {
+		return exportFileNamePrefix;
+	}
+	public void setExportFileNamePrefix(String exportFileNamePrefix) {
+		this.exportFileNamePrefix = exportFileNamePrefix;
 	}
 	
 }
