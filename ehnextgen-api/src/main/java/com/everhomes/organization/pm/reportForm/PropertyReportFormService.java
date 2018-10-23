@@ -2,7 +2,9 @@ package com.everhomes.organization.pm.reportForm;
 
 import java.util.List;
 
+import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
@@ -17,5 +19,15 @@ public interface PropertyReportFormService {
 
 	void exportBuildingReportForm(GetBuildingReportFormCommand cmd);
 	
-	void generateReportFormStatics();
+	List<CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList,
+			String dateStr);
+
+	CommunityBriefStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList,
+			String dateStr);
+
+	List<BuildingBriefStaticsDTO> listBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
+			List<String> buildingNameList, String dateStr);
+
+	BuildingBriefStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
+			List<String> buildingNameList, String dateStr);
 }

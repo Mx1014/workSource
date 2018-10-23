@@ -83,6 +83,7 @@ CREATE TABLE `eh_property_statistic_community` (
 CREATE TABLE `eh_property_statistic_building` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11),
+  `community_id` bigint(20),
   `building_id` bigint(20),
   `building_name` varchar(64),
   `date_str` varchar(10) COMMENT '统计月份（格式为xxxx-xx）',
