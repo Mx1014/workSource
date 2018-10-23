@@ -103,7 +103,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				order.setBizOrderNo(cmd.getBizOrderNum());
 				if (cmd.getPaymentType() == 29)
-					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else 
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				parkingProvider.updateParkingRechargeOrder(order);
@@ -156,7 +156,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setBizOrderNo(cmd.getBizOrderNum());
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				if (cmd.getPaymentType() == 29)
-					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));
@@ -170,7 +170,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				order.setBizOrderNo(cmd.getBizOrderNum());
 				if (cmd.getPaymentType() == 29)
-					order.setPayMode(GorderPayType.ENTERPRISE_PAID.getCode());
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));

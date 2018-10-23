@@ -2267,7 +2267,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
 				});
 				LOGGER.info("call point api end");
-				if (cmd.getPaymentStatus() != null){
+				if (cmd.getPaymentStatus() != null && cmd.getPaymentType() != null){
 		            switch (cmd.getPaymentType()){
 	                case 1:
 	                case 7:
