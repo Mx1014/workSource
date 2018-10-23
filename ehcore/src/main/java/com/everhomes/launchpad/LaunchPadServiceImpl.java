@@ -3239,7 +3239,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				//填充路由信息
 				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null);
 				dto.setRouterPath(routerInfo.getPath());
-				dto.setRouterQuery(routerInfo.getQuery());
+				dto.setRouterQuery("moduleId=" + serviceModule.getId() + "&clientHandlerType=" + serviceModule.getClientHandlerType() + "&" + routerInfo.getQuery());
+
+				String host = serviceModule.getHost();
+				if(org.springframework.util.StringUtils.isEmpty(host)){
+					host  = "default";
+				}
+
+				String router = "zl://" + host + dto.getRouterPath() + "?" + dto.getRouterQuery();
+				dto.setRouter(router);
+
 			}
 
 			dto.setName(item.getItemLabel());
