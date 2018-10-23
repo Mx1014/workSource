@@ -473,7 +473,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode("NS"+record.getNamespaceId().toString());
-        createRefundOrderCommand.setBusinessOrderNumber(record.getBizOrderNum());
+        if (record.getMerchantId() != null)
+            createRefundOrderCommand.setMerchantOrderId(record.getMerchantOrderId());
+        else //兼容旧的
+             createRefundOrderCommand.setBusinessOrderNumber(record.getBizOrderNum());
         createRefundOrderCommand.setAmount(amount);
         createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
         createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
