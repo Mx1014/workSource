@@ -31,8 +31,10 @@ import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
 import com.everhomes.scheduler.EnergyAutoReadingJob;
@@ -129,7 +131,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 * @return
 	 */
 	@Override
-	public CommunityBriefStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
+	public CommunityTotalStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
 		return null;
 	}
 	
@@ -155,7 +157,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 * @return
 	 */
 	@Override
-	public BuildingBriefStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId,Long communityId,List<String> buildingNameList, String dateStr){
+	public BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId,Long communityId,List<String> buildingNameList, String dateStr){
 		return null;
 	}
 
