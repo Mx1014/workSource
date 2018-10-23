@@ -6,9 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 
 /**
  * @author created by ycx
@@ -20,27 +25,11 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	@Autowired
 	private AssetStatisticProvider assetStatisticProvider;
 	
-	/**
-	 * 提供给资产那边做统计的接口
-	 * @param namespaceId
-	 * @param ownerIdList
-	 * @param ownerType
-	 * @param dateStrBegin
-	 * @param dateStrEnd
-	 * @return
-	 */
-	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
-			String ownerType, String dateStrBegin, String dateStrEnd) {
-        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunityForProperty(
-        		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
-		return list;
-	}
-	
+	//项目维度
 	public ListBillStatisticByCommunityResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
 		ListBillStatisticByCommunityResponse response = new ListBillStatisticByCommunityResponse();
 		Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
-        //卸货完毕
         if (pageAnchor == null || pageAnchor < 1l) {
             pageAnchor = 0l;
         }
@@ -58,6 +47,100 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
         }
 		response.setListBillStatisticByCommunityDTOs(list);
 		return response;
+	}
+	
+	//楼宇维度
+	public ListBillStatisticByBuildingResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse response = new ListBillStatisticByBuildingResponse();
+		Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        List<ListBillStatisticByBuildingDTO> list = assetStatisticProvider.listBillStatisticByBuilding(pageOffSet, pageSize, 
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingNameList());
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
+		response.setListBillStatisticByBuildingDTOs(list);
+		return response;
+	}
+	
+	/**
+	 * 提供给资产获取“缴费信息汇总表-项目”列表接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId, List<Long> ownerIdList, 
+			String ownerType, String dateStrBegin, String dateStrEnd) {
+        List<ListBillStatisticByCommunityDTO> list = assetStatisticProvider.listBillStatisticByCommunityForProperty(
+        		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return list;
+	}
+	
+	/**
+	 * 提供给资产获取“缴费信息汇总表-楼宇”列表接口
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @param buildingNameList
+	 * @return
+	 */
+	public List<ListBillStatisticByBuildingDTO> listBillStatisticByBuildingForProperty(Integer namespaceId, Long ownerId, String ownerType,
+			String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		List<ListBillStatisticByBuildingDTO> list = assetStatisticProvider.listBillStatisticByBuildingForProperty(namespaceId, ownerId, 
+				ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return list;
+	}
+
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotal(
+        		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		return dto;
+	}
+	
+	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotal(
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingNameList());
+		return dto;
+	}
+
+	/**
+	 * 提供给资产获取“缴费信息汇总表-项目-合计”列表接口
+	 * @param namespaceId
+	 * @param ownerIdList
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @return
+	 */
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotalForProperty(
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return dto;
+	}
+
+	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotalForProperty(namespaceId, ownerId, 
+				ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return dto;
 	}
 	
 	
