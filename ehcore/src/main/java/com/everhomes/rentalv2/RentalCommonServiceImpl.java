@@ -247,7 +247,8 @@ public class RentalCommonServiceImpl {
 
         Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
 
-        if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
+        if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode() ||
+                order.getPaidVersion() == ActivityRosterPayVersionFlag.V3.getCode() ) {
             //新支付退款
             Long amount = changePayAmount(orderAmount);
             rentalv2PayService.refundOrder(order,amount);
