@@ -408,6 +408,26 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	
 	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunity(Integer pageOffSet, Integer pageSize, 
 			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		List<ListBillStatisticByCommunityDTO> list = listBillStatisticByCommunityUtil(pageOffSet, pageSize, 
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+    	//TODO 调用资产的接口获取资产相关的统计数据
+//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
+//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
+//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		return list;
+	}
+	
+	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		Integer pageOffSet = null;
+		Integer pageSize = null;
+		List<ListBillStatisticByCommunityDTO> list = listBillStatisticByCommunityUtil(pageOffSet, pageSize, 
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return list;
+	}
+	
+	private List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityUtil(Integer pageOffSet, Integer pageSize, 
+			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
@@ -432,7 +452,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
         }
         query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
-        query.addLimit(pageOffSet,pageSize+1);
+        if(pageOffSet != null && pageSize != null) {
+        	query.addLimit(pageOffSet,pageSize+1);
+        }
         query.fetch().map(f -> {
         	ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillStatisticCommunity(f, statistic);
         	ListBillStatisticByCommunityDTO dto  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
@@ -441,6 +463,14 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	list.add(dto);
         	return null;
         });
+        return list;
+	}
+	
+	public List<ListBillStatisticByBuildingDTO> listBillStatisticByBuilding(Integer pageOffSet, Integer pageSize,
+			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
+			List<String> buildingNameList) {
+		List<ListBillStatisticByBuildingDTO> list = listBillStatisticByBuildingUtil(pageOffSet, pageSize,
+				namespaceId, ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
     	//TODO 调用资产的接口获取资产相关的统计数据
 //    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
 //    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
@@ -448,9 +478,18 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		return list;
 	}
 	
-	public List<ListBillStatisticByBuildingDTO> listBillStatisticByBuilding(Integer pageOffSet, Integer pageSize,
+	public List<ListBillStatisticByBuildingDTO> listBillStatisticByBuildingForProperty(Integer namespaceId,
+			Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		Integer pageOffSet = null;
+		Integer pageSize = null;
+		List<ListBillStatisticByBuildingDTO> list = listBillStatisticByBuildingUtil(pageOffSet, pageSize,
+				namespaceId, ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return list;
+	}
+	
+	private List<ListBillStatisticByBuildingDTO> listBillStatisticByBuildingUtil(Integer pageOffSet, Integer pageSize,
 			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
-			List<String> buildingNameList) {
+			List<String> buildingNameList){
 		List<ListBillStatisticByBuildingDTO> list = new ArrayList<ListBillStatisticByBuildingDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding statistic = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("statistic");
@@ -477,7 +516,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
         }
         query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, statistic.BUILDING_NAME);
-        query.addLimit(pageOffSet,pageSize+1);
+        if(pageOffSet != null && pageSize != null) {
+        	query.addLimit(pageOffSet,pageSize+1);
+        }
         query.fetch().map(f -> {
         	ListBillStatisticByBuildingDTO convertDTO = convertEhPaymentBillItemsStatisticBuilding(f, statistic);
         	ListBillStatisticByBuildingDTO dto  = ConvertHelper.convert(convertDTO, ListBillStatisticByBuildingDTO.class);
@@ -487,49 +528,28 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	list.add(dto);
         	return null;
         });
+        return list;
+	}
+
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(Integer namespaceId,
+			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
+		ListBillStatisticByCommunityDTO dto = listBillStatisticByCommunityTotalUtil(
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
     	//TODO 调用资产的接口获取资产相关的统计数据
 //    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
 //    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
 //    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
-		return list;
+        return dto;
 	}
-
-	public List<ListBillStatisticByCommunityDTO> listBillStatisticByCommunityForProperty(Integer namespaceId,
+	
+	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
-		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
-        SelectQuery<Record> query = context.selectQuery();
-        //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(Tables.EH_COMMUNITIES.ID.as("communityId"), Tables.EH_COMMUNITIES.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
-        		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addFrom(Tables.EH_COMMUNITIES); //为了兼容没有统计结果的查询
-		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_COMMUNITIES.ID.eq(statistic.OWNER_ID));
-        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ownerIdList));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
-        }
-        query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
-        query.fetch().map(f -> {
-        	ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillStatisticCommunity(f, statistic);
-        	ListBillStatisticByCommunityDTO dto  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
-        	dto.setOwnerId(f.getValue("communityId", Long.class));
-        	dto.setOwnerType(f.getValue(statistic.OWNER_TYPE));
-        	list.add(dto);
-        	return null;
-        });
-		return list;
+		ListBillStatisticByCommunityDTO dto = listBillStatisticByCommunityTotalUtil(
+				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
+		return dto;
 	}
-
-	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(Integer namespaceId,
+	
+	private ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalUtil(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		final ListBillStatisticByCommunityDTO[] response = {new ListBillStatisticByCommunityDTO()};
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -556,14 +576,28 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	response[0]  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
         	return null;
         });
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
         return response[0];
 	}
 	
 	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotal(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		ListBillStatisticByBuildingDTO dto = listBillStatisticByBuildingTotalUtil(namespaceId, 
+				ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+    	//TODO 调用资产的接口获取资产相关的统计数据
+//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
+//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
+//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+        return dto;
+	}
+	
+	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		ListBillStatisticByBuildingDTO dto = listBillStatisticByBuildingTotalUtil(namespaceId, 
+				ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return dto;
+	}
+	
+	private ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalUtil(Integer namespaceId, Long ownerId,
 			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
 		final ListBillStatisticByBuildingDTO[] response = {new ListBillStatisticByBuildingDTO()};
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -596,43 +630,8 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	response[0].setOwnerType(f.getValue(statistic.OWNER_TYPE));
         	return null;
         });
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
         return response[0];
 	}
-	
-	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
-			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
-		final ListBillStatisticByCommunityDTO[] response = {new ListBillStatisticByCommunityDTO()};
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(statistic);
-        //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID.as("communityId"), statistic.OWNER_TYPE, 
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
-        		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(statistic.OWNER_ID.in(ownerIdList));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
-        }
-        query.fetch().map(f -> {
-        	ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillStatisticCommunity(f, statistic);
-        	response[0]  = ConvertHelper.convert(convertDTO, ListBillStatisticByCommunityDTO.class);
-        	return null;
-        });
-        return response[0];
-	}
-
 	
     
     

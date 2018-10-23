@@ -89,6 +89,23 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
         		namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
 		return list;
 	}
+	
+	/**
+	 * 提供给资产获取“缴费信息汇总表-楼宇”列表接口
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @param buildingNameList
+	 * @return
+	 */
+	public List<ListBillStatisticByBuildingDTO> listBillStatisticByBuildingForProperty(Integer namespaceId, Long ownerId, String ownerType,
+			String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		List<ListBillStatisticByBuildingDTO> list = assetStatisticProvider.listBillStatisticByBuildingForProperty(namespaceId, ownerId, 
+				ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return list;
+	}
 
 	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
 		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotal(
@@ -119,9 +136,12 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		return dto;
 	}
 
-	
-
-	
+	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotalForProperty(namespaceId, ownerId, 
+				ownerType, dateStrBegin, dateStrEnd, buildingNameList);
+		return dto;
+	}
 	
 	
 }

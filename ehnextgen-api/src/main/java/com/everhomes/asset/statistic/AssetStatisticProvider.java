@@ -60,7 +60,32 @@ public interface AssetStatisticProvider {
 	ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotalForProperty(Integer namespaceId,
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd);
 
-	
+	/**
+	 * 提供给资产获取“缴费信息汇总表-楼宇”列表接口
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @param buildingNameList
+	 * @return
+	 */
+	List<ListBillStatisticByBuildingDTO> listBillStatisticByBuildingForProperty(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList);
+
+	/**
+	 * 提供给资产获取“缴费信息汇总表-楼宇-合计”列表接口
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param dateStrBegin
+	 * @param dateStrEnd
+	 * @param buildingNameList
+	 * @return
+	 */
+	ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList);
+
 
 	
 
