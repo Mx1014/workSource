@@ -46,4 +46,6 @@ public interface RentalMessageHandler {
     void autoCancelOrderSendMessage(RentalOrder rentalBill);
 
     void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill);
+
+    default void cancelOrderWithoutPaySendMessage(RentalOrder rentalBill){}
 }

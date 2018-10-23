@@ -4,10 +4,10 @@ public interface RentalNotificationTemplateCode {
     String SCOPE = "rental.notification";
     //local template table
     int RENTAL_BEGIN_NOTIFY = 1; //预定快开始的推送
-    int RENTAL_ADMIN_NOTIFY = 2; //添加预定给管理员推送
+    int RENTAL_ADMIN_NOTIFY = 2; //添加预定给管理员推送 ${userName}预约了${resourceName}使用详情：${useDetail}预约数：${rentalCount}
     int RENTAL_APPLY_SUCCESS_CODE = 3; // 申请成功短信：预定成功给管理员发推送','您申请预约的${useTime}的${resourceName}已通过审批，为确保您成功预约，请尽快完成支付，支付方式支持：1. 请联系${offlinePayeeName}（${offlinePayeeContact}）上门收费，2. 到${offlineCashierAddress}付款；感谢您的使用。
     int RENTAL_APPLY_FAILURE_CODE = 4; // 申请失败短信：【正在会】您申请预约的{使用时间}的{资源名称}没有通过审批，您可以申请预约其他空闲资源，由此给您造成的不便，敬请谅解，感谢您的使用。
-    int RENTAL_PAY_SUCCESS_CODE = 5; // 支付成功推送：【正中会】您已完成支付，成功预约{使用时间}的{资源名称}，请按照预约的时段使用资源，感谢您的使用。
+    int RENTAL_PAY_SUCCESS_CODE = 5; // 支付成功推送：您已成功预约了$资源名称$，使用时间：$预订时间$。如需取消，请在预订开始时间前取消，感谢您的使用。
     int APPROVE_RENTAL_APPLY_SUCCESS_CODE = 6; // 审批线上支付模式，申请成功短信：【正中会】您申请预约的{使用时间}的{资源名称}已通过审批，为确保您成功预约，请尽快到APP完成在线支付，感谢您的使用。
     int RENTAL_CANCEL_CODE = 7; // 取消短信：【正中会】您申请预约的{使用时间}的{资源名称}由于超时未支付或被其他客户抢先预约，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。
     int RENTAL_REMIND_CODE = 8; // 资催办-正中会:【正中发】客户（{申请人姓名}{申请人联系电话}）提交资源预约的线下支付申请，预约{资源名称}，使用时间：{使用时间}，订单金额{订单金额}，请尽快联系客户完成支付
@@ -15,7 +15,7 @@ public interface RentalNotificationTemplateCode {
 	int RENTAL_END_NOTIFY_HOUR = 10;//预定快结束的推送(小时/半天):温馨提醒：{资源名称}资源的使用将在15分钟后结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
 	int RENTAL_END_NOTIFY_DAY = 11;//预定快结束的推送(天/月):温馨提醒：{资源名称}资源的使用将在今日结束，使用客户{客户姓名}（{客户联系方式}），请进行确认
     int RENTAL_CHANGE_AMOUNT = 12;//修改金额的推送  您申请预订的$资源名称$，使用时间：$使用时间$，订单金额调整为$调整后的金额$
-
+    int RENTAL_CANCEL_NOT_PAY = 24;//取消未支付的订单 您预约的${useDetail}已成功取消，期待下次为您服务。
     // vip 车位预约 消息模版
     int RENTAL_USER_CANCEL_ORDER = 13;  //vip车位预约用户取消订单推送消息    订单取消通知：您的${VIP车位预约}订单已成功取消。
     int UNPAID_ORDER_OVER_TIME = 14; //订单超时取消通知：由于您未在15分钟内完成支付，您预约的${VIP车位（科兴科学园停车场AE003车位：2017-11-15 10:00 - 2017-11-15 12:00）}已自动取消，期待下次为您服务。

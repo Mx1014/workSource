@@ -50,7 +50,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         if (null == user )
             return;
         managerContent.append(user.getNickName());
-        managerContent.append("取消了");
+        managerContent.append("取消预约");
         managerContent.append(rentalBill.getResourceName());
         managerContent.append("\n使用详情：");
         managerContent.append(rentalBill.getUseDetail());
@@ -99,13 +99,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         map.put("resourceName", order.getResourceName());
         rentalCommonService.sendMessageCode(order.getRentalUid(), map,
                 RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
-        //发消息
+        //发短信
         String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = RentalNotificationTemplateCode.locale;
         int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
 
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
         smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+        smsProvider.addToTupleList(variables, "orderNum", order.getOrderNo());
+        smsProvider.addToTupleList(variables, "aclink", "");
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
                 IdentifierType.MOBILE.getCode());
@@ -115,6 +117,15 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
             smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
                     templateId, templateLocale, variables);
         }
+    }
+
+    @Override
+    public void cancelOrderWithoutPaySendMessage(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
     }
 
     @Override

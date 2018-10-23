@@ -4228,6 +4228,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 				//如果不需要退款，直接状态为已取消
 				order.setStatus(SiteBillStatus.FAIL.getCode());
+                RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+                messageHandler.cancelOrderWithoutPaySendMessage(order);
+
 			} else {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 						ErrorCodes.ERROR_INVALID_PARAMETER, "Can not cancel order");
