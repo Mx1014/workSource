@@ -142,6 +142,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             if(user == null){
                 throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
             }
+            LOGGER.debug("请求参数：" + req.getParameter("request_source") + " " + req.getParameter("project_id") + "" +
+                    req.getParameter("service_id")+ " " + req.getParameter("record_type"));
             service.submitEvent(pk_crop, req.getParameter("request_source"), user.getArchibusUid(), req.getParameter("project_id"),
                     req.getParameter("service_id"), req.getParameter("record_type"), req.getParameter("remarks"), req.getParameter("contack"),
                     req.getParameter("telephone"), req.getParameter("location"), req.getParameter("order_date"), req.getParameter("order_time"));
