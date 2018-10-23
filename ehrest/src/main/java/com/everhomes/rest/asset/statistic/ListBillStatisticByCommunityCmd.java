@@ -3,6 +3,8 @@ package com.everhomes.rest.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>pageAnchor:锚点</li>
@@ -25,6 +27,11 @@ public class ListBillStatisticByCommunityCmd{
 	private String dateStrEnd;
 	
 	private String exportFileNamePrefix;
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
