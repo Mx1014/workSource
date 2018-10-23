@@ -17,36 +17,28 @@ import com.everhomes.util.StringHelper;
  * <li>sortField: 排序字段名</li>
  * <li>categoryId: 合同类型多入口</li>
  * <li>taskId : 查询导入错误信息用，输入sync产生的taskId</li>
+ * <li>depositStatus: 押金状态(0 未缴，1 已缴)</li>
  * </ul>
  * Created by ying.xiong on 2017/8/17.
  */
 public class SearchContractCommand {
     private Integer namespaceId;
-
     private Long communityId;
-
     private Byte customerType;
-
     private String keywords;
-
     private Long categoryItemId;
-
     private Byte contractType;
-
     private Byte status;
-
     private Long pageAnchor;
-
     private Integer pageSize;
-
     private Integer sortType;
-
     private String sortField;
     private Long orgId;
     private Long addressId;
     private Long buildingId;
     private Long categoryId;
     private Long taskId;
+    private Byte depositStatus;
     private Long pageNumber;
 
     public Long getPageNumber() {
@@ -55,6 +47,14 @@ public class SearchContractCommand {
 
 	public void setPageNumber(Long pageNumber) {
 		this.pageNumber = pageNumber;
+	}
+
+    public Byte getDepositStatus() {
+		return depositStatus;
+	}
+
+	public void setDepositStatus(Byte depositStatus) {
+		this.depositStatus = depositStatus;
 	}
 
 	public Long getCategoryId() {
