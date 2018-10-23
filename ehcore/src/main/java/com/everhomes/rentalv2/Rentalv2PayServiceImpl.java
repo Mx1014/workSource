@@ -706,7 +706,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             bill.setStatus(SiteBillStatus.REFUNDED.getCode());
             rentalProvider.updateRentalBill(bill);
             rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
-//			rentalService.cancelOrderSendMessage(bill);
+
 
     }
 

@@ -48,4 +48,6 @@ public interface RentalMessageHandler {
     void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill);
 
     default void cancelOrderWithoutPaySendMessage(RentalOrder rentalBill){}
+
+    default void refundOrderSuccessSendMessage(RentalOrder rentalBill){}
 }

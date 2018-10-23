@@ -2335,7 +2335,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//按半天预定 结束时间根据产品需求,早上 12 下午  18 晚上 21
 		//计算的时间用于定时任务 提醒时间:消息提醒  结束时间:订单过期
 
-		//计算结束提醒时间 按小时半天预约 提前15分钟提醒 按天、月预约结束日期下午8点提醒
+		//计算结束提醒时间 提前15分钟提醒
 		//计算门禁时间 按小时半天预约 按预定时间延伸1小时(未来可变) 按天预约 6点到20点 按月预约 前一天6点到后一天20点
 
 		List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(rs.getResourceType(),
@@ -2375,7 +2375,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				startTime = new Timestamp(rentalCell.getResourceRentalDate().getTime());
 				reminderTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() - 8 * 60 * 60 * 1000L);
 				endTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 24 * 60 * 60 * 1000L);
-				reminderEndTime = new Timestamp(endTime.getTime() - 6 * 60 * 60 * 1000L);
+				reminderEndTime = new Timestamp(endTime.getTime() - 15 * 60 * 1000L);
 				authStartTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 6 * 60 * 60 * 1000L);
 				authEndTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 20 * 60 * 60 * 1000L);
 			} else if (rentalCell.getRentalType().equals(RentalType.MONTH.getCode())) {
@@ -2387,14 +2387,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				calendar.setTime(rentalCell.getResourceRentalDate());
 				calendar.add(Calendar.MONTH, 1);
 				endTime = new Timestamp(calendar.getTimeInMillis());
-				reminderEndTime = new Timestamp(endTime.getTime() - 6 * 60 * 60 * 1000L);
+				reminderEndTime = new Timestamp(endTime.getTime() - 15 * 60 * 1000L);
 				authStartTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() - 18 * 60 * 60 * 1000L);
 				authEndTime = new Timestamp(endTime.getTime() + 20 * 60 * 60 * 1000L);
 			} else if (rentalCell.getRentalType().equals(RentalType.WEEK.getCode())) {
 				startTime = new Timestamp(rentalCell.getResourceRentalDate().getTime());
 				reminderTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() - 8 * 60 * 60 * 1000L);
 				endTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 7 * 24 * 60 * 60 * 1000L);
-				reminderEndTime = new Timestamp(endTime.getTime() - 6 * 60 * 60 * 1000L);
+				reminderEndTime = new Timestamp(endTime.getTime() - 15 * 60 * 1000L);
 				authStartTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 6 * 60 * 60 * 1000L);
 				authEndTime = new Timestamp(rentalCell.getResourceRentalDate().getTime() + 20 * 60 * 60 * 1000L+ 7 * 24 * 60 * 60 * 1000L);
 			} else {
@@ -3016,12 +3016,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						RentalResource resource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
 						Long chargeUid = resource.getChargeUid();
 						String notifyTextForOther;
-						if (orderReminderEndTimeLong % 3600000 != 0)//检测是否在15分或45分结束
-							notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
+						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
 									RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR, RentalNotificationTemplateCode.locale, map, "");
-						else
-							notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
-									RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
 						Map<String, Object> messageMap = new HashMap<>();
 						messageMap.put("userId",chargeUid);
