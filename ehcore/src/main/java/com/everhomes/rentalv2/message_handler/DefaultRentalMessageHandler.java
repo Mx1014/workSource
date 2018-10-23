@@ -169,4 +169,25 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     public void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill) {
 
     }
+
+    @Override
+    public void refundOrderSuccessSendMessage(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        map.put("refundAmount", rentalBill.getRefundAmount().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_REFUND);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables, "totalAmount", rentalBill.getPayTotalMoney().toString());
+        smsProvider.addToTupleList(variables, "refundAmount", rentalBill.getRefundAmount().toString());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER_REFUND;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+    }
 }
