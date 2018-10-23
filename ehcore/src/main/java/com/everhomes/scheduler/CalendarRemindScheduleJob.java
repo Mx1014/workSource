@@ -66,7 +66,8 @@ public class CalendarRemindScheduleJob extends  QuartzJobBean implements Applica
          		//取今天0点到第二天0点的数据
                  Timestamp remindEndTime = new Timestamp(DateStatisticHelper.getCurrent0Hour().getTime() + 24*3600*1000L);
                  Timestamp remindStartTime = new Timestamp(DateStatisticHelper.getCurrent0Hour().getTime()); 
-                 List<Remind> reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
+                 int offset = 1;
+                 List<Remind> reminds = remindProvider.findUndoRemindsByRemindTimeByPage(remindStartTime, remindEndTime, FETCH_SIZE, offset++);
                  boolean isProcess = !CollectionUtils.isEmpty(reminds);
                  while (isProcess) {
                      reminds.forEach(remind -> {
@@ -77,8 +78,12 @@ public class CalendarRemindScheduleJob extends  QuartzJobBean implements Applica
                              LOGGER.error("remindSchedule error,remindId = {}", remind.getId(), e);
                          }
                      });
-                     reminds = remindProvider.findUndoRemindsByRemindTime(remindStartTime, remindEndTime, FETCH_SIZE);
-                     isProcess = !CollectionUtils.isEmpty(reminds);
+                     if(CollectionUtils.isEmpty(reminds) || reminds.size() < FETCH_SIZE){
+                    	 isProcess = false;
+                     }else{
+                    	 reminds = remindProvider.findUndoRemindsByRemindTimeByPage(remindStartTime, remindEndTime, FETCH_SIZE, offset++);
+                     }
+                     
                  }
                  LOGGER.debug("load data complete : size{}, begintime {} end time{}",reminds==null?0:reminds.size(),remindStartTime ,remindEndTime);
          	});
