@@ -322,7 +322,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		List<Tuple<Long,String>> result = new ArrayList<>();
 		SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("control_id").eq(t2.field("control_id")));
 		Condition cond = t1.field("auth_type").eq(EntityType.SERVICE_MODULE_APP.getCode());
-		cond = cond.and(t1.field("module_control_type").in(types));
+		cond = cond.and(t1.field("module_control_type").in(types)
+				.or(t1.field("module_control_type").isNull()));//这一行必须加，权限细化的 module_control_type 为空值
 		Condition targetCond = null;
 		for (Target target:targets) {
 			if(null == targetCond){
@@ -333,7 +334,9 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		cond = cond.and(targetCond);
 		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds)).or(t2.field("control_id").eq(0)));
-		cond = cond.and(t2_condition);
+		cond = cond.and(
+				t1.field("control_id").isNull() //这一行必须加，因为权限细化的 control_id 为空值
+				.or(t2_condition));
 		step.where(cond).fetch().map((r) -> {
 			result.add(new Tuple<Long,String>((Long)r.getValue(t1.field("module_app_id")), (String)r.getValue(t1.field("module_control_type"))));
 			return null;
