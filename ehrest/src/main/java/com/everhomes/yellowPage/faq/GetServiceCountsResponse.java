@@ -1,0 +1,27 @@
+package com.everhomes.yellowPage.faq;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>count : 正在处理的个数</li>
+ * </ul>
+ * @author huangmingbo 
+ * @date 2018年10月23日
+ */
+public class GetServiceCountsResponse {
+	private Long count;
+	
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public Long getCount() {
+		return count;
+	}
+
+	public void setCount(Long count) {
+		this.count = count;
+	}
+	
+}

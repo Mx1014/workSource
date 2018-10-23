@@ -1256,7 +1256,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateServiceAlliance(UpdateServiceAllianceCommand cmd) {
-
+		
 		dbProvider.execute(status -> {
 			
 			boolean needDeleteOldPic = true;

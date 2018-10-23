@@ -20,6 +20,34 @@ import com.everhomes.rest.yellowPage.stat.TestClickStatCommand;
 import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.yellowPage.faq.AllianceFAQService;
+import com.everhomes.yellowPage.faq.CreateFAQCommand;
+import com.everhomes.yellowPage.faq.CreateFAQTypeCommand;
+import com.everhomes.yellowPage.faq.DeleteFAQCommand;
+import com.everhomes.yellowPage.faq.DeleteFAQTypeCommand;
+import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
+import com.everhomes.yellowPage.faq.GetLatestServiceStateResponse;
+import com.everhomes.yellowPage.faq.GetServiceCountsCommand;
+import com.everhomes.yellowPage.faq.GetServiceCountsResponse;
+import com.everhomes.yellowPage.faq.ListFAQTypesCommand;
+import com.everhomes.yellowPage.faq.ListFAQTypesResponse;
+import com.everhomes.yellowPage.faq.ListFAQsCommand;
+import com.everhomes.yellowPage.faq.ListFAQsResponse;
+import com.everhomes.yellowPage.faq.ListOperateServicesCommand;
+import com.everhomes.yellowPage.faq.ListOperateServicesResponse;
+import com.everhomes.yellowPage.faq.GetFAQOnlineServiceCommand;
+import com.everhomes.yellowPage.faq.GetFAQOnlineServiceResponse;
+import com.everhomes.yellowPage.faq.ListTopFAQsCommand;
+import com.everhomes.yellowPage.faq.ListTopFAQsResponse;
+import com.everhomes.yellowPage.faq.ListUiFAQsResponse;
+import com.everhomes.yellowPage.faq.UpdateFAQCommand;
+import com.everhomes.yellowPage.faq.UpdateFAQTypeCommand;
+import com.everhomes.yellowPage.faq.UpdateFAQTypeOrdersCommand;
+import com.everhomes.yellowPage.faq.UpdateOperateServiceOrdersCommand;
+import com.everhomes.yellowPage.faq.UpdateOperateServicesCommand;
+import com.everhomes.yellowPage.faq.UpdateFAQOnlineServiceCommand;
+import com.everhomes.yellowPage.faq.UpdateTopFAQFlagCommand;
+import com.everhomes.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.yellowPage.stat.AllianceClickStatService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +76,11 @@ public class YellowPageController  extends ControllerBase {
 	@Autowired
 	private AllianceStandardService allianceStandardService;
 
-
 	@Autowired
 	AllianceClickStatService allianceClickStatService;
+	
+	@Autowired
+	AllianceFAQService allianceFAQService;
 
 	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -582,7 +612,7 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
     
-    
+                                                       
     /**
    	 * <b>URL: /yellowPage/updateServiceAllianceProvider</b> 
    	 * <p> 更新服务商  </p>
@@ -737,38 +767,6 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse getAllianceTagList(GetAllianceTagCommand cmd){
 		GetAllianceTagResponse resp = yellowPageService.getAllianceTagList(cmd);
 
-		RestResponse response = new RestResponse(resp);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /yellowPage/getFormList</b>
-	 * <p>
-	 * 获取某个项目下的表单列表
-	 * </p>
-	 */
-	@RequestMapping("getFormList")
-	@RestReturn(GetFormListResponse.class)
-	public RestResponse getFormList(GetFormListCommand cmd){
-		GetFormListResponse resp = allianceStandardService.getFormList(cmd);
-		RestResponse response = new RestResponse(resp);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /yellowPage/getWorkFlowList</b>
-	 * <p>
-	 * 获取某个项目下的工作流列表
-	 * </p>
-	 */
-	@RequestMapping("getWorkFlowList")
-	@RestReturn(GetWorkFlowListResponse.class)
-	public RestResponse getWorkFlowList(GetWorkFlowListCommand cmd){
-		GetWorkFlowListResponse resp = allianceStandardService.getWorkFlowList(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -939,4 +937,274 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
+	
+    /**
+	 * <b>URL: /yellowPage/createFAQType</b>
+	 * <p> 新增分类 </p>
+	 */
+	@RequestMapping("createFAQType")
+    @RestReturn(value = String.class)
+	public RestResponse createFAQType(CreateFAQTypeCommand cmd) {
+		allianceFAQService.createFAQType(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateFAQType</b>
+	 * <p> 更新分类 </p>
+	 */
+	@RequestMapping("updateFAQType")
+    @RestReturn(value = String.class)
+	public RestResponse updateFAQType(UpdateFAQTypeCommand cmd) {
+		allianceFAQService.updateFAQType(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/deleteFAQType</b>
+	 * <p> 删除分类 </p>
+	 */
+	@RequestMapping("deleteFAQType")
+    @RestReturn(value = String.class)
+	public RestResponse deleteFAQType(DeleteFAQTypeCommand cmd) {
+		allianceFAQService.deleteFAQType(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+    /**
+	 * <b>URL: /yellowPage/listFAQTypes</b>
+	 * <p> 获取分类列表 </p>
+	 */
+	@RequestMapping("listFAQTypes")
+    @RestReturn(value = ListFAQTypesResponse.class)
+	public RestResponse listFAQTypes(ListFAQTypesCommand cmd) {
+		ListFAQTypesResponse resp = allianceFAQService.listFAQTypes(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+    /**
+	 * <b>URL: /yellowPage/updateFAQTypeOrders</b>
+	 * <p> 获取分类列表 </p>
+	 */
+	@RequestMapping("updateFAQTypeOrders")
+    @RestReturn(value = String.class)
+	public RestResponse updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
+		allianceFAQService.updateFAQTypeOrders(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+    /**
+	 * <b>URL: /yellowPage/createFAQ</b>
+	 * <p> 创建问题 </p>
+	 */
+	@RequestMapping("createFAQ")
+    @RestReturn(value = String.class)
+	public RestResponse createFAQ(CreateFAQCommand cmd) {
+		allianceFAQService.createFAQ(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateFAQ</b>
+	 * <p> 更新问题 </p>
+	 */
+	@RequestMapping("updateFAQ")
+    @RestReturn(value = String.class)
+	public RestResponse updateFAQ(UpdateFAQCommand cmd) {
+		allianceFAQService.updateFAQ(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateTopFAQFlag</b>
+	 * <p> 设置为热门/非热门 </p>
+	 */
+	@RequestMapping("updateTopFAQFlag")
+    @RestReturn(value = String.class)
+	public RestResponse updateTopFAQFlag(UpdateTopFAQFlagCommand cmd) {
+		allianceFAQService.updateTopFAQFlag(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/deleteFAQ</b>
+	 * <p> 删除问题 </p>
+	 */
+	@RequestMapping("deleteFAQ")
+    @RestReturn(value = String.class)
+	public RestResponse deleteFAQ(DeleteFAQCommand cmd) {
+		allianceFAQService.deleteFAQ(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/listFAQs</b>
+	 * <p> 获取问题列表 后台使用</p>
+	 */
+	@RequestMapping("listFAQs")
+    @RestReturn(value = ListFAQsResponse.class)
+	public RestResponse listFAQs(ListFAQsCommand cmd) {
+		ListFAQsResponse resp = allianceFAQService.listFAQs(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/listTopFAQs</b>
+	 * <p> 获取热门问题列表 </p>
+	 */
+	@RequestMapping("listTopFAQs")
+    @RestReturn(value = ListTopFAQsResponse.class)
+	public RestResponse listTopFAQs(ListTopFAQsCommand cmd) {
+		ListTopFAQsResponse resp = allianceFAQService.listTopFAQs(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateTopFAQOrders</b>
+	 * <p> 更新问题顺序 </p>
+	 */
+	@RequestMapping("updateTopFAQOrders")
+    @RestReturn(value = String.class)
+	public RestResponse updateTopFAQOrders(UpdateTopFAQOrdersCommand cmd) {
+		allianceFAQService.updateTopFAQOrders(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateFAQOnlineService</b>
+	 * <p> 更新在线客服</p>
+	 */
+	@RequestMapping("updateFAQOnlineService")
+    @RestReturn(value = String.class)
+	public RestResponse updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
+		allianceFAQService.updateFAQOnlineService(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/getFAQOnlineService</b>
+	 * <p> 获取FAQ的在线客服</p>
+	 */
+	@RequestMapping("getFAQOnlineService")
+    @RestReturn(value = GetFAQOnlineServiceResponse.class)
+	public RestResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
+		GetFAQOnlineServiceResponse resp = allianceFAQService.getFAQOnlineService(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+    /**
+	 * <b>URL: /yellowPage/listOperateServices</b>
+	 * <p> 获取运营服务模块显示的服务 </p>
+	 */
+	@RequestMapping("listOperateServices")
+    @RestReturn(value = ListOperateServicesResponse.class)
+	public RestResponse listOperateServices(ListOperateServicesCommand cmd) {
+		ListOperateServicesResponse resp = allianceFAQService.listOperateServices(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateOperateServices</b>
+	 * <p> 更新运营的模块显示的服务 </p>
+	 */
+	@RequestMapping("updateOperateServices")
+    @RestReturn(value = String.class)
+	public RestResponse updateOperateServices(UpdateOperateServicesCommand cmd) {
+		allianceFAQService.updateOperateServices(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/updateOperateServiceOrders</b>
+	 * <p> 更新运营模块服务两者之间的顺序 </p>
+	 */
+	@RequestMapping("updateOperateServiceOrders")
+    @RestReturn(value = String.class)
+	public RestResponse updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
+		allianceFAQService.updateOperateServiceOrders(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/getLatestServiceState</b>
+	 * <p> 最新的服务状态 </p>
+	 */
+	@RequestMapping("getLatestServiceState")
+    @RestReturn(value = GetLatestServiceStateResponse.class)
+	public RestResponse getLatestServiceState(GetLatestServiceStateCommand cmd) {
+		GetLatestServiceStateResponse resp = allianceFAQService.getLatestServiceState(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+    /**
+	 * <b>URL: /yellowPage/getServiceCounts</b>
+	 * <p> 获取处理中的服务记录个数 </p>
+	 */
+	@RequestMapping("getServiceCounts")
+    @RestReturn(value = GetServiceCountsResponse.class)
+	public RestResponse getServiceCounts(GetServiceCountsCommand cmd) {
+		GetServiceCountsResponse resp = allianceFAQService.getServiceCounts(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+
+	/**
+	 * <b>URL: /yellowPage/listUiFAQs</b>
+	 * <p>
+	 * 客户端/前端获取问题
+	 * </p>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("listUiFAQs")
+	@RestReturn(value = ListUiFAQsResponse.class)
+	public RestResponse listUiFAQs(ListUiFAQsCommand cmd) {
+		ListUiFAQsResponse resp = allianceFAQService.listUiFAQs(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

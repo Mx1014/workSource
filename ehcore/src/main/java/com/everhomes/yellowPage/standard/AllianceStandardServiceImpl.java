@@ -19,10 +19,6 @@ import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.yellowPage.AllianceTagDTO;
 import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
-import com.everhomes.rest.yellowPage.GetFormListCommand;
-import com.everhomes.rest.yellowPage.GetFormListResponse;
-import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
-import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
@@ -84,17 +80,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
 	
-	
-	
-	@Override
-	public GetFormListResponse getFormList(GetFormListCommand cmd) {
-		return null;
-	}
-
-	@Override
-	public GetWorkFlowListResponse getWorkFlowList(GetWorkFlowListCommand cmd) {
-		return null;
-	}
 
 	@Override
 	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
