@@ -73,11 +73,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		
 	}
 
-	@Override
-	public void updateServiceOnlineService(UpdateFAQOnlineServiceCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd) {
@@ -119,6 +114,18 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	public GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
