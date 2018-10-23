@@ -178,8 +178,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         FmWorkDataService service = getService();
         String json = "";
         try {
-            getUser(req.getParameter("user_id"));
-            json = service.eventList(req.getParameter("user_id"), req.getParameter("project_id"), req.getParameter("order_type"),
+            PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
+            json = service.eventList(user.getArchibusUid(), req.getParameter("project_id"), req.getParameter("order_type"),
                     req.getParameter("record_type"), Integer.valueOf(req.getParameter("page_num")), perg_size);
             LOGGER.debug(json);
         } catch (RemoteException e) {
