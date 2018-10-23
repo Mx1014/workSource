@@ -322,6 +322,31 @@ UPDATE eh_web_menus set `name` = '企业办公业务' WHERE id = 23000000;
 UPDATE eh_web_menus set `name` = '统计分析业务' WHERE id = 27000000;
 
 
+
+-- AUTHOR: 严军 2018-10-21
+-- REMARK: issue-null 增加模块路由
+update eh_service_modules set host = 'bulletin'	 where id = 	10300	;
+update eh_service_modules set host = 'activity'	 where id = 	10600	;
+update eh_service_modules set host = 'post'	 where id = 	10100	;
+update eh_service_modules set host = 'group'	 where id = 	10750	;
+update eh_service_modules set host = 'approval'	 where id = 	52000	;
+update eh_service_modules set host = 'work-report'	 where id = 	54000	;
+update eh_service_modules set host = 'file-management'	 where id = 	55000	;
+update eh_service_modules set host = 'remind'	 where id = 	59100	;
+update eh_service_modules set host = 'meeting-reservation'	 where id = 	53000	;
+update eh_service_modules set host = 'video-conference'	 where id = 	50700	;
+update eh_service_modules set host = 'enterprise-bulletin'	 where id = 	57000	;
+update eh_service_modules set host = 'enterprise-contact'	 where id = 	50100	;
+update eh_service_modules set host = 'attendance'	 where id = 	50600	;
+update eh_service_modules set host = 'salary'	 where id = 	51400	;
+update eh_service_modules set host = 'news-feed'	 where id = 	10800	;
+update eh_service_modules set host = 'hot-line'	 where id = 	40300	;
+update eh_service_modules set host = 'resource-reservation'	 where id = 	40400	;
+update eh_service_modules set host = 'parking'	 where id = 	40800	;
+update eh_service_modules set host = 'park-enterprises'	 where id = 	33000	;
+update eh_service_modules set host = 'park-settle'	 where id = 	40100	;
+update eh_service_modules set host = 'access-control'	 where id = 	41000	;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
