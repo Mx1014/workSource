@@ -138,6 +138,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         String json = "";
         try {
             PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
+            LOGGER.debug("用户Id：" + user.getArchibusUid());
             if(user == null){
                 throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
             }

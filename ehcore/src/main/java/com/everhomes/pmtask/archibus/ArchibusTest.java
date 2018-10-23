@@ -188,7 +188,7 @@ public class ArchibusTest {
     public static void main(String[] args) {
         ArchibusTest bean = new ArchibusTest();
         Map<String,String> params = new HashMap<>();
-        bean.getUsers();
+//        bean.getUsers();
 //        楼栋
 //        params.put("projectId","YZ8600PEK01GMWYGMYJY");
 //        params.put("parentId","YZ8600PEK01GMWYGMYJY");
@@ -207,18 +207,18 @@ public class ArchibusTest {
 //        params.put("record_type","4");
 //        bean.getThirdCategories(params);
 //      下单
-//        params.put("request_source","taskSource4");
-//        params.put("user_id","000000201807220FERQP");
-//        params.put("project_id","YZ8600PEK01GMWYGMYJY");
-//        params.put("service_id","0000002017110205VF4D");
-//        params.put("record_type","4");
-//        params.put("remarks","报修");
-//        params.put("contack","tom");
-//        params.put("telephone","15010499864");
-//        params.put("location","深圳");
-//        params.put("order_date","2018-11-17");
-//        params.put("order_time","FAST");
-//        bean.createThirdTask(params);
+        params.put("request_source","taskSource4");
+        params.put("user_id","000000201807220FERQP");
+        params.put("project_id","YZ8600PEK01GMWYGMYJY");
+        params.put("service_id","0000002017110205VF4D");
+        params.put("record_type","4");
+        params.put("remarks","报修");
+        params.put("contack","tom");
+        params.put("telephone","15010499864");
+        params.put("location","深圳");
+        params.put("order_date","2018-11-17");
+        params.put("order_time","FAST");
+        bean.createThirdTask(params);
 //      查询列表
 //        params.put("user_id","000000201807220FERQP");
 //        params.put("project_id","YZ8600PEK01GMWYGMYJY");
