@@ -836,9 +836,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 		processCommentToken(dto);
 		return dto;
 	}
-
+	
 	@Override
-	public ServiceAllianceDTO getServiceAllianceByScene(GetServiceAllianceCommand cmd) {
+	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
+		if (null != cmd.getSourceRequestType() && ServiceAllianceSourceRequestType.CLIENT.getCode() == cmd.getSourceRequestType()) {
+			return getServiceAllianceByScene(cmd);
+		}
+		
+		return getServiceAllianceByAdmin(cmd);
+	}
+
+	private ServiceAllianceDTO getServiceAllianceByScene(GetServiceAllianceCommand cmd) {
 		
 		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerType())) {
 			throwError(YellowPageServiceErrorCode.ERROR_OWNER_TYPE_NOT_COMMUNITY, "ownerType must be community");
@@ -862,8 +870,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return dto;
 	}
 	
-	@Override
-	public ServiceAllianceDTO getServiceAllianceByAdmin(GetServiceAllianceCommand cmd) {
+	private ServiceAllianceDTO getServiceAllianceByAdmin(GetServiceAllianceCommand cmd) {
 		ServiceAllianceCategories homePageCa = allianceStandardService.queryHomePageCategoryByAdmin(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getType());
 		if (null == homePageCa) {
@@ -1802,7 +1809,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
 		cmd.setPageAnchor(null);
 		cmd.setPageSize(null);
-		ListServiceAllianceCategoriesAdminResponse resp = listServiceAllianceCategoriesByScene(cmd);
+		
+		ListServiceAllianceCategoriesAdminResponse resp = null;
+		if (null != cmd.getSourceRequestType() && ServiceAllianceSourceRequestType.CLIENT.getCode() == cmd.getSourceRequestType()) {
+			resp = listServiceAllianceCategoriesByScene(cmd);
+		} else {
+			resp = listServiceAllianceCategoriesByAdmin(cmd);
+		}
+		
 		return resp.getDtos();
 	}
 
@@ -1843,8 +1857,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return resp;
 	}
 	
-	@Override
-	public ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesByScene(
+	private ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesByScene(
 			ListServiceAllianceCategoriesCommand cmd) {
 		
 		List<Byte> displayDestination = new ArrayList<>();

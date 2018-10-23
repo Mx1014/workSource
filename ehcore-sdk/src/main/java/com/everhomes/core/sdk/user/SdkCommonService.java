@@ -11,6 +11,7 @@ import com.everhomes.rest.category.GetCategoryCommand;
 import com.everhomes.rest.category.GetCategoryRestResponse;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.contentserver.ParseSharedUriRestResponse;
 import com.everhomes.rest.contentserver.ParseURICommand;
 import com.everhomes.rest.contentserver.UploadFileByUrlRestResponse;
 import com.everhomes.rest.contentserver.UploadFileCommand;
@@ -132,8 +133,8 @@ public class SdkCommonService extends NsDispatcher {
         ParseURICommand cmd = new ParseURICommand();
         cmd.setUri(uri);
         return dispatcher(namespaceId, sdkClient -> {
-            RestResponse response = sdkClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, RestResponse.class);
-            return (String) response.getResponseObject();
+            ParseSharedUriRestResponse response = sdkClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, ParseSharedUriRestResponse.class);
+            return (String) response.getResponse().getUrl();
         });
     }
 

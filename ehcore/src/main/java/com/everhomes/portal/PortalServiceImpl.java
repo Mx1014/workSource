@@ -187,7 +187,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LaunchPadService launchPadService;
-
+	
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -1705,7 +1705,7 @@ public class PortalServiceImpl implements PortalService {
 							for (PortalLayout layout: layouts) {
 
 								//标准版不能删除
-								if(namespaceId == 2){
+								if(namespacesService.isStdNamespace(namespaceId)){
 									continue;
 								}
 								//发布layout
@@ -1784,7 +1784,7 @@ public class PortalServiceImpl implements PortalService {
 		assert namespaceId != null;
 
 		//标准版不能删除
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			return;
 		}
 

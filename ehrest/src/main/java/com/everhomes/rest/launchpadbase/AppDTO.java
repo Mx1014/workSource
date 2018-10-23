@@ -56,6 +56,9 @@ public class AppDTO {
 
     private String routerQuery;
 
+    //路由2.0
+    private String router;
+
 
     //权限控制
     private Byte accessControlType;

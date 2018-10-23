@@ -179,17 +179,6 @@ public class YellowPageController  extends ControllerBase {
 	}
     
     /**
-	 * <b>URL: /yellowPage/listServiceAllianceCategoriesByScene</b>
-	 * <p> 列出服务联盟类型，前端使用 </p>
-	 */
-    @RequireAuthentication(false)
-	@RequestMapping("listServiceAllianceCategoriesByScene")
-	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
-	public RestResponse listServiceAllianceCategoriesByScene(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByScene(cmd));
-	}
-
-    /**
 	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
 	 * <p>获取服务联盟机构的展示类型</p>
 	 */
@@ -225,21 +214,7 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("getServiceAlliance")
     @RestReturn(value=ServiceAllianceDTO.class)
     public RestResponse getServiceAlliance(@Valid GetServiceAllianceCommand cmd) {
-    	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceByScene(cmd);
-    	 RestResponse response = new RestResponse(res);
-         response.setErrorCode(ErrorCodes.SUCCESS);
-         response.setErrorDescription("OK");
-         return response;
-    }
-    
-    /**
-   	 * <b>URL: /yellowPage/getServiceAllianceAdmin</b>
-   	 * <p> 后台获取服务联盟首页 </p>
-   	 */
-    @RequestMapping("getServiceAllianceAdmin")
-    @RestReturn(value=ServiceAllianceDTO.class)
-    public RestResponse getServiceAllianceAdmin(@Valid GetServiceAllianceCommand cmd) {
-    	ServiceAllianceDTO res = this.yellowPageService.getServiceAllianceByAdmin(cmd);
+    	ServiceAllianceDTO res = this.yellowPageService.getServiceAlliance(cmd);
     	 RestResponse response = new RestResponse(res);
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");

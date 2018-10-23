@@ -7,6 +7,7 @@ import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.module.*;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -101,6 +102,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private PortalVersionProvider portalVersionProvider;
+	
+	@Autowired
+	private NamespacesService namespacesService ;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -346,7 +350,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		//1、查询已安装的应用
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 		List<ServiceModuleApp> apps;
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), null, null, organizationId, TrueOrFalseFlag.TRUE.getCode(), null, null, 10000);
 		}else {
 			apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion.getId(), null);
