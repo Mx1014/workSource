@@ -275,7 +275,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		//TODO 1.对authAppIds遍历的时候调用listUserRelatedProjectByModuleId涉及权限有点慢，
 		//TODO 2.然后发现这段代码只对标准版有用（原因见下TODO 3），现在用标准版域空间框起来。
 
-		if(UserContext.getCurrentNamespaceId() == 2){
+		if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
 			//这里需要优化，需要缓存
 			List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
 			List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
