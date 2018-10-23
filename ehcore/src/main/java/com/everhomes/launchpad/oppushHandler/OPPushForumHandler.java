@@ -125,15 +125,19 @@ public class OPPushForumHandler implements OPPushHandler{
                     }
                 }
                 properties.add(imageUrl);
-                properties.add(postDTO.getSubject());
                 String tag = "";
+                String title = "";
                 if (postDTO.getEmbeddedAppId() != null && postDTO.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY)) {
+                    title = postDTO.getSubject();
                     tag = "活动";
                 }else if (postDTO.getCategoryId() != null && postDTO.getCategoryId().equals(CategoryConstants.CATEGORY_ID_TOPIC_POLLING)){
+                    title = postDTO.getContent();
                     tag = "投票";
                 }else {
+                    title = postDTO.getContent();
                     tag = "话题";
                 }
+                properties.add(title);
                 properties.add(tag);
                 properties.add(getTimeStr(postDTO.getCreateTime().getTime()));
                 card.setProperties(properties);
