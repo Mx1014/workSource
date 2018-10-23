@@ -23,12 +23,12 @@ import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormComma
  */
 @RestController
 @RequestMapping("/pm/reportForm")
-public class AssetReportFormController extends ControllerBase{
+public class PropertyReportFormController extends ControllerBase{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AssetReportFormController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReportFormController.class);
 
 	@Autowired
-	private AssetReportFormService assetReportFormService;
+	private PropertyReportFormService assetReportFormService;
 	
 	
 	/**

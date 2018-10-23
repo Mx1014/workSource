@@ -52,7 +52,7 @@ CREATE TABLE `eh_payment_bill_statistic_building` (
 
 -- AUTHOR: 唐岑   20181021
 -- REMARK: 资产管理V3.4（资产统计报表） 
--- REMARK: 项目信息报表结果集表（项目-月份） 
+-- REMARK: 项目信息报表结果集（项目-月份） 
 CREATE TABLE `eh_property_statistic_community` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11),
@@ -75,11 +75,11 @@ CREATE TABLE `eh_property_statistic_community` (
   `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目信息报表结果集表（项目-月份）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目信息报表结果集（项目-月份）';
 
 -- AUTHOR: 唐岑   20181021
 -- REMARK: 资产管理V3.4（资产统计报表） 
--- REMARK: 楼宇信息报表结果集表（楼宇-月份） 
+-- REMARK: 楼宇信息报表结果集（楼宇-月份） 
 CREATE TABLE `eh_property_statistic_building` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11),
@@ -101,4 +101,4 @@ CREATE TABLE `eh_property_statistic_building` (
   `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集表（楼宇-月份）'; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 

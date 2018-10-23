@@ -7,7 +7,7 @@ import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
 
-public interface AssetReportFormService {
+public interface PropertyReportFormService {
 
 	List<CommunityReportFormDTO> getCommunityReportForm(GetCommunityReportFormCommand cmd);
 
@@ -16,5 +16,6 @@ public interface AssetReportFormService {
 	List<BuildingReportFormDTO> getBuildingReportForm(GetBuildingReportFormCommand cmd);
 
 	void exportBuildingReportForm(GetBuildingReportFormCommand cmd);
-
+	
+	void generateReportFormStatics();
 }

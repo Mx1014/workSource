@@ -10,6 +10,7 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -142,4 +143,6 @@ public interface AddressProvider {
 
     List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
     List<Address> findActiveApartmentsByBuildingId(Long buildingId);
+	int getTotalApartmentCount();
+	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
 }
