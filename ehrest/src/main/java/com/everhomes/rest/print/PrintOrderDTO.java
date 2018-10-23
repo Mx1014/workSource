@@ -35,7 +35,7 @@ public class PrintOrderDTO {
 	private String detail;
 	private Long orderNo;
 	private String email;
-	private String payMode;
+	private Byte payMode;
 	public String getEmail() {
 		return email;
 	}
@@ -97,10 +97,10 @@ public class PrintOrderDTO {
 		this.orderNo = orderNo;
 	}
 
-	public String getPayMode() {
+	public Byte getPayMode() {
 		return payMode;
 	}
-	public void setPayMode(String payMode) {
+	public void setPayMode(Byte payMode) {
 		this.payMode = payMode;
 	}
 	@Override

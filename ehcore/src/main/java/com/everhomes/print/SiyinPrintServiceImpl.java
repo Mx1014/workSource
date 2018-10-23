@@ -525,7 +525,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
-	public GetPrintOrdersResponse getPrintOrders(GetPrintOrdersCommand cmd) {
+	public GetPrintOrdersResponse getPrintOrder(GetPrintOrdersCommand cmd) {
 		
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 			
@@ -534,7 +534,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		GetPrintOrdersResponse response = new GetPrintOrdersResponse();
 		if(printOrder == null)
 			return response;
-		response.setPrintOrder(ConvertHelper.convert(printOrder, PrintOrderDTO.class));
+		PrintOrderDTO dto = ConvertHelper.convert(printOrder, PrintOrderDTO.class);
+		dto.setOrderTotalAmount(printOrder.getOrderTotalFee());
+		response.setPrintOrder(dto);
 		return response;
 	}
 

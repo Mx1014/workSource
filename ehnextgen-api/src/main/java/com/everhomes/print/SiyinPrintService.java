@@ -86,5 +86,5 @@ public interface SiyinPrintService {
 
 	PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd);
 
-	GetPrintOrdersResponse getPrintOrders(GetPrintOrdersCommand cmd);
+	GetPrintOrdersResponse getPrintOrder(GetPrintOrdersCommand cmd);
 }

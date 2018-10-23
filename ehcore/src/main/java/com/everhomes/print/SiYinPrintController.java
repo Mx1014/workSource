@@ -508,14 +508,14 @@ public class SiYinPrintController extends ControllerBase {
 	}
 	
 	 /**
-	  * <b>URL: /siyinprint/getPrintOrders</b>
+	  * <b>URL: /siyinprint/getPrintOrder</b>
 	  * <p>23.根据orderNo查询订单</p>
 	  */
-	 @RequestMapping("getPrintOrders")
+	 @RequestMapping("getPrintOrder")
 	 @RestReturn(value=GetPrintOrdersResponse.class)
 	 public RestResponse getPrintOrders(GetPrintOrdersCommand cmd) {
 		
-	     RestResponse response = new RestResponse(siyinPrintService.getPrintOrders(cmd));
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintOrder(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
