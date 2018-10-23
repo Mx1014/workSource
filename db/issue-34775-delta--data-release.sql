@@ -11,3 +11,8 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('oa.u
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('oa.unit','2','zh_CN','次');
 
 INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT) VALUE( 'PunchStatusStatisticsItemName', 11, 'zh_CN', '外出');
+
+-- AUTHOR: 吴寒
+-- REMARK: 日程提醒给共享人发消息
+SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','6','zh_CN','创建给被共享人发消息','${trackContractName}共享了日程“${planDescription}” ','0');
