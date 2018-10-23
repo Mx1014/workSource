@@ -13,10 +13,13 @@ import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -41,6 +44,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private AssetProvider assetProvider;
  
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
@@ -632,7 +638,85 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         });
         return response[0];
 	}
-	
-    
+
+	public List<ListBillStatisticByAddressDTO> listBillStatisticByAddress(Integer pageOffSet, Integer pageSize,
+			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
+			String buildingName, List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName) {
+		List<ListBillStatisticByAddressDTO> list = new ArrayList<ListBillStatisticByAddressDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBillItems r = Tables.EH_PAYMENT_BILL_ITEMS.as("r");
+        EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
+		SelectQuery<Record> query = context.selectQuery();
+        //缴费信息明细表-房源维度的统计是实时统计，因为已经细到最细的维度即收费项目维度；
+        query.addSelect(r.BUILDING_NAME, r.APARTMENT_NAME, r.TARGET_NAME,
+        		r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_OWED,
+        		r.AMOUNT_RECEIVABLE_WITHOUT_TAX, r.AMOUNT_RECEIVED_WITHOUT_TAX, r.AMOUNT_OWED_WITHOUT_TAX,
+        		r.TAX_AMOUNT, r.CHARGING_ITEMS_ID, r.CATEGORY_ID,
+        		bills.DUE_DAY_COUNT, bills.NOTICE_TIMES,
+        		bills.NOTICETEL, bills.TARGET_NAME, bills.DATE_STR_BEGIN, bills.DATE_STR_END);
+        query.addFrom(r);
+		query.addJoin(bills, JoinType.LEFT_OUTER_JOIN, r.BILL_ID.eq(bills.ID));
+        query.addConditions(r.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(r.OWNER_ID.eq(ownerId));
+        query.addConditions(r.OWNER_TYPE.eq(ownerType));
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
+        	query.addConditions(r.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
+        	query.addConditions(r.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        query.addConditions(r.BUILDING_NAME.eq(buildingName));
+        query.addConditions(r.APARTMENT_NAME.in(apartmentNameList));
+        query.addConditions(r.CHARGING_ITEMS_ID.in(chargingItemIdList));
+        if(!org.springframework.util.StringUtils.isEmpty(targetName)) {
+        	query.addConditions(r.TARGET_NAME.greaterOrEqual(targetName));
+        }
+        query.addConditions(bills.SWITCH.eq((byte)1));//只统计已出账单的已缴和未缴费用
+        query.addConditions(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+        query.addOrderBy(r.BUILDING_NAME, r.APARTMENT_NAME);
+        query.addLimit(pageOffSet,pageSize+1);
+        query.fetch().map(f -> {
+        	ListBillStatisticByAddressDTO dto = convertBillStatisticByAddress(f, r, bills);
+        	dto.setAddressName(f.getValue(r.BUILDING_NAME) + "-" + f.getValue(r.APARTMENT_NAME));
+        	dto.setTargetName(f.getValue(r.TARGET_NAME));
+        	dto.setNoticeTel(f.getValue(bills.NOTICETEL));
+        	dto.setDateStrBegin(f.getValue(bills.DATE_STR_BEGIN));
+        	dto.setDateStrEnd(f.getValue(bills.DATE_STR_END));
+        	Long chargingItemId = f.getValue(r.CHARGING_ITEMS_ID);
+        	Long categoryId = f.getValue(r.CATEGORY_ID);;
+        	String projectChargingItemName = assetProvider.getProjectChargingItemName(namespaceId, ownerId, ownerType, chargingItemId, categoryId);
+            dto.setProjectChargingItemName(projectChargingItemName);
+        	list.add(dto);
+        	return null;
+        });
+        return list;
+	}
+
+	private ListBillStatisticByAddressDTO convertBillStatisticByAddress(Record f, EhPaymentBillItems r, EhPaymentBills bills) {
+		ListBillStatisticByAddressDTO dto = new ListBillStatisticByAddressDTO();
+		BigDecimal amountReceivable = f.getValue(r.AMOUNT_RECEIVABLE);
+    	BigDecimal amountReceived = f.getValue(r.AMOUNT_RECEIVED);
+    	BigDecimal amountOwed = f.getValue(r.AMOUNT_OWED);
+    	BigDecimal amountReceivableWithoutTax = f.getValue(r.AMOUNT_RECEIVABLE_WITHOUT_TAX);
+    	BigDecimal amountReceivedWithoutTax = f.getValue(r.AMOUNT_RECEIVED_WITHOUT_TAX);
+    	BigDecimal amountOwedWithoutTax = f.getValue(r.AMOUNT_OWED_WITHOUT_TAX);
+    	BigDecimal taxAmount = f.getValue(r.TAX_AMOUNT);
+    	Long dueDayCount = f.getValue(bills.DUE_DAY_COUNT);
+    	Integer noticeTimes = f.getValue(bills.NOTICE_TIMES);
+    	
+    	dto.setAmountReceivable(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
+    	dto.setAmountReceived(amountReceived != null ? amountReceived : BigDecimal.ZERO);
+    	dto.setAmountOwed(amountOwed != null ? amountOwed : BigDecimal.ZERO);
+    	dto.setAmountReceivableWithoutTax(amountReceivableWithoutTax != null ? amountReceivableWithoutTax : BigDecimal.ZERO);
+    	dto.setAmountReceivedWithoutTax(amountReceivedWithoutTax != null ? amountReceivedWithoutTax : BigDecimal.ZERO);
+    	dto.setAmountOwedWithoutTax(amountOwedWithoutTax != null ? amountOwedWithoutTax : BigDecimal.ZERO);
+    	dto.setTaxAmount(taxAmount != null ? taxAmount : BigDecimal.ZERO);
+    	dto.setDueDayCount(dueDayCount != null ? new BigDecimal(dueDayCount) : BigDecimal.ZERO);
+    	dto.setNoticeTimes(noticeTimes != null ? new BigDecimal(noticeTimes) : BigDecimal.ZERO);
+    	//收缴率=已收含税金额/应收含税金额  
+    	BigDecimal collectionRate = calculateCollecionRate(amountReceivable, amountReceived);
+    	dto.setCollectionRate(collectionRate);
+		return dto;
+	}
     
 }

@@ -6,6 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
@@ -71,6 +74,31 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
             list.remove(list.size()-1);
         }
 		response.setListBillStatisticByBuildingDTOs(list);
+		return response;
+	}
+	
+	//房源维度
+	public ListBillStatisticByAddressResponse listBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		ListBillStatisticByAddressResponse response = new ListBillStatisticByAddressResponse();
+		Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        List<ListBillStatisticByAddressDTO> list = assetStatisticProvider.listBillStatisticByAddress(pageOffSet, pageSize, 
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingName(), cmd.getApartmentNameList(), cmd.getChargingItemIdList(), cmd.getTargetName());
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
+		response.setListBillStatisticByAddressDTOs(list);
 		return response;
 	}
 	
@@ -142,6 +170,5 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 				ownerType, dateStrBegin, dateStrEnd, buildingNameList);
 		return dto;
 	}
-	
 	
 }

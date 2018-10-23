@@ -10,8 +10,8 @@ import java.math.BigDecimal;
  * <li>ownerId: 所属项目ID</li>
  * <li>projectName:项目名称</li>
  * <li>projectClassify:项目分类</li>
- * <li>addressCount:楼宇总数</li>
- * <li>addressArea:建筑面积</li>
+ * <li>buildingCount:楼宇总数</li>
+ * <li>areaSize:建筑面积</li>
  * <li>amountReceivable:应收含税</li>
  * <li>amountReceivableWithoutTax:应收不含税</li>
  * <li>taxAmount:税额</li>
@@ -32,8 +32,8 @@ public class ListBillStatisticByCommunityDTO {
 	private String ownerType;
     private String projectName;
     private String projectClassify;
-    private Long addressCount;
-    private Long addressArea;
+    private Integer buildingCount;
+    private BigDecimal areaSize;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceivableWithoutTax;
     private BigDecimal taxAmount;
@@ -47,6 +47,24 @@ public class ListBillStatisticByCommunityDTO {
     private BigDecimal noticeTimes;
     private BigDecimal collectionRate;
     
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
 	public String getProjectName() {
 		return projectName;
 	}
@@ -59,17 +77,17 @@ public class ListBillStatisticByCommunityDTO {
 	public void setProjectClassify(String projectClassify) {
 		this.projectClassify = projectClassify;
 	}
-	public Long getAddressCount() {
-		return addressCount;
+	public Integer getBuildingCount() {
+		return buildingCount;
 	}
-	public void setAddressCount(Long addressCount) {
-		this.addressCount = addressCount;
+	public void setBuildingCount(Integer buildingCount) {
+		this.buildingCount = buildingCount;
 	}
-	public Long getAddressArea() {
-		return addressArea;
+	public BigDecimal getAreaSize() {
+		return areaSize;
 	}
-	public void setAddressArea(Long addressArea) {
-		this.addressArea = addressArea;
+	public void setAreaSize(BigDecimal areaSize) {
+		this.areaSize = areaSize;
 	}
 	public BigDecimal getAmountReceivable() {
 		return amountReceivable;
@@ -143,24 +161,5 @@ public class ListBillStatisticByCommunityDTO {
 	public void setCollectionRate(BigDecimal collectionRate) {
 		this.collectionRate = collectionRate;
 	}
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-	public Long getOwnerId() {
-		return ownerId;
-	}
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-	public String getOwnerType() {
-		return ownerType;
-	}
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-    
     
 }

@@ -2,6 +2,8 @@ package com.everhomes.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 
@@ -86,9 +88,9 @@ public interface AssetStatisticProvider {
 	ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotalForProperty(Integer namespaceId, Long ownerId,
 			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList);
 
-
-	
-
+	List<ListBillStatisticByAddressDTO> listBillStatisticByAddress(Integer pageOffSet, Integer pageSize,
+			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
+			String buildingName, List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName);
 	
 	
 
