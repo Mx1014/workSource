@@ -16,5 +16,6 @@ public interface PropertyReportFormService {
 	List<BuildingReportFormDTO> getBuildingReportForm(GetBuildingReportFormCommand cmd);
 
 	void exportBuildingReportForm(GetBuildingReportFormCommand cmd);
-
+	
+	void generateReportFormStatics();
 }

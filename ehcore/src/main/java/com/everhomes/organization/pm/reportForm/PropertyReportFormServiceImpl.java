@@ -10,6 +10,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
@@ -18,6 +21,8 @@ import com.everhomes.asset.schedule.AssetSchedule;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.ApartmentDTO;
@@ -28,16 +33,17 @@ import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
+import com.everhomes.scheduler.EnergyAutoReadingJob;
+import com.everhomes.scheduler.EnergyTaskScheduleJob;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class PropertyReportFormServiceImpl implements PropertyReportFormService{
+public class PropertyReportFormServiceImpl implements PropertyReportFormService,ApplicationListener<ContextRefreshedEvent>{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReportFormServiceImpl.class);
-	
-	@Autowired
-	private NamespacesProvider namespacesProvider;
 	
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -46,10 +52,36 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 	private AddressProvider addressProvider;
 	
 	@Autowired
-	private PropertyReportFormProvider assetReportFormProvider;
+	private PropertyReportFormProvider propertyReportFormProvider;
 	
 	@Autowired
-	private SequenceProvider sequenceProvider;
+	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+	@Value("${equipment.ip}")
+    private String equipmentIp;
+	
+	@Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+
+    public void init() {
+        String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_PROPERTY_TASK_TIME, "0 30 2 * * ? ");
+        String propertyReportFormTrigger = "PropertyReportFormTask " + System.currentTimeMillis();
+        String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+        LOGGER.info("=======================PropertyReportFormTaskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+        if (taskServer.equals(equipmentIp)) {
+            if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+                scheduleProvider.scheduleCronJob(propertyReportFormTrigger, propertyReportFormTrigger,
+                        cronExpression, PropertyReportFormJob.class, null);
+            }
+        }
+    }
 	
 	@Override
 	public List<CommunityReportFormDTO> getCommunityReportForm(GetCommunityReportFormCommand cmd) {
@@ -76,6 +108,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 	}
 	
 	//定时统计园区数据的接口
+	@Override
 	public void generateReportFormStatics() {
 		int pageSize = 5000;
 		int totalCount = addressProvider.getTotalApartmentCount();
@@ -90,6 +123,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 		Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
 		
 		for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+			
 			int startIndex = currentPage * pageSize;
 			List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
 			
@@ -135,13 +169,17 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 
 	private void createBuildingStatics(Map<Long, BuildingStatistics> buildingResultMap) {
 		Collection<BuildingStatistics> values = buildingResultMap.values();
-		assetReportFormProvider.batchAddBuildingStatistics(values);
+		for (BuildingStatistics buildingStatistics : values) {
+			propertyReportFormProvider.createBuildingStatistics(buildingStatistics);
+		}
 		buildingResultMap.clear();
 	}
 
 	private void createCommunityStatics(Map<Long, CommunityStatistics> communityResultMap) {
 		Collection<CommunityStatistics> values = communityResultMap.values();
-		assetReportFormProvider.batchAddCommunityStatics(values);
+		for (CommunityStatistics communityStatistics : values) {
+			propertyReportFormProvider.createCommunityStatics(communityStatistics);
+		}
 		communityResultMap.clear();
 	}
 
@@ -236,10 +274,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 		communityStatistics.setRentRate(rentRate);
 		communityStatistics.setFreeRate(freeRate);
 		
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(CommunityStatistics.class));
-		communityStatistics.setId(id);
 		communityStatistics.setStatus(PropertyReportFormStatus.ACTIVE.getCode());
-		communityStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		return communityStatistics;
 	}
@@ -274,13 +309,12 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService{
 		buildingStatistics.setRentRate(rentRate);
 		buildingStatistics.setFreeRate(freeRate);
 		
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(BuildingStatistics.class));
-		buildingStatistics.setId(id);
-		buildingStatistics.setStatus(PropertyReportFormStatus.ACTIVE.getCode());
 		buildingStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
 		return buildingStatistics;
 	}
+
+	
 	
 
 }

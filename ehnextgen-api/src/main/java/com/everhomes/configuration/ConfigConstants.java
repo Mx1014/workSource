@@ -218,4 +218,7 @@ public interface ConfigConstants {
 
     //支付双向安全校验
     public static final String SECURITY_PAY_SERVER = "security.pay.server";
+    
+    //资产报表定时任务
+	public static final String SCHEDULE_PROPERTY_TASK_TIME = "schedule.property.task.time";
 }
