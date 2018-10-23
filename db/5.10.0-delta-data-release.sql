@@ -273,8 +273,8 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pro
 
 -- end
 
--- xq.tian 2018-10-19
--- 驳回按钮的默认跟踪
+-- AUTHOR: xq.tian 2018-10-19
+-- REMARK: 驳回按钮的默认跟踪
 UPDATE eh_locale_strings SET text='任务已被 ${text_tracker_curr_operator_name} 驳回' WHERE scope='flow' AND code='20005';
 
 
