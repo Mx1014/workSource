@@ -283,13 +283,13 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
-            addExpandItems(items,cmd.getFieldId());
+            addExpandItems(items,cmd.getFieldId(), cmd.getOwnerId(), cmd.getOwnerType());
             return items;
         }
         return null;
     }
 
-    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId, Long ownerId, String ownerType) {
         Field field = fieldProvider.findFieldById(fieldId);
         if (field!=null && field.getName().equals("sourceItemId")) {
             List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
@@ -307,6 +307,8 @@ public class FieldServiceImpl implements FieldService {
             //add service alliance categories
             ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            cmd.setOwnerId(ownerId);
+            cmd.setOwnerType(ownerType);
             List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
             if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
                 serviceAllianceCategories.forEach((r) -> {
@@ -532,7 +534,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
-                addExpandItems(itemDTOs, systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId(), cmd.getOwnerId(), cmd.getOwnerType());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
