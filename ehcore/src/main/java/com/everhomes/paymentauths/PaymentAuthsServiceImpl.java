@@ -33,6 +33,12 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	private PaymentAuthsProvider paymentAuthsProvider;
 	@Autowired
 	private OrganizationService organizationService;
+	Long rentalScreen = Long.parseLong(PaymentAuthsAPPType.RENTALSCREEN.getCode());
+	Long rentalVIP = Long.parseLong(PaymentAuthsAPPType.RENTALVIP.getCode());
+	Long rentalService = Long.parseLong(PaymentAuthsAPPType.RENTALSERVICE.getCode());
+	Long rentalRoom = Long.parseLong(PaymentAuthsAPPType.RENTALROOM.getCode());
+	Long print = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
+	Long parking = Long.parseLong(PaymentAuthsAPPType.PARKING.getCode());
 	
 	@Override
 	public CheckUserAuthsResponse checkUserAuths(CheckUserAuthsCommand cmd){
@@ -61,28 +67,72 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrganizationId());
 		List<EnterprisePaymentAuthsDTO> results = new ArrayList<EnterprisePaymentAuthsDTO>();
 		List<EnterpriesAuthDTO> printAuth = new ArrayList<EnterpriesAuthDTO>();
-		Long printAppId = null;
+		List<EnterpriesAuthDTO> parkingAuth = new ArrayList<EnterpriesAuthDTO>();
+		List<EnterpriesAuthDTO> rentalRoomAuth = new ArrayList<EnterpriesAuthDTO>();
+		List<EnterpriesAuthDTO> rentalVIPAuth = new ArrayList<EnterpriesAuthDTO>();
+		List<EnterpriesAuthDTO> rentalScreenAuth = new ArrayList<EnterpriesAuthDTO>();
+		List<EnterpriesAuthDTO> rentalServiceAuth = new ArrayList<EnterpriesAuthDTO>();
+
 		for(EnterprisePaymentAuths enterprisePaymentAuth : authsList){
 			EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
-			Long appId = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
-			if (enterprisePaymentAuth.getAppId().equals(appId)){
-				printAppId = enterprisePaymentAuth.getAppId();
-				if (enterprisePaymentAuth.getSourceType().equals("person")){
-					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
-					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
-				} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
-					authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
-					authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
-				}
-				authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
-				authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
-				printAuth.add(authDTO);
+			if (enterprisePaymentAuth.getSourceType().equals("person")){
+				authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
+				authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+			} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
+				authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
+				authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
 			}
+			authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
+			authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
+			if (enterprisePaymentAuth.getAppId().equals(print)){
+				printAuth.add(authDTO);
+			} else if (enterprisePaymentAuth.getAppId().equals(parking)){
+				parkingAuth.add(authDTO);
+			} else if (enterprisePaymentAuth.getAppId().equals(rentalVIP)){
+				rentalVIPAuth.add(authDTO);
+			} else if (enterprisePaymentAuth.getAppId().equals(rentalRoom)){
+				rentalRoomAuth.add(authDTO);
+			} else if (enterprisePaymentAuth.getAppId().equals(rentalService)){
+				rentalServiceAuth.add(authDTO);
+			} else if (enterprisePaymentAuth.getAppId().equals(rentalScreen)){
+				rentalScreenAuth.add(authDTO);
+			}
+					
 		}
 		if (printAuth != null) {
 			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
 			e.setEnterpriseAuth(printAuth);
-			e.setAppId(printAppId);
+			e.setAppId(print);
+			results.add(e);
+		}
+		if (parkingAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(parkingAuth);
+			e.setAppId(parking);
+			results.add(e);
+		}
+		if (rentalVIPAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(rentalVIPAuth);
+			e.setAppId(rentalVIP);
+			results.add(e);
+		}
+		if (rentalRoomAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(rentalRoomAuth);
+			e.setAppId(rentalRoom);
+			results.add(e);
+		}
+		if (rentalServiceAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(rentalServiceAuth);
+			e.setAppId(rentalService);
+			results.add(e);
+		}
+		if (rentalScreenAuth != null) {
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			e.setEnterpriseAuth(rentalScreenAuth);
+			e.setAppId(rentalScreen);
 			results.add(e);
 		}
 		return results;
