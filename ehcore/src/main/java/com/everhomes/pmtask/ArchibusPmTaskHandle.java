@@ -246,7 +246,24 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
         }
         return result.getData();
+    }
 
+    @Override
+    public Object submitThirdAttachment(HttpServletRequest req) {
+        FmWorkDataService service = getService();
+        String json;
+        try {
+            json = service.submitEventFile(pk_crop,req.getParameter("order_id"),req.getParameter("file_path"),req.getParameter("file_name"),req.getParameter("file_size"),req.getParameter("file_type"));
+            LOGGER.debug(json);
+        } catch (RemoteException e) {
+            LOGGER.error("submitEventEvaluation fail",e);
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"submitEventFile fail,params={}",req.getParameterMap());
+        }
+        ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
+        if(!result.isSuccess()){
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+        }
+        return result.getMsg();
     }
 
     private PmTaskArchibusUserMapping getUser(String phone){

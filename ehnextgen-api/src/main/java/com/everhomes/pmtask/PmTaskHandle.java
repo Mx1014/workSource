@@ -46,4 +46,7 @@ public interface PmTaskHandle {
 
 	Object createThirdEvaluation(HttpServletRequest req);
 	Object getThirdEvaluation(HttpServletRequest req);
+
+	Object submitThirdAttachment(HttpServletRequest req);
+
 }
