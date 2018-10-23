@@ -91,6 +91,10 @@ public interface AssetStatisticProvider {
 	List<ListBillStatisticByAddressDTO> listBillStatisticByAddress(Integer pageOffSet, Integer pageSize,
 			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
 			String buildingName, List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName);
+
+	ListBillStatisticByAddressDTO listBillStatisticByAddressTotal(Integer namespaceId, Long ownerId,
+			String ownerType, String dateStrBegin, String dateStrEnd, String buildingName,
+			List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName);
 	
 	
 

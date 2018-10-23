@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
+ * <li>count: 合计总数</li>
  * <li>namespaceId: 域空间</li>
  * <li>ownerType: 所属项目类型</li>
  * <li>ownerId: 所属项目ID</li>
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
  *</ul>
  */
 public class ListBillStatisticByAddressDTO {
+	private BigDecimal count;
 	private Integer namespaceId;
 	private Long ownerId;
 	private String ownerType;
@@ -184,6 +186,12 @@ public class ListBillStatisticByAddressDTO {
 	}
 	public void setProjectChargingItemName(String projectChargingItemName) {
 		this.projectChargingItemName = projectChargingItemName;
+	}
+	public BigDecimal getCount() {
+		return count;
+	}
+	public void setCount(BigDecimal count) {
+		this.count = count;
 	}
     
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
@@ -135,16 +136,26 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		return list;
 	}
 
+	//项目维度
 	public ListBillStatisticByCommunityDTO listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
 		ListBillStatisticByCommunityDTO dto = assetStatisticProvider.listBillStatisticByCommunityTotal(
         		cmd.getNamespaceId(), cmd.getOwnerIdList(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd());
 		return dto;
 	}
 	
+	//楼宇维度
 	public ListBillStatisticByBuildingDTO listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
 		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotal(
         		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd(),
         		cmd.getBuildingNameList());
+		return dto;
+	}
+	
+	//房源维度
+	public ListBillStatisticByAddressDTO listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd) {
+		ListBillStatisticByAddressDTO dto = assetStatisticProvider.listBillStatisticByAddressTotal(
+        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+        		cmd.getBuildingName(), cmd.getApartmentNameList(), cmd.getChargingItemIdList(), cmd.getTargetName());
 		return dto;
 	}
 
