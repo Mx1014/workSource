@@ -300,12 +300,17 @@ public class RemindServiceImpl implements RemindService  {
             remindShare.setSharedSourceType(shareMember.getSourceType());
             remindShare.setSharedSourceName(shareMember.getSourceName());
             shares.add(remindShare);
-            
-            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
-            trackRemind.setTrackRemindId(remind.getId());
-            trackRemind.setTrackContractName(remind.getContactName());
-            trackRemind.setTrackRemindUserId(remind.getUserId());
-            trackReminds.add(trackRemind);
+            if(ShareMemberSourceType.MEMBER_DETAIL == ShareMemberSourceType.fromCode(shareMember.getSourceType())){
+	            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(shareMember.getSourceId());
+	            if(null != detail && !detail.getTargetId().equals(0L)){
+		            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
+		            trackRemind.setUserId(detail.getTargetId());
+		            trackRemind.setTrackRemindId(remind.getId());
+		            trackRemind.setTrackContractName(remind.getContactName());
+		            trackRemind.setTrackRemindUserId(remind.getUserId());
+		            trackReminds.add(trackRemind);
+	            }
+            }
         });
         sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.CREATE_SUBSCRIBE);
         return shares;
