@@ -135,23 +135,37 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     @Override
     public Object createThirdTask(HttpServletRequest req) {
         FmWorkDataService service = getService();
-        String json = "";
+        String json;
+
+        PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
+        LOGGER.debug("用户Id：" + user.getArchibusUid());
+        if(user == null){
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
+        }
+
+        String user_id = user.getArchibusUid();
+
+        String request_source = req.getParameter("request_source");
+        String project_id = req.getParameter("project_id");
+        String service_id = req.getParameter("service_id");
+        String record_type = req.getParameter("record_type");
+        String remarks = req.getParameter("remarks");
+        String contack = req.getParameter("contack");
+
+        String telephone = req.getParameter("telephone");
+        String location =req.getParameter("location");
+        String order_date = req.getParameter("order_date");
+        String order_time = req.getParameter("order_time");
         try {
-            PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
-            LOGGER.debug("用户Id：" + user.getArchibusUid());
-            if(user == null){
-                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
-            }
-            LOGGER.debug("请求参数：" + req.getParameter("request_source") + " " + req.getParameter("project_id") + "" +
-                    req.getParameter("service_id")+ " " + req.getParameter("record_type"));
-            service.submitEvent(pk_crop, req.getParameter("request_source"), user.getArchibusUid(), req.getParameter("project_id"),
-                    req.getParameter("service_id"), req.getParameter("record_type"), req.getParameter("remarks"), req.getParameter("contack"),
-                    req.getParameter("telephone"), req.getParameter("location"), req.getParameter("order_date"), req.getParameter("order_time"));
+
+            json = service.submitEvent(pk_crop, request_source, user_id, project_id,
+                            service_id, record_type, remarks, contack,
+                            telephone, location, order_date, order_time);
+            LOGGER.debug(json);
         } catch (RemoteException e) {
             LOGGER.error("getProjectInfo fail",e);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"getProjectInfo fail,params={}",req.getParameterMap());
         }
-        LOGGER.debug(json);
         ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
         if(!result.isSuccess()){
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);

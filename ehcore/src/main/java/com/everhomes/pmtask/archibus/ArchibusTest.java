@@ -210,14 +210,16 @@ public class ArchibusTest {
         params.put("request_source","taskSource4");
         params.put("user_id","000000201807220FERQP");
         params.put("project_id","YZ8600PEK01GMWYGMYJY");
-        params.put("service_id","0000002017110205VF4D");
-        params.put("record_type","4");
+//        params.put("service_id","0000002017110205VF4D");
+//        params.put("record_type","4");
+        params.put("service_id","64");
+        params.put("record_type","1");
         params.put("remarks","报修");
         params.put("contack","tom");
         params.put("telephone","15010499864");
         params.put("location","深圳");
-        params.put("order_date","2018-11-17");
-        params.put("order_time","FAST");
+//        params.put("order_date","2018-11-17");
+//        params.put("order_time","FAST");
         bean.createThirdTask(params);
 //      查询列表
 //        params.put("user_id","000000201807220FERQP");
