@@ -28,6 +28,7 @@ import com.everhomes.rest.asset.BillItemIdCommand;
 import com.everhomes.rest.asset.BillStaticsCommand;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.CalculateRentCommand;
+import com.everhomes.rest.asset.CancelGeneralBillCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
 import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
 import com.everhomes.rest.asset.CheckTokenRegisterCommand;
@@ -69,6 +70,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListGeneralBillsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsCommand;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
@@ -323,7 +325,6 @@ public interface AssetService {
 	default void exportAssetListByParams(Object cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
-
 
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
 
