@@ -657,7 +657,7 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("payNotify")
     @RestReturn(value = String.class)
     @RequireAuthentication(false)
-    public RestResponse payNotify(WechatPayNotifyCommand cmd) {
+    public RestResponse payNotify(PayNotifyCommand cmd) {
         parkingService.notifyParkingRechargeOrderPayment(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
