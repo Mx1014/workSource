@@ -5,6 +5,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ruian.*;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -141,7 +142,12 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         //先查询出所有分类
         //List<ActivityCategoryModel> cateGorys = this.getCategoryList(null , null);
         //获取活动列表
-        List<ActivityModel> activitys = this.getActivityList(null, null,null, null, null, 10, 1);
+        AppContext appContext = UserContext.current().getAppContext();
+        Long communityId = null ;
+        if(appContext != null){
+            communityId = appContext.getCommunityId() ;
+        }
+        List<ActivityModel> activitys = this.getActivityList(null, communityId,null, null, null, 10, 1);
         ListActivityPromotionEntitiesBySceneReponse res = new ListActivityPromotionEntitiesBySceneReponse();
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
