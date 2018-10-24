@@ -1,4 +1,4 @@
-
+﻿
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
@@ -43,7 +43,7 @@ CREATE TABLE `eh_alliance_config_state` (
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
 	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
 	PRIMARY KEY (`id`),
-	INDEX `u_eh_prefix` (`type`, `project_id`)
+	UNIQUE INDEX `u_eh_prefix` (`type`, `project_id`)
 )
 COMMENT='储存应用不同项目下的配置情况。'
 COLLATE='utf8mb4_general_ci'
