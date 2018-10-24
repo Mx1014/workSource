@@ -590,7 +590,11 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		//楼宇房源
 		Cell cell2 = tempRow.createCell(1);
 		cell2.setCellStyle(style);
-		cell2.setCellValue(dto.getAddressName());
+		if(isLastRow) {
+			cell2.setCellValue("--");
+		}else {
+			cell2.setCellValue(dto.getAddressName());
+		}
 		//客户名称
 		Cell cell3 = tempRow.createCell(2);
 		cell3.setCellStyle(style);
@@ -614,11 +618,19 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		//账单时间
 		Cell cell6 = tempRow.createCell(5);
 		cell6.setCellStyle(style);
-		cell6.setCellValue(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());		
+		if(isLastRow) {
+			cell6.setCellValue("--");	
+		}else {
+			cell6.setCellValue(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());	
+		}
 		//收费项目
 		Cell cell7 = tempRow.createCell(6);
 		cell7.setCellStyle(style);
-		cell7.setCellValue(dto.getProjectChargingItemName());	
+		if(isLastRow) {
+			cell7.setCellValue("--");	
+		}else {
+			cell7.setCellValue(dto.getProjectChargingItemName());	
+		}
 		//应收含税金额(元)
 		Cell cell8 = tempRow.createCell(7);
 		cell8.setCellStyle(style);
@@ -640,9 +652,9 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		cell12.setCellStyle(style);
 		cell12.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
 		//催缴次数
-		Cell cell13= tempRow.createCell(12);
-		cell13.setCellStyle(style);
-		cell13.setCellValue(dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
+//		Cell cell13= tempRow.createCell(12);
+//		cell13.setCellStyle(style);
+//		cell13.setCellValue(dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
 	}
 	
 	private InputStream copyInputStream(InputStream source) {
