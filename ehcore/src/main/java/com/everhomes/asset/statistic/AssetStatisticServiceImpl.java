@@ -249,7 +249,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		Sheet sheet = wb.getSheetAt(0);
 		if (null != sheet) {
 			Row defaultRow = sheet.getRow(2);
-			Cell cell = defaultRow.getCell(1);
+			Cell cell = defaultRow.getCell(0);
 			CellStyle style = cell.getCellStyle();
 			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
 			int size = 0;
@@ -312,7 +312,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
      */
     private void fillRowCellBillStatisticByCommunity(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, ListBillStatisticByCommunityDTO dto) {
     	//序号
-		Cell cell1 = tempRow.createCell(1);
+		Cell cell1 = tempRow.createCell(0);
 		cell1.setCellStyle(style);
 		if(isLastRow) {
 			cell1.setCellValue("合计");
@@ -320,11 +320,11 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 			cell1.setCellValue(orderNum);
 		}
 		//项目名称
-		Cell cell2 = tempRow.createCell(2);
+		Cell cell2 = tempRow.createCell(1);
 		cell2.setCellStyle(style);
 		cell2.setCellValue(dto.getProjectName());
 		//项目分类
-		Cell cell3 = tempRow.createCell(3);
+		Cell cell3 = tempRow.createCell(2);
 		cell3.setCellStyle(style);
 		if(isLastRow) {
 			cell3.setCellValue("--");
@@ -332,35 +332,35 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 			cell3.setCellValue(dto.getProjectClassify() != null ? dto.getProjectClassify().toString() : "");
 		}
 		//楼宇总数
-		Cell cell4 = tempRow.createCell(4);
+		Cell cell4 = tempRow.createCell(3);
 		cell4.setCellStyle(style);
 		cell4.setCellValue(dto.getBuildingCount() != null ? dto.getBuildingCount().toString() : "0");
 		//建筑面积
-		Cell cell5 = tempRow.createCell(5);
+		Cell cell5 = tempRow.createCell(4);
 		cell5.setCellStyle(style);
 		cell5.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
 		//应收含税金额(元)
-		Cell cell6 = tempRow.createCell(6);
+		Cell cell6 = tempRow.createCell(5);
 		cell6.setCellStyle(style);
 		cell6.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
 		//已收金额(元)
-		Cell cell7 = tempRow.createCell(7);
+		Cell cell7 = tempRow.createCell(6);
 		cell7.setCellStyle(style);
 		cell7.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
 		//待收金额(元)
-		Cell cell8 = tempRow.createCell(8);
+		Cell cell8 = tempRow.createCell(7);
 		cell8.setCellStyle(style);
 		cell8.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
 		//总欠费天数(天)
-		Cell cell9 = tempRow.createCell(9);
+		Cell cell9 = tempRow.createCell(8);
 		cell9.setCellStyle(style);
 		cell9.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
 		//收缴率(%)
-		Cell cell10 = tempRow.createCell(10);
+		Cell cell10 = tempRow.createCell(9);
 		cell10.setCellStyle(style);
-		cell10.setCellValue(dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0");
-		//收缴率(%)
-		Cell cell11 = tempRow.createCell(11);
+		cell10.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+		//催缴次数
+		Cell cell11 = tempRow.createCell(10);
 		cell11.setCellStyle(style);
 		cell11.setCellValue(dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
 	}
@@ -376,7 +376,9 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	}
 
 	//issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇 (导出对接下载中心)
+	@SuppressWarnings("deprecation")
 	public OutputStream exportOutputStreamBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd, Long taskId) {
+		OutputStream outputStream = new ByteArrayOutputStream();
     	//每一条数据
     	Integer pageOffSet = 0;
         Integer pageSize = 100000;
@@ -384,66 +386,115 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
         		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
         		cmd.getBuildingNameList());
 		taskService.updateTaskProcess(taskId, 20);
-		//初始化 字段信息
-        List<String> propertyNames = new ArrayList<String>();
-        List<String> titleName = new ArrayList<String>();
-        List<Integer> titleSize = new ArrayList<Integer>();
-        propertyNames.add("orderNum");titleName.add("序号");titleSize.add(20);
-        propertyNames.add("buildingName");titleName.add("楼宇名称");titleSize.add(20);
-        propertyNames.add("addressCount");titleName.add("房源总数");titleSize.add(20);
-        propertyNames.add("areaSize");titleName.add("建筑面积"); titleSize.add(20);
-        propertyNames.add("amountReceivable");titleName.add("应收含税金额（元）");titleSize.add(20);
-        propertyNames.add("amountReceived");titleName.add("已收含税金额（元）");titleSize.add(20);
-        propertyNames.add("amountOwed");titleName.add("待收含税金额（元）");titleSize.add(20);
-        propertyNames.add("dueDayCount");titleName.add("总欠费天数（天）");titleSize.add(20);
-        propertyNames.add("collectionRate");titleName.add("收缴率（%）");titleSize.add(20);
-        propertyNames.add("noticeTimes");titleName.add("催缴次数");titleSize.add(20);
-        //组装Excel数据
-        List<Map<String, String>> dataList = new ArrayList<>();
-        for(int i = 0; i < dtos.size(); i++) {
-        	ListBillStatisticByBuildingDTO dto = dtos.get(i);
-            Map<String, String> detail = new HashMap<String, String>();
-            detail.put("orderNum", i + 1 + "");
-            detail.put("buildingName", dto.getBuildingName());
-            detail.put("addressCount", dto.getAddressCount() != null ? dto.getAddressCount().toString() : "0");
-            detail.put("areaSize", dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
-            detail.put("amountReceivable", dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
-            detail.put("amountReceived", dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
-            detail.put("amountOwed", dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
-            detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
-            detail.put("collectionRate", (dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
-            detail.put("noticeTimes", dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
-            dataList.add(detail);
-        }
-		taskService.updateTaskProcess(taskId, 50);
-		
-		//最后的一行总计
-		ListBillStatisticByBuildingDTO dto = assetStatisticProvider.listBillStatisticByBuildingTotal(
-        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd(),
-        		cmd.getBuildingNameList());
-		Map<String, String> detail = new HashMap<String, String>();
-        detail.put("orderNum", "合计（总数）");
-        detail.put("buildingName", String.valueOf(dtos.size()));
-        detail.put("addressCount", dto.getAddressCount() != null ? dto.getAddressCount().toString() : "0");
-        detail.put("areaSize", dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
-        detail.put("amountReceivable", dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
-        detail.put("amountReceived", dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
-        detail.put("amountOwed", dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
-        detail.put("dueDayCount", dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
-        detail.put("collectionRate", (dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
-        detail.put("noticeTimes", dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
-        dataList.add(detail);
-        taskService.updateTaskProcess(taskId, 70);
-		
-		if (dtos != null && dtos.size() > 0) {
-			String fileName = String.format(cmd.getExportFileNamePrefix()+"报表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
-			ExcelUtils excelUtils = new ExcelUtils(null, fileName, cmd.getExportFileNamePrefix()+"报表");
-			excelUtils.setNeedSequenceColumn(false);//不需要序号列
-			taskService.updateTaskProcess(taskId, 80);
-			return excelUtils.getOutputStream(propertyNames, titleName, titleSize, dataList);
-		}else {
-			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+		Workbook wb = null;
+		InputStream in;
+		in = this.getClass().getResourceAsStream("/excels/asset/statisticByBuilding.xlsx");
+		try {
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
+			LOGGER.error("exportOutputStreamBillStatisticByBuilding copy inputStream error.");
 		}
+		Sheet sheet = wb.getSheetAt(0);
+		if (null != sheet) {
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
+			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
+			int size = 0;
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					ListBillStatisticByBuildingDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellBillStatisticByBuilding(tempRow, style, isLastRow, orderNum, dto);
+				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				ListBillStatisticByBuildingDTO totalDTO = assetStatisticProvider.listBillStatisticByBuildingTotal(
+		        		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+		        		cmd.getBuildingNameList());
+				fillRowCellBillStatisticByBuilding(tempRow, totalStyle, isLastRow, orderNum, totalDTO);
+				taskService.updateTaskProcess(taskId, 80);
+				//设置自适应列宽
+//				for(int i = 0; i < 50;i++) {
+//					sheet.autoSizeColumn(i);
+//				}
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			}
+		}
+		return outputStream;
+	}
+	
+	/**
+     * @param tempRow ： Excel的行
+     * @param style 
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellBillStatisticByBuilding(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, ListBillStatisticByBuildingDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		if(isLastRow) {
+			cell0.setCellValue("合计");
+		}else {
+			cell0.setCellValue(orderNum);
+		}
+		//楼宇名称
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		cell2.setCellValue(dto.getBuildingName());
+		//房源总数
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		if(isLastRow) {
+			cell3.setCellValue("--");
+		}else {
+			cell3.setCellValue(dto.getAddressCount() != null ? dto.getAddressCount().toString() : "");
+		}
+		//建筑面积
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		cell4.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
+		//应收含税金额(元)
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
+		//已收金额(元)
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		cell6.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
+		//待收金额(元)
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		cell7.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		//总欠费天数(天)
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		//收缴率(%)
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+		//催缴次数
+		Cell cell10= tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
 	}
 
 	//缴费信息汇总表-房源 (导出对接下载中心)
@@ -458,6 +509,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 
 	//缴费信息汇总表-房源 (导出对接下载中心)
 	public OutputStream exportOutputStreamBillStatisticByAddress(ListBillStatisticByAddressCmd cmd, Long taskId) {
+		//OutputStream outputStream = new ByteArrayOutputStream();
     	//每一条数据
     	Integer pageOffSet = 0;
         Integer pageSize = 100000;
