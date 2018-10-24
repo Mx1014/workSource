@@ -1,21 +1,26 @@
 package com.everhomes.yellowPage.faq;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.yellowPage.ListUiFAQsCommand;
 
 @Component
 public class AllianceFAQServiceImpl implements AllianceFAQService{
+	
+	@Autowired
+	AllianceFAQProvider allianceFAQProvider;
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		AllianceFAQType faqType = ConvertHelper.convert(cmd, AllianceFAQType.class);
+		faqType.setName(cmd.getFAQTypeName());
+		allianceFAQProvider.createFAQType(faqType);
 	}
 
 	@Override
 	public void updateFAQType(UpdateFAQTypeCommand cmd) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -126,6 +131,12 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public GetSquareCardInfosResponse getSquareCardInfos(GetSquareCardInfosCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

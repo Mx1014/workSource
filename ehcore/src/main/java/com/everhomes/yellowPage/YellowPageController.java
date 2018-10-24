@@ -29,6 +29,8 @@ import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
 import com.everhomes.yellowPage.faq.GetLatestServiceStateResponse;
 import com.everhomes.yellowPage.faq.GetServiceCountsCommand;
 import com.everhomes.yellowPage.faq.GetServiceCountsResponse;
+import com.everhomes.yellowPage.faq.GetSquareCardInfosCommand;
+import com.everhomes.yellowPage.faq.GetSquareCardInfosResponse;
 import com.everhomes.yellowPage.faq.ListFAQTypesCommand;
 import com.everhomes.yellowPage.faq.ListFAQTypesResponse;
 import com.everhomes.yellowPage.faq.ListFAQsCommand;
@@ -194,7 +196,11 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategories")
 	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
 	public RestResponse listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategories(cmd));
+		List<ServiceAllianceCategoryDTO> dtos = yellowPageService.listServiceAllianceCategories(cmd);
+    	RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
 	}
 
     /**
@@ -205,7 +211,11 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategoriesAdmin")
 	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
 	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByAdmin(cmd));
+		ListServiceAllianceCategoriesAdminResponse resp = yellowPageService.listServiceAllianceCategoriesByAdmin(cmd);
+    	RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
 	}
     
     /**
@@ -1207,4 +1217,20 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /yellowPage/getSquareCardInfos</b>
+	 * <p>
+	 * 客户端获取icon跳转信息
+	 * </p>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("getSquareCardInfos")
+	@RestReturn(value = GetSquareCardInfosResponse.class)
+	public RestResponse getSquareCardInfos(GetSquareCardInfosCommand cmd) {
+		GetSquareCardInfosResponse resp = allianceFAQService.getSquareCardInfos(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

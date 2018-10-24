@@ -154,7 +154,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	}
 
 	private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name) {
-		
 		User user = UserContext.current().getUser();
 		ServiceAllianceCategories serviceAllianceCategories = new ServiceAllianceCategories();
 		serviceAllianceCategories.setName(name);
@@ -166,26 +165,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		serviceAllianceCategories.setDeleteUid(user.getId());
 		serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
 
-
 		long id = this.sequenceProvider
 				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
 		serviceAllianceCategories.setId(id);
 		serviceAllianceCategories.setEntryId(generateEntryId(namespaceId, id));
 		serviceAllianceCategories.setType(id);
 		yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
-
-		ServiceAlliances serviceAlliances = new ServiceAlliances();
-		serviceAlliances.setParentId(0L);
-		serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
-		serviceAlliances.setOwnerId(-1L);
-		serviceAlliances.setName(name);
-		serviceAlliances.setDisplayName(name);
-		serviceAlliances.setType(serviceAllianceCategories.getId());
-		serviceAlliances.setStatus(YellowPageStatus.ACTIVE.getCode());
-		serviceAlliances.setAddress("");
-		serviceAlliances.setSupportType((byte) 0);
-		serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
-		yellowPageProvider.createServiceAlliances(serviceAlliances);
 
 		boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
 		if (iscreateMenuScope) {

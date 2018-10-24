@@ -44,5 +44,6 @@ public interface AllianceFAQService {
 
 	void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd);
 
+	GetSquareCardInfosResponse getSquareCardInfos(GetSquareCardInfosCommand cmd);
 
 }

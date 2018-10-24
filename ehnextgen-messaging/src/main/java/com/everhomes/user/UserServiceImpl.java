@@ -1102,7 +1102,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
             LOGGER.error("Password does not match for " + userIdentifierToken);
-//            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Invalid password");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Invalid password");
         }
 
         if (deviceIdentifier != null && deviceIdentifier.isEmpty())
