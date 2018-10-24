@@ -152,7 +152,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
             List<ModulePromotionEntityDTO> entitys = transfer2LocalEntity(activitys);
-            res.setEntities(new ArrayList<>());
+            res.setEntities(entitys);
         }
         return res;
     }
