@@ -57,7 +57,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
         //解析结果
         ActivityCategoryList resultObject = (ActivityCategoryList) StringHelper.fromJsonString(result,ActivityCategoryList.class);
-        if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
+        if(resultObject.getCode()!=null && resultObject.getCode()== 1){//code 为1表示调用成功
             return resultObject.getData();
         }
         return new ArrayList<ActivityCategoryModel>();
@@ -102,7 +102,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
         //解析结果
         ActivityModelList resultObject = (ActivityModelList) StringHelper.fromJsonString(result,ActivityModelList.class);
-        if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
+        if(resultObject.getCode()!=null && resultObject.getCode()== 1){//code 为1表示调用成功
             return resultObject.getData();
         }
         return new ArrayList<ActivityModel>();
@@ -130,7 +130,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
         //解析结果
         ActivityDetailDTO resultObject = (ActivityDetailDTO) StringHelper.fromJsonString(result,ActivityDetailDTO.class);
-        if(resultObject.getCode()!=null && "1".equals(resultObject.getCode())){//code 为1表示调用成功
+        if(resultObject.getCode()!=null && resultObject.getCode() == 1){//code 为1表示调用成功
             return resultObject.getData();
         }
         return null;
