@@ -158,7 +158,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      */
     private List<ModulePromotionEntityDTO> transfer2LocalEntity(List<ActivityModel> activitys){
         List<ModulePromotionEntityDTO> entities = new ArrayList<ModulePromotionEntityDTO>();
-        if(CollectionUtils.isNotEmpty(activitys)){
+        if(CollectionUtils.isEmpty(activitys)){
             return entities;
         }
         for(ActivityModel model : activitys){
