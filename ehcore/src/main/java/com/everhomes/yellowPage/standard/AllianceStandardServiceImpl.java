@@ -17,6 +17,7 @@ import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.AllianceTagDTO;
 import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
@@ -454,7 +455,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 
 	@Override
-	public ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId) {
+	public ServiceCategoryMatch findServiceCategory(String ownerType, Long ownerId, Long type, Long serviceId) {
 		return serviceCategoryMatchProvider.findMatch(ownerType, ownerId, type, serviceId);
 	}
 	
@@ -462,5 +463,23 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	public void updateMatchCategoryName(Long type, Long categoryId, String categoryName) {
 		serviceCategoryMatchProvider.updateMatchCategoryName(type, categoryId, categoryName);
 	}
+	
+	private void reNewCommonReqParam(AllianceCommonCommand cmd, boolean isByScene) {
+		
+		String ownerType = cmd.getOwnerType();
+		Long ownerId = cmd.getOwnerId();
+		if (isByScene && ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(),ownerId);
+			if (isDisableSelfConfig(state)) {
+				ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
+				ownerId = getOrgIdByTypeAndProjectId(cmd.getType(), ownerId);
+			}
+		}
+		
+		cmd.setOwnerType(ownerType);
+		cmd.setOwnerId(ownerId);
+	}
+	
+
 	
 }

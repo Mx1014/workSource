@@ -30,7 +30,7 @@ public interface AllianceStandardService {
 
 	void updateHomePageCategorysByPublish(ServiceAllianceInstanceConfig config, String name);
 
-	ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId);
+	ServiceCategoryMatch findServiceCategory(String ownerType, Long ownerId, Long type, Long serviceId);
 
 	void updateMatchCategoryName(Long type, Long categoryId, String categoryName);
 

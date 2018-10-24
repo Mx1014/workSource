@@ -1,5 +1,7 @@
 package com.everhomes.yellowPage;
 
+import static com.everhomes.yellowPage.YellowPageUtils.throwError;
+
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -24,6 +26,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
@@ -65,6 +68,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.file.FileUtils;
 import com.everhomes.util.pdf.PdfUtils;
+import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.yellowPage.stat.ClickStatDetail;
 import com.everhomes.yellowPage.stat.ClickStatDetailProvider;
 @Component
@@ -149,42 +153,37 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return;
 
 		// 服务联盟的审批拼接工作流 content字符串
-		
-		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
 		String formItemsInfo = flowCase.getContent();
 		
 		PostGeneralFormValCommand cmd = JSONObject.parseObject(formItemsInfo, PostGeneralFormValCommand.class);
-		StringBuffer contentBuffer = new StringBuffer();
 		List<PostApprovalFormItem> values = cmd.getValues();
-		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
-		Long yellowPageId = 0L;
-		ServiceAlliances  yellowPage = null;
-		if(null != sourceVal){
-			if(contentBuffer.length()>1)
-				contentBuffer.append("\n");
-			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-			yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
-			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
-			
-			contentBuffer.append("服务名称 : ");
-			contentBuffer.append(yellowPage.getName());
-			flowCase.setTitle(parentPage.getName());
-			request.setServiceAllianceId(yellowPageId);
-			request.setType(yellowPage.getParentId());
-		}
-
-		//如果没有选择服务直接返回
+		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(),null,null); 
 		if (null == yellowPage) {
+			LOGGER.error("formItemsInfo:"+formItemsInfo);
+			throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
 			return;
 		}
-
+		
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		if (null != match) {
+			flowCase.setTitle(match.getCategoryName());
+		}
+		
+		StringBuffer contentBuffer = new StringBuffer();
+		contentBuffer.append("服务名称 : ");
+		contentBuffer.append(yellowPage.getName());
 		flowCase.setContent(contentBuffer.toString());
 
 		Byte status = ServiceAllianceWorkFlowStatus.PROCESSING.getCode();
 		if(FlowCaseType.fromCode(flowCase.getCaseType()) == FlowCaseType.DUMB){
 			status = ServiceAllianceWorkFlowStatus.NONE.getCode();
 		}
+		
 		//同步申请到es
+		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
+		request.setServiceAllianceId(cmd.getSourceId());
+		request.setType(yellowPage.getParentId());
 		syncRequest(values, request, flowCase,yellowPage,status);
 		
 		//添加到埋点统计中
@@ -478,13 +477,13 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return ConvertHelper.convert(r, PostApprovalFormItem.class);
 		}).collect(Collectors.toList());
 
-		PostApprovalFormItem val = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),valItems);
-		if (null == val) {
-			return null;
-		}
 
-		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId, null, null);
+		ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(), null, null);
+		if (null == yellowPage) {
+			LOGGER.error("flowCaseInfo:"+flowCase.toString());
+			throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
+		}
+		
 		entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));
 		entities.add(new FlowCaseEntity("服务类型", yellowPage.getServiceType(), FlowCaseEntityType.MULTI_LINE.getCode()));
 
@@ -499,7 +498,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		}
 
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		val = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),valItems);
+		PostApprovalFormItem val = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),valItems);
 		if(val!=null){
 			dto = getFieldDTO(val.getFieldName(), fieldDTOs);
 			entities.add(new FlowCaseEntity(dto.getFieldDisplayName(), JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText(), FlowCaseEntityType.MULTI_LINE.getCode()));

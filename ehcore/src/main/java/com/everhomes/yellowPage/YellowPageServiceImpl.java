@@ -1398,7 +1398,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(serviceAlliance.getOwnerType(), serviceAlliance.getOwnerId(),
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(serviceAlliance.getOwnerType(), serviceAlliance.getOwnerId(),
 				serviceAlliance.getParentId(), serviceAlliance.getId());
 		if (null == match) {
 			createServiceCategoryMatch(serviceAlliance, categoryId, category.getName());
@@ -1559,7 +1559,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	private void populateServiceAllianceCategory(ServiceAlliances sa) {
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(sa.getOwnerType(), sa.getOwnerId(), sa.getParentId(), sa.getId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(sa.getOwnerType(), sa.getOwnerId(), sa.getParentId(), sa.getId());
 		if (null != match) {
 			sa.setCategoryId(match.getCategoryId());
 			sa.setServiceType(match.getCategoryName());
