@@ -91,12 +91,19 @@ public class OPPushNewsHandler implements OPPushHandler{
 				} catch (UnsupportedEncodingException e) {
 					LOGGER.info("url can't encode:"+dto.getNewsUrl());
 				}
+
+
+               String host = "news-feed";
+               String router = "zl://" + host + card.getRouterPath() + "?moduleId=10800&clientHandlerType=2&" + card.getRouterQuery();
+               card.setRouter(router);
+
                List<Object> properties = new ArrayList<>();
                properties.add(dto.getCoverUri() == null ? "" : dto.getCoverUri());
                properties.add(dto.getTitle() == null ? "" : dto.getTitle());
                properties.add(dto.getTopFlag() == null ? "0" : ""+dto.getTopFlag() );
                properties.add(DateUtil.dateToStr(dto.getPublishTime(), "yyyy-MM-dd HH:mm"));
                properties.add(dto.getLikeCount() == null ? "0" : ""+dto.getLikeCount());
+               card.setProperties(properties);
                listCards.add(card);
            }
     	   

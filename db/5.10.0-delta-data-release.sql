@@ -373,6 +373,9 @@ update eh_service_modules set host = 'quality'  where id = 	20600;
 update eh_service_modules set host = 'energy-management'  where id = 	49100;
 update eh_service_modules set host = 'customer-management'  where id = 	21100;
 
+update eh_service_modules set host = 'access-control'  where id = 	41000;
+update eh_service_modules set client_handler_type = 2  where id = 	40700;
+update eh_service_modules set client_handler_type = 2  where id = 	10800;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 

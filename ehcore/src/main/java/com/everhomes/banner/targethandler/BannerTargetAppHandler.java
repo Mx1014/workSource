@@ -70,7 +70,7 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
 
         ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(tData.getOriginId());
         if(serviceModuleApp != null){
-            routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), serviceModuleApp.getOriginId(), serviceModuleApp.getName(), serviceModuleApp.getInstanceConfig(), null, null, null);
+            routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), serviceModuleApp.getOriginId(), serviceModuleApp.getName(), serviceModuleApp.getInstanceConfig(), null, null, null, null);
             //routerInfo = routerInfoService.getRouterInfo(serviceModuleApp.getModuleId(), "/index", tData.getActionData());
 
             if(routerInfo != null){
