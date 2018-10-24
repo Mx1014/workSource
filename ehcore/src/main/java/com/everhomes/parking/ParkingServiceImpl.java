@@ -848,7 +848,7 @@ public class ParkingServiceImpl implements ParkingService {
 //		}
 	}
 
-	private CreateParkingGeneralOrderResponse convertOrderDTOForV3(ParkingRechargeOrder order, String clientAppName, ParkingLot parkingLot, Integer paymentType, Long merchantId){
+	private CreateParkingGeneralOrderResponse convertOrderDTOForV3(ParkingRechargeOrder order, String clientAppName, ParkingLot parkingLot, Integer paymentType, Long organizationId){
 		ParkingRechargeType rechargeType = ParkingRechargeType.fromCode(order.getRechargeType());
 		String returnUrl = null;
 		ParkingBusinessType bussinessType = null;
@@ -900,6 +900,7 @@ public class ParkingServiceImpl implements ParkingService {
         baseInfo.setGoods(buildGoods(parkingLot, order, bizPayeeId, bussinessType));
         baseInfo.setGoodsDetail(buildGoodsDetails(parkingLot, order, bussinessType));
         baseInfo.setReturnUrl(returnUrl);
+        baseInfo.setOrganizationId(organizationId);
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
@@ -1067,7 +1068,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);//todoed
 
-		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getMerchantId());
+		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
 		
 		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayeeUserId());
 		parkingRechargeOrder.setInvoiceStatus((byte)0);

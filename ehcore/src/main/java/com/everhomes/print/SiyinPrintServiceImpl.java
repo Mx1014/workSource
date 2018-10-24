@@ -675,9 +675,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
         //3、收款方是否有会员，无则报错
-		Long bizPayeeId = getOrderPayeeAccount(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		Long merchantId = getOrderPayeeMerchantId(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
-		cmd2.setIds(Arrays.asList(bizPayeeId));
+		cmd2.setIds(Arrays.asList(merchantId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
 		if(null == resp || null == resp.getResponse()) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
@@ -690,7 +690,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         }
 		
 		//准备创建订单的参数，包括一些支付参数以及商品
-		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, bizPayeeId);
+		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, merchantId);
 		CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
 
 		//保存参数
@@ -801,6 +801,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		return account.getPayeeId();
+	}
+	
+	private Long getOrderPayeeMerchantId(Integer namespaceId, String ownerType, Long ownerId) {
+		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
+				.getSiyinPrintBusinessPayeeAccountByOwner(namespaceId,ownerType,ownerId);
+		if (null == account) {
+			return null;
+		}
+		
+		return account.getMerchantId();
 	}
 
 	private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse,
@@ -2054,6 +2064,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(oldPayeeAccount.getPayeeId());
 			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
@@ -2072,7 +2084,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
-		cmd2.setIds(Arrays.asList(account.getPayeeId()));
+		cmd2.setIds(Arrays.asList(account.getMerchantId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
 		if(null == resp || null == resp.getResponse()) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
