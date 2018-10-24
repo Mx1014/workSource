@@ -401,6 +401,11 @@
             <artifactId>user-rest-sdk</artifactId>
             <version>${ehuser-sdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.everhomes.ehpoint</groupId>
+            <artifactId>ehpoint-rest-sdk</artifactId>
+            <version>5.10.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 
 	<build>

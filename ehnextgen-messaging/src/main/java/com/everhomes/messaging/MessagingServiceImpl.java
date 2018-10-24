@@ -301,16 +301,19 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
             }
         }
 
-        String url = null;
+        String url = configProvider.getValue(UserContext.getCurrentNamespaceId(),"wx.default.template.url", "");
         String title = null;
         if(message.getMeta() != null ){
             Map meta = message.getMeta();
 
             if("message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
-                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
-                if(routerMetaObject != null){
-                    url = routerToUrl(routerMetaObject.getUrl());
-                }
+
+                url = url + "?routerMetaObject=" + meta.get(MessageMetaConstant.META_OBJECT);
+
+//                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
+//                if(routerMetaObject != null){
+//                    url = routerToUrl(routerMetaObject.getUrl());
+//                }
             }
 
             title = (String)meta.get(MessageMetaConstant.MESSAGE_SUBJECT);

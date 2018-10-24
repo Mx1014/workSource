@@ -69,6 +69,7 @@ UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id in (52100, 5220
 
 -- 默认的微信消息模板Id
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('wx.default.template.id', 'JnTt-ce69Wlie-o8nv4Jhl3CKA0pXaageIsr4aJiWCk', '默认的微信消息模板Id', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('wx.default.template.url', 'http://www.zuolin.com/', '默认的微信消息模板url', '0', NULL, '1');
 
 
 -- AUTHOR: 荣楠
@@ -272,8 +273,8 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pro
 
 -- end
 
--- xq.tian 2018-10-19
--- 驳回按钮的默认跟踪
+-- AUTHOR: xq.tian 2018-10-19
+-- REMARK: 驳回按钮的默认跟踪
 UPDATE eh_locale_strings SET text='任务已被 ${text_tracker_curr_operator_name} 驳回' WHERE scope='flow' AND code='20005';
 
 
@@ -361,6 +362,9 @@ update eh_service_modules set host = 'quality'  where id = 	20600;
 update eh_service_modules set host = 'energy-management'  where id = 	49100;
 update eh_service_modules set host = 'customer-management'  where id = 	21100;
 
+update eh_service_modules set host = 'access-control'  where id = 	41000;
+update eh_service_modules set client_handler_type = 2  where id = 	40700;
+update eh_service_modules set client_handler_type = 2  where id = 	10800;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
