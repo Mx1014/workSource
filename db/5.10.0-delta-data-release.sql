@@ -69,6 +69,7 @@ UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id in (52100, 5220
 
 -- 默认的微信消息模板Id
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('wx.default.template.id', 'JnTt-ce69Wlie-o8nv4Jhl3CKA0pXaageIsr4aJiWCk', '默认的微信消息模板Id', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('wx.default.template.url', 'http://www.zuolin.com/', '默认的微信消息模板url', '0', NULL, '1');
 
 
 -- AUTHOR: 荣楠
@@ -272,8 +273,8 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pro
 
 -- end
 
--- xq.tian 2018-10-19
--- 驳回按钮的默认跟踪
+-- AUTHOR: xq.tian 2018-10-19
+-- REMARK: 驳回按钮的默认跟踪
 UPDATE eh_locale_strings SET text='任务已被 ${text_tracker_curr_operator_name} 驳回' WHERE scope='flow' AND code='20005';
 
 
@@ -336,27 +337,41 @@ UPDATE eh_web_menus set `name` = '统计分析业务' WHERE id = 27000000;
 
 -- AUTHOR: 严军 2018-10-21
 -- REMARK: issue-null 增加模块路由
-update eh_service_modules set host = 'bulletin'	 where id = 	10300	;
-update eh_service_modules set host = 'activity'	 where id = 	10600	;
-update eh_service_modules set host = 'post'	 where id = 	10100	;
-update eh_service_modules set host = 'group'	 where id = 	10750	;
-update eh_service_modules set host = 'approval'	 where id = 	52000	;
-update eh_service_modules set host = 'work-report'	 where id = 	54000	;
-update eh_service_modules set host = 'file-management'	 where id = 	55000	;
-update eh_service_modules set host = 'remind'	 where id = 	59100	;
-update eh_service_modules set host = 'meeting-reservation'	 where id = 	53000	;
-update eh_service_modules set host = 'video-conference'	 where id = 	50700	;
-update eh_service_modules set host = 'enterprise-bulletin'	 where id = 	57000	;
-update eh_service_modules set host = 'enterprise-contact'	 where id = 	50100	;
-update eh_service_modules set host = 'attendance'	 where id = 	50600	;
-update eh_service_modules set host = 'salary'	 where id = 	51400	;
-update eh_service_modules set host = 'news-feed'	 where id = 	10800	;
-update eh_service_modules set host = 'hot-line'	 where id = 	40300	;
-update eh_service_modules set host = 'resource-reservation'	 where id = 	40400	;
-update eh_service_modules set host = 'parking'	 where id = 	40800	;
-update eh_service_modules set host = 'park-enterprises'	 where id = 	33000	;
-update eh_service_modules set host = 'park-settle'	 where id = 	40100	;
-update eh_service_modules set host = 'access-control'	 where id = 	41000	;
+update eh_service_modules set host = 'bulletin'  where id = 	10300;
+update eh_service_modules set host = 'activity'  where id = 	10600;
+update eh_service_modules set host = 'post'  where id = 	10100;
+update eh_service_modules set host = 'group'  where id = 	10750;
+update eh_service_modules set host = 'approval'  where id = 	52000;
+update eh_service_modules set host = 'work-report'  where id = 	54000;
+update eh_service_modules set host = 'file-management'  where id = 	55000;
+update eh_service_modules set host = 'remind'  where id = 	59100;
+update eh_service_modules set host = 'meeting-reservation'  where id = 	53000;
+update eh_service_modules set host = 'video-conference'  where id = 	50700;
+update eh_service_modules set host = 'enterprise-bulletin'  where id = 	57000;
+update eh_service_modules set host = 'enterprise-contact'  where id = 	50100;
+update eh_service_modules set host = 'attendance'  where id = 	50600;
+update eh_service_modules set host = 'salary'  where id = 	51400;
+update eh_service_modules set host = 'station'  where id = 	40200;
+update eh_service_modules set host = 'news-feed'  where id = 	10800;
+update eh_service_modules set host = 'questionnaire'  where id = 	41700;
+update eh_service_modules set host = 'hot-line'  where id = 	40300;
+update eh_service_modules set host = 'property-repair'  where id = 	20100;
+update eh_service_modules set host = 'resource-reservation'  where id = 	40400;
+update eh_service_modules set host = 'visitor'  where id = 	41800;
+update eh_service_modules set host = 'parking'  where id = 	40800;
+update eh_service_modules set host = 'vehicle-release'  where id = 	20900;
+update eh_service_modules set host = 'cloud-print'  where id = 	41400;
+update eh_service_modules set host = 'item-release'  where id = 	49200;
+update eh_service_modules set host = 'decoration'  where id = 	22000;
+update eh_service_modules set host = 'service-alliance'  where id = 	40500;
+update eh_service_modules set host = 'wifi'  where id = 	41100;
+update eh_service_modules set host = 'park-enterprises'  where id = 	33000;
+update eh_service_modules set host = 'park-settle'  where id = 	40100;
+update eh_service_modules set host = 'property-payment'  where id = 	20400;
+update eh_service_modules set host = 'property-inspection'  where id = 	20800;
+update eh_service_modules set host = 'quality'  where id = 	20600;
+update eh_service_modules set host = 'energy-management'  where id = 	49100;
+update eh_service_modules set host = 'customer-management'  where id = 	21100;
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 

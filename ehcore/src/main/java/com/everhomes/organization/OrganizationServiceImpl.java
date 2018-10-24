@@ -8409,7 +8409,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
         this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
@@ -13170,8 +13171,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (size != pageSize) {
                 response.setNextPageAnchor(null);
             } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
                 list.remove(list.size() - 1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
             }
             
             response.setRequests(list.stream().map(r -> {

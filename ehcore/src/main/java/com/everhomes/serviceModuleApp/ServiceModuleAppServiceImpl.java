@@ -726,13 +726,18 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		//填充路由信息
 		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType);
-		appDTO.setRouterPath(routerInfo.getPath());
-		appDTO.setRouterQuery(routerInfo.getQuery());
 
-		if(!StringUtils.isEmpty(serviceModule.getHost())){
-			String router = "zl://" + serviceModule.getHost() + "/" + routerInfo.getPath() + "?" + routerInfo.getQuery();
-			appDTO.setRouter(router);
+
+		appDTO.setRouterPath(routerInfo.getPath());
+		appDTO.setRouterQuery("moduleId=" + serviceModule.getId() + "&clientHandlerType=" + serviceModule.getClientHandlerType() + "&" + routerInfo.getQuery());
+
+		String host = serviceModule.getHost();
+		if(StringUtils.isEmpty(host)){
+			host  = "default";
 		}
+
+		String router = "zl://" + host + appDTO.getRouterPath() + "?" + appDTO.getRouterQuery();
+		appDTO.setRouter(router);
 
 		return appDTO;
 	}
