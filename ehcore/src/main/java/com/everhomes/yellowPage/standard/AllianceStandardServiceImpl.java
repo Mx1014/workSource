@@ -198,9 +198,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		// 获取主样式配置
 		ServiceAllianceCategories currentMainCag = yellowPageProvider
 				.findMainCategory(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organizationId, type);
-		if (null == currentMainCag) {
-			throwError(YellowPageServiceErrorCode.ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST,
-					"service alliance main category not exist");
+		if (null == currentMainCag) { 
+			currentMainCag = getAllianceTypeBaseCategory(type);
 		}
 		
 		ServiceAllianceCategories newMainCag = copyMainCategorysConfigToProject(currentMainCag, projectId); // 复制主样式

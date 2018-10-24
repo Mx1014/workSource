@@ -839,11 +839,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Override
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
+		ServiceAllianceDTO dto = null;
 		if (null != cmd.getSourceRequestType() && ServiceAllianceSourceRequestType.CLIENT.getCode() == cmd.getSourceRequestType()) {
-			return getServiceAllianceByScene(cmd);
+			dto = getServiceAllianceByScene(cmd);
+		} else {
+			dto = getServiceAllianceByAdmin(cmd);
 		}
 		
-		return getServiceAllianceByAdmin(cmd);
+		return dto == null ? new ServiceAllianceDTO() : dto;
 	}
 
 	private ServiceAllianceDTO getServiceAllianceByScene(GetServiceAllianceCommand cmd) {
