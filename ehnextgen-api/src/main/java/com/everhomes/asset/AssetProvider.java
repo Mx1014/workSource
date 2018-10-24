@@ -18,15 +18,11 @@ import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
 import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.ConfigChargingItemsCommand;
 import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateChargingItemCommand;
-import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
@@ -37,7 +33,6 @@ import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
@@ -365,15 +360,6 @@ public interface AssetProvider {
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
-<<<<<<< HEAD
-=======
-    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
->>>>>>> issue-customer4.1
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -455,13 +441,7 @@ public interface AssetProvider {
 	
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 	
-<<<<<<< HEAD
-	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
-		
-=======
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault);
-				
-	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 	
 	PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId);
 	
@@ -474,5 +454,4 @@ public interface AssetProvider {
 	void updateCMBill(PaymentBills paymentBills);
 	
 	void updateCMBillItem(PaymentBillItems items);
->>>>>>> issue-customer4.1
 }
