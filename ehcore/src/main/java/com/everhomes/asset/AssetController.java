@@ -1649,4 +1649,18 @@ public class AssetController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("exportBillStatisticByBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		assetStatisticService.exportBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

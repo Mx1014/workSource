@@ -88,6 +88,8 @@ public interface AssetStatisticService {
 	void exportBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
 
 	OutputStream exportOutputStreamBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd, Long taskId);
+
+	void exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd);
 	
-	
+	OutputStream exportOutputStreamBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd, Long taskId);
 }
