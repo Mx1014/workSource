@@ -7353,6 +7353,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
       }
 
     @Override
+    public void updateUserVipLevel(Long userId, Integer vipLevel) {
+
+    }
+
+    @Override
     public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
         User user = this.userProvider.findUserById(userId);
         if(user == null){
@@ -7414,6 +7419,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
                     dto.setResult(TrueOrFalseCode.FALSE.getCode());
             }
+            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
+                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
+                    && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
+                res.getDtos().add(dto);
+            }
+        }
+        return res;
+    }
     /*******************统一用户同步数据**********************/
     @KafkaListener(topics = "user-create-event")
     public void syncCreateUser(ConsumerRecord<?, String> record) {
@@ -7521,14 +7534,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
-                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
-                          && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
-                res.getDtos().add(dto);
-            }
-        }
-        return res;
-    }
 
     /**
 	 * 获取商户跳转URL

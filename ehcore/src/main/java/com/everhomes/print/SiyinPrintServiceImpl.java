@@ -88,11 +88,6 @@ import com.everhomes.qrcode.QRCodeController;
 import com.everhomes.qrcode.QRCodeService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -2247,49 +2242,49 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 
-			//检查签名
-			if(!PayUtil.verifyCallbackSignature(cmd)){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"sign verify faild");
+		//检查签名
+		if (!PayUtil.verifyCallbackSignature(cmd)) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"sign verify faild");
+		}
+
+		// * RAW(0)：
+		// * SUCCESS(1)：支付成功
+		// * PENDING(2)：挂起
+		// * ERROR(3)：错误
+		if (cmd.getPaymentStatus() == null || 1 != cmd.getPaymentStatus()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild paymentstatus," + cmd.getPaymentStatus());
+		}//检查状态
+
+		//检查orderType
+		//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
+		//充值，体现，支付，退款
+		if (cmd.getOrderType() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"invaild ordertype," + cmd.getOrderType());
+		}
+
+
+		if (cmd.getOrderType() == 3) {
+
+			//根据统一订单生成的支付编号获得记录
+			SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId() + "");
+			if (order == null) {
+				LOGGER.error("the order {} not found.", cmd.getMerchantOrderId());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the order not found.");
 			}
 
-			// * RAW(0)：
-			// * SUCCESS(1)：支付成功
-			// * PENDING(2)：挂起
-			// * ERROR(3)：错误
-			if(cmd.getPaymentStatus()== null || 1!=cmd.getPaymentStatus()){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"invaild paymentstatus,"+cmd.getPaymentStatus());
-			}//检查状态
+			BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 
-			//检查orderType
-			//RECHARGE(1), WITHDRAW(2), PURCHACE(3), REFUND(4);
-			//充值，体现，支付，退款
-			if(cmd.getOrderType()==null){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"invaild ordertype,"+cmd.getOrderType());
-			}
-
-
-			if(cmd.getOrderType() == 3) {
-				
-				//根据统一订单生成的支付编号获得记录
-				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId()+"");
-				if(order == null){
-					LOGGER.error("the order {} not found.",cmd.getMerchantOrderId());
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"the order not found.");
+			//加一个开关，方便在beta环境测试
+			boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
+			if (!flag) {
+				if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
+					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+					throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
 				}
-
-				BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
-
-				//加一个开关，方便在beta环境测试
-				boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
-				if (!flag) {
-					if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
-						LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-						throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
-					}
 				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
@@ -2310,29 +2305,30 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
 				});
 				LOGGER.info("call point api end");
-				if (cmd.getPaymentStatus() != null && cmd.getPaymentType() != null){
-		            switch (cmd.getPaymentType()){
-	                case 1:
-	                case 7:
-	                case 9:
-	                case 21:
-	                	LOGGER.info("微信支付");
-	                	order.setPaidType(VendorType.WEI_XIN.getCode());
-	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
-	                	break;
-	                case 29:
-	                	LOGGER.info("企业支付");
-	                	order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
-	                	break;
-	                default:
-	                	LOGGER.info("支付宝支付");
-	                	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
-	                	break;
-		            }
+				if (cmd.getPaymentStatus() != null && cmd.getPaymentType() != null) {
+					switch (cmd.getPaymentType()) {
+						case 1:
+						case 7:
+						case 9:
+						case 21:
+							LOGGER.info("微信支付");
+							order.setPaidType(VendorType.WEI_XIN.getCode());
+							order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+							break;
+						case 29:
+							LOGGER.info("企业支付");
+							order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+							break;
+						default:
+							LOGGER.info("支付宝支付");
+							order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+							order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+							break;
+					}
 				}
 				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
+		}
 	}
 
 	@Override
@@ -2377,9 +2373,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
 	}
 
-	public static void throwError(int errorCode, String errorMsg) {
-		throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
-	}
 	public void enterprisePayPrintOrder(EnterprisePayPrintOrderCommand cmd) {
 
 		// 获取订单
@@ -2438,17 +2431,18 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	private List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
-		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
-		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
-		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-		cmd2.setCategoryId(cmd.getChargeAppToken());
-		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		List<ListBillGroupsDTO> dtos = assetService.listBillGroups(cmd2);
-		return dtos.stream().map(r -> {
-			BillGroupDTO dto = new BillGroupDTO();
-			dto.setBillGroupName(r.getBillGroupName());
-			dto.setBillGroupToken(r.getBillGroupId());
-			return dto;
-		}).collect(Collectors.toList());
+//		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
+//		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+//		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+//		cmd2.setCategoryId(cmd.getChargeAppToken());
+//		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+//		List<ListBillGroupsDTO> dtos = assetService.listBillGroups(cmd2);
+//		return dtos.stream().map(r -> {
+//			BillGroupDTO dto = new BillGroupDTO();
+//			dto.setBillGroupName(r.getBillGroupName());
+//			dto.setBillGroupToken(r.getBillGroupId());
+//			return dto;
+//		}).collect(Collectors.toList());
+		return null;
 	}
 }

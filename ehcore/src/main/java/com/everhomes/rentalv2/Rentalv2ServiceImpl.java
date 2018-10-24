@@ -2515,17 +2515,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (order.getPayTotalMoney().compareTo(new BigDecimal(0)) == 0 ){
 
 			changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);//工作流自动进到下一节点
-			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
-			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
-			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
-			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-			stepDTO.setFlowCaseId(flowCase.getId());
-			stepDTO.setFlowMainId(flowCase.getFlowMainId());
-			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-			stepDTO.setFlowVersion(flowCase.getFlowVersion());
-			stepDTO.setStepCount(flowCase.getStepCount());
-			flowService.processAutoStep(stepDTO);
 			//工作流自动进到下一节点
             FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
             FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
