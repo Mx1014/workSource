@@ -18,15 +18,11 @@ import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
 import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.ConfigChargingItemsCommand;
 import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateChargingItemCommand;
-import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
@@ -37,7 +33,6 @@ import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
@@ -397,6 +392,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+	
 	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
@@ -445,6 +441,17 @@ public interface AssetProvider {
 	
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
 	
-	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
-		
+	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault);
+	
+	PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId);
+	
+	PaymentBillItems getCMBillItemByBillId(Long billId);
+	
+	Long createCMBill(PaymentBills paymentBills);
+	
+	void createCMBillItem(PaymentBillItems items);
+	
+	void updateCMBill(PaymentBills paymentBills);
+	
+	void updateCMBillItem(PaymentBillItems items);
 }

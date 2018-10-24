@@ -646,7 +646,7 @@ public class AssetProviderImpl implements AssetProvider {
                 t.DATE_STR,t.TARGET_NAME,t.TARGET_ID,t.TARGET_TYPE,t.OWNER_ID,t.OWNER_TYPE,t.CONTRACT_NUM,t.CONTRACT_ID,t.BILL_GROUP_ID,
                 t.INVOICE_NUMBER,t.PAYMENT_TYPE,t.DATE_STR_BEGIN,t.DATE_STR_END,t.CUSTOMER_TEL,
         		DSL.groupConcatDistinct(DSL.concat(t2.BUILDING_NAME,DSL.val("/"), t2.APARTMENT_NAME)).as("addresses"),
-        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY);
+        		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
         query.addConditions(t.OWNER_ID.eq(ownerId));
@@ -803,6 +803,8 @@ public class AssetProviderImpl implements AssetProvider {
             //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
             dto.setCanDelete(r.getValue(t.CAN_DELETE));
             dto.setCanModify(r.getValue(t.CAN_MODIFY));
+            //瑞安CM对接 账单、费项表增加是否是只读字段:只读状态：0：非只读；1：只读
+            dto.setIsReadOnly(r.getValue(t.IS_READONLY));
             list.add(dto);
             return null;});
         return list;
@@ -1460,6 +1462,8 @@ public class AssetProviderImpl implements AssetProvider {
                     item.setCanModify(cmd.getCanModify());
                     //物业缴费V6.0 账单、费项表增加是否删除状态字段
                     item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                    //瑞安CM对接 账单、费项表增加是否是只读字段
+                    item.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     billItemsList.add(item);
 
                     amountReceivable = amountReceivable.add(var1);
@@ -1641,6 +1645,8 @@ public class AssetProviderImpl implements AssetProvider {
             newBill.setCanModify(cmd.getCanModify());
             //物业缴费V6.0 账单、费项表增加是否删除状态字段
             newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+            //瑞安CM对接 账单、费项表增加是否是只读字段
+            newBill.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
             EhPaymentBillsDao billsDao = new EhPaymentBillsDao(context.configuration());
             billsDao.insert(newBill);
             response[0] = ConvertHelper.convert(newBill, ListBillsDTO.class);
@@ -3097,6 +3103,8 @@ public class AssetProviderImpl implements AssetProvider {
                 //修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
                 .where(t.DATE_STR_DUE.lessOrEqual(billDateStr))//DATE_STR_DUE：应收日期（出账单日）
                 .and(t.SWITCH.eq((byte)0))
+                //瑞安CM对接：只读的账单是来源于第三方，不允许从未出转为已出
+                .and(t.IS_READONLY.eq((byte)0))//只读状态：0：非只读；1：只读
                 .execute();
     }
 
@@ -3478,7 +3486,6 @@ public class AssetProviderImpl implements AssetProvider {
                 .fetchOne(0,String.class);
     }
 
-    @Override
     public void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId) {
         DSLContext context = getReadWriteContext();
         EhPaymentBillGroups t = Tables.EH_PAYMENT_BILL_GROUPS.as("t");
@@ -3555,7 +3562,7 @@ public class AssetProviderImpl implements AssetProvider {
         return list;
     }
 
-    public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId) {
+    public PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault) {
     	SelectQuery<EhPaymentBillGroupsRecord> query = getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILL_GROUPS).getQuery();
 		query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.NAMESPACE_ID.eq(namespaceId));
 		if(ownerId != null){
@@ -3569,6 +3576,9 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 		if(brotherGroupId != null){
 			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.BROTHER_GROUP_ID.eq(brotherGroupId));
+		}
+		if(isDefault != null) {
+			query.addConditions(Tables.EH_PAYMENT_BILL_GROUPS.IS_DEFAULT.eq(isDefault));
 		}
 		List<PaymentBillGroup> records = query.fetchInto(PaymentBillGroup.class);
 		return records.get(0);
@@ -4258,6 +4268,8 @@ public class AssetProviderImpl implements AssetProvider {
                 .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
                 .and(Tables.EH_PAYMENT_BILLS.STATUS.eq((byte) 0))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                //瑞安CM对接：只读的账单不允许任何修改，要过滤掉
+                .and(Tables.EH_PAYMENT_BILLS.IS_READONLY.eq((byte)0))//只读状态：0：非只读；1：只读
                 .limit(pageOffset.intValue(), pageSize+1)
                 .fetchInto(PaymentBills.class);
         if(paymentBills.size() > pageSize){
@@ -5742,6 +5754,76 @@ query.addConditions(Tables.EH_ASSET_MODULE_APP_MAPPINGS.OWNER_ID.isNull());
             LOGGER.error(e.toString());
         }
         return dto;
+    }
+
+    public PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId))
+                .and(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
+                .fetchInto(PaymentBills.class);
+        if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    public PaymentBillItems getCMBillItemByBillId(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBillItems> list = context.selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                .fetchInto(PaymentBillItems.class);
+        if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    public Long createCMBill(PaymentBills bill) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+
+        bill.setId(id);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, id));
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        dao.insert(bill);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBills.class, null);
+
+        return id;
+    }
+
+    public void createCMBillItem(PaymentBillItems items) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+
+        items.setId(id);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, id));
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+        dao.insert(items);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBillItems.class, null);
+    }
+
+    public void updateCMBill(PaymentBills paymentBills) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, paymentBills.getId()));
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        paymentBills.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(paymentBills);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBills.class, paymentBills.getId());
+    }
+
+    public void updateCMBillItem(PaymentBillItems items) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, items.getId()));
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+        items.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(items);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBillItems.class, items.getId());
     }
 
 }

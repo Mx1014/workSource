@@ -774,13 +774,27 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public Timestamp findLastContractVersionByCommunity(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.UPDATE_TIME);
+		}
+		return null;
+	}
+
+
+	@Override
 	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
-		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
-		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		/*query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -789,6 +803,28 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 
 		return result;
+	}
+	
+	@Override
+	public Contract findContractByNamespaceToken(Integer namespaceId, String namespaceContractType, Long namespaceContractToken, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceContractType));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		if (namespaceContractToken != null || "".equals(namespaceContractToken)) {
+			query.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(namespaceContractToken.toString()));
+		}
+		
+		Record result = query.fetchAny();
+		if (result != null) {
+			return ConvertHelper.convert(result, Contract.class);
+		}
+		return null;
 	}
 
 	@Override
