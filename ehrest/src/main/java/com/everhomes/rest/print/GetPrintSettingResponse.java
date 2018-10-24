@@ -9,7 +9,8 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>paperSizePriceDTO : 打印/复印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
+ * <li>printPriceDTO : 打印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
+ * <li>copyPriceDTO : 复印价格，参考 {@link com.everhomes.rest.print.PrintSettingPaperSizePriceDTO}</li>
  * <li>colorTypeDTO : 扫描价格，参考 {@link com.everhomes.rest.print.PrintSettingColorTypeDTO}</li>
  * <li>hotline : 咨询电话</li>
  * <li>printCourseList : 打印教程（string）数组，四个步骤</li>
@@ -20,18 +21,26 @@ import com.everhomes.util.StringHelper;
  */
 
 public class GetPrintSettingResponse {
-	private PrintSettingPaperSizePriceDTO paperSizePriceDTO;
+	private PrintSettingPaperSizePriceDTO printPriceDTO;
+	private PrintSettingPaperSizePriceDTO copyPriceDTO;
 	private PrintSettingColorTypeDTO colorTypeDTO;
 	private String hotline;
 	@ItemType(String.class)
 	private List<String> printCourseList;
 	@ItemType(String.class)
 	private List<String> scanCopyCourseList;
-	public PrintSettingPaperSizePriceDTO getPaperSizePriceDTO() {
-		return paperSizePriceDTO;
+
+	public PrintSettingPaperSizePriceDTO getPrintPriceDTO() {
+		return printPriceDTO;
 	}
-	public void setPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO) {
-		this.paperSizePriceDTO = paperSizePriceDTO;
+	public void setPrintPriceDTO(PrintSettingPaperSizePriceDTO printPriceDTO) {
+		this.printPriceDTO = printPriceDTO;
+	}
+	public PrintSettingPaperSizePriceDTO getCopyPriceDTO() {
+		return copyPriceDTO;
+	}
+	public void setCopyPriceDTO(PrintSettingPaperSizePriceDTO copyPriceDTO) {
+		this.copyPriceDTO = copyPriceDTO;
 	}
 	public PrintSettingColorTypeDTO getColorTypeDTO() {
 		return colorTypeDTO;

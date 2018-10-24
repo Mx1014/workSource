@@ -61,4 +61,6 @@ public interface ServiceModuleAppService {
 	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
 
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
+    
+    ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd);
 }

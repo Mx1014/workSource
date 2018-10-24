@@ -2,16 +2,73 @@
 package com.everhomes.print;
 
 import com.alibaba.fastjson.JSONArray;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.pay.order.OrderCommandResponse;
+import com.everhomes.pay.order.SourceType;
+import com.everhomes.paySDK.PayUtil;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.general.order.CreateOrderBaseInfo;
+import com.everhomes.rest.general.order.GorderPayType;
+import com.everhomes.rest.goods.GoodBizEnum;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
+import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
+import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.GoodDTO;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
+import com.everhomes.rest.promotion.order.OrderErrorCode;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.order.*;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.print.*;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.*;
+import com.everhomes.bus.LocalEventBus;
+import com.everhomes.bus.LocalEventContext;
+import com.everhomes.bus.SystemEvent;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.general.order.GeneralOrderBizHandler;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
@@ -40,12 +97,17 @@ import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.print.*;
 import com.everhomes.rest.qrcode.GetQRCodeImageCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.qrcode.QRCodeHandler;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
+import com.everhomes.server.schema.tables.EhSiyinPrintOrders;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
@@ -103,6 +165,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "_";
 	public static final String PRINT_COMPANY_SPLIT = ",";
 	
+
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
 	@Autowired
@@ -171,18 +234,31 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Autowired
 	public NamespaceProvider namespaceProvider;
     @Autowired
-    private com.everhomes.paySDK.api.PayService payServiceV2;
+    private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
+
     @Autowired
     protected GeneralOrderService orderService;
-    
+    @Autowired
+    protected AssetService assetService;
+
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
+	@Autowired
+	private CommunityProvider communityProvider;
+
+
+
+
+
     @Value("${server.contextPath:}")
     private String contextPath;
 	
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
-		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
-		}
+		//云打印V1.4删除打印设置权限
+//		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4140041430L, cmd.getAppId(), null,cmd.getCurrentProjectId());//打印设置权限
+//		}
 		//检查参数
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		
@@ -237,7 +313,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(map.get("ownerTypeList"),map.get("ownerIdList"),starttime
-				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
+				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1, cmd.getPayMode(), cmd.getPayType());
 		
 		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
 		if(printOrdersList!=null && printOrdersList.size()>pageSize){
@@ -476,6 +552,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
+	public GetPrintOrdersResponse getPrintOrder(GetPrintOrdersCommand cmd) {
+
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+
+		SiyinPrintOrder printOrder = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(cmd.getOrderNo());
+
+		GetPrintOrdersResponse response = new GetPrintOrdersResponse();
+		if(printOrder == null)
+			return response;
+		PrintOrderDTO dto = ConvertHelper.convert(printOrder, PrintOrderDTO.class);
+		dto.setOrderTotalAmount(printOrder.getOrderTotalFee());
+		response.setPrintOrder(dto);
+		return response;
+	}
+
+
+	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		GetPrintUnpaidOrderResponse r = new GetPrintUnpaidOrderResponse();
@@ -536,6 +629,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public PreOrderDTO payPrintOrderV2(PayPrintOrderCommandV2 cmd) {
 		//检查订单id是否存在，是否已经是  已支付状态
 		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+
 		if(order.getPayDto()!=null && order.getPayDto().length()>0){
 			PreOrderDTO preOrder = (PreOrderDTO)StringHelper.fromJsonString(order.getPayDto(), PreOrderDTO.class);
 			return preOrder;
@@ -557,11 +651,18 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
         //3、收款方是否有会员，无则报错
-		Long bizPayeeId = getOrderPayeeAccount(cmd);
-        List<PayUserDTO> payUserDTOs = payServiceV2.listPayUsersByIds(Stream.of(bizPayeeId).collect(Collectors.toList()));
+		Long bizPayeeId = getOrderPayeeAccount(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(bizPayeeId));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		List<PayUserDTO> payUserDTOs = resp.getResponse();
         if (payUserDTOs == null || payUserDTOs.size() == 0){
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 1001,
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
                     "暂未绑定收款账户");
         }
 
@@ -576,14 +677,152 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         order.setPayDto(StringHelper.toJsonString(preOrderDTO));
         order.setGeneralOrderId(orderCommandResponse.getPayResponse().getBizOrderNum());
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
-		
-		//oldMethod();
+
 		return preOrderDTO;
 	}
 	
-	private Long getOrderPayeeAccount(PayPrintOrderCommandV2 cmd) {
+	@Override
+	public PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
+		//检查订单id是否存在，是否已经是  已支付状态
+		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+
+		//检查订单是否被锁定
+		//没有被锁定的订单，锁定他
+		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
+		if(lockType == PrintOrderLockType.UNLOCKED){
+			order = lockOrder(cmd.getOrderId());
+		}
+
+		//锁定了，金额为0，设置为已支付
+		if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+			return null;
+		}
+
+        //3、收款方是否有会员，无则报错
+		Long merchantId = getOrderPayeeMerchantId(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(merchantId));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+		List<PayUserDTO> payUserDTOs = resp.getResponse();
+        if (payUserDTOs == null || payUserDTOs.size() == 0){
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
+                    "暂未绑定收款账户");
+        }
+
+		//准备创建订单的参数，包括一些支付参数以及商品
+		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, merchantId);
+		CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
+
+		//保存参数
+        order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+
+		//返回参数
+		PayPrintGeneralOrderResponse resp2 = new PayPrintGeneralOrderResponse();
+		resp2.setOrderId(generalOrderResp.getMerchantOrderId());
+		resp2.setMerchantId(generalOrderResp.getMerchantId());
+		return resp2;
+	}
+
+	private CreateOrderBaseInfo buildCreateOrderBaseInfo(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order, Long merchantId) {
+		CreateOrderBaseInfo baseInfo = new CreateOrderBaseInfo();
+		baseInfo.setOrganizationId(cmd.getOrganizationId());
+		baseInfo.setOwnerId(cmd.getOwnerId());
+		ServiceModuleApp app = getApp();
+		baseInfo.setAppOriginId(app.getOriginId());
+		baseInfo.setClientAppName(cmd.getClientAppName());
+		baseInfo.setPaymentMerchantId(merchantId);
+		baseInfo.setGoods(buildGoods(cmd, order, merchantId));
+		baseInfo.setTotalAmount(order.getOrderTotalFee());
+		 String backUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.v2.callback.url.siyinprint", "/siyinprint/notifySiyinprintOrderPaymentV2");
+		baseInfo.setCallBackUrl(backUrl);
+		baseInfo.setOrderTitle(app.getName());
+		baseInfo.setPaySourceType(SourceType.PC.getCode());
+		baseInfo.setGoodsDetail(buildGoodsDetails(cmd, order));
+		return baseInfo;
+	}
+
+	private List<OrderDescriptionEntity> buildGoodsDetails(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order) {
+
+		// 设置订单展示
+		List<OrderDescriptionEntity> goodsDetail = new ArrayList<>();
+		OrderDescriptionEntity e = new OrderDescriptionEntity();
+		String jobTypeDescription = PrintJobTypeType.fromCode(order.getJobType()).getDescribe();
+		e.setKey("任务类型");
+		e.setValue(jobTypeDescription);
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey(jobTypeDescription + "详情");
+		e.setValue(order.getDetail());
+		goodsDetail.add(e);
+
+		e = new OrderDescriptionEntity();
+		e.setKey("订单金额");
+		e.setValue(order.getOrderTotalFee().toString() + "元");
+		goodsDetail.add(e);
+		return goodsDetail;
+	}
+
+
+	private List<GoodDTO> buildGoods(PayPrintGeneralOrderCommand cmd, SiyinPrintOrder order, Long merchantId) {
+		List<GoodDTO> goods = new ArrayList<>();
+		GoodDTO good = new GoodDTO();
+		good.setNamespace("NS");
+		good.setServeType(ServiceModuleConstants.PRINT_MODULE+"");
+		good.setServeApplyName("云打印");
+		good.setTag1(cmd.getOwnerId() + "");
+		good.setTag2(order.getPrinterName());
+		fillGoodTagByJobType(good, order.getJobType());
+		Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+		if (null != community) {
+			good.setServeApplyName(community.getName()+"-"+order.getPrinterName()); //
+		}
+		good.setGoodDescription(order.getDetail());// 商品描述
+		good.setCounts(1);
+		good.setPrice(order.getOrderTotalFee());
+		good.setTotalPrice(order.getOrderTotalFee());
+		goods.add(good);
+		return goods;
+	}
+
+	private void fillGoodTagByJobType(GoodDTO good, Byte jobType) {
+		GoodBizEnum bizEnum = GoodBizEnum.NONE;
+		if (jobType.equals(PrintJobTypeType.PRINT.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_PRINT;
+		} else if (jobType.equals(PrintJobTypeType.COPY.getCode())) {
+			bizEnum = GoodBizEnum.PRINT_COPY;
+		} else {
+			bizEnum = GoodBizEnum.PRINT_SCAN;
+		}
+		good.setGoodTag(bizEnum.getIdentity());
+		good.setGoodName(bizEnum.getName());
+	}
+
+
+	private GeneralOrderBizHandler getSiyinPrintGeneralOrderHandler() {
+		return PlatformContextNoWarnning.getComponent(GeneralOrderBizHandler.GENERAL_ORDER_HANDLER + OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
+	}
+
+	private ServiceModuleApp getApp() {
+		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
+				UserContext.getCurrentNamespaceId(),
+				ServiceModuleConstants.PRINT_MODULE,
+				null, null, null);
+
+		return apps.get(0);
+	}
+
+	private Long getOrderPayeeAccount(Integer namespaceId, String ownerType, Long ownerId) {
 		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
-				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
+				.getSiyinPrintBusinessPayeeAccountByOwner(namespaceId,ownerType,ownerId);
 		if (null == account) {
 			return null;
 		}
@@ -591,75 +830,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return account.getPayeeId();
 	}
 
+	private Long getOrderPayeeMerchantId(Integer namespaceId, String ownerType, Long ownerId) {
+		SiyinPrintBusinessPayeeAccount account = siyinBusinessPayeeAccountProvider
+				.getSiyinPrintBusinessPayeeAccountByOwner(namespaceId,ownerType,ownerId);
+		if (null == account) {
+			return null;
+		}
 
-	private void oldMethod() {
-//		Long amount = order.getOrderTotalFee().multiply(new BigDecimal(100)).longValue();
-//		Integer namespaceId = cmd.getNamespaceId();
-//		if(namespaceId == null){
-//			namespaceId = UserContext.getCurrentNamespaceId();
-//		}
-//
-//		User user = UserContext.current().getUser();
-//		String sNamespaceId = BIZ_ACCOUNT_PRE+UserContext.getCurrentNamespaceId();		//todoed
-//		TargetDTO userTarget = userProvider.findUserTargetById(user.getId());
-//		ListBizPayeeAccountDTO payerDto = siyinPrintOrderProvider.createPersonalPayUserIfAbsent(user.getId() + "",
-//				sNamespaceId, userTarget.getUserIdentifier(),null, null, null);
-//		List<SiyinPrintBusinessPayeeAccount> payeeAccounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts(null,namespaceId,
-//				order.getOwnerType(), order.getOwnerId());
-//		if(payeeAccounts==null || payeeAccounts.size()==0){
-//			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//					"未设置收款方账号");
-//		}
-//		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
-//		createOrderCommand.setAccountCode(sNamespaceId);
-//		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PRINT_ORDER.getPycode(),order.getOrderNo()));
-//		createOrderCommand.setClientAppName(cmd.getClientAppName());//todoed
-//		createOrderCommand.setPayerUserId(payerDto.getAccountId());
-//		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
-//		createOrderCommand.setAmount(amount);
-//		createOrderCommand.setExtendInfo(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
-//		createOrderCommand.setGoodsName(OrderType.OrderTypeEnum.PRINT_ORDER.getMsg());
-//		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
-//		String homeurl = configProvider.getValue("home.url", "");
-//		String callbackurl = String.format(configProvider.getValue("siyinprint.pay.callBackUrl", "%s/evh/siyinprint/notifySiyinprintOrderPaymentV2"), homeurl);
-//		createOrderCommand.setBackUrl(callbackurl);
-//		createOrderCommand.setOrderRemark1(configProvider.getValue("siyinprint.pay.OrderRemark1","云打印"));
-//
-//		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
-//		CreateOrderRestResponse purchaseOrder = sdkPayService.createPurchaseOrder(createOrderCommand);
-//		if(purchaseOrder==null || 200!=purchaseOrder.getErrorCode() || purchaseOrder.getResponse()==null){
-//			LOGGER.info("purchaseOrder "+purchaseOrder);
-//			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//					"preorder failed "+ StringHelper.toJsonString(purchaseOrder));
-//		}
-//		OrderCommandResponse response = purchaseOrder.getResponse();
-//		PreOrderDTO preDto = ConvertHelper.convert(response,PreOrderDTO.class);
-//		preDto.setExpiredIntervalTime(response.getExpirationMillis());
-//		List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
-//		String format = "{\"getOrderInfoUrl\":\"%s\"}";
-//		if(paymentMethods!=null){
-//			preDto.setPayMethod(paymentMethods.stream().map(bizPayMethod->{
-//				PayMethodDTO payMethodDTO = ConvertHelper.convert(bizPayMethod, PayMethodDTO.class);
-//				payMethodDTO.setPaymentName(bizPayMethod.getPaymentName());
-//				payMethodDTO.setExtendInfo(String.format(format, response.getOrderPaymentStatusQueryUrl()));
-//				String paymentLogo = contentServerService.parserUri(bizPayMethod.getPaymentLogo());
-//				payMethodDTO.setPaymentLogo(paymentLogo);
-//				payMethodDTO.setPaymentType(bizPayMethod.getPaymentType());
-//				PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
-//				com.everhomes.pay.order.PaymentParamsDTO bizPaymentParamsDTO = bizPayMethod.getPaymentParams();
-//				if(bizPaymentParamsDTO != null) {
-//					paymentParamsDTO.setPayType(bizPaymentParamsDTO.getPayType());
-//				}
-//				payMethodDTO.setPaymentParams(paymentParamsDTO);
-//
-//				return payMethodDTO;
-//			}).collect(Collectors.toList()));
-//		}
-//		order.setPayDto(StringHelper.toJsonString(preDto));
-//		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		return account.getMerchantId();
 	}
-	
-
 
 	private PreOrderDTO orderCommandResponseToDto(PurchaseOrderCommandResponse orderCommandResponse,
 			PayPrintOrderCommandV2 cmd) {
@@ -766,8 +945,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
+
+//        preOrderCommand.
 
         LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
         return preOrderCommand;
@@ -775,9 +956,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
     private String getBusinessPayerParams(PayPrintOrderCommandV2 cmd) {
 
-
         Long businessPayerId = UserContext.currentUserId();
-
 
         UserIdentifier buyerIdentifier = userProvider.findUserIdentifiersOfUser(businessPayerId, cmd.getNamespaceId());
         String buyerPhone = null;
@@ -786,7 +965,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -910,6 +1089,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				response.setSourceType(PrintScanTarget.UL_CLIENT.getCode());
 			}else{
 				response.setSourceType(PrintScanTarget.UL_PRINTER.getCode());
+				response.setPrinterName(readerName);
 		        Integer namespaceId = cmd.getNamespaceId();
 		        if(namespaceId == null){
 		        	namespaceId = UserContext.getCurrentNamespaceId();
@@ -995,6 +1175,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(orderStatus == PrintOrderStatusType.PAID){
 			throwError(PrintErrorCode.ERROR_ORDER_IS_PAYED, "order have paid");
 		}
+
+		if(orderStatus == PrintOrderStatusType.WAIT_FOR_ENTERPRISE_PAY){
+			throwError(PrintErrorCode.ERROR_PRINT_ORDER_ALREADY_WAITING_PAID, "order is waiting for enterprise payments");
+		}
+
 		return order;
 	}
 
@@ -1206,23 +1391,41 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
 		response.getColorTypeDTO().setColorPrice(defaultdecimal);
 		
-		response.setPaperSizePriceDTO(new PrintSettingPaperSizePriceDTO());
+		response.setPrintPriceDTO(new PrintSettingPaperSizePriceDTO());
+
+		response.getPrintPriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
+		response.getPrintPriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
+		response.getPrintPriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
+		response.getPrintPriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
 		
-		response.getPaperSizePriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
-		response.getPaperSizePriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
-		response.getPaperSizePriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
+		response.setCopyPriceDTO(new PrintSettingPaperSizePriceDTO());
+
+		response.getCopyPriceDTO().setAthreePrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAthreePrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAthreePrice().setColorPrice(defaultdecimal);
+
+		response.getCopyPriceDTO().setAfourPrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAfourPrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAfourPrice().setColorPrice(defaultdecimal);
+
+		response.getCopyPriceDTO().setAfivePrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAfivePrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAfivePrice().setColorPrice(defaultdecimal);
+
+		response.getCopyPriceDTO().setAsixPrice(new PrintSettingColorTypeDTO());
+		response.getCopyPriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
+		response.getCopyPriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
 		
 		response.setPrintCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST).split("\\|")));
 		response.setScanCopyCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST).split("\\|")));
@@ -1253,6 +1456,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			setPrintPaperSizePrice(response,siyinPrintSetting);
 			break;
 		case COPY:
+			setCopyPaperSizePrice(response,siyinPrintSetting);
 			break;
 		case SCAN:
 			response.setColorTypeDTO(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
@@ -1264,35 +1468,64 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	/**
-	 * 根据纸张设置
+	 * 根据纸张设置打印价格
 	 */
 	private void setPrintPaperSizePrice(GetPrintSettingResponse response, SiyinPrintSetting siyinPrintSetting) {
 		PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(siyinPrintSetting.getPaperSize());
 		
-		PrintSettingPaperSizePriceDTO dto = response.getPaperSizePriceDTO();
+		PrintSettingPaperSizePriceDTO dto = response.getPrintPriceDTO();
 		if(dto == null){
-			response.setPaperSizePriceDTO(new PrintSettingPaperSizePriceDTO());
-			dto = response.getPaperSizePriceDTO();
+			response.setPrintPriceDTO(new PrintSettingPaperSizePriceDTO());
+			dto = response.getPrintPriceDTO();
 		}
-		
+
 		switch (paperSizeType) {
 		case A3:
-			response.getPaperSizePriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A4:
-			response.getPaperSizePriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A5:
-			response.getPaperSizePriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		case A6:
-			response.getPaperSizePriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			response.getPrintPriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
 			break;
 		default:
 			break;
 		}
 	}
-	
+
+	/**
+	 * 根据纸张设置复印价格
+	 */
+	private void setCopyPaperSizePrice(GetPrintSettingResponse response, SiyinPrintSetting siyinPrintSetting) {
+		PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(siyinPrintSetting.getPaperSize());
+
+		PrintSettingPaperSizePriceDTO dto = response.getCopyPriceDTO();
+		if(dto == null){
+			response.setCopyPriceDTO(new PrintSettingPaperSizePriceDTO());
+			dto = response.getCopyPriceDTO();
+		}
+		
+		switch (paperSizeType) {
+		case A3:
+			response.getCopyPriceDTO().setAthreePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A4:
+			response.getCopyPriceDTO().setAfourPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A5:
+			response.getCopyPriceDTO().setAfivePrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		case A6:
+			response.getCopyPriceDTO().setAsixPrice(ConvertHelper.convert(siyinPrintSetting, PrintSettingColorTypeDTO.class));
+			break;
+		default:
+			break;
+		}
+	}
 	private List<SiyinPrintSetting> checkUpdatePrintSettingCommand(UpdatePrintSettingCommand cmd) {
 		// TODO Auto-generated method stub
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
@@ -1300,7 +1533,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(namespaceId == null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
+		List<SiyinPrintSetting> list = checkPrintPriceDTO(cmd.getPrintPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId);
+
+		list.addAll(checkCopyPriceDTO(cmd.getCopyPriceDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId(),namespaceId));
 		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline(),namespaceId));
 		return list;
@@ -1326,23 +1561,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 
 	/**
-	 * 检查打印扫描价格的DTO，并生成实体
+	 * 检查复印打印价格的DTO，并生成实体
 	 */
-	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1,Integer namespaceId) {
+	private List<SiyinPrintSetting> checkPrintPriceDTO(PrintSettingPaperSizePriceDTO printPriceDTO, String string, Long long1,Integer namespaceId) {
 		// TODO Auto-generated method stub
-		if(paperSizePriceDTO == null){
-			paperSizePriceDTO = new PrintSettingPaperSizePriceDTO();
+		if(printPriceDTO == null){
+			printPriceDTO = new PrintSettingPaperSizePriceDTO();
 //			throw RuntimeErrorException.errorWith(, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
 		}
-		paperSizePriceDTO.setAthreePrice(checkPrice(paperSizePriceDTO.getAthreePrice()));
-		paperSizePriceDTO.setAfourPrice(checkPrice(paperSizePriceDTO.getAfourPrice()));
-		paperSizePriceDTO.setAfivePrice(checkPrice(paperSizePriceDTO.getAfivePrice()));
-		paperSizePriceDTO.setAsixPrice(checkPrice(paperSizePriceDTO.getAsixPrice()));
+		printPriceDTO.setAthreePrice(checkPrice(printPriceDTO.getAthreePrice()));
+		printPriceDTO.setAfourPrice(checkPrice(printPriceDTO.getAfourPrice()));
+		printPriceDTO.setAfivePrice(checkPrice(printPriceDTO.getAfivePrice()));
+		printPriceDTO.setAsixPrice(checkPrice(printPriceDTO.getAsixPrice()));
 		
-		SiyinPrintSetting settinga3 = ConvertHelper.convert(paperSizePriceDTO.getAthreePrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga4 = ConvertHelper.convert(paperSizePriceDTO.getAfourPrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga5 = ConvertHelper.convert(paperSizePriceDTO.getAfivePrice(), SiyinPrintSetting.class);
-		SiyinPrintSetting settinga6 = ConvertHelper.convert(paperSizePriceDTO.getAsixPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga3 = ConvertHelper.convert(printPriceDTO.getAthreePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga4 = ConvertHelper.convert(printPriceDTO.getAfourPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga5 = ConvertHelper.convert(printPriceDTO.getAfivePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga6 = ConvertHelper.convert(printPriceDTO.getAsixPrice(), SiyinPrintSetting.class);
 		
 		settinga3.setOwnerType(string);
 		settinga3.setOwnerId(long1);
@@ -1367,7 +1602,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		settinga4.setPaperSize(PrintPaperSizeType.A4.getCode());
 		settinga5.setPaperSize(PrintPaperSizeType.A5.getCode());
 		settinga6.setPaperSize(PrintPaperSizeType.A6.getCode());
-		
+
 		settinga3.setNamespaceId(namespaceId);
 		settinga4.setNamespaceId(namespaceId);
 		settinga5.setNamespaceId(namespaceId);
@@ -1375,6 +1610,56 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
 	}
 
+
+	/**
+	 * 检查复印价格的DTO，并生成实体
+	 */
+	private List<SiyinPrintSetting> checkCopyPriceDTO(PrintSettingPaperSizePriceDTO copyPriceDTO, String string, Long long1,Integer namespaceId) {
+		// TODO Auto-generated method stub
+		if(copyPriceDTO == null){
+			copyPriceDTO = new PrintSettingPaperSizePriceDTO();
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
+		}
+		copyPriceDTO.setAthreePrice(checkPrice(copyPriceDTO.getAthreePrice()));
+		copyPriceDTO.setAfourPrice(checkPrice(copyPriceDTO.getAfourPrice()));
+		copyPriceDTO.setAfivePrice(checkPrice(copyPriceDTO.getAfivePrice()));
+		copyPriceDTO.setAsixPrice(checkPrice(copyPriceDTO.getAsixPrice()));
+
+		SiyinPrintSetting settinga3 = ConvertHelper.convert(copyPriceDTO.getAthreePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga4 = ConvertHelper.convert(copyPriceDTO.getAfourPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga5 = ConvertHelper.convert(copyPriceDTO.getAfivePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga6 = ConvertHelper.convert(copyPriceDTO.getAsixPrice(), SiyinPrintSetting.class);
+
+		settinga3.setOwnerType(string);
+		settinga3.setOwnerId(long1);
+		settinga4.setOwnerType(string);
+		settinga4.setOwnerId(long1);
+		settinga5.setOwnerType(string);
+		settinga5.setOwnerId(long1);
+		settinga6.setOwnerType(string);
+		settinga6.setOwnerId(long1);
+
+		settinga3.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga4.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga5.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga6.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+
+		settinga3.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga4.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga5.setJobType(PrintJobTypeType.COPY.getCode());
+		settinga6.setJobType(PrintJobTypeType.COPY.getCode());
+
+		settinga3.setPaperSize(PrintPaperSizeType.A3.getCode());
+		settinga4.setPaperSize(PrintPaperSizeType.A4.getCode());
+		settinga5.setPaperSize(PrintPaperSizeType.A5.getCode());
+		settinga6.setPaperSize(PrintPaperSizeType.A6.getCode());
+		
+		settinga3.setNamespaceId(namespaceId);
+		settinga4.setNamespaceId(namespaceId);
+		settinga5.setNamespaceId(namespaceId);
+		settinga6.setNamespaceId(namespaceId);
+		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
+	}
 
 	/**
 	 * 检查扫描价格，并生成实体
@@ -1430,7 +1715,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			PrintOrderStatusType orderStatusType = PrintOrderStatusType.fromCode(siyinPrintOrder.getOrderStatus());
 			//总体统计
 			addOrderTotalAmountToStat(allStat,siyinPrintOrder.getOrderTotalFee(),orderStatusType);
-			
+			LOGGER.info("siyinPrintOrderid :" + siyinPrintOrder.getOrderNo());
 			switch (jobType) {
 			case PRINT:
 				addOrderTotalAmountToStat(printStat, siyinPrintOrder.getOrderTotalFee(), orderStatusType);
@@ -1753,7 +2038,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ArrayList arrayList = new ArrayList(Arrays.asList("0", cmd.getCommunityId() + ""));
 		String key = OwnerType.ORGANIZATION.getCode() + cmd.getOrganizationId();
 		LOGGER.info("sdkPayService request params:{} {} ",key,arrayList);
-		List<PayUserDTO> payUserList = payServiceV2.getPayUserList(key,arrayList);
+		GetPayUserListByMerchantCommand cmd2 = new GetPayUserListByMerchantCommand();
+		cmd2.setUserId(key);
+		cmd2.setTag1(arrayList);
+		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+
+		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
 		if(payUserList==null || payUserList.size() == 0){
 			return null;
 		}
@@ -1778,12 +2071,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		List<SiyinPrintBusinessPayeeAccount> accounts = siyinBusinessPayeeAccountProvider.findRepeatBusinessPayeeAccounts
-				(cmd.getId(),cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
-		if(accounts!=null && accounts.size()>0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"repeat account");
-		}
 		if(cmd.getId()!=null){
 			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
 			if(oldPayeeAccount == null){
@@ -1796,6 +2083,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(oldPayeeAccount.getPayeeId());
 			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
@@ -1812,7 +2101,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(account==null){
 			return null;
 		}
-		List<PayUserDTO> payUserDTOS = payServiceV2.listPayUsersByIds(new ArrayList<>(Arrays.asList(account.getPayeeId())));
+
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(account.getMerchantId()));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || null == resp.getResponse()) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+		}
+
+		List<PayUserDTO> payUserDTOS = resp.getResponse();
+
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
 		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
@@ -1934,13 +2232,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				cmd.setUser_id(uIdentifier.getOwnerUid()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
 			}
 		}
-		
 		try {
 			response.getOutputStream().write("OK".getBytes());
 		} catch (IOException e) {
 			LOGGER.info("return ok failed");
 		}
-		
+
 		MfpLogNotificationCommand cmd2 = new MfpLogNotificationCommand();
 		cmd2.setJobData(StringHelper.toJsonString(cmd));
 		mfpLogNotification(cmd2);
@@ -1948,7 +2245,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 
 	@Override
-	public void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+	public void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
+
 			//检查签名
 			if(!PayUtil.verifyCallbackSignature(cmd)){
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -1971,19 +2269,18 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"invaild ordertype,"+cmd.getOrderType());
 			}
+
+
 			if(cmd.getOrderType() == 3) {
 				
 				//根据统一订单生成的支付编号获得记录
-				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByBizOrderNum(cmd.getBizOrderNum());
+				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByGeneralOrderId(cmd.getMerchantOrderId()+"");
 				if(order == null){
-					LOGGER.error("the order {} not found.",cmd.getBizOrderNum());
+					LOGGER.error("the order {} not found.",cmd.getMerchantOrderId());
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"the order not found.");
 				}
-				
-//				Long orderNo = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));
-//				SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(orderNo);
-	
+
 				BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 
 				//加一个开关，方便在beta环境测试
@@ -1993,21 +2290,77 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 						LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
 						throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
 					}
+				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
+				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
+				if (!isOk) {
+					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", StringHelper.toJsonString(cmd), order);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Order amount is not equal to payAmount");
 				}
-				Long payTime = System.currentTimeMillis();
-				Timestamp payTimeStamp = new Timestamp(payTime);
-				if(order.getOrderStatus().byteValue() == PrintOrderStatusType.UNPAID.getCode()) {
-					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-					order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-					order.setPaidTime(payTimeStamp);
-					order.setPayOrderNo(cmd.getOrderId()+"");
-					siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+				LOGGER.info("call point api start");
+				//用户积分
+				LocalEventBus.publish(event -> {
+					LocalEventContext context = new LocalEventContext();
+					context.setUid(order.getCreatorUid());
+					context.setNamespaceId(order.getNamespaceId());
+					context.setCommunityId(order.getOwnerId());
+					event.setContext(context);
+					event.setEntityType(EhSiyinPrintOrders.class.getSimpleName());
+					event.setEntityId(order.getId());
+					event.setEventName(SystemEvent.SIYIN_PRINT_PAID.dft());
+				});
+				LOGGER.info("call point api end");
+				if (cmd.getPaymentStatus() != null && cmd.getPaymentType() != null){
+		            switch (cmd.getPaymentType()){
+	                case 1:
+	                case 7:
+	                case 9:
+	                case 21:
+	                	LOGGER.info("微信支付");
+	                	order.setPaidType(VendorType.WEI_XIN.getCode());
+	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+	                	break;
+	                case 29:
+	                	LOGGER.info("企业支付");
+	                	order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+	                	break;
+	                default:
+	                	LOGGER.info("支付宝支付");
+	                	order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+	                	order.setPayMode(GorderPayType.PERSON_PAY.getCode());
+	                	break;
+		            }
 				}
-
+				updatePrintOrder(order, cmd.getBizOrderNum());
 			}
 	}
-	
-    /*
+
+	@Override
+	public void updatePrintOrder(SiyinPrintOrder order, String payOrderNo) {
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		if (order.getOrderStatus().byteValue() != PrintOrderStatusType.PAID.getCode()) {
+			order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+			order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
+			order.setPaidTime(payTimeStamp);
+			order.setPayOrderNo(payOrderNo);
+			siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+		}
+	}
+
+	public boolean checkNotifyPrintOrderAmount(SiyinPrintOrder order, BigDecimal payAmount, BigDecimal couponAmount) {
+		//加一个开关，方便在beta环境测试
+		boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
+		if (!flag) {
+			if (0 != order.getOrderTotalFee().compareTo(payAmount.add(couponAmount))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/*
      * 由于从支付系统里回来的CreateOrderRestResponse有可能没有errorScope，故不能直接使用CreateOrderRestResponse.isSuccess()来判断，
        CreateOrderRestResponse.isSuccess()里会对errorScope进行比较
      */
@@ -2023,8 +2376,79 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return configurationProvider.getValue(UserContext.getCurrentNamespaceId(),
 				PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
 	}
-    
+
 	public static void throwError(int errorCode, String errorMsg) {
 		throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
+	}
+	public void enterprisePayPrintOrder(EnterprisePayPrintOrderCommand cmd) {
+
+		// 获取订单
+		SiyinPrintOrder siyinPrintOrder = checkPrintOrder(cmd.getOrderId());
+
+		dbProvider.execute(r -> {
+
+			// 调用接口
+			String generalBillId = createGeneralBill(siyinPrintOrder, cmd.getOrganizationId());
+
+			// 保存数据
+			siyinPrintOrder.setGeneralBillId(generalBillId);
+			siyinPrintOrder.setOrderStatus(PrintOrderStatusType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+			siyinPrintOrderProvider.updateSiyinPrintOrder(siyinPrintOrder);
+			return null;
+		});
+
+	}
+
+    private String createGeneralBill(SiyinPrintOrder siyinPrintOrder, Long organizationId) {
+//    	CreateGeneralBillCommand cmd = new CreateGeneralBillCommand();
+//    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//    	cmd.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+//    	cmd.setOwnerId(siyinPrintOrder.getOwnerId());
+//    	cmd.setSourceType(AssetModuleNotifyConstants.PRINT_MODULE);
+//    	cmd.setSourceId(ServiceModuleConstants.PRINT_MODULE);
+//    	cmd.setThirdBillId(siyinPrintOrder.getId()+"");
+//    	cmd.setSourceName("云打印订单");
+//    	cmd.setConsumeUserId(UserContext.currentUserId());
+//    	cmd.setTargetType(AssetTargetType.ORGANIZATION.getCode());
+//    	cmd.setTargetId(organizationId);
+//    	cmd.setAmountReceivable(siyinPrintOrder.getOrderTotalFee());
+//
+//    	List<ListBillsDTO> dtos = assetService.createGeneralBill(cmd);
+//    	if (CollectionUtils.isEmpty(dtos)) {
+//    		throwError(PrintErrorCode.ERROR_CREATE_GENERAL_BILL, "error creating general bill");
+//    	}
+//
+//		return dtos.get(0).getBillId();
+    	return null;
+	}
+
+	private void throwError(int errorCode, String errorMsg) {
+    	throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, errorCode, errorMsg);
+    }
+
+	private List<ChargeModuleAppDTO> listChargeModuleApps(ListChargeModuleAppsCommand cmd) {
+		List<AssetServiceModuleAppDTO> dtos = assetService.listAssetModuleApps(cmd.getNamespaceId());
+
+		return dtos.stream().map(r -> {
+			ChargeModuleAppDTO dto = new ChargeModuleAppDTO();
+			dto.setChargeAppName(r.getName());
+			dto.setChargeAppToken(r.getCategoryId());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	private List<BillGroupDTO> listBillGroups(ListBillGroupsCommand cmd) {
+		OwnerIdentityCommand cmd2 = new OwnerIdentityCommand();
+		cmd2.setNamespaceId(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+		cmd2.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+		cmd2.setCategoryId(cmd.getChargeAppToken());
+		cmd2.setModuleId(ServiceModuleConstants.ASSET_MODULE);
+		List<ListBillGroupsDTO> dtos = assetService.listBillGroups(cmd2);
+		return dtos.stream().map(r -> {
+			BillGroupDTO dto = new BillGroupDTO();
+			dto.setBillGroupName(r.getBillGroupName());
+			dto.setBillGroupToken(r.getBillGroupId());
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }
