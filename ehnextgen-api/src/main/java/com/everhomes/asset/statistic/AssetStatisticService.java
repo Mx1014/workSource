@@ -92,4 +92,8 @@ public interface AssetStatisticService {
 	void exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd);
 	
 	OutputStream exportOutputStreamBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd, Long taskId);
+
+	void exportBillStatisticByAddress(ListBillStatisticByAddressCmd cmd);
+	
+	OutputStream exportOutputStreamBillStatisticByAddress(ListBillStatisticByAddressCmd cmd, Long taskId);
 }
