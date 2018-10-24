@@ -4511,7 +4511,7 @@ public class AssetServiceImpl implements AssetService {
 				Long charingItemId = mapping.getChargingItemId();
 				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
 				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), 
-						categoryId, brotherGroupId);
+						categoryId, brotherGroupId, null);
 				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
 				ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 				dtos.add(dto);

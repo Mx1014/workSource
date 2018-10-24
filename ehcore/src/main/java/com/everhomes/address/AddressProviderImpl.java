@@ -1211,7 +1211,7 @@ public class AddressProviderImpl implements AddressProvider {
         return aByte;
 	}
 
-@Override
+	@Override
 	public List<Address> findActiveApartmentsByBuildingId(Long buildingId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return  context.select()
@@ -1221,8 +1221,6 @@ public class AddressProviderImpl implements AddressProvider {
 				       .and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
 				       .fetchInto(Address.class);
 	}
-<<<<<<< HEAD
-=======
 
 	@Override
 	public Address findApartmentByThirdPartyId(String thirdPartyType, String thirdPartyToken) {
@@ -1254,5 +1252,4 @@ public class AddressProviderImpl implements AddressProvider {
 				       .fetchAnyInto(Community.class);
 	}
 	
->>>>>>> issue-customer4.1
 }
