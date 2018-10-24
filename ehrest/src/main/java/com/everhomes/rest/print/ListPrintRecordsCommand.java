@@ -18,6 +18,9 @@ import com.everhomes.util.StringHelper;
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
  * <li>appId: 应用id</li>
+ * <li>payType:支付方式，全部则为空,参考{@link com.everhomes.rest.organization.VendorType}</li>
+ * <li>payMode:支付类型，全部则为空，参考 {@link com.everhomes.rest.general.order.GorderPayType}</li>
+ * <li>paymentType:账单的支付方式（0-线下缴费，1-微信支付，2-对公转账，8-支付宝支付）</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -36,7 +39,9 @@ public class ListPrintRecordsCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
-
+	private String payType;
+	private Byte paymentType;
+	private Byte payMode;
 	public Long getCurrentPMId() {
 		return currentPMId;
 	}
@@ -123,6 +128,31 @@ public class ListPrintRecordsCommand {
 		this.pageSize = pageSize;
 	}
 	
+	public String getPayType() {
+		return payType;
+	}
+
+	public void setPayType(String payType) {
+		this.payType = payType;
+	}
+
+	public Byte getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(Byte paymentType) {
+		this.paymentType = paymentType;
+	}
+
+	
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

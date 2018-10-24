@@ -48,6 +48,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.*;
 import com.google.gson.reflect.TypeToken;
 import org.jooq.*;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForEnterprisePayCommand;
+import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsForEnterprisePayResponse;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -394,7 +397,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			apps.remove(pageSize);
 			response.setNextPageAnchor(apps.get(pageSize - 1).getId());
 		}
-
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
 		for (ServiceModuleApp app: apps){
 			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
@@ -454,7 +456,6 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		response.setServiceModuleApps(dtos);
 		return response;
 	}
-
 
 	@Override
 	public ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd) {
@@ -1427,5 +1428,35 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			return null;
 		});
+	}
+	
+	@Override
+	public ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
+		ListServiceModuleAppsForEnterprisePayResponse response  = new ListServiceModuleAppsForEnterprisePayResponse();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+
+		if(releaseVersion == null){
+			return response;
+		}
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), cmd.getEnableEnterprisePayFlag());
+
+		if(apps == null){
+			return response;
+		}
+
+
+		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
+		for (ServiceModuleApp app: apps){
+			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+			ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+			if(serviceModule != null){
+				dto.setModuleName(serviceModule.getName());
+			}
+			dtos.add(dto);
+		}
+
+		response.setApps(dtos);
+
+		return response;
 	}
 }
