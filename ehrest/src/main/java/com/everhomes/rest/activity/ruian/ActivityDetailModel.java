@@ -12,15 +12,15 @@ public class ActivityDetailModel {
     private String Photo ;//头图
     private String Article ;//活动详情（富文本）
     private String Pact ;//活动规则
-    private Timestamp StartTime ;//开始时间
-    private Timestamp EndTime ;//结束时间
+    private String StartTime ;//开始时间
+    private String EndTime ;//结束时间
     private Integer Rank ;//排序权重
     private Long ActivityCategoryID ;//活动一级分类ID
     private Long ActivitySubCategoryID ;//活动二级分类ID
     private Boolean IsNeedSign ;//是否需要报名
     private Boolean IsAudit ;//报名是否需要审核（前提IsNeedSign为true）
-    private Timestamp SignStartTime ;//报名开始时间（如果IsNeedSign为true,则一定返回）
-    private Timestamp SignEndTime ;//报名结束时间（如果IsNeedSign为true,则一定返回）
+    private String SignStartTime ;//报名开始时间（如果IsNeedSign为true,则一定返回）
+    private String SignEndTime ;//报名结束时间（如果IsNeedSign为true,则一定返回）
     private String SignCondition ;//报名条件（前提IsNeedSign为true，以文本形式返回）
     private Boolean IsDeductionBonus ;//报名是否需要积分（前提IsNeedSign为true）
     private Double DeductionBonus ;//报名所需积分值（如果IsDeductionBonus为true，则一定返回）
@@ -75,19 +75,19 @@ public class ActivityDetailModel {
         Pact = pact;
     }
 
-    public Timestamp getStartTime() {
+    public String getStartTime() {
         return StartTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         StartTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public String getEndTime() {
         return EndTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(String endTime) {
         EndTime = endTime;
     }
 
@@ -131,19 +131,19 @@ public class ActivityDetailModel {
         IsAudit = audit;
     }
 
-    public Timestamp getSignStartTime() {
+    public String getSignStartTime() {
         return SignStartTime;
     }
 
-    public void setSignStartTime(Timestamp signStartTime) {
+    public void setSignStartTime(String signStartTime) {
         SignStartTime = signStartTime;
     }
 
-    public Timestamp getSignEndTime() {
+    public String getSignEndTime() {
         return SignEndTime;
     }
 
-    public void setSignEndTime(Timestamp signEndTime) {
+    public void setSignEndTime(String signEndTime) {
         SignEndTime = signEndTime;
     }
 

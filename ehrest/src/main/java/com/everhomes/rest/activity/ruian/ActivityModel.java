@@ -11,8 +11,8 @@ public class ActivityModel {
     private String SubTitle ;//副标题
     private String Photo ;//头图
     private Byte State ;//状态（1|即将开始，2|进行中，3|已结束）
-    private Timestamp StartTime ;//开始时间
-    private Timestamp EndTime ;//结束时间
+    private String StartTime ;//开始时间
+    private String EndTime ;//结束时间
     private Long ActivityCategoryID ;//活动一级分类ID
     private Long ActivitySubCategoryID ;//活动二级分类ID
 
@@ -56,19 +56,19 @@ public class ActivityModel {
         State = state;
     }
 
-    public Timestamp getStartTime() {
+    public String getStartTime() {
         return StartTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         StartTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public String getEndTime() {
         return EndTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(String endTime) {
         EndTime = endTime;
     }
 
