@@ -15,9 +15,10 @@ public class CheckUserStatisticPrivilegeCommand {
         super();
     }
 
-    public CheckUserStatisticPrivilegeCommand(Long orgId) {
+    public CheckUserStatisticPrivilegeCommand(Long orgId, Long appId) {
         super();
         this.orgId = orgId;
+        this.appId = appId;
     }
     @Override
     public String toString() {

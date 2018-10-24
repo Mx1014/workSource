@@ -10754,7 +10754,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public ListPunchStatusMembersResponse listMembersOfAPunchStatus(
             ListPunchStatusMembersCommand cmd) {
-        checkUserStatisticPrivilege(cmd.getOrganizationId());
+        checkUserStatisticPrivilege(cmd.getOrganizationId(), cmd.getAppId());
 
         ListPunchStatusMembersResponse response = new ListPunchStatusMembersResponse();
 
@@ -10808,7 +10808,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListPunchMembersResponse listMembersOfDepartment(ListPunchMembersCommand cmd){
-        checkUserStatisticPrivilege(cmd.getOrganizationId());
+        checkUserStatisticPrivilege(cmd.getOrganizationId(), cmd.getAppId());
 
         ListPunchMembersResponse response = new ListPunchMembersResponse();
         //如果查询日期是 null设为当天 由于现在每天早上刷新日报表,不需要当天做特殊处理了
@@ -10975,7 +10975,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
 	public ListPunchExceptionRequestMembersResponse listMembersOfAPunchExceptionRequest(
 			ListPunchExceptionRequestMembersCommand cmd) {
-        checkUserStatisticPrivilege(cmd.getOrganizationId());
+        checkUserStatisticPrivilege(cmd.getOrganizationId(), cmd.getAppId());
         ListPunchExceptionRequestMembersResponse response = new ListPunchExceptionRequestMembersResponse();
         PunchExceptionRequestStatisticsItemType itemType = PunchExceptionRequestStatisticsItemType.fromCode(cmd.getPunchExceptionRequestStatisticsItemType());
         List<PunchExceptionRequestStatisticsItemDTO> items = null;
@@ -11446,8 +11446,8 @@ public class PunchServiceImpl implements PunchService {
 		return response;
     	
     }
-    private void checkUserStatisticPrivilege(Long orgId){
-        CheckUserStatisticPrivilegeResponse resp = checkUserStatisticPrivilege(new CheckUserStatisticPrivilegeCommand(orgId));
+    private void checkUserStatisticPrivilege(Long orgId, Long appId){
+        CheckUserStatisticPrivilegeResponse resp = checkUserStatisticPrivilege(new CheckUserStatisticPrivilegeCommand(orgId, appId));
         if (NormalFlag.fromCode(resp.getQueryPrivilege()) != NormalFlag.YES) {
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_CHECK_APP_PRIVILEGE,
                     "check app privilege error");
