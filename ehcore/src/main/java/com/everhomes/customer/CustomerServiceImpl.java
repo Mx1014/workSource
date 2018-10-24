@@ -61,6 +61,7 @@ import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.acl.admin.ListOrganizationContectDTOResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CustomerAptitudeFlag;
@@ -220,6 +221,7 @@ import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
@@ -238,21 +240,7 @@ import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -2810,6 +2798,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         Long userId = UserContext.currentUserId();
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        Address trueAddress = addressProvider.findAddressById(addressId);
         if (address != null) {
             return;
         }
@@ -2827,6 +2816,22 @@ public class CustomerServiceImpl implements CustomerService {
         address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
         this.organizationProvider.createOrganizationAddress(address);
+
+        UpdateWorkPlaceCommand cmd = new UpdateWorkPlaceCommand();
+        cmd.setOrganizationId(orgId);
+        CreateOfficeSiteCommand cmd2 = new CreateOfficeSiteCommand();
+        cmd2.setCommunityId(trueAddress.getCommunityId());
+        cmd2.setSiteName(trueAddress.getAddress());
+        cmd2.setWholeAddressName(trueAddress.getAddress());
+        OrganizationSiteApartmentDTO siteDto = new OrganizationSiteApartmentDTO();
+        siteDto.setBuildingId(buildingId);
+        siteDto.setApartmentId(addressId);
+        List<OrganizationSiteApartmentDTO> siteDtos = new ArrayList<>();
+        siteDtos.add(siteDto);
+        cmd2.setSiteDtos(siteDtos);
+        List<CreateOfficeSiteCommand> cmd2s = new ArrayList<>();
+        cmd2s.add(cmd2);
+        cmd.setOfficeSites(cmd2s);
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898

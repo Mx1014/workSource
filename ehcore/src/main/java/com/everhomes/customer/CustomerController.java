@@ -3,6 +3,7 @@ package com.everhomes.customer;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
@@ -12,6 +13,7 @@ import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -49,6 +51,9 @@ public class CustomerController extends ControllerBase {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
     private EnterpriseCustomerSearcher enterpriseCustomerSearcher;
@@ -1718,5 +1723,19 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+   /* *//**
+     * <b>URL: /customer/createSuperAdmin</b>
+     * <p>创建企业管理员</p>
+     *//*
+    @RequestMapping("createSuperAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse createSuperAdmin(@Valid UpdateSuperAdminCommand cmd) {
+        customerService.
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+*/
 
 }
