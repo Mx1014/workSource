@@ -2,7 +2,9 @@ package com.everhomes.organization.pm.reportForm;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 import com.everhomes.scheduler.RunningFlag;
@@ -38,8 +42,12 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	
 	@Autowired
 	private PropertyReportFormProvider propertyReportFormProvider;
+	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
 	
 	@Autowired
 	private PropertyReportFormService propertyReportFormService;
@@ -57,61 +65,69 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	
 	//定时统计园区数据的接口
 	public void generateReportFormStatics() {
-		int pageSize = 5000;
-		int totalCount = addressProvider.getTotalApartmentCount();
-		int totalPage = 0;
-		if (totalCount%pageSize==0) {
-			totalPage = totalCount/pageSize;
-		}else {
-			totalPage = totalCount/pageSize + 1;
-		}
 		
-		Map<Long, CommunityStatistics> communityResultMap = new HashMap<>();
-		Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
-		
-		for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+		dbProvider.execute((TransactionStatus status) -> {
+			//先删掉这个月的的统计数据
+			String todayDateStr = getTodayDateStr();
+			//propertyReportFormProvider.deleteDataByDateStr(todayDateStr);
 			
-			int startIndex = currentPage * pageSize;
-			List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
-			
-			if (currentPage != 0 && apartments != null && apartments.size() > 0) {
-				//插入园区信息统计数据
-				if (communityResultMap.containsKey(apartments.get(0).getCommunityId())) {
-					CommunityStatistics remove = communityResultMap.remove(apartments.get(0).getCommunityId());
-					createCommunityStatics(communityResultMap);
-					communityResultMap.put(remove.getCommunityId(), remove);
-				}else{
-					createCommunityStatics(communityResultMap);
-				}
-				//插入楼宇信息统计数据
-				if (buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
-					BuildingStatistics remove = buildingResultMap.remove(apartments.get(0).getBuildingId());
-					createBuildingStatics(buildingResultMap);
-					buildingResultMap.put(remove.getBuildingId(), remove);
-				}else{
-					createBuildingStatics(buildingResultMap);
-				}
+			int pageSize = 5000;
+			int totalCount = addressProvider.getTotalApartmentCount();
+			int totalPage = 0;
+			if (totalCount%pageSize==0) {
+				totalPage = totalCount/pageSize;
+			}else {
+				totalPage = totalCount/pageSize + 1;
 			}
 			
-			for (ApartmentReportFormDTO apartment : apartments) {
-				//园区信息统计数据
-				if (communityResultMap.containsKey(apartment.getCommunityId())) {
-					CommunityStatistics communityStatistics = communityResultMap.get(apartment.getCommunityId());
-					countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
-				}else{
-					CommunityStatistics communityStatistics = initCommunityStatistics(apartment.getCommunityId());
-					countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
+			Map<Long, CommunityStatistics> communityResultMap = new HashMap<>();
+			Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
+			
+			for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+				
+				int startIndex = currentPage * pageSize;
+				List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
+				
+				if (currentPage != 0 && apartments != null && apartments.size() > 0) {
+					//插入园区信息统计数据
+					if (communityResultMap.containsKey(apartments.get(0).getCommunityId())) {
+						CommunityStatistics remove = communityResultMap.remove(apartments.get(0).getCommunityId());
+						createCommunityStatics(communityResultMap);
+						communityResultMap.put(remove.getCommunityId(), remove);
+					}else{
+						createCommunityStatics(communityResultMap);
+					}
+					//插入楼宇信息统计数据
+					if (buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
+						BuildingStatistics remove = buildingResultMap.remove(apartments.get(0).getBuildingId());
+						createBuildingStatics(buildingResultMap);
+						buildingResultMap.put(remove.getBuildingId(), remove);
+					}else{
+						createBuildingStatics(buildingResultMap);
+					}
 				}
-				//楼宇信息统计数据
-				if (buildingResultMap.containsKey(apartment.getBuildingId())) {
-					BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
-					countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
-				}else{
-					BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
-					countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+				
+				for (ApartmentReportFormDTO apartment : apartments) {
+					//园区信息统计数据
+					if (communityResultMap.containsKey(apartment.getCommunityId())) {
+						CommunityStatistics communityStatistics = communityResultMap.get(apartment.getCommunityId());
+						countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
+					}else{
+						CommunityStatistics communityStatistics = initCommunityStatistics(apartment.getCommunityId());
+						countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
+					}
+					//楼宇信息统计数据
+					if (buildingResultMap.containsKey(apartment.getBuildingId())) {
+						BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
+						countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+					}else{
+						BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
+						countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+					}
 				}
 			}
-		}
+			return null;
+		});
 	}
 
 	private void createBuildingStatics(Map<Long, BuildingStatistics> buildingResultMap) {
@@ -196,6 +212,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		communityStatistics.setCommunityId(communityId);
 		communityStatistics.setCommunityName(community.getName());
 		
+		communityStatistics.setDateStr(getTodayDateStr());
+		
 		Integer buildingCount = communityProvider.countActiveBuildingsByCommunityId(community.getId());
 		communityStatistics.setBuildingCount(buildingCount);
 		
@@ -236,6 +254,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		buildingStatistics.setBuildingId(buildingId);
 		buildingStatistics.setBuildingName(building.getName());
 		
+		buildingStatistics.setDateStr(getTodayDateStr());
+		
 		buildingStatistics.setTotalApartmentCount(0);
 		buildingStatistics.setFreeApartmentCount(0);
 		buildingStatistics.setRentApartmentCount(0);
@@ -263,6 +283,12 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		
 		return buildingStatistics;
 	}
-
+	
+	private String getTodayDateStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
 
 }

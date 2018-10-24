@@ -2083,4 +2083,17 @@ public class CommunityProviderImpl implements CommunityProvider {
 		return result;
 	}
 
+	@Override
+	public String findCommunityCategoryByCommunityId(Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		com.everhomes.server.schema.tables.EhResourceCategoryAssignments ehResourceCategoryAssignments = Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS;
+		com.everhomes.server.schema.tables.EhResourceCategories ehResourceCategories = Tables.EH_RESOURCE_CATEGORIES;
+		
+		return context.select(ehResourceCategories.NAME)
+					.from(ehResourceCategoryAssignments)
+					.leftOuterJoin(ehResourceCategories).on(ehResourceCategoryAssignments.RESOURCE_CATEGRY_ID.eq(ehResourceCategories.ID))
+					.where(ehResourceCategoryAssignments.RESOURCE_ID.eq(communityId))
+					.fetchAnyInto(String.class);
+	}
+
 }

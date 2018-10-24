@@ -1,21 +1,43 @@
 package com.everhomes.organization.pm.reportForm;
 
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.ResultQuery;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.address.Address;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticBuildingDao;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticCommunityDao;
 import com.everhomes.server.schema.tables.pojos.EhPropertyStatisticBuilding;
+import com.microsoft.schemas.office.excel.STObjectType;
 
 @Component
 public class PropertyReportFormProviderImpl implements PropertyReportFormProvider{
 	
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
 
 	@Override
 	public void createBuildingStatistics(BuildingStatistics buildingStatistics) {
@@ -33,6 +55,104 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		communityStatistics.setStatus(PropertyReportFormStatus.ACTIVE.getCode());
 		EhPropertyStatisticCommunityDao dao = new EhPropertyStatisticCommunityDao();
 		dao.insert(communityStatistics);
+	}
+
+	@Override
+	public Map<Long, CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId,
+			List<Long> communityIdList, String dateStr) {
+		Map<Long, CommunityBriefStaticsDTO> result = new HashMap<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		
+		query.addFrom(Tables.EH_PROPERTY_STATISTIC_COMMUNITY);
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.COMMUNITY_ID.in(communityIdList));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.DATE_STR.eq(dateStr));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().map(r->{
+			CommunityBriefStaticsDTO dto = new CommunityBriefStaticsDTO();
+			
+			dto.setCommunityId(r.getValue(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.COMMUNITY_ID));
+			dto.setCommunityName(r.getValue(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.COMMUNITY_NAME));
+			dto.setBuildingCount(r.getValue(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.BUILDING_COUNT));
+			dto.setAreaSize(r.getValue(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE));
+			
+			result.put(dto.getCommunityId(), dto);
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public CommunityTotalStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId,
+			List<Long> communityIdList, String dateStr) {
+		CommunityTotalStaticsDTO result = new CommunityTotalStaticsDTO();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		
+		query.addSelect(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.BUILDING_COUNT),
+				DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE));
+		query.addFrom(Tables.EH_PROPERTY_STATISTIC_COMMUNITY);
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.COMMUNITY_ID.in(communityIdList));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.DATE_STR.eq(dateStr));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			result.setBuildingCount(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.BUILDING_COUNT)).intValue());
+			result.setAreaSize(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE)));
+		});
+		return result;
+	}
+
+	@Override
+	public Map<String, BuildingBriefStaticsDTO> listBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
+			List<String> buildingNameList, String dateStr) {
+		Map<String, BuildingBriefStaticsDTO> result = new HashMap<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		
+		query.addFrom(Tables.EH_PROPERTY_STATISTIC_BUILDING);
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.BUILDING_NAME.in(buildingNameList));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.DATE_STR.eq(dateStr));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			BuildingBriefStaticsDTO dto = new BuildingBriefStaticsDTO();
+			
+			dto.setBuildingName(r.getValue(Tables.EH_PROPERTY_STATISTIC_BUILDING.BUILDING_NAME));
+			dto.setAreaSize(r.getValue(Tables.EH_PROPERTY_STATISTIC_BUILDING.AREA_SIZE));
+			dto.setTotalApartmentCount(r.getValue(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT));
+			
+			result.put(dto.getBuildingName(), dto);
+		});
+		return result;
+	}
+
+	@Override
+	public BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
+			List<String> buildingNameList, String dateStr) {
+		BuildingTotalStaticsDTO result = new BuildingTotalStaticsDTO();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<Record> query = context.selectQuery();
+		
+		query.addSelect(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT),
+				DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.AREA_SIZE));
+		query.addFrom(Tables.EH_PROPERTY_STATISTIC_BUILDING);
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.BUILDING_NAME.in(buildingNameList));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.DATE_STR.eq(dateStr));
+		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			result.setTotalApartmentCount(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT)).intValue());
+			result.setAreaSize(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.AREA_SIZE)));
+		});
+		return result;
 	}
 
 

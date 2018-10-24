@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +137,8 @@ public interface ContractProvider {
 	List<Contract> listContractsByNamespaceIdAndStatus(Integer namespaceId, byte statusCode);
 
 	List<ContractCategory> listContractAppCategory(Integer namespaceId);
+
+	BigDecimal getChargeAreaByContractIdAndAddress(Long contractId, String buildingName, String apartmentName);
 
 	
 }

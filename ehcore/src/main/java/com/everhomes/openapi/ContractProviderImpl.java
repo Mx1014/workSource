@@ -1581,5 +1581,21 @@ public class ContractProviderImpl implements ContractProvider {
 	        .fetchInto(ContractCategory.class);
 		return list;
 	}
+	
+	@Override
+	public BigDecimal getChargeAreaByContractIdAndAddress(Long contractId,String buildingName,String apartmentName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Double areaSize = context.select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.AREA_SIZE)
+							         .from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+							         .where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
+							         .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+							         .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
+							         .fetchAnyInto(Double.class);
+		
+		if (areaSize != null) {
+			return new BigDecimal(areaSize);
+		}
+		return null;
+	}
 
 }

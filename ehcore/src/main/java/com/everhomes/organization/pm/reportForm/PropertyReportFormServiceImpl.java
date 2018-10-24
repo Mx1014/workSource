@@ -2,7 +2,9 @@ package com.everhomes.organization.pm.reportForm;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +91,8 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
     
 	@Override
 	public List<CommunityReportFormDTO> getCommunityReportForm(GetCommunityReportFormCommand cmd) {
-		// TODO Auto-generated method stub
+		
+		
 		return null;
 	}
 
@@ -115,24 +118,44 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 * 提供给缴费报表的项目信息列表的接口
 	 * @param namespaceId
 	 * @param communityIdList
-	 * @param dateStr
+	 * @param dateStr（年份传2018，或者传月份2018-07）
 	 * @return
 	 */
 	@Override
-	public List<CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
-		return null;
+	public Map<Long, CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
+		
+		dateStr = formatDateStr(dateStr);
+		
+		Map<Long, CommunityBriefStaticsDTO> result = propertyReportFormProvider.listCommunityBriefStaticsForBill(namespaceId,communityIdList,dateStr);
+		
+		for(Long communityId : communityIdList){
+			CommunityBriefStaticsDTO dto = result.get(communityId);
+			if (dto != null) {
+				String category = communityProvider.findCommunityCategoryByCommunityId(communityId);
+				dto.setCategory(category);
+			}else {
+				CommunityBriefStaticsDTO communityBriefStaticsDTO = new CommunityBriefStaticsDTO();
+				String category = communityProvider.findCommunityCategoryByCommunityId(communityId);
+				communityBriefStaticsDTO.setCategory(category);
+				result.put(communityId, communityBriefStaticsDTO);
+			}
+		}
+		return result;
 	}
 	
 	/**
 	 * 提供给缴费报表的项目信息汇总信息的接口
 	 * @param namespaceId
 	 * @param communityIdList
-	 * @param dateStr
+	 * @param dateStr（年份传2018，或者传月份2018-07）
 	 * @return
 	 */
 	@Override
 	public CommunityTotalStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
-		return null;
+		dateStr = formatDateStr(dateStr);
+		CommunityTotalStaticsDTO result = propertyReportFormProvider.getTotalCommunityBriefStaticsForBill(namespaceId,communityIdList,dateStr);
+		result.setCommunityCount(communityIdList.size());
+		return result;
 	}
 	
 	/**
@@ -140,12 +163,22 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 * @param namespaceId
 	 * @param communityId
 	 * @param buildingNameList
-	 * @param dateStr
+	 * @param dateStr（年份传2018，或者传月份2018-07）
 	 * @return
 	 */
 	@Override
-	public List<BuildingBriefStaticsDTO> listBuildingBriefStaticsForBill(Integer namespaceId,Long communityId ,List<String> buildingNameList, String dateStr){
-		return null;
+	public Map<String,BuildingBriefStaticsDTO> listBuildingBriefStaticsForBill(Integer namespaceId,Long communityId ,List<String> buildingNameList, String dateStr){
+		dateStr = formatDateStr(dateStr);
+		Map<String,BuildingBriefStaticsDTO> result = propertyReportFormProvider.listBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,dateStr);
+		
+		for (String buildingName : buildingNameList) {
+			BuildingBriefStaticsDTO dto = result.get(buildingName);
+			if (dto == null) {
+				BuildingBriefStaticsDTO buildingBriefStaticsDTO = new BuildingBriefStaticsDTO();
+				result.put(buildingName, buildingBriefStaticsDTO);
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -153,12 +186,47 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 * @param namespaceId
 	 * @param communityId
 	 * @param buildingNameList
-	 * @param dateStr
+	 * @param dateStr（传年份例子：2018，传月份例子：2018-07）
 	 * @return
 	 */
 	@Override
 	public BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId,Long communityId,List<String> buildingNameList, String dateStr){
-		return null;
+		dateStr = formatDateStr(dateStr);
+		BuildingTotalStaticsDTO result = propertyReportFormProvider.getTotalBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,dateStr);
+		result.setBuildindCount(buildingNameList.size());
+		return result;
+	}
+	
+	private String getTodayYearStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	
+	private String getTodayMonthStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	
+	//如果是2018这种年份字符串，那就要处理
+	private String formatDateStr(String dateStr){
+		if (dateStr.matches("\\d{4}")) {
+			String todayYearStr = getTodayYearStr();
+			if (dateStr.equals(todayYearStr)) {
+				dateStr = getTodayMonthStr();
+			}else {
+				dateStr = dateStr + "-12";
+			}
+			return dateStr;
+		}else if (dateStr.matches("\\d{4}-\\d{2}")) {
+			return dateStr;
+		}else {
+			//可以抛出异常
+		}
+		return dateStr;
 	}
 
 }
