@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -249,4 +250,5 @@ public interface AssetService {
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
 	
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	
 }

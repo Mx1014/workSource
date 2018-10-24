@@ -1,6 +1,7 @@
 
 package com.everhomes.asset.statistic;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
@@ -84,6 +85,15 @@ public interface AssetStatisticService {
 
 	ListBillStatisticByAddressDTO listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd);
 
+	void exportBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd);
+
+	OutputStream exportOutputStreamBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd, Long taskId);
+
+	void exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd);
 	
+	OutputStream exportOutputStreamBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd, Long taskId);
+
+	void exportBillStatisticByAddress(ListBillStatisticByAddressCmd cmd);
 	
+	OutputStream exportOutputStreamBillStatisticByAddress(ListBillStatisticByAddressCmd cmd, Long taskId);
 }

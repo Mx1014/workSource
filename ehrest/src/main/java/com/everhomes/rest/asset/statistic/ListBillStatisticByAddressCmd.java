@@ -3,6 +3,8 @@ package com.everhomes.rest.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>pageAnchor:锚点</li>
@@ -16,6 +18,7 @@ import java.util.List;
  * <li>targetName: 客户名称</li>
  * <li>dateStrBegin: 账期范围</li>
  * <li>dateStrEnd: 账期范围</li>
+ * <li>exportFileNamePrefix: 导出的文件名前缀</li>
  *</ul>
  */
 public class ListBillStatisticByAddressCmd{
@@ -30,6 +33,13 @@ public class ListBillStatisticByAddressCmd{
 	private String targetName;
 	private String dateStrBegin;
 	private String dateStrEnd;
+	
+	private String exportFileNamePrefix;
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 	public Integer getPageSize() {
 		return pageSize;
@@ -96,6 +106,12 @@ public class ListBillStatisticByAddressCmd{
 	}
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
+	}
+	public String getExportFileNamePrefix() {
+		return exportFileNamePrefix;
+	}
+	public void setExportFileNamePrefix(String exportFileNamePrefix) {
+		this.exportFileNamePrefix = exportFileNamePrefix;
 	}
 	
 }

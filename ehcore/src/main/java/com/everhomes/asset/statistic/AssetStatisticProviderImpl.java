@@ -403,7 +403,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     		collectionRate = new BigDecimal("100");
     	}else {
     		if(amountReceived != null) {
-        		collectionRate = amountReceived.divide(amountReceivable, 4, BigDecimal.ROUND_HALF_UP);
+        		collectionRate = amountReceived.divide(amountReceivable, 2, BigDecimal.ROUND_HALF_UP);
         		collectionRate = collectionRate.multiply(new BigDecimal(100));
         	}else {
         		collectionRate = BigDecimal.ZERO;

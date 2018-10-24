@@ -3,6 +3,8 @@ package com.everhomes.rest.asset.statistic;
 
 import java.util.List;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>pageAnchor:锚点</li>
@@ -13,6 +15,7 @@ import java.util.List;
  * <li>buildingNameList: 楼宇名称列表</li>
  * <li>dateStrBegin: 账期范围</li>
  * <li>dateStrEnd: 账期范围</li>
+ * <li>exportFileNamePrefix: 导出的文件名前缀</li>
  *</ul>
  */
 public class ListBillStatisticByBuildingCmd{
@@ -24,6 +27,13 @@ public class ListBillStatisticByBuildingCmd{
 	private List<String> buildingNameList;
 	private String dateStrBegin;
 	private String dateStrEnd;
+	
+	private String exportFileNamePrefix;
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -72,6 +82,14 @@ public class ListBillStatisticByBuildingCmd{
 	}
 	public void setBuildingNameList(List<String> buildingNameList) {
 		this.buildingNameList = buildingNameList;
+	}
+
+	public String getExportFileNamePrefix() {
+		return exportFileNamePrefix;
+	}
+
+	public void setExportFileNamePrefix(String exportFileNamePrefix) {
+		this.exportFileNamePrefix = exportFileNamePrefix;
 	}
 	
 }
