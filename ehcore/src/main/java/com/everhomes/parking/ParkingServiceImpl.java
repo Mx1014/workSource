@@ -924,6 +924,8 @@ public class ParkingServiceImpl implements ParkingService {
 		if (null != community) {
 			good.setServeApplyName(community.getName()); //
 		}
+		good.setServeType(ServiceModuleConstants.PARKING_MODULE+"");
+		good.setServeApplyName("停车缴费");
 		good.setGoodName(bussinessType.getDesc());
 		good.setGoodDescription(order.getPlateNumber());// 商品描述
 		good.setCounts(1);
