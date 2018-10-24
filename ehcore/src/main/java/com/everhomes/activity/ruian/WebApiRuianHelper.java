@@ -40,15 +40,15 @@ public class WebApiRuianHelper {
 		return webApi;
 	}
 
-	public String requestPost(String requestUrl, String jsonParameter) {
-		return httpsRequest(requestUrl, "POST", jsonParameter);
+	public String requestPost(String requestUrl, String jsonParameter ,Long communityId) {
+		return httpsRequest(requestUrl, "POST", jsonParameter , communityId);
 	}
 
-	public String requestGet(String requestUrl, String jsonParameter) {
-		return httpsRequest(requestUrl, "GET", jsonParameter);
+	public String requestGet(String requestUrl, String jsonParameter,Long communityId) {
+		return httpsRequest(requestUrl, "GET", jsonParameter , communityId);
 	}
 
-	private String httpsRequest(String requestUrl, String requestMethod, String jsonParameter) {
+	private String httpsRequest(String requestUrl, String requestMethod, String jsonParameter , Long communityId) {
 		StringBuffer buffer = null;
 		try {
 			SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -68,7 +68,7 @@ public class WebApiRuianHelper {
 
 			conn.setRequestMethod(requestMethod);
 
-			setHeadr(conn, jsonParameter);
+			setHeadr(conn, jsonParameter ,communityId);
 			conn.setRequestProperty("Content-Length", "0");
 			DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 			os.write("".getBytes("UTF-8"), 0, 0);
@@ -102,7 +102,7 @@ public class WebApiRuianHelper {
 	 * @param conn
 	 * @param jsonParameter
 	 */
-	private void setHeadr(HttpsURLConnection conn, String jsonParameter) {
+	private void setHeadr(HttpsURLConnection conn, String jsonParameter ,Long communityId) {
 		if (jsonParameter == null) {
 			jsonParameter = "";
 		}
@@ -110,15 +110,26 @@ public class WebApiRuianHelper {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		String dateStr = simpleDateFormat.format(new Date());
 		ConfigurationProvider configProvider = PlatformContext.getComponent(ConfigurationProvider.class);
-		String pkey =configProvider.getValue(namespaceId,"activity.butt.ruian.publickey", "") ;
+		String publickey = "mall.ruian.publickey" ;
+		String privatekey = "mall.ruian.privatekey" ;
+		String appid = "mall.ruian.appid" ;
+        if(communityId != null && communityId != 0){
+			publickey = publickey + "."+ communityId ;
+			privatekey = privatekey + "."+ communityId ;
+			appid = appid + "."+ communityId ;
+		}
+		LOGGER.info("publickey:{};privatekey:{};appid:{}",publickey,privatekey,appid);
+
+		String pkey =configProvider.getValue(namespaceId,publickey, "") ;
 		publicKey =  pkey==null?publicKey : pkey;
-		String prkey = configProvider.getValue(namespaceId,"activity.butt.ruian.privatekey", "");
+		String prkey = configProvider.getValue(namespaceId,privatekey, "");
 		privateKey = prkey==null?privateKey : prkey;
-		String appId = configProvider.getValue(namespaceId,"activity.butt.ruian.appid", "");
+		String appId = configProvider.getValue(namespaceId,appid, "");
 		AppID =	appId==null?AppID:appId ;
 
 		String timeStamp = dateStr;
 		String encryptString = "{publicKey:" + publicKey + ",timeStamp:" + timeStamp + ",data:" + jsonParameter + ",privateKey:" + privateKey + "}";
+		LOGGER.info(encryptString);
 		String sign = MD5.md5EncryptTo16(encryptString);
 
 		conn.setRequestProperty("AppID", AppID);
@@ -137,14 +148,14 @@ public class WebApiRuianHelper {
 	 * @param jsonParameter 请求json参数
 	 * @return
 	 */
-	public String doPost(String url, String jsonParameter) {
+	public String doPost(String url, String jsonParameter ,Long communityId) {
 		String charset = "UTF-8";
 		String result = null;
 		try {
 			SSLClient httpClient = new SSLClient();
 
 			HttpPost httpPost = new HttpPost(url);
-			setHeadr(httpPost, jsonParameter);
+			setHeadr(httpPost, jsonParameter , communityId);
 
 			// 解决中文乱码问题
 			StringEntity stringEntity = new StringEntity(jsonParameter, charset);
@@ -181,7 +192,7 @@ public class WebApiRuianHelper {
 	 * @param httpPost
 	 * @param jsonParameter
 	 */
-	private void setHeadr(HttpPost httpPost, String jsonParameter) {
+	private void setHeadr(HttpPost httpPost, String jsonParameter ,Long communityId) {
 		if (jsonParameter == null) {
 			jsonParameter = "";
 		}
@@ -193,11 +204,21 @@ public class WebApiRuianHelper {
 
 		String timeStamp = dateStr;
 		ConfigurationProvider configProvider = PlatformContext.getComponent(ConfigurationProvider.class);
-		String pkey =configProvider.getValue(namespaceId,"activity.butt.ruian.publickey", "") ;
+
+		String publickey = "mall.ruian.publickey" ;
+		String privatekey = "mall.ruian.privatekey" ;
+		String appid = "mall.ruian.appid" ;
+		if(communityId != null && communityId != 0){
+			publickey = publickey + "."+ communityId ;
+			privatekey = privatekey + "."+ communityId ;
+			appid = appid + "."+ communityId ;
+		}
+		LOGGER.info("publickey:{};privatekey:{};appid:{}",publickey,privatekey,appid);
+		String pkey =configProvider.getValue(namespaceId,publickey, "") ;
 		publicKey =  pkey==null?publicKey : pkey;
-		String prkey = configProvider.getValue(namespaceId,"activity.butt.ruian.privatekey", "");
+		String prkey = configProvider.getValue(namespaceId,privatekey, "");
 		privateKey = prkey==null?privateKey : prkey;
-		String appId = configProvider.getValue(namespaceId,"activity.butt.ruian.appid", "");
+		String appId = configProvider.getValue(namespaceId,appid, "");
 		AppID =	appId==null?AppID:appId ;
 
 		String encryptString = "{publicKey:" + publicKey + ",timeStamp:" + timeStamp + ",data:" + jsonParameter + ",privateKey:" + privateKey + "}";

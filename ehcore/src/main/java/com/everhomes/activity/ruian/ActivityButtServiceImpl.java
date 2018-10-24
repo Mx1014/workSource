@@ -41,7 +41,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      * @return
      */
     @Override
-    public List<ActivityCategoryModel> getCategoryList(Integer namespaceId , Long level1Id) {
+    public List<ActivityCategoryModel> getCategoryList(Integer namespaceId , Long communityId ,  Long level1Id) {
 
         namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
         String url = configProvider.getValue(namespaceId,"activity.butt.url.getcategorylist", "") ;
@@ -54,7 +54,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         if(level1Id != null){
             object.put("ParentID",level1Id);
         }
-        String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
+        String result = WebApiRuianHelper.getIns().doPost(url, object.toString(),communityId);
         //解析结果
         ActivityCategoryList resultObject = (ActivityCategoryList) StringHelper.fromJsonString(result,ActivityCategoryList.class);
         if(resultObject.getCode()!=null && resultObject.getCode()== 1){//code 为1表示调用成功
@@ -74,7 +74,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      * @return
      */
     @Override
-    public List<ActivityModel> getActivityList(Integer namespaceId, Long activityCategoryID, Long activitySubCategoryID, Byte state, Integer pageSize, Integer pageIndex) {
+    public List<ActivityModel> getActivityList(Integer namespaceId,Long communityId ,  Long activityCategoryID, Long activitySubCategoryID, Byte state, Integer pageSize, Integer pageIndex) {
         namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
         String url = configProvider.getValue(namespaceId,"activity.butt.url.getactivitylist", "") ;
         if(StringUtils.isBlank(url)){
@@ -99,7 +99,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         if(pageIndex != null){
             object.put("PageIndex",pageIndex);
         }
-        String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
+        String result = WebApiRuianHelper.getIns().doPost(url, object.toString(),communityId);
         //解析结果
         ActivityModelList resultObject = (ActivityModelList) StringHelper.fromJsonString(result,ActivityModelList.class);
         if(resultObject.getCode()!=null && resultObject.getCode()== 1){//code 为1表示调用成功
@@ -115,7 +115,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      * @return
      */
     @Override
-    public ActivityDetailModel getActivityDetail(Integer namespaceId,Long activityId) {
+    public ActivityDetailModel getActivityDetail(Integer namespaceId,Long communityId , Long activityId) {
         namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
         String url = configProvider.getValue(namespaceId,"activity.butt.url.getactivity ", "") ;
         if(StringUtils.isBlank(url)){
@@ -127,7 +127,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         if(activityId != null){
             object.put("ActivityID",activityId);
         }
-        String result = WebApiRuianHelper.getIns().doPost(url, object.toString());
+        String result = WebApiRuianHelper.getIns().doPost(url, object.toString(),communityId);
         //解析结果
         ActivityDetailDTO resultObject = (ActivityDetailDTO) StringHelper.fromJsonString(result,ActivityDetailDTO.class);
         if(resultObject.getCode()!=null && resultObject.getCode() == 1){//code 为1表示调用成功
@@ -141,7 +141,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         //先查询出所有分类
         //List<ActivityCategoryModel> cateGorys = this.getCategoryList(null , null);
         //获取活动列表
-        List<ActivityModel> activitys = this.getActivityList(null, null, null, null, 10, 1);
+        List<ActivityModel> activitys = this.getActivityList(null, null,null, null, null, 10, 1);
         ListActivityPromotionEntitiesBySceneReponse res = new ListActivityPromotionEntitiesBySceneReponse();
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
