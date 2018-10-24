@@ -9,6 +9,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
@@ -13634,6 +13635,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
             //organizationMemberDetails表中的organizationId指的是总公司的organizationId
             organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
+            organizationMemberDetail.setCheckInTime(ArchivesUtil.currentDate());
             //根据OrganizationMemberDetails来获取detailId的方法
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /* 如果档案表中有记录 */
