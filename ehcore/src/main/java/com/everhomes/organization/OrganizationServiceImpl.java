@@ -13170,8 +13170,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (size != pageSize) {
                 response.setNextPageAnchor(null);
             } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
                 list.remove(list.size() - 1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
             }
             
             response.setRequests(list.stream().map(r -> {
