@@ -74,6 +74,9 @@ ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEF
 ALTER TABLE `eh_siyin_print_printers` ADD COLUMN `printer_name` VARCHAR(128) NOT NULL COMMENT 'printer name' ;
 ALTER TABLE `eh_siyin_print_records` ADD COLUMN `serial_number` VARCHAR(128) NULL DEFAULT NULL COMMENT 'reader_name' ;
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `printer_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '打印机名称';
+ALTER TABLE `eh_siyin_print_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL  DEFAULT '0' COMMENT '商户ID';
+
+
 
 -- AUTHOR: 缪洲 20181010
 -- REMARK： 云打印 添加支付方式字段
