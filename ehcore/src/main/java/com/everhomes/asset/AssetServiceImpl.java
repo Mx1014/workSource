@@ -55,6 +55,7 @@ import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -95,6 +96,16 @@ import com.everhomes.rest.common.AssetMapEnergyConfig;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
+<<<<<<< HEAD
+=======
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.contract.CMBill;
+import com.everhomes.rest.contract.CMContractHeader;
+import com.everhomes.rest.contract.CMContractUnit;
+import com.everhomes.rest.contract.CMDataObject;
+import com.everhomes.rest.contract.CMSyncObject;
+import com.everhomes.rest.contract.NamespaceContractType;
+>>>>>>> issue-customer4.1
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
@@ -972,6 +983,8 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 	item.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                	//瑞安CM对接 账单、费项表增加是否是只读字段
+                	item.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     //放到数组中去
                     billItemsList.add(item);
                 }
@@ -1101,6 +1114,8 @@ public class AssetServiceImpl implements AssetService {
                 	}
                 	//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 	newBill.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+                	//瑞安CM对接 账单、费项表增加是否是只读字段
+                	newBill.setIsReadonly((byte)0);//只读状态：0：非只读；1：只读
                     billList.add(newBill);
                 }
                 //创建一个 contract——receiver，只用来保留状态和记录合同，其他都不干
@@ -2459,12 +2474,476 @@ public class AssetServiceImpl implements AssetService {
         return new BigDecimal("0");
     }
 
+<<<<<<< HEAD
     @Override
     public CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd) {
         CheckEnterpriseHasArrearageResponse response = new CheckEnterpriseHasArrearageResponse();
         List<PaymentBills> assetArrearage = assetProvider.findAssetArrearage(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOrganizationId());
         response.setHasArrearage(assetArrearage.size() > 0 ? (byte) 1 : (byte) 0);
         return response;
+    }
+=======
+    /**
+     * 定时任务：未出账单转为已出账单
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
+    public void updateBillSwitchOnTime() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_STATUS_UPDATE.getCode()).tryEnter(() -> {
+//                List<PaymentBillGroup> list = assetProvider.listAllBillGroups();
+//                //获取当前时间，如果是5号，则将之前的账单的switch装为1
+//                for (int i = 0; i < list.size(); i++) {
+//                    PaymentBillGroup paymentBillGroup = list.get(i);
+//                    Calendar c = newClearedCalendar();
+//                    if (c.get(Calendar.DAY_OF_MONTH) == paymentBillGroup.getBillsDay()) {
+//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+//                        String billDateStr = sdf.format(c.getTime());
+//                        assetProvider.updateBillSwitchOnTime(billDateStr);
+//                    }
+//                }
+            	//修复issue-36575 【新微创源】企业账单：已出账单依旧在未出账单中
+                Calendar c = newClearedCalendar();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String billDateStr = sdf.format(c.getTime());
+                assetProvider.updateBillSwitchOnTime(billDateStr);
+            });
+        }
+>>>>>>> issue-customer4.1
+
+    @Override
+    public List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd) {
+        Long ownerId = cmd.getOwnerId();
+        String ownerType = cmd.getOwnerType();
+        Integer namespaceId = cmd.getNamespaceId();
+        checkNullProhibit("communityId",cmd.getOwnerId());
+        // set category default is 0 representing the old data
+        if(cmd.getCategoryId() == null){
+            cmd.setCategoryId(0l);
+        }
+        if(cmd.getModuleId() != null && cmd.getModuleId().longValue() != ServiceModuleConstants.ASSET_MODULE){
+            // 转换
+            Long assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l,cmd.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+            cmd.setCategoryId(assetCategoryId);
+         }
+        return assetProvider.listLateFineStandards(ownerId,ownerType,namespaceId, cmd.getCategoryId());
+    }
+
+    /**
+<<<<<<< HEAD
+=======
+     * 定时任务：更新欠费状态，并计算滞纳金
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
+    private void lateFineCal(){
+    	if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+    		/**
+             * 1. 遍历所有的账单（所有维度），更新账单的欠费状态
+             * 2. 遍历所有的账单（所有维度），拿到所有欠费的账单，拿到所有的billItem的itemd
+             * 3. 遍历所有的billItem和他们对应的滞纳规则，计算，然后新增滞纳的数据,update bill, 不用锁，一条一条走
+             */
+            //获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            coordinationProvider.getNamedLock("update_bill_and_late_fine").tryEnter(()->{
+                Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    List<Long> overdueBillIds = new ArrayList<>();
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+//                        if(bill.getChargeStatus().byteValue() == 0 && deadline.compareTo(today) != 1) {  兼容以前的没有正常欠费状态的账单
+                            if(deadline.compareTo(today) != 1) {
+                                assetProvider.changeBillToDue(bill.getId());
+                                bill.setChargeStatus((byte)1);
+                            }
+                            if(bill.getChargeStatus().byteValue() == (byte)1) overdueBillIds.add(bill.getId());
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                    //这10000个账单中欠费的billItem
+                    List<PaymentBillItems> billItems = assetProvider.getBillItemsByBillIds(overdueBillIds);
+                    for(int i = 0; i < billItems.size(); i++){
+                        PaymentBillItems item = billItems.get(i);
+                        //没有关联滞纳金标准的不计算，剔除出更新队列
+                        if(item.getLateFineStandardId() == null){
+                            billItems.remove(i--);
+                            continue;
+                        }
+                        //计算滞纳金金额
+                        //获得欠费的钱
+                        BigDecimal amountOwed = new BigDecimal("0");
+                        if(item.getAmountOwed() !=null){
+                            amountOwed = amountOwed.add(item.getAmountOwed());
+                        }else{
+                            item.setAmountOwed(new BigDecimal("0"));
+                            assetProvider.updatePaymentItem(item);
+                        }
+                        amountOwed = amountOwed.add(assetProvider.getLateFineAmountByItemId(item.getId()));
+                        List<PaymentFormula> formulas = assetProvider.getFormulas(item.getLateFineStandardId());
+                        if(formulas.size() != 1) {
+                            LOGGER.error("late fine cal error, the corresponding formula is more than one or less than one, the bill item id is "+item.getId());
+                        }
+                        String formulaJson = formulas.get(0).getFormulaJson();
+                        if(formulaJson.contains("qf")) {//issue-34468 【物业缴费】执行接口，报错
+                        	formulaJson = formulaJson.replace("qf",amountOwed.toString());
+	                        BigDecimal fineAmount = CalculatorUtil.arithmetic(formulaJson);
+	                        //开始构造一条滞纳金记录
+	                        //查看item是否已经有滞纳金产生了
+	                        PaymentLateFine fine = assetProvider.findLastedFine(item.getId());
+	                        boolean isInsert = false;
+	                        if(fine == null){
+	                            isInsert = true;
+	                            fine = new PaymentLateFine();
+	                            long nextSequence = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPaymentLateFine.class));
+	                            fine.setId(nextSequence);
+	                            fine.setName(item.getChargingItemName() + "滞纳金");
+	                            fine.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                            fine.setBillId(item.getBillId());
+	                            fine.setBillItemId(item.getId());
+	                            fine.setCommunityId(item.getOwnerId());
+	                            fine.setNamespaceId(item.getNamespaceId());
+	                            fine.setCustomerId(item.getTargetId());
+	                            fine.setCustomerType(item.getTargetType());
+	                        }
+	                        fine.setAmount(fineAmount);
+	                        fine.setUpateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	                        assetProvider.updateLateFineAndBill(fine,fineAmount,item.getBillId(), isInsert);
+	                        // 重新计算下账单
+	                        assetProvider.reCalBillById(item.getBillId());
+                        }
+                    }
+                }
+            });
+    	}
+    }
+
+    /**
+     *
+     * 定时任务：查询所有有设置的园区的账单，拿到最晚交付日，根据map中拿到configs，判断是否符合发送要求，符合则催缴
+     */
+    @Scheduled(cron = "0 0 12 * * ?")
+    //@Scheduled(cron="0/10 * *  * * ? ")   //每10秒执行一次 
+    public void autoBillNotice() {
+        if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            this.coordinationProvider.getNamedLock("asset_auto_notice").tryEnter(() -> {
+                SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+                Calendar today = newClearedCalendar();
+                List<PaymentNoticeConfig> configs = assetProvider.listAllNoticeConfigs();
+                Map<Long, List<PaymentNoticeConfig>> noticeConfigs = new HashMap<>();
+                for (int i = 0; i < configs.size(); i++) {
+                    PaymentNoticeConfig config = configs.get(i);
+                    if (noticeConfigs.containsKey(config.getOwnerId())) {
+                        noticeConfigs.get(config.getOwnerId()).add(config);
+                    } else {
+                        List<PaymentNoticeConfig> configList = new ArrayList<>();
+                        configList.add(config);
+                        noticeConfigs.put(config.getOwnerId(), configList);
+                    }
+                }
+                Map<Long, PaymentBills> needNoticeBills = new HashMap<>();
+                Map<Long, PaymentNoticeConfig> noticeConfigMap = new HashMap<>();
+                // noticeConfig map中存有communityid和notice days
+                for (Map.Entry<Long, List<PaymentNoticeConfig>> map : noticeConfigs.entrySet()) {
+                    List<PaymentBills> bills = assetProvider.getAllBillsByCommunity(null,map.getKey());
+                    for (int i = 0; i < bills.size(); i++) {
+                        PaymentBills bill = bills.get(i);
+                        if (!needNoticeBills.containsKey(bill.getId())) {
+                            List<PaymentNoticeConfig> days = map.getValue();
+                            for (int j = 0; j < days.size(); j++) {
+                                PaymentNoticeConfig day = days.get(j);
+                                String dueDayDeadline = bill.getDueDayDeadline();
+                                try {
+                                    //比较此config与账单的时间，看是否应该催缴
+                                    Calendar deadline = newClearedCalendar();
+                                    deadline.setTime(yyyyMMdd.parse(dueDayDeadline));
+                                    if(day.getNoticeDayType() != null && day.getNoticeDayType().byteValue() == NoticeDayType.AFTER.getCode()){
+                                        deadline.add(Calendar.DAY_OF_MONTH, day.getNoticeDayAfter());
+                                    }else{
+                                        deadline.add(Calendar.DAY_OF_MONTH, -day.getNoticeDayBefore());
+                                    }
+                                    //符合催缴的日期设定就催缴
+                                    String todayInDate = yyyyMMdd.format(today.getTime());
+                                    String deadlineInDate = yyyyMMdd.format(deadline.getTime());
+                                    if (todayInDate.equalsIgnoreCase(deadlineInDate)) {
+                                        needNoticeBills.put(bill.getId(), bill);
+                                        noticeConfigMap.put(bill.getId(), day);
+                                    }
+                                } catch (Exception e) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                for (Map.Entry<Long, PaymentBills> entry : needNoticeBills.entrySet()) {
+                    List<Long> billIds = new ArrayList<>();
+                    Set<NoticeInfo> noticeInfoList = new HashSet<>();
+                    PaymentBills b = entry.getValue();
+                    billIds.add(b.getId());
+                    NoticeInfo info = new NoticeInfo();
+                    info.setDateStr(b.getDateStr());
+                    info.setTargetName(b.getTargetName());
+                    info.setAmountOwed(b.getAmountOwed());
+                    info.setAmountRecevable(b.getAmountReceivable());
+                    info.setAppName(assetProvider.findAppName(b.getNamespaceId()));
+                    info.setOwnerId(b.getOwnerId());
+                    info.setOwnerType(b.getOwnerType());
+                    //增加模板id by wentian sama @ 2018.5.9   u lies to me~
+                    info.setUseTemplate(true);
+                    PaymentNoticeConfig specificConfig = noticeConfigMap.get(entry.getKey());
+                    info.setMsgTemplateId(specificConfig.getNoticeMsgId());
+                    info.setAppTemplateId(specificConfig.getNoticeAppId());
+                    if(info.getMsgTemplateId() == null && info.getAppTemplateId() == null){
+                        continue;
+                    }
+                    List<NoticeObj> noticeObjs = (List<NoticeObj>)new Gson()
+                            .fromJson(specificConfig.getNoticeObjs(), new TypeToken<List<NoticeObj>>() {
+                            }.getType());
+                    if(noticeObjs == null){
+                        noticeObjs = new ArrayList<>();
+                    }
+//                    info.setNoticeObjs(noticeObjs);
+                    //根据催缴账单催缴
+                    info.setPhoneNums(b.getNoticetel());
+                    info.setTargetType(b.getTargetType());
+                    info.setTargetId(b.getTargetId());
+                    // 增加域空间信息
+                    info.setNamespaceId(b.getNamespaceId());
+                    noticeInfoList.add(info);
+                    //待发送人员如如果是定义好的，之类就转成个人，再来一个info
+                    List<NoticeMemberIdAndContact> userIds = new ArrayList<>();
+                    for (NoticeObj obj : noticeObjs) {
+                        Long noticeObjId = obj.getNoticeObjId();
+                        String noticeObjType = obj.getNoticeObjType();
+                        FlowUserSourceType sourceTypeA = FlowUserSourceType.fromCode(noticeObjType);
+                        if(sourceTypeA == null){
+                            LOGGER.error("sourceType faild to fromcode, noticeObjType={},noticeConfigMap.getConfigId={}"
+                                    ,noticeObjType, noticeConfigMap.get(b.getId()).getId());
+                            continue;
+                        }
+                        switch (sourceTypeA) {
+                            // 具体部门
+                            case SOURCE_DEPARTMENT:
+                                userIds.addAll(getAllMembersFromDepartment(noticeObjId, "USER","UNTRACK"));
+                                break;
+                            case SOURCE_USER:
+                                NoticeMemberIdAndContact c = new NoticeMemberIdAndContact();
+                                c.setTargetId(noticeObjId);
+                                c.setContactToken(userProvider.findUserTokenOfUser(noticeObjId));
+                                userIds.add(c);
+                                break;
+                        }
+                    }
+
+                    //组织架构中选择的部门或者个人用户也进行发送短信，注意，概念上来讲这些是通知对象，不是催缴对象 by wentian @2018/5/10
+                    for(NoticeMemberIdAndContact uid : userIds){
+                        try {
+                        	if(uid.getTargetId() == info.getTargetId()){
+                                continue;
+                            }
+                            NoticeInfo newInfo = CopyUtils.deepCopy(info);
+                            newInfo.setTargetId(uid.getTargetId());
+                            newInfo.setPhoneNums(uid.getContactToken());
+                            newInfo.setTargetType(AssetPaymentStrings.EH_USER);
+                            noticeInfoList.add(newInfo);
+                        } catch (Exception e) {
+                            LOGGER.error("failed to have a new notice info, new info is ={}",info,e);
+                        }
+                    }
+                    //一个一个发，因为每个账单的变量注入值不一样
+                    LOGGER.info("billIds size should be one, now = {}",billIds.size());
+                    NoticeWithTextAndMessage(billIds, new ArrayList<>(noticeInfoList));
+                }
+                LOGGER.info("done");
+            });
+        }
+    }
+
+    private List<NoticeMemberIdAndContact> getAllMembersFromDepartment(Long noticeObjId, String ... types) {
+        return organizationProvider.findActiveUidsByTargetTypeAndOrgId( noticeObjId,types);
+    }
+
+    @Override
+    public CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd) {
+        CheckEnterpriseHasArrearageResponse response = new CheckEnterpriseHasArrearageResponse();
+        List<PaymentBills> assetArrearage = assetProvider.findAssetArrearage(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOrganizationId());
+        response.setHasArrearage(assetArrearage.size() > 0 ? (byte) 1 : (byte) 0);
+        return response;
+    }
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId.longValue() == userId.longValue()){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
+        AssetVendor assetVendor = checkAssetVendor(UserContext.getCurrentNamespaceId(),0);
+//        AssetVendor assetVendor = checkAssetVendor(999983);
+        String vendorName = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendorName);
+        List<ShowBillForClientV2DTO> ret = handler.showBillForClientV2(cmd);
+        for(ShowBillForClientV2DTO dto : ret){
+            try{
+            	if(UserContext.getCurrentNamespaceId().equals(999966)) {//深圳湾APP的物业缴费账单是对接的第三方，需要特殊处理
+            		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+                    EhContractCategories t = Tables.EH_CONTRACT_CATEGORIES.as("t");
+                    Long categoryId = context.select(t.ID)
+                            .from(t)
+                            .where(t.NAMESPACE_ID.eq(999966))
+                            .fetchOne(0, Long.class);
+                    dto.setCategoryId(categoryId);
+            	}else {
+            		//获得contract的categoryId
+                    if(!StringUtils.isBlank(dto.getContractId())){
+                        Long categoryId = contractService.findContractCategoryIdByContractId(Long.valueOf(dto.getContractId()));
+                        LOGGER.error("issue32639 categoryId={}",categoryId);
+                        dto.setCategoryId(categoryId);
+                    }
+            	}
+            }catch (Exception e){
+                LOGGER.error("issue32639 failed to get category id, contractId is={}",dto.getContractId(), e);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     *
+     * @modify 2018/1/16
+     *  @modifyPoint 1 make bill ordered by date desc
+     */
+    @Override
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd) {
+        //企业用户的话判断是否为企业管理员
+        out:{
+            if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+                Long userId = UserContext.currentUserId();
+                ListServiceModuleAdministratorsCommand cmd1 = new ListServiceModuleAdministratorsCommand();
+                cmd1.setOrganizationId(cmd.getTargetId());
+                cmd1.setActivationFlag((byte)1);
+                cmd1.setOwnerType("EhOrganizations");
+                cmd1.setOwnerId(null);
+                LOGGER.info("organization manager check for bill display, cmd = "+ cmd1.toString());
+                List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd1);
+                LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+                LOGGER.info("organization manager check for bill display, userId = "+ userId);
+                for(OrganizationContactDTO dto : organizationContactDTOS){
+                    Long targetId = dto.getTargetId();
+                    if(targetId.longValue() == userId.longValue()){
+                        break out;
+                    }
+                }
+                throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE,AssetErrorCodes.NOT_CORP_MANAGER,
+                        "not valid corp manager");
+            }
+        }
+        AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
+        //AssetVendor vendor = checkAssetVendor(999966, 0);
+        AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
+        return handler.listAllBillsForClient(cmd);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd) {
+        FunctionDisableListDto dto = new FunctionDisableListDto();
+        Integer namespaceId = cmd.getNamespaceId();
+        Byte hasContractView = 1;
+        Byte hasPay = 1;
+        //是否显示上传凭证按钮（add by tangcen）
+        Byte hasUploadCertificate = 0;
+        Byte hasEnergy = 0;//默认不展示能耗
+
+        Boolean[] remarkCheckList = new Boolean[3];
+        remarkCheckList[0] = false;
+        remarkCheckList[1] = false;
+        remarkCheckList[2] = false;
+        if(namespaceId==null){
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        if(cmd.getBillGroupId() != null && cmd.getBillGroupName() == null){
+            cmd.setBillGroupName(assetProvider.findBillGroupNameById(cmd.getBillGroupId()));
+        }
+        //是否进行ownerType判断
+        if(!StringUtils.isBlank(cmd.getOwnerType()) && (cmd.getOwnerType().equals(AssetPaymentStrings.EH_ORGANIZATION)||
+        cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER))){
+            remarkCheckList[0] = true;
+        }
+        // 999971目前判断逻辑在前端
+        if(!StringUtils.isBlank(cmd.getBillGroupName()) && namespaceId == 999971){
+            remarkCheckList[0] = false;
+            remarkCheckList[1] = true;
+        }
+        List<PaymentAppView> views = assetProvider.findAppViewsByNamespaceIdOrRemark(namespaceId, cmd.getCommunityId(), "targetType",cmd.getOwnerType(),
+               "billGroupName", cmd.getBillGroupName(), remarkCheckList);
+        for(PaymentAppView view : views){
+            if(view.getViewItem().equals(PaymentViewItems.CONTRACT.getCode())){
+                hasContractView = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.PAY.getCode())){
+                hasPay = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.CERTIFICATE.getCode())){
+                hasUploadCertificate = view.getHasView();
+            }else if(view.getViewItem().equals(PaymentViewItems.ENERGY.getCode())){
+            	hasEnergy = view.getHasView();
+            }
+        }
+        //用数据库配置的方式替代了
+//        switch (namespaceId){
+//            case 999958:
+//                hasPay = 0;
+//            case 999971:
+//                if(cmd.getOwnerType()!=null && cmd.getOwnerType().equals(AssetPaymentStrings.EH_USER)) hasPay = 1;
+//                break;
+//            case 999983:
+//                //hasContractView = 0;
+//                //正中会要求可以看合同
+//                hasContractView = 1;
+//                hasPay = 0;
+//                break;
+//            case 999966:
+//                //深圳湾要求可以看合同，只查费不显示支付按钮
+//                hasContractView = 1;
+//                hasPay = 0;
+//                break;
+//            case 999955:
+//                //住总ELive只是查询账单，没有合同，没有支付按钮
+//                hasContractView = 0;
+//                hasPay = 0;
+//                break;
+//            default:
+//                break;
+//        }
+        dto.setHasPay(hasPay);
+        dto.setHasContractView(hasContractView);
+        dto.setHasUploadCertificate(hasUploadCertificate);
+        dto.setHasEnergy(hasEnergy);
+        return dto;
     }
 
     @Override
@@ -2486,6 +2965,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
+>>>>>>> issue-customer4.1
      *
      * @param cmd includes communityId and namespaceId for locating the address and checking privileges, and billGroupId
      *            for get bill items column.
@@ -4375,6 +4855,7 @@ public class AssetServiceImpl implements AssetService {
         	return false;
         }
     }
+<<<<<<< HEAD
 
 //	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
 //        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
@@ -4411,6 +4892,80 @@ public class AssetServiceImpl implements AssetService {
 //        }
 //    }
 
+=======
+	
+	/**
+	 * 定时任务：每天晚上12点定时计算一下欠费天数并更新！(账单组的最晚还款日（eh_payment_bills ： due_day_deadline）)
+	 */
+	@Scheduled(cron = "0 0 0 * * ?")
+	//@Scheduled(cron="0/10 * *  * * ? ")//每10秒执行一次 
+    public void updateBillDueDayCountOnTime() {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = new Date();
+            coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+            	Long nextPageAnchor = 0l;
+                while(nextPageAnchor != null){
+                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+                    List<PaymentBills> bills = res.getBills();
+                    //更新账单
+                    for(PaymentBills bill : bills){
+                        String dueDayDeadline = bill.getDueDayDeadline();
+                        try{
+                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+                            if(dueDayCount.compareTo(0l) < 0) {
+                            	dueDayCount = null;
+                            }
+                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+                        } catch (Exception e){ continue; };
+                    }
+                    nextPageAnchor = res.getNextPageAnchor();
+                }
+            });
+        }
+    }
+	
+	public void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd) {
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag())==RunningFlag.TRUE) {
+        	//获得账单,分页一次最多10000个，防止内存不够
+            int pageSize = 10000;
+            long pageAnchor = 1l;
+            SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				Date today = yyyyMMdd.parse(cmd.getDate());
+				coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
+	            	//根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
+	            	Long nextPageAnchor = 0l;
+	                while(nextPageAnchor != null){
+	                    SettledBillRes res = assetProvider.getSettledBills(pageSize,pageAnchor);
+	                    List<PaymentBills> bills = res.getBills();
+	                    //更新账单
+	                    for(PaymentBills bill : bills){
+	                        String dueDayDeadline = bill.getDueDayDeadline();
+	                        try{
+	                            Date deadline = yyyyMMdd.parse(dueDayDeadline);
+	                            Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000*3600*24));
+	                            if(dueDayCount.compareTo(0l) <= 0) {
+	                            	dueDayCount = null;
+	                            }
+	                            assetProvider.updateBillDueDayCount(bill.getId(), dueDayCount);//更新账单欠费天数
+	                        } catch (Exception e){ continue; };
+	                    }
+	                    nextPageAnchor = res.getNextPageAnchor();
+	                }
+	            });
+			} catch (ParseException e1) {
+				LOGGER.error("please input yyyy-MM-dd");
+			}
+        }
+    }
+	
+>>>>>>> issue-customer4.1
 	public PreOrderDTO payBillsForEnt(CreatePaymentBillOrderCommand cmd) {
 		AssetVendor vendor = checkAssetVendor(cmd.getNamespaceId(),0);
         AssetVendorHandler handler = getAssetVendorHandler(vendor.getVendorName());
@@ -4534,8 +5089,13 @@ public class AssetServiceImpl implements AssetService {
 				Long brotherGroupId = mapping.getBillGroupId();//这里的账单组ID实际上是默认配置里面的账单组ID
 				Long charingItemId = mapping.getChargingItemId();
 				//如果找的到数据，并且ownerId是空，那么需要再往下找与其有继承关系的园区账单组ID
+<<<<<<< HEAD
 				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(),
 						categoryId, brotherGroupId);
+=======
+				PaymentBillGroup commnuityGroup = assetProvider.getBillGroup(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), 
+						categoryId, brotherGroupId, null);
+>>>>>>> issue-customer4.1
 				Long billGroupId = commnuityGroup.getId();//实际园区的账单组ID
 				ListBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 				dtos.add(dto);
@@ -4620,6 +5180,230 @@ public class AssetServiceImpl implements AssetService {
             cmd.setCategoryId(0l);
         }
         assetChargingItemProvider.createChargingItem(cmd, communityIds);
+	}
+	
+	/**
+	 * 同步瑞安CM的账单数据到左邻的数据库表中
+	 */
+	public void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId){
+		if(cmSyncObjectList != null) {
+			for(CMSyncObject cmSyncObject : cmSyncObjectList) {
+				List<CMDataObject> data = cmSyncObject.getData();
+				if(data != null) {
+					for(CMDataObject cmDataObject : data) {
+						CMContractHeader contractHeader = cmDataObject.getContractHeader();
+						//1、根据propertyId获取左邻communityId
+						Long communityId = null;
+						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
+						if(community != null) {
+							communityId = community.getId();
+						}
+						//2、获取左邻客户ID
+						Long targetId = null;
+						targetId = cmDataObject.getCustomerId();
+						//3、获取左邻楼栋单元地址ID
+						Long addressId = null;
+						if(cmDataObject.getContractUnit() != null && cmDataObject.getContractUnit().size() != 0) {
+							CMContractUnit cmContractUnit = cmDataObject.getContractUnit().get(0);
+							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+							if(address != null) {
+								addressId = address.getId();
+							}
+						}
+						
+						//获取左邻合同ID、合同编号
+						Long contractId = null;
+						String contractNum = null;
+						String rentalID = "";
+						if(cmDataObject.getContractHeader() != null) {
+							rentalID = cmDataObject.getContractHeader().getRentalID();//瑞安CM定义的合同ID
+							try {
+								Long namespaceContractToken = Long.parseLong(rentalID);
+								Contract contract = contractProvider.findContractByNamespaceToken(namespaceId, NamespaceContractType.RUIAN_CM.getCode(), 
+										namespaceContractToken, contractCategoryId);
+								if(contract != null) {
+									contractId = contract.getId();
+									contractNum = contract.getContractNumber();
+								}
+							}catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+						}
+						//获取左邻缴费应用categoryId
+						Long categoryId = null;
+						try {
+							List<AssetServiceModuleAppDTO> assetServiceModuleAppDTOs = listAssetModuleApps(namespaceId);
+							if(assetServiceModuleAppDTOs != null && assetServiceModuleAppDTOs.get(0) != null){
+								categoryId = assetServiceModuleAppDTOs.get(0).getCategoryId();
+							}
+						}catch (Exception e){
+				            LOGGER.error(e.toString());
+				        }
+						List<CMBill> cmBills = cmDataObject.getBill();
+						for(CMBill cmBill : cmBills) {
+							BigDecimal amountOwed = BigDecimal.ZERO;//待收(含税 元)
+							BigDecimal amountOwedWithoutTax = BigDecimal.ZERO;//待收(不含税 元)
+							BigDecimal amountReceivable = BigDecimal.ZERO;//应收含税
+							BigDecimal amountReceivableWithoutTax = BigDecimal.ZERO;//应收不含税
+							BigDecimal amountReceived = BigDecimal.ZERO;//待收含税
+							BigDecimal amountReceivedWithoutTax = BigDecimal.ZERO;//待收不含税
+							BigDecimal taxAmount = BigDecimal.ZERO;//税额
+							try{
+								amountOwed = new BigDecimal(cmBill.getBalanceAmt());
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							try{
+								amountOwedWithoutTax = new BigDecimal(cmBill.getBalanceAmt());
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							try{
+								amountReceivable = new BigDecimal(cmBill.getDocumentAmt());
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							try{
+								amountReceivableWithoutTax = new BigDecimal(cmBill.getChargeAmt());
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							//已收=账单金额（应收）-账单欠款金额（待收）
+							amountReceived = amountReceivable.subtract(amountOwed);
+							amountReceivedWithoutTax = amountReceived;
+							try{
+								taxAmount = new BigDecimal(cmBill.getTaxAmt());
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							
+							PaymentBills paymentBills = new PaymentBills();
+							paymentBills.setNamespaceId(namespaceId);
+							paymentBills.setOwnerId(communityId);
+							paymentBills.setOwnerType("community");
+							paymentBills.setCategoryId(categoryId);
+							//通过园区ID获取到对应的默认账单组ID
+							PaymentBillGroup group = assetProvider.getBillGroup(namespaceId, communityId, null, null, null, (byte)1);
+							paymentBills.setBillGroupId(group.getId());
+							paymentBills.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+							paymentBills.setTargetId(targetId);
+							if(cmDataObject.getContractHeader() != null) {
+								paymentBills.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+							}
+							paymentBills.setContractId(contractId);
+							paymentBills.setContractNum(contractNum);
+							paymentBills.setDateStrBegin(cmBill.getStartDate());
+							paymentBills.setDateStrEnd(cmBill.getEndDate());
+							String dateStr = "";
+							SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+							try{
+					            // 如果传递了计费开始时间
+					            if(cmBill.getStartDate() != null){
+					            	dateStr = yyyyMM.format(yyyyMM.parse(cmBill.getStartDate()));//账期取的是账单开始时间的yyyy-MM
+					            }
+					        }catch (Exception e){
+					            LOGGER.error(e.toString());
+					        }
+							paymentBills.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
+							if(cmBill.getStatus() != null) {
+								if(cmBill.getStatus().equals("已出账单")) {//已出未缴
+									paymentBills.setSwitch((byte) 1);
+									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+								}else if(cmBill.getStatus().equals("已缴账单")){//已出已缴
+									paymentBills.setSwitch((byte) 1);
+									paymentBills.setStatus(AssetPaymentBillStatus.PAID.getCode());
+								}else {//未出未缴
+									paymentBills.setSwitch((byte) 0);
+									paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());
+								}
+							}else {
+								paymentBills.setSwitch((byte) 0);//默认为未出
+								paymentBills.setStatus(AssetPaymentBillStatus.UNPAID.getCode());//默认为未缴
+							}
+							paymentBills.setAmountReceivable(amountReceivable);
+							paymentBills.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+							paymentBills.setAmountReceived(amountReceived);
+							paymentBills.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+							paymentBills.setAmountOwed(amountOwed);
+							paymentBills.setAmountOwedWithoutTax(amountOwedWithoutTax);
+							paymentBills.setTaxAmount(taxAmount);
+							paymentBills.setAddressId(addressId);
+							//物业缴费V6.6（对接统一账单） 账单要增加来源
+							paymentBills.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+							LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CM_CREATE_CODE, "zh_CN");
+							paymentBills.setSourceName(localeString.getText());
+				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+							paymentBills.setCanDelete((byte)0);
+							paymentBills.setCanModify((byte)0);
+				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+							paymentBills.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+				            //瑞安CM对接 账单、费项表增加是否是只读字段
+							paymentBills.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+							//瑞安CM对接 账单表增加第三方唯一标识字段
+							paymentBills.setThirdBillId(cmBill.getBillScheduleID());
+							paymentBills.setCreatTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							
+							PaymentBillItems items = new PaymentBillItems();
+							items.setNamespaceId(namespaceId);
+							items.setOwnerId(communityId);
+							items.setOwnerType("community");
+							items.setCategoryId(categoryId);
+							items.setBillGroupId(group.getId());
+							items.setTargetType(AssetTargetType.ORGANIZATION.getCode());//全部默认是企业级别的
+							items.setTargetId(targetId);
+							if(cmDataObject.getContractHeader() != null) {
+								items.setTargetName(cmDataObject.getContractHeader().getAccountName());//客户名称
+							}
+							items.setContractId(contractId);
+							items.setContractNum(contractNum);
+							items.setDateStrBegin(cmBill.getStartDate());
+							items.setDateStrEnd(cmBill.getEndDate());
+							items.setDateStr(dateStr);//账期取的是账单开始时间的yyyy-MM
+							items.setChargingItemName(cmBill.getBillItemName());
+							items.setAmountReceivable(amountReceivable);
+							items.setAmountReceivableWithoutTax(amountReceivableWithoutTax);
+							items.setAmountReceived(amountReceived);
+							items.setAmountReceivedWithoutTax(amountReceivedWithoutTax);
+							items.setAmountOwed(amountOwed);
+							items.setAmountOwedWithoutTax(amountOwedWithoutTax);
+							items.setTaxAmount(taxAmount);
+							items.setAddressId(addressId);
+							//物业缴费V6.6（对接统一账单） 账单要增加来源
+							items.setSourceType(AssetModuleNotifyConstants.ASSET_CM_MODULE);
+							items.setSourceName(localeString.getText());
+				            //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
+							items.setCanDelete((byte)0);
+							items.setCanModify((byte)0);
+				            //物业缴费V6.0 账单、费项表增加是否删除状态字段
+							items.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+				            //瑞安CM对接 账单、费项表增加是否是只读字段
+							items.setIsReadonly((byte)1);//只读状态：0：非只读；1：只读
+							items.setStatus(paymentBills.getStatus());
+							items.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							
+							PaymentBills existCmBill = assetProvider.getCMBillByThirdBillId(namespaceId, communityId, cmBill.getBillScheduleID());
+							if(existCmBill != null) {
+								//如果账单的唯一标识存在，那么是更新
+								Long billId = existCmBill.getId();
+								paymentBills.setId(billId);
+								assetProvider.updateCMBill(paymentBills);
+								PaymentBillItems existCmBillItem = assetProvider.getCMBillItemByBillId(billId);
+								if(existCmBillItem != null) {
+									items.setId(existCmBillItem.getId());
+									assetProvider.updateCMBillItem(items);
+								}
+							}else {
+								//如果账单的唯一标识不存在，那么是新增
+								Long billId = assetProvider.createCMBill(paymentBills);//创建账单并返回账单ID
+								items.setBillId(billId);
+								assetProvider.createCMBillItem(items);
+							}
+							
+						}
+					}
+				}
+			}
+		}
 	}
 
 	//对接下载中心的导出账单列表

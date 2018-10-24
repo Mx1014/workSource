@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+<<<<<<< HEAD
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -13,13 +14,33 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.*;
+=======
+import com.everhomes.order.PaymentOrderRecord;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.contract.CMSyncObject;
+import com.everhomes.rest.contract.SearchContractCommand;
+>>>>>>> issue-customer4.1
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+<<<<<<< HEAD
 import com.everhomes.util.Tuple;
+=======
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+
+import java.io.OutputStream;
+>>>>>>> issue-customer4.1
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -213,8 +234,13 @@ public interface AssetService {
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
 	
+<<<<<<< HEAD
 //	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 
+=======
+	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
+	
+>>>>>>> issue-customer4.1
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
 	 */
@@ -233,9 +259,11 @@ public interface AssetService {
 	void tranferAssetMappings();
 	
 	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
-
-	void createChargingItem(CreateChargingItemCommand cmd);
 	
+	void createChargingItem(CreateChargingItemCommand cmd);
+
+	void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId);
+
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
