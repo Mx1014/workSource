@@ -141,6 +141,47 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     }
 
     @Override
+    public void cancelOrderWithoutRefund(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_NO_REFUND);
+
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables,"totalAmount",rentalBill.getPayTotalMoney().toString());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER_NO_REFUND;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+
+    }
+
+    @Override
+    public void cancelOrderNeedRefund(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("orderNum", rentalBill.getOrderNo());
+        map.put("refundAmount", rentalBill.getRefundAmount().toString());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER);
+
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables,"totalAmount",rentalBill.getPayTotalMoney().toString());
+        smsProvider.addToTupleList(variables,"refundAmount",rentalBill.getRefundAmount().toString());
+        smsProvider.addToTupleList(variables,"orderNum",rentalBill.getOrderNo());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+    }
+
+    @Override
     public void renewRentalOrderSendMessage(RentalOrder rentalBill) {
 
     }

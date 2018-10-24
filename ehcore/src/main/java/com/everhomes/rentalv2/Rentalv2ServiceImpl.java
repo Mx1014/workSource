@@ -4210,13 +4210,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 							//更新bill状态
 							order.setStatus(SiteBillStatus.REFUNDED.getCode());
 							order.setRefundAmount(orderAmount);
+							messageHandler.cancelOrderNeedRefund(order);
 						} else {
 							order.setRefundAmount(orderAmount);
 							order.setStatus(SiteBillStatus.REFUNDING.getCode());//线下支付人工退款
 						}
 					} else //退款金额过小
 						order.setStatus(SiteBillStatus.FAIL.getCode());
-
+						messageHandler.cancelOrderWithoutRefund(order);
 				} else
 					//如果不需要退款，直接状态为已取消
 					order.setStatus(SiteBillStatus.FAIL.getCode());
