@@ -112,7 +112,7 @@ alter table eh_contracts modify column sponsor_uid varchar(50);
 
 -- AUTHOR: 荣楠
 -- REMARK：OA增加域账号
-ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
 
 -- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 企业支付授权应用列表
