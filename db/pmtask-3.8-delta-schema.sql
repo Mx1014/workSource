@@ -15,7 +15,32 @@ CREATE TABLE `eh_pm_task_archibus_user_mapping` (
   `update_time` DATETIME DEFAULT NOW(),
   `update_uid` BIGINT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业保修国贸对接用户映射表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修国贸对接用户映射表';
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181001
+CREATE TABLE `eh_pm_task_categories`(
+  `id` BIGINT NOT NULL,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `create_time` DATETIME,
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used',
+  `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
+  `description` TEXT,
+  `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_category_path` (`path`),
+  KEY `i_eh_category_order` (`default_order`),
+  KEY `i_eh_category_delete_time` (`delete_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
+
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
