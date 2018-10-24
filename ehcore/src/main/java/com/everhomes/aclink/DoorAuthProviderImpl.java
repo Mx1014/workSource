@@ -203,14 +203,14 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
     public List<DoorAuth> queryDoorAuthByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
-
+        com.everhomes.server.schema.tables.EhDoorAuth t = Tables.EH_DOOR_AUTH.as("t");
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
         //根据userId查询userName add by liqingyan
-        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.USER_ID.eq(Tables.EH_USERS.ID));
+//        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(Tables.EH_USERS.ID));
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
         if(locator.getAnchor() != null && locator.getAnchor() != 0) {
             query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
@@ -220,7 +220,57 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         	query.addLimit(count + 1);
         }
         List<DoorAuth> objs = query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, DoorAuth.class);
+            DoorAuth auth = ConvertHelper.convert(r, DoorAuth.class);
+//            auth.setUserName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            return auth;
+        });
+
+        if(count > 0 && objs.size() > count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+            objs.remove(objs.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+
+    public List<DoorAuth> queryTempAuthByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+        com.everhomes.server.schema.tables.EhDoorAuth t = Tables.EH_DOOR_AUTH;
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(t);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
+        //根据userId查询userName add by liqingyan
+        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(Tables.EH_USERS.ID));
+        query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc(),Tables.EH_DOOR_AUTH.ID.desc());
+        if(locator.getAnchor() != null && locator.getAnchor() != 0) {
+            query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(locator.getAnchor())));
+        }
+        // count<=0默认查全部
+        if(count > 0){
+            query.addLimit(count + 1);
+        }
+        List<DoorAuth> objs = query.fetch().map((r) -> {
+            DoorAuth auth = ConvertHelper.convert(r, DoorAuth.class);
+            auth.setUserName(r.getValue(Tables.EH_USERS.NICK_NAME));
+            auth.setId(r.getValue(t.ID));
+            auth.setDoorId(r.getValue(t.DOOR_ID));
+            auth.setPhone(r.getValue(t.PHONE));
+            auth.setNickname(r.getValue(t.NICKNAME));
+            auth.setCreateTime(r.getValue(t.CREATE_TIME));
+            auth.setApproveUserId(r.getValue(t.APPROVE_USER_ID));
+            auth.setStatus(r.getValue(t.STATUS));
+            auth.setValidFromMs(r.getValue(t.VALID_FROM_MS));
+            auth.setValidEndMs(r.getValue(t.VALID_END_MS));
+            auth.setTotalAuthAmount(r.getValue(t.TOTAL_AUTH_AMOUNT));
+            auth.setValidAuthAmount(r.getValue(t.VALID_AUTH_AMOUNT));
+            auth.setDescription(r.getValue(t.DESCRIPTION));
+            
+            return auth;
         });
 
         if(count > 0 && objs.size() > count) {
@@ -503,13 +553,51 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 if(cmd.getKeyword() != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(cmd.getKeyword()+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(cmd.getKeyword()+"%")));
                 }
-                //添加按照createTime查询和按照创建人查询 add by liqingyan
-                if(cmd.getCreateTimeStart() != null && cmd.getCreateTimeEnd() != null){
-                    query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.between(cmd.getCreateTimeStart(),cmd.getCreateTimeEnd()));
+
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
+
+                return query;
+            }
+
+        });
+    }
+    @Override
+    public List<DoorAuth> searchTempAuthByAdmin(ListingLocator locator, SearchDoorAuthCommand cmd,
+                                         int count){
+
+        return queryTempAuthByTime(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                SelectQuery<? extends Record> query) {
+
+                if(cmd.getStatus() != null) {
+                    Long now = DateHelper.currentGMTTime().getTime();
+                    if(cmd.getStatus().equals(DoorAuthStatus.INVALID.getCode())) {
+//                       query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
+                        query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(cmd.getStatus()).or(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now)
+                                .or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.le(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
+                    } else {
+                        query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(cmd.getStatus())).and((Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 0))
+                                .or(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.isNull())
+                                .or(Tables.EH_DOOR_AUTH.VALID_AUTH_AMOUNT.gt(0).and(Tables.EH_DOOR_AUTH.AUTH_RULE_TYPE.eq((byte) 1)))));
+                    }
                 }
 
-                if(cmd.getUserId() != null){
-                    query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(cmd.getUserId()));
+                if(cmd.getDoorId() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
+                }
+
+                if(cmd.getKeyword() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(cmd.getKeyword()+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(cmd.getKeyword()+"%")));
+                }
+                //添加按照createTime查询和按照创建人查询 add by liqingyan
+                if(cmd.getCreateTimeStart() != null && cmd.getCreateTimeEnd() != null){
+                    query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.between(new Timestamp(cmd.getCreateTimeStart()), new Timestamp(cmd.getCreateTimeEnd())));
+                }
+
+                if(cmd.getUserName() != null && !cmd.getUserName().isEmpty()){
+                    query.addConditions(Tables.EH_USERS.NICK_NAME.like(cmd.getUserName()+"%"));
                 }
 
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));

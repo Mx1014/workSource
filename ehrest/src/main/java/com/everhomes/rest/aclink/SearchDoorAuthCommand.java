@@ -24,11 +24,11 @@ public class SearchDoorAuthCommand {
     
     private Integer pageSize;
 
-    private Timestamp createTimeStart;
+    private Long createTimeStart;
 
-    private Timestamp createTimeEnd;
+    private Long createTimeEnd;
 
-    private Long userId;
+    private String userName;
 
 //    @NotNull
 //    private Integer namespaceId;
@@ -37,28 +37,28 @@ public class SearchDoorAuthCommand {
     
     private Byte status;
 
-    public Timestamp getCreateTimeStart() {
+    public Long getCreateTimeStart() {
         return createTimeStart;
     }
 
-    public void setCreateTimeStart(Timestamp createTimeStart) {
+    public void setCreateTimeStart(Long createTimeStart) {
         this.createTimeStart = createTimeStart;
     }
 
-    public Timestamp getCreateTimeEnd() {
+    public Long getCreateTimeEnd() {
         return createTimeEnd;
     }
 
-    public void setCreateTimeEnd(Timestamp createTimeEnd) {
+    public void setCreateTimeEnd(Long createTimeEnd) {
         this.createTimeEnd = createTimeEnd;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public Long getPageAnchor() {

@@ -45,6 +45,8 @@ public interface DoorAuthProvider {
     List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, SearchDoorAuthCommand cmd,
             int count);
 
+    List<DoorAuth> searchTempAuthByAdmin(ListingLocator locator, SearchDoorAuthCommand cmd,
+										 int count);
     /**
      * 查用户及其所属组织的所有有效权限
      */

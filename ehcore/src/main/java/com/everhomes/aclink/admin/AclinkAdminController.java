@@ -553,6 +553,20 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/listTempAuth</b>
+     * <p>获取门禁授权列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listTempAuth")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse listTempAuth(@Valid SearchDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listTempAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/exportVisitorDoorAuthByAdmin</b>
      * <p>导出访客授权记录</p>
      */

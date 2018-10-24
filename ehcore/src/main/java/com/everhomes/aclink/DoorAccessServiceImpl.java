@@ -2287,6 +2287,40 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;        
     }
+
+    @Override
+    public ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        List<DoorAuth> auths = doorAuthProvider.searchTempAuthByAdmin(locator, cmd, count);
+        List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        long now = DateHelper.currentGMTTime().getTime();
+        for(DoorAuth auth : auths) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+            DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setGoFloor(auth.getCurrStorey());
+            dto.setHardwareId(doorAccess.getHardwareId());
+            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
+            dto.setPhone(auth.getPhone());
+            dto.setOrganization(auth.getOrganization());
+            User u = userProvider.findUserById(auth.getApproveUserId());
+            if(u != null) {
+                dto.setApproveUserName(getRealName(u));
+            }
+
+            if(auth.getValidEndMs() < now) {
+                auth.setStatus(DoorAuthStatus.INVALID.getCode());
+            }
+
+            dtos.add(dto);
+        }
+
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
+    }
     
     private Long getDoorAccessLastTick(DoorAccess doorAccess) {
         Long doorAccId = doorAccess.getId();
@@ -5615,7 +5649,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){
         DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(cmd.getDoorId());
-        doorAccess.setName(cmd.getName());
+        doorAccess.setDisplayName(cmd.getName());
         doorAccess.setAddress(cmd.getDoorAddress());
         doorAccess.setDescription(cmd.getDoorDescription());
         doorAccessProvider.updateDoorAccessNew(doorAccess);

@@ -82,6 +82,8 @@ public interface DoorAccessService {
     ListDoorAuthResponse createDoorAuthList(AclinkCreateDoorAuthListCommand cmd);
 
     ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd);
+    //add by liqingyan
+    ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd);
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
 

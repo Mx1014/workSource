@@ -1,5 +1,6 @@
 package com.everhomes.aclink;
 
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.util.StringHelper;
 
@@ -15,7 +16,13 @@ public class DoorAuth extends EhDoorAuth {
 
     private  String userName;
 
-    public String getUserName;
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public String getLinglingId(String linglingId) {
         return AclinkAuthCustomField.AUTH_LINGLING_ID.getStringValue(this);
