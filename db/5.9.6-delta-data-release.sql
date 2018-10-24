@@ -448,6 +448,14 @@ WHERE account_name='root' AND namespace_id=0;
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+-- AUTHOR:梁燕龙  20181022
+-- REMARK: 瑞安个人中心跳转URL
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+VALUES ('ruian.point.url','https://m.mallcoo.cn/a/user/10764/Point/List','瑞安积分跳转URL',999929, '瑞安积分跳转URL');
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+VALUES ('ruian.vip.url','https://m.mallcoo.cn/a/custom/10764/xtd/Rights','瑞安会员跳转URL',999929, '瑞安会员跳转URL');
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+VALUES ('ruian.order.url','/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix','瑞安订单跳转URL',999929, '瑞安订单跳转URL');
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 
