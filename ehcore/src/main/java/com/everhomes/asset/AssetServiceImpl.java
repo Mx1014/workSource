@@ -4521,6 +4521,10 @@ public class AssetServiceImpl implements AssetService {
 		//1、根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询相关配置
 		AssetGeneralBillMappingCmd assetGeneralBillMappingCmd = ConvertHelper.convert(cmd, AssetGeneralBillMappingCmd.class);
 		GeneralBillHandler generalBillHandler = getGeneralBillHandler(cmd.getSourceType());
+		if(generalBillHandler == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find asset mapping");
+		}
 		List<AssetModuleAppMapping> records = generalBillHandler.findAssetModuleAppMapping(assetGeneralBillMappingCmd);
 		if(records.size() > 0) {
 			//如果根据namespaceId、ownerId、ownerType、sourceType、sourceId这五个参数在映射表查询的到相关配置，说明配置的是按园区走的
@@ -4538,10 +4542,8 @@ public class AssetServiceImpl implements AssetService {
 			ListGeneralBillsDTO dto = createGeneralBillForCommunity(cmd, categoryId, billGroupId, charingItemId);
 			dtos.add(dto);
 		}else {
-
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	                    "can not find asset mapping");
-
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "can not find asset mapping");
 		}
 		return dtos;
 	}
