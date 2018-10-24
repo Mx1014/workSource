@@ -96,12 +96,13 @@ import com.everhomes.rest.asset.UploadCertificateCommand;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
+import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.util.Tuple;
 
 /**
@@ -138,7 +139,7 @@ public interface AssetService {
 	AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
 //
 	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
-	
+
 	//=============================================================================
 	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
 	//=============================================================================
@@ -194,7 +195,7 @@ public interface AssetService {
 	PaymentBillItems findBillItemById(Long billItemId);
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
-	
+
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
@@ -292,10 +293,10 @@ public interface AssetService {
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
-    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+    //void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
-	
+
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
 	 */
@@ -304,17 +305,15 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	//public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
 	 */
-	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
+	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
 
-	void tranferAssetMappings();
-	
-	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
-	
+	GeneralBillHandler getGeneralBillHandler(String sourceType);
+
 	void createChargingItem(CreateChargingItemCommand cmd);
 
 	void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId);
@@ -322,14 +321,17 @@ public interface AssetService {
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
-	
+
+	void cancelGeneralBill(CancelGeneralBillCommand cmd);
+
+
 	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
-	
+
 	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
-	
+
 	void checkNullProhibit(String name , Object object);
-	
+
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
-	
+
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
 }
