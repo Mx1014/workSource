@@ -27,6 +27,7 @@ import java.sql.Timestamp;
  *     <li>appId: appId</li>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
+ *     <li>router: router</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  * </ul>
  */
@@ -53,6 +54,7 @@ public class BannerDTO {
     private Long appId;
     private String routerPath;
     private String routerQuery;
+    private String router;
     private Byte clientHandlerType;
 
     public Long getId() {
@@ -221,6 +223,14 @@ public class BannerDTO {
 
     public void setClientHandlerType(Byte clientHandlerType) {
         this.clientHandlerType = clientHandlerType;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     @Override

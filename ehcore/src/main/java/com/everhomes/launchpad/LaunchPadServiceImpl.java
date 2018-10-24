@@ -2948,9 +2948,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null, null, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null, null, null, serviceModule.getClientHandlerType());
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
+
+			String host = serviceModule.getHost();
+            if(org.springframework.util.StringUtils.isEmpty(host)){
+                host  = "default";
+            }
+
+            String router = "zl://" + host + response.getRouterPath() + "?" + response.getRouterQuery();
+            response.setRouter(router);
+
 		}
 
 		return response;
@@ -3049,10 +3058,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null, null, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null, null, null, serviceModule.getClientHandlerType());
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
-		}
+
+			String host = serviceModule.getHost();
+            if(org.springframework.util.StringUtils.isEmpty(host)){
+                host  = "default";
+            }
+
+            String router = "zl://" + host + response.getRouterPath() + "?" + response.getRouterQuery();
+            response.setRouter(router);
+        }
 
 
 		return response;
@@ -3223,13 +3240,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			if(app != null){
 				dto.setModuleId(app.getModuleId());
 				ServiceModule serviceModule = moduleMap.get(app.getModuleId());
-				Long moduleId = 0L;
 				Byte clientHandlerType = 0;
 				String host = "default";
 				if(serviceModule != null){
 					dto.setClientHandlerType(serviceModule.getClientHandlerType());
 
-					moduleId = serviceModule.getId();
 					clientHandlerType = serviceModule.getClientHandlerType();
 					host = serviceModule.getHost();
 
@@ -3245,9 +3260,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				}
 
 				//填充路由信息
-				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null);
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null, clientHandlerType);
 				dto.setRouterPath(routerInfo.getPath());
-				dto.setRouterQuery("moduleId=" + moduleId + "&clientHandlerType=" + clientHandlerType + "&" + routerInfo.getQuery());
+				dto.setRouterQuery(routerInfo.getQuery());
 
 				if(org.springframework.util.StringUtils.isEmpty(host)){
 					host  = "default";

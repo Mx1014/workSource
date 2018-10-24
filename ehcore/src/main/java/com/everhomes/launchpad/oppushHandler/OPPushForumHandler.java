@@ -98,11 +98,16 @@ public class OPPushForumHandler implements OPPushHandler{
 
                 contentRouterJson.setForumId(postDTO.getForumId());
                 contentRouterJson.setTopicId(postDTO.getId());
-                RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(10100L, app.getId(),"论坛", contentRouterJson.toString(), "/detail",null,null);
+                RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(10100L, app.getId(),"论坛", contentRouterJson.toString(), "/detail",null,null, ClientHandlerType.NATIVE.getCode());
 
                 card.setRouterPath(routerInfo.getPath());
                 card.setRouterQuery(routerInfo.getQuery());
                 card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+
+                String host = "forum";
+                String router = "zl://" + host + card.getRouterPath() + "?" + card.getRouterQuery();
+                card.setRouter(router);
+
 
                 List<Object> properties = new ArrayList<>();
                 String imageUrl = "";
