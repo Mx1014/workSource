@@ -1096,6 +1096,18 @@ public class ParkingServiceImpl implements ParkingService {
 			createOrderCommand.setCommitFlag(1);
 			createOrderCommand.setOrderType(3);
 			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay","NS"+UserContext.getCurrentNamespaceId()));
+		} else if (paymentType != null && paymentType == PaymentType.ALI_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.ALI_JS_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("acct",user.getNamespaceUserToken());
+			//flattenMap.put("acct","11");
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
+//			flattenMap.put("vspCusid",vspCusid);
+			flattenMap.put("payType","no_credit");
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+			createOrderCommand.setOrderType(3);
+			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay","NS"+UserContext.getCurrentNamespaceId()));
 		}
 		createOrderCommand.setOrderRemark1(configProvider.getValue("parking.pay.OrderRemark1","停车缴费"));
 		LOGGER.info("createPurchaseOrder params"+createOrderCommand);
@@ -3979,7 +3991,7 @@ public class ParkingServiceImpl implements ParkingService {
 	
 
 	@Override
-	public void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd) {
+	public void notifyParkingRechargeOrderPayment(PayNotifyCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		//微信通知开关
 		if (!configProvider.getBooleanValue(UserContext.getCurrentNamespaceId(),"parking.wechatNotify",false))
@@ -3990,7 +4002,10 @@ public class ParkingServiceImpl implements ParkingService {
 			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
 			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-			order.setPaidType(VendorType.WEI_XIN.getCode());
+			if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode())
+				order.setPaidType(VendorType.WEI_XIN.getCode());
+			 else if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.ALI_JS_PAY.getCode())
+				order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
 			if (handler.notifyParkingRechargeOrderPayment(order)) {
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
