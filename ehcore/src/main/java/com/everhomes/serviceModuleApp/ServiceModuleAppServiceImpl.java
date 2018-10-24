@@ -616,9 +616,15 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		allDto.setModuleId(-10000L);
 		allDto.setClientHandlerType((byte)0);
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode(), null, null);
+		RouterInfo routerInfo = convertRouterInfo(allDto.getModuleId(), allDto.getAppId(), allDto.getName(), null, "/" + AllOrMoreType.fromCode(allOrMoreType).getCode(), null, null, (byte)0);
 		allDto.setRouterPath(routerInfo.getPath());
 		allDto.setRouterQuery(routerInfo.getQuery());
+
+		String host = "app-management";
+
+		String router = "zl://" + host + allDto.getRouterPath() + "?" + allDto.getRouterQuery();
+		allDto.setRouter(router);
+
 
 		Community community = communityProvider.findCommunityById(communityId);
 
@@ -725,26 +731,39 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		}
 
 		//填充路由信息
-		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType);
+		RouterInfo routerInfo = convertRouterInfo(appDTO.getModuleId(), app.getOriginId(), appDTO.getName(), app.getInstanceConfig(), null, routerLocationType, routerSceneType, serviceModule.getClientHandlerType());
+
+
 		appDTO.setRouterPath(routerInfo.getPath());
 		appDTO.setRouterQuery(routerInfo.getQuery());
 
-		if(!StringUtils.isEmpty(serviceModule.getHost())){
-			String router = "zl://" + serviceModule.getHost() + "/" + routerInfo.getPath() + "?" + routerInfo.getQuery();
-			appDTO.setRouter(router);
+		String host = serviceModule.getHost();
+		if(StringUtils.isEmpty(host)){
+			host  = "default";
 		}
+
+		String router = "zl://" + host + appDTO.getRouterPath() + "?" + appDTO.getRouterQuery();
+		appDTO.setRouter(router);
 
 		return appDTO;
 	}
 
 	@Override
-	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path, Byte locationType, Byte sceneType){
+	public RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path, Byte locationType, Byte sceneType, Byte clientHandlerType){
 
 		if(StringUtils.isEmpty(path)){
 			path = "/index";
 		}
 
 		String query = "appId=" + appId;
+
+		if(moduleId != null){
+			query = query + "&moduleId=" + moduleId;
+		}
+
+		if(clientHandlerType != null){
+			query = query + "&clientHandlerType=" + clientHandlerType;
+		}
 
         if(locationType != null){
             query = query + "&locationType=" + locationType;

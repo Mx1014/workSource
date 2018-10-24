@@ -2101,15 +2101,28 @@ public class PortalServiceImpl implements PortalService {
 						config.setItemGroup(itemGroup.getName());
 
 						ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+
+						Byte clientHandlerType = 0;
+						String host = "";
 						if(module != null){
 							config.setClientHandlerType(module.getClientHandlerType());
+							clientHandlerType = module.getClientHandlerType();
+							host = module.getHost();
 						}
 
 						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
 						//填充路由信息
-						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null);
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null, clientHandlerType);
 						config.setRouterPath(routerInfo.getPath());
 						config.setRouterQuery(routerInfo.getQuery());
+
+						if(StringUtils.isEmpty(host)){
+							host  = "default";
+						}
+
+						String router = "zl://" + host + config.getRouterPath() + "?" + config.getRouterQuery();
+						config.setRouter(router);
+
 					}
 				}
 
