@@ -71,6 +71,11 @@ public class OPPushBizHandler implements OPPushHandler {
                     e.printStackTrace();
                 }
 
+
+                String host = "default";
+                String router = "zl://" + host + card.getRouterPath() + "?moduleId=92100&clientHandlerType=2&" + card.getRouterQuery();
+                card.setRouter(router);
+
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());

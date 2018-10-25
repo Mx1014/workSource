@@ -23,6 +23,8 @@ import com.everhomes.util.StringHelper;
  * <li>detail : 详情</li>
  * <li>orderNo : 订单编号</li>
  * <li>email : 发件邮件</li>
+ * <li>payMode : 支付类型，全部则为空，参考 {@link com.everhomes.rest.print.PrintPayType}</li>
+ * <li>payType:支付方式，全部则为空,参考{@link com.everhomes.rest.organization.VendorType}</li>
  * <li>creatorCompanys : 所在企业列表（String）</li>
  * </ul>
  *
@@ -43,6 +45,17 @@ public class PrintRecordDTO {
 	private String email;
 	@ItemType(String.class)
 	private List<String> creatorCompanys;
+	private Byte payMode;
+	private String payType;
+	
+	public String getPayType() {
+		return payType;
+	}
+	
+	public void setPayType(String payType) {
+		this.payType = payType;
+	}
+	
 	public List<String> getCreatorCompanys() {
 		return creatorCompanys;
 	}
@@ -122,6 +135,14 @@ public class PrintRecordDTO {
 		this.orderNo = orderNo;
 	}
 	
+	public Byte getPayMode() {
+		return payMode;
+	}
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+	
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

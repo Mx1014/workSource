@@ -113,7 +113,7 @@ import com.everhomes.rest.asset.SimpleAssetBillDTO;
 import com.everhomes.rest.asset.TenantType;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -130,6 +130,7 @@ import com.everhomes.rest.organization.ImportFileResultLog;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
@@ -207,7 +208,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     @Autowired
     private AssetGroupProvider assetGroupProvider;
-    
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
@@ -612,8 +613,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @Override
     public ListBillDetailResponse listBillDetail(ListBillDetailCommand cmd) {
-        ListBillDetailVO vo = assetProvider.listBillDetail(cmd.getBillId());
-        ListBillDetailResponse response = ConvertHelper.convert(vo, ListBillDetailResponse.class);
+        ListBillDetailResponse response = assetProvider.listBillDetail(cmd.getBillId());
         List<ExemptionItemDTO> dtos = response.getBillGroupDTO().getExemptionItemDTOList();
         for(int i = 0; i< dtos.size(); i ++) {
             ExemptionItemDTO dto = dtos.get(i);
@@ -667,7 +667,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     @Override
     public ListBillsDTO createBill(CreateBillCommand cmd) {
     	//物业缴费V6.0（UE优化) 账单区分数据来源
-    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	cmd.setSourceId(AssetPaymentBillSourceId.CREATE.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_CREATE_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());
@@ -679,7 +679,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     
     public ListBillsDTO createBillFromImport(CreateBillCommand cmd) {
     	//物业缴费V6.0（UE优化) 账单区分数据来源
-    	cmd.setSourceType(AssetModuleNotifyConstants.ASSET_MODULE);
+    	cmd.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
     	cmd.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
     	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
     	cmd.setSourceName(localeString.getText());
@@ -696,10 +696,10 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
         ListBillDetailCommand ncmd = new ListBillDetailCommand();
         ncmd.setBillId(Long.valueOf(cmd.getBillId()));
         ListBillDetailResponse billDetail = listBillDetail(ncmd);
-        AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
-        if(null != handler){
-        	handler.payNotifyBillSourceModule(billDetail);
-        }
+        //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+        NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
+        notifyBillHasBeenPaidCommand.setMerchantOrderId(billDetail.getMerchantOrderId());
+        orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
     }
 
     @Override

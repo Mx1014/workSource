@@ -187,7 +187,7 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LaunchPadService launchPadService;
-
+	
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -261,6 +261,7 @@ public class PortalServiceImpl implements PortalService {
 		moduleApp.setActionType(serviceModule.getActionType());
 		moduleApp.setModuleControlType(serviceModule.getModuleControlType());
 		moduleApp.setAccessControlType(serviceModule.getAccessControlType());
+		moduleApp.setEnableEnterprisePayFlag(serviceModule.getEnableEnterprisePayFlag());
 
 		//todo
 		moduleApp.setCustomTag(cmd.getCustomTag());
@@ -302,6 +303,8 @@ public class PortalServiceImpl implements PortalService {
 
 			moduleApp.setAccessControlType(serviceModule.getAccessControlType());
 
+			moduleApp.setEnableEnterprisePayFlag(serviceModule.getEnableEnterprisePayFlag());
+
 			serviceModuleApps.add(moduleApp);
 		}
 		serviceModuleAppProvider.createServiceModuleApps(serviceModuleApps);
@@ -334,6 +337,12 @@ public class PortalServiceImpl implements PortalService {
 		if(!StringUtils.isEmpty(cmd.getAccessControlType())){
 			moduleApp.setAccessControlType(cmd.getAccessControlType());
 		}
+
+		if(TrueOrFalseFlag.fromCode(cmd.getEnableEnterprisePayFlag()) != null){
+			moduleApp.setEnableEnterprisePayFlag(cmd.getEnableEnterprisePayFlag());
+		}
+
+
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
@@ -1705,7 +1714,7 @@ public class PortalServiceImpl implements PortalService {
 							for (PortalLayout layout: layouts) {
 
 								//标准版不能删除
-								if(namespaceId == 2){
+								if(namespacesService.isStdNamespace(namespaceId)){
 									continue;
 								}
 								//发布layout
@@ -1784,7 +1793,7 @@ public class PortalServiceImpl implements PortalService {
 		assert namespaceId != null;
 
 		//标准版不能删除
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			return;
 		}
 
@@ -2101,15 +2110,28 @@ public class PortalServiceImpl implements PortalService {
 						config.setItemGroup(itemGroup.getName());
 
 						ServiceModule module = serviceModuleProvider.findServiceModuleById(app.getModuleId());
+
+						Byte clientHandlerType = 0;
+						String host = "";
 						if(module != null){
 							config.setClientHandlerType(module.getClientHandlerType());
+							clientHandlerType = module.getClientHandlerType();
+							host = module.getHost();
 						}
 
 						String appConfig = launchPadService.refreshActionData(app.getInstanceConfig());
 						//填充路由信息
-						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null);
+						RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), app.getName(), appConfig, null, null, null, clientHandlerType);
 						config.setRouterPath(routerInfo.getPath());
 						config.setRouterQuery(routerInfo.getQuery());
+
+						if(StringUtils.isEmpty(host)){
+							host  = "default";
+						}
+
+						String router = "zl://" + host + config.getRouterPath() + "?" + config.getRouterQuery();
+						config.setRouter(router);
+
 					}
 				}
 

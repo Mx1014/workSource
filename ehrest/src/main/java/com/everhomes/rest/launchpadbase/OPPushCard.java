@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
+ *     <li>router: router</li>
  *     <li>properties: 需要展现的一些字段，需要和客户端预定字段和顺序，推荐按照显示的从上到下、从左到右显示放置properties</li>
  * </ul>
  */
@@ -21,6 +22,7 @@ public class OPPushCard {
     private String routerPath;
     private String routerQuery;
     private Byte clientHandlerType;
+    private String router;
     private List<Object> properties;
 
 
@@ -38,6 +40,14 @@ public class OPPushCard {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     public Byte getClientHandlerType() {

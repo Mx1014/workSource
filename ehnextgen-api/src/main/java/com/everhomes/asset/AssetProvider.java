@@ -12,24 +12,22 @@ import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
 import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
 import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
 import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
-import com.everhomes.rest.asset.ConfigChargingItemsCommand;
 import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateChargingItemCommand;
-import com.everhomes.rest.asset.DeleteChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
-import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
 import com.everhomes.rest.asset.ListBillsCommand;
@@ -37,7 +35,6 @@ import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
-import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
@@ -103,7 +100,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    
+
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
@@ -111,7 +108,7 @@ public interface AssetProvider {
 
     ListBillsDTO creatPropertyBill(CreateBillCommand cmd, Long billId);
 
-    ListBillDetailVO listBillDetail(Long billId);
+    ListBillDetailResponse listBillDetail(Long billId);
 
     List<BillStaticsDTO> listBillStaticsByDateStrs(String beginLimit, String endLimit, Long ownerId, String ownerType, Long categoryId);
 
@@ -309,6 +306,8 @@ public interface AssetProvider {
 
     PaymentBills findPaymentBillById(Long billId);
 
+    PaymentBills findPaymentBill(Integer namespaceId, String sourceType, Long sourceId, String thirdBillId);
+
     List<Long> findbillIdsByOwner(Integer namespaceId, String ownerType, Long ownerId);
 
     //add by tangcen
@@ -364,7 +363,7 @@ public interface AssetProvider {
     PaymentLateFine findLastedFine(Long id);
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
-    
+
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -376,13 +375,13 @@ public interface AssetProvider {
      * @param assetCategoryId
      * @return
      */
-    boolean checkExistAssetMapContract(Long assetCategoryId);
+//    boolean checkExistAssetMapContract(Long assetCategoryId);
     
-    boolean checkExistAssetMapEnergy(Long assetCategoryId);
+//    boolean checkExistAssetMapEnergy(Long assetCategoryId);
     
-    void updateAssetMapContract(AssetModuleAppMapping mapping);
+//    void updateAssetMapContract(AssetModuleAppMapping mapping);
     
-    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
+//    void updateAssetMapEnergy(AssetModuleAppMapping mapping);
 
     void modifyBillForImport(Long billId, CreateBillCommand cmd);
     
@@ -397,6 +396,7 @@ public interface AssetProvider {
 	Boolean isConfigItemSubtraction(Long billId, Long charingItemId);
 	
 	Boolean isConfigLateFineSubtraction(Long billId, Long charingItemId);
+
 	Double getApartmentInfo(Long addressId, Long contractId);
 
 	void updatePaymentBillSwitch(BatchUpdateBillsToSettledCmd cmd);
@@ -425,15 +425,12 @@ public interface AssetProvider {
 	void deleteBillItemsAfterDate(Long contractId, String endTimeStr);
 	
 	boolean isInWorkChargingStandard(Integer namespaceId, Long chargingStandardId);
-	
-	void tranferAssetMappings();
-	
+
 	List<AppAssetCategory> listAssetAppCategory(Integer namespaceId);
 	
-	boolean checkExistGeneralBillAssetMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,
-			String sourceType);
-	
-	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+//	boolean checkExistGeneralBillAssetMapping(AssetGeneralBillMappingCmd cmd);
+//
+//	AssetModuleAppMapping updateGeneralBillAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6统一账单：如果该账单组中的费项被其他模块应用选中了，则不允许删除
@@ -443,8 +440,21 @@ public interface AssetProvider {
 	 */
 	boolean checkIsUsedByGeneralBill(Long billGroupId, Long chargingItemId);
 	
-	List<AssetModuleAppMapping> findAssetModuleAppMapping(Integer namespaceId, Long ownerId, String ownerType, Long sourceId,String sourceType);
+	List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
 	
-	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
-		
+	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault);
+
+	PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId);
+
+	PaymentBillItems getCMBillItemByBillId(Long billId);
+
+	Long createCMBill(PaymentBills paymentBills);
+
+	void createCMBillItem(PaymentBillItems items);
+
+	void updateCMBill(PaymentBills paymentBills);
+
+	void updateCMBillItem(PaymentBillItems items);
+
+	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
 }

@@ -421,6 +421,14 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if(isAuthor == 0 || isAuthor == 2){
 				//未认证用户 userprofile表中的用户-已认证或者认证中的用户
 				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+//				认证中的用户
+				List<UserOrganizations> users1 = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),Arrays.asList((Long) cmd.getCommunityId()),
+						Arrays.asList((new Integer(1))),null,999999999);
+				users.addAll(users1.stream().map(r -> {
+					User bean = new User();
+					bean.setId(r.getUserId());
+					return bean;
+				}).collect(Collectors.toList()));
 				if(users == null){
 					users = new ArrayList<>();
 				}
@@ -428,6 +436,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					userids.add(user.getId()+"");
 				}
 			}
+			userids = new ArrayList<>(new HashSet<>(userids));
 			return userids;
 		}catch (Exception e) {
 			LOGGER.info("getCommunityUsers catch exception, range = {}, isAuthor={}", range,isAuthor, e);

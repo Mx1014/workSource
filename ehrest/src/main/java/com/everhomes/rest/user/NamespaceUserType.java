@@ -10,7 +10,7 @@ package com.everhomes.rest.user;
  * </ul>
  */
 public enum NamespaceUserType {
-	WANKE("wanke"), WX("wx"), JINDIE("jindie"), GUOMAO("guomao"), ANBANG("anbang");
+	WANKE("wanke"), WX("wx"), JINDIE("jindie"), GUOMAO("guomao"), ANBANG("anbang"), ALIPAY("alipay");
     
     private String code;
     private NamespaceUserType(String code) {

@@ -77,6 +77,8 @@ import com.google.gson.reflect.TypeToken;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6974,7 +6976,7 @@ public class FlowServiceImpl implements FlowService {
         exp.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
         exp.setFlowConditionId(condition.getId());
         exp.setLogicOperator(expressionCmd.getLogicOperator());
-        exp.setRelationalOperator(expressionCmd.getRelationalOperator());
+        exp.setRelationalOperator(StringEscapeUtils.unescapeHtml(expressionCmd.getRelationalOperator()));
         exp.setVariable1(expressionCmd.getVariable1());
         exp.setVariable2(expressionCmd.getVariable2());
         exp.setVariableExtra1(expressionCmd.getVariableExtra1());

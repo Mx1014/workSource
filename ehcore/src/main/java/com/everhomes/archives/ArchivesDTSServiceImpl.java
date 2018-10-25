@@ -250,6 +250,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN), null);
         if(null != employee){
         	addCommand.setUpdateDetailId(employee.getDetailId());
+        	addCommand.setDetailId(employee.getDetailId());
         }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());

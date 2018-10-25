@@ -17,8 +17,9 @@ import java.util.List;
  *     <li>instanceConfig: instanceConfig</li>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
- *     <li>cards: 卡片信息{@link OPPushCard}</li>
+ *     <li>router: router</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
+ *     <li>cards: 卡片信息{@link OPPushCard}</li>
  * </ul>
  */
 public class ListOPPushCardsResponse {
@@ -30,6 +31,7 @@ public class ListOPPushCardsResponse {
     private String instanceConfig;
     private String routerPath;
     private String routerQuery;
+    private String router;
     private Byte clientHandlerType;
     private List<OPPushCard> cards;
 
@@ -87,6 +89,14 @@ public class ListOPPushCardsResponse {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     public Byte getClientHandlerType() {
