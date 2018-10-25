@@ -20,10 +20,7 @@ import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
 import com.everhomes.rest.asset.BillStaticsDTO;
 import com.everhomes.rest.asset.CreateBillCommand;
-<<<<<<< HEAD
-=======
 import com.everhomes.rest.asset.CreateChargingItemCommand;
->>>>>>> contract3.9
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
 import com.everhomes.rest.asset.GetDoorAccessParamCommand;
@@ -446,7 +443,6 @@ public interface AssetProvider {
 	
 	List<AssetModuleAppMapping> findAssetModuleAppMapping(AssetGeneralBillMappingCmd cmd);
 	
-<<<<<<< HEAD
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 	void createDoorAccessParam(AssetDooraccessParam asseDooraccessParam);
 	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
@@ -458,7 +454,6 @@ public interface AssetProvider {
 	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
 	PaymentBillOrder getPaymentBillOrderByBillId(String billId);
 		
-=======
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId, Byte isDefault);
 
 	PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId);
@@ -474,5 +469,4 @@ public interface AssetProvider {
 	void updateCMBillItem(PaymentBillItems items);
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
->>>>>>> contract3.9
 }

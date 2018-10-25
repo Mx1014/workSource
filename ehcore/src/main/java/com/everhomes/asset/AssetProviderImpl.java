@@ -114,7 +114,6 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
-<<<<<<< HEAD
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
@@ -123,9 +122,7 @@ import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
-=======
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
->>>>>>> contract3.9
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -135,11 +132,8 @@ import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
-<<<<<<< HEAD
 import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
-=======
->>>>>>> contract3.9
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
@@ -5819,7 +5813,6 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class, assetDooraccessParam.getId()));
         EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
 
-<<<<<<< HEAD
         assetDooraccessParam.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         assetDooraccessParam.setOperatorUid(UserContext.currentUserId());
         
@@ -5956,7 +5949,7 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 		return null;
 	}
-=======
+	
     public PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<PaymentBills> list = context.selectFrom(Tables.EH_PAYMENT_BILLS)
@@ -6047,6 +6040,4 @@ public class AssetProviderImpl implements AssetProvider {
 		}
 	}
 
-
->>>>>>> contract3.9
 }
