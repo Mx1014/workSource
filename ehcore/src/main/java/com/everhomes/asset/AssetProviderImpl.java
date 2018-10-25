@@ -118,7 +118,6 @@ import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
