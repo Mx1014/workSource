@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -17,11 +18,14 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.pm.reportForm.PropertyReportFormService;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -47,6 +51,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     
     @Autowired
     private AssetProvider assetProvider;
+    
+    @Autowired
+    private PropertyReportFormService propertyReportFormService;
  
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
@@ -174,6 +181,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		    .execute();
 	}
     
+	/**
+	 * 统计规则：
+		1) 只统计来源于：合同、能耗、缴费模块手动新增、缴费模块批量导入产生的已出账单的已缴和未缴费用，其他业务模块对接过来的费用不包含在内；
+		2) 手动新增和批量导入的已出账单有楼栋门牌的就按照楼宇门牌统计，没有楼栋门牌的就只统计到项目级；
+		3) 展示的数据为今天之前符合条件的最新数据；【例如：9月份的报表，如果9月份的数据在今天之前有更新，则9月份的报表会同时被更新，但今天更新的数据不会被更新】
+	*/
 	public EhPaymentBillStatisticCommunity statisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -192,11 +205,21 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addConditions(r.DATE_STR.eq(dateStr));
         query.addConditions(r.SWITCH.eq((byte)1));//只统计已出账单的已缴和未缴费用
         query.addConditions(r.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+        //只统计来源于：合同、能耗、缴费模块手动新增、缴费模块批量导入产生的已出账单的已缴和未缴费用，其他业务模块对接过来的费用不包含在内；
+        query.addConditions(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_MODULE)
+        		.or(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+        		.or(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE)));
         ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBills(query, r);
         dto  = ConvertHelper.convert(convertDTO, EhPaymentBillStatisticCommunity.class);
         return dto;
 	}
 	
+	/**
+	 * 统计规则：
+		1) 只统计来源于：合同、能耗、缴费模块手动新增、缴费模块批量导入产生的已出账单的已缴和未缴费用，其他业务模块对接过来的费用不包含在内；
+		2) 手动新增和批量导入的已出账单有楼栋门牌的就按照楼宇门牌统计，没有楼栋门牌的就只统计到项目级；
+		3) 展示的数据为今天之前符合条件的最新数据；【例如：9月份的报表，如果9月份的数据在今天之前有更新，则9月份的报表会同时被更新，但今天更新的数据不会被更新】
+	*/
 	public EhPaymentBillStatisticBuilding statisticByBuilding(Integer namespaceId, Long ownerId, String ownerType, String dateStr, String buildingName) {
 		//根据namespaceId、ownerId、ownerType、dateStr、buildingName统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -217,6 +240,10 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addConditions(r.BUILDING_NAME.eq(buildingName));
         query.addConditions(bills.SWITCH.eq((byte)1));//只统计已出账单的已缴和未缴费用
         query.addConditions(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
+        //只统计来源于：合同、能耗、缴费模块手动新增、缴费模块批量导入产生的已出账单的已缴和未缴费用，其他业务模块对接过来的费用不包含在内；
+        query.addConditions(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ASSET_MODULE)
+        		.or(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.CONTRACT_MODULE))
+        		.or(r.SOURCE_TYPE.eq(AssetModuleNotifyConstants.ENERGY_MODULE)));
         ListBillStatisticByCommunityDTO convertDTO = convertEhPaymentBillItems(query, r);
         dto  = ConvertHelper.convert(convertDTO, EhPaymentBillStatisticBuilding.class);
         return dto;
@@ -417,9 +444,10 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		List<ListBillStatisticByCommunityDTO> list = listBillStatisticByCommunityUtil(pageOffSet, pageSize, 
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
     	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		Map<Long, CommunityBriefStaticsDTO> map = propertyReportFormService.listCommunityBriefStaticsForBill(namespaceId, ownerIdList, dateStrEnd);
+		for(ListBillStatisticByCommunityDTO dto : list) {
+			//CommunityBriefStaticsDTO communityBriefStaticsDTO 
+		}
 		return list;
 	}
 	

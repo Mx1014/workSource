@@ -508,62 +508,153 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 	}
 
 	//缴费信息汇总表-房源 (导出对接下载中心)
+	@SuppressWarnings("deprecation")
 	public OutputStream exportOutputStreamBillStatisticByAddress(ListBillStatisticByAddressCmd cmd, Long taskId) {
-		//OutputStream outputStream = new ByteArrayOutputStream();
+		OutputStream outputStream = new ByteArrayOutputStream();
     	//每一条数据
     	Integer pageOffSet = 0;
         Integer pageSize = 100000;
-        List<ListBillStatisticByAddressDTO> list = assetStatisticProvider.listBillStatisticByAddress(pageOffSet, pageSize, 
+        List<ListBillStatisticByAddressDTO> dtos = assetStatisticProvider.listBillStatisticByAddress(pageOffSet, pageSize, 
         		cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
         		cmd.getBuildingName(), cmd.getApartmentNameList(), cmd.getChargingItemIdList(), cmd.getTargetName());
-        Workbook wb = null;
+        taskService.updateTaskProcess(taskId, 20);
+		Workbook wb = null;
 		InputStream in;
-		in = this.getClass().getResourceAsStream("/excels/pmtask.xlsx");
+		in = this.getClass().getResourceAsStream("/excels/asset/statisticByAddress.xlsx");
 		try {
 			wb = new XSSFWorkbook(copyInputStream(in));
 		} catch (IOException e) {
-			LOGGER.error("Copy inputStream error.");
+			LOGGER.error("exportOutputStreamBillStatisticByAddress copy inputStream error.");
 		}
 		Sheet sheet = wb.getSheetAt(0);
 		if (null != sheet) {
-			Row defaultRow = sheet.getRow(4);
-			Cell cell = defaultRow.getCell(1);
+			Row defaultRow = sheet.getRow(2);
+			Cell cell = defaultRow.getCell(0);
 			CellStyle style = cell.getCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中   
 			int size = 0;
-			if(null != list){
-				size = list.size();
-				for(int i=0;i<size;i++){
-					Row tempRow = sheet.createRow(i + 4);
-					ListBillStatisticByAddressDTO task = list.get(i);
-					Cell cell1 = tempRow.createCell(1);
-					cell1.setCellStyle(style);
-					cell1.setCellValue(i + 1);
-					Cell cell2 = tempRow.createCell(2);
-					cell2.setCellStyle(style);
-					cell2.setCellValue(task.getAmountReceivable().toString());
-					Cell cell3 = tempRow.createCell(3);
-					cell3.setCellStyle(style);
-					cell3.setCellValue(task.getAmountReceived().toString());
+			if(null != dtos){
+				size = dtos.size();
+				taskService.updateTaskProcess(taskId, 30);
+				for(int i = 0;i < size;i++){
+					Row tempRow = sheet.createRow(i + 2);
+					ListBillStatisticByAddressDTO dto = dtos.get(i);
+					int orderNum = i + 1;//序号
+					boolean isLastRow = false;
+					fillRowCellBillStatisticByAddress(tempRow, style, isLastRow, orderNum, dto);
 				}
+				taskService.updateTaskProcess(taskId, 70);
+				//最后的一行总计
+				CellStyle totalStyle = getTotalStyle(wb, style);
+				Row tempRow = sheet.createRow(dtos.size() + 2);
+				int orderNum = dtos.size() + 1;//序号
+				boolean isLastRow = true;
+				ListBillStatisticByAddressDTO totalDTO = assetStatisticProvider.listBillStatisticByAddressTotal(
+						cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(),
+		        		cmd.getBuildingName(), cmd.getApartmentNameList(), cmd.getChargingItemIdList(), cmd.getTargetName());
+				fillRowCellBillStatisticByAddress(tempRow, totalStyle, isLastRow, orderNum, totalDTO);
+				taskService.updateTaskProcess(taskId, 80);
+				//设置自适应列宽
+//				for(int i = 0; i < 50;i++) {
+//					sheet.autoSizeColumn(i);
+//				}
+				try {
+					wb.write(outputStream);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return outputStream;
+			}else {
+				throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 			}
 		}
-		
-		if (list != null && list.size() > 0) {
-			String fileName = String.format(cmd.getExportFileNamePrefix()+"报表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
-			ExcelUtils excelUtils = new ExcelUtils(null, fileName, cmd.getExportFileNamePrefix()+"报表");
-			excelUtils.setNeedSequenceColumn(false);//不需要序号列
-			taskService.updateTaskProcess(taskId, 80);
-			//return excelUtils.getOutputStream(propertyNames, titleName, titleSize, dataList);
-			OutputStream outputStream = new ByteArrayOutputStream();
-			try {
-				wb.write(outputStream);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return outputStream;
+		return outputStream;
+	}
+	
+	/**
+     * @param tempRow ： Excel的行
+     * @param style 
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellBillStatisticByAddress(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, ListBillStatisticByAddressDTO dto) {
+    	//序号
+		Cell cell0 = tempRow.createCell(0);
+		cell0.setCellStyle(style);
+		if(isLastRow) {
+			cell0.setCellValue("合计");
 		}else {
-			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+			cell0.setCellValue(orderNum);
 		}
+		//楼宇房源
+		Cell cell2 = tempRow.createCell(1);
+		cell2.setCellStyle(style);
+		if(isLastRow) {
+			cell2.setCellValue("--");
+		}else {
+			cell2.setCellValue(dto.getAddressName());
+		}
+		//客户名称
+		Cell cell3 = tempRow.createCell(2);
+		cell3.setCellStyle(style);
+		if(isLastRow) {
+			cell3.setCellValue("--");
+		}else {
+			cell3.setCellValue(dto.getTargetName());
+		}
+		//催缴手机号码
+		Cell cell4 = tempRow.createCell(3);
+		cell4.setCellStyle(style);
+		if(isLastRow) {
+			cell4.setCellValue("--");
+		}else {
+			cell4.setCellValue(dto.getNoticeTel() != null ? dto.getAreaSize().toString() : "0");
+		}
+		//收费面积
+		Cell cell5 = tempRow.createCell(4);
+		cell5.setCellStyle(style);
+		cell5.setCellValue(dto.getAreaSize() != null ? dto.getAreaSize().toString() : "0");
+		//账单时间
+		Cell cell6 = tempRow.createCell(5);
+		cell6.setCellStyle(style);
+		if(isLastRow) {
+			cell6.setCellValue("--");	
+		}else {
+			cell6.setCellValue(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());	
+		}
+		//收费项目
+		Cell cell7 = tempRow.createCell(6);
+		cell7.setCellStyle(style);
+		if(isLastRow) {
+			cell7.setCellValue("--");	
+		}else {
+			cell7.setCellValue(dto.getProjectChargingItemName());	
+		}
+		//应收含税金额(元)
+		Cell cell8 = tempRow.createCell(7);
+		cell8.setCellStyle(style);
+		cell8.setCellValue(dto.getAmountReceivable() != null ? dto.getAmountReceivable().toString() : "0");
+		//已收金额(元)
+		Cell cell9 = tempRow.createCell(8);
+		cell9.setCellStyle(style);
+		cell9.setCellValue(dto.getAmountReceived() != null ? dto.getAmountReceived().toString() : "0");
+		//待收金额(元)
+		Cell cell10 = tempRow.createCell(9);
+		cell10.setCellStyle(style);
+		cell10.setCellValue(dto.getAmountOwed() != null ? dto.getAmountOwed().toString() : "0");
+		//总欠费天数(天)
+		Cell cell11 = tempRow.createCell(10);
+		cell11.setCellStyle(style);
+		cell11.setCellValue(dto.getDueDayCount() != null ? dto.getDueDayCount().toString() : "0");
+		//收缴率(%)
+		Cell cell12 = tempRow.createCell(11);
+		cell12.setCellStyle(style);
+		cell12.setCellValue((dto.getCollectionRate() != null ? dto.getCollectionRate().toString() : "0") + "%");
+		//催缴次数
+//		Cell cell13= tempRow.createCell(12);
+//		cell13.setCellStyle(style);
+//		cell13.setCellValue(dto.getNoticeTimes() != null ? dto.getNoticeTimes().toString() : "0");
 	}
 	
 	private InputStream copyInputStream(InputStream source) {
