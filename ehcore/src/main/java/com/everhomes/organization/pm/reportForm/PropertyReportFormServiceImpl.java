@@ -3,6 +3,7 @@ package com.everhomes.organization.pm.reportForm;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
@@ -164,25 +166,73 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 
 	@Override
 	public void exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
-		
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public ListBuildingReportFormResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
+		ListBuildingReportFormResponse response = new ListBuildingReportFormResponse();
 		
-		return null;
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        String dateStr = cmd.getDateStr();
+        String formatDateStr = formatDateStr(dateStr);
+        
+        List<BuildingReportFormDTO> resultList = null;
+        //List<BuildingReportFormDTO> resultList = propertyReportFormProvider.listBuildingReportForm(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingIds(),formatDateStr,pageOffSet,pageSize);
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        
+        List<Building> buildingList = communityProvider.findBuildingsByIds(cmd.getBuildingIds());
+        List<String> buildingNameList = new ArrayList<>();
+        for (Building building : buildingList) {
+        	buildingNameList.add(building.getName());
+		}
+        
+        List<ListBillStatisticByBuildingDTO> billStatisticList = assetStatisticService.listBillStatisticByBuildingForProperty(cmd.getNamespaceId(),
+        		cmd.getCommunityId(), "building", null, formatDateStr,buildingNameList);
+        Map<String, ListBillStatisticByBuildingDTO> billStatisticMap = new HashMap<>();
+        billStatisticList.stream().forEach(b->billStatisticMap.put(b.getBuildingName(), b));
+        
+        for (BuildingReportFormDTO result : resultList) {
+        	ListBillStatisticByBuildingDTO billStatistic = billStatisticMap.get(result.getBuildingName());
+        	if (billStatistic != null) {
+				result.setAmountReceivable(billStatistic.getAmountReceivable());
+				result.setAmountReceived(billStatistic.getAmountReceived());
+        		result.setAmountOwed(billStatistic.getAmountOwed());
+        		result.setDueDayCount(billStatistic.getDueDayCount());
+        		result.setCollectionRate(billStatistic.getCollectionRate());
+			}
+		}
+        response.setResults(resultList);
+		return response;
 	}
 
 	@Override
 	public TotalBuildingStaticsDTO getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
+		
+		
 		
 		return null;
 	}
 	
 	@Override
 	public void exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	
@@ -300,7 +350,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 			format = dateStr;
 			return format;
 		}else {
-			//可以抛出异常
+			//抛出异常
 		}
 		return format;
 	}

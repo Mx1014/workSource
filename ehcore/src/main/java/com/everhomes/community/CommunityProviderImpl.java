@@ -45,6 +45,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
@@ -2094,6 +2095,17 @@ public class CommunityProviderImpl implements CommunityProvider {
 					.leftOuterJoin(ehResourceCategories).on(ehResourceCategoryAssignments.RESOURCE_CATEGRY_ID.eq(ehResourceCategories.ID))
 					.where(ehResourceCategoryAssignments.RESOURCE_ID.eq(communityId))
 					.fetchAnyInto(String.class);
+	}
+
+	@Override
+	public List<Building> findBuildingsByIds(List<Long> buildingIds) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Building> buildings = context.select()
+							        		.from(Tables.EH_BUILDINGS)
+							        		.where(Tables.EH_BUILDINGS.ID.in(buildingIds))
+							        		.and(Tables.EH_BUILDINGS.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+							        		.fetchInto(Building.class);
+		return buildings;
 	}
 
 }

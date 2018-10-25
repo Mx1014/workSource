@@ -9,6 +9,7 @@ public class GetBuildingReportFormCommand {
 	private Integer namespaceId;
 	private Long communityId;
 	private List<Long> buildingIds;
+	private String dateStr;
 	private Integer pageSize;
 	private Long pageAnchor;
 	
@@ -29,6 +30,12 @@ public class GetBuildingReportFormCommand {
 	}
 	public void setBuildingIds(List<Long> buildingIds) {
 		this.buildingIds = buildingIds;
+	}
+	public String getDateStr() {
+		return dateStr;
+	}
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
 	}
 	public Integer getPageSize() {
 		return pageSize;

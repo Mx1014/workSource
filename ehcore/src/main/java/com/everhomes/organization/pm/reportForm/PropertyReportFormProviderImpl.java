@@ -34,6 +34,7 @@ import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhPropertyStatisticCommunity;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticBuildingDao;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticCommunityDao;
+import com.everhomes.server.schema.tables.records.EhPropertyStatisticCommunityRecord;
 
 @Component
 public class PropertyReportFormProviderImpl implements PropertyReportFormProvider{
@@ -105,8 +106,11 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.DATE_STR.eq(dateStr));
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
-			result.setBuildingCount(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.BUILDING_COUNT)).intValue());
-			result.setAreaSize(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE)));
+			BigDecimal buildingCount = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.BUILDING_COUNT));
+			BigDecimal areaSize = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE));
+			
+			result.setBuildingCount(buildingCount!=null ? buildingCount.intValue() : null);
+			result.setAreaSize(areaSize);
 		});
 		return result;
 	}
@@ -154,8 +158,11 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.DATE_STR.eq(dateStr));
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
-			result.setTotalApartmentCount(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT)).intValue());
-			result.setAreaSize(r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.AREA_SIZE)));
+			BigDecimal totalApartmentCount = r.getValue(DSL.sum(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT)));
+			BigDecimal areaSize = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE));
+			
+			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
+			result.setAreaSize(areaSize);
 		});
 		return result;
 	}
@@ -165,10 +172,10 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			String dateStr, Integer pageOffSet, Integer pageSize) {
 		List<CommunityReportFormDTO> result = new ArrayList<>();
 		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhCommunities a = Tables.EH_COMMUNITIES;
 		EhPropertyStatisticCommunity b = Tables.EH_PROPERTY_STATISTIC_COMMUNITY;
 		
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(a.ID,a.NAME,
 				b.BUILDING_COUNT,b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
@@ -181,7 +188,9 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(a.ID.in(communityIds));
 		query.addConditions(b.DATE_STR.eq(dateStr));
 		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
-		query.addLimit(pageOffSet, pageSize + 1);
+		if (pageOffSet != null && pageSize != null) {
+			query.addLimit(pageOffSet, pageSize + 1);
+		}
 		query.fetch().forEach(r->{
 			CommunityReportFormDTO dto = new CommunityReportFormDTO();
 			
@@ -206,15 +215,46 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 	}
 
 	@Override
-	public TotalCommunityStaticsDTO getTotalCommunityStatics(Integer namespaceId, List<Long> communityIds,
-			String formatDateStr) {
+	public TotalCommunityStaticsDTO getTotalCommunityStatics(Integer namespaceId, List<Long> communityIds,String dateStr) {
+		TotalCommunityStaticsDTO result = new TotalCommunityStaticsDTO();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhPropertyStatisticCommunity a = Tables.EH_PROPERTY_STATISTIC_COMMUNITY;
 		
-		
-		
-		
-		
-		return null;
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(DSL.sum(a.BUILDING_COUNT),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
+				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
+				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
+		query.addFrom(a);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(a.ID.in(communityIds));
+		query.addConditions(a.DATE_STR.eq(dateStr));
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			result.setBuildingCount(r.getValue(DSL.sum(a.BUILDING_COUNT)).intValue());
+			result.setTotalApartmentCount(r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT)).intValue());
+			result.setFreeApartmentCount(r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT)).intValue());
+			result.setRentApartmentCount(r.getValue(DSL.sum(a.RENT_APARTMENT_COUNT)).intValue());
+			result.setOccupiedApartmentCount(r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT)).intValue());
+			result.setLivingApartmentCount(r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT)).intValue());
+			result.setSaledApartmentCount(r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT)).intValue());
+			result.setAreaSize(r.getValue(DSL.sum(a.AREA_SIZE)));
+			result.setRentArea(r.getValue(DSL.sum(a.RENT_AREA)));
+			result.setFreeArea(r.getValue(DSL.sum(a.FREE_AREA)));
+			
+			BigDecimal rentRate;
+			BigDecimal freeRate;
+			if (result.getAreaSize() == null && result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
+				rentRate = BigDecimal.ZERO;
+				freeRate = BigDecimal.ZERO;
+			}else {
+				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+			}
+			result.setRentRate(rentRate);
+			result.setFreeRate(freeRate);
+		});
+		return result;
 	}
 	
 	
