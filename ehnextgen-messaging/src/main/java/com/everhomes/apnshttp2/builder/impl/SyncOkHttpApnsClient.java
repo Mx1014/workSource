@@ -396,4 +396,9 @@ public class SyncOkHttpApnsClient implements ApnsClient {
 		// TODO Auto-generated method stub
 		
 	}
+
+    @Override
+    public String toString() {
+        return "defaultTopic:"+defaultTopic+";apnsAuthKey:"+apnsAuthKey+";teamID:"+teamID+";keyID:"+keyID+";gateway:"+gateway;
+    }
 }

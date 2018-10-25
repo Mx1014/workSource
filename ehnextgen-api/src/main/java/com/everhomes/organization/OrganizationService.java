@@ -216,6 +216,7 @@ public interface OrganizationService {
     OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier);
 
     OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
+	OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);

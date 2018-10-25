@@ -17,6 +17,8 @@ import com.everhomes.constants.Constants;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.OrganizationAndDetailDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.questionnaire.*;
 import com.everhomes.rest.user.NamespaceUserType;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -1107,7 +1109,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService, Applicati
 		try {
 			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
 			homeUrl = homeUrl.endsWith("/")?homeUrl.substring(0,homeUrl.length()-1):homeUrl;
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question?questionId=%s#sign_suffix");
 			String srcUrl = String.format(homeUrl+contextUrl, dto.getId());
 //			String shareContext = String.format("/evh/wxauth/authReq?ns=%s&src_url=%s",dto.getNamespaceId(), URLEncoder.encode(srcUrl,"utf-8"));
 //			dto.setShareUrl(homeUrl+shareContext);
@@ -1388,5 +1390,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService, Applicati
 	@Override
 	public void reSendQuesionnaireMessages() {
 		questionnaireAsynSendMessageService.sendUnAnsweredTargetMessage();
+	}
+
+	@Override
+	public List<OrganizationAndDetailDTO> listRangeOrgs(ListRangeOrgsCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Questionnaire quest = questionnaireProvider.findQuestionnaireById(cmd.getQuestionnaireId());
+		List<OrganizationAndDetailDTO> resp = new ArrayList<>();
+		if(QuestionnaireTargetType.ORGANIZATION.equals(quest.getTargetType())){
+			List<QuestionnaireRange> ranges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(cmd.getQuestionnaireId());
+			for (QuestionnaireRange range : ranges){
+				OrganizationAndDetailDTO dto = organizationProvider.getOrganizationAndDetailByorgIdAndNameId(range.getRid(),namespaceId);
+				resp.add(dto);
+			}
+		}
+		return resp;
 	}
 }

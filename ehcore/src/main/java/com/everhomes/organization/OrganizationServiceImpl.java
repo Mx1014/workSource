@@ -9,6 +9,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
@@ -25,6 +26,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -58,6 +60,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.openapi.AppNamespaceMapping;
 import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.openapi.Contract;
@@ -204,6 +207,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -420,6 +424,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ServiceModuleService serviceModuleService;
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+    private NamespacesService namespacesService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -2042,7 +2049,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
@@ -3969,10 +3976,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
-                if(null == organizationDetail) {
-                    continue;
+                tempSimpleOrgDTO.setDisplayName(tempSimpleOrgDTO.getName());
+                if(null != organizationDetail) {
+                	// #39544 企业客户未认证，则企业没有 organization detail
+                	tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 }
-                tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
+                
                 //物业或业委增加小区Id和小区name信息
                 if(org.getOrganizationType() != null){
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
@@ -6850,17 +6859,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/部门岗位
+        //:todo 部门/部门岗位 +2018年10月22日增加公司搜索
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(),  Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.ENTERPRISE.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 部门岗位
         ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
         cmd_3.setName(cmd.getKeywords());
         cmd_3.setNamespaceId(namespaceId);
-        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 岗位
         ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();
@@ -8396,6 +8405,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
+        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+        this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
 
@@ -12333,6 +12350,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
+                else{
+                	//始终都要发消息
+                    organizationMember.setOrganizationId(enterpriseId);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息
+//                    sendMessageForContactApproved(organizationMember);
+                }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
             if (leaveMembers.size() > 0) {
@@ -13130,7 +13153,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Organization not found.");
         }
 
-        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()) + 1;
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
@@ -13145,6 +13168,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         int size = list.size();
         if (size > 0) {
+
+            if (size != pageSize) {
+                response.setNextPageAnchor(null);
+            } else {
+                list.remove(list.size() - 1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+            }
+            
             response.setRequests(list.stream().map(r -> {
                 ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
                 dto.setParentName(organization.getName());
@@ -13172,11 +13203,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return dto;
             }).collect(Collectors.toList()));
 
-            if (size != pageSize) {
-                response.setNextPageAnchor(null);
-            } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
-            }
         }
         return response;
     }
@@ -13609,6 +13635,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
             //organizationMemberDetails表中的organizationId指的是总公司的organizationId
             organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
+            organizationMemberDetail.setCheckInTime(ArchivesUtil.currentDate());
             //根据OrganizationMemberDetails来获取detailId的方法
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /* 如果档案表中有记录 */
@@ -13964,7 +13991,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.debug("listUnderOrganizations start, i ={}, orgs = {}, namespaceId = {}, list={}" , i, orgs, namespaceId, list);
         if (orgs == null) {
             //:todo 第一次进入
-            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByActualName(list[0], null, null, namespaceId);
             LOGGER.debug("listUnderOrganizations oneStep" + orgs_0.toString());
             if (orgs_0 != null) {
                 return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
@@ -13983,7 +14010,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {
-                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByActualName(list[i], null, r.getId(), namespaceId);
                 LOGGER.debug("listUnderOrganizations twoStep" + orgs_1.toString());
                 if (orgs_1 != null && orgs_1.size() > 0) {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
@@ -14156,6 +14183,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     officeSiteDTO.setSiteName(organizationWorkPlaces.getWorkplaceName());
                     officeSiteDTO.setCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                    officeSiteDTO.setId(organizationWorkPlaces.getId());
                     //根据查询到的community_id来查询表eh_communities然后得到所属项目的名称，并且将其封装在对象OfficeSiteDTO中
                     String communityName = organizationProvider.getCommunityNameByCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setCommunityName(communityName);
@@ -14554,7 +14582,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         OrganizationDTO dto = null;
 
-        if(UserContext.getCurrentNamespaceId() == 2){
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
             //标准版
             ServiceModuleAppAuthorization serviceModuleAppAuthorization = serviceModuleAppAuthorizationService.findServiceModuleAppAuthorization(cmd.getProjectId(), cmd.getAppId());
             if(serviceModuleAppAuthorization != null){

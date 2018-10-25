@@ -25,23 +25,28 @@ import java.util.Set;
  * Created by ying.xiong on 2017/8/11.
  */
 public interface EnterpriseCustomerProvider {
-    void createEnterpriseCustomer(EnterpriseCustomer customer);
+
     void createEnterpriseCustomers(Collection<EhEnterpriseCustomers> customers);
-    void updateEnterpriseCustomer(EnterpriseCustomer customer);
     void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers);
+
+    Long createEnterpriseCustomer(EnterpriseCustomer customer);
+    Long updateEnterpriseCustomer(EnterpriseCustomer customer);
+
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
     EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, Long communityId, String name);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, String name);
-    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, String number);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndNumber(Integer namespaceId, Long communityId, String number);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceId(Integer namespaceId);
     List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize);
     Map<Long, EnterpriseCustomer> listEnterpriseCustomersByIds(List<Long> ids);
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomers(Set<Long> customerIds);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType);
 
 
     void createCustomerAccount(CustomerAccount account);

@@ -600,7 +600,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                 "organization not find");
         }
-      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(org.getAdminTargetId() != null && org.getAdminTargetId()!= 0
+			  && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
           return false;
         }
       

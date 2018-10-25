@@ -16,8 +16,9 @@ import java.util.List;
  *     <li>instanceConfig: instanceConfig</li>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
- *     <li>cards: 卡片信息{@link BulletinsCard}</li>
+ *     <li>router: router</li>
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
+ *     <li>cards: 卡片信息{@link BulletinsCard}</li>
  * </ul>
  */
 public class ListBulletinsCardsResponse {
@@ -29,6 +30,7 @@ public class ListBulletinsCardsResponse {
     private String instanceConfig;
     private String routerPath;
     private String routerQuery;
+    private String router;
     private Byte clientHandlerType;
     private List<BulletinsCard> cards;
 
@@ -86,6 +88,14 @@ public class ListBulletinsCardsResponse {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     public Byte getClientHandlerType() {

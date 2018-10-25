@@ -481,8 +481,8 @@ public class NewsServiceImpl implements NewsService {
 	private void checkNewsParameter(Long userId, CreateNewsCommand cmd) {
 		if (StringUtils.isEmpty(cmd.getTitle()) || StringUtils.isEmpty(cmd.getContent())) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters");
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_INPUT_PARAM_INVALID, "Invalid parameters");
 		}
 
 		if (null == cmd.getCommunityIds() || cmd.getCommunityIds().isEmpty()) {
@@ -513,8 +513,8 @@ public class NewsServiceImpl implements NewsService {
 		if (ownerId == null || StringUtils.isEmpty(ownerType)) {
 			LOGGER.error(
 					"Invalid parameters, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters");
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_INPUT_PARAM_INVALID, "Invalid parameters");
 		}
 
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(ownerType);
@@ -661,9 +661,7 @@ public class NewsServiceImpl implements NewsService {
 		return listNews(cmd, true);
 	}
 
-	/**
-	 * <b>listNews:/</b>
-	 */
+	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene) {
 
 		// 先进行权限验证
@@ -814,9 +812,12 @@ public class NewsServiceImpl implements NewsService {
 		}
 		if (newsDTO.getCoverUri() == null) {
 			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
-			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(),
-					UserContext.current().getUser().getId()));
+			if (null != category) {
+				newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(),
+						UserContext.current().getUser().getId()));
+			}
 		}
+		
 		newsDTO.setNewsUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 
 		newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());
@@ -1368,8 +1369,8 @@ public class NewsServiceImpl implements NewsService {
 	private void checkCommentType(Long userId, String contentType) {
 		if (StringUtils.isEmpty(contentType)) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", contentType=" + contentType);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters");
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_INPUT_PARAM_INVALID, "Invalid parameters");
 		}
 		NewsCommentContentType commentContentType = NewsCommentContentType.fromCode(contentType);
 		if (commentContentType == null) {
@@ -1648,8 +1649,8 @@ public class NewsServiceImpl implements NewsService {
 	private SceneTokenDTO getNamespaceFromSceneToken(Long userId, String sceneToken) {
 		if (StringUtils.isEmpty(sceneToken)) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", sceneToken=" + sceneToken);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters");
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_INPUT_PARAM_INVALID, "Invalid parameters");
 		}
 		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
 		if (sceneTokenDTO == null || sceneTokenDTO.getNamespaceId() == null) {
@@ -2088,8 +2089,8 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		if (cmd.getNewsToken() == null) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters");
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_INPUT_PARAM_INVALID, "Invalid parameters");
 		}
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		News news = findNewsById(userId, newsId);

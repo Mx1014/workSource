@@ -175,9 +175,9 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategoriesAdmin")
 	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
 	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategoriesAdmin(cmd));
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByAdmin(cmd));
 	}
-
+    
     /**
 	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
 	 * <p>获取服务联盟机构的展示类型</p>
@@ -208,7 +208,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
    	 * <b>URL: /yellowPage/getServiceAlliance</b>
-   	 * <p> 服务联盟首页 </p>
+   	 * <p> 客户端/前端获取服务联盟首页 </p>
    	 */
     @RequireAuthentication(false)
     @RequestMapping("getServiceAlliance")
@@ -918,7 +918,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
 	 * <b>URL: /yellowPage/listServiceTypeNames</b>
-	 * <p> 获取所有服务名称 </p>
+	 * <p> 获取所有服务类型名称 </p>
 	 */
 	@RequestMapping("listServiceTypeNames")
     @RestReturn(value = IdNameDTO.class, collection = true)

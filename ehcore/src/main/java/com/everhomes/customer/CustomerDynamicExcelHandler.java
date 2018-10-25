@@ -894,7 +894,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setGeohash(geohash);
             }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
                         updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
@@ -960,6 +960,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         //企业客户新增成功,保存客户事件
         //customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
         //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
+
+
+        dynamicCustomers.forEach(r -> {
+            customerSearcher.feedDoc(r.getCustomer());
+        });
 
 
         long startUpdateSyncCustomerTime = System.currentTimeMillis();

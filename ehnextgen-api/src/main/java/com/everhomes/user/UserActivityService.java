@@ -89,4 +89,6 @@ public interface UserActivityService {
     GetUserTreasureResponse getUserTreasureV2();
 
     GetUserTreasureNewResponse getUserTreasureNew();
+
+    GetUserTreasureForRuiAnResponse getUserTreasureForRuiAn();
 }

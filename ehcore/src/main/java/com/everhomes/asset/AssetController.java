@@ -52,7 +52,7 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetAppService assetAppService;
-	
+
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
 //	 * <b>URL: /asset/listAssetBillTemplate</b>
@@ -880,7 +880,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("showBillForClient")
 	@RestReturn(value = ShowBillForClientDTO.class)
 	public RestResponse showBillForClient(ClientIdentityCommand cmd) {
-		ShowBillForClientDTO dto = assetService.showBillForClient(cmd);
+		ShowBillForClientDTO dto = assetAppService.showBillForClient(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -953,7 +953,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillDetailOnDateChange")
 	@RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
 	public RestResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-		ShowBillDetailForClientResponse res = assetService.listBillDetailOnDateChange(cmd);
+		ShowBillDetailForClientResponse res = assetAppService.listBillDetailOnDateChange(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1476,20 +1476,6 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
-
-	/**
-	 * <p>物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移</p>
-	 * <b>URL: /asset/tranferAssetMappings</b>
-	 */
-	@RequestMapping("tranferAssetMappings")
-	@RestReturn(value = String.class)
-	public RestResponse tranferAssetMappings(HttpServletResponse response) {
-		assetService.tranferAssetMappings();
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return restResponse;
-	}
 	
 	/**
      * <p>新增收费项配置（物业缴费V6.0（UE优化）-30557）</p>
@@ -1536,6 +1522,38 @@ public class AssetController extends ControllerBase {
     }
     
     /**
+	 * <p>创建统一账单接口</p>
+	 * <b>URL: /asset/createGeneralBill</b>
+	 */
+	@RequestMapping("createGeneralBill")
+	@RestReturn(value = ListGeneralBillsResponse.class, collection = false)
+	@RequireAuthentication(value = false)
+	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListGeneralBillsDTO> dtos = assetService.createGeneralBill(cmd);
+		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
+		listGeneralBillsResponse.setListGeneralBillsDTOs(dtos);
+	    RestResponse response = new RestResponse(listGeneralBillsResponse);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+	 * <p>取消统一账单接口</p>
+	 * <b>URL: /asset/cancelGeneralBill</b>
+	 */
+	@RequestMapping("cancelGeneralBill")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(value = false)
+	public RestResponse cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		assetService.cancelGeneralBill(cmd);
+	    RestResponse response = new RestResponse();
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+    /**
      * <p>对接门禁：设置缴费门禁基础参数</p>
      * <b>URL: /asset/setDoorAccessParam</b>
      */
@@ -1580,4 +1598,5 @@ public class AssetController extends ControllerBase {
     public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
     	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
+	
 }

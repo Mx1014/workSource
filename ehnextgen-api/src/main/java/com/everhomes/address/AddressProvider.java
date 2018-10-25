@@ -2,6 +2,8 @@
 package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.building.Building;
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -142,4 +144,26 @@ public interface AddressProvider {
 
     List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
     List<Address> findActiveApartmentsByBuildingId(Long buildingId);
+    
+    /**
+     * 根据第三方数据的id列表查询房源
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */ 
+    Address findApartmentByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询楼宇
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */
+    Building findBuildingByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询园区
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */
+    Community findCommunityByThirdPartyId(String thirdPartyType,String thirdPartyToken);
 }

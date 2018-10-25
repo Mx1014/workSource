@@ -97,10 +97,21 @@ public class WechatMessageServiceImpl implements WeChatMessageService {
         String time=sdf.format(new Date());
 
         HashMap<String, MessageItem> params = new HashMap<>();
-        params.put("first", new MessageItem(title, "#008000"));
-        params.put("keyword1", new MessageItem(message, "#008000"));
+
+
+//        {{first.DATA}}
+//        业务：{{keyword1.DATA}}
+//        时间：{{keyword2.DATA}}
+//        提醒内容：{{keyword3.DATA}}
+//        处理建议：{{keyword4.DATA}}
+//        {{remark.DATA}}
+
+        //params.put("first", new MessageItem(title, "#008000"));
+        params.put("keyword1", new MessageItem(title, "#008000"));
         params.put("keyword2", new MessageItem(time, "#008000"));
-        params.put("remark", new MessageItem("remark, detail", "#008000"));
+        params.put("keyword3", new MessageItem(message, "#008000"));
+        params.put("keyword4", new MessageItem("查看详情", "#008000"));
+        //params.put("remark", new MessageItem("remark, detail", "#008000"));
 
 
         String defaultTemplateId = configProvider.getValue(UserContext.getCurrentNamespaceId(),"wx.default.template.id", "");

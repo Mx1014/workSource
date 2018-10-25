@@ -35,6 +35,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -323,9 +324,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private ArchivesContactDTO getArchivesStickyContactInfo(Long detailId) {
-        ArchivesContactDTO dto = new ArchivesContactDTO();
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
 
+        ArchivesContactDTO dto = getArchivesStickContactInfo(detail);
+
+        return dto;
+    }
+
+	private ArchivesContactDTO getArchivesStickContactInfo(OrganizationMemberDetails detail) {
+		ArchivesContactDTO dto = new ArchivesContactDTO();
         if (detail == null)
             return null;
         dto.setDetailId(detail.getId());
@@ -338,7 +345,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setRegionCode(detail.getRegionCode());
         dto.setContactShortToken(detail.getContactShortToken());
         dto.setContactEnName(detail.getEnName());
-
+        dto.setAccount(detail.getAccount());
         //  查询部门
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -355,10 +362,14 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  设置置顶
         dto.setStick("1");
-
-        return dto;
+		return dto;
+	}
+	
+	@Override
+    public ArchivesContactDTO getArchivesContact(GetArchivesContactCommand cmd){
+    	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
+    	return getArchivesStickContactInfo(detail);
     }
-
     private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {
         List<ArchivesContactDTO> contacts = new ArrayList<>();
 

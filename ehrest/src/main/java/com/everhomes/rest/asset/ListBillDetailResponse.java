@@ -5,6 +5,7 @@ package com.everhomes.rest.asset;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -33,6 +34,7 @@ import java.util.List;
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  * <li>canDelete:0：不可删除；1：可删除</li>
  * <li>canModify:0：不可编辑；1：可编辑</li>
+ * <li>merchantOrderId:统一订单定义的唯一标识</li>
  *</ul>
  */
 public class ListBillDetailResponse {
@@ -54,12 +56,16 @@ public class ListBillDetailResponse {
     private String invoiceNum;
     private String certificateNote;
     private Byte billStatus;
+    private String thirdBillId;
 	@ItemType(UploadCertificateDTO.class)
 	private List<UploadCertificateDTO> uploadCertificateDTOList;
 	//新增附件
     private List<AssetPaymentBillAttachment> assetPaymentBillAttachmentList;
     //催缴手机号码列表
     private List<String> noticeTelList;
+    private BigDecimal amoutExemption;
+    private BigDecimal amountSupplement;
+    private Long contractId;//新增合同ID字段
 	
     //新增账单来源信息
     private String sourceType;
@@ -73,6 +79,8 @@ public class ListBillDetailResponse {
     private Byte canModify;
     //对接统一账单业务线的需求
     private Integer paymentType;
+    //物业缴费V7.1 统一账单加入的：统一订单定义的唯一标识
+    private String merchantOrderId;
     
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -298,5 +306,45 @@ public class ListBillDetailResponse {
 
 	public void setPaymentType(Integer paymentType) {
 		this.paymentType = paymentType;
+	}
+
+	public String getThirdBillId() {
+		return thirdBillId;
+	}
+
+	public void setThirdBillId(String thirdBillId) {
+		this.thirdBillId = thirdBillId;
+	}
+
+	public String getMerchantOrderId() {
+		return merchantOrderId;
+	}
+
+	public void setMerchantOrderId(String merchantOrderId) {
+		this.merchantOrderId = merchantOrderId;
+	}
+
+	public BigDecimal getAmoutExemption() {
+		return amoutExemption;
+	}
+
+	public void setAmoutExemption(BigDecimal amoutExemption) {
+		this.amoutExemption = amoutExemption;
+	}
+
+	public BigDecimal getAmountSupplement() {
+		return amountSupplement;
+	}
+
+	public void setAmountSupplement(BigDecimal amountSupplement) {
+		this.amountSupplement = amountSupplement;
+	}
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
 	}
 }

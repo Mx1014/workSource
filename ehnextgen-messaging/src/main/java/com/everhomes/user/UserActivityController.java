@@ -307,6 +307,17 @@ public class UserActivityController extends ControllerBase {
     }
 
     /**
+     * URL：<b>url:/user/getUserTreasureForRuiAn</b>
+     * 瑞安个人中心配置
+     */
+    @RequestMapping("getUserTreasureForRuiAn")
+    @RestReturn(GetUserTreasureForRuiAnResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse getUserTreasureForRuiAn() {
+        return new RestResponse(userActivityService.getUserTreasureForRuiAn());
+    }
+
+    /**
      * 电商用户财富：<b>url:/user/listBusinessTreasure</b>
      */
     @RequestMapping("listBusinessTreasure")

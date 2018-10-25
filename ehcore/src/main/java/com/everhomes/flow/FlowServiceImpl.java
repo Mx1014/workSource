@@ -72,9 +72,13 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6421,9 +6425,10 @@ public class FlowServiceImpl implements FlowService {
         cmd.setOrganizationId(null);
 
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
-        RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
+        RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
 
-        List<FlowServiceTypeDTO> dtoList = (List<FlowServiceTypeDTO>) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
+        String dtoListStr = (String) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
+        List<FlowServiceTypeDTO> dtoList = new Gson().fromJson(dtoListStr, new TypeToken<List<FlowServiceTypeDTO>>(){}.getType());
 
         Stream<FlowServiceTypeDTO> stream = dtoList.stream();
         if (cmd.getOrganizationId() != null) {
@@ -6971,7 +6976,7 @@ public class FlowServiceImpl implements FlowService {
         exp.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
         exp.setFlowConditionId(condition.getId());
         exp.setLogicOperator(expressionCmd.getLogicOperator());
-        exp.setRelationalOperator(expressionCmd.getRelationalOperator());
+        exp.setRelationalOperator(StringEscapeUtils.unescapeHtml(expressionCmd.getRelationalOperator()));
         exp.setVariable1(expressionCmd.getVariable1());
         exp.setVariable2(expressionCmd.getVariable2());
         exp.setVariableExtra1(expressionCmd.getVariableExtra1());
@@ -7191,10 +7196,10 @@ public class FlowServiceImpl implements FlowService {
         return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 
-    @Scheduled(fixedRate = 30 * 60 * 1000L)
+    @Scheduled(fixedRate = 30 * 60 * 1000L, initialDelay = 10000)
     public void refreshFlowServiceType() {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
-        RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
+        RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
 
         List<Namespace> namespaces = namespaceProvider.listNamespaces();
         for (Namespace ns : namespaces) {
@@ -7211,7 +7216,8 @@ public class FlowServiceImpl implements FlowService {
                             return dto;
                         }).collect(Collectors.toList());
 
-                template.opsForHash().put("flow-service-type", String.valueOf(ns.getId()), dtoList);
+                template.opsForHash().delete("flow-service-type", String.valueOf(ns.getId()));
+                template.opsForHash().put("flow-service-type", String.valueOf(ns.getId()), StringHelper.toJsonString(dtoList));
             } catch (Exception e) {
                 e.printStackTrace();
             }

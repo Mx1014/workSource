@@ -3780,12 +3780,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId) {
-        return listOrganizationByName(name, groupType, parentId, namespaceId, null);
+    public List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId) {
+    	List<Organization> result = new ArrayList<Organization>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(name));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        if (parentId != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+        }
+        if (groupType != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+        }
+
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
     }
 
     @Override
-    public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId) {
+    public List listOrganizationByName(String name, List<String> groupTypes, Long parentId, Integer namespaceId, Long enterpriseId) {
         List<Organization> result = new ArrayList<Organization>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -3795,8 +3812,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (parentId != null) {
             query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
         }
-        if (groupType != null) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+        if (groupTypes != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
         }
         if (enterpriseId != null) {
             query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + enterpriseId + "%"));

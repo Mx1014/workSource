@@ -85,6 +85,12 @@ public class OPPushActivityHandler implements OPPushHandler {
                 card.setRouterPath(routerInfo.getPath());
                 card.setRouterQuery(routerInfo.getQuery());
                 card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+
+
+                String host = "activity";
+                String router = "zl://" + host + card.getRouterPath() + "?moduleId=10600&clientHandlerType=0&" + card.getRouterQuery();
+                card.setRouter(router);
+
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());
                 properties.add(dto.getSubject());

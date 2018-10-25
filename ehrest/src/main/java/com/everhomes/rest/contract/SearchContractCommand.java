@@ -39,6 +39,15 @@ public class SearchContractCommand {
     private Long categoryId;
     private Long taskId;
     private Byte depositStatus;
+    private Long pageNumber;
+
+    public Long getPageNumber() {
+		return pageNumber;
+	}
+
+	public void setPageNumber(Long pageNumber) {
+		this.pageNumber = pageNumber;
+	}
 
     public Byte getDepositStatus() {
 		return depositStatus;

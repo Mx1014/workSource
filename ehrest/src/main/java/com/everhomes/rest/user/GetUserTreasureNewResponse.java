@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>coupon: 礼券数量 </li>
  *     <li>order: 订单数量 </li>
  *     <li>pointUrl: 积分跳转URL</li>
+ *     <li>vipLevelText: 会员等级</li>
  * </ul>
  */
 public class GetUserTreasureNewResponse {
@@ -16,6 +17,15 @@ public class GetUserTreasureNewResponse {
     private Long coupon;
     private Long order;
     private String pointUrl;
+    private String vipLevelText;
+
+    public String getVipLevelText() {
+        return vipLevelText;
+    }
+
+    public void setVipLevelText(String vipLevelText) {
+        this.vipLevelText = vipLevelText;
+    }
 
     public String getPointUrl() {
         return pointUrl;

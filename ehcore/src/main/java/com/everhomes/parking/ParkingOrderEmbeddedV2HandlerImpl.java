@@ -12,10 +12,12 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.paySDK.PayUtil;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -60,17 +62,18 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		return bizOrderNum;
 	}
 
-	private void paySuccess(OrderPaymentNotificationCommand cmd) {
+	private void paySuccess(MerchantPaymentNotificationCommand cmd) {
 		this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
 		this.checkPayAmountIsNull(cmd.getAmount());//
 
 
 
 		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
+		BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
-			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 			if (order == null) { //做一下兼容
 				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 				order = checkOrder(orderId);
@@ -79,20 +82,18 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 
 			if (!flag) {
-				if (0 != order.getPrice().compareTo(payAmount)) {
+				if (0 != order.getPrice().compareTo(payAmount.add(couponAmount))) {
 					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 							"Order amount is not equal to payAmount.");
 				}
 			}
-
 			Long payTime = System.currentTimeMillis();
 			Timestamp payTimeStamp = new Timestamp(payTime);
 
 			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
 			String vendorName = lot.getVendorName();
 			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-
 			//先将状态置为已付款
 			if(order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
@@ -100,6 +101,11 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				order.setOrderNo(parkingService.createOrderNo(lot));
+				order.setBizOrderNo(cmd.getBizOrderNum());
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				else 
+					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {
@@ -147,7 +153,12 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
+				order.setBizOrderNo(cmd.getBizOrderNum());
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				else
+					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
@@ -157,6 +168,11 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				order.setBizOrderNo(cmd.getBizOrderNum());
+				if (cmd.getPaymentType() == 29)
+					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				else
+					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
@@ -254,7 +270,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	}
 
 	@Override
-	public void payCallBack(OrderPaymentNotificationCommand cmd) {
+	public void payCallBack(MerchantPaymentNotificationCommand cmd) {
 		//检查签名
 		if(!PayUtil.verifyCallbackSignature(cmd)){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -285,10 +301,10 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		}
 	}
 
-	private void refundSuccess(OrderPaymentNotificationCommand cmd) {
+	private void refundSuccess(MerchantPaymentNotificationCommand cmd) {
 		//when you refund, i can do nothing.
 
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 		if (order == null) { //做一下兼容
 			Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
 			order = checkOrder(orderId);

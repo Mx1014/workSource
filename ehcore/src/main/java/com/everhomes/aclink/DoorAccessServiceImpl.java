@@ -143,13 +143,11 @@ import com.everhomes.rest.organization.OrganizationManagerDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.*;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -172,6 +170,51 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
+import com.google.gson.JsonArray;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.Security;
+import java.sql.Timestamp;
+import java.text.Format;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -4335,9 +4378,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 query.addConditions(Tables.EH_ACLINK_LOGS.NAMESPACE_ID.eq(namespaceId));
                 return query;
             }
-            
+
         });
-        
+
         for(AclinkLog obj : objs) {
             AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
             resp.getDtos().add(dto);
@@ -4345,7 +4388,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
-    
+
     @Override
     public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
         return doorAuthProvider.getLinglingDoorAuthByUuid(uuid);

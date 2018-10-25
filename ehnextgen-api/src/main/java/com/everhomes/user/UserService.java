@@ -149,7 +149,7 @@ public interface UserService {
 	Boolean validateUserPass(ValidatePassCommand passCmd);
 
     List<SceneDTO> listTouristRelatedScenes();
-
+    void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode);
     /**
      * 判断是否登录
      * @return
@@ -374,5 +374,22 @@ public interface UserService {
     UserDTO getTopAdministrator( GetTopAdministratorCommand cmd);
 
     void updateUserVipLevel(Long userId, Integer vipLevel);
-	SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
+
+    /**
+     * 批量通过手机号查询用户信息
+     * @param cmd
+     * @return
+     */
+    FindUsersByPhonesResponse findUsersByPhones(FindUsersByPhonesCommand cmd) ;
+
+    /**
+     * 获取商户跳转URL
+     * @param cmd
+     * @return
+     */
+    GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) ;
+    void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText);
+
+    SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd);
+
 }

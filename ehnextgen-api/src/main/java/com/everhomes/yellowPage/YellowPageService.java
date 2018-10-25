@@ -42,7 +42,6 @@ public interface YellowPageService {
 	void deleteServiceAllianceCategory(DeleteServiceAllianceCategoryCommand cmd);
 
 	ServiceAllianceDTO getServiceAllianceEnterpriseDetail(GetServiceAllianceEnterpriseDetailCommand cmd);
-	ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd);
 	ServiceAllianceListResponse getServiceAllianceEnterpriseList(GetServiceAllianceEnterpriseListCommand cmd);
 	void updateServiceAlliance(UpdateServiceAllianceCommand cmd);
 	void deleteServiceAllianceEnterprise(DeleteServiceAllianceEnterpriseCommand cmd);
@@ -118,7 +117,7 @@ public interface YellowPageService {
 
 	String transferTime(Long parentId);
 
-	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd);
+	ListServiceAllianceCategoriesAdminResponse listServiceAllianceCategoriesByAdmin(ListServiceAllianceCategoriesCommand cmd);
 
 	void updateServiceTypeOrders(UpdateServiceTypeOrdersCommand cmd);
 
@@ -127,5 +126,7 @@ public interface YellowPageService {
 
 	List<AllianceTagGroupDTO> getAllianceTagList(ListingLocator locator, Integer pageSize, Integer namespaceId,
 			String ownerType, Long ownerId, Long type);
+
+	ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd);
 
 }

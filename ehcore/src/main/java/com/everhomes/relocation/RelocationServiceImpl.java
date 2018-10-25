@@ -255,21 +255,21 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 		RelocationRequest request = ConvertHelper.convert(cmd, RelocationRequest.class);
 		request.setRelocationDate(new Timestamp(cmd.getRelocationDate()));
-
-		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
-//		    小区场景
-            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
-            request.setOrgOwnerTypeId(ownerType.getId());
-        }
-
-		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
-		if (null == orgRequest) {
-			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"OrganizationCommunityRequest not found.");
-		}
-		request.setOwnerId(orgRequest.getCommunityId());
-		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
+//标准版修改，由前端传入当前的项目Id
+//		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
+////		    小区场景
+//            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
+//            request.setOrgOwnerTypeId(ownerType.getId());
+//        }
+//
+//		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
+//		if (null == orgRequest) {
+//			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
+//			throw RuntimeErrorException.errorWith(RelocationErrorCode.SCOPE, RelocationErrorCode.ERROR_INVALID_PARAMETER,
+//					"OrganizationCommunityRequest not found.");
+//		}
+//		request.setOwnerId(orgRequest.getCommunityId());
+//		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 

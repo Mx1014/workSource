@@ -97,6 +97,12 @@ public class RegionServiceImpl implements RegionService{
     }
 
     @Override
+    public RegionDTO findRegionById(GetRegionCommand cmd) {
+        RegionDTO regionDTO = ConvertHelper.convert(this.regionProvider.findRegionById(cmd.getId()), RegionDTO.class);
+        return regionDTO;
+    }
+
+    @Override
     public RegionTreeResponse regionTree(RegionTreeCommand cmd) {
         RegionTreeResponse response = new RegionTreeResponse();
         if(null == cmd.getNamespaceId())

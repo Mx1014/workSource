@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class FlowNashornConfigService {
 
-    @Autowired
     private static FlowScriptConfigProvider flowScriptConfigProvider;
 
     public static String getConfigByKey(String ownerType, Long ownerId, String configName) {

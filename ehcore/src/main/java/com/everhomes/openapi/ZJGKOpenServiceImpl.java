@@ -1289,7 +1289,7 @@ public class ZJGKOpenServiceImpl {
                     continue;
                 }
                 // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, zjEnterprise.getName());
+                List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId,  zjEnterprise.getCommunityId(), zjEnterprise.getName());
                 if (customers == null || customers.size() == 0) {
                     insertEnterpriseCustomer(NAMESPACE_ID, zjEnterprise);
                 }else {

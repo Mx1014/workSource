@@ -3,6 +3,7 @@ package com.everhomes.print;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -14,7 +15,11 @@ import javax.validation.Valid;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
+import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.print.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import com.everhomes.asset.AssetService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
@@ -41,6 +50,7 @@ import sun.misc.BASE64Decoder;
 public class SiYinPrintController extends ControllerBase {
 	@Autowired
 	private SiyinPrintService siyinPrintService;
+	
 	
 	 /**
 	  * <b>URL: /siyinprint/getPrintSetting</b>
@@ -246,6 +256,7 @@ public class SiYinPrintController extends ControllerBase {
 	     return response;
 	 }
 	 
+	 
 	 /**
 	  * <b>URL: /siyinprint/getPrintUnpaidOrder</b>
 	  * <p>15.查询是否存在未支付订单</p>
@@ -295,7 +306,7 @@ public class SiYinPrintController extends ControllerBase {
 	@RequestMapping("notifySiyinprintOrderPaymentV2")
 	@RestReturn(value=String.class)
 	@RequireAuthentication(false)
-	public RestResponse notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd) {
+	public RestResponse notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd) {
 		siyinPrintService.notifySiyinprintOrderPaymentV2(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -353,10 +364,15 @@ public class SiYinPrintController extends ControllerBase {
 	 * <p>21.司印方调用，任务日志处理</p>
 	 */
     @RequestMapping("mfpLogNotification")
+    @RestReturn(value=String.class)
     @RequireAuthentication(false)
-    public void mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData, HttpServletResponse response){
-    	siyinPrintService.mfpLogNotification(jobData,response);
-    }
+	public RestResponse mfpLogNotification(MfpLogNotificationCommand cmd) {
+		siyinPrintService.mfpLogNotification(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
     /**
 	  * <b>URL: /siyinprint/listQueueJobs</b>
@@ -423,8 +439,8 @@ public class SiYinPrintController extends ControllerBase {
 	public RestResponse listPayeeAccount(ListPayeeAccountCommand cmd) {
 
 		RestResponse response = new RestResponse(siyinPrintService.listPayeeAccount(cmd));
-		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
 
@@ -482,4 +498,31 @@ public class SiYinPrintController extends ControllerBase {
 	public void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response){
 		siyinPrintService.mfpLogNotificationV2(cmd,response);
 	}
+	
+	/**
+	 * <b>URL: /siyinprint/payPrintGeneralOrder</b>
+	 * <p>22.统一订单支付</p>
+	 */
+	@RequestMapping("payPrintGeneralOrder")
+	@RestReturn(value=PayPrintGeneralOrderResponse.class)
+	public RestResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd) {
+		RestResponse response = new RestResponse(siyinPrintService.payPrintGeneralOrder(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	 /**
+	  * <b>URL: /siyinprint/getPrintOrder</b>
+	  * <p>23.根据orderNo查询订单</p>
+	  */
+	 @RequestMapping("getPrintOrder")
+	 @RestReturn(value=GetPrintOrdersResponse.class)
+	 public RestResponse getPrintOrders(GetPrintOrdersCommand cmd) {
+		
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintOrder(cmd));
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
 }
