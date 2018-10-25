@@ -5783,7 +5783,98 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return dto;
     }
-    
+
+    public PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBills> list = context.selectFrom(Tables.EH_PAYMENT_BILLS)
+                .where(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId))
+                .and(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
+                .fetchInto(PaymentBills.class);
+        if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    public PaymentBillItems getCMBillItemByBillId(Long billId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<PaymentBillItems> list = context.selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
+                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
+                .fetchInto(PaymentBillItems.class);
+        if(list.size() > 0){
+            return list.get(0);
+        }else{
+            return null;
+        }
+    }
+
+    public Long createCMBill(PaymentBills bill) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
+
+        bill.setId(id);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, id));
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        dao.insert(bill);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBills.class, null);
+
+        return id;
+    }
+
+    public void createCMBillItem(PaymentBillItems items) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
+
+        items.setId(id);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, id));
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+        dao.insert(items);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBillItems.class, null);
+    }
+
+    public void updateCMBill(PaymentBills paymentBills) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, paymentBills.getId()));
+        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
+        paymentBills.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(paymentBills);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBills.class, paymentBills.getId());
+    }
+
+    public void updateCMBillItem(PaymentBillItems items) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, items.getId()));
+        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
+        items.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(items);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBillItems.class, items.getId());
+    }
+
+    public void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping) {
+		//判断缴费是否已经存在关联的记录
+		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
+		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
+		if(records.size() != 0 && records.get(0) != null) {
+			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
+			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
+			Long id = records.get(0).getId();
+			mapping.setId(id);
+			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			mapping.setUpdateUid(UserContext.currentUserId());
+	        dao.update(mapping);
+	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
+	        LOGGER.info("update eh_asset_module_app_mappings.id={} success!", id);
+		}else {
+			insertAppMapping(mapping);
+			LOGGER.info("insert eh_asset_module_app_mappings success!");
+		}
+	}
+
+    //
     @Override
 	public AssetDooraccessParam findDoorAccessParamById(Long id) {
 		assert (id != null);
@@ -5948,96 +6039,6 @@ public class AssetProviderImpl implements AssetProvider {
 			return assetDooraccessParams.get(0);
 		}
 		return null;
-	}
-	
-    public PaymentBills getCMBillByThirdBillId(Integer namespaceId, Long ownerId, String thirdBillId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<PaymentBills> list = context.selectFrom(Tables.EH_PAYMENT_BILLS)
-                .where(Tables.EH_PAYMENT_BILLS.THIRD_BILL_ID.eq(thirdBillId))
-                .and(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
-                .fetchInto(PaymentBills.class);
-        if(list.size() > 0){
-            return list.get(0);
-        }else{
-            return null;
-        }
-    }
-
-    public PaymentBillItems getCMBillItemByBillId(Long billId) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<PaymentBillItems> list = context.selectFrom(Tables.EH_PAYMENT_BILL_ITEMS)
-                .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.eq(billId))
-                .fetchInto(PaymentBillItems.class);
-        if(list.size() > 0){
-            return list.get(0);
-        }else{
-            return null;
-        }
-    }
-
-    public Long createCMBill(PaymentBills bill) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBills.class));
-
-        bill.setId(id);
-
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, id));
-        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
-        dao.insert(bill);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBills.class, null);
-
-        return id;
-    }
-
-    public void createCMBillItem(PaymentBillItems items) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPaymentBillItems.class));
-
-        items.setId(id);
-
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, id));
-        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
-        dao.insert(items);
-
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentBillItems.class, null);
-    }
-
-    public void updateCMBill(PaymentBills paymentBills) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class, paymentBills.getId()));
-        EhPaymentBillsDao dao = new EhPaymentBillsDao(context.configuration());
-        paymentBills.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dao.update(paymentBills);
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBills.class, paymentBills.getId());
-    }
-
-    public void updateCMBillItem(PaymentBillItems items) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBillItems.class, items.getId()));
-        EhPaymentBillItemsDao dao = new EhPaymentBillItemsDao(context.configuration());
-        items.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dao.update(items);
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentBillItems.class, items.getId());
-    }
-
-    public void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping) {
-		//判断缴费是否已经存在关联的记录
-		AssetGeneralBillMappingCmd cmd = ConvertHelper.convert(mapping, AssetGeneralBillMappingCmd.class);
-		List<AssetModuleAppMapping> records = findAssetModuleAppMapping(cmd);
-		if(records.size() != 0 && records.get(0) != null) {
-			DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readWrite());
-			EhAssetModuleAppMappingsDao dao = new EhAssetModuleAppMappingsDao(dslContext.configuration());
-			Long id = records.get(0).getId();
-			mapping.setId(id);
-			mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			mapping.setUpdateUid(UserContext.currentUserId());
-	        dao.update(mapping);
-	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetModuleAppMappings.class, id);
-	        LOGGER.info("update eh_asset_module_app_mappings.id={} success!", id);
-		}else {
-			insertAppMapping(mapping);
-			LOGGER.info("insert eh_asset_module_app_mappings success!");
-		}
 	}
 
 }
