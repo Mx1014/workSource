@@ -1,16 +1,12 @@
 package com.everhomes.activity.ruian;
 
-import com.everhomes.activity.ActivityServiceImpl;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ruian.*;
 import com.everhomes.rest.launchpadbase.AppContext;
-import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
-import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
-import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
-import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.activity.ruian.ListRuianActivityBySceneReponse;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
@@ -138,7 +134,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
     }
 
     @Override
-    public ListActivityPromotionEntitiesBySceneReponse listActivityRuiAnEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd) {
+    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene() {
         //先查询出所有分类
         //List<ActivityCategoryModel> cateGorys = this.getCategoryList(null , null);
         //获取活动列表
@@ -148,10 +144,10 @@ public class ActivityButtServiceImpl implements ActivityButtService {
             communityId = appContext.getCommunityId() ;
         }
         List<ActivityModel> activitys = this.getActivityList(null, communityId,null, null, null, 10, 1);
-        ListActivityPromotionEntitiesBySceneReponse res = new ListActivityPromotionEntitiesBySceneReponse();
+        ListRuianActivityBySceneReponse res = new ListRuianActivityBySceneReponse();
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
-            List<ModulePromotionEntityDTO> entitys = transfer2LocalEntity(activitys);
+            List<ActivityRuianDetail> entitys = transfer2LocalEntity(activitys,communityId);
             res.setEntities(entitys);
         }
         return res;
@@ -162,26 +158,19 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      * @param activitys
      * @return
      */
-    private List<ModulePromotionEntityDTO> transfer2LocalEntity(List<ActivityModel> activitys){
-        List<ModulePromotionEntityDTO> entities = new ArrayList<ModulePromotionEntityDTO>();
+    private List<ActivityRuianDetail> transfer2LocalEntity(List<ActivityModel> activitys ,Long communityId){
+        List<ActivityRuianDetail> entities = new ArrayList<ActivityRuianDetail>();
         if(CollectionUtils.isEmpty(activitys)){
             return entities;
         }
         for(ActivityModel model : activitys){
-            ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
-            dto.setId(model.getActivityID());//id=2861
-            dto.setDescription(model.getSubTitle());//内容 description=启航
-            ModulePromotionInfoDTO mdto = new ModulePromotionInfoDTO();
-            mdto.setContent(model.getStartTime());
-            mdto.setInfoType((byte)1);
-            ArrayList<ModulePromotionInfoDTO> l = new ArrayList<ModulePromotionInfoDTO>();
-            l.add(mdto);
-            dto.setInfoList(l);//信息流列表ModulePromotionInfoDTO[{content=2018-06-06,infoType=1}]
-            dto.setMetadata("");//业务所需的其他数据metadata={"topicId":199264,"forumId":194236}
-            dto.setPosterUrl(model.getPhoto());//封面图url posterUrl=http://10.1.120.92:512/image/aW1hZ2UvTVRvNFpXRTJZalF6WlRWaVptSmhOekF6WmpNelpXVm1aREkyTkdJMllUWmpNQQ?ownerType=EhActivities&ownerId=2861&token=Us4rJVeXsj3IU2ik0iFGuheOqZtOBp48XSuM5h5NqebaLu9BGEpsUpSuA4dLWUO8Md0Y7k4rKL9uZd76c9G09UYZoH81C8gbzNAh9mrf8TWPWTmNTupgC4bzWnHCWM2u&pxw=890&pxh=542
-            dto.setSubject(model.getName());//标题 subject=创客 | 启航
-            //dto.setCommoNo();//商品id
-            entities.add(dto);
+            ActivityRuianDetail dto = new ActivityRuianDetail();
+
+            ActivityDetailModel detail = this.getActivityDetail(null,communityId,model.getActivityID());
+            ActivityRuianDetail rdetail = ConvertHelper.convert(detail, ActivityRuianDetail.class);
+            rdetail.setState(model.getState());
+
+            entities.add(rdetail);
         }
         return entities;
     }

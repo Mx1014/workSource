@@ -1,11 +1,7 @@
 package com.everhomes.activity.ruian;
 
-import com.everhomes.rest.activity.ruian.ActivityCategoryModel;
-import com.everhomes.rest.activity.ruian.ActivityDetailDTO;
-import com.everhomes.rest.activity.ruian.ActivityDetailModel;
-import com.everhomes.rest.activity.ruian.ActivityModel;
-import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
-import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.activity.ruian.*;
+import com.everhomes.rest.ui.activity.ruian.ListRuianActivityBySceneReponse;
 
 import java.util.List;
 
@@ -18,6 +14,6 @@ public interface ActivityButtService {
 
     public ActivityDetailModel getActivityDetail(Integer namespaceId, Long communityId , Long activityId);
 
-    public ListActivityPromotionEntitiesBySceneReponse listActivityRuiAnEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd);
+    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene();
 
 }
