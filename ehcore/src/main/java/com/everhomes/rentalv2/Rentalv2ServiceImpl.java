@@ -409,7 +409,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         if (structures != null)
             this.dbProvider.execute((TransactionStatus status) -> {
                 structures.stream().forEach(r -> {
-                    RentalStructure structure = new RentalStructure();
+                    RentalStructure structure = ConvertHelper.convert(r,RentalStructure.class);
                     structure.setResourceType(resourceType);
                     structure.setSourceId(sourceId);
                     structure.setSourceType(sourceType);
