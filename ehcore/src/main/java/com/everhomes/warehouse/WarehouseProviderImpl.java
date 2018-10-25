@@ -287,9 +287,9 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
-//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
         query.fetch().map((r) -> {
