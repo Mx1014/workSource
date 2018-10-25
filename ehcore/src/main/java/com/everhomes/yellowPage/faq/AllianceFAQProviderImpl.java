@@ -19,7 +19,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	private AllianceFaqTypeProvider allianceFaqTypeProvider;
 	
 	@Autowired
-	private AllianceFaqProvider allianceFaqProvider;
+	private AllianceFaqsProvider allianceFaqProvider;
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -73,8 +73,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public void createFAQ(AllianceFAQ faq) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqProvider.createFAQ(faq);
 	}
 
 	@Override

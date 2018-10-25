@@ -24,15 +24,13 @@ import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAllianceFaqTypesDao;
-import com.everhomes.server.schema.tables.records.EhAllianceFaqTypesRecord;
-import com.everhomes.server.schema.tables.records.EhAllianceTagRecord;
+import com.everhomes.server.schema.tables.daos.EhAllianceFaqsDao;
+import com.everhomes.server.schema.tables.records.EhAllianceFaqsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
-import com.everhomes.yellowPage.AllianceTag;
 
 @Component
-public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
+public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	
 	@Autowired
 	DbProvider dbProvider;
@@ -40,24 +38,24 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	@Autowired
 	SequenceProvider sequenceProvider;
 	
-	com.everhomes.server.schema.tables.EhAllianceFaqTypes TABLE = Tables.EH_ALLIANCE_FAQ_TYPES;
+	com.everhomes.server.schema.tables.EhAllianceFaqs TABLE = Tables.EH_ALLIANCE_FAQS;
 	
-	Class<AllianceFAQType> CLASS = AllianceFAQType.class;
+	Class<AllianceFAQ> CLASS = AllianceFAQ.class;
 	
 
 	@Override
-	public void createFAQType(AllianceFAQType faqType) {
+	public void createFAQ(AllianceFAQ createItem) {
 		// 设置动态属性 如id，createTime
 		Long id = sequenceProvider
 				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(CLASS));
-		faqType.setId(id);
-		faqType.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		faqType.setCreateUid(UserContext.currentUserId());
-		faqType.setDefaultOrder(id);
-		faqType.setStatus(YellowPageStatus.ACTIVE.getCode());
+		createItem.setId(id);
+		createItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		createItem.setCreateUid(UserContext.currentUserId());
+		createItem.setStatus(YellowPageStatus.ACTIVE.getCode());
+		createItem.setDefaultOrder(id);
 
 		// 使用dao方法
-		writeDao().insert(faqType);
+		writeDao().insert(createItem);
 
 		// 广播给从数据库
 		DaoHelper.publishDaoAction(DaoAction.CREATE, CLASS, null);
@@ -65,19 +63,18 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public void updateFAQType(AllianceFAQType faqType) {
+	public void updateFAQ(AllianceFAQ updateItem) {
 		// 使用dao方法
-		writeDao().update(faqType);
+		writeDao().update(updateItem);
 
 		// 广播给从数据库
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, CLASS, null);
 	}
 
 	@Override
-	public void deleteFAQType(Long faqTypeId) {
+	public void deleteFAQ(Long itemId) {
 
-		// 当前 item只能更新name,showFlag,order
-		int updateCnt = updateSingle(faqTypeId, query -> {
+		int updateCnt = updateSingle(itemId, query -> {
 			query.addValue(TABLE.STATUS, YellowPageStatus.INACTIVE.getCode());
 		});
 
@@ -87,10 +84,10 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public AllianceFAQType getFAQType(Long faqTypeId) {
+	public AllianceFAQ getFAQ(Long itemId) {
 		
-		List<AllianceFAQType> types =  listTool(null, null, (l, q) -> {
-			q.addConditions(TABLE.ID.eq(faqTypeId));
+		List<AllianceFAQ> types =  listTool(null, null, (l, q) -> {
+			q.addConditions(TABLE.ID.eq(itemId));
 			return q;
 		});
 		
@@ -98,8 +95,8 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public void updateFAQTypeOrder(Long faqTypeId, Long defaultOrderId) {
-		int updateCnt = updateSingle(faqTypeId, query -> {
+	public void updateFAQOrder(Long itemId, Long defaultOrderId) {
+		int updateCnt = updateSingle(itemId, query -> {
 			query.addValue(TABLE.DEFAULT_ORDER, defaultOrderId);
 		});
 
@@ -109,8 +106,8 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, CrossShardListingLocator locator,
-			Integer pageSize, Long pageAnchor) {
+	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
+			Long pageAnchor) {
 		return listTool(pageSize, locator, (l,q)-> {
 			q.addConditions(TABLE.NAMESPACE_ID.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
 			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
@@ -120,9 +117,9 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		});
 	}
 	
-	private EhAllianceFaqTypesDao getAllianceFAQTypeDao(AccessSpec arg0) {
+	private EhAllianceFaqsDao getAllianceFAQDao(AccessSpec arg0) {
 		DSLContext context = dbProvider.getDslContext(arg0);
-		return new EhAllianceFaqTypesDao(context.configuration());
+		return new EhAllianceFaqsDao(context.configuration());
 	}
 	
 	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
@@ -131,7 +128,7 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 			return 0;
 		}
 
-		UpdateQuery<EhAllianceFaqTypesRecord> query = updateQuery();
+		UpdateQuery<EhAllianceFaqsRecord> query = updateQuery();
 
 		if (callback != null) {
 			callback.buildCondition(query);
@@ -143,21 +140,21 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		return query.execute();
 	}
 
-	private EhAllianceFaqTypesDao readDao() {
-		return getAllianceFAQTypeDao(AccessSpec.readOnly());
+	private EhAllianceFaqsDao readDao() {
+		return getAllianceFAQDao(AccessSpec.readOnly());
 	}
 
-	private EhAllianceFaqTypesDao writeDao() {
-		return getAllianceFAQTypeDao(AccessSpec.readWrite());
+	private EhAllianceFaqsDao writeDao() {
+		return getAllianceFAQDao(AccessSpec.readWrite());
 	}
 
-	public List<AllianceFAQType> listTool(Integer pageSize, ListingLocator locator,
+	public List<AllianceFAQ> listTool(Integer pageSize, ListingLocator locator,
 			ListingQueryBuilderCallback callback) {
 		
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
         int realPageSize = null == pageSize ? 0 : pageSize;
         
-        SelectQuery<EhAllianceFaqTypesRecord> query = context.selectQuery(TABLE);
+        SelectQuery<EhAllianceFaqsRecord> query = context.selectQuery(TABLE);
         if(callback != null)
         	callback.buildCondition(locator, query);
 
@@ -174,7 +171,7 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		query.addOrderBy(TABLE.DEFAULT_ORDER.asc());
 		query.addOrderBy(TABLE.ID.asc());
         
-        List<AllianceFAQType> list = query.fetchInto(CLASS);
+        List<AllianceFAQ> list = query.fetchInto(CLASS);
         
         // 设置锚点
         if (null != locator && null != list) {
@@ -205,11 +202,11 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		return dbProvider.getDslContext(AccessSpec.readWrite());
 	}
 
-	private SelectQuery<EhAllianceFaqTypesRecord> selectQuery() {
+	private SelectQuery<EhAllianceFaqsRecord> selectQuery() {
 		return readOnlyContext().selectQuery(TABLE);
 	}
 
-	private UpdateQuery<EhAllianceFaqTypesRecord> updateQuery() {
+	private UpdateQuery<EhAllianceFaqsRecord> updateQuery() {
 		return readWriteContext().updateQuery(TABLE);
 	}
 	

@@ -42,6 +42,8 @@ import com.everhomes.yellowPage.faq.GetFAQOnlineServiceResponse;
 import com.everhomes.yellowPage.faq.ListTopFAQsCommand;
 import com.everhomes.yellowPage.faq.ListTopFAQsResponse;
 import com.everhomes.yellowPage.faq.ListUiFAQsResponse;
+import com.everhomes.yellowPage.faq.ListUiServiceRecordsCommand;
+import com.everhomes.yellowPage.faq.ListUiServiceRecordsResponse;
 import com.everhomes.yellowPage.faq.UpdateFAQCommand;
 import com.everhomes.yellowPage.faq.UpdateFAQTypeCommand;
 import com.everhomes.yellowPage.faq.UpdateFAQTypeOrdersCommand;
@@ -1204,7 +1206,7 @@ public class YellowPageController  extends ControllerBase {
 	/**
 	 * <b>URL: /yellowPage/listUiFAQs</b>
 	 * <p>
-	 * 客户端/前端获取问题
+	 * 获取问题列表
 	 * </p>
 	 */
 	@RequireAuthentication(false)
@@ -1221,7 +1223,7 @@ public class YellowPageController  extends ControllerBase {
 	/**
 	 * <b>URL: /yellowPage/updateFAQSolveTimes</b>
 	 * <p>
-	 * 客户端/前端获取问题
+	 * 更新解决/未解决次数
 	 * </p>
 	 */
 	@RequireAuthentication(false)
@@ -1235,4 +1237,20 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /yellowPage/listUiServiceRecords</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("listUiServiceRecords")
+	@RestReturn(value = ListUiServiceRecordsResponse.class)
+	public RestResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
+		ListUiServiceRecordsResponse resp = allianceFAQService.listUiServiceRecords(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

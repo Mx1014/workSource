@@ -47,4 +47,6 @@ public interface AllianceFAQService {
 
 	void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd);
 
+	ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd);
+
 }

@@ -24,19 +24,16 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQType(UpdateFAQTypeCommand cmd) {
-		
 	}
 
 	@Override
 	public void deleteFAQType(DeleteFAQTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		allianceFAQProvider.deleteFAQType(cmd.getFAQTypeId());
 	}
 
 	@Override
 	public ListFAQTypesResponse listFAQTypes(ListFAQTypesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		return allianceFAQProvider.listFAQTypes(cmd, cmd.getPageSize(), cmd.getPageAnchor());
 	}
 
 	@Override
@@ -158,6 +155,12 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
 		 
+	}
+
+	@Override
+	public ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
