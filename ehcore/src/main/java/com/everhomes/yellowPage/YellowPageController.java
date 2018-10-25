@@ -922,7 +922,7 @@ public class YellowPageController  extends ControllerBase {
 	 * <p> 获取所有服务名称 </p>
 	 */
 	@RequestMapping("listServiceNames")
-    @RestReturn(value = IdNameDTO.class, collection = true)
+    @RestReturn(value = IdNameInfoDTO.class, collection = true)
 	public RestResponse listServiceNames(ListServiceNamesCommand cmd) {
         return new RestResponse(allianceClickStatService.listServiceNames(cmd));
 	}
@@ -932,7 +932,7 @@ public class YellowPageController  extends ControllerBase {
 	 * <p> 获取所有服务类型名称 </p>
 	 */
 	@RequestMapping("listServiceTypeNames")
-    @RestReturn(value = IdNameDTO.class, collection = true)
+    @RestReturn(value = IdNameInfoDTO.class, collection = true)
 	public RestResponse listServiceTypeNames(ListServiceTypeNamesCommand cmd) {
         return new RestResponse(allianceClickStatService.listServiceTypeNames(cmd));
 	}

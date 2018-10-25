@@ -44,8 +44,8 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_FLOW_CASE_SERVICE_NOT_FOUND= 11206;  //未获取到服务
     
     //FAQ
-    static final int ERROR_FAQ_TYPE_NOT_FOUND = 11400;  //问题
-    static final int ERROR_FAQ_TYPE_NOT_VALID1 = 11401;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_FOUND = 11400;  //
+    static final int ERROR_FAQ_NOT_FOUND = 11401;  //
     static final int ERROR_FAQ_TYPE_NOT_VALID2 = 11402;  //问题
     static final int ERROR_FAQ_TYPE_NOT_VALID3 = 11403;  //问题
     static final int ERROR_FAQ_TYPE_NOT_VALID4 = 11404;  //问题

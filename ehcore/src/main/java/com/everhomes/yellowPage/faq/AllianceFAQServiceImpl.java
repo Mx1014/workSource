@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
+import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.yellowPage.ListUiFAQsCommand;
@@ -24,6 +27,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
@@ -68,6 +74,28 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
 	}
+	
+
+	@Override
+	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
+		AllianceFAQType upFaqType = allianceFAQProvider.getFAQType(cmd.getUpFAQTypeId());
+		AllianceFAQType lowFaqType = allianceFAQProvider.getFAQType(cmd.getLowFAQTypeId());
+		if (null == upFaqType ||null == lowFaqType) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
+		}		
+		
+		if (upFaqType.getDefaultOrder() < lowFaqType.getDefaultOrder()) {
+			return;
+		}
+		
+		dbProvider.execute(r->{
+			allianceFAQProvider.updateFAQTypeOrder(upFaqType.getId(), lowFaqType.getDefaultOrder());
+			allianceFAQProvider.updateFAQTypeOrder(lowFaqType.getId(), upFaqType.getDefaultOrder());
+			return null;
+		});
+		
+	}
+
 
 	@Override
 	public void createFAQ(CreateFAQCommand cmd) {
@@ -77,38 +105,138 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQ(UpdateFAQCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		AllianceFAQ faq = allianceFAQProvider.getFAQ(cmd.getFAQId());
+		if (null == faq) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
+		}
+		faq.setTitle(cmd.getTitle());
+		faq.setContent(cmd.getContent());
+		faq.setTypeId(cmd.getTypeId());
+		faq.setTypeName(cmd.getTypeName());
+		allianceFAQProvider.updateFAQ(faq);
 	}
 
 	@Override
 	public void updateTopFAQFlag(UpdateTopFAQFlagCommand cmd) {
-		// TODO Auto-generated method stub
+		AllianceFAQ faq = allianceFAQProvider.getFAQ(cmd.getFAQId());
+		if (null == faq) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
+		}
 		
+		if (faq.getTopFlag().equals(cmd.getTopFlag())) {
+			return;
+		}
+		
+		allianceFAQProvider.updateTopFAQFlag(cmd.getFAQId(), cmd.getTopFlag());
 	}
 
 	@Override
 	public void deleteFAQ(DeleteFAQCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		allianceFAQProvider.deleteFAQ(cmd.getFAQId());
 	}
 
 	@Override
 	public ListFAQsResponse listFAQs(ListFAQsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListingLocator locator = new ListingLocator();
+		List<AllianceFAQ> faqs = allianceFAQProvider.listFAQs(cmd, locator, cmd.getPageSize(), cmd.getPageAnchor(), cmd.getFAQType(), cmd.getTopFlag(), cmd.getKeyword(), cmd.getOrderType(), cmd.getSortType());
+
+		// 组织
+		List<FAQDTO> dtos = faqs.stream().map(r -> {
+			return ConvertHelper.convert(r, FAQDTO.class);
+		}).collect(Collectors.toList());
+
+		// 返回
+		ListFAQsResponse resp = new ListFAQsResponse();
+		resp.setDtos(dtos);
+		resp.setNextPageAnchor(locator.getAnchor());
+		return resp;
 	}
 
 	@Override
 	public ListTopFAQsResponse listTopFAQs(ListTopFAQsCommand cmd) {
-		// TODO Auto-generated method stub
+		List<AllianceFAQ> faqs = allianceFAQProvider.listTopFAQs(cmd, null, null, null);
+		List<IdNameDTO> dtos = faqs.stream().map(r -> {
+			IdNameDTO dto = new IdNameDTO();
+			dto.setId(r.getId());
+			dto.setName(r.getTitle());
+			return dto;
+		}).collect(Collectors.toList());
+		ListTopFAQsResponse resp = new ListTopFAQsResponse();
+		resp.setDtos(dtos);
 		return null;
 	}
 
 	@Override
 	public void updateTopFAQOrders(UpdateTopFAQOrdersCommand cmd) {
-		// TODO Auto-generated method stub
+		AllianceFAQ upFaq = allianceFAQProvider.getFAQ(cmd.getUpFAQId());
+		AllianceFAQ lowFaq = allianceFAQProvider.getFAQ(cmd.getLowFAQId());
+		if (null == upFaq ||null == lowFaq) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
+		}		
 		
+		if (upFaq.getTopOrder() < lowFaq.getTopOrder()) {
+			return;
+		}
+		
+		dbProvider.execute(r->{
+			allianceFAQProvider.updateTopFAQOrder(upFaq.getId(), lowFaq.getTopOrder());
+			allianceFAQProvider.updateTopFAQOrder(lowFaq.getId(), upFaq.getTopOrder());
+			return null;
+		});
+		
+	}
+	
+	@Override
+	public ListUiFAQsResponse listUiFAQs(ListUiFAQsCommand cmd) {
+		ListUiFAQsResponse resp = new ListUiFAQsResponse();
+		List<IdNameInfoDTO> dtos = new ArrayList<>();
+		if (null != cmd.getFAQId()) {
+			AllianceFAQ faq = allianceFAQProvider.getFAQ(cmd.getFAQId());
+			if (null != faq) {
+				IdNameInfoDTO dto = new IdNameInfoDTO();
+				dto.setId(faq.getId());
+				dto.setName(faq.getTitle());
+				dto.setContent(faq.getContent());
+				dtos.add(dto);
+			}
+
+			resp.setDtos(dtos);
+			return resp;
+		}
+
+		if (null != cmd.getFAQTypeId()) {
+			List<AllianceFAQ> faqs = listFAQByType(cmd, cmd.getFAQTypeId());
+			dtos = faqs.stream().map(r -> {
+				IdNameInfoDTO dto = new IdNameInfoDTO();
+				dto.setId(r.getId());
+				dto.setName(r.getTitle());
+				return dto;
+			}).collect(Collectors.toList());
+			resp.setDtos(dtos);
+			return resp;
+		}
+
+		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, null, null, null);
+		dtos = faqTypes.stream().map(r -> {
+			IdNameInfoDTO dto = new IdNameInfoDTO();
+			dto.setId(r.getId());
+			dto.setName(r.getName());
+			return dto;
+		}).collect(Collectors.toList());
+		resp.setDtos(dtos);
+		return resp;
+	}
+	
+	private List<AllianceFAQ> listFAQByType(AllianceCommonCommand cmd, Long faqTypeId) {
+		return allianceFAQProvider.listFAQs(cmd, null, null, null,  faqTypeId, null, null, null, null);
+	}
+
+
+	@Override
+	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
+//		private Long FAQId;
+//		private Byte solveStaus;
+//		allianceFAQProvider.updateFAQSolveTimes
 	}
 
 
@@ -121,7 +249,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public void updateOperateServices(UpdateOperateServicesCommand cmd) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -172,12 +299,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	}
 
 	@Override
-	public ListUiFAQsResponse listUiFAQs(ListUiFAQsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
@@ -190,26 +311,15 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	}
 
 	@Override
-	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public GetPendingServiceCountsResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
-		 
-	}
 
 	@Override
 	public ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

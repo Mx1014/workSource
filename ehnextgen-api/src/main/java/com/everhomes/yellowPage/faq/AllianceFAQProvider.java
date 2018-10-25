@@ -16,7 +16,7 @@ public interface AllianceFAQProvider {
 	
 	AllianceFAQType getFAQType(Long faqTypeId);
 	
-	void updateFAQTypeOrders(Long upFAQTypeId, Long lowFAQTypeId);
+	void updateFAQTypeOrder(Long upFAQTypeId, Long lowFAQTypeId);
 	
 	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 
@@ -37,7 +37,7 @@ public interface AllianceFAQProvider {
 	//热门问题
 	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 	
-	void updateTopFAQOrders(Long upFAQId, Long lowFAQId);
+	void updateTopFAQOrder(Long upFAQId, Long lowFAQId);
 
 	
 	//运营商模块

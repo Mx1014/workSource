@@ -47,7 +47,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public void updateFAQTypeOrders(Long upFAQTypeId, Long lowFAQTypeId) {
+	public void updateFAQTypeOrder(Long FAQTypeId, Long newDefaultOrderId) {
 //		dbProvider.execute(arg0)
 //		allianceFaqTypeProvider.updateFAQTypeOrder(upFAQTypeId, lowFAQTypeId); 
 	}
@@ -94,7 +94,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public void updateTopFAQOrders(Long upFAQId, Long lowFAQId) {
+	public void updateTopFAQOrder(Long faqId, Long newTopOrder) {
 		
 	}
 

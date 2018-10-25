@@ -44,7 +44,7 @@ import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.statistics.event.StatEventCommonStatus;
 import com.everhomes.rest.statistics.event.StatEventLogDTO;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
-import com.everhomes.rest.yellowPage.IdNameDTO;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.ListServiceNamesCommand;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
@@ -333,7 +333,7 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	}
 
 	@Override
-	public List<IdNameDTO> listServiceNames(ListServiceNamesCommand cmd) {
+	public List<IdNameInfoDTO> listServiceNames(ListServiceNamesCommand cmd) {
 		// 校验权限
 		checkPrivilege(PrivilegeType.USER_BEHAVIOUR_STAT, cmd.getCurrentPMId(), cmd.getAppId(), cmd.getCurrentProjectId());
 		
@@ -344,12 +344,12 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 		}
 
 		return dtos.stream().map(r -> {
-			return ConvertHelper.convert(r, IdNameDTO.class);
+			return ConvertHelper.convert(r, IdNameInfoDTO.class);
 		}).collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd) {
+	public List<IdNameInfoDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd) {
 		// 校验权限
 		checkPrivilege(PrivilegeType.USER_BEHAVIOUR_STAT, cmd.getCurrentPMId(), cmd.getAppId(),
 				cmd.getCurrentProjectId());
@@ -364,7 +364,7 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 			}
 		}
 
-		List<IdNameDTO> dtos = yellowPageProvider.listServiceTypeNames(ownerType, ownerId,  cmd.getType());
+		List<IdNameInfoDTO> dtos = yellowPageProvider.listServiceTypeNames(ownerType, ownerId,  cmd.getType());
 		if (null != dtos && dtos.size() > 1) {
 			return dtos.stream().filter(r -> !r.getParentId().equals(0L)).collect(Collectors.toList());
 		}
@@ -595,7 +595,7 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 				dto = new ClickStatDTO();
 				dto.setServiceId(serviceId);
 				dto.setServiceName(serviceName);
-				IdNameDTO idName = getStatTool(stat.getType()).getTypeByServiceId(serviceId);
+				IdNameInfoDTO idName = getStatTool(stat.getType()).getTypeByServiceId(serviceId);
 				if (null != idName) {
 					dto.setServiceTypeId(idName.getId());
 					dto.setServiceTypeName(idName.getName());

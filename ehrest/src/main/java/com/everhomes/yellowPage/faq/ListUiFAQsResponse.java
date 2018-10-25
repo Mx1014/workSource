@@ -3,17 +3,18 @@ package com.everhomes.yellowPage.faq;
 import java.util.List;
 
 import com.everhomes.rest.common.IdNameDTO;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *  <li> nextPageAnchor: 下一页锚点</li>
- *  <li> dtos: 列表 {@link com.everhomes.rest.common.IdNameDTO}</li>
+ *  <li> dtos: 列表 {@link com.everhomes.rest.yellowPage.IdNameInfoDTO}</li>
  * </ul>
  */
 public class ListUiFAQsResponse {
 	private Long nextPageAnchor;
-	private List<IdNameDTO> dtos;
+	private List<IdNameInfoDTO> dtos;
 	
 	@Override
 	public String toString() {
@@ -28,11 +29,11 @@ public class ListUiFAQsResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<IdNameDTO> getDtos() {
+	public List<IdNameInfoDTO> getDtos() {
 		return dtos;
 	}
 
-	public void setDtos(List<IdNameDTO> dtos) {
+	public void setDtos(List<IdNameInfoDTO> dtos) {
 		this.dtos = dtos;
 	}
 

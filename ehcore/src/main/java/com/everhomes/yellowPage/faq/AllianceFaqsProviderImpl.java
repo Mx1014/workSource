@@ -140,19 +140,19 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	private void buildOrderBy(SelectQuery<? extends Record> q, Byte orderType, Byte sortType) {
 		
 		if (AllianceFaqOrderType.SOLVE_TIMES.getCode().equals(orderType)) {
-			if (null == sortType || sortType < 0) {
-				q.addOrderBy(TABLE.SOLVE_TIMES.desc());
-			} else {
+			if (null != sortType && sortType > 0) {
 				q.addOrderBy(TABLE.SOLVE_TIMES.asc());
+			} else {
+				q.addOrderBy(TABLE.SOLVE_TIMES.desc());
 			}
 			
 			return;
 		}
 		
-		if (null == sortType || sortType < 0) {
-			q.addOrderBy(TABLE.UN_SOLVE_TIMES.desc());
-		} else {
+		if (null != sortType && sortType > 0) {
 			q.addOrderBy(TABLE.UN_SOLVE_TIMES.asc());
+		} else {
+			q.addOrderBy(TABLE.UN_SOLVE_TIMES.desc());
 		}
 	}
 
@@ -250,8 +250,16 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void updateTopFAQFlag(Long faqId, byte topFlag) {
-		
+	public void updateTopFAQFlag(Long itemId, byte topFlag) {
+
+		int updateCnt = updateSingle(itemId, query -> {
+			query.addValue(TABLE.TOP_FLAG, topFlag);
+		});
+
+		if (updateCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	
 	}
 
 	@Override
