@@ -35,4 +35,20 @@ public class OPPushUrlHandler implements OPPushHandler {
         return null;
     }
 
+
+    @Override
+    public String refreshInstanceConfig(String instanceConfig) {
+        if(oPPushUrlDetailHandlers == null){
+            return null;
+        }
+
+        for (OPPushUrlDetailHandler handler: oPPushUrlDetailHandlers){
+            if(handler.checkUrl(instanceConfig)){
+
+                return handler.refreshInstanceConfig(instanceConfig);
+            }
+        }
+        return null;
+    }
+
 }

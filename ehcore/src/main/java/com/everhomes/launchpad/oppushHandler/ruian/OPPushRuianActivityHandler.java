@@ -1,8 +1,10 @@
 // @formatter:off
-package com.everhomes.launchpad.oppushHandler;
+package com.everhomes.launchpad.oppushHandler.ruian;
 
 import com.everhomes.activity.ActivityService;
 import com.everhomes.activity.ruian.ActivityButtService;
+import com.everhomes.activity.ruian.ActivityButtServiceImpl;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.launchpad.OPPushUrlDetailHandler;
 import com.everhomes.module.RouterInfoService;
@@ -17,9 +19,13 @@ import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.rest.ui.activity.ruian.ListRuianActivityBySceneReponse;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
+import com.everhomes.rest.widget.OPPushUrlInstanceConfig;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,31 +37,41 @@ import static com.everhomes.poll.ProcessStatus.NOTSTART;
 import static com.everhomes.poll.ProcessStatus.UNDERWAY;
 
 /**
- * 活动
+ * 瑞安活动抓取
  */
 @Component
-public class OPPush55655ActivityHandler implements OPPushUrlDetailHandler {
+public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
 
-
-    @Autowired
-    private ServiceModuleAppService serviceModuleAppService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OPPushRuianActivityHandler.class);
 
     @Autowired
-    private RouterInfoService routerService;
+    private ConfigurationProvider configProvider;
 
     @Autowired
     private ActivityButtService activityButtService ;
 
+    private final String defaultUrl = "https://m.mallcoo.cn/a/custom/10764/xtd/activitylist";
+
     @Override
     public boolean checkUrl(Object instanceConfig) {
+        //客户端传来的url应该长这个样子：
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String url = configProvider.getValue(namespaceId,"mall.ruian.url.activity", defaultUrl) ;
+        LOGGER.info("checkUrl　get defaultUrl :{}",url);
+        OPPushUrlInstanceConfig config = (OPPushUrlInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushUrlInstanceConfig.class);
+        if(config == null){
+            LOGGER.info("checkUrl　OPPushUrlInstanceConfig is null");
+            return false;
+        }
+        LOGGER.info("checkUrl　get OPPushUrlInstanceConfig :{}",config.getUrl());
+        if(url.equals(config.getUrl())){//检测链接一致则返回true
+            return true;
+        }
         return false;
     }
 
     @Override
     public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
-
-        /*OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());*/
 
         ListRuianActivityBySceneReponse res = activityButtService.listActivityRuiAnEntitiesByScene();
 
@@ -76,8 +92,11 @@ public class OPPush55655ActivityHandler implements OPPushUrlDetailHandler {
 
             }
         }
-
         return listCards;
     }
 
+    @Override
+    public String refreshInstanceConfig( String instanceConfig) {
+        return null;
+    }
 }

@@ -14,5 +14,8 @@ public interface OPPushUrlDetailHandler {
      * @return
      */
     boolean checkUrl(Object instanceConfig);
+    default String refreshInstanceConfig( String instanceConfig ){
+        return instanceConfig;
+    };
     List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context);
 }
