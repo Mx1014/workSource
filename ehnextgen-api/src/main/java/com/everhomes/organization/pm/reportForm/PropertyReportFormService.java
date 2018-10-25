@@ -1,9 +1,11 @@
 package com.everhomes.organization.pm.reportForm;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
@@ -49,4 +51,9 @@ public interface PropertyReportFormService {
 			List<String> apartmentNames);
 
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
+
+	OutputStream exportOutputStreamForCommunity(GetTotalCommunityStaticsCommand cmd, Long taskId);
+
+	OutputStream exportOutputStreamForBuilding(GetTotalBuildingStaticsCommand cmd, Long taskId);
+
 }
