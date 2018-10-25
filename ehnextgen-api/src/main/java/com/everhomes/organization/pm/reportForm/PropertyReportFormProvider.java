@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
@@ -33,5 +34,8 @@ public interface PropertyReportFormProvider {
 
 	TotalCommunityStaticsDTO getTotalCommunityStatics(Integer namespaceId, List<Long> communityIds,
 			String formatDateStr);
+
+	List<BuildingReportFormDTO> listBuildingReportForm(Integer namespaceId, Long communityId, List<Long> buildingIds,
+			String formatDateStr, Integer pageOffSet, Integer pageSize);
 
 }

@@ -3902,4 +3902,24 @@ long assetCategoryId = 0l;
 			}
 		}
 	}
+	
+	@Override
+	public BigDecimal getChargeAreaByContractIdAndAddress(ContractBuildingMappingDTO dto){
+		BigDecimal chargeArea = contractProvider.getChargeAreaByContractIdAndAddress(dto.getContractId(), dto.getBuildingName(), dto.getApartmentName());
+		return chargeArea;
+	}
+	
+	@Override
+	public BigDecimal getTotalChargeArea(List<ContractBuildingMappingDTO> dtoList){
+		BigDecimal result = BigDecimal.ZERO;
+		for (ContractBuildingMappingDTO dto: dtoList) {
+			BigDecimal chargeArea = contractProvider.getChargeAreaByContractIdAndAddress(dto.getContractId(), dto.getBuildingName(), dto.getApartmentName());
+			result.add(chargeArea!=null ? result : BigDecimal.ZERO);
+		}
+		return result;
+	}
+	
+	
+	
+	
 }

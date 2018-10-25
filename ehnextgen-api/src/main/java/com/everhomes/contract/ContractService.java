@@ -2,6 +2,7 @@
 package com.everhomes.contract;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.rest.contract.*;
@@ -70,5 +71,7 @@ public interface ContractService {
 	//导出对接下载中心
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
+	BigDecimal getChargeAreaByContractIdAndAddress(ContractBuildingMappingDTO dto);
+	BigDecimal getTotalChargeArea(List<ContractBuildingMappingDTO> dtoList);
    
 }

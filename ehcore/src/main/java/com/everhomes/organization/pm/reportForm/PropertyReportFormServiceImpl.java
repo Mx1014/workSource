@@ -188,8 +188,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
         String dateStr = cmd.getDateStr();
         String formatDateStr = formatDateStr(dateStr);
         
-        List<BuildingReportFormDTO> resultList = null;
-        //List<BuildingReportFormDTO> resultList = propertyReportFormProvider.listBuildingReportForm(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingIds(),formatDateStr,pageOffSet,pageSize);
+        List<BuildingReportFormDTO> resultList = propertyReportFormProvider.listBuildingReportForm(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingIds(),formatDateStr,pageOffSet,pageSize);
         if(resultList.size() <= pageSize){
             response.setNextPageAnchor(null);
         }else {

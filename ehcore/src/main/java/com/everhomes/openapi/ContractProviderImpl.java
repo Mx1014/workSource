@@ -1590,6 +1590,7 @@ public class ContractProviderImpl implements ContractProvider {
 							         .where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID.eq(contractId))
 							         .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 							         .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
+							         .and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq((byte)2))
 							         .fetchAnyInto(Double.class);
 		
 		if (areaSize != null) {

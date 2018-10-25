@@ -23,6 +23,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
@@ -30,7 +31,9 @@ import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhBuildings;
 import com.everhomes.server.schema.tables.EhCommunities;
+import com.everhomes.server.schema.tables.EhPropertyStatisticBuilding;
 import com.everhomes.server.schema.tables.EhPropertyStatisticCommunity;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticBuildingDao;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticCommunityDao;
@@ -231,13 +234,22 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(a.DATE_STR.eq(dateStr));
 		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
-			result.setBuildingCount(r.getValue(DSL.sum(a.BUILDING_COUNT)).intValue());
-			result.setTotalApartmentCount(r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT)).intValue());
-			result.setFreeApartmentCount(r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT)).intValue());
-			result.setRentApartmentCount(r.getValue(DSL.sum(a.RENT_APARTMENT_COUNT)).intValue());
-			result.setOccupiedApartmentCount(r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT)).intValue());
-			result.setLivingApartmentCount(r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT)).intValue());
-			result.setSaledApartmentCount(r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT)).intValue());
+			
+			BigDecimal buildingCount = r.getValue(DSL.sum(a.BUILDING_COUNT));
+			BigDecimal totalApartmentCount = r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT));
+			BigDecimal freeApartmentCount = r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT));
+			BigDecimal rentApartmentCount = r.getValue(DSL.sum(a.RENT_APARTMENT_COUNT));
+			BigDecimal occupiedApartmentCount = r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT));
+			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
+			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
+			
+			result.setBuildingCount(buildingCount!=null ? buildingCount.intValue() : null);
+			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
+			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
+			result.setRentApartmentCount(rentApartmentCount!=null ? rentApartmentCount.intValue() : null);
+			result.setOccupiedApartmentCount(occupiedApartmentCount!=null ? occupiedApartmentCount.intValue() : null);
+			result.setLivingApartmentCount(livingApartmentCount!=null ? livingApartmentCount.intValue() : null);
+			result.setSaledApartmentCount(saledApartmentCount!=null ? saledApartmentCount.intValue() : null);
 			result.setAreaSize(r.getValue(DSL.sum(a.AREA_SIZE)));
 			result.setRentArea(r.getValue(DSL.sum(a.RENT_AREA)));
 			result.setFreeArea(r.getValue(DSL.sum(a.FREE_AREA)));
@@ -253,6 +265,52 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			}
 			result.setRentRate(rentRate);
 			result.setFreeRate(freeRate);
+		});
+		return result;
+	}
+
+	@Override
+	public List<BuildingReportFormDTO> listBuildingReportForm(Integer namespaceId, Long communityId,
+			List<Long> buildingIds, String dateStr, Integer pageOffSet, Integer pageSize) {
+		List<BuildingReportFormDTO> result = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhBuildings a = Tables.EH_BUILDINGS;
+		EhPropertyStatisticBuilding b = Tables.EH_PROPERTY_STATISTIC_BUILDING;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(a.ID,a.NAME,
+				b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
+				b.OCCUPIED_APARTMENT_COUNT,b.LIVING_APARTMENT_COUNT,b.SALED_APARTMENT_COUNT,
+				b.AREA_SIZE,b.RENT_AREA,b.FREE_AREA,b.RENT_RATE,b.FREE_RATE);
+		query.addFrom(a);
+		query.addJoin(b, JoinType.LEFT_OUTER_JOIN, a.ID.eq(b.BUILDING_ID));
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(a.COMMUNITY_ID.eq(communityId));
+		query.addConditions(a.ID.in(buildingIds));
+		query.addConditions(b.DATE_STR.eq(dateStr));
+		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		if (pageOffSet != null && pageSize != null) {
+			query.addLimit(pageOffSet, pageSize + 1);
+		}
+		query.fetch().forEach(r->{
+			BuildingReportFormDTO dto = new BuildingReportFormDTO();
+			
+			dto.setBuildingId(r.getValue(a.ID));
+			dto.setBuildingName(r.getValue(a.NAME));
+			dto.setTotalApartmentCount(r.getValue(b.TOTAL_APARTMENT_COUNT));
+			dto.setFreeApartmentCount(r.getValue(b.FREE_APARTMENT_COUNT));
+			dto.setRentApartmentCount(r.getValue(b.RENT_APARTMENT_COUNT));
+			dto.setOccupiedApartmentCount(r.getValue(b.OCCUPIED_APARTMENT_COUNT));
+			dto.setLivingApartmentCount(r.getValue(b.LIVING_APARTMENT_COUNT));
+			dto.setSaledApartmentCount(r.getValue(b.SALED_APARTMENT_COUNT));
+			dto.setAreaSize(r.getValue(b.AREA_SIZE));
+			dto.setRentArea(r.getValue(b.RENT_AREA));
+			dto.setFreeArea(r.getValue(b.FREE_AREA));
+			dto.setRentRate(r.getValue(b.RENT_RATE));
+			dto.setFreeRate(r.getValue(b.FREE_RATE));
+			
+			result.add(dto);
 		});
 		return result;
 	}
