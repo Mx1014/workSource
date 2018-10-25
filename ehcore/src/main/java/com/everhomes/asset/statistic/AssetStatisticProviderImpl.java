@@ -26,6 +26,7 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -630,10 +631,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
 		ListBillStatisticByBuildingDTO dto = listBillStatisticByBuildingTotalUtil(namespaceId, 
 				ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		//调用资产的接口提供给缴费报表的楼宇信息列表的接口
+		BuildingTotalStaticsDTO buildingTotalStaticsDTO = propertyReportFormService.getTotalBuildingBriefStaticsForBill(
+				namespaceId, ownerId, buildingNameList, dateStrEnd);
+		dto.setBuildingName(buildingTotalStaticsDTO.getBuildindCount() != null ? buildingTotalStaticsDTO.getBuildindCount().toString() : "0");
+		dto.setAddressCount(buildingTotalStaticsDTO.getTotalApartmentCount() != null ? buildingTotalStaticsDTO.getTotalApartmentCount() : 0);
+		dto.setAreaSize(buildingTotalStaticsDTO.getAreaSize() != null ? buildingTotalStaticsDTO.getAreaSize() : BigDecimal.ZERO);
         return dto;
 	}
 	
