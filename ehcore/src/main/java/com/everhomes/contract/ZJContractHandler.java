@@ -1,5 +1,6 @@
 package com.everhomes.contract;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -857,5 +858,19 @@ public class ZJContractHandler implements ContractService{
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,
+			List<String> buildindNames, List<String> apartmentNames) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames,
+			List<String> apartmentNames) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

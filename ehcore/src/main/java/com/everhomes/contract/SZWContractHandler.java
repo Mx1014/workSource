@@ -1,7 +1,9 @@
 package com.everhomes.contract;
 
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -329,6 +331,20 @@ public class SZWContractHandler implements ContractService{
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,
+			List<String> buildindNames, List<String> apartmentNames) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames,
+			List<String> apartmentNames) {
+		// TODO Auto-generated method stub
+		return null;
 	}
     
 }

@@ -3904,19 +3904,14 @@ long assetCategoryId = 0l;
 	}
 	
 	@Override
-	public BigDecimal getChargeAreaByContractIdAndAddress(ContractBuildingMappingDTO dto){
-		BigDecimal chargeArea = contractProvider.getChargeAreaByContractIdAndAddress(dto.getContractId(), dto.getBuildingName(), dto.getApartmentName());
-		return chargeArea;
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
+		Map<String, BigDecimal> resultMap = contractProvider.getChargeAreaByContractIdAndAddress(contractIds, buildindNames, apartmentNames);
+		return resultMap;
 	}
 	
 	@Override
-	public BigDecimal getTotalChargeArea(List<ContractBuildingMappingDTO> dtoList){
-		BigDecimal result = BigDecimal.ZERO;
-		for (ContractBuildingMappingDTO dto: dtoList) {
-			BigDecimal chargeArea = contractProvider.getChargeAreaByContractIdAndAddress(dto.getContractId(), dto.getBuildingName(), dto.getApartmentName());
-			result.add(chargeArea!=null ? result : BigDecimal.ZERO);
-		}
-		return result;
+	public BigDecimal getTotalChargeArea(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
+		return contractProvider.getTotalChargeArea(contractIds, buildindNames, apartmentNames);
 	}
 	
 	
