@@ -14,7 +14,7 @@ public interface AllianceFaqTypeProvider {
 	
 	AllianceFAQType getFAQType(Long faqTypeId);
 	
-	void updateFAQTypeOrders(Long upFAQTypeId, Long lowFAQTypeId);
+	void updateFAQTypeOrder(Long faqTypeId, Long defaultOrderId);
 	
 	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, CrossShardListingLocator locator, Integer pageSize, Long pageAnchor);
 }

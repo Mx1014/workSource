@@ -1217,20 +1217,4 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /yellowPage/getSquareCardInfos</b>
-	 * <p>
-	 * 客户端获取icon跳转信息
-	 * </p>
-	 */
-	@RequireAuthentication(false)
-	@RequestMapping("getSquareCardInfos")
-	@RestReturn(value = GetSquareCardInfosResponse.class)
-	public RestResponse getSquareCardInfos(GetSquareCardInfosCommand cmd) {
-		GetSquareCardInfosResponse resp = allianceFAQService.getSquareCardInfos(cmd);
-		RestResponse response = new RestResponse(resp);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
 }

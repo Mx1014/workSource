@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>infos : 字符串list 分别代表开工单 聊天路由 常见问题 kefu电话</li>
+ * <li>infos : 字符串list 分别代表开工单 常见问题  聊天 kefu电话</li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月24日

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
@@ -16,6 +17,13 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	
 	@Autowired
 	private AllianceFaqTypeProvider allianceFaqTypeProvider;
+	
+	@Autowired
+	private AllianceFaqProvider allianceFaqProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
+	
 
 	@Override
 	public void createFAQType(AllianceFAQType faqType) {
@@ -39,7 +47,8 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public void updateFAQTypeOrders(Long upFAQTypeId, Long lowFAQTypeId) {
-		allianceFaqTypeProvider.updateFAQTypeOrders(upFAQTypeId, lowFAQTypeId);
+//		dbProvider.execute(arg0)
+//		allianceFaqTypeProvider.updateFAQTypeOrder(upFAQTypeId, lowFAQTypeId); 
 	}
 
 	@Override

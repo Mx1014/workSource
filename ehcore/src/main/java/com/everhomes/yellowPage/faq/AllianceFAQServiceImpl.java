@@ -1,5 +1,8 @@
 package com.everhomes.yellowPage.faq;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -99,8 +102,27 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public GetLatestServiceStateResponse getLatestServiceState(GetLatestServiceStateCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		GetLatestServiceStateResponse resp = new GetLatestServiceStateResponse();
+		resp.setServiceId(500000028L);
+		resp.setServiceName("测试");
+		resp.setCurrentStatus("处理中");
+		List<String> channels = new ArrayList<>();
+		channels.add("开始");
+		channels.add("中间1");
+		channels.add("中间2");
+		channels.add("中间3");
+		channels.add("结束");
+		
+		List<String> squareInfos = new ArrayList<>();
+		squareInfos.add("http://www.baidu.com");
+		squareInfos.add("http://www.baidu.com");
+		squareInfos.add("505389");
+		squareInfos.add("0755-123456");
+		resp.setChannels(channels);
+		resp.setSquareInfos(squareInfos);
+//		resp.set
+		return resp;
 	}
 
 	@Override
@@ -131,12 +153,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public GetSquareCardInfosResponse getSquareCardInfos(GetSquareCardInfosCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
