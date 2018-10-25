@@ -27,8 +27,8 @@ import com.everhomes.yellowPage.faq.DeleteFAQCommand;
 import com.everhomes.yellowPage.faq.DeleteFAQTypeCommand;
 import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
 import com.everhomes.yellowPage.faq.GetLatestServiceStateResponse;
-import com.everhomes.yellowPage.faq.GetServiceCountsCommand;
-import com.everhomes.yellowPage.faq.GetServiceCountsResponse;
+import com.everhomes.yellowPage.faq.GetPendingServiceCountsCommand;
+import com.everhomes.yellowPage.faq.GetPendingServiceCountsResponse;
 import com.everhomes.yellowPage.faq.GetSquareCardInfosCommand;
 import com.everhomes.yellowPage.faq.GetSquareCardInfosResponse;
 import com.everhomes.yellowPage.faq.ListFAQTypesCommand;
@@ -48,6 +48,7 @@ import com.everhomes.yellowPage.faq.UpdateFAQTypeOrdersCommand;
 import com.everhomes.yellowPage.faq.UpdateOperateServiceOrdersCommand;
 import com.everhomes.yellowPage.faq.UpdateOperateServicesCommand;
 import com.everhomes.yellowPage.faq.UpdateFAQOnlineServiceCommand;
+import com.everhomes.yellowPage.faq.UpdateFAQSolveTimesCommand;
 import com.everhomes.yellowPage.faq.UpdateTopFAQFlagCommand;
 import com.everhomes.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.yellowPage.stat.AllianceClickStatService;
@@ -1191,9 +1192,9 @@ public class YellowPageController  extends ControllerBase {
 	 * <p> 获取处理中的服务记录个数 </p>
 	 */
 	@RequestMapping("getServiceCounts")
-    @RestReturn(value = GetServiceCountsResponse.class)
-	public RestResponse getServiceCounts(GetServiceCountsCommand cmd) {
-		GetServiceCountsResponse resp = allianceFAQService.getServiceCounts(cmd);
+    @RestReturn(value = GetPendingServiceCountsResponse.class)
+	public RestResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
+		GetPendingServiceCountsResponse resp = allianceFAQService.getPendingServiceCounts(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1212,6 +1213,23 @@ public class YellowPageController  extends ControllerBase {
 	public RestResponse listUiFAQs(ListUiFAQsCommand cmd) {
 		ListUiFAQsResponse resp = allianceFAQService.listUiFAQs(cmd);
 		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/updateFAQSolveTimes</b>
+	 * <p>
+	 * 客户端/前端获取问题
+	 * </p>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("updateFAQSolveTimes")
+	@RestReturn(value = String.class)
+	public RestResponse updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
+		allianceFAQService.updateFAQSolveTimes(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

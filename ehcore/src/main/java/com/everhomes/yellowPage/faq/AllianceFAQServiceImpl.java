@@ -126,12 +126,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	}
 
 	@Override
-	public GetServiceCountsResponse getServiceCounts(GetServiceCountsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public ListUiFAQsResponse listUiFAQs(ListUiFAQsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
@@ -153,6 +147,17 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public GetPendingServiceCountsResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
+		 
 	}
 
 }

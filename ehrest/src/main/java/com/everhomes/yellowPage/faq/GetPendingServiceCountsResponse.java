@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * @author huangmingbo 
  * @date 2018年10月23日
  */
-public class GetServiceCountsResponse {
+public class GetPendingServiceCountsResponse {
 	private Long count;
 	
 	public String toString() {

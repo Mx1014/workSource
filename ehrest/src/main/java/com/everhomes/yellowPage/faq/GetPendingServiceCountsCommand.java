@@ -9,5 +9,5 @@ import com.everhomes.rest.yellowPage.AllianceCommonCommand;
  * <li>type: 服务联盟类型</li>
  * </ul>
  **/
-public class GetServiceCountsCommand extends AllianceCommonCommand{
+public class GetPendingServiceCountsCommand extends AllianceCommonCommand{
 }

@@ -34,7 +34,6 @@ public interface AllianceFAQService {
 
 	GetLatestServiceStateResponse getLatestServiceState(GetLatestServiceStateCommand cmd);
 
-	GetServiceCountsResponse getServiceCounts(GetServiceCountsCommand cmd);
 
 	ListUiFAQsResponse listUiFAQs(ListUiFAQsCommand cmd);
 
@@ -43,5 +42,9 @@ public interface AllianceFAQService {
 	GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd);
 
 	void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd);
+
+	GetPendingServiceCountsResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd);
+
+	void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd);
 
 }
