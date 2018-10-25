@@ -245,7 +245,8 @@ class PmTaskCommonServiceImpl {
 //        else {
             setPmTaskAddressInfo(cmd, task);
 //        }
-        task.setapp
+//      多应用标识
+        task.setAppId(cmd.getAppId());
         pmTaskProvider.createTask(task);
         //附件
         addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
