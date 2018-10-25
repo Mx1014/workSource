@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.contract.ContractService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.reportForm.PropertyReportFormService;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
@@ -57,7 +59,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     
     @Autowired
     private PropertyReportFormService propertyReportFormService;
- 
+    
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -687,6 +689,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			Integer namespaceId, Long ownerId, String ownerType, String dateStrBegin, String dateStrEnd,
 			String buildingName, List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName) {
 		List<ListBillStatisticByAddressDTO> list = new ArrayList<ListBillStatisticByAddressDTO>();
+		List<Long> contractIds = new ArrayList<Long>();
+		List<String> buildindNames = new ArrayList<String>();
+		List<String> apartmentNames = new ArrayList<String>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPaymentBillItems r = Tables.EH_PAYMENT_BILL_ITEMS.as("r");
         EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
@@ -695,7 +700,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addSelect(r.BUILDING_NAME, r.APARTMENT_NAME, r.TARGET_NAME,
         		r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_OWED,
         		r.AMOUNT_RECEIVABLE_WITHOUT_TAX, r.AMOUNT_RECEIVED_WITHOUT_TAX, r.AMOUNT_OWED_WITHOUT_TAX,
-        		r.TAX_AMOUNT, r.CHARGING_ITEMS_ID, r.CATEGORY_ID,
+        		r.TAX_AMOUNT, r.CHARGING_ITEMS_ID, r.CATEGORY_ID, r.CONTRACT_ID, 
         		bills.DUE_DAY_COUNT, bills.NOTICE_TIMES,
         		bills.NOTICETEL, bills.TARGET_NAME, bills.DATE_STR_BEGIN, bills.DATE_STR_END);
         query.addFrom(r);
@@ -730,13 +735,24 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         	Long categoryId = f.getValue(r.CATEGORY_ID);;
         	String projectChargingItemName = assetProvider.getProjectChargingItemName(namespaceId, ownerId, ownerType, chargingItemId, categoryId);
             dto.setProjectChargingItemName(projectChargingItemName);
+            dto.setContractId(f.getValue(r.CONTRACT_ID));//为了调用资产的提供给缴费报表的房源收费面积的接口
         	list.add(dto);
+        	//调用资产的提供给缴费报表的房源收费面积的接口
+        	contractIds.add(f.getValue(r.CONTRACT_ID));
+        	buildindNames.add(f.getValue(r.BUILDING_NAME));
+        	apartmentNames.add(f.getValue(r.APARTMENT_NAME));
         	return null;
         });
-      //TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+        //调用资产的提供给缴费报表的房源收费面积的接口
+        Map<String, BigDecimal> map = propertyReportFormService.getChargeAreaByContractIdAndAddress(contractIds, buildindNames, apartmentNames);
+        for(ListBillStatisticByAddressDTO dto : list) {
+        	//设置收费面积
+        	BigDecimal areaSize = map.get(dto.getContractId() + "-" + dto.getAddressName());
+        	if(areaSize != null) {
+        		areaSize = areaSize.setScale(2,BigDecimal.ROUND_HALF_DOWN);
+        	}
+        	dto.setAreaSize(areaSize != null ? areaSize : BigDecimal.ZERO);
+        }
         return list;
 	}
 
@@ -771,6 +787,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			String ownerType, String dateStrBegin, String dateStrEnd, String buildingName,
 			List<String> apartmentNameList, List<Long> chargingItemIdList, String targetName) {
 		ListBillStatisticByAddressDTO dto = new ListBillStatisticByAddressDTO();
+		List<Long> contractIds = new ArrayList<Long>();
+		List<String> buildindNames = new ArrayList<String>();
+		List<String> apartmentNames = new ArrayList<String>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPaymentBillItems r = Tables.EH_PAYMENT_BILL_ITEMS.as("r");
         EhPaymentBills bills = Tables.EH_PAYMENT_BILLS.as("bills");
@@ -778,7 +797,8 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         //缴费信息明细表-房源维度的统计是实时统计，因为已经细到最细的维度即收费项目维度；
         query.addSelect(r.AMOUNT_RECEIVABLE, r.AMOUNT_RECEIVED, r.AMOUNT_OWED,
         		r.AMOUNT_RECEIVABLE_WITHOUT_TAX, r.AMOUNT_RECEIVED_WITHOUT_TAX, r.AMOUNT_OWED_WITHOUT_TAX,
-        		r.TAX_AMOUNT, bills.DUE_DAY_COUNT, bills.NOTICE_TIMES);
+        		r.TAX_AMOUNT, r.CONTRACT_ID, r.BUILDING_NAME, r.APARTMENT_NAME,
+        		bills.DUE_DAY_COUNT, bills.NOTICE_TIMES);
         query.addFrom(r);
 		query.addJoin(bills, JoinType.LEFT_OUTER_JOIN, r.BILL_ID.eq(bills.ID));
         query.addConditions(r.NAMESPACE_ID.eq(namespaceId));
@@ -800,10 +820,13 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addConditions(bills.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));//物业缴费V6.0 账单、费项表增加是否删除状态字段
         query.addOrderBy(r.BUILDING_NAME, r.APARTMENT_NAME);
         dto = convertBillStatisticByAddress(query, r, bills);
-        //TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+        //调用资产的提供给缴费报表的房源收费面积的接口
+        BigDecimal areaSize = propertyReportFormService.getTotalChargeArea(contractIds, buildindNames, apartmentNames);
+        //设置收费面积
+    	if(areaSize != null) {
+    		areaSize = areaSize.setScale(2,BigDecimal.ROUND_HALF_DOWN);
+    	}
+    	dto.setAreaSize(areaSize != null ? areaSize : BigDecimal.ZERO);
         return dto;
 	}
 	
@@ -821,6 +844,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		final BigDecimal[] amountSupplementFinal = {BigDecimal.ZERO};
 		final BigDecimal[] dueDayCountFinal = {BigDecimal.ZERO};
 		final BigDecimal[] noticeTimesFinal = {BigDecimal.ZERO};
+		List<Long> contractIds = new ArrayList<Long>();
+		List<String> buildindNames = new ArrayList<String>();
+		List<String> apartmentNames = new ArrayList<String>();
 		query.fetch().map(f -> {
 			BigDecimal amountReceivable = f.getValue(r.AMOUNT_RECEIVABLE);
 	    	BigDecimal amountReceived = f.getValue(r.AMOUNT_RECEIVED);
@@ -843,6 +869,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	    	noticeTimesFinal[0] = noticeTimesFinal[0].add(noticeTimes != null ? new BigDecimal(noticeTimes) : BigDecimal.ZERO);
         	
 	    	countFinal[0] = countFinal[0].add(BigDecimal.ONE);//合计总数
+	    	
+	    	//调用资产的提供给缴费报表的房源收费面积的接口
+	    	contractIds.add(f.getValue(r.CONTRACT_ID));
+	    	buildindNames.add(f.getValue(r.BUILDING_NAME));
+	    	apartmentNames.add(f.getValue(r.APARTMENT_NAME));
+	    	
 	    	return null;
         });
 		//收缴率=已收含税金额/应收含税金额  
@@ -861,6 +893,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     	dto.setCollectionRate(collectionRate);
     	
     	dto.setCount(countFinal[0]);
+    	
+    	//调用资产的提供给缴费报表的房源收费面积的接口
+    	dto.setContractIds(contractIds);
+    	dto.setBuildindNames(buildindNames);
+    	dto.setApartmentNames(apartmentNames);
+    	
 		return dto;
 	}
     

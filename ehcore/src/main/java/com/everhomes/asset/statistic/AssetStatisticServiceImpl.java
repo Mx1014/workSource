@@ -587,7 +587,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		Cell cell2 = tempRow.createCell(1);
 		cell2.setCellStyle(style);
 		if(isLastRow) {
-			cell2.setCellValue("--");
+			cell2.setCellValue(dto.getCount() != null ? dto.getCount().toString() : "0");
 		}else {
 			cell2.setCellValue(dto.getAddressName());
 		}

@@ -2,6 +2,8 @@
 package com.everhomes.rest.asset.statistic;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *<ul>
@@ -10,7 +12,7 @@ import java.math.BigDecimal;
  * <li>ownerType: 所属项目类型</li>
  * <li>ownerId: 所属项目ID</li>
  * <li>addressName:楼宇房源名称</li>
- * <li>areaSize:建筑面积</li>
+ * <li>areaSize:收费面积</li>
  * <li>targetName:客户名称</li>
  * <li>noticeTel:催缴手机号码</li>
  * <li>dateStrBegin:账单开始时间</li>
@@ -54,6 +56,12 @@ public class ListBillStatisticByAddressDTO {
     private BigDecimal dueDayCount;
     private BigDecimal noticeTimes;
     private BigDecimal collectionRate;
+    
+    //调用资产的提供给缴费报表的房源收费面积的接口
+    private Long contractId;
+    private List<Long> contractIds;
+    private  List<String> buildindNames;
+    private  List<String> apartmentNames;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -192,6 +200,30 @@ public class ListBillStatisticByAddressDTO {
 	}
 	public void setCount(BigDecimal count) {
 		this.count = count;
+	}
+	public Long getContractId() {
+		return contractId;
+	}
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
+	public List<Long> getContractIds() {
+		return contractIds;
+	}
+	public void setContractIds(List<Long> contractIds) {
+		this.contractIds = contractIds;
+	}
+	public List<String> getBuildindNames() {
+		return buildindNames;
+	}
+	public void setBuildindNames(List<String> buildindNames) {
+		this.buildindNames = buildindNames;
+	}
+	public List<String> getApartmentNames() {
+		return apartmentNames;
+	}
+	public void setApartmentNames(List<String> apartmentNames) {
+		this.apartmentNames = apartmentNames;
 	}
     
 }
