@@ -3254,8 +3254,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 				String path = "/index";
 				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
+					host = "app-management";
 					path = "/more";
 				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+					host = "app-management";
 					path = "/all";
 				}
 
