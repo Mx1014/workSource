@@ -28,6 +28,7 @@ import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -314,8 +315,74 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		});
 		return result;
 	}
+
+	@Override
+	public TotalBuildingStaticsDTO getTotalBuildingStatics(Integer namespaceId, Long communityId,
+			List<Long> buildingIds, String dateStr) {
+		TotalBuildingStaticsDTO result = new TotalBuildingStaticsDTO();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPropertyStatisticBuilding a = Tables.EH_PROPERTY_STATISTIC_BUILDING;
+		
+		SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
+				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
+				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
+		query.addFrom(a);
+		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(a.COMMUNITY_ID.eq(communityId));
+		query.addConditions(a.BUILDING_ID.in(buildingIds));
+		query.addConditions(a.DATE_STR.eq(dateStr));
+		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.fetch().forEach(r->{
+			
+			BigDecimal totalApartmentCount = r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT));
+			BigDecimal freeApartmentCount = r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT));
+			BigDecimal rentApartmentCount = r.getValue(DSL.sum(a.RENT_APARTMENT_COUNT));
+			BigDecimal occupiedApartmentCount = r.getValue(DSL.sum(a.OCCUPIED_APARTMENT_COUNT));
+			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
+			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
+			
+			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
+			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
+			result.setRentApartmentCount(rentApartmentCount!=null ? rentApartmentCount.intValue() : null);
+			result.setOccupiedApartmentCount(occupiedApartmentCount!=null ? occupiedApartmentCount.intValue() : null);
+			result.setLivingApartmentCount(livingApartmentCount!=null ? livingApartmentCount.intValue() : null);
+			result.setSaledApartmentCount(saledApartmentCount!=null ? saledApartmentCount.intValue() : null);
+			result.setAreaSize(r.getValue(DSL.sum(a.AREA_SIZE)));
+			result.setRentArea(r.getValue(DSL.sum(a.RENT_AREA)));
+			result.setFreeArea(r.getValue(DSL.sum(a.FREE_AREA)));
+			
+			BigDecimal rentRate;
+			BigDecimal freeRate;
+			if (result.getAreaSize() == null && result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
+				rentRate = BigDecimal.ZERO;
+				freeRate = BigDecimal.ZERO;
+			}else {
+				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+			}
+			result.setRentRate(rentRate);
+			result.setFreeRate(freeRate);
+		});
+		return result;
+	}
+
+	@Override
+	public void deleteCommunityDataByDateStr(String dateStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_PROPERTY_STATISTIC_COMMUNITY)
+				.where(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.DATE_STR.eq(dateStr))
+				.execute();
+	}
 	
-	
+	@Override
+	public void deleteBuildingDataByDateStr(String dateStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_PROPERTY_STATISTIC_BUILDING)
+				.where(Tables.EH_PROPERTY_STATISTIC_BUILDING.DATE_STR.eq(dateStr))
+				.execute();
+	}
 
 
 }

@@ -34,8 +34,9 @@ public class PropertyReportFormController extends ControllerBase{
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReportFormController.class);
 
 	@Autowired
-	private PropertyReportFormService assetReportFormService;
+	private PropertyReportFormService propertyReportFormService;
 	
+	private PropertyReportFormJob propertyReportFormJob;
 	
 	/**
      * <b>URL: /pm/reportForm/getCommunityReportForm</b>
@@ -44,7 +45,7 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("getCommunityReportForm")
     @RestReturn(value=ListCommunityReportFormResponse.class)
     public RestResponse getCommunityReportForm(GetCommunityReportFormCommand cmd) {
-    	ListCommunityReportFormResponse result = assetReportFormService.getCommunityReportForm(cmd);
+    	ListCommunityReportFormResponse result = propertyReportFormService.getCommunityReportForm(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -58,7 +59,7 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("getTotalCommunityStatics")
     @RestReturn(value=TotalCommunityStaticsDTO.class)
     public RestResponse getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd) {
-    	TotalCommunityStaticsDTO result = assetReportFormService.getTotalCommunityStatics(cmd);
+    	TotalCommunityStaticsDTO result = propertyReportFormService.getTotalCommunityStatics(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -72,7 +73,7 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("exportCommunityReportForm")
     @RestReturn(value=String.class)
     public RestResponse exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
-    	assetReportFormService.exportCommunityReportForm(cmd);
+    	propertyReportFormService.exportCommunityReportForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -86,7 +87,7 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("getBuildingReportForm")
     @RestReturn(value=ListBuildingReportFormResponse.class)
     public RestResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
-    	ListBuildingReportFormResponse result = assetReportFormService.getBuildingReportForm(cmd);
+    	ListBuildingReportFormResponse result = propertyReportFormService.getBuildingReportForm(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -100,7 +101,7 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("getTotalBuildingStatics")
     @RestReturn(value=TotalBuildingStaticsDTO.class)
     public RestResponse getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
-    	TotalBuildingStaticsDTO result = assetReportFormService.getTotalBuildingStatics(cmd);
+    	TotalBuildingStaticsDTO result = propertyReportFormService.getTotalBuildingStatics(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -114,11 +115,27 @@ public class PropertyReportFormController extends ControllerBase{
     @RequestMapping("exportBuildingReportForm")
     @RestReturn(value=String.class)
     public RestResponse exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
-    	assetReportFormService.exportBuildingReportForm(cmd);
+    	propertyReportFormService.exportBuildingReportForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /pm/reportForm/testReportFormJob</b>
+     * <p>测试定时任务</p>
+     */
+    @RequestMapping("testReportFormJob")
+    @RestReturn(value=String.class)
+    public RestResponse testReportFormJob() {
+    	propertyReportFormJob.generateReportFormStatics();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
     
 }

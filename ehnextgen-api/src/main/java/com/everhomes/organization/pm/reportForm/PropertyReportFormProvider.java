@@ -9,6 +9,7 @@ import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 
 public interface PropertyReportFormProvider {
@@ -37,5 +38,12 @@ public interface PropertyReportFormProvider {
 
 	List<BuildingReportFormDTO> listBuildingReportForm(Integer namespaceId, Long communityId, List<Long> buildingIds,
 			String formatDateStr, Integer pageOffSet, Integer pageSize);
+
+	TotalBuildingStaticsDTO getTotalBuildingStatics(Integer namespaceId, Long communityId, List<Long> buildingIds,
+			String formatDateStr);
+
+	void deleteBuildingDataByDateStr(String dateStr);
+
+	void deleteCommunityDataByDateStr(String dateStr);
 
 }

@@ -860,17 +860,4 @@ public class ZJContractHandler implements ContractService{
 
 	}
 
-	@Override
-	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,
-			List<String> buildindNames, List<String> apartmentNames) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames,
-			List<String> apartmentNames) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

@@ -3903,16 +3903,6 @@ long assetCategoryId = 0l;
 		}
 	}
 	
-	@Override
-	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
-		Map<String, BigDecimal> resultMap = contractProvider.getChargeAreaByContractIdAndAddress(contractIds, buildindNames, apartmentNames);
-		return resultMap;
-	}
-	
-	@Override
-	public BigDecimal getTotalChargeArea(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
-		return contractProvider.getTotalChargeArea(contractIds, buildindNames, apartmentNames);
-	}
 	
 	
 	

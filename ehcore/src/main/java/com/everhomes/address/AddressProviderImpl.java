@@ -1261,8 +1261,8 @@ public class AddressProviderImpl implements AddressProvider {
 		List<ApartmentReportFormDTO> result = new ArrayList<>();
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES.as("a");
-		EhOrganizationAddressMappings b = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.as("b");
+		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES;
+		EhOrganizationAddressMappings b = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS;
 		
 		context.select(a.ID,a.COMMUNITY_ID,a.COMMUNITY_NAME,a.BUILDING_ID,a.BUILDING_NAME,b.LIVING_STATUS)
 			   .from(a)
@@ -1270,6 +1270,7 @@ public class AddressProviderImpl implements AddressProvider {
 			   .on(a.ID.eq(b.ADDRESS_ID))
 			   .where(a.NAMESPACE_ID.ne(0))
 			   .and(a.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+			   .and(a.IS_FUTURE_APARTMENT.eq((byte)0))
 			   .orderBy(a.COMMUNITY_ID,a.BUILDING_ID)
 			   .limit(startIndex, pageSize)
 			   .fetch()

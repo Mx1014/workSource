@@ -1,5 +1,6 @@
 package com.everhomes.organization.pm.reportForm;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -43,4 +44,9 @@ public interface PropertyReportFormService {
 	TotalCommunityStaticsDTO getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd);
 
 	TotalBuildingStaticsDTO getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd);
+
+	Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds, List<String> buildindNames,
+			List<String> apartmentNames);
+
+	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 }

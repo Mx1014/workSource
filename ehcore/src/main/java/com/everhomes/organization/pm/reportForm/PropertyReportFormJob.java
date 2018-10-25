@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.indices.recovery.RecoveryState.Start;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -69,21 +70,29 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		dbProvider.execute((TransactionStatus status) -> {
 			//先删掉这个月的的统计数据
 			String todayDateStr = getTodayDateStr();
-			//propertyReportFormProvider.deleteDataByDateStr(todayDateStr);
+			propertyReportFormProvider.deleteCommunityDataByDateStr(todayDateStr);
+			propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
 			
-			int pageSize = 5000;
-			int totalCount = addressProvider.getTotalApartmentCount();
-			int totalPage = 0;
-			if (totalCount%pageSize==0) {
-				totalPage = totalCount/pageSize;
-			}else {
-				totalPage = totalCount/pageSize + 1;
-			}
+			int pageSize = 100;
+//			int totalCount = addressProvider.getTotalApartmentCount();
+//			int totalPage = 0;
+//			if (totalCount%pageSize==0) {
+//				totalPage = totalCount/pageSize;
+//			}else {
+//				totalPage = totalCount/pageSize + 1;
+//			}
+			
+			int totalPage = 1;
 			
 			Map<Long, CommunityStatistics> communityResultMap = new HashMap<>();
 			Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
 			
 			for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+				
+				long startTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("Start PropertyReportFormJob for"+ currentPage+1 +" time.........");
+				}
 				
 				int startIndex = currentPage * pageSize;
 				List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
@@ -125,6 +134,13 @@ public class PropertyReportFormJob extends QuartzJobBean{
 						countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
 					}
 				}
+				
+				long endTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("End PropertyReportFormJob for"+ currentPage+1 +" time.........");
+					LOGGER.debug(currentPage+1 +" time spend " + (endTime-startTime)/1000 + "s");
+				}
+				
 			}
 			return null;
 		});

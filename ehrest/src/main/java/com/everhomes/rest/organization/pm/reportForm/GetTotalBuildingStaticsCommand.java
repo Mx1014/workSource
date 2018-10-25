@@ -9,6 +9,7 @@ public class GetTotalBuildingStaticsCommand {
 	private Integer namespaceId;
 	private Long communityId;
 	private List<Long> buildingIds;
+	private String dateStr;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -27,6 +28,12 @@ public class GetTotalBuildingStaticsCommand {
 	}
 	public void setBuildingIds(List<Long> buildingIds) {
 		this.buildingIds = buildingIds;
+	}
+	public String getDateStr() {
+		return dateStr;
+	}
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
 	}
 	
 	@Override

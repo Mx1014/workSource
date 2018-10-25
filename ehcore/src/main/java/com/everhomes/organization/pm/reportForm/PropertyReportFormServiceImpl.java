@@ -21,17 +21,23 @@ import org.springframework.stereotype.Component;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.schedule.AssetSchedule;
+import com.everhomes.asset.statistic.AssetStatisticCommunityExportHandler;
 import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
@@ -54,6 +60,7 @@ import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 
 @Component
@@ -65,10 +72,10 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	private AssetStatisticService assetStatisticService;
 	
 	@Autowired
-	private CommunityProvider communityProvider;
+	private TaskService taskService;
 	
 	@Autowired
-	private AddressProvider addressProvider;
+	private CommunityProvider communityProvider;
 	
 	@Autowired
 	private PropertyReportFormProvider propertyReportFormProvider;
@@ -78,6 +85,9 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+	
+	@Autowired
+	private ContractProvider contractProvider;
 	
 	@Value("${equipment.ip}")
     private String equipmentIp;
@@ -166,10 +176,14 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 
 	@Override
 	public void exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		Map<String, Object> params = new HashMap<>();
+		params.put("UserContext", UserContext.current().getUser());
+		params.put("GetTotalCommunityStaticsCommand", cmd);
+		//String exportFileNamePrefix = cmd.getExportFileNamePrefix();
+		String fileName = String.format("项目信息汇总表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CommunityReportFormExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
-
+		
 	@Override
 	public ListBuildingReportFormResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
 		ListBuildingReportFormResponse response = new ListBuildingReportFormResponse();
@@ -223,15 +237,30 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 
 	@Override
 	public TotalBuildingStaticsDTO getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
+		String dateStr = cmd.getDateStr();
+	    String formatDateStr = formatDateStr(dateStr);
 		
+	    TotalBuildingStaticsDTO result = propertyReportFormProvider.getTotalBuildingStatics(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingIds(),formatDateStr);
 		
+	    List<Building> buildingList = communityProvider.findBuildingsByIds(cmd.getBuildingIds());
+        List<String> buildingNameList = new ArrayList<>();
+        for (Building building : buildingList) {
+        	buildingNameList.add(building.getName());
+		}
+        ListBillStatisticByBuildingDTO billTotalStatistic = assetStatisticService.listBillStatisticByBuildingTotalForProperty(cmd.getNamespaceId(), 
+				                                                           cmd.getCommunityId(), "building", null, formatDateStr,buildingNameList);
+		result.setAmountReceivable(billTotalStatistic.getAmountReceivable());
+		result.setAmountReceived(billTotalStatistic.getAmountReceived());
+		result.setAmountOwed(billTotalStatistic.getAmountOwed());
+		result.setDueDayCount(billTotalStatistic.getDueDayCount());
+		result.setCollectionRate(billTotalStatistic.getCollectionRate());
 		
-		return null;
+		return result;
 	}
 	
 	@Override
 	public void exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
-		
+		// TODO Auto-generated method stub
 		
 	}
 	
@@ -316,6 +345,17 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		BuildingTotalStaticsDTO result = propertyReportFormProvider.getTotalBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,formatDateStr);
 		result.setBuildindCount(buildingNameList.size());
 		return result;
+	}
+	
+	@Override
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
+		Map<String, BigDecimal> resultMap = contractProvider.getChargeAreaByContractIdAndAddress(contractIds, buildindNames, apartmentNames);
+		return resultMap;
+	}
+	
+	@Override
+	public BigDecimal getTotalChargeArea(List<Long> contractIds,List<String> buildindNames,List<String> apartmentNames){
+		return contractProvider.getTotalChargeArea(contractIds, buildindNames, apartmentNames);
 	}
 	
 	private String getTodayYearStr(){
