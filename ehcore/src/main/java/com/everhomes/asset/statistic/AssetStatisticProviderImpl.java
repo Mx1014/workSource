@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -17,12 +18,14 @@ import com.everhomes.asset.AssetProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.pm.reportForm.PropertyReportFormService;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -48,6 +51,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
     
     @Autowired
     private AssetProvider assetProvider;
+    
+    @Autowired
+    private PropertyReportFormService propertyReportFormService;
  
 	public void createStatisticByCommnunity(Integer namespaceId, Long ownerId, String ownerType, String dateStr) {
 		//根据namespaceId、ownerId、ownerType、dateStr统计账单相关数据
@@ -438,9 +444,10 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		List<ListBillStatisticByCommunityDTO> list = listBillStatisticByCommunityUtil(pageOffSet, pageSize, 
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
     	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		Map<Long, CommunityBriefStaticsDTO> map = propertyReportFormService.listCommunityBriefStaticsForBill(namespaceId, ownerIdList, dateStrEnd);
+		for(ListBillStatisticByCommunityDTO dto : list) {
+			//CommunityBriefStaticsDTO communityBriefStaticsDTO 
+		}
 		return list;
 	}
 	
