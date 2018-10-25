@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>payeeRegisterStatus: 企业账户：0未审核 1审核通过 个人帐户：0 未绑定手机 1 绑定手机</li>
  * <li>payeeRemark: 用户自定义账户名称，用以区分同一个企业注册了多个用户</li>
  * <li>payeeAccountCode: payeeAccountCode</li>
+ * <li>merchantId:商户ID</li>
  * </ul>
  */
 public class BusinessPayeeAccountDTO {
@@ -35,6 +36,7 @@ public class BusinessPayeeAccountDTO {
     private Integer payeeRegisterStatus;
     private String payeeRemark;
     private String payeeAccountCode;
+    private Long merchantId;
 
     public Long getId() {
         return id;
@@ -148,7 +150,16 @@ public class BusinessPayeeAccountDTO {
         this.payeeAccountCode = payeeAccountCode;
     }
 
-    @Override
+    
+    public Long getMerchantId() {
+		return merchantId;
+	}
+
+	public void setMerchantId(Long merchantId) {
+		this.merchantId = merchantId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

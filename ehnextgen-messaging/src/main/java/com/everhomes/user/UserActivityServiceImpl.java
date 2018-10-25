@@ -44,8 +44,12 @@ import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.flow.GetFlowCaseCountResponse;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
@@ -998,6 +1002,56 @@ public class UserActivityServiceImpl implements UserActivityService {
             rsp.setPoint(0L);
         }
         return rsp;
+    }
+
+    @Override
+    public GetUserTreasureForRuiAnResponse getUserTreasureForRuiAn() {
+        GetUserTreasureForRuiAnResponse response = new GetUserTreasureForRuiAnResponse();
+        //积分
+        UserTreasureDTO point = new UserTreasureDTO();
+        try {
+            point = pointService.getPointTreasure();
+        }catch (Exception e) {
+            LOGGER.error("get point exception");
+            e.printStackTrace();
+        }
+        response.setPoint(point.getCount());
+        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.RUIAN_POINT_URL, "https://m.mallcoo.cn/a/user/10764/Point/List");
+        response.setPointUrl(pointUrl);
+
+        //会员
+        User user = this.userProvider.findUserById(UserContext.currentUserId());
+        if (user != null) {
+            response.setVipLevelText(user.getVipLevelText());
+        }
+        String vipUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.RUIAN_VIP_URL, "https://m.mallcoo.cn/a/custom/10764/xtd/Rights");
+        response.setVipUrl(vipUrl);
+
+        //任务
+        SearchFlowCaseCommand caseCommand = new SearchFlowCaseCommand();
+        caseCommand.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+        caseCommand.setFlowCaseStatus(FlowCaseStatus.PROCESS.getCode());
+        GetFlowCaseCountResponse task = this.flowService.getFlowCaseCount(caseCommand);
+        response.setTask(0);
+        if (task != null && task.getCount() != null) {
+            response.setTask(task.getCount());
+        }
+
+
+        //订单
+        BizMyUserCenterCountResponse biz = fetchBizMyUserCenterCount(user);
+        if (biz != null && biz.getResponse() != null) {
+
+            long orderCount = biz.getResponse().orderCount;
+            response.setOrder(orderCount);
+        }
+        String orderHomeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
+        String url = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),ConfigConstants.RUIAN_ORDER_URL,
+                "/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix");
+        response.setOrderUrl(orderHomeUrl + url);
+
+        //卡包
+        return response;
     }
 
     private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {

@@ -25,10 +25,13 @@ import java.util.Set;
  * Created by ying.xiong on 2017/8/11.
  */
 public interface EnterpriseCustomerProvider {
-    void createEnterpriseCustomer(EnterpriseCustomer customer);
+
     void createEnterpriseCustomers(Collection<EhEnterpriseCustomers> customers);
-    void updateEnterpriseCustomer(EnterpriseCustomer customer);
     void updateEnterpriseCustomers(List<EhEnterpriseCustomers> customers);
+
+    Long createEnterpriseCustomer(EnterpriseCustomer customer);
+    Long updateEnterpriseCustomer(EnterpriseCustomer customer);
+
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
@@ -43,6 +46,7 @@ public interface EnterpriseCustomerProvider {
     Map<Long, Long> listEnterpriseCustomerSourceByCommunityId(Long communityId);
     Map<Long, Long> listEnterpriseCustomerIndustryByCommunityId(Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomers(Set<Long> customerIds);
+    List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType);
 
 
     void createCustomerAccount(CustomerAccount account);

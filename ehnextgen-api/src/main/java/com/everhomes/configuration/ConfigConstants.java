@@ -218,4 +218,9 @@ public interface ConfigConstants {
 
     //支付双向安全校验
     public static final String SECURITY_PAY_SERVER = "security.pay.server";
+
+    //瑞安
+    public static final String RUIAN_POINT_URL = "ruian.point.url";
+    public static final String RUIAN_VIP_URL = "ruian.vip.url";
+    public static final String RUIAN_ORDER_URL = "ruian.order.url";
 }
