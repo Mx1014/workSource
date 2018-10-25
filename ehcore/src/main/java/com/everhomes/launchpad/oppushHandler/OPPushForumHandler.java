@@ -104,7 +104,7 @@ public class OPPushForumHandler implements OPPushHandler{
                 card.setRouterQuery(routerInfo.getQuery());
                 card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 
-                String host = "forum";
+                String host = "post";
                 String router = "zl://" + host + card.getRouterPath() + "?" + card.getRouterQuery();
                 card.setRouter(router);
 
