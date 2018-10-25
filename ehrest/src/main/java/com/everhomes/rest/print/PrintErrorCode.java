@@ -4,6 +4,21 @@ package com.everhomes.rest.print;
 public class PrintErrorCode {
 
 	public static final String SCOPE = "print";
+	
+	public static final int ERROR_ORDER_NOT_EXIST = 10000; //订单不存在
+	public static final int ERROR_ORDER_ABNORMAL = 10001; //订单异常
+	public static final int ERROR_EMAIL_FORMAT_ERROR = 10002; //邮箱地址格式错误
+	public static final int ERROR_INPUT_PARAM_LACK = 10003; //接口参数缺失
+	public static final int ERROR_INPUT_PARAM_NOT_VALID = 10004; //接口参数异常
+	public static final int ERROR_QUERY_PRINT_TASK_ERROR = 10005; //获取打印任务失败
+	public static final int ERROR_ORDER_NOT_EXIST_OR_PAYED = 10006; //订单不存在或已支付
+	public static final int ERROR_UNLOCK_PRINTER_ERROR = 10007; //打印机解锁失败
+	public static final int ERROR_THIRD_RESPONSE_ERROR = 10008; //第三方返回失败
+	public static final int ERROR_QRCODE_INVALID = 10009; //扫码失败，请重试
+	public static final int ERROR_UNPAID_ORDER_EXIST = 10010; //有未支付订单，请支付后重试
+	public static final int ERROR_ORDER_IS_PAYED = 10011; //订单已支付
+	public static final int ERROR_LOCK_ORDER_FAILED = 10012; //锁定订单失败
+	public static final int ERROR_EXPORT_EXCEL_FAILED = 10013; //文件导出失败
 
 	//eh_locale_strings
 	public static final String PRINT_COURSE_LIST= "print_course_list";//打印教程 ‘|’做分割

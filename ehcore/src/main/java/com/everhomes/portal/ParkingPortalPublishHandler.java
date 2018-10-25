@@ -60,7 +60,9 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
                     setParkingConfig(config, JSONObject.parseArray(parkingLot.getFuncList()), parkingLotFuncConfig.getFuncLists());
                 }
                 config.setMonthCardFlag(parkingLotFuncConfig.getEnableMonthCard());
-                config.setFlowMode(Integer.valueOf(parkingLotFuncConfig.getMonthCardFlow()));
+				if (parkingLotFuncConfig.getMonthCardFlow() != null) {
+					config.setFlowMode(Integer.valueOf(parkingLotFuncConfig.getMonthCardFlow()));
+				}
                 parkingLot.setConfigJson(StringHelper.toJsonString(config));
                 parkingProvider.updateParkingLot(parkingLot);
 
@@ -117,7 +119,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
         return instanceConfig;
     }
 
@@ -150,7 +152,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
         rentalResourceType.setPayMode(payMode);
         rentalResourceType.setIdentify(identify);
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
-        rentalResourceType.setUnauthVisible((byte)0);
+        rentalResourceType.setUnauthVisible((byte)1);
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         return rentalResourceType;
     }

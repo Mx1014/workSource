@@ -12,6 +12,14 @@
 -- AUTHOR: 黄鹏宇 2018年9月5日
 -- REMARK: 1、调用接口/customer/syncEnterpriseCustomerIndex
 
+
+
+
+
+-- ---------------------------------------------------    标准版在5.8.4.21080925已经执行过，这里不再执行  start ----------------
+
+
+
 -- AUTHOR: ryan  20180827
 -- REMARK: 执行 /workReport/syncWorkReportReceiver 接口, 用以同步工作汇报接收人公司信息(以下接口需等待上一接口执行完毕,基线大约需要10分钟)
 
@@ -20,6 +28,14 @@
 
 -- AUTHOR: ryan  20180926
 -- REMARK: 执行 /workReport/updateWorkReportValAvatar 接口, 用以更新历史工作汇报值的头像(需等待上一接口执行完毕,基线大约需要10分钟)
+
+
+
+-- ---------------------------------------------------    标准版在5.8.4.21080925已经执行过，这里不再执行  end ----------------
+
+
+
+
 
 -- AUTHOR: 黄良铭 20180927
 -- REMARK: core server 和 point server  的kafka配置 加上:client-id: ehcore   (client-id的名字建议根据各服务名来起比如积分的可叫point)# 如果是自己的环境不需要 Kafka, 则把这个值配置为 disable, 示例： client-id: disable(5.9.0 之后的代码将认为没有配置即不启用kafka)
@@ -131,102 +147,119 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('pay.v2.asset.haian_environment', 'release', 'release：正式环境，beta：测试环境，以此来判断是否需要为海岸造测试数据', 999993, NULL, 0);
 
 
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
-UPDATE eh_punch_rules SET punch_remind_flag=1,remind_minutes_on_duty=10 WHERE rule_type=1;
+--  ----------------------------------------- 如下脚本为OA脚本，已经提前在5.8.4.21080925上线了，这里不再执行      start   ------------------------------------------------
 
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 假期余额变更消息提醒文案配置
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 考勤规则新增打卡提醒设置初始化，默认开启
+-- UPDATE eh_punch_rules SET punch_remind_flag=1,remind_minutes_on_duty=10 WHERE rule_type=1;
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 假期余额变更消息提醒文案配置
+-- SET @max_template_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),1);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10006, 'zh_CN', '消息标题','假期余额变动', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10007, 'zh_CN', '假期余额变动提醒：管理员调整假期余额','管理员调整了你的假期余额：<#if annualLeaveAdd != 0><#if annualLeaveAdd gt 0>发放<#else>扣除</#if>年假${annualLeaveAddShow}</#if><#if annualLeaveAdd != 0 && overtimeAdd != 0>，</#if><#if overtimeAdd != 0><#if overtimeAdd gt 0>发放<#else>扣除</#if>调休${overtimeAddShow}</#if>。当前余额为：年假${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10008, 'zh_CN', '假期余额变动提醒：年假/调休的审批被撤销/终止/删除','${categoryName}申请（${requestTime}） 已失效，假期已返还。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10009, 'zh_CN', '假期余额变动提醒：请假审批提交','${categoryName}申请（${requestTime}） 已提交，假期已扣除。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
+--
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType eq 0>上班打卡<#else>下班打卡</#if>', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 2, 'zh_CN', '上班打卡提醒','最晚${onDutyTime}上班打卡，立即打卡', 0);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+-- VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 3, 'zh_CN', '下班打卡提醒','上班辛苦了，记得打下班卡', 0);
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 打卡记录报表排序
+-- UPDATE eh_punch_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+-- SET l.detail_id=d.id
+-- WHERE d.target_id>0 AND l.detail_id IS NULL;
+--
+-- UPDATE eh_punch_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
+-- SET l.detail_id=d.id
+-- WHERE d.target_id>0 AND l.detail_id IS NULL;
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: issue-33943 日程提醒1.2 增加5.9.0之后使用的提醒设置
+-- SET @id = (SELECT MAX(id) FROM eh_remind_settings);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'准时','0',NULL,'1','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5分钟','0',NULL,'2','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',300000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前15分钟','0',NULL,'3','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',900000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前30分钟','0',NULL,'4','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',1800000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1小时','0',NULL,'5','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',3600000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2小时','0',NULL,'6','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',7200000);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1天','1',NULL,'7','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2天','2',NULL,'8','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前3天','3',NULL,'9','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5天','5',NULL,'10','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+-- INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1周','7',NULL,'11','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
+--
+-- INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES('remind.version.segmen','5.8.4','日程提醒的版本分隔','0',NULL,NULL);
+--
+-- SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','1','zh_CN','完成日程发消息','${trackContractName}的日程“${planDescription}” 已完成','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','2','zh_CN','重置未完成日程发消息','${trackContractName}的日程“${planDescription}” 重置为未完成','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','3','zh_CN','修改日程发消息','${trackContractName}修改了日程“${planDescription}”','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','4','zh_CN','删除日程发消息','${trackContractName}删除了日程“${planDescription}”','0');
+-- INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','5','zh_CN','取消共享日程发消息','${trackContractName}的日程“${planDescription}” 取消共享了','0');
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: 会议管理V1.2
+-- UPDATE eh_configurations SET VALUE = 5000 WHERE NAME ='meeting.record.word.limit';
+--
+-- -- AUTHOR: 荣楠
+-- -- REMARK: 工作汇报V1.2
+-- UPDATE `eh_locale_templates` SET `text`='${applierName}给你提交了${reportName}（${reportTime}）', `code` = 101 WHERE `scope`='work.report.notification' AND `code`='1';
+-- UPDATE `eh_locale_templates` SET `text`='${applierName}更新了Ta的${reportName}（${reportTime}）', `code` = 102 WHERE `scope`='work.report.notification' AND `code`='2';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 回复了你', `code` = 1, `description` = '评论消息类型1' WHERE `scope`='work.report.notification' AND `code`='3';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 发表了评论', `code` = 2, `description` = '评论消息类型2' WHERE `scope`='work.report.notification' AND `code`='4';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 回复了你', `code` = 3, `description` = '评论消息类型3' WHERE `scope`='work.report.notification' AND `code`='5';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在${applierName}的${reportName}（${reportTime}）中 回复了你', `code` = 4, `description` = '评论消息类型4' WHERE `scope`='work.report.notification' AND `code`='6';
+-- UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 发表了评论', `code` = 5, `description` = '评论消息类型5' WHERE `scope`='work.report.notification' AND `code`='7';
+--
+--
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endTime":"10:00","endType":1,"startTime":"15:00","startType":0}' WHERE `report_type` = 0;
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"5","startTime":"15:00","startType":0}' WHERE `report_type` = 1;
+-- UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"31","startTime":"15:00","startType":0}' WHERE `report_type` = 2;
+--
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE (`id`='1') LIMIT 1;
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE (`id`='2') LIMIT 1;
+-- UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE (`id`='3') LIMIT 1;
+--
+-- SET @config_id = (SELECT MAX(id) FROM eh_configurations);
+-- INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES (@config_id := @config_id + 1, 'work.report.icon', 'cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ', 'the icon of the customize workReport ', '0', NULL, NULL);
+--
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ' ;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE report_template_id = 1;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE report_template_id = 2;
+-- UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE report_template_id = 3;
+
+
+
+--  ----------------------------------------- 如上脚本为OA脚本，已经提前在5.8.4.21080925上线了，这里不再执行      end   ------------------------------------------------
+
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 假期余额变更消息提醒文案配置
 SET @max_template_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_templates`),1);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10006, 'zh_CN', '消息标题','假期余额变动', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10007, 'zh_CN', '假期余额变动提醒：管理员调整假期余额','管理员调整了你的假期余额：<#if annualLeaveAdd != 0><#if annualLeaveAdd gt 0>发放<#else>扣除</#if>年假${annualLeaveAddShow}</#if><#if annualLeaveAdd != 0 && overtimeAdd != 0>，</#if><#if overtimeAdd != 0><#if overtimeAdd gt 0>发放<#else>扣除</#if>调休${overtimeAddShow}</#if>。当前余额为：年假${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10008, 'zh_CN', '假期余额变动提醒：年假/调休的审批被撤销/终止/删除','${categoryName}申请（${requestTime}） 已失效，假期已返还。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'approval.tip.info', 10009, 'zh_CN', '假期余额变动提醒：请假审批提交','${categoryName}申请（${requestTime}） 已提交，假期已扣除。当前余额为：年假 ${annualLeaveBalance} ，调休${overtimeCompensationBalance} 。', 0);
-
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 1, 'zh_CN', '消息标题','<#if punchType == 0>上班打卡<#else>下班打卡</#if>', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 2, 'zh_CN', '上班打卡提醒','最晚${onDutyTime}上班打卡，立即打卡', 0);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 3, 'zh_CN', '下班打卡提醒','上班辛苦了，记得打下班卡', 0);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUE (@max_template_id:=@max_template_id+1, 'punch.remind', 4, 'zh_CN', '打卡首页','打卡', 0);
 
--- AUTHOR: 张智伟 20180822
--- REMARK: issue-36367 打卡记录报表排序
-UPDATE eh_punch_logs l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
-SET l.detail_id=d.id
-WHERE d.target_id>0 AND l.detail_id IS NULL;
-
-UPDATE eh_punch_log_files l INNER JOIN eh_organization_member_details d ON d.organization_id=l.enterprise_id AND d.target_id=l.user_id
-SET l.detail_id=d.id
-WHERE d.target_id>0 AND l.detail_id IS NULL;
-
--- AUTHOR: 吴寒
--- REMARK: issue-33943 日程提醒1.2 增加5.9.0之后使用的提醒设置
-SET @id = (SELECT MAX(id) FROM eh_remind_settings);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'准时','0',NULL,'1','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5分钟','0',NULL,'2','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',300000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前15分钟','0',NULL,'3','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',900000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前30分钟','0',NULL,'4','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',1800000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1小时','0',NULL,'5','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',3600000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2小时','0',NULL,'6','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',7200000);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1天','1',NULL,'7','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前2天','2',NULL,'8','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前3天','3',NULL,'9','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前5天','5',NULL,'10','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-INSERT INTO `eh_remind_settings` (`id`, `name`, `offset_day`, `fix_time`, `default_order`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`, `app_version`, `before_time`) VALUES((@id := @id + 1),'提前1周','7',NULL,'11','0','2018-08-22 18:27:36',NULL,NULL,'5.9.0',NULL);
-
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES('remind.version.segmen','5.8.4','日程提醒的版本分隔','0',NULL,NULL);
-
-SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','1','zh_CN','完成日程发消息','${trackContractName}的日程“${planDescription}” 已完成','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','2','zh_CN','重置未完成日程发消息','${trackContractName}的日程“${planDescription}” 重置为未完成','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','3','zh_CN','修改日程发消息','${trackContractName}修改了日程“${planDescription}”','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','4','zh_CN','删除日程发消息','${trackContractName}删除了日程“${planDescription}”','0');
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','5','zh_CN','取消共享日程发消息','${trackContractName}的日程“${planDescription}” 取消共享了','0');
-
--- AUTHOR: 吴寒
--- REMARK: 会议管理V1.2
-UPDATE eh_configurations SET VALUE = 5000 WHERE NAME ='meeting.record.word.limit';
-
--- AUTHOR: 荣楠
--- REMARK: 工作汇报V1.2
-UPDATE `eh_locale_templates` SET `text`='${applierName}给你提交了${reportName}（${reportTime}）', `code` = 101 WHERE `scope`='work.report.notification' AND `code`='1';
-UPDATE `eh_locale_templates` SET `text`='${applierName}更新了Ta的${reportName}（${reportTime}）', `code` = 102 WHERE `scope`='work.report.notification' AND `code`='2';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 回复了你', `code` = 1, `description` = '评论消息类型1' WHERE `scope`='work.report.notification' AND `code`='3';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在Ta的${reportName}（${reportTime}）中 发表了评论', `code` = 2, `description` = '评论消息类型2' WHERE `scope`='work.report.notification' AND `code`='4';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 回复了你', `code` = 3, `description` = '评论消息类型3' WHERE `scope`='work.report.notification' AND `code`='5';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在${applierName}的${reportName}（${reportTime}）中 回复了你', `code` = 4, `description` = '评论消息类型4' WHERE `scope`='work.report.notification' AND `code`='6';
-UPDATE `eh_locale_templates` SET `text`='${commentatorName}在你的${reportName}（${reportTime}）中 发表了评论', `code` = 5, `description` = '评论消息类型5' WHERE `scope`='work.report.notification' AND `code`='7';
 
 
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endTime":"10:00","endType":1,"startTime":"15:00","startType":0}' WHERE `report_type` = 0;
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"5","startTime":"15:00","startType":0}' WHERE `report_type` = 1;
-UPDATE `eh_work_reports` SET `validity_setting` = '{"endMark":"1","endTime":"10:00","endType":1,"startMark":"31","startTime":"15:00","startType":0}' WHERE `report_type` = 2;
+--  ----------------------------------------- “ 活动报名人”脚本，已经提前在5.8.4.21080925上线了，这里不再执行      start   ------------------------------------------------
 
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE (`id`='1') LIMIT 1;
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE (`id`='2') LIMIT 1;
-UPDATE `eh_work_report_templates` SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE (`id`='3') LIMIT 1;
+-- -- AUTHOR: 梁燕龙
+-- -- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
+-- INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
+-- VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
+-- INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
+-- INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+--
 
-SET @config_id = (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO `ehcore`.`eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES (@config_id := @config_id + 1, 'work.report.icon', 'cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ', 'the icon of the customize workReport ', '0', NULL, NULL);
-
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRveE9UVm1aRGhsTTJRek9HRmpaRFV3WXpKaU5ESTNNV1ppT0RneVpHRTFaQQ' ;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRwaFlqazJNVFk1WkdabFpEbGhNamc0T1RjNVltWmlOakl3TmpobE1qUXpOUQ' WHERE report_template_id = 1;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvMU1tRTVPV0kwWlRjeU16WmlOR05rTnpWbE9HUTFZV1ExTlRZMFpHUm1Odw' WHERE report_template_id = 2;
-UPDATE eh_work_reports SET `icon_uri`='cs://1/image/aW1hZ2UvTVRvd1lXRmtObUkwWkRaaFlXRXdPRFV5TmpjMU5qa3hNelk1TVRRNE5XUTRNdw' WHERE report_template_id = 3;
-
--- AUTHOR: 梁燕龙
--- REMARK: 活动报名人数不足最低限制人数自动取消活动消息推送
-INSERT INTO eh_locale_templates(`scope`, `code`,`locale`, `description`, `text`)
-VALUES( 'announcement.notification', 1, 'zh_CN', '公告消息', '${subject}');
-INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('announcement',1,'zh_CN','公告消息');
-INSERT INTO `eh_locale_strings` (`scope`,`code`,`locale`,`text`) VALUES ('forum',10007,'zh_CN','来晚啦，公告已不存在');
+--  ----------------------------------------- “ 活动报名人”脚本，已经提前在5.8.4.21080925上线了，这里不再执行      end   ------------------------------------------------
 
 
 -- AUTHOR: 严军
@@ -250,17 +283,18 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.funcUrl', 'http://www.jslife.com.cn/jsaims/as', '捷顺接口请求地址', 0, NULL, 1);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.version', '2', '捷顺接口版本', 0, NULL, 1);
 
+-- -------------------------------------------------- 这一段已经有了。 这里注释掉  start---------------------------
 
--- AUTHOR: 严军
--- REMARK: 增加“企业钱包”模块，更新“会议室管理”菜单path
--- issue null
-UPDATE eh_web_menus SET path = '/23000000/23010000/16041900' WHERE id = 16041900;
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('59200', '企业钱包', '50000', '/100/50000/59200', '1', '3', '2', '240', '2018-09-19 14:42:53', NULL, NULL, '2018-09-19 14:43:07', '0', '0', '0', '0', 'org_control', '1', '1', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79100000', '企业钱包', '23010000', NULL, 'enterprise-wallet', '1', '2', '/23000000/23010000/79100000', 'zuolin', '240', '59200', '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79200000', '企业钱包', '77000000', NULL, 'enterprise-wallet', '1', '2', '/70000010/77000000/79200000', 'organization', '240', '59200', '3', 'system', 'module', NULL);
-UPDATE eh_web_menus SET parent_id = 53000000, path = '/40000010/53000000/79200000', type = 'park', sort_num = 80 WHERE id =  79200000;
-
-
+-- -- AUTHOR: 严军
+-- -- REMARK: 增加“企业钱包”模块，更新“会议室管理”菜单path
+-- -- issue null
+-- UPDATE eh_web_menus SET path = '/23000000/23010000/16041900' WHERE id = 16041900;
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('59200', '企业钱包', '50000', '/100/50000/59200', '1', '3', '2', '240', '2018-09-19 14:42:53', NULL, NULL, '2018-09-19 14:43:07', '0', '0', '0', '0', 'org_control', '1', '1', 'module');
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79100000', '企业钱包', '23010000', NULL, 'enterprise-wallet', '1', '2', '/23000000/23010000/79100000', 'zuolin', '240', '59200', '3', 'system', 'module', NULL);
+-- INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79200000', '企业钱包', '77000000', NULL, 'enterprise-wallet', '1', '2', '/70000010/77000000/79200000', 'organization', '240', '59200', '3', 'system', 'module', NULL);
+-- UPDATE eh_web_menus SET parent_id = 53000000, path = '/40000010/53000000/79200000', type = 'park', sort_num = 80 WHERE id =  79200000;
+--
+-- -------------------------------------------------- 这一段已经有了。 这里注释掉  end---------------------------
 
 
 
@@ -279,41 +313,51 @@ VALUES (@configid := @configid + 1 , 'parking.chean.accessKeyId', 'UT', '车安�
 INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
 VALUES (@configid := @configid + 1 , 'parking.chean.branchno', '0', '车安基金小镇停车分点编号', '0', NULL, NULL);
 
-SET @parkinglotid = (select max(id) from eh_parking_lots);
-INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`)
-VALUES (@parkinglotid := @parkinglotid + 1, 'community', '240111044332063798', '基金小镇停车场', 'CHEAN', '', '2', '1', '2018-07-27 17:48:07', '999938', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 0,\"identityCardFlag\":1}', SUBSTRING(@id, -3), '0', NULL,  '[\"tempfee\",\"monthRecharge\",\"searchCar\",\"carNum\",\"monthCardApply\"]');
 
-SET @parkingcardid = (select max(id) from eh_parking_lots);
-INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
-VALUES (@parkingcardid := @parkingcardid + 1, '999938', 'community', '240111044332063798', @parkinglotid, '1', '月卡', '2', '1', '2018-05-03 10:49:48', NULL, NULL);
+-- -------------------------------------  标准版执行冲突了，并且标准版没有999938这些数据 这里注释了   start   ------------------------------------
+-- SET @parkinglotid = (select max(id) from eh_parking_lots);
+-- INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`)
+-- VALUES (@parkinglotid := @parkinglotid + 1, 'community', '240111044332063798', '基金小镇停车场', 'CHEAN', '', '2', '1', '2018-07-27 17:48:07', '999938', NULL, '{\"tempfeeFlag\": 1, \"rateFlag\": 0, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 0,\"identityCardFlag\":1}', SUBSTRING(@id, -3), '0', NULL,  '[\"tempfee\",\"monthRecharge\",\"searchCar\",\"carNum\",\"monthCardApply\"]');
+--
+-- SET @parkingcardid = (select max(id) from eh_parking_lots);
+-- INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+-- VALUES (@parkingcardid := @parkingcardid + 1, '999938', 'community', '240111044332063798', @parkinglotid, '1', '月卡', '2', '1', '2018-05-03 10:49:48', NULL, NULL);
+
+-- -------------------------------------  标准版执行冲突了，并且标准版没有999938这些数据 这里注释了   end   ------------------------------------
 
 SET @locId = (select max(id) from eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locId := @locId + 1, 'parking', '10033', 'zh_CN', '未查询到停车记录');
 
--- AUTHOR: 马世亨  20180919
--- REMARK: 停车缴费V6.6.4 【大沙河建投】二期智园项目，对接车安系统
-SET @namespaceid = '999967';
-SET @communityid = '240111044332064133';
-SET @configid = (select max(id) from eh_configurations);
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
-VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.url', 'http://113.98.59.44:9022', '车安大沙河智园停车场url', '0', NULL, NULL);
 
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
-VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.privatekey', '71cfa1c59773ddfa289994e6d505bba3', '车安大沙河智园停车场私钥', '0', NULL, NULL);
+-- -------------------------------------  标准版执行冲突了，并且标准版没有“大沙河建投”这些数据 这里注释了   start   ------------------------------------
+--
+-- -- AUTHOR: 马世亨  20180919
+-- -- REMARK: 停车缴费V6.6.4 【大沙河建投】二期智园项目，对接车安系统
+-- SET @namespaceid = '999967';
+-- SET @communityid = '240111044332064133';
+-- SET @configid = (select max(id) from eh_configurations);
+-- INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+-- VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.url', 'http://113.98.59.44:9022', '车安大沙河智园停车场url', '0', NULL, NULL);
+--
+-- INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+-- VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.privatekey', '71cfa1c59773ddfa289994e6d505bba3', '车安大沙河智园停车场私钥', '0', NULL, NULL);
+--
+-- INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+-- VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.accessKeyId', 'UT', '车安大沙河智园停车场接入方标识', '0', NULL, NULL);
+--
+-- INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
+-- VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.branchno', '0', '车安大沙河智园停车分点编号', '0', NULL, NULL);
+--
+-- SET @parkinglotid = (select max(id) from eh_parking_lots);
+-- INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`)
+-- VALUES (@parkinglotid := @parkinglotid + 1, 'community', @communityid, '大沙河智园停车场', 'CHEANZHIYUAN', @namespaceid, '2', '1', '2018-05-21 14:36:29', '0', '{\"expiredRechargeFlag\": 0,\"monthlyDiscountFlag\":0}', '{\"tempfeeFlag\": 1, \"rateFlag\": 1, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 0,\"identityCardFlag\":1,\"monthCardFlag\":1,\"monthRechargeFlag\":1}', SUBSTRING(@parkinglotid, -3), '8', NULL, '[\"tempfee\",\"monthRecharge\",\"searchCar\"]');
+--
+-- SET @parkingcardid = (select max(id) from eh_parking_card_types);
+-- INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
+-- VALUES (@parkingcardid := @parkingcardid + 1, @namespaceid, 'community', @communityid, @parkinglotid, '1', '月卡', '2', '1', '2018-05-03 10:49:48', NULL, NULL);
 
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
-VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.accessKeyId', 'UT', '车安大沙河智园停车场接入方标识', '0', NULL, NULL);
 
-INSERT INTO eh_configurations (id, name, value, description, namespace_id, display_name, is_readonly)
-VALUES (@configid := @configid + 1 , 'parking.cheanzhiyuan.branchno', '0', '车安大沙河智园停车分点编号', '0', NULL, NULL);
-
-SET @parkinglotid = (select max(id) from eh_parking_lots);
-INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `status`, `creator_uid`, `create_time`, `namespace_id`, `recharge_json`, `config_json`, `order_tag`, `order_code`, `id_hash`, `func_list`)
-VALUES (@parkinglotid := @parkinglotid + 1, 'community', @communityid, '大沙河智园停车场', 'CHEANZHIYUAN', @namespaceid, '2', '1', '2018-05-21 14:36:29', '0', '{\"expiredRechargeFlag\": 0,\"monthlyDiscountFlag\":0}', '{\"tempfeeFlag\": 1, \"rateFlag\": 1, \"lockCarFlag\": 0, \"searchCarFlag\": 1, \"currentInfoType\": 0,\"identityCardFlag\":1,\"monthCardFlag\":1,\"monthRechargeFlag\":1}', SUBSTRING(@parkinglotid, -3), '8', NULL, '[\"tempfee\",\"monthRecharge\",\"searchCar\"]');
-
-SET @parkingcardid = (select max(id) from eh_parking_card_types);
-INSERT INTO `eh_parking_card_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parking_lot_id`, `card_type_id`, `card_type_name`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
-VALUES (@parkingcardid := @parkingcardid + 1, @namespaceid, 'community', @communityid, @parkinglotid, '1', '月卡', '2', '1', '2018-05-03 10:49:48', NULL, NULL);
+-- -------------------------------------  标准版执行冲突了，并且标准版没有“大沙河建投”这些数据 这里注释了   end   ------------------------------------
 
 
 -- AUTHOR:丁建民 20180920
@@ -615,7 +659,7 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 
 
 
-DELETE FROM `eh_var_field_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
+UPDATE `eh_var_field_scopes` SET STATUS = 0 WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
 set @item_id = (select max(id) from `eh_var_field_scopes`);
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 2, '{\"fieldParamType\": \"text\", \"length\": 32}', '客户名称', 1, 1, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 5, '{\"fieldParamType\": \"unRenameSelect\", \"length\": 32}', '客户状态', 1, 2, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
@@ -630,7 +674,7 @@ INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id
 INSERT INTO `eh_var_field_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `field_id`, `field_param`, `field_display_name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_path`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 10, 12117, '{\"fieldParamType\": \"text\", \"length\": 32}', '招商跟进人', 0, 11, 2, 1, SYSDATE(), NULL, NULL, NULL, '/1/10/', NULL);
 
 
-DELETE FROM `eh_var_field_item_scopes` WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
+UPDATE `eh_var_field_item_scopes` SET STATUS = 0 WHERE `namespace_id` = 0 AND `module_name` = 'investment_promotion';
 set @item_id = (select max(id) from `eh_var_field_item_scopes`);
 INSERT INTO `eh_var_field_item_scopes`(`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 5, 3, '初次接触', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_item_scopes`(`id`, `namespace_id`, `module_name`, `field_id`, `item_id`, `item_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `business_value`, `category_id`) VALUES ((@item_id:=@item_id+1), 0, 'investment_promotion', 5, 4, '潜在客户', 2, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
@@ -667,8 +711,8 @@ UPDATE eh_general_forms SET template_text='[{"dataSourceType":"USER_NAME","dynam
 
 -- AUTHOR: 黄良铭
 -- REMARK: 脚本管理菜单
-INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category,operator_uid,creator_uid)
-VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module',1,1);
+INSERT INTO eh_service_modules(id ,NAME , parent_id,path ,TYPE ,LEVEL ,STATUS ,default_order ,menu_auth_flag,category, operator_uid , creator_uid)
+VALUES(60300,'脚本管理',60000,'/100/60000/60300',1,3,2,30,1,'module', 1, 1);
 INSERT INTO eh_web_menus(id,NAME,parent_id,icon_url,data_type ,leaf_flag,STATUS,path,TYPE,sort_num,module_id,LEVEL,condition_type,category,config_type)
 VALUES(79000000 ,'脚本管理',21000000,NULL,'script-management',1,2,'/11000000/21000000/79000000','zuolin',30,60300,3,'system','module',NULL);
 
@@ -727,10 +771,14 @@ INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `gr
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1008, '历史房源', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1009, '附件', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);
 
--- AUTHOR: tangcen
--- REMARK:添加房源招商、招商客户管理模块
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150010', '房源招商', '110000', '/200/110000/150010', '1', '3', '2', '0', NOW(), '{\"url\":\"${home.url}/park-entry-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0#/home/#sign_suffix\"}', '14', NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'module');
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150020', '招商客户管理', '110000', '/200/110000/150020', '1', '3', '2', '0', NOW(), '{\"url\":\"${home.url}/rentCustomer/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}', '14', NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'module');
+
+-- ---------------------------------------------执行冲突了，应该是之前已经合并过了 start---------------------------------------------
+-- -- AUTHOR: tangcen
+-- -- REMARK:添加房源招商、招商客户管理模块
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150010', '房源招商', '110000', '/200/110000/150010', '1', '3', '2', '0', NOW(), '{\"url\":\"${home.url}/park-entry-web/build/index.html?hideNavigationBar=1&ehnavigatorstyle=0#/home/#sign_suffix\"}', '14', NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'module');
+-- INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('150020', '招商客户管理', '110000', '/200/110000/150020', '1', '3', '2', '0', NOW(), '{\"url\":\"${home.url}/rentCustomer/build/index.html?hideNavigationBar=1#/home#sign_suffix\"}', '14', NOW(), '0', '0', '0', '0', 'community_control', '1', '1', 'module');
+
+-- ---------------------------------------------执行冲突了，应该是之前已经合并过了 end---------------------------------------------
 
 -- -- AUTHOR: tangcen
 -- REMARK:添加房源招商、招商客户管理的web menu
@@ -752,7 +800,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 -- REMARK: 更改group_path编写不规范的问题
 UPDATE eh_var_fields SET group_path = '/1/10/' WHERE group_path = '/1/10';
 UPDATE eh_var_fields SET display_name = '来源渠道' WHERE id = 6;
-UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6;
+UPDATE eh_var_field_scopes SET field_display_name = '来源渠道' WHERE field_id = 6 AND field_display_name = '客户来源';
 UPDATE eh_var_field_scopes SET group_path = '/1/10/' WHERE group_path = '/1/10' and status = 2;
 
 
@@ -872,13 +920,13 @@ update eh_customer_trackings t1 set t1.customer_source = (select customer_source
 -- END
 
 
-
 -- AUTHOR 黄鹏宇
 -- REMARK 同步名称
-UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
-UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
-UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
+-- UPDATE eh_var_field_item_scopes a inner join eh_var_field_items b on a.item_id = b.id SET a.item_display_name = b.display_name;
+-- UPDATE eh_var_field_scopes a inner join eh_var_fields b on a.field_id = b.id SET a.field_display_name = b.display_name, a.field_param = b.field_param;
+-- UPDATE eh_var_field_group_scopes a inner join eh_var_field_groups b on a.group_id = b.id SET a.group_display_name = b.title;
 -- END
+
 
 -- AUTHOR 黄鹏宇
 -- REMARK 修改客户的名称
@@ -889,6 +937,7 @@ UPDATE eh_var_field_items set  display_name ='潜在客户' where id  = 4;
 update eh_var_field_item_scopes set item_display_name ='初次接触' where item_id = 3 and field_id =5 and `status` = 2;
 update eh_var_field_item_scopes set item_display_name ='潜在客户' where item_id = 4 and field_id =5 and `status` = 2;
 -- END
+
 
 -- --------------------- SECTION END ---------------------------------------------------------
 

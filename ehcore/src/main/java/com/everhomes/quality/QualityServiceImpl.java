@@ -544,15 +544,15 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionStandards> standards = new ArrayList<>();
 		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult(),cmd.getPlanCondition());
-		} else {
+					ownerId, ownerType, cmd.getTargetType(), Collections.singletonList(cmd.getTargetId()), cmd.getReviewResult(),cmd.getPlanCondition());
+		} else if(cmd.getTargetIds()!=null && cmd.getTargetIds().size()>0){
 			standards = qualityProvider.listQualityInspectionStandards(locator, pageSize + 1,
-					ownerId, ownerType, null, null, cmd.getReviewResult(),cmd.getPlanCondition());
+					ownerId, ownerType, null, cmd.getTargetIds(), cmd.getReviewResult(),cmd.getPlanCondition());
 		}
 
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);
-Long nextPageAnchor = null;
+        Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
         	standards.remove(standards.size() - 1);
             nextPageAnchor = standards.get(standards.size() - 1).getId();
@@ -1045,8 +1045,11 @@ Long nextPageAnchor = null;
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(cmd.getOwnerId()));
 		if (cmd.getOwnerType() != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(cmd.getOwnerType()));
-		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L)
+		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(cmd.getTargetId()));
+		} else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.in(cmd.getTargetIds()));
+		}
 		if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(cmd.getTargetType()));
 		if (cmd.getTaskType() != null)
@@ -1066,12 +1069,15 @@ Long nextPageAnchor = null;
 	}
 
 	private void listTasksQueryBuilder(ListQualityInspectionTasksCommand cmd, SelectQuery<? extends Record> query) {
-		if (cmd.getOwnerId()!= null)
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(cmd.getOwnerId()));
-		if (cmd.getOwnerType() != null)
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(cmd.getOwnerType()));
-		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L)
+//		if (cmd.getOwnerId()!= null)
+//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(cmd.getOwnerId()));
+//		if (cmd.getOwnerType() != null)
+//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(cmd.getOwnerType()));
+		if (cmd.getTargetId() != null && cmd.getTargetId() != 0L) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(cmd.getTargetId()));
+		} else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.in(cmd.getTargetIds()));
+		}
 		if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(cmd.getTargetType()));
 		if (cmd.getTaskType() != null)
@@ -1808,6 +1814,12 @@ Long nextPageAnchor = null;
 			command.setCommunityId(task.getTargetId());
 			command.setNamespaceId(task.getNamespaceId());
 			command.setOwnerType(EntityType.QUALITY_TASK.getCode());
+			OrganizationDTO organization  = equipmentService.getAuthOrgByProjectIdAndModuleId(task.getTargetId(), task.getNamespaceId(), QualityConstant.QUALITY_MODULE);
+			if(organization!=null){
+				// here targetId means organization id for searching notify params
+				command.setTargetId(organization.getId());
+				command.setTargetType(EntityType.ORGANIZATIONS.getCode());
+			}
 			//此处为拿到自定义通知参数的接收人ids
 			List<PmNotifyParamDTO> paramDTOs = listPmNotifyParams(command);
 			if (paramDTOs != null && paramDTOs.size() > 0) {
@@ -2634,13 +2646,18 @@ Long nextPageAnchor = null;
 	@Override
 	public ListQualityInspectionLogsResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd) {
 
-		checkUserPrivilege(cmd.getOwnerId(),PrivilegeConstants.QUALITY_UPDATELOG_LIST,cmd.getScopeId());
+		checkUserPrivilege(cmd.getOwnerId(), PrivilegeConstants.QUALITY_UPDATELOG_LIST, cmd.getScopeId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-
-        List<QualityInspectionLogs> logs = qualityProvider.listQualityInspectionLogs(cmd.getOwnerType(), cmd.getOwnerId(),
-        									cmd.getTargetType(), cmd.getTargetId(),cmd.getScopeId(), locator, pageSize+1);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Long> scopeIds = new ArrayList<>();
+		if (cmd.getTargetId() != null) {
+			scopeIds = Collections.singletonList(cmd.getScopeId());
+		} else {
+			scopeIds = cmd.getScopeIds();
+		}
+		List<QualityInspectionLogs> logs = qualityProvider.listQualityInspectionLogs(cmd.getOwnerType(), null,
+				null, cmd.getTargetId(), scopeIds, locator, pageSize + 1);
 
         Long nextPageAnchor = null;
         if(logs != null && logs.size() > pageSize) {
@@ -2973,11 +2990,13 @@ Long nextPageAnchor = null;
 		if(cmd.getParentId() == null || cmd.getParentId() == 0) {
 			parent.setId(0L);
 			parent.setReferId(0L);
+			// 管理公司对应的全部模板
 			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
-				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
+				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", null, null, cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}else {
-				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+				// add all communities data without ownerId condition
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications("/%", null, null, cmd.getScopeIds(), cmd.getInspectionType()));
 			}
 
 		} else {
@@ -2986,7 +3005,7 @@ Long nextPageAnchor = null;
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}else {
-				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionType()));
+				specifications.addAll(qualityProvider.listAllCommunitiesChildrenSpecifications(parent.getPath() +"/%", null, null,cmd.getScopeIds(), cmd.getInspectionType()));
 			}
 		}
 		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<>();
@@ -3845,7 +3864,7 @@ Long nextPageAnchor = null;
 	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
 		SearchQualityTasksCommand command = ConvertHelper.convert(cmd, SearchQualityTasksCommand.class);
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		Long anchor = 0l;
+		Long anchor = 0L;
 		if(cmd.getPageAnchor() != null) {
 			anchor = cmd.getPageAnchor();
 		}
@@ -3907,7 +3926,7 @@ Long nextPageAnchor = null;
 		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
 			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, null);
 		} else {
-			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId(),null);
+			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), null, null,null);
 			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, parent.getId(), null);
 		}
 

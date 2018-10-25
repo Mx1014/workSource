@@ -97,6 +97,11 @@ public interface GeneralFormProvider {
     void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion);
 
 
+    List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+                                      String projectType, Long projectId, String ownerType, Long ownerId);
+
+    GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName);
+
 	Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
 
 	void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);

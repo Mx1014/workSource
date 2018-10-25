@@ -10,44 +10,57 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 小区Id</li>
- * <li>uuid: 小区uuid，作为唯一标识</li>
- * <li>cityId: 城市Id</li>
- * <li>cityName: 城市名称</li>
- * <li>areaId: 区域Id</li>
- * <li>areaName: 区域名称</li>
- * <li>name: 小区名称</li>
- * <li>aliasName: 小区别名</li>
- * <li>address: 小区地址</li>
- * <li>zipcode: 邮政编码</li>
- * <li>description: 简略描述</li>
- * <li>detailDescription: 详细描述</li>
- * <li>aptCount: 公寓数</li>
- * <li>creatorUid: 创建者Id</li>
- * <li>status: 小区状态，参考{@link com.everhomes.rest.address.CommunityAdminStatus}</li>
- * <li>createTime: 创建时间</li>
- * <li>deleteTime: 删除时间</li>
- * <li>requestStatus: 小区收集状态，参考{@link com.everhomes.rest.community.RequestStatus}</li>
- * <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
- * <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
- * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
- * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
- * <li>areaSize: 面积</li>
- * <li>sharedArea: 公摊面积</li>
- * <li>chargeArea: 收费面积</li>
- * <li>buildArea: 建筑面积</li>
- * <li>rentArea: 出租面积</li>
- * <li>updateTime: 更新时间</li>
- * <li>categoryId: 分类id</li>
- * <li>categoryName: 分类名称</li>
- * <li>communityUserCount : 统计人数</li>
- * <li>communityNumber: 园区编号</li>
- * <li>firstLatterOfName: 名字首字母</li>
+ *     <li>id: 小区Id</li>
+ *     <li>uuid: 小区uuid，作为唯一标识</li>
+ *     <li>provinceId: 省份Id</li>
+ *     <li>provinceName: 省份名称</li>
+ *     <li>cityId: 城市Id</li>
+ *     <li>cityName: 城市名称</li>
+ *     <li>areaId: 区域Id</li>
+ *     <li>areaName: 区域名称</li>
+ *     <li>name: 小区名称</li>
+ *     <li>aliasName: 小区别名</li>
+ *     <li>address: 小区地址</li>
+ *     <li>zipcode: 邮政编码</li>
+ *     <li>description: 简略描述</li>
+ *     <li>detailDescription: 详细描述</li>
+ *     <li>aptSegment1: aptSegment1</li>
+ *     <li>aptSegment2: aptSegment2</li>
+ *     <li>aptSegment3: aptSegment3</li>
+ *     <li>aptSeg1Sample: aptSeg1Sample</li>
+ *     <li>aptSeg2Sample: aptSeg2Sample</li>
+ *     <li>aptSeg3Sample: aptSeg3Sample</li>
+ *     <li>aptCount: 公寓数</li>
+ *     <li>creatorUid: 创建者Id</li>
+ *     <li>status: 小区状态，参考{@link com.everhomes.rest.address.CommunityAdminStatus}</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>deleteTime: 删除时间</li>
+ *     <li>requestStatus: 小区收集状态，参考{@link com.everhomes.rest.community.RequestStatus}</li>
+ *     <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
+ *     <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ *     <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
+ *     <li>updateTime: 更新时间</li>
+ *     <li>areaSize: 面积</li>
+ *     <li>sharedArea: 公摊面积</li>
+ *     <li>chargeArea: 收费面积</li>
+ *     <li>buildArea: 建筑面积</li>
+ *     <li>rentArea: 出租面积</li>
+ *     <li>categoryName: 分类名称</li>
+ *     <li>categoryId: 分类id</li>
+ *     <li>communityUserCount: 统计人数</li>
+ *     <li>communityNumber: 园区编号</li>
+ *     <li>firstLatterOfName: 名字首字母</li>
+ *     <li>pmOrgId: 管理公司Id</li>
+ *     <li>pmOrgName: 管理公司名称</li>
+ *     <li>appSelfConfigFlag: 是否自己配置参考，0,null-否（跟随默认），1-是（自己配置）{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *     <li>geoPointList: 小区经纬度列表，参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
  * </ul>
  */
 public class CommunityDTO {
     private Long id;
     private String uuid;
+    private Long provinceId;
+    private String provinceName;
     private Long cityId;
     private String cityName;
     private Long areaId;
@@ -87,8 +100,12 @@ public class CommunityDTO {
     private Integer communityUserCount;
 
     private String communityNumber;
-    
+
     private String firstLatterOfName;
+
+    private Long pmOrgId;
+    private String pmOrgName;
+    private Byte appSelfConfigFlag;
 
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -110,6 +127,22 @@ public class CommunityDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(Long provinceId) {
+        this.provinceId = provinceId;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
     }
 
     public Long getCityId() {
@@ -329,12 +362,12 @@ public class CommunityDTO {
     }
 
     public Double getAreaSize() {
-		return areaSize;
-	}
+        return areaSize;
+    }
 
-	public void setAreaSize(Double areaSize) {
-		this.areaSize = areaSize;
-	}
+    public void setAreaSize(Double areaSize) {
+        this.areaSize = areaSize;
+    }
 
     public String getCategoryName() {
         return categoryName;
@@ -413,4 +446,27 @@ public class CommunityDTO {
         this.firstLatterOfName = firstLatterOfName;
     }
 
+    public Long getPmOrgId() {
+        return pmOrgId;
+    }
+
+    public void setPmOrgId(Long pmOrgId) {
+        this.pmOrgId = pmOrgId;
+    }
+
+    public String getPmOrgName() {
+        return pmOrgName;
+    }
+
+    public void setPmOrgName(String pmOrgName) {
+        this.pmOrgName = pmOrgName;
+    }
+
+    public Byte getAppSelfConfigFlag() {
+        return appSelfConfigFlag;
+    }
+
+    public void setAppSelfConfigFlag(Byte appSelfConfigFlag) {
+        this.appSelfConfigFlag = appSelfConfigFlag;
+    }
 }

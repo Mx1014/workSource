@@ -199,7 +199,7 @@ public class CustomerController extends ControllerBase {
     }
     /**
      * <b>URL: /customer/listEnterpriseCustomers</b>
-     * <p>列出所有企业客户）</p>
+     * <p>列出所有企业客户</p>
      */
     @RequestMapping("listEnterpriseCustomers")
     @RestReturn(value = EasySearchEnterpriseCustomersDTO.class, collection = true)

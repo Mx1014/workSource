@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 /**
  *<ul>
  * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者type</li>
+ * <li>ownerType: 所属者type community</li>
  * <li>namespaceId: 域名</li>
  *</ul>
  */

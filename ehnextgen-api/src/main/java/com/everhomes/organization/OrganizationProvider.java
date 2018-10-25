@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
@@ -10,9 +11,12 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
-import com.everhomes.rest.asset.NoticeMemberIdAndContact;
 import com.everhomes.rest.asset.TargetDTO;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.asset.NoticeMemberIdAndContact;
+
 import com.everhomes.userOrganization.UserOrganizations;
 
 import org.jooq.Condition;
@@ -35,7 +39,7 @@ public interface OrganizationProvider {
     void deleteOrganization(Organization organization);
 
     void deleteOrganizationById(Long id);
-
+	/**根据组织id来查询eh_organizations表信息**/
     Organization findOrganizationById(Long id);
 
     /**
@@ -52,6 +56,8 @@ public interface OrganizationProvider {
     List<Organization> listOrganizations(String organizationType, String name, Integer pageOffset, Integer pageSize);
 
     List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
+
+    List<Organization> listOrganizationsByPath(Long organizationId);
 
     void createOrganizationMember(OrganizationMember organizationMember);
 
@@ -108,7 +114,7 @@ public interface OrganizationProvider {
     List<OrganizationMember> findOrganizationMemberByOrgIdAndUIdWithoutAllStatus(Long organizationId, Long userId);
 
     List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId);
-
+	/**根据手机号和组织id来查询对应的OrganizationMember信息**/
     OrganizationMember findOrganizationMemberByOrgIdAndToken(String contactPhone, Long organizationId);
 
     OrganizationMember findMemberDepartmentByDetailId(Long detailId);
@@ -220,10 +226,12 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize, ListOrganizationContactCommand listCommand);
 
-    OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
+	/**根据组织id和手机号来查询eh_organization_members表中有效的用户信息**/
+	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone,Integer namespaceId);
 
     OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail);
 
+    OrganizationMemberDetails findOrganizationPersonnelByAccount(String account);
     /**
      * Create enterprise details
      *
@@ -256,7 +264,6 @@ public interface OrganizationProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback);
 
     OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
-
     List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count,
                                                                           ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -289,8 +296,46 @@ public interface OrganizationProvider {
 
     List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, CrossShardListingLocator locator, Integer pageSize);
 
+	/**
+	 * 根据域空间id、企业类型、关键字、来查询企业信息
+	 * @param namespaceId
+	 * @param organizationType
+	 * @param setAdminFlag
+	 * @param keywords
+	 * @param locator
+	 * @param pageSize
+	 * @return
+	 */
     List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
                                                     Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize);
+
+	/**
+	 * 根据公司id来查询对应的管理的项目
+	 * @param organizationId
+	 * @return
+	 */
+	int getCommunityByOrganizationId(Long organizationId);
+
+	/**
+	 *  向表eh_organization_communities中添加数据
+	 * @param organizationCommunity
+	 */
+	void insertOrganizationCommunity(OrganizationCommunity organizationCommunity);
+
+	/**
+	 * 根据公司id来查询公司详细信息的方法
+	 * @param organizationId
+	 * @return
+	 */
+	OrganizationDetail getOrganizationDetailByOrgId(Long organizationId);
+
+	/**
+	 * 根据节点编号organizationId和域空间ID来查询节点信息
+	 * @param organizationId
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationAndDetailDTO getOrganizationAndDetailByorgIdAndNameId(Long organizationId,Integer namespaceId);
 
     List<OrganizationMember> listOrganizationMembersByPhone(String phone);
 
@@ -459,7 +504,7 @@ public interface OrganizationProvider {
 
     Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+    List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId);
 
     List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
 
@@ -492,6 +537,7 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 
+	/**根据OrganizationMemberDetails来获取detailId的方法**/
     Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
 
     void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
@@ -558,6 +604,9 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId);
 
+// TODO 冲突先注释
+	//OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId);
+
     //查询所有总公司
     List<Organization> listHeadEnterprises();
 
@@ -595,9 +644,9 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType);
 
-    List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Long targetId, int pageSize, ListingLocator locator);
 
-    List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
+	List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(Long organizationId, String memberGroup, String targetType, Integer pageSize, ListingLocator locator);
 
     List<OrganizationMember> listOrganizationMembersByOrganizationIdAndMemberGroup(String memberGroup, String targetType, Long targetId);
 
@@ -642,10 +691,267 @@ public interface OrganizationProvider {
 
     List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
 
+	//List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<Organization> listPMOrganizations(Integer namespaceId);
+	List<Organization> listPMOrganizations(Integer namespaceId);
 
-    Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId, Long groupId);
+	Organization findOrganizationByName(String groupType, String name, Long directlyEnterpriseId,Long groupId);
+
+	/**
+	 * 将OrganizationWorkPlaces对象持久化在表eh_Organization_workPlaces表中
+	 * @param organizationWorkPlaces
+	 */
+	void insertIntoOrganizationWorkPlaces(OrganizationWorkPlaces organizationWorkPlaces);
+
+	/**
+	 * 将CommunityAndBuildingRelationes对象中的数据持久化到eh_communityAndBuilding_relationes表中
+	 * @param communityAndBuildingRelationes
+	 */
+	void insertIntoCommunityAndBuildingRelationes(CommunityAndBuildingRelationes communityAndBuildingRelationes);
+
+	/**
+	 * 根据organizationId来查询eh_organization_workPlaces表中对应的项目办公地点（可能存在多个办公地点）集合
+	 * @param organizationId
+	 * @return
+	 */
+	List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgId(Long organizationId);
+
+	/**
+	 * 根据organizationId和communityId来查询eh_organization_workplaces表中的信息
+	 * @param organizationId
+	 * @param communityId
+	 * @return
+	 */
+	List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgIdAndCommunityId(Long organizationId,Long communityId);
+
+	/**
+	 * 根据项目Id来查询项目名称
+	 * @param communityId
+	 * @return
+	 */
+	String getCommunityNameByCommunityId(Long communityId);
+
+	/**
+	 * 根据communityId来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes
+	 * 一个项目可能对应多个楼栋和门牌
+	 * @param communityId
+	 * @return
+	 */
+	List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByWorkPlaceId(Long workplaceId);
+
+	/**
+	 * 根据手机号、域空间Id、组织id来查询表eh_organization_members中的id值
+	 * @param contactToken
+	 * @param namespaceId
+	 * @param organizationId
+	 * @return
+	 */
+	Long findOrganizationMembersByTokenAndSoON(String contactToken,Integer namespaceId,Long organizationId);
+
+	/**
+	 * 查询eh_organization_members表中已经从注册的对应的信息
+	 * @param contactToken
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId);
+
+	/**
+	 * 查询超级管理员
+	 * @param contactToken
+	 * @param namespaceId
+	 * @param memberGroup
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId,String memberGroup);
+
+	/**
+	 * 向eh_organization_members表中添加数据
+	 * @param organizationMember
+	 */
+	void insertIntoOrganizationMember(OrganizationMember organizationMember);
+
+	/**
+	 * 查询eh_organization_members表中未注册的对应的信息
+	 * @param contactToken
+	 * @param namespaceId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberNoSigned(String contactToken,Integer namespaceId);
+
+	/**
+	 * 根据项目id集合来查询对应的公司id集合
+	 * @param communityIdList
+	 * @return
+	 */
+	List<Integer> findOrganizationIdListByCommunityIdList(List<Long> communityIdList);
+
+	/**
+	 * 根据公司编号集合查询公司集合
+	 * @param organizationIdList
+	 * @return
+	 */
+	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword, CrossShardListingLocator locator, int pageSize);
+
+	/**
+	 * 根据项目编号communityId查询eh_organization_workPlaces表中的信息
+	 * @param communityId
+	 * @return
+	 */
+	List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword);
+
+	/**
+	 * 根据organizationId来更改超级管理员
+	 * @param organization
+	 */
+	void updateOrganizationSuperAdmin(Organization organization);
+
+	/**
+	 * 根据组织ID来删除该项目下的办公地点
+	 * @param organizationId
+	 */
+	void deleteWorkPlacesByOrgId(Long organizationId,String siteName,Long communityId);
+
+	/**
+	 * 更新企业信息的方法
+	 * @param organization
+	 */
+	void updateOrganizationProperty(Organization organization);
+
+	/**
+	 * 根据企业编号来更新企业信息
+	 * @param organization
+	 */
+	void updateOrganizationByOrgId(Organization organization);
+
+
+	/**
+	 * 根据组织Id和手机号来查询Eh_organization_members表中的信息，来判断该用户是否已经加入到该公司
+	 * @param organizationId
+	 * @param contactToken
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken);
+
+	/**
+	 * 根据域空间Id和组织ID来删除eh_organization_member_details表中的信息
+	 * @param organizationId
+	 * @param namespaceId
+	 */
+	void deleteOrganizationMemberDetailByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId);
+
+	/**
+	 * 根据域空间Id和组织ID来删除eh_organization_members表中的信息
+	 * @param organizationId
+	 * @param namespaceId
+	 */
+	void deleteOrganizationMemberByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId);
+
+	/**
+	 * 根据组织ID来删除eh_organization_details表中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationDetailByOrganizationId(Long organizationId);
+
+	/**
+	 * 根据组织ID来删除eh_organizations表中的信息
+	 * @param id
+	 */
+	void deleteOrganizationsById(Long id);
+
+	/**
+	 * 根据组织ID来删除公司所在项目的关系表（eh_organization_workplaces）中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationWorkPlacesByOrgId(Long organizationId);
+
+	/**
+	 * 根据组织ID删除表eh_organization_community_requests中的信息
+	 * @param organizationId
+	 */
+	void deleteOrganizationCommunityRequestByOrgId(Long organizationId);
+
+	/**
+	 * 根据communityId来查询eh_communityAndBuilding_relationes表中的address_id字段
+	 * @param communityId
+	 * @return
+	 */
+	List<Long> getCommunityAndBuildingRelationesAddressIdsByCommunityId(Long communityId);
+
+	/**
+	 * 根据项目名称的集合来查询项目编号的集合
+	 * @param communityNameList
+	 * @return
+	 */
+	List<Long> findCommunityIdListByNames(List<String> communityNameList);
+
+	/**
+	 * 根据项目Id和域空间Id和楼栋名称来查询eh_buildings表中的楼栋信息
+	 * @param communityId
+	 * @param namespaceId
+	 * @param buildingName
+	 * @return
+	 */
+	Building findBuildingByCommunityIdAndBuildingNameWithNamespaceId(Long communityId, Integer namespaceId, String buildingName);
+
+	/**
+	 * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+	 * @param organizationId
+	 * @param namespaceId
+	 * @param workBenchFlag
+	 */
+	void updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(Long organizationId,Integer namespaceId,Byte workBenchFlag);
+
+	/**
+	 * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+	 * @param organizationId
+	 * @param workplaceName
+	 * @param communityId
+	 * @param wholeAddressNameNew
+	 * @param wholeAddressNameOld
+	 */
+	void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew , String wholeAddressNameOld);
+
+	/**
+	 * 向表eh_organizationAddress表中添加数据
+	 * @param organizationAddress
+	 */
+	void insertIntoOrganizationAddress(OrganizationAddress organizationAddress);
+
+	/**
+	 * 根据域空间Id和项目编号来查询楼栋
+	 * @param namespaceId
+	 * @param communityId
+	 * @return
+	 */
+	List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId, Long communityId);
+
+	/**
+	 * 根据targetId来查询eh_organization_members表中的公司的id的集合
+	 * @param targetId
+	 * @return
+	 */
+	List<Long> findOrganizationIdListByTargetId(Long targetId);
+
+	/**
+	 * 根据公司id来查询eh_organization_members表中的targetId集合
+	 * @param organizationId
+	 * @return
+	 */
+	List<Long> findTargetIdListByOrgId(Long organizationId);
+
+	/**
+	 * 根据公司Id和targetId来查询超级管理员
+	 * @param organizationId
+	 * @param targetId
+	 * @return
+	 */
+	OrganizationMember findOrganizationMemberByOrgIdAndSoOn(Long organizationId,Long targetId);
+	OrganizationWorkPlaces findWorkPlacesByOrgId(Long organizationId,
+			String siteName, Long communityId);
+	
+	void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(
+			Long communityId, Long organizationId);
 
     OrganizationCommunityRequest getOrganizationRequest(Long organizationId);
 
@@ -659,8 +965,6 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
             Long targetId, Long organizationId);
-    OrganizationMember findOrganizationMemberByContactTokenAndOrgId(
-            Long organizationId, String contactToken);
     
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);

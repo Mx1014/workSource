@@ -240,4 +240,20 @@ public class RegionController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+
+    /**
+     * <b>URL: /region/getRegion</b>
+     * 获取区域
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getRegion")
+    @RestReturn(value=RegionDTO.class)
+    public RestResponse getRegion(@Valid GetRegionCommand cmd) {
+        RegionDTO regionDTO = regionService.findRegionById(cmd);
+
+        RestResponse res = new RestResponse(regionDTO);
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 }

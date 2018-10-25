@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Building;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -42,6 +45,9 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterprisePropertyDTO;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
@@ -49,66 +55,9 @@ import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserOrganizations;
-import com.everhomes.server.schema.tables.daos.EhCommunityOrganizationDetailDisplayDao;
-import com.everhomes.server.schema.tables.daos.EhImportFileTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionMapsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhCommunityOrganizationDetailDisplay;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhImportFileTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionMapsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -154,7 +103,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-    
+
     @Autowired
     private UserProvider userProvider;
 
@@ -195,6 +144,45 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(department);
 
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
+
+    }
+
+    /**
+     * 根据企业编号来更新企业信息
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationByOrgId(Organization organization){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID,organization.getAdminTargetId())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
+    }
+
+    /**
+     * 更新企业信息的方法
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationProperty(Organization organization){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.NAME,organization.getName())
+                .set(Tables.EH_ORGANIZATIONS.PM_FLAG,organization.getPmFlag())
+                .set(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE,organization.getOrganizationType())
+                .set(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG,organization.getServiceSupportFlag())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
+    }
+
+    /**
+     * 根据organizationId来更改超级管理员
+     * @param organization
+     */
+    @Override
+    public void updateOrganizationSuperAdmin(Organization organization){
+        //获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID,organization.getAdminTargetId())
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organization.getId())).execute();
     }
 
     @Override
@@ -262,12 +250,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * @return
      */
     @Override
-    public OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId, String contactToken) {
+    public OrganizationMember findOrganizationMemberByContactTokenAndOrgId(Long organizationId,String contactToken){
         //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+         OrganizationMember organizationMember =  context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .fetchAnyInto(OrganizationMember.class);
         return organizationMember;
     }
@@ -289,14 +278,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return dao.fetchById(ids).stream().map(o -> ConvertHelper.convert(o, Organization.class)).collect(Collectors.toList());
     }
 
+    /**
+     * 根据组织id和手机号来查询eh_organization_members表中有效的用户信息
+     * @param id
+     * @param phone
+     * @return
+     */
     @Override
-    public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone) {
+    public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone,Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+        }
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
         //added by wh 2016-10-13 把被拒绝的过滤掉
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
@@ -318,6 +316,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(orgId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.WORK_EMAIL.eq(workEmail));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.ne(EmployeeStatus.DISMISSAL.getCode()));
+        return query.fetchAnyInto(OrganizationMemberDetails.class);
+    }
+
+    @Override
+    public OrganizationMemberDetails findOrganizationPersonnelByAccount(String account) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ACCOUNT.eq(account));
         return query.fetchAnyInto(OrganizationMemberDetails.class);
     }
 
@@ -428,6 +434,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+    @Override
+    public List<Organization> listOrganizationsByPath(Long organizationId){
+        List<Organization> result = new ArrayList<Organization>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + organizationId + "%"));
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
+    }
+
 
     @Override
     public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, CrossShardListingLocator locator, Integer pageSize) {
@@ -445,24 +464,74 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return listEnterpriseByNamespaceIds(namespaceId, organizationType, setAdminFlag, locator, pageSize);
     }
 
+    /**
+     * 根据域空间id、企业属性、关键字来查询企业信息（分页）
+     * @param namespaceId
+     * @param organizationType
+     * @param setAdminFlag
+     * @param keywords
+     * @param locator
+     * @param pageSize
+     * @return
+     */
     @Override
     public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
-                                                           Byte setAdminFlag, String keywords, CrossShardListingLocator locator, int pageSize) {
+                                                           Byte setAdminFlag, String keywords,
+                                                           CrossShardListingLocator locator, int pageSize) {
+        //获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         pageSize = pageSize + 1;
+        //声明一个List<Organization>集合
         List<Organization> result = new ArrayList<Organization>();
+        //查询Eh_organizations表
         SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         if (null != namespaceId) {
+            //添加命名空间查询条件
             query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
         }
+
+        //添加查询条件，首先我们先将关键字转换为Long的，如果转换成功的话，那么就说明=该关键字是企业编号，那么就根据关键字搜索，否则我们就认为他是企业
+        //名称，那么我们就根据企业名称进行搜索
+/*        try {
+            Long aLong = Long.valueOf(keywords);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keywords)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%"));
+            }
+        }*/
+
+        //本来是根据企业名称和企业编号来进行模糊，也就是上面注释的那一段，那一段需要进行类型的转换，但是现在有变更了方案，只是根据企业名称来进行模糊所以就有了下面的
+        //这块逻辑
         if (!StringUtils.isEmpty(keywords)) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keywords + "%"));
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keywords + "%");
+
+            try {
+                Long aLong = Long.valueOf(keywords);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
+            }
+
+            query.addConditions(conditionkeyword);
         }
+
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
+        //添加查询条件为：节点为企业
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
         if (!StringUtils.isEmpty(organizationType)) {
-            query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+            //说明传进来的organizationType字段是有值的，那么我们现在也不知道该值具体是什么呢，在这里我们的organziationType字段有三个类型
+            //ENTERPRISE表示的是普通公司、PM表示的是管理公司、SERVICE表示的是服务商，所以我们需要一一进行判断
+            if(OrganizationTypeEnum.ENTERPRISE.getCode().equals(organizationType)){
+                query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())
+                        .or(Tables.EH_ORGANIZATIONS.PM_FLAG.isNull()));
+            }else if(OrganizationTypeEnum.PM.getCode().equals(organizationType)){
+                query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+            }else if(OrganizationTypeEnum.SERVICE.getCode().equals(organizationType)){
+                query.addConditions(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+            }
         }
         if (setAdminFlag != null) {
             query.addConditions(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG.eq(setAdminFlag));
@@ -484,6 +553,31 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
         return result;
+    }
+
+    /**
+     * 根据公司id来查询对应的管理的项目
+     * @param organizationId
+     * @return
+     */
+    public int getCommunityByOrganizationId(Long organizationId){
+        //1.获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询Eh_organizations表
+        SelectJoinStep<Record1<Integer>> nums = context.selectCount().from(Tables.EH_ORGANIZATION_COMMUNITIES);
+            return nums.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId)).fetchOneInto(Integer.class);
+    }
+
+    /**
+     * 根据公司id来查询公司详细信息的方法
+     * @param organizationId
+     * @return
+     */
+    public OrganizationDetail getOrganizationDetailByOrgId(Long organizationId){
+        //1.获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        //2.查询eh_organization_details表
+        return context.select().from(Tables.EH_ORGANIZATION_DETAILS).where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId)).fetchAnyInto(OrganizationDetail.class);
     }
 
     @Caching(evict = {@CacheEvict(value = "listGroupMessageMembers", allEntries = true), @CacheEvict(value = "ListOrganizationMemberByPath", allEntries = true)})
@@ -619,7 +713,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
 
         }
-        if (null != memberGroup) {
+        if (null != memberGroup){
             query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup));
         }
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
@@ -2592,12 +2686,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.insert(organizationDetail);
     }
 
+    /**
+     * 向表eh_organization_communities中添加数据
+     * @param organizationCommunity
+     */
+    @Override
+    public void insertOrganizationCommunity(OrganizationCommunity organizationCommunity){
+        //拿到一个id序列
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationCommunities.class));
+        //拿到上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //创建EhOrganizationCommunitiesDao对象，通过该对象来将OrganizationCommunity对象持久化到数据库
+        EhOrganizationCommunitiesDao dao = new EhOrganizationCommunitiesDao(context.configuration());
+        //设置表中的主键id值
+        organizationCommunity.setId(id);
+        //持久化到数据库
+        dao.insert(organizationCommunity);
+    }
+
     @Override
     public void updateOrganizationDetail(OrganizationDetail organizationDetail) {
         // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, organizationDetail.getCommunityId()));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
-        dao.update(organizationDetail);
+        /*EhOrganizationDetailsDao dao = new EhOrganizationDetailsDao(context.configuration());
+        dao.update(organizationDetail);*/
+        context.update(Tables.EH_ORGANIZATION_DETAILS)/*.set(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG ,organizationDetail.getPmFlag())
+                .set(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG,organizationDetail.getServiceSupportFlag())*/
+                .set(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME,organizationDetail.getDisplayName())
+                .set(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE,organizationDetail.getMemberRange())
+                .set(Tables.EH_ORGANIZATION_DETAILS.AVATAR,organizationDetail.getAvatar())
+                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationDetail.getOrganizationId())).execute();
     }
 
     @Override
@@ -2796,6 +2914,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         return null;
+    }
+
+    @Override
+    public void deleteOrganizationCommunityRequestByCommunityIdAndOrgId(Long communityId, Long organizationId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+                .execute();
     }
 
     @Override
@@ -3652,8 +3780,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId) {
-        return listOrganizationByName(name, groupType, parentId, namespaceId, null);
+    public List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId) {
+    	List<Organization> result = new ArrayList<Organization>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(name));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        if (parentId != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+        }
+        if (groupType != null) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType));
+        }
+
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
     }
 
     @Override
@@ -4048,7 +4193,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         //add by huangliangming 指定返回值的ID选LOG的,不指定它会随机选导致ID不唯一前端排序出错.
         List<OrganizationMemberLog> list = query.fetch().map(record -> {
         	Long memberLogId = record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID);
-            OrganizationMemberLog memberLog = new OrganizationMemberLog();       
+            OrganizationMemberLog memberLog = new OrganizationMemberLog();
             memberLog.setId(memberLogId);
             memberLog.setContactDescription(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_DESCRIPTION));
             memberLog.setContactName(record.getValue(Tables.EH_ORGANIZATION_MEMBER_LOGS.CONTACT_NAME));
@@ -4782,6 +4927,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
+    /**
+     * 根据OrganizationMemberDetails来获取detailId的方法
+     * @param organizationMemberDetails
+     * @return
+     */
     public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails) {
         if (organizationMemberDetails.getNamespaceId() == null) {
             Integer namespaceId = UserContext.getCurrentNamespaceId(null);
@@ -5298,12 +5448,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return results.get(0);
     }
 
+
+    @Override
     public OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(Long targetId, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         List<OrganizationMemberDetails> results = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId)
-                        .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
-
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(targetId).and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId)))
                 .fetchInto(OrganizationMemberDetails.class);
         if (null == results || results.size() == 0)
             return null;
@@ -5318,6 +5468,62 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         step.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L));
         return step.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
     }
+
+
+//    @Override
+//    public List<OrganizationMember> listOrganizationMemberByPathHavingDetailId(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//
+//        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).join(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("group_path").like(path + "%");
+//        if (null != groupTypes && groupTypes.size() > 0)
+//            condition = condition.and(t1.field("group_type").in(groupTypes));
+//        if (!StringUtils.isEmpty(keywords)) {
+//            condition = condition.and(t2.field("contact_token").eq(keywords).or(t2.field("contact_name").like(keywords + "%")));
+//        }
+//
+//        if (null != visibleFlag) {
+//            condition = condition.and(t1.field("visible_flag").eq(visibleFlag.getCode()));
+//        }
+//
+//        if (null != locator.getAnchor()) {
+//            condition = condition.and(t1.field("id").lt(locator.getAnchor()));
+//        }
+//        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//        List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, OrganizationMember.class));
+//                return null;
+//            }).collect(Collectors.toList());
+//        }
+//        locator.setAnchor(null);
+//        if (result.size() > pageSize) {
+//            result.remove(result.size() - 1);
+//            locator.setAnchor(result.get(result.size() - 1).getId());
+//        }
+//
+//        return result;
+//    }
+
+//    /**
+//     * 查询非离职状态下所有员工的 detailId
+//     * added by R, 20170719
+//     */
+//    @Override
+//    public List<Long> listOrganizationMemberDetailIdsInActiveStatus(Long organizationId) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//        return context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID)
+//                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+//                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+////                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS.notEqual(EmployeeStatus.LEAVETHEJOB.getCode()))
+//                //	TODO:离职状态人员查询逻辑
+//                .fetchInto(Long.class);
+//    }
 
     @Override
     public List<Organization> listOrganizationsByGroupType(String groupType, Long organizationId, List<Long> orgIds,
@@ -5370,6 +5576,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         });
         return list;
     }
+
+//    @Override
+//    public List listOrganizationMemberByEnterpriseIdAndToken(String token, Long enterpriseId) {
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//        List<EhOrganizationMembers> list = new ArrayList<>();
+//        context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+//                .where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(token))
+//                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like("/" + enterpriseId + "%"))
+//                .fetch().map(r -> {
+//            list.add(ConvertHelper.convert(r, EhOrganizationMembers.class));
+//            return null;
+//        });
+//        return list;
+//    }
+
 
     @Override
     public String getOrganizationNameById(Long targetId) {
@@ -5930,7 +6151,718 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
+    /**
+     * 根据节点编号organizationId和域空间ID来查询节点信息
+     * @param organizationId
+     * @param namespaceId
+     * @return
+     */
     @Override
+	public OrganizationAndDetailDTO getOrganizationAndDetailByorgIdAndNameId(Long organizationId, Integer namespaceId){
+        OrganizationAndDetailDTO organizationAndDetailDTO = new OrganizationAndDetailDTO();
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //表eh_organizations和表eh_organization_details进行联查
+        SelectQuery<Record> query = context.select().from(Tables.EH_ORGANIZATIONS).getQuery();
+        query.addJoin(Tables.EH_ORGANIZATION_DETAILS,JoinType.JOIN,Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID));
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        //查询
+        query.fetch().map(r -> {
+            //将organizationId组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
+            //将节点名称组装在对象OrganizationAndDetailDTO中
+            organizationAndDetailDTO.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            organizationAndDetailDTO.setAddressId(r.getValue(Tables.EH_ORGANIZATIONS.ADDRESS_ID));
+            organizationAndDetailDTO.setDescription(r.getValue(Tables.EH_ORGANIZATIONS.DESCRIPTION));
+            organizationAndDetailDTO.setDepartmentType(r.getValue(Tables.EH_ORGANIZATIONS.DEPARTMENT_TYPE));
+            organizationAndDetailDTO.setDirectlyEnterpriseId(r.getValue(Tables.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID));
+            organizationAndDetailDTO.setShowFlag(r.getValue(Tables.EH_ORGANIZATIONS.SHOW_FLAG));
+            organizationAndDetailDTO.setNamespaceOrganizationToken(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN));
+            organizationAndDetailDTO.setNamespaceOrganizationType(r.getValue(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE));
+            organizationAndDetailDTO.setCreatorUid(r.getValue(Tables.EH_ORGANIZATIONS.CREATOR_UID));
+            organizationAndDetailDTO.setOperatorUid(r.getValue(Tables.EH_ORGANIZATIONS.OPERATOR_UID));
+            organizationAndDetailDTO.setSetAdminFlag(r.getValue(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG));
+            organizationAndDetailDTO.setEmailContent(r.getValue(Tables.EH_ORGANIZATIONS.EMAIL_CONTENT));
+            organizationAndDetailDTO.setWebsite(r.getValue(Tables.EH_ORGANIZATIONS.WEBSITE));
+            organizationAndDetailDTO.setAdminTargetId(r.getValue(Tables.EH_ORGANIZATIONS.ADMIN_TARGET_ID));
+            organizationAndDetailDTO.setWorkbenchFlag(r.getValue(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG));
+            organizationAndDetailDTO.setContact(r.getValue(Tables.EH_ORGANIZATION_DETAILS.CONTACT));
+            organizationAndDetailDTO.setAddress(r.getValue(Tables.EH_ORGANIZATION_DETAILS.ADDRESS));
+            organizationAndDetailDTO.setDisplayName(r.getValue(Tables.EH_ORGANIZATION_DETAILS.DISPLAY_NAME));
+            organizationAndDetailDTO.setContactor(r.getValue(Tables.EH_ORGANIZATION_DETAILS.CONTACTOR));
+            organizationAndDetailDTO.setMemberCount(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_COUNT));
+            organizationAndDetailDTO.setAvatar(r.getValue(Tables.EH_ORGANIZATION_DETAILS.AVATAR));
+            organizationAndDetailDTO.setPostUri(r.getValue(Tables.EH_ORGANIZATION_DETAILS.POST_URI));
+            organizationAndDetailDTO.setMemberRange(r.getValue(Tables.EH_ORGANIZATION_DETAILS.MEMBER_RANGE));
+//            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.PM_FLAG));
+//            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATION_DETAILS.SERVICE_SUPPORT_FLAG));
+            organizationAndDetailDTO.setPmFlag(r.getValue(Tables.EH_ORGANIZATIONS.PM_FLAG));
+            organizationAndDetailDTO.setServiceSupportFlag(r.getValue(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG));
+            return null;
+        });
+        //将组装的对象进行返回
+        return organizationAndDetailDTO;
+    }
+
+    /**
+     * 将OrganizationWorkPlaces对象持久化在表eh_Organization_workPlaces表中
+     * @param organizationWorkPlaces
+     */
+    @Override
+    public void insertIntoOrganizationWorkPlaces(OrganizationWorkPlaces organizationWorkPlaces){
+        //拿到一个最新的主键id
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationWorkplaces.class));
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhOrganizationWorkplacesDao dao = new EhOrganizationWorkplacesDao(context.configuration());
+        //将最新的主键id值设置进去
+        organizationWorkPlaces.setId(id);
+        //持久化到数据库
+        dao.insert(organizationWorkPlaces);
+    }
+
+    /**
+     * 将CommunityAndBuildingRelationes对象中的数据持久化到eh_communityAndBuilding_relationes表中
+     * @param communityAndBuildingRelationes
+     */
+    @Override
+    public void insertIntoCommunityAndBuildingRelationes(CommunityAndBuildingRelationes communityAndBuildingRelationes){
+        //拿到一个最新的主键id
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhCommunityandbuildingRelationes.class));
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        EhCommunityandbuildingRelationesDao dao = new EhCommunityandbuildingRelationesDao(context.configuration());
+        //将最新的主键id值设置进去
+        communityAndBuildingRelationes.setId(id);
+        //持久化到数据库
+        dao.insert(communityAndBuildingRelationes);
+    }
+
+    /**
+     * 根据organizationId来查询eh_organization_workPlaces表中对应的项目办公地点（可能存在多个办公地点）集合
+     * @param organizationId
+     * @return
+     */
+    @Override
+    public List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+        SelectQuery<EhOrganizationWorkplacesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_WORKPLACES);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId));
+        List<OrganizationWorkPlaces> list = query.fetch().map( r -> ConvertHelper.convert(r, OrganizationWorkPlaces.class));
+        return list;
+    }
+
+    /**
+     * 根据organizationId和communityId来查询eh_organization_workplaces表中的信息
+     * @param organizationId
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<OrganizationWorkPlaces> findOrganizationWorkPlacesByOrgIdAndCommunityId(Long organizationId,Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+        SelectQuery<EhOrganizationWorkplacesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_WORKPLACES);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
+        List<OrganizationWorkPlaces> list = query.fetch().map( r -> ConvertHelper.convert(r, OrganizationWorkPlaces.class));
+        return list;
+    }
+
+    /**
+     * 根据项目Id来查询项目名称
+     * @param communityId
+     * @return
+     */
+    @Override
+    public String getCommunityNameByCommunityId(Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_WORKPLACES
+        String name = context.select(Tables.EH_COMMUNITIES.NAME).from(Tables.EH_COMMUNITIES)
+               .where(Tables.EH_COMMUNITIES.ID.eq(communityId)).fetchAnyInto(String.class);
+        return name;
+    }
+
+    /**
+     * 根据communityId来查询项目和楼栋门牌的关系表eh_communityAndBuilding_relationes
+     * 一个项目可能对应多个楼栋和门牌
+     * @param workplaceId
+     * @return
+     */
+    @Override
+    public List<CommunityAndBuildingRelationes> getCommunityAndBuildingRelationesByWorkPlaceId(Long workplaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_COMMUNITYANDBUILDING_RELATIONES
+        SelectQuery<EhCommunityandbuildingRelationesRecord> query = context.selectQuery(Tables.EH_COMMUNITYANDBUILDING_RELATIONES);
+        //添加查询条件
+        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.WORKPLACE_ID.eq(workplaceId));
+        //查询
+       List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
+       return list;
+    }
+
+//TODO
+//    @Override
+//    public void deleteCommunityAndBuildingRelationesByCommunityId(Long communityId){
+//        //获取上下文
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//        //查询表EH_COMMUNITYANDBUILDING_RELATIONES
+//        SelectQuery<EhCommunityandbuildingRelationesRecord> query = context.selectQuery(Tables.EH_COMMUNITYANDBUILDING_RELATIONES);
+//        //添加查询条件
+//        query.addConditions(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId));
+//        //查询
+//       List<CommunityAndBuildingRelationes> list = query.fetch().map( r -> ConvertHelper.convert(r , CommunityAndBuildingRelationes.class));
+//       return list;
+//    }
+
+
+    /**
+     * 根据communityId来查询eh_communityAndBuilding_relationes表中的address_id字段
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<Long> getCommunityAndBuildingRelationesAddressIdsByCommunityId(Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> addressIdList = context.select(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.ADDRESS_ID)
+                .from(Tables.EH_COMMUNITYANDBUILDING_RELATIONES)
+                .where(Tables.EH_COMMUNITYANDBUILDING_RELATIONES.COMMUNITY_ID.eq(communityId))
+                .fetchInto(Long.class);
+        return addressIdList;
+    }
+
+    /**
+     * 根据手机号、域空间Id、组织id来查询表eh_organization_members中的id值
+     * @param contactToken
+     * @param namespaceId
+     * @param organizationId
+     * @return
+     */
+    @Override
+    public Long findOrganizationMembersByTokenAndSoON(String contactToken,Integer namespaceId,Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表EH_ORGANIZATION_MEMBERS
+        Long id = context.select(Tables.EH_ORGANIZATION_MEMBERS.ID).from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .fetchAnyInto(Long.class);
+        return id;
+    }
+
+    /**
+     * 查询eh_organization_members表中已经从注册的对应的信息
+     * @param contactToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表eh_organization_members
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+
+    /**
+     * 查询eh_organization_members表中已经从注册的对应的信息
+     * @param contactToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberSigned(String contactToken,Integer namespaceId,String memberGroup){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表eh_organization_members
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+
+    /**
+     * 查询eh_organization_members表中未注册的对应的信息
+     * @param contactToken
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberNoSigned(String contactToken,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        //查询表eh_organization_members
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("UNTRACK"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+    /**
+     * 向eh_organization_members表中添加数据
+     * @param organizationMember
+     */
+    @Override
+    public void insertIntoOrganizationMember(OrganizationMember organizationMember){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        //设置最大主键
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
+        organizationMember.setId(id);
+        organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+        dao.insert(organizationMember);
+    }
+
+    /**
+     * 根据项目id集合来查询对应的公司id集合
+     * @param communityIdList
+     * @return
+     */
+    @Override
+    public List<Integer> findOrganizationIdListByCommunityIdList(List<Long> communityIdList){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Integer> organizationIdList = context.select(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.in(communityIdList))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+                .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .fetchInto(Integer.class);
+        return organizationIdList;
+    }
+
+    /**
+     * 根据公司编号集合查询公司集合
+     * @param organizationIdList
+     * @return
+     */
+    @Override
+    public List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword,
+                                                            CrossShardListingLocator locator, int pageSize){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        pageSize = pageSize + 1;
+        //声明一个List<Organization>集合
+        List<EnterpriseDTO> result = new ArrayList<EnterpriseDTO>();
+        //查询表EH_ORGANIZATIONS
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.ID.in(organizationIdList));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
+            }
+
+            query.addConditions(conditionkeyword);
+        }
+
+        /*try {
+            Long aLong = Long.valueOf(keyword);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keyword)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
+            }
+        }*/
+
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseDTO.class));
+            return null;
+        });
+        locator.setAnchor(null);
+
+        if (result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+        return result;
+    }
+
+    /**
+     * 根据项目编号communityId查询eh_organization_workPlaces表和eh_organizations表（联查）中的信息
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<EnterprisePropertyDTO> findEnterpriseListByCommunityId(ListingLocator locator, Long communityId, Integer pageSize, String keyword){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select().from(Tables.EH_ORGANIZATIONS).getQuery();
+        query.addJoin(Tables.EH_ORGANIZATION_WORKPLACES, JoinType.RIGHT_OUTER_JOIN,
+                Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID));
+        query.setDistinct(true);
+
+        if (locator.getAnchor() != null)
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(locator.getAnchor()));
+
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+
+            /*if (org.apache.commons.lang.math.NumberUtils.isDigits(keyword)) {
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID
+                        .eq(org.apache.commons.lang.math.NumberUtils.toLong(keyword)));
+            }*/
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+                //传来的可能不是数值，这样的话就不要查id了
+                LOGGER.error("中文转换为Long类型出错",ex);
+            }
+
+            query.addConditions(conditionkeyword);
+        }
+
+/*        try {
+            Long aLong = Long.valueOf(keyword);
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+        } catch (NumberFormatException e) {
+            if (!StringUtils.isEmpty(keyword)) {
+                query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%"));
+            }
+        }*/
+
+        if (communityId != null) {
+            query.addConditions(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId));
+        }
+        if(pageSize != null){
+            query.addLimit(pageSize);
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+
+        List<EnterprisePropertyDTO> records = query.fetch().map(r -> {
+            EnterprisePropertyDTO dto = new EnterprisePropertyDTO();
+            dto.setId(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.ID));
+            dto.setName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            dto.setWholeAddressName(r.getValue(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME));
+            dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATIONS.ID));
+            return dto;
+        });
+
+        if (records.size() > pageSize) {
+            locator.setAnchor(records.get(records.size() - 1).getId());
+        }
+        return records;
+    }
+
+
+    /**
+     * 根据组织ID来删除该项目下的办公地点
+     * @param organizationId
+     */
+    @Override
+    public void deleteWorkPlacesByOrgId(Long organizationId,String siteName,Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
+                .execute();
+    }
+
+    @Override
+    public OrganizationWorkPlaces findWorkPlacesByOrgId(Long organizationId, String siteName, Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        return context.select().from(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(siteName))
+                .fetchAnyInto(OrganizationWorkPlaces.class);
+    }
+
+    /**
+     * 根据域空间Id和组织ID来删除eh_organization_member_details表中的信息
+     * @param organizationId
+     * @param namespaceId
+     */
+    @Override
+    public void deleteOrganizationMemberDetailByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+    /**
+     * 根据域空间Id和组织ID来删除eh_organization_members表中的信息
+     * @param organizationId
+     * @param namespaceId
+     */
+    @Override
+    public void deleteOrganizationMemberByNamespaceIdAndOrgId(Long organizationId,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID来删除eh_organization_details表中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationDetailByOrganizationId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_DETAILS)
+                .where(Tables.EH_ORGANIZATION_DETAILS.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+
+    /**
+     * 根据组织ID来删除eh_organizations表中的信息
+     * @param id
+     */
+    @Override
+    public void deleteOrganizationsById(Long id){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATIONS)
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(id))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID来删除公司所在项目的关系表（eh_organization_workplaces）中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationWorkPlacesByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_WORKPLACES)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .execute();
+    }
+
+    /**
+     * 根据组织ID删除表eh_organization_community_requests中的信息
+     * @param organizationId
+     */
+    @Override
+    public void deleteOrganizationCommunityRequestByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+                .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
+                .execute();
+    }
+
+
+    /**
+     * 根据项目名称的集合来查询项目编号的集合
+     * @param communityNameList
+     * @return
+     */
+    @Override
+    public List<Long> findCommunityIdListByNames(List<String> communityNameList){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        List<Long> communityIdList = context.select(Tables.EH_COMMUNITIES.ID).from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAME.in(communityNameList))
+                .fetchInto(Long.class);
+        return communityIdList;
+    }
+
+    /**
+     * 根据项目Id和域空间Id和楼栋名称来查询eh_buildings表中的楼栋信息
+     * @param communityId
+     * @param namespaceId
+     * @param buildingName
+     * @return
+     */
+    @Override
+    public Building findBuildingByCommunityIdAndBuildingNameWithNamespaceId(Long communityId,Integer namespaceId,String buildingName){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Building building = context.select().from(Tables.EH_BUILDINGS)
+                .where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_BUILDINGS.NAME.eq(buildingName))
+                .fetchAnyInto(Building.class);
+        return building;
+    }
+
+    /**
+     * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+     * @param organizationId
+     * @param namespaceId
+     * @param workBenchFlag
+     */
+    @Override
+    public void  updateWorkBenchFlagByOrgIdAndNamespaceIdWithWorkBenchFlag(Long organizationId,Integer namespaceId,Byte workBenchFlag){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATIONS).set(Tables.EH_ORGANIZATIONS.WORK_PLATFORM_FLAG,workBenchFlag)
+                .where(Tables.EH_ORGANIZATIONS.ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+                .execute();
+    }
+
+    /**
+     * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+     * @param organizationId
+     * @param workplaceName
+     * @param communityId
+     * @param wholeAddressNameNew
+     * @param wholeAddressNameOld
+     */
+    @Override
+    public void updateWholeAddressName(Long organizationId , String workplaceName , Long communityId , String wholeAddressNameNew ,
+                                       String wholeAddressNameOld){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_WORKPLACES).set(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME,wholeAddressNameNew)
+                .where(Tables.EH_ORGANIZATION_WORKPLACES.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WORKPLACE_NAME.eq(workplaceName))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ORGANIZATION_WORKPLACES.WHOLE_ADDRESS_NAME.eq(wholeAddressNameOld))
+                .execute();
+
+    }
+
+    /**
+     * 向表eh_organizationAddress表中添加数据
+     * @param organizationAddress
+     */
+    @Override
+    public void insertIntoOrganizationAddress(OrganizationAddress organizationAddress){
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
+        organizationAddress.setId(id);
+        dao.insert(organizationAddress);
+    }
+
+    /**
+     * 根据域空间Id和项目编号来查询楼栋
+     * @param namespaceId
+     * @param communityId
+     * @return
+     */
+    @Override
+    public List<Building> findBuildingByNamespaceIdAndCommunityId(Integer namespaceId, Long communityId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_BUILDINGS)
+                .where(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+                .fetch()
+                .map(r->ConvertHelper.convert(r, Building.class));
+    }
+
+
+    /**
+     * 根据targetId来查询eh_organization_members表中的公司的id的集合
+     * @param targetId
+     * @return
+     */
+    @Override
+    public List<Long> findOrganizationIdListByTargetId(Long targetId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> orgIdList = context.select(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(Byte.valueOf("3")))
+                .fetchInto(Long.class);
+        return orgIdList;
+    }
+
+    /**
+     * 根据公司id来查询eh_organization_members表中的targetId集合
+     * @param organizationId
+     * @return
+     */
+    @Override
+    public List<Long> findTargetIdListByOrgId(Long organizationId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> targetIdList = context.select(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq("USER"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(Byte.valueOf("3")))
+                .fetchInto(Long.class);
+        return targetIdList;
+    }
+
+    /**
+     * 根据公司Id和targetId来查询超级管理员
+     * @param organizationId
+     * @param targetId
+     * @return
+     */
+    @Override
+    public OrganizationMember findOrganizationMemberByOrgIdAndSoOn(Long organizationId,Long targetId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        OrganizationMember organizationMember = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(OrganizationMemberGroupType.MANAGER.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+                .fetchAnyInto(OrganizationMember.class);
+        return organizationMember;
+    }
+
+@Override
     public List<NoticeMemberIdAndContact> findActiveUidsByTargetTypeAndOrgId(Long orgId, String... targetTypes) {
         List<NoticeMemberIdAndContact> ret = new ArrayList<>();
         this.dbProvider.getDslContext(AccessSpec.readOnly())
@@ -6036,11 +6968,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         return results;
     }
-    
-	
+
+
 	/**
 	 * 根据用户id获取用户的真实姓名和手机号 1.获取真实姓名。 2.没有的话获取昵称
-	 * 
+	 *
 	 * @param userId
 	 * @return
 	 */

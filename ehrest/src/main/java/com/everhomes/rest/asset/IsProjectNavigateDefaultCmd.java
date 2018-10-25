@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属者id</li>
  * <li>ownerType: 所属者type</li>
  * <li>namespaceId: 域名</li>
+ * <li>organizationId: 标准版新增的管理公司ID</li>
  *</ul>
  */
 public class IsProjectNavigateDefaultCmd {
@@ -27,6 +28,7 @@ public class IsProjectNavigateDefaultCmd {
     @NotNull
     private Integer namespaceId;
     private Long categoryId;
+    private Long organizationId;//标准版新增的管理公司ID
 
     @Override
     public String toString() {
@@ -71,5 +73,13 @@ public class IsProjectNavigateDefaultCmd {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

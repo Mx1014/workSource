@@ -2,20 +2,21 @@ package com.everhomes.rest.user;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
+import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- *     <li>contentServer: 内容服务器地址。如果用户为登录，则此字段不返回</li>
+ *     <li>contentServer: 内容服务器地址。如果用户未登录，则此字段不返回</li>
  *     <li>uploadUrlInBrowser: 通过 pc 上传文件的 url 链接地址</li>
  *     <li>paymentPlatform: 0旧支付  1新支付</li>
- *     <li>accessPoints: borderServer 的链接地址。如果用户不登录，则此地址不返回</li>
- *     <li>myPublishFlag: "我"-"我的发布"是否显示，参考{@link MyPublishFlag}</li>
  *     <li>scanForLogonServer: 扫码登录服务器地址</li>
+ *     <li>accessPoints: borderServer 的链接地址。如果用户未登录，则此地址不返回</li>
  *     <li>contentCacheConfig: 资源缓存配置 {@link com.everhomes.rest.contentserver.ContentCacheConfigDTO}</li>
  *     <li>securityPayServer: 支付双向安全校验</li>
+ *     <li>indexDtos: 主页签信息{@link IndexDTO}</li>
  * </ul>
  */
 public class SystemInfoResponse {
@@ -36,6 +37,8 @@ public class SystemInfoResponse {
     private String securityPayServer;
 
     private ContentCacheConfigDTO contentCacheConfig;
+
+    private List<IndexDTO> indexDtos;
 
     public String getSecurityPayServer() {
         return securityPayServer;
@@ -85,12 +88,12 @@ public class SystemInfoResponse {
         this.paymentPlatform = paymentPlatform;
     }
 
-    public Byte getMyPublishFlag() {
-        return myPublishFlag;
+    public List<IndexDTO> getIndexDtos() {
+        return indexDtos;
     }
 
-    public void setMyPublishFlag(Byte myPublishFlag) {
-        this.myPublishFlag = myPublishFlag;
+    public void setIndexDtos(List<IndexDTO> indexDtos) {
+        this.indexDtos = indexDtos;
     }
 
     public Integer getAddressDialogStyle() {

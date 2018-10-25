@@ -1005,4 +1005,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createVisitorBatch</b>
+     * <p>批量授权访客 </p>
+     * @return
+     */
+    @RequestMapping("createVisitorBatch")
+    @RestReturn(value=String.class)
+    public RestResponse createVisitorBatch(CreateVisitorBatchCommand cmd){
+    	RestResponse response = new RestResponse();
+    	doorAccessService.createVisitorBatch(cmd);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

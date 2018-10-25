@@ -1,7 +1,9 @@
 package com.everhomes.rest.investmentAd;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -41,7 +43,30 @@ public class ListInvestmentAdCommand {
 	private Long PageAnchor;
 	private String sortField;
 	private Byte sortType;
+	@ItemType(Long.class)
+    private List<Long> communityIds;
+    private Long appId;
+    private Byte allScope;
+    
 	
+    public Byte getAllScope() {
+		return allScope;
+	}
+	public void setAllScope(Byte allScope) {
+		this.allScope = allScope;
+	}
+	public List<Long> getCommunityIds() {
+		return communityIds;
+	}
+	public void setCommunityIds(List<Long> communityIds) {
+		this.communityIds = communityIds;
+	}
+	public Long getAppId() {
+		return appId;
+	}
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	public Long getOrganizationId() {
 		return organizationId;
 	}

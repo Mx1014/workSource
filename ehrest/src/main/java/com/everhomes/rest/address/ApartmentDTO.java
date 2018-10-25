@@ -29,10 +29,11 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
     private Double chargeArea;
     private String enterpriseName;
     private String apartmentFloor;
+    private Byte isLived;
     private String orientation;
 	private String namespaceAddressType;
 	private String namespaceAddressToken;
-    
+
     public String getOrientation() {
 		return orientation;
 	}
@@ -160,7 +161,15 @@ public class ApartmentDTO implements Comparable<ApartmentDTO> {
 		this.apartmentFloor = apartmentFloor;
 	}
 
-	@Override
+    public Byte getIsLived() {
+        return isLived;
+    }
+
+    public void setIsLived(Byte isLived) {
+        this.isLived = isLived;
+    }
+
+    @Override
     public boolean equals(Object obj){
         if (! (obj instanceof ApartmentDTO)) {
             return false;

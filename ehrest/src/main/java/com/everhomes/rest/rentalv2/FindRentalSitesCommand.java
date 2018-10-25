@@ -45,7 +45,7 @@ public class FindRentalSitesCommand {
 	private Integer peopleSpecMost;
 	private List<Long> structureList;
 
-	private String sceneToken;
+	private String sceneType;
 
 	private Long anchor;
 	private Integer pageSize;
@@ -110,12 +110,12 @@ public class FindRentalSitesCommand {
 		this.communityId = communityId;
 	}
 
-	public String getSceneToken() {
-		return sceneToken;
+	public String getSceneType() {
+		return sceneType;
 	}
 
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
 	}
 
 	public Byte getRentalType() {

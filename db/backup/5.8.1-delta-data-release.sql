@@ -217,6 +217,7 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
  
 -- AUTHOR: 梁燕龙
 -- REMARK: 个人中心初始化数据
+-- 标准版升级时不要执行该sql，sql已迁移至标准版的脚本文件中
 set @id = IFNULL((select MAX(id) FROM eh_personal_center_settings), 1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid,link_url)
 VALUES ((@id := @id + 1),0,'钱包','钱包',1,1,1,1,2,2,'cs://1/image/aW1hZ2UvTVRwaFkyUmhZV1F3WkdRMk56RXpNMlptWkRVek0ySXlNbVkxTVRJNFkyVTRZUQ',1,1,'/app/wallet');

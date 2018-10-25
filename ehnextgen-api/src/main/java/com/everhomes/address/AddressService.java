@@ -27,7 +27,9 @@ public interface AddressService {
     Tuple<Integer, List<CommunityDTO>> listCommunitiesByKeyword(ListCommunityByKeywordCommand cmd);
     Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(ListBuildingByKeywordCommand cmd);
     Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd);
-    
+
+    Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordNew(ListPropApartmentsByKeywordCommand cmd);
+
     ClaimedAddressInfo claimAddress(ClaimAddressCommand cmd);
     void disclaimAddress(DisclaimAddressCommand cmd);
     
@@ -86,6 +88,13 @@ public interface AddressService {
     List<ApartmentAttachmentDTO> listApartmentAttachments(ListApartmentAttachmentsCommand cmd);
     List<EnterpriseCustomerDTO> listApartmentEnterpriseCustomers(ListApartmentEnterpriseCustomersCommand cmd);
     void downloadApartmentAttachment(DownloadApartmentAttachmentCommand cmd);
+
+    /**
+     * 根据门牌地址id集合 批量删除门牌地址（标准版）
+     * @param cmd
+     */
+    void betchDisclaimAddress(BetchDisclaimAddressCommand cmd);
+
 	void createAddressArrangement(CreateAddressArrangementCommand cmd);
 	AddressArrangementDTO listAddressArrangement(ListAddressArrangementCommand cmd);
 	void updateAddressArrangement(UpdateAddressArrangementCommand cmd);

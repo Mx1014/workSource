@@ -543,4 +543,12 @@ public interface FlowService {
 	void updateSubFlowInfo(UpdateSubFlowInfoCommand cmd);
 
     FlowServiceMappingDTO getFlowServiceMapping(GetFlowServiceMappingCommand cmd);
+
+	void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+    Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
+
+    void doFlowMirror(DoFlowMirrorCommand cmd);
 }

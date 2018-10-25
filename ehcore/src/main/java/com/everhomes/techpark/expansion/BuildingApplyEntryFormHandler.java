@@ -49,14 +49,14 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
         Long requestFormId;
-        if (null == request) {
+        if (null == request || request.getSourceId() == null) {
             //查询初始默认数据
             GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());
             requestFormId = defaultForm.getFormOriginId();
@@ -152,15 +152,15 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                null, null, cmd.getSourceType(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         GeneralFormDTO dto;
 
         GeneralForm form = getDefaultGeneralForm(cmd.getSourceType());
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
-        if (null != request) {
+        if (null != request && request.getSourceId() == null) {
             try{
                 GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
                 cmd2.setFormId(request.getSourceId());

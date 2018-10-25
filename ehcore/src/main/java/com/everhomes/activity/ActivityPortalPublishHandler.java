@@ -368,7 +368,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String processInstanceConfig(String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 		if(config != null && null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
 			for (ActivityCategoryDTO dto: config.getCategoryDTOList()) {

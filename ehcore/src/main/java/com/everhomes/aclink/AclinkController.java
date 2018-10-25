@@ -960,4 +960,61 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+    *
+    * <b>URL: /aclink/listZLDoorAccess</b>
+    * <p> 获取门禁mac地址列表 </p>
+    * @return
+    */
+   @RequestMapping("listZLDoorAccess")
+   @RestReturn(value=ListZLDoorAccessResponse.class)
+   @RequireAuthentication(value = true)
+   public RestResponse listZLDoorAccess() {
+       RestResponse response = new RestResponse();
+
+       response.setResponseObject(doorAccessService.listDoorAccessMacByApp());
+
+       response.setErrorCode(ErrorCodes.SUCCESS);
+       response.setErrorDescription("OK");
+       return response;
+   }
+   
+   /**
+   *
+   * <b>URL: /aclink/getZLAesUserKey</b>
+   * <p> 第三方申请门禁钥匙 </p>
+   * @return
+   */
+  @RequestMapping("getZLAesUserKey")
+  @RestReturn(value=GetZLAesUserKeyResponse.class)
+  @RequireAuthentication(value = true)
+  public RestResponse getZLAesUserKey(GetZLAesUserKeyCommand cmd) {
+      RestResponse response = new RestResponse();
+
+      response.setResponseObject(doorAccessService.getAppAesUserKey(cmd));
+
+      response.setErrorCode(ErrorCodes.SUCCESS);
+      response.setErrorDescription("OK");
+      return response;
+  }
+  
+  /**
+  *
+  * <b>URL: /aclink/createZLVisitorQRKey</b>
+  * <p> 第三方申请访客二维码 </p>
+  * @return
+  */
+ @RequestMapping("createZLVisitorQRKey")
+ @RestReturn(value=CreateZLVisitorQRKeyResponse.class)
+ @RequireAuthentication(value = true)
+ public RestResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd) {
+     RestResponse response = new RestResponse();
+
+     response.setResponseObject(doorAccessService.createZLVisitorQRKey(cmd));
+
+     response.setErrorCode(ErrorCodes.SUCCESS);
+     response.setErrorDescription("OK");
+     return response;
+ }
 }

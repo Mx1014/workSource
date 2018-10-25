@@ -92,6 +92,8 @@ import java.util.List;
  */
 public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>{
     private Long id;
+    private Long ownerId;
+    private String ownerType;
     private Long enterpriseId;
     private Long organizationId;
     private Long communityId;
@@ -1569,6 +1571,22 @@ public class EnterpriseCustomerDTO  implements Comparable<EnterpriseCustomerDTO>
 
     public void setAptitudeFlagItemName(String aptitudeFlagItemName) {
         this.aptitudeFlagItemName = aptitudeFlagItemName;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

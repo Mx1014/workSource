@@ -16,7 +16,9 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord;
+import com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.Tuple;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -725,6 +727,38 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
+	public List<ItemServiceCategry> listItemServiceCategryByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.GROUP_ID.eq(groupId));
+
+		Condition scopeCondition = null;
+
+		for(Tuple<Byte, Long> scope: scopes){
+			if(scopeCondition == null){
+				scopeCondition = Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scope.second()));
+			}else {
+				scopeCondition = scopeCondition.or(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_ITEM_SERVICE_CATEGRIES.SCOPE_ID.eq(scope.second())));
+			}
+
+		}
+		query.addConditions(scopeCondition);
+
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		query.addConditions(getPreviewPortalVersionCondition(Tables.EH_ITEM_SERVICE_CATEGRIES.getName()));
+
+		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER.asc());
+
+		List<ItemServiceCategry> res = query.fetch().map(r -> ConvertHelper.convert(r, ItemServiceCategry.class));
+		return res;
+	}
+
+
+	@Override
 	public void createItemServiceCategry(ItemServiceCategry itemServiceCategry) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhItemServiceCategries.class));
 		itemServiceCategry.setId(id);
@@ -817,4 +851,94 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		query.execute();
 	}
 
+
+	@Override
+	public List<LaunchPadItem> listLaunchPadItemsByGroupId(Long groupId, List<Tuple<Byte, Long>> scopes, String categoryName, Byte displayFlag){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+
+		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
+
+		Condition scopeCondition = null;
+
+		for(Tuple<Byte, Long> scope: scopes){
+			if(scopeCondition == null){
+				scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scope.second()));
+			}else {
+				scopeCondition = scopeCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scope.first())
+						.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scope.second())));
+			}
+
+		}
+		query.addConditions(scopeCondition);
+
+		if(!StringUtils.isEmpty(categoryName)){
+			query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.CATEGRY_NAME.eq(categoryName));
+		}
+
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(SceneType.PARK_TOURIST.getCode()));
+
+		if(displayFlag != null){
+			query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.DISPLAY_FLAG.eq(displayFlag));
+		}
+
+		//增加版本功能，默认找正式版本，有特别标识的找该版本功能
+		Condition previewCondition = getPreviewPortalVersionCondition(Tables.EH_LAUNCH_PAD_ITEMS.getName());
+		query.addConditions(previewCondition);
+		query.addGroupBy(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME);
+		query.addOrderBy(Tables.EH_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
+
+		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));
+
+		return items;
+	}
+
+	@Override
+	public void deleteUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhUserLaunchPadItemsRecord> query = context.deleteQuery(Tables.EH_USER_LAUNCH_PAD_ITEMS);
+
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.USER_ID.eq(userId));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+		query.execute();
+	}
+
+	@Override
+	public List<UserLaunchPadItem> listUserLaunchPadItemByUserId(Long userId, Long groupId, String ownerType, Long ownerId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserLaunchPadItems.class));
+		SelectQuery<EhUserLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_USER_LAUNCH_PAD_ITEMS);
+
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.USER_ID.eq(userId));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.GROUP_ID.eq(groupId));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+		query.addOrderBy(Tables.EH_USER_LAUNCH_PAD_ITEMS.DEFAULT_ORDER.asc());
+
+		List<UserLaunchPadItem> response = query.fetch().map((r) -> ConvertHelper.convert(r, UserLaunchPadItem.class));
+
+		return response;
+
+	}
+
+
+	@Override
+	public List<LaunchPadItem> listLaunchPadItemsByIds(List<Long> itemIds) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+
+		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.ID.in(itemIds));
+
+		List<LaunchPadItem> items = query.fetch().map((r) -> ConvertHelper.convert(r, LaunchPadItem.class));
+
+		return items;
+	}
 }

@@ -65,6 +65,8 @@ public interface ServiceModuleProvider {
 
     void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
 
+    List<ServiceModule> listServiceModules(Byte appType, String keyword);
+
     List<ServiceModule> listServiceModulesByMenuAuthFlag(Byte menuAuthFlag);
 
     List<ServiceModule> listServiceModule(String path);

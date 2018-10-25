@@ -32,6 +32,7 @@ import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.investmentAd.InvestmentAdService;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
@@ -93,6 +94,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private TaskService taskService;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
@@ -206,6 +210,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageSize(pageSize);
 		
+		//管理公司全部项目范围
+		if (cmd.getAllScope() != null && cmd.getAllScope() == 1) {
+			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			cmd.setCommunityIds(communityIds);
+		}
+		
 		List<InvestmentAd> investmentAds = investmentAdProvider.listInvestmentAds(cmd);
 		if (investmentAds != null && investmentAds.size() > 0) {
 			if (investmentAds.size() > cmd.getPageSize()) {
@@ -232,6 +242,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		}
 		
 		InvestmentAdDetailDTO dto = ConvertHelper.convert(investmentAd, InvestmentAdDetailDTO.class);
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(dto.getCommunityId());
+		dto.setCurrentOrganizationId(currentOrganizationId);
 		//设置封面图url
 		Long userId = UserContext.currentUserId();
 		if (null != dto.getPosterUri()) {

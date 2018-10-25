@@ -1,5 +1,6 @@
 package com.everhomes.rest.banner;
 
+import com.everhomes.rest.portal.ClientHandlerType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -22,6 +23,11 @@ import java.sql.Timestamp;
  *     <li>status: status</li>
  *     <li>order: 顺序</li>
  *     <li>updateTime: 最后一次更新的时间</li>
+ *     <li>moduleId: moduleId</li>
+ *     <li>appId: appId</li>
+ *     <li>routerPath: routerPath</li>
+ *     <li>routerQuery: routerQuery</li>
+ *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  * </ul>
  */
 public class BannerDTO {
@@ -42,6 +48,12 @@ public class BannerDTO {
     private Byte status;
     private Integer order;
     private Timestamp updateTime;
+
+    private Long moduleId;
+    private Long appId;
+    private String routerPath;
+    private String routerQuery;
+    private Byte clientHandlerType;
 
     public Long getId() {
         return id;
@@ -169,6 +181,46 @@ public class BannerDTO {
 
     public void setTargetData(String targetData) {
         this.targetData = targetData;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public String getRouterPath() {
+        return routerPath;
+    }
+
+    public void setRouterPath(String routerPath) {
+        this.routerPath = routerPath;
+    }
+
+    public String getRouterQuery() {
+        return routerQuery;
+    }
+
+    public void setRouterQuery(String routerQuery) {
+        this.routerQuery = routerQuery;
+    }
+
+    public Byte getClientHandlerType() {
+        return clientHandlerType;
+    }
+
+    public void setClientHandlerType(Byte clientHandlerType) {
+        this.clientHandlerType = clientHandlerType;
     }
 
     @Override

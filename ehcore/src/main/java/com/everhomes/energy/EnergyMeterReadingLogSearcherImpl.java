@@ -28,6 +28,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermsFilterBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -206,9 +207,9 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             FilterBuilder meterNumberTerm = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
             filterBuilders.add(meterNumberTerm);
         }
-        if (cmd.getCommunityId() != null) {
-            FilterBuilder communityIdTerm = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-            filterBuilders.add(communityIdTerm);
+        if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size()>0) {
+            TermsFilterBuilder communityIdTerms = FilterBuilders.termsFilter("communityId", cmd.getCommunityIds());
+            filterBuilders.add(communityIdTerms);
         }
         if (cmd.getMeterType() != null) {
             TermFilterBuilder meterTypeTerm = FilterBuilders.termFilter("meterType", cmd.getMeterType());

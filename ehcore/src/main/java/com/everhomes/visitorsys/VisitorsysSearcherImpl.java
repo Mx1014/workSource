@@ -93,7 +93,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
             feedDoc(String.valueOf(idstring), b);
         } catch (Exception ex) {
             LOGGER.error("Create VisitorSysCount {} error", object.toString(), ex);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_SYNC_ES_FAIL,
                     "es Create VisitorSysCount " + object + " error");
         }
     }
@@ -486,8 +486,7 @@ public class VisitorsysSearcherImpl extends AbstractElasticSearch implements Vis
     private VisitorsysFlagType checkVisitorsysFlag(Byte flag) {
         VisitorsysFlagType flagType = VisitorsysFlagType.fromCode(flag);
         if(flagType ==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor flag = "+flag);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor flag = "+flag);
         }
         return flagType;
     }

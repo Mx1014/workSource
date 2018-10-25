@@ -3563,7 +3563,6 @@ public class PunchServiceImpl implements PunchService {
         }
         return o.toString();
     }
-
     public void setNewPunchStatisticsBookRow(Sheet sheet, PunchCountDTO statistic, List<String> dateList, XSSFWorkbook wb) {
         Row row = sheet.createRow(sheet.getLastRowNum() + 1);
         int i = -1;
@@ -4906,10 +4905,14 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public Long getTopEnterpriseId(Long organizationId) {
         Organization organization = organizationProvider.findOrganizationById(organizationId);
-        if (organization.getParentId() == null)
+        if(organization != null){
+            if (organization.getParentId() == null)
+                return organizationId;
+            else {
+                return Long.valueOf(organization.getPath().split("/")[1]);
+            }
+        }else{
             return organizationId;
-        else {
-            return Long.valueOf(organization.getPath().split("/")[1]);
         }
     }
 
@@ -7306,8 +7309,7 @@ public class PunchServiceImpl implements PunchService {
         CheckPunchAdminResponse response = new CheckPunchAdminResponse();
         response.setIsAdminFlag(NormalFlag.NO.getCode());
         try {
-            if (resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId())
-                    || resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+            if (resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
                 response.setIsAdminFlag(NormalFlag.YES.getCode());
         } catch (Exception e) {
             LOGGER.error("there is a error when check org admin ", e);
@@ -11298,8 +11300,9 @@ public class PunchServiceImpl implements PunchService {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
         try {
-            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
-                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+//            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())
+//                    || resolver.checkOrganizationAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
+            if (resolver.checkSuperAdmin(UserContext.currentUserId(), cmd.getOrgId())) {
                 response.setAdminFlag(NormalFlag.YES.getCode());
                 response.setQueryPrivilege(NormalFlag.YES.getCode());
                 return response;

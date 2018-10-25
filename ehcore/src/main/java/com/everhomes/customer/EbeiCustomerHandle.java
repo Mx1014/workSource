@@ -274,7 +274,7 @@ public class EbeiCustomerHandle implements CustomerHandle {
                     }
                     if(notdeal){
                         // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, ebeiCustomer.getCompanyName());
+                        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, communityId, ebeiCustomer.getCompanyName());
                         if (customers == null || customers.size() == 0) {
                             insertEnterpriseCustomer(NAMESPACE_ID, communityId, ebeiCustomer);
                         } else {

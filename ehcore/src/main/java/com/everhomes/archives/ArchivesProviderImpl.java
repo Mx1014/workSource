@@ -8,7 +8,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.archives.ArchivesOperationStatus;
-import com.everhomes.rest.organization.EmployeeStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;

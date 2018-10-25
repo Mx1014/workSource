@@ -20,12 +20,15 @@ public interface NewsServiceErrorCode {
 	int ERROR_NEWS_MODULE_NOT_FOUND = 10014;
 	int ERROR_ENCODE_STRING_EXCEPTION = 10015;
 	int ERROR_PORTAL_ITEM_GROUP_NOT_FOUND = 10016;
-	
+	int ERROR_COMMENT_NOT_EXIST_OR_DELETED = 10017; //评论不存在或已被删除
+	int ERROR_INPUT_PARAM_INVALID = 10018; //接口参数异常
+	int ERROR_CATEGORY_ID_NOT_VALID = 10019; //无效的快讯类型id
+
 	// openapi 错误码
 	int ERROR_NEWS_NOT_FOUND = 11000; //文章不存在
 	int ERROR_PARAMS_NOT_VALID = 11001; //参数不合法
 	int ERROR_NEWS_OWNER_NOT_FOUND = 11002; //项目不存在
-	
+
 	int ERROR_NOT_LEGAL_REQUEST = 90000; //非法访问
 	int ERROR_APPKEY_NAMESPACE_MAP_NOT_FOUND = 90001; //未找到appkey对应namespaceId
 

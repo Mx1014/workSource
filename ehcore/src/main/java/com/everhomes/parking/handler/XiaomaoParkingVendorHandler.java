@@ -543,7 +543,7 @@ public class XiaomaoParkingVendorHandler extends DefaultParkingVendorHandler {
 			cardInfoDTO.setPlateNumber(cmd.getPlateNumber());
 			long now = getStartTimeMillis();
 			cardInfoDTO.setOpenDate(now);
-			cardInfoDTO.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+			cardInfoDTO.setExpireDate(Utils.getTimestampByAddDistanceMonthV2(now, requestMonthCount).getTime());
 
 			// 根据配置设定收费标准，默认按实际天数，即ParkingCardExpiredRechargeType.ACTUAL(2)
 			if (requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {

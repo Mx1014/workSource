@@ -97,6 +97,23 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/14.
@@ -149,7 +166,7 @@ public class ZJContractHandler implements ContractService{
             String categoryName = "";
             params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         } else {
-            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryItemId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByFieldItemId(cmd.getNamespaceId(),cmd.getOrgId(), cmd.getCommunityId(), cmd.getCategoryItemId());
             String categoryName = item == null ? "none" : item.getItemDisplayName();
             params = generateParams(communityIdentifier, contractStatus, contractAttribute, categoryName, cmd.getKeywords(), pageOffset, pageSize);
         }
@@ -763,7 +780,7 @@ public class ZJContractHandler implements ContractService{
 	@Override
 	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -799,7 +816,7 @@ public class ZJContractHandler implements ContractService{
 	@Override
 	public void deleteContractTemplate(DeleteContractTemplateCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

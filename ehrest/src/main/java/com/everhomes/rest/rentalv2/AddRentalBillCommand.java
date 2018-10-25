@@ -25,16 +25,10 @@ public class AddRentalBillCommand {
 	private String resourceType;
 	private Byte rentalType;
 	private Long rentalDate;
-//	@NotNull
-//	private Long startTime;
-//	@NotNull
-//	private Long endTime;
 	@NotNull
 	@ItemType(RentalBillRuleDTO.class)
-	private List<RentalBillRuleDTO> rules; 
-//	@ItemType(SiteItemDTO.class)
-//	private List<SiteItemDTO> rentalItems;
-	private String sceneToken;
+	private List<RentalBillRuleDTO> rules;
+	private String sceneType;
 	private String packageName;
 
 	public String getResourceType() {
@@ -53,12 +47,12 @@ public class AddRentalBillCommand {
 		this.rentalType = rentalType;
 	}
 
-	public String getSceneToken() {
-		return sceneToken;
+	public String getSceneType() {
+		return sceneType;
 	}
 
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
 	}
 
 	@Override

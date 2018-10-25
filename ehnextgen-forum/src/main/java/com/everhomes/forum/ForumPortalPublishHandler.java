@@ -79,7 +79,7 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String processInstanceConfig(String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
 		return instanceConfig;
 	}
 

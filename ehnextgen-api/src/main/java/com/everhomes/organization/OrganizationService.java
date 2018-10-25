@@ -1,16 +1,31 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.customer.EnterpriseCustomer;
+import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
-import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
-import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -25,124 +40,7 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.AddNewOrganizationInZuolinCommand;
-import com.everhomes.rest.organization.AddOrgAddressCommand;
-import com.everhomes.rest.organization.AddOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.AddPersonnelsToGroup;
-import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
-import com.everhomes.rest.organization.ApplyForEnterpriseContactNewCommand;
-import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
-import com.everhomes.rest.organization.AssginOrgTopicCommand;
-import com.everhomes.rest.organization.BatchUpdateOrganizationContactVisibleFlagCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeBySceneCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeCommand;
-import com.everhomes.rest.organization.CheckOfficalPrivilegeResponse;
-import com.everhomes.rest.organization.CommunityOrganizationTreeResponse;
-import com.everhomes.rest.organization.CreateDepartmentCommand;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
-import com.everhomes.rest.organization.CreateOrganizationContactCommand;
-import com.everhomes.rest.organization.CreateOrganizationJobPositionCommand;
-import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
-import com.everhomes.rest.organization.DeleteChildrenOrganizationAsListCommand;
-import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.DeleteOrganizationJobPositionsByPositionIdAndDetailsCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DeleteOrganizationPersonnelByContactTokenCommand;
-import com.everhomes.rest.organization.ExcelOrganizationPersonnelCommand;
-import com.everhomes.rest.organization.FindOrgPersonelCommand;
-import com.everhomes.rest.organization.FindOrgPersonelCommandResponse;
-import com.everhomes.rest.organization.GetContactTopDepartmentCommand;
-import com.everhomes.rest.organization.GetImportFileResultCommand;
-import com.everhomes.rest.organization.GetOrgDetailCommand;
-import com.everhomes.rest.organization.GetOrganizationDetailByIdCommand;
-import com.everhomes.rest.organization.GetOrganizationDetailFlagCommand;
-import com.everhomes.rest.organization.ImportEnterpriseDataDTO;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportOrganizationContactDataDTO;
-import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
-import com.everhomes.rest.organization.ImportOwnerDataCommand;
-import com.everhomes.rest.organization.LeaveTheJobCommand;
-import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
-import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
-import com.everhomes.rest.organization.ListAllTreeOrganizationsCommand;
-import com.everhomes.rest.organization.ListChildrenOrganizationJobLevelResponse;
-import com.everhomes.rest.organization.ListChildrenOrganizationJobPositionResponse;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.ListCommunityOrganizationTreeCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.ListModuleOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.ListOrganizationAddressesCommand;
-import com.everhomes.rest.organization.ListOrganizationByModuleIdCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationJobPositionCommand;
-import com.everhomes.rest.organization.ListOrganizationJobPositionResponse;
-import com.everhomes.rest.organization.ListOrganizationManagersCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
-import com.everhomes.rest.organization.ListOrganizationPersonnelsByOrgIdsCommand;
-import com.everhomes.rest.organization.ListOrganizationsByEmailCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
-import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.ListPMOrganizationsCommand;
-import com.everhomes.rest.organization.ListPMOrganizationsResponse;
-import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
-import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationAddressesCommand;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.ListUserTaskCommand;
-import com.everhomes.rest.organization.OrgAddressDTO;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationManagerDTO;
-import com.everhomes.rest.organization.OrganizationMemberCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
-import com.everhomes.rest.organization.OrganizationServiceUser;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.OrganizationTreeDTO;
-import com.everhomes.rest.organization.PmManagementCommunityDTO;
-import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.RejectOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
-import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
-import com.everhomes.rest.organization.SendOrganizationMessageCommand;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
-import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
-import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
-import com.everhomes.rest.organization.SetOrganizationDetailFlagCommand;
-import com.everhomes.rest.organization.SortOrganizationsAtSameLevelCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
-import com.everhomes.rest.organization.UpdateOrganizationContactVisibleFlagCommand;
-import com.everhomes.rest.organization.UpdateOrganizationJobPositionCommand;
-import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
-import com.everhomes.rest.organization.UpdateOrganizationsCommand;
-import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
-import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
-import com.everhomes.rest.organization.UserExitOrganizationCommand;
-import com.everhomes.rest.organization.UserJoinOrganizationCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommandResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
@@ -151,7 +49,6 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
@@ -234,7 +131,10 @@ public interface OrganizationService {
 	void userJoinOrganization(UserJoinOrganizationCommand cmd);
 	void deleteOrgMember(OrganizationMemberCommand cmd);
 	void updateTopicPrivacy(UpdateTopicPrivacyCommand cmd);
-	void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
+
+    void createOrganizationCommunity(Long orgId, Long communityId);
+
+    void createOrganizationCommunityByAdmin(CreateOrganizationCommunityCommand cmd);
 	void createOrganizationByAdmin(CreateOrganizationByAdminCommand cmd);
 	void addOrgAddress(AddOrgAddressCommand cmd);
 	void importOrganization(MultipartFile[] files);
@@ -275,6 +175,12 @@ public interface OrganizationService {
 
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
 	ListEnterpriseDetailResponse listEnterprisesAbstract(ListEnterprisesCommand cmd);
+
+	/**
+	 * 创建企业
+	 * @param cmd
+	 * @return
+	 */
 	OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd);
 	void createRoleOrganizationMember(CreateOrganizationMemberCommand cmd);
 	void updateChildrenOrganization(UpdateOrganizationsCommand cmd);
@@ -289,7 +195,11 @@ public interface OrganizationService {
 	ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd);
 	void updateOrganizationPersonnel(UpdateOrganizationMemberCommand cmd);
 	VerifyPersonnelByPhoneCommandResponse verifyPersonnelByPhone(VerifyPersonnelByPhoneCommand cmd);
-	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
+	boolean verifyPersonnelByWorkEmail(Long orgId, Long detailId, String workEmail);
+	boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail);
+	boolean verifyPersonnelByAccount(Long detailId, String account);
+	boolean verifyPersonnelByAccount(String contactToken, String account);
+	ListOrganizationMemberCommandResponse listParentOrganizationPersonnels(ListOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd);
 	OrganizationDTO applyForEnterpriseContactNew(ApplyForEnterpriseContactNewCommand cmd);
 	void approveForEnterpriseContact(ApproveContactCommand cmd);
@@ -306,6 +216,7 @@ public interface OrganizationService {
     OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier);
 
     OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
+	OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);
@@ -588,6 +499,7 @@ public interface OrganizationService {
 	OrganizationDetailDTO getOrganizationDetailById(GetOrganizationDetailByIdCommand cmd);
 	OrganizationDetailDTO getOrganizationDetailWithDefaultAttachmentById(GetOrganizationDetailByIdCommand cmd);
 
+	/**创建机构账号，包括注册、把用户添加到公司**/
 	OrganizationMember createOrganiztionMemberWithDetailAndUserOrganizationAdmin(Long organizationId, String contactName,
 			String contactToken,boolean notSendMsgFlag);
 
@@ -642,9 +554,83 @@ public interface OrganizationService {
 	Long getDepartmentByDetailIdAndOrgId(Long detailId, Long OrgId);
 	void checkNameRepeat(Long organizationId, String name, String groupType, Long groupId);
 
+	/**
+	 * 根据域空间id、关键字、企业类型、来查询企业信息
+	 * @param cmd
+	 * @return
+	 */
+	ListPMOrganizationsResponse listEnterpriseByNamespaceIds(ListEnterpriseByNamespaceIdCommand cmd);
+
+	OrganizationDTO createStandardEnterprise(CreateEnterpriseStandardCommand cmd);
+
+	/**
+	 * 根据organizationId来查询公司详细信息
+	 * 表eh_organizations和表eh_organization_details进行联查
+	 * @param cmd
+	 * @return
+	 */
+	OrganizationAndDetailDTO getOrganizationDetailByOrgId(FindEnterpriseDetailCommand cmd);
+
+	/**
+	 * 编辑单个公司的信息
+	 * @param cmd
+	 */
+	void updateEnterpriseDetail(UpdateEnterpriseDetailCommand cmd);
+
+	/**
+	 * 更新办公地点以及其中的楼栋和门牌
+	 * @param cmd
+	 */
+	void insertWorkPlacesAndBuildings(UpdateWorkPlaceCommand cmd);
+
+	/**
+	 * 根据用户id来进行更高超级管理员手机号
+	 * @param cmd
+	 */
+	void updateSuperAdmin(UpdateSuperAdminCommand cmd);
+
+	/**
+	 * 添加入驻企业（标准版）
+	 * @param cmd
+	 */
+	void createSettledEnterprise(CreateSettledEnterpriseCommand cmd);
+
+
+	/**
+	 * 根据组织ID来删除办公地点
+	 * @param cmd
+	 */
+	void deleteWorkPlacesByOrgId(DeleteWorkPlacesCommand cmd);
+
+	/**
+	 * 根据公司ID和域空间ID来删除公司以及相应的信息
+	 * @param cmd
+	 */
+	void destoryOrganizationByOrgId(DestoryOrganizationCommand cmd);
+
+	/**
+	 * 根据公司Id、域空间Id、工作台状态 来修改工作台状态
+	 * @param cmd
+	 */
+	void changeWorkBenchFlag(ChangeWorkBenchFlagCommand cmd);
+
+	/**
+	 * 根据公司id、办公地点名称、项目id、办公地点名称全称来进行修改办公地点名称
+	 * @param cmd
+	 */
+	void updateWholeAddressName(WholeAddressComamnd cmd);
+
 	void updateCustomerEntryInfo(EnterpriseCustomer customer, OrganizationAddress address);
 
     OrganizationDTO getAuthOrgByProjectIdAndAppId(GetAuthOrgByProjectIdAndAppIdCommand cmd);
 
 	ListUserOrganizationsResponse listUserOrganizations(ListUserOrganizationsCommand cmd);
+
+	List<Long> getOrganizationProjectIdsByAppId(Long organizationId, Long originAppId);
+
+	List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId,
+			AppInstanceConfigConfigMatchCallBack matchCallback);
+	//	物业组所需获取企业员工的唯一标识符
+	String getAccountByTargetIdAndOrgId(Long targetId, Long orgId);
+	OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd);
 }

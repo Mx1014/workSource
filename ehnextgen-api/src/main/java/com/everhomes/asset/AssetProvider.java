@@ -1,13 +1,5 @@
 package com.everhomes.asset;
 
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.order.PaymentAccount;
-import com.everhomes.order.PaymentServiceConfig;
-import com.everhomes.order.PaymentUser;
-import com.everhomes.rest.address.ApartmentAbstractDTO;
-import com.everhomes.rest.asset.*;
-import com.everhomes.server.schema.tables.pojos.*;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -15,32 +7,84 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.order.PaymentAccount;
+import com.everhomes.order.PaymentServiceConfig;
+import com.everhomes.order.PaymentUser;
+import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillDTO;
+import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.ConfigChargingItemsCommand;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateChargingItemCommand;
+import com.everhomes.rest.asset.DeleteChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardCommand;
+import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailVO;
+import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectancyDTO;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
+import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandardsScopes;
+import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
+import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
+
 /**
  * Created by Wentian on 2017/2/20.
  */
 public interface AssetProvider {
 
-    void creatAssetBill(AssetBill bill);
-    void updateAssetBill(AssetBill bill);
+//    void creatAssetBill(AssetBill bill);
+//    void updateAssetBill(AssetBill bill);
     AssetBill findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType);
-
+//
     List<AssetBillTemplateFieldDTO> findTemplateFieldByTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion);
-    Long getTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType);
-
-    void creatTemplateField(AssetBillTemplateFields field);
-
+    	Long getTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType);
+//
+//    void creatTemplateField(AssetBillTemplateFields field);
+//
     List<AssetBill> listAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, List<Long> tenantIds, String tenantType,
                                   Long addressId, Byte status, Long startTime, Long endTime, CrossShardListingLocator locator, Integer pageSize);
 
     List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType, Long addressId,
                                                    String tenantType, Long tenantId, Timestamp currentAccountPeriod);
-
-    List<AssetBill> listUnpaidBillsGroupByTenant(Long ownerId, String ownerType, Long targetId, String targetType);
-
-    int countNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType, Timestamp startTime, Timestamp endTime);
-
-    AssetBillNotifyRecords getLastAssetBillNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType);
-
+//
+//    List<AssetBill> listUnpaidBillsGroupByTenant(Long ownerId, String ownerType, Long targetId, String targetType);
+//
+//    int countNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType, Timestamp startTime, Timestamp endTime);
+//
+//    AssetBillNotifyRecords getLastAssetBillNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType);
+//
     AssetVendor findAssetVendorByOwner(String ownerType,Long ownerId);
 
     List<AssetBill> listUnpaidBills(String tenantType, Long tenantId, Long addressId);
@@ -59,8 +103,7 @@ public interface AssetProvider {
 
     ShowBillDetailForClientResponse getBillDetailForClient(Long billId);
 
-    List<ListBillGroupsDTO> listBillGroups(Long ownerId, String ownerType, Long categoryId);
-
+    
 
     ShowCreateBillDTO showCreateBill(Long billGroupId);
 
@@ -78,10 +121,7 @@ public interface AssetProvider {
 
     void modifyBillStatus(Long billId);
 
-    List<ListChargingItemsDTO> listChargingItems(String ownerType, Long ownerId, Long categoryId);
-
     List<ListChargingStandardsDTO> listChargingStandards(String ownerType, Long ownerId, Long chargingItemId, Long categoryId, Long billGroupId);
-
 
     void modifyNotSettledBill(ModifyNotSettledBillCommand cmd);
 
@@ -167,18 +207,9 @@ public interface AssetProvider {
 
     PaymentAccount findPaymentAccount();
 
-    void configChargingItems(ConfigChargingItemsCommand cmd, List<Long> communityIds);
-
     void createChargingStandard(EhPaymentChargingStandards c, EhPaymentChargingStandardsScopes s, List<EhPaymentFormula> f);
 
-
-    void modifyChargingStandard(Long chargingStandardId,String chargingStandardName,String instruction,byte deCouplingFlag,String ownerType,Long ownerId
-            , Byte useUnitPrice);
-
-
     GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-    void deleteChargingStandard(DeleteChargingStandardCommand cmd, byte deCouplingFlag);
 
     List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
 
@@ -186,37 +217,13 @@ public interface AssetProvider {
 
     String getVariableIdenfitierByName(String targetStr);
 
-    Long createBillGroup(CreateBillGroupCommand cmd,byte deCouplingFlag,Long brotherGroupId, Long nextGroupId);
-
-    void modifyBillGroup(ModifyBillGroupCommand cmd,byte deCouplingFlag);
-
-    List<ListChargingStandardsDTO> listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
     void adjustBillGroupOrder(Long subjectBillGroupId, Long targetBillGroupId);
 
     List<ListChargingItemsForBillGroupDTO> listChargingItemsForBillGroup(Long billGroupId,Long pageAnchor,Integer pageSize);
 
-    Long addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd,Long brotherRuleId,byte deCouplingFlag);
-
-    EhPaymentBillGroupsRules findBillGroupRuleById(Long billGroupRuleId);
-
-    boolean isInWorkGroupRule(com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules rule);
-
-    DeleteChargingItemForBillGroupResponse deleteBillGroupRuleById(Long billGroupRuleId,byte deCouplingFlag);
-
-    EhPaymentChargingStandards findChargingStandardById(Long chargingStandardId);
-
-    PaymentBillGroup getBillGroupById(Long billGroupId);
-
-    boolean checkBillsByBillGroupId(Long billGroupId);
-
-    DeleteBillGroupReponse deleteBillGroupAndRules(Long billGroupId,byte deCouplingFlag,String ownerType,Long ownerId);
-
     ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(Long billGroupRuleId);
 
     List<ListChargingItemsDTO> listAvailableChargingItems(OwnerIdentityCommand cmd);
-
-    List<PaymentFormula> getFormulas(Long id);
 
     boolean cheackGroupRuleExistByChargingStandard(Long chargingStandardId,String ownerType,Long ownerId);
 
@@ -250,17 +257,11 @@ public interface AssetProvider {
 
     List<PaymentBills> getAllBillsByCommunity(Integer namespaceId, Long key);
 
-
     List<PaymentBills> findAssetArrearage(Integer namespaceId, Long communityId, Long organizationId);
-
-
-
 
     List<EhPaymentBillGroupsRules> getBillGroupRuleByCommunityWithBro(Long ownerId, String ownerType, boolean b);
 
     List<PaymentBills> findSettledBillsByContractIds(List<Long> contractIds);
-
-    String getbillGroupNameById(Long billGroupId);
 
     Collection<? extends Long> getAddressIdByBillId(Long id);
 
@@ -323,11 +324,9 @@ public interface AssetProvider {
 
     List<PaymentNoticeConfig> listAllNoticeConfigsByNameSpaceId(Integer namespaceId);
 
-
     Long findCategoryIdFromBillGroup(Long billGroupId);
 
     void insertAssetCategory(EhAssetAppCategories c);
-
 
     ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
  
@@ -366,12 +365,6 @@ public interface AssetProvider {
     
     List<PaymentOrderBillDTO> listBillsForOrder(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListPaymentBillCmd cmd);
     
-    IsProjectNavigateDefaultResp isChargingItemsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isChargingStandardsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-    
-    IsProjectNavigateDefaultResp isBillGroupsForJudgeDefault(IsProjectNavigateDefaultCmd cmd);
-
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId, Integer namespaceId);
 
     Long getOriginIdFromMappingApp(Long moduleId, Long originId, long targetModuleId);
@@ -454,5 +447,4 @@ public interface AssetProvider {
 	
 	PaymentBillGroup getBillGroup(Integer namespaceId, Long ownerId, String ownerType, Long categoryId, Long brotherGroupId);
 		
-	void createChargingItem(CreateChargingItemCommand cmd, List<Long> communityIds);
 }

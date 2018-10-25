@@ -12,7 +12,6 @@ import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
 import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.CreateEnergyMeterCommand;
 import com.everhomes.rest.energy.CreateEnergyMeterDefaultSettingCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
 import com.everhomes.rest.energy.CreateEnergyMeterPriceConfigCommand;
 import com.everhomes.rest.energy.CreateEnergyTaskCommand;
 import com.everhomes.rest.energy.DelelteEnergyMeterPriceConfigCommand;
@@ -148,7 +147,7 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
-     * <p>搜索表记</p>
+     * <p>搜索表记简单信息</p>
      * <b>URL: /energy/searchSimpleEnergyMeter</b>
      */
     @RestReturn(SearchEnergyMeterResponse.class)
@@ -241,15 +240,15 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.updateEnergyMeterDefaultSetting(cmd));
     }
 
-    /**
-     * <p>新建计算公式</p>
-     * <b>URL: /energy/createEnergyMeterFormula</b>
-     */
-    @RestReturn(EnergyMeterFormulaDTO.class)
-    @RequestMapping("createEnergyMeterFormula")
-    public RestResponse createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
-        return response(energyConsumptionService.createEnergyMeterFormula(cmd));
-    }
+//    /**
+//     * <p>新建计算公式</p>
+//     * <b>URL: /energy/createEnergyMeterFormula</b>
+//     */
+//    @RestReturn(EnergyMeterFormulaDTO.class)
+//    @RequestMapping("createEnergyMeterFormula")
+//    public RestResponse createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
+//        return response(energyConsumptionService.createEnergyMeterFormula(cmd));
+//    }
 
     /**
      * <p>新建表记的分类(项目, 性质)</p>

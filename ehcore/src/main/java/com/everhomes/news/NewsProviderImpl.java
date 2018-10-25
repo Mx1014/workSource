@@ -11,6 +11,8 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhNewsCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhNewsTagRecord;
 import com.everhomes.user.UserContext;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +170,7 @@ public class NewsProviderImpl implements NewsProvider {
 	
 
 	@Override
-	public List<News> listNews(List<Long> communityIds, Long categoryId, Integer namespaceId, Long from, Integer pageSize,  boolean isScene, Byte status) {
+	public List<News> listNews(Long ownerId, List<Long> communityIds, Long categoryId, Integer namespaceId, Long from, Integer pageSize,  boolean isScene, Byte status) {
 		SelectJoinStep<Record> step =  getReadOnlyContext().select().from(Tables.EH_NEWS);
 
 		Condition cond = Tables.EH_NEWS.NAMESPACE_ID.eq(namespaceId);
@@ -178,17 +180,20 @@ public class NewsProviderImpl implements NewsProvider {
 		else{
 			cond = cond.and(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()).or(Tables.EH_NEWS.STATUS.eq(NewsStatus.DRAFT.getCode())));
 		}
-		if(null != categoryId) {
-			cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
+		
+		//作为多应用的标识categoryId必须传
+		cond = cond.and(Tables.EH_NEWS.CATEGORY_ID.eq(categoryId));
+		
+		if (null != ownerId && isScene) {
+			// 只用于客户端或前端使用
+			step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
+			cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(ownerId));
 		}
+		
 		if (communityIds != null && !communityIds.isEmpty()) {
-			if (isScene) {
-				step.join(Tables.EH_NEWS_COMMUNITIES).on(Tables.EH_NEWS_COMMUNITIES.NEWS_ID.eq(Tables.EH_NEWS.ID));
-				cond = cond.and(Tables.EH_NEWS_COMMUNITIES.COMMUNITY_ID.eq(communityIds.get(0)));
-			} else {
-				cond = cond.and(Tables.EH_NEWS.OWNER_TYPE.eq(NewsOwnerType.COMMUNITY.getCode()));
-				cond = cond.and(Tables.EH_NEWS.OWNER_ID.in(communityIds));
-			}
+			//所有查询都需要限定在管理的项目id下
+			cond = cond.and(Tables.EH_NEWS.OWNER_TYPE.eq(NewsOwnerType.COMMUNITY.getCode()));
+			cond = cond.and(Tables.EH_NEWS.OWNER_ID.in(communityIds));
 		}
 
 		return step.where(cond).orderBy(Tables.EH_NEWS.STATUS.asc(),Tables.EH_NEWS.TOP_INDEX.desc(), Tables.EH_NEWS.PUBLISH_TIME.desc(), Tables.EH_NEWS.ID.desc())
@@ -196,11 +201,17 @@ public class NewsProviderImpl implements NewsProvider {
 	}
 
 	@Override
-	public List<NewsTag> listNewsTag(Integer namespaceId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
+	public List<NewsTag> listNewsTag(Integer namespaceId, String ownerType, Long ownerId, Byte isSearch,Long parentId,Long pageAnchor, Integer pageSize,Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhNewsTag.class));
 		SelectQuery<EhNewsTagRecord> query = context.selectQuery(Tables.EH_NEWS_TAG);
-//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
-//		query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		if (!StringUtils.isEmpty(ownerType)) {
+			query.addConditions(Tables.EH_NEWS_TAG.OWNER_TYPE.eq(ownerType));
+		}
+
+		if (null != ownerId) {
+			query.addConditions(Tables.EH_NEWS_TAG.OWNER_ID.eq(ownerId));
+		}
+
 		query.addConditions(Tables.EH_NEWS_TAG.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_NEWS_TAG.DELETE_FLAG.eq((byte)0));
 		if (isSearch != null)
@@ -348,4 +359,22 @@ public class NewsProviderImpl implements NewsProvider {
 		EhNewPreview result = dao.findById(id);
 		return ConvertHelper.convert(result,News.class);
 	}
+
+	@Override
+	public List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId) {
+		return listNewsTag(UserContext.getCurrentNamespaceId(), ownerType, ownerId, null, 0L, null, null, categoryId);
+	}
+
+	@Override
+	public void deleteProjectNewsTags(Long projectId, Long categoryId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_NEWS_TAG)
+		.where(
+				Tables.EH_NEWS_TAG.OWNER_TYPE.eq(NewsOwnerType.COMMUNITY.getCode())
+				.and(Tables.EH_NEWS_TAG.OWNER_ID.eq(projectId))
+				.and(Tables.EH_NEWS_TAG.CATEGORY_ID.eq(categoryId))
+				)
+		.execute();
+	}
+
 }

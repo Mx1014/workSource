@@ -12,6 +12,7 @@ import com.everhomes.parking.bosigao2.rest.Bosigao2CardInfo;
 import com.everhomes.parking.bosigao2.rest.Bosigao2GetCardCommand;
 import com.everhomes.parking.bosigao2.rest.Bosigao2RechargeCommand;
 import com.everhomes.parking.bosigao2.rest.Bosigao2ResultEntity;
+import com.everhomes.parking.clearance.ParkingClearanceLog;
 import com.everhomes.rest.parking.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -166,5 +167,10 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setVendorName(ParkingLotVendor.TEST.getCode());
 
 		return dto;
+	}
+
+	@Override
+	public String applyTempCard(ParkingClearanceLog log) {
+		return "tempToken";
 	}
 }

@@ -258,8 +258,9 @@ public class DecorationServiceImpl implements  DecorationService {
             worker.setUid(0l);//注册未登陆
             worker.setNamespaceId(UserContext.getCurrentNamespaceId());
 
+            //merge conflict add  UserContext.getCurrentNamespaceId()
             OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(dc.getOrganizationId(),
-                    worker.getPhone());
+                    worker.getPhone(), UserContext.getCurrentNamespaceId());
             if (member == null) {
                 VerifyPersonnelByPhoneCommandResponse res1 = organizationService.verifyPersonnelByPhone(cmd1);
                 if (res1.getDto() != null)
@@ -878,8 +879,10 @@ public class DecorationServiceImpl implements  DecorationService {
             }
             // 注册装修公司负责人
             DecorationCompany decorationCompany = this.decorationProvider.getDecorationCompanyById(request.getDecoratorCompanyId());
+
+            //merge conflict add  UserContext.getCurrentNamespaceId()
             OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(decorationCompany.getOrganizationId(),
-                    request.getDecoratorPhone());
+                    request.getDecoratorPhone(), UserContext.getCurrentNamespaceId());
             if (member == null) {
                 AddArchivesContactCommand cmd2 = new AddArchivesContactCommand();
                 cmd2.setContactName(request.getDecoratorName());

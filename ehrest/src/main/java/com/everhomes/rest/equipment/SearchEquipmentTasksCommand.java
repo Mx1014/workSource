@@ -33,6 +33,10 @@ public class SearchEquipmentTasksCommand {
 	private String ownerType;
 
 	private Long targetId;
+	@ItemType(Long.class)
+	private List<Long> targetIds;
+
+	private String targetIdString;
 	
 	private String targetType;
 	
@@ -167,6 +171,22 @@ public class SearchEquipmentTasksCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public List<Long> getTargetIds() {
+		return targetIds;
+	}
+
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
+	}
+
+	public String getTargetIdString() {
+		return targetIdString;
+	}
+
+	public void setTargetIdString(String targetIdString) {
+		this.targetIdString = targetIdString;
 	}
 
 	@Override
