@@ -27,4 +27,6 @@ public interface IncubatorProvider {
     IncubatorApplyAttachment findByAttachmentId(Long id);
 
     List<IncubatorApplyAttachment> listAttachmentsByApplyId(Long applyId, Byte type);
+
+    IncubatorApply findSameApply(IncubatorApply incubatorApply);
 }

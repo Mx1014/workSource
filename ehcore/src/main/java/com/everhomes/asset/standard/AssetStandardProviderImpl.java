@@ -160,7 +160,6 @@ public class AssetStandardProviderImpl implements AssetStandardProvider {
                     }
                     index++;
                 }
-
             }
             dto.setVariableNames(new ArrayList<>(varIdens));
         }

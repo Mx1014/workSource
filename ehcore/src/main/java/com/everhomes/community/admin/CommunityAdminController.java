@@ -255,6 +255,7 @@ public class CommunityAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/community/updateBuilding</b>
      */
+    
 	@RequestMapping("updateBuilding")
 	@RestReturn(value = BuildingDTO.class)
 	public RestResponse updateBuilding(UpdateBuildingAdminCommand cmd) {

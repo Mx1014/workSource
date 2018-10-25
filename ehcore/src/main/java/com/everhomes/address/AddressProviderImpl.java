@@ -3,6 +3,8 @@ package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.building.Building;
+import com.everhomes.community.Community;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -1209,7 +1211,7 @@ public class AddressProviderImpl implements AddressProvider {
         return aByte;
 	}
 
-@Override
+	@Override
 	public List<Address> findActiveApartmentsByBuildingId(Long buildingId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return  context.select()
@@ -1219,4 +1221,35 @@ public class AddressProviderImpl implements AddressProvider {
 				       .and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
 				       .fetchInto(Address.class);
 	}
+
+	@Override
+	public Address findApartmentByThirdPartyId(String thirdPartyType, String thirdPartyToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select()
+				       .from(Tables.EH_ADDRESSES)
+				       .where(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(thirdPartyType))
+				       .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TOKEN.eq(thirdPartyToken))
+				       .fetchAnyInto(Address.class);
+	}
+
+	@Override
+	public Building findBuildingByThirdPartyId(String thirdPartyType, String thirdPartyToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select()
+				       .from(Tables.EH_BUILDINGS)
+				       .where(Tables.EH_BUILDINGS.NAMESPACE_BUILDING_TYPE.eq(thirdPartyType))
+				       .and(Tables.EH_BUILDINGS.NAMESPACE_BUILDING_TOKEN.eq(thirdPartyToken))
+				       .fetchAnyInto(Building.class);
+	}
+
+	@Override
+	public Community findCommunityByThirdPartyId(String thirdPartyType, String thirdPartyToken) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.select()
+				       .from(Tables.EH_COMMUNITIES)
+				       .where(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(thirdPartyType))
+				       .and(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN.eq(thirdPartyToken))
+				       .fetchAnyInto(Community.class);
+	}
+	
 }

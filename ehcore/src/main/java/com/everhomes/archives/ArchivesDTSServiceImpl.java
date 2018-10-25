@@ -209,13 +209,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         if (checkArchivesContactToken(log, data, data.getContactToken()))
             return log;
         OrganizationMemberDetails contact = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, data.getContactToken());
-
+        String realContactToken = getRealContactToken(data.getContactToken().trim(), ArchivesParameter.CONTACT_TOKEN);
         //  姓名校验
         if (checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
         //  账号校验
-        if (checkArchivesAccount(log, data, data.getAccount(), data.getContactToken()))
+        if (checkArchivesAccount(log, data, data.getAccount(), realContactToken))
             return log;
         if (contact != null)
             if (checkArchivesAccount(log, data, data.getAccount(), contact))
@@ -230,7 +230,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return log;
 
         //  工作邮箱
-        if (checkArchivesWorkEmail(log, data, data.getContactToken(), data.getWorkEmail(), organizationId))
+        if (checkArchivesWorkEmail(log, data, realContactToken, data.getWorkEmail(), organizationId))
             return log;
 
         //  部门
@@ -247,9 +247,10 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     private boolean saveContactsInfo(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         //  1.设置信息
-        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, data.getContactToken().trim(), null);
+        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN), null);
         if(null != employee){
         	addCommand.setUpdateDetailId(employee.getDetailId());
+        	addCommand.setDetailId(employee.getDetailId());
         }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
@@ -939,7 +940,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setCode(ArchivesLocaleStringCode.ERROR_NAME_TOO_LONG);
             return true;
         }
-        if (!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)) {
+        if (!Pattern.matches("^[\\u4E00-\\u9FA5 A-Za-z0-9_\\n]+$", contactName)) {
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
@@ -984,7 +985,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     private <T> boolean checkArchivesContactEnName(ImportFileResultLog<T> log, T data, String contactEnName) {
         if (!StringUtils.isEmpty(contactEnName)) {
-            if (!Pattern.matches("^[a-zA-Z0-9_\\-.]+$", contactEnName)) {
+            if (!Pattern.matches("^[a-zA-Z0-9_ \\-.]+$", contactEnName)) {
                 LOGGER.warn("Contact EnName wrong format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Contact EnName wrong format");

@@ -21,6 +21,15 @@ public class GetRunningRequisitionFlowCommand {
     private String ownerType;
     private Long projectId;
     private String projectType;
+    private Long orgId;
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

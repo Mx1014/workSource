@@ -100,6 +100,8 @@ public interface NewsService {
 	void updateNewsByOpenApi(News originNews, UpdateOpenNewsCommand cmd);
 
 	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
+
+	ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene);
 }
 
 

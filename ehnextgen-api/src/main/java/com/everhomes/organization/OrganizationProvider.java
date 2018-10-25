@@ -504,9 +504,9 @@ public interface OrganizationProvider {
 
     Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+    List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
+    List listOrganizationByName(String name, List<String> groupTypes, Long parentId, Integer namespaceId, Long enterpriseId);
 
     void createImportFileTask(ImportFileTask importFileTask);
 

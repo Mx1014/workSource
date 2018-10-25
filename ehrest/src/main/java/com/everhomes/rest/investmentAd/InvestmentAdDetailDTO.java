@@ -80,6 +80,16 @@ public class InvestmentAdDetailDTO {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 	
+	private Long currentOrganizationId;
+	
+	public Long getCurrentOrganizationId() {
+		return currentOrganizationId;
+	}
+
+	public void setCurrentOrganizationId(Long currentOrganizationId) {
+		this.currentOrganizationId = currentOrganizationId;
+	}
+
 	public Long getId() {
 		return id;
 	}

@@ -41,7 +41,19 @@ public interface ParkingErrorCode {
 
     int CAR_ENTRY_INFO_NOT_FOUND = 10033;
     
-    
+    int PARAMTER_LOSE = 10034;
+
+    int PARAMTER_UNUSUAL = 10035;
+
+    int ORDER_UNUSUAL = 10036;
+
+    int FAIL_EXPORT_FILE = 10037;
+
+    int NO_WORK_FLOW_ENABLE = 10038;
+
+    int OBJECT_NO_FOUND = 10039;
+
+
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败

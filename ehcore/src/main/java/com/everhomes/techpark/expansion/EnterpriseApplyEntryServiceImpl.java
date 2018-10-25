@@ -43,6 +43,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
@@ -57,6 +58,7 @@ import com.everhomes.rest.investment.InvitedCustomerDTO;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -324,7 +326,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("exportApplyEntrys is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXPORT_FILE_FAILURE,
 					"exportApplyEntrys is fail.");
 		}
 
@@ -508,7 +510,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//1.保存合同带的地址
 			Contract contract = contractProvider.findContractById(request.getContractId());
 			if(null == contract )
-				throw errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"can not find contract!!");
+				throw errorWith(ContractErrorCode.SCOPE,ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,"can not find contract!!");
 			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
 					contract.getContractNumber());
 

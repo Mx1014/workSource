@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>chargeArea: 收费面积</li>
  *     <li>orientation: 朝向</li>
  *     <li>relatedArrangementBeginDate: 关联的拆分合并计划的生效日期</li>
+ *     <li>communityName: 所在园区名</li>
  * </ul>
  * Created by ying.xiong on 2017/8/18.
  */
@@ -31,6 +32,10 @@ public class ApartmentAbstractDTO {
     private Long relatedArrangementBeginDate;
     
     private Byte isFutureApartment;
+
+    private String communityName;
+
+    private Long communityId;
     
     public Byte getIsFutureApartment() {
 		return isFutureApartment;
@@ -94,6 +99,22 @@ public class ApartmentAbstractDTO {
 
     public void setOrientation(String orientation) {
         this.orientation = orientation;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     @Override

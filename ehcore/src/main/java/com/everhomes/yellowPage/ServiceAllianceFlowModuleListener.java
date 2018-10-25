@@ -111,6 +111,9 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	ServiceAllianceProviderProvider serviceAllianceProvidProvider;
     @Autowired
     protected GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
+    
+	@Autowired
+	AllianceStandardService allianceStandardService;
 
     public ServiceAllianceFlowModuleListener() {
         for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -643,9 +646,9 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		}
 
 		Byte enableProvider = (byte) 0;
-		ServiceAlliances sa = yellowPageProvider.queryServiceAllianceTopic(null, null, flowCase.getReferId());
-		if (null != sa && null != sa.getEnableProvider()) {
-			enableProvider = sa.getEnableProvider();
+		ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(flowCase.getReferId(), flowCase.getOwnerId());
+		if (null != sc && null != sc.getEnableProvider()) {
+			enableProvider = sc.getEnableProvider();
 		}
 
 		json.put("enableProvider", enableProvider);

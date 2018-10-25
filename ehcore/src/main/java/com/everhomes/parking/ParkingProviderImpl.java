@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.parking.*;
@@ -150,6 +151,16 @@ public class ParkingProviderImpl implements ParkingProvider {
 		return ConvertHelper.convert(query.fetchAny(), ParkingRechargeOrder.class);
 	}
 
+	@Override
+	public ParkingRechargeOrder findParkingRechargeOrderByGeneralOrderId(Long gorderId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.GENERAL_ORDER_ID.eq(String.valueOf(gorderId)));
+		return ConvertHelper.convert(query.fetchAny(), ParkingRechargeOrder.class);
+	}
+
+	
 	@Override
 	public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
@@ -432,7 +443,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
 																  String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, Long pageAnchor, Integer pageSize) {
+																  Byte rechargeType, String paidType, String cardNumber, Byte status, String paySource, String keyWords, 
+																  Long pageAnchor, Integer pageSize,Byte payMode) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -457,9 +469,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != rechargeType)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
         if(null != startDate)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
         if(null != endDate)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.lt(endDate));
         if(paySource !=null){
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_SOURCE.eq(paySource));
 		}
@@ -467,6 +479,15 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.like("%" + keyWords + "%")
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.like("%" + keyWords + "%"))
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
+		}
+		if(payMode!=null){
+			if (payMode == GorderPayType.ENTERPRISE_PAID.getCode()){
+				List<Byte> modes = new ArrayList();
+				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
+				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.in(modes));
+			} else
+				query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAY_MODE.eq(payMode));
 		}
         if (null != status) {
             query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));

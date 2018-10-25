@@ -36,7 +36,7 @@ public class PointServerRPCRestService {
         factory.setReadTimeout(5000);
         template = new RestTemplate(factory);
     }
-    
+
   /*  @Autowired
     private RestTemplate template;*/
 
@@ -61,8 +61,6 @@ public class PointServerRPCRestService {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 
-        //SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
         Timestamp start = new Timestamp(DateHelper.currentGMTTime().getTime());
         LOGGER.debug("start time, start = {}", start);

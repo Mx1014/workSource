@@ -2,8 +2,15 @@
 package com.everhomes.visitorsys;
 
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.visitorsys.VisitorsysConstant;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @Author dengs[shuang.deng@zuolin.com]
@@ -12,8 +19,17 @@ import org.springframework.stereotype.Component;
  */
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + VisitorsysConstant.ENTERPRISE_MODULE_ID)
 public class VisitorsysEnterprisePortalPublishHandler implements PortalPublishHandler{
+    @Autowired
+    private PortalVersionProvider portalVersionProvider;
+    @Autowired
+    private ServiceModuleAppProvider serviceModuleAppProvider;
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
+        PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+        List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.COMMUNITY_MODULE_ID);
+        if(serviceModuleApps!=null && serviceModuleApps.size()>0){
+            return String.format(instanceConfig,namespaceId,serviceModuleApps.get(serviceModuleApps.size()-1).getOriginId());
+        }
         return String.format(instanceConfig,namespaceId);
     }
 

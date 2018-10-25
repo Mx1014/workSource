@@ -12,6 +12,7 @@ package com.everhomes.rest.community.admin;
  *     <li>identifierToken: 手机号</li>
  *     <li>communityKeyword: 小区名称</li>
  *     <li>currentOrgId: 当前用户的组织ID</li>
+ *     <li>appId: appId</li>
  * </ul>
  */
 public class CommunityAuthUserAddressCommand {
@@ -25,8 +26,16 @@ public class CommunityAuthUserAddressCommand {
     private String userInfoKeyword;
     private String identifierToken;
     private String communityKeyword;
-
+    private Long appId;
     private Long currentOrgId;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 
     public Long getCurrentOrgId() {
         return currentOrgId;

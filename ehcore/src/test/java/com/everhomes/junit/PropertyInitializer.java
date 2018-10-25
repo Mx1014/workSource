@@ -54,7 +54,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("objc.response.base", "EvhRestResponseBase")
             .withProperty("class.name.prefix", "Evh")
             .withProperty("source.jars", "")
-            .withProperty("source.excludes", "com.everhomes.rpc.*")
+            .withProperty("source.excludes", "com.everhomes.rpcapi.*")
             .withProperty("destination.dir", "/")
             .withProperty("destination.dir.java", "/")
             .withProperty("javadoc.root", "/")

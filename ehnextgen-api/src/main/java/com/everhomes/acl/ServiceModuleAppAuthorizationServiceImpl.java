@@ -5,22 +5,27 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.oauth2.ModuleManagementType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.ServiceModuleAppAuthorizationDTO;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+
 import org.jooq.Condition;
 import org.jooq.JoinType;
 import org.jooq.Record;
@@ -59,9 +64,16 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Autowired
     private PortalService portalService;
+    
+    @Autowired
+    private NamespacesService namespacesService ;
 
     @Override
     public boolean checkCommunityRelationOfOrgId(Integer namespaceId, Long currentOrgId, Long checkCommunityId) {
+    	if(!namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())) {
+    		return true;
+    	}
+    	
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -76,6 +88,16 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public List<ProjectDTO> listCommunityRelationOfOrgId(Integer namespaceId, Long organizationId) {
+    	//非标准适配，拿公司名下所有的项目
+    	if(!namespacesService.isStdNamespace(namespaceId)) {
+    		List<OrganizationCommunity> organizationCommunities = organizationProvider.listOrganizationCommunities(organizationId);	
+    		return organizationCommunities.stream().map((r)-> {
+    			ProjectDTO p = new ProjectDTO();
+    			p.setProjectId(r.getCommunityId());
+    			return p;
+    		}).collect(Collectors.toList());
+    	}
+    	
         List<ProjectDTO> dtos = new ArrayList<>();
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
@@ -159,6 +181,11 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
 
     @Override
     public List<Long> listCommunityAppIdOfOrgId(Integer namespaceId, Long organizationId) {
+    	if(!namespacesService.isStdNamespace(namespaceId)) {
+    		List<ServiceModuleApp> serviceModuleApps = serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
+    		return serviceModuleApps.stream().map(r->r.getId()).collect(Collectors.toList());
+    	}
+    	
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(
                 new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
@@ -452,11 +479,10 @@ public class ServiceModuleAppAuthorizationServiceImpl implements ServiceModuleAp
     }
 
     @Override
-    public void removeAllCommunityAppAuthorizations(Integer namespaceId, Long ownerId, Long appId) {
+    public void removeAllCommunityAppAuthorizations(Long ownerId, Long appId) {
         List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationProvider.queryServiceModuleAppAuthorizations(new ListingLocator(), MAX_COUNT_IN_A_QUERY, new ListingQueryBuilderCallback() {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.NAMESPACE_ID.eq(namespaceId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_SERVICE_MODULE_APP_AUTHORIZATIONS.APP_ID.eq(appId));
                 return query;
