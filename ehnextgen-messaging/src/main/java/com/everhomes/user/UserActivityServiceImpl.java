@@ -23,6 +23,7 @@ import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
@@ -54,6 +55,8 @@ import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.promotion.coupon.couponjointorders.GetAllCouponsForUserCommand;
+import com.everhomes.rest.promotion.coupon.couponjointorders.GetAllCouponsForUserRestResponse;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
@@ -194,6 +197,9 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private GeneralOrderService generalOrderService;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -1015,6 +1021,9 @@ public class UserActivityServiceImpl implements UserActivityService {
             LOGGER.error("get point exception");
             e.printStackTrace();
         }
+        if (point.getCount() == null) {
+            point.setCount(0L);
+        }
         response.setPoint(point.getCount());
         String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.RUIAN_POINT_URL, "https://m.mallcoo.cn/a/user/10764/Point/List");
         response.setPointUrl(pointUrl);
@@ -1040,6 +1049,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         //订单
         BizMyUserCenterCountResponse biz = fetchBizMyUserCenterCount(user);
+        response.setOrder(0L);
         if (biz != null && biz.getResponse() != null) {
 
             long orderCount = biz.getResponse().orderCount;
@@ -1051,6 +1061,16 @@ public class UserActivityServiceImpl implements UserActivityService {
         response.setOrderUrl(orderHomeUrl + url);
 
         //卡包
+        response.setCoupon(0L);
+        GetAllCouponsForUserCommand couponsForUserCommand = new GetAllCouponsForUserCommand();
+        couponsForUserCommand.setNamespaceId(user.getNamespaceId());
+        couponsForUserCommand.setUserId(user.getId());
+        GetAllCouponsForUserRestResponse couponsForUserRestResponse = this.generalOrderService.getCouponsNumberForUser(couponsForUserCommand);
+        if (couponsForUserRestResponse != null && couponsForUserRestResponse.getResponse() != null) {
+            response.setCoupon(couponsForUserRestResponse.getResponse().getCouponAmount());
+        }
+        String couponUrl = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),ConfigConstants.RUIAN_COUPON_URL,"");
+        response.setCouponUrl(couponUrl);
         return response;
     }
 
