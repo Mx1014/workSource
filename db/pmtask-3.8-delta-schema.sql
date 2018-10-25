@@ -41,6 +41,8 @@ CREATE TABLE `eh_pm_task_categories`(
   KEY `i_eh_category_delete_time` (`delete_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
 
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+-- 物业报修3.8 end
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001

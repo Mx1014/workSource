@@ -99,4 +99,9 @@ public interface PmTaskProvider {
 	PmTaskArchibusUserMapping findArchibusUserbyPhone(String phoneNum);
 	PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid);
 
+//	服务类型
+	void createCategory(PmTaskCategory bean);
+	void updateCategory(PmTaskCategory bean);
+	PmTaskCategory findCategoryById(Long id);
+
 }
