@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 
 import com.everhomes.util.StringHelper;
 
-public class BuildingReportFormDTO {
+public class TotalCommunityStaticsDTO {
 	
-	private Long buildingId;
-	private String buildingName;
+	private Long communityCount;
+	private Integer buildingCount;
 	private Integer totalApartmentCount;
 	private Integer freeApartmentCount;
 	private Integer rentApartmentCount;
@@ -25,17 +25,17 @@ public class BuildingReportFormDTO {
 	private BigDecimal dueDayCount;
 	private BigDecimal collectionRate;
 	
-	public Long getBuildingId() {
-		return buildingId;
+	public Long getCommunityCount() {
+		return communityCount;
 	}
-	public void setBuildingId(Long buildingId) {
-		this.buildingId = buildingId;
+	public void setCommunityCount(Long communityCount) {
+		this.communityCount = communityCount;
 	}
-	public String getBuildingName() {
-		return buildingName;
+	public Integer getBuildingCount() {
+		return buildingCount;
 	}
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
+	public void setBuildingCount(Integer buildingCount) {
+		this.buildingCount = buildingCount;
 	}
 	public Integer getTotalApartmentCount() {
 		return totalApartmentCount;
@@ -138,4 +138,5 @@ public class BuildingReportFormDTO {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
 }

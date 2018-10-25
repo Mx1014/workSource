@@ -6,7 +6,9 @@ import java.util.Map;
 import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 
 public interface PropertyReportFormProvider {
 
@@ -25,5 +27,11 @@ public interface PropertyReportFormProvider {
 
 	BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
 			List<String> buildingNameList, String dateStr);
+
+	List<CommunityReportFormDTO> listCommunityReportForm(Integer namespaceId, List<Long> communityIds, String dateStr,
+			Integer pageOffSet, Integer pageSize);
+
+	TotalCommunityStaticsDTO getTotalCommunityStatics(Integer namespaceId, List<Long> communityIds,
+			String formatDateStr);
 
 }

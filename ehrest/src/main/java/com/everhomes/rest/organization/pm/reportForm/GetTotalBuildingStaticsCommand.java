@@ -4,13 +4,11 @@ import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
-public class GetBuildingReportFormCommand {
+public class GetTotalBuildingStaticsCommand {
 	
 	private Integer namespaceId;
 	private Long communityId;
 	private List<Long> buildingIds;
-	private Integer pageSize;
-	private Long pageAnchor;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -30,22 +28,9 @@ public class GetBuildingReportFormCommand {
 	public void setBuildingIds(List<Long> buildingIds) {
 		this.buildingIds = buildingIds;
 	}
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
 }

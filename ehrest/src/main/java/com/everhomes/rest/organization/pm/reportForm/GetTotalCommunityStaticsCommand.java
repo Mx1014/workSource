@@ -4,13 +4,11 @@ import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
-public class GetCommunityReportFormCommand {
+public class GetTotalCommunityStaticsCommand {
 	
 	private Integer namespaceId;
 	private List<Long> communityIds;
 	private String dateStr;
-	private Integer pageSize;
-	private Long pageAnchor;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -30,21 +28,10 @@ public class GetCommunityReportFormCommand {
 	public void setDateStr(String dateStr) {
 		this.dateStr = dateStr;
 	}
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
 	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+	
 }

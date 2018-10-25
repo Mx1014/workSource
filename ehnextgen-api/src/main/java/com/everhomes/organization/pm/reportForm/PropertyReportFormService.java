@@ -11,16 +11,22 @@ import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.ListBuildingReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.ListCommunityReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 
 public interface PropertyReportFormService {
 
-	List<CommunityReportFormDTO> getCommunityReportForm(GetCommunityReportFormCommand cmd);
+	ListCommunityReportFormResponse getCommunityReportForm(GetCommunityReportFormCommand cmd);
 
-	void exportCommunityReportForm(GetCommunityReportFormCommand cmd);
+	void exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd);
 
-	List<BuildingReportFormDTO> getBuildingReportForm(GetBuildingReportFormCommand cmd);
+	ListBuildingReportFormResponse getBuildingReportForm(GetBuildingReportFormCommand cmd);
 
-	void exportBuildingReportForm(GetBuildingReportFormCommand cmd);
+	void exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd);
 	
 	Map<Long, CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList,
 			String dateStr);
@@ -33,4 +39,8 @@ public interface PropertyReportFormService {
 
 	BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId, Long communityId,
 			List<String> buildingNameList, String dateStr);
+
+	TotalCommunityStaticsDTO getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd);
+
+	TotalBuildingStaticsDTO getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd);
 }

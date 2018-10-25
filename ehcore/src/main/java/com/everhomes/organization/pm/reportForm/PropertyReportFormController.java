@@ -16,6 +16,12 @@ import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.ListBuildingReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.ListCommunityReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 
 /**
  * 此类用于产生资产（园区、楼宇、房源）相关的报表
@@ -36,9 +42,23 @@ public class PropertyReportFormController extends ControllerBase{
      * <p>获取项目信息汇总表</p>
      */
     @RequestMapping("getCommunityReportForm")
-    @RestReturn(value=CommunityReportFormDTO.class,collection=true)
+    @RestReturn(value=ListCommunityReportFormResponse.class)
     public RestResponse getCommunityReportForm(GetCommunityReportFormCommand cmd) {
-    	List<CommunityReportFormDTO> result = assetReportFormService.getCommunityReportForm(cmd);
+    	ListCommunityReportFormResponse result = assetReportFormService.getCommunityReportForm(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/reportForm/getTotalCommunityStatics</b>
+     * <p>获取项目信息汇总表总计</p>
+     */
+    @RequestMapping("getTotalCommunityStatics")
+    @RestReturn(value=TotalCommunityStaticsDTO.class)
+    public RestResponse getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd) {
+    	TotalCommunityStaticsDTO result = assetReportFormService.getTotalCommunityStatics(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -51,7 +71,7 @@ public class PropertyReportFormController extends ControllerBase{
      */
     @RequestMapping("exportCommunityReportForm")
     @RestReturn(value=String.class)
-    public RestResponse exportCommunityReportForm(GetCommunityReportFormCommand cmd) {
+    public RestResponse exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
     	assetReportFormService.exportCommunityReportForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -64,9 +84,23 @@ public class PropertyReportFormController extends ControllerBase{
      * <p>获取楼宇信息汇总表</p>
      */
     @RequestMapping("getBuildingReportForm")
-    @RestReturn(value=BuildingReportFormDTO.class,collection=true)
+    @RestReturn(value=ListBuildingReportFormResponse.class)
     public RestResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
-    	List<BuildingReportFormDTO> result = assetReportFormService.getBuildingReportForm(cmd);
+    	ListBuildingReportFormResponse result = assetReportFormService.getBuildingReportForm(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pm/reportForm/getTotalBuildingStatics</b>
+     * <p>获取楼宇信息汇总表总计</p>
+     */
+    @RequestMapping("getTotalBuildingStatics")
+    @RestReturn(value=TotalBuildingStaticsDTO.class)
+    public RestResponse getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
+    	TotalBuildingStaticsDTO result = assetReportFormService.getTotalBuildingStatics(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -79,7 +113,7 @@ public class PropertyReportFormController extends ControllerBase{
      */
     @RequestMapping("exportBuildingReportForm")
     @RestReturn(value=String.class)
-    public RestResponse exportBuildingReportForm(GetBuildingReportFormCommand cmd) {
+    public RestResponse exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
     	assetReportFormService.exportBuildingReportForm(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.schedule.AssetSchedule;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -28,6 +29,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
@@ -39,6 +41,12 @@ import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.ListBuildingReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.ListCommunityReportFormResponse;
+import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 import com.everhomes.scheduler.EnergyAutoReadingJob;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.scheduler.RunningFlag;
@@ -50,6 +58,9 @@ import com.everhomes.util.DateHelper;
 public class PropertyReportFormServiceImpl implements PropertyReportFormService,ApplicationListener<ContextRefreshedEvent>{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReportFormServiceImpl.class);
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 	
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -90,26 +101,87 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
     }
     
 	@Override
-	public List<CommunityReportFormDTO> getCommunityReportForm(GetCommunityReportFormCommand cmd) {
+	public ListCommunityReportFormResponse getCommunityReportForm(GetCommunityReportFormCommand cmd) {
+		ListCommunityReportFormResponse response = new ListCommunityReportFormResponse();
 		
+		Long pageAnchor = cmd.getPageAnchor();
+		if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        
+		Integer pageSize = cmd.getPageSize();
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        
+        String dateStr = cmd.getDateStr();
+        String formatDateStr = formatDateStr(dateStr);
+        
+        List<CommunityReportFormDTO> resultList = propertyReportFormProvider.listCommunityReportForm(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr,pageOffSet,pageSize);
+        if(resultList.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            resultList.remove(resultList.size()-1);
+        }
+        
+        List<ListBillStatisticByCommunityDTO> billStatisticList = assetStatisticService.listBillStatisticByCommunityForProperty(cmd.getNamespaceId(),cmd.getCommunityIds(), "community", null, formatDateStr);
+        Map<Long, ListBillStatisticByCommunityDTO> billStatisticMap = new HashMap<>();
+        billStatisticList.stream().forEach(b->billStatisticMap.put(b.getOwnerId(), b));
+        
+        for (CommunityReportFormDTO result : resultList) {
+        	ListBillStatisticByCommunityDTO billStatistic = billStatisticMap.get(result.getCommunityId());
+        	if (billStatistic != null) {
+				result.setAmountReceivable(billStatistic.getAmountReceivable());
+				result.setAmountReceived(billStatistic.getAmountReceived());
+        		result.setAmountOwed(billStatistic.getAmountOwed());
+        		result.setDueDayCount(billStatistic.getDueDayCount());
+        		result.setCollectionRate(billStatistic.getCollectionRate());
+			}
+		}
+        response.setResultList(resultList);
+		return response;
+	}
+	
+	@Override
+	public TotalCommunityStaticsDTO getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd){
+		String dateStr = cmd.getDateStr();
+	    String formatDateStr = formatDateStr(dateStr);
+		
+		TotalCommunityStaticsDTO result = propertyReportFormProvider.getTotalCommunityStatics(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr);
+		ListBillStatisticByCommunityDTO billTotalStatistic = assetStatisticService.listBillStatisticByCommunityTotalForProperty(cmd.getNamespaceId(), 
+				                                                           cmd.getCommunityIds(), "community", null, formatDateStr);
+		
+		result.setAmountReceivable(billTotalStatistic.getAmountReceivable());
+		result.setAmountReceived(billTotalStatistic.getAmountReceived());
+		result.setAmountOwed(billTotalStatistic.getAmountOwed());
+		result.setDueDayCount(billTotalStatistic.getDueDayCount());
+		result.setCollectionRate(billTotalStatistic.getCollectionRate());
+		
+		return result;
+	}
+
+	@Override
+	public void exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public ListBuildingReportFormResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
 		
 		return null;
 	}
 
 	@Override
-	public void exportCommunityReportForm(GetCommunityReportFormCommand cmd) {
-		// TODO Auto-generated method stub
+	public TotalBuildingStaticsDTO getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
 		
-	}
-
-	@Override
-	public List<BuildingReportFormDTO> getBuildingReportForm(GetBuildingReportFormCommand cmd) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
-	public void exportBuildingReportForm(GetBuildingReportFormCommand cmd) {
+	public void exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -124,9 +196,9 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	@Override
 	public Map<Long, CommunityBriefStaticsDTO> listCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
 		
-		dateStr = formatDateStr(dateStr);
+		String formatDateStr = formatDateStr(dateStr);
 		
-		Map<Long, CommunityBriefStaticsDTO> result = propertyReportFormProvider.listCommunityBriefStaticsForBill(namespaceId,communityIdList,dateStr);
+		Map<Long, CommunityBriefStaticsDTO> result = propertyReportFormProvider.listCommunityBriefStaticsForBill(namespaceId,communityIdList,formatDateStr);
 		
 		for(Long communityId : communityIdList){
 			CommunityBriefStaticsDTO dto = result.get(communityId);
@@ -152,8 +224,8 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 */
 	@Override
 	public CommunityTotalStaticsDTO getTotalCommunityBriefStaticsForBill(Integer namespaceId, List<Long> communityIdList, String dateStr){
-		dateStr = formatDateStr(dateStr);
-		CommunityTotalStaticsDTO result = propertyReportFormProvider.getTotalCommunityBriefStaticsForBill(namespaceId,communityIdList,dateStr);
+		String formatDateStr = formatDateStr(dateStr);
+		CommunityTotalStaticsDTO result = propertyReportFormProvider.getTotalCommunityBriefStaticsForBill(namespaceId,communityIdList,formatDateStr);
 		result.setCommunityCount(communityIdList.size());
 		return result;
 	}
@@ -168,8 +240,8 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 */
 	@Override
 	public Map<String,BuildingBriefStaticsDTO> listBuildingBriefStaticsForBill(Integer namespaceId,Long communityId ,List<String> buildingNameList, String dateStr){
-		dateStr = formatDateStr(dateStr);
-		Map<String,BuildingBriefStaticsDTO> result = propertyReportFormProvider.listBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,dateStr);
+		String formatDateStr = formatDateStr(dateStr);
+		Map<String,BuildingBriefStaticsDTO> result = propertyReportFormProvider.listBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,formatDateStr);
 		
 		for (String buildingName : buildingNameList) {
 			BuildingBriefStaticsDTO dto = result.get(buildingName);
@@ -191,8 +263,8 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	 */
 	@Override
 	public BuildingTotalStaticsDTO getTotalBuildingBriefStaticsForBill(Integer namespaceId,Long communityId,List<String> buildingNameList, String dateStr){
-		dateStr = formatDateStr(dateStr);
-		BuildingTotalStaticsDTO result = propertyReportFormProvider.getTotalBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,dateStr);
+		String formatDateStr = formatDateStr(dateStr);
+		BuildingTotalStaticsDTO result = propertyReportFormProvider.getTotalBuildingBriefStaticsForBill(namespaceId,communityId,buildingNameList,formatDateStr);
 		result.setBuildindCount(buildingNameList.size());
 		return result;
 	}
@@ -213,20 +285,24 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 	
 	//如果是2018这种年份字符串，那就要处理
 	private String formatDateStr(String dateStr){
-		if (dateStr.matches("\\d{4}")) {
+		String format = null;
+		if (dateStr == null) {
+			format = getTodayMonthStr();
+		}else if (dateStr.matches("\\d{4}")) {
 			String todayYearStr = getTodayYearStr();
 			if (dateStr.equals(todayYearStr)) {
-				dateStr = getTodayMonthStr();
+				format = getTodayMonthStr();
 			}else {
-				dateStr = dateStr + "-12";
+				format = dateStr + "-12";
 			}
-			return dateStr;
+			return format;
 		}else if (dateStr.matches("\\d{4}-\\d{2}")) {
-			return dateStr;
+			format = dateStr;
+			return format;
 		}else {
 			//可以抛出异常
 		}
-		return dateStr;
+		return format;
 	}
-
+	
 }
