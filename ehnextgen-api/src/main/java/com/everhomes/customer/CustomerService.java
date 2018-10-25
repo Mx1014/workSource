@@ -285,6 +285,6 @@ public interface CustomerService {
 
     ListSignupInfoByOrganizationIdResponse listCustomerApartmentActivity(ListCustomerApartmentActivityCommand cmd);
 
-    void updateSuperAdmin(UpdateSuperAdminCommand cmd);
+    //void updateSuperAdmin(UpdateSuperAdminCommand cmd);
 
 }
