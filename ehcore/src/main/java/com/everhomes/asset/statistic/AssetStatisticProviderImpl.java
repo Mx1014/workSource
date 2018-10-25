@@ -25,7 +25,10 @@ import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
+import com.everhomes.rest.organization.pm.reportForm.BuildingBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.BuildingTotalStaticsDTO;
 import com.everhomes.rest.organization.pm.reportForm.CommunityBriefStaticsDTO;
+import com.everhomes.rest.organization.pm.reportForm.CommunityTotalStaticsDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
@@ -443,10 +446,14 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			Integer namespaceId, List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		List<ListBillStatisticByCommunityDTO> list = listBillStatisticByCommunityUtil(pageOffSet, pageSize, 
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
-    	//TODO 调用资产的接口获取资产相关的统计数据
+    	//调用资产提供给缴费报表的项目信息列表的接口
 		Map<Long, CommunityBriefStaticsDTO> map = propertyReportFormService.listCommunityBriefStaticsForBill(namespaceId, ownerIdList, dateStrEnd);
 		for(ListBillStatisticByCommunityDTO dto : list) {
-			//CommunityBriefStaticsDTO communityBriefStaticsDTO 
+			CommunityBriefStaticsDTO communityBriefStaticsDTO = map.get(dto.getOwnerId());
+			dto.setProjectName(communityBriefStaticsDTO.getCommunityName() != null ? communityBriefStaticsDTO.getCommunityName() : "--");
+			dto.setProjectClassify(communityBriefStaticsDTO.getCategory() != null ? communityBriefStaticsDTO.getCategory() : "--");
+			dto.setBuildingCount(communityBriefStaticsDTO.getBuildingCount() != null ? communityBriefStaticsDTO.getBuildingCount() : 0);
+			dto.setAreaSize(communityBriefStaticsDTO.getAreaSize() != null ? communityBriefStaticsDTO.getAreaSize() : BigDecimal.ZERO);
 		}
 		return list;
 	}
@@ -505,10 +512,15 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			List<String> buildingNameList) {
 		List<ListBillStatisticByBuildingDTO> list = listBillStatisticByBuildingUtil(pageOffSet, pageSize,
 				namespaceId, ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+    	//调用资产的接口提供给缴费报表的楼宇信息列表的接口
+		Map<String,BuildingBriefStaticsDTO> map = propertyReportFormService.listBuildingBriefStaticsForBill(
+				namespaceId, ownerId, buildingNameList, dateStrEnd);
+		for(ListBillStatisticByBuildingDTO dto : list) {
+			BuildingBriefStaticsDTO buildingBriefStaticsDTO = map.get(dto.getBuildingName());
+			dto.setBuildingName(buildingBriefStaticsDTO.getBuildingName() != null ? buildingBriefStaticsDTO.getBuildingName() : "--");
+			dto.setAddressCount(buildingBriefStaticsDTO.getTotalApartmentCount() != null ? buildingBriefStaticsDTO.getTotalApartmentCount() : 0);
+			dto.setAreaSize(buildingBriefStaticsDTO.getAreaSize() != null ? buildingBriefStaticsDTO.getAreaSize() : BigDecimal.ZERO);
+		}
 		return list;
 	}
 	
@@ -569,10 +581,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			List<Long> ownerIdList, String ownerType, String dateStrBegin, String dateStrEnd) {
 		ListBillStatisticByCommunityDTO dto = listBillStatisticByCommunityTotalUtil(
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		//调用资产提供给缴费报表的项目信息列表的接口
+		CommunityTotalStaticsDTO communityTotalStaticsDTO = propertyReportFormService.getTotalCommunityBriefStaticsForBill(namespaceId, ownerIdList, dateStrEnd);
+		dto.setProjectName(communityTotalStaticsDTO.getCommunityCount() != null ? communityTotalStaticsDTO.getCommunityCount().toString() : "0");
+		dto.setProjectClassify("--");
+		dto.setBuildingCount(communityTotalStaticsDTO.getBuildingCount() != null ? communityTotalStaticsDTO.getBuildingCount() : 0);
+		dto.setAreaSize(communityTotalStaticsDTO.getAreaSize() != null ? communityTotalStaticsDTO.getAreaSize() : BigDecimal.ZERO);
         return dto;
 	}
 	
@@ -617,10 +631,12 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 			String ownerType, String dateStrBegin, String dateStrEnd, List<String> buildingNameList) {
 		ListBillStatisticByBuildingDTO dto = listBillStatisticByBuildingTotalUtil(namespaceId, 
 				ownerId, ownerType, dateStrBegin, dateStrEnd, buildingNameList);
-    	//TODO 调用资产的接口获取资产相关的统计数据
-//    	Integer currentNamespaceId = f.getValue(statistic.NAMESPACE_ID);
-//    	Long currentOwnerId = f.getValue(statistic.OWNER_ID);
-//    	String currentOwnerType = f.getValue(statistic.OWNER_TYPE);
+		//调用资产的接口提供给缴费报表的楼宇信息列表的接口
+		BuildingTotalStaticsDTO buildingTotalStaticsDTO = propertyReportFormService.getTotalBuildingBriefStaticsForBill(
+				namespaceId, ownerId, buildingNameList, dateStrEnd);
+		dto.setBuildingName(buildingTotalStaticsDTO.getBuildindCount() != null ? buildingTotalStaticsDTO.getBuildindCount().toString() : "0");
+		dto.setAddressCount(buildingTotalStaticsDTO.getTotalApartmentCount() != null ? buildingTotalStaticsDTO.getTotalApartmentCount() : 0);
+		dto.setAreaSize(buildingTotalStaticsDTO.getAreaSize() != null ? buildingTotalStaticsDTO.getAreaSize() : BigDecimal.ZERO);
         return dto;
 	}
 	

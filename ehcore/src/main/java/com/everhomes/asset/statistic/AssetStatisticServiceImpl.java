@@ -462,11 +462,7 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		//房源总数
 		Cell cell3 = tempRow.createCell(2);
 		cell3.setCellStyle(style);
-		if(isLastRow) {
-			cell3.setCellValue("--");
-		}else {
-			cell3.setCellValue(dto.getAddressCount() != null ? dto.getAddressCount().toString() : "");
-		}
+		cell3.setCellValue(dto.getAddressCount() != null ? dto.getAddressCount().toString() : "");
 		//建筑面积
 		Cell cell4 = tempRow.createCell(3);
 		cell4.setCellStyle(style);
