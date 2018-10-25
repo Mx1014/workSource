@@ -491,6 +491,8 @@ INSERT INTO eh_configurations (name, value, description, namespace_id, display_n
 VALUES ('ruian.vip.url','https://m.mallcoo.cn/a/custom/10764/xtd/Rights','瑞安会员跳转URL',999929, '瑞安会员跳转URL');
 INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
 VALUES ('ruian.order.url','/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix','瑞安订单跳转URL',999929, '瑞安订单跳转URL');
+INSERT INTO eh_configurations (name, value, description)
+VALUES ('ruian.coupon.url','https://inno.xintiandi.com/promotion/app-coupon?systemId=16#/','瑞安新天地卡券链接');
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 
