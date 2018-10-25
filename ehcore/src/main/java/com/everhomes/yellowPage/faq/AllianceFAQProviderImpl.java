@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 
@@ -19,7 +20,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	private AllianceFaqTypeProvider allianceFaqTypeProvider;
 	
 	@Autowired
-	private AllianceFaqsProvider allianceFaqProvider;
+	private AllianceFaqsProvider allianceFaqsProvider;
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -52,76 +53,53 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public ListFAQTypesResponse listFAQTypes(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor) {
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<AllianceFAQType> faqTypes = allianceFaqTypeProvider.listFAQTypes(cmd, locator, pageSize, pageAnchor);
-		
-		//组织
-		List<IdNameDTO> dtos = faqTypes.stream().map(r -> {
-			IdNameDTO dto = new IdNameDTO();
-			dto.setId(r.getId());
-			dto.setName(r.getName());
-			return dto;
-		}).collect(Collectors.toList());
-		
-		//返回
-		ListFAQTypesResponse resp = new ListFAQTypesResponse();
-		resp.setDtos(dtos);
-		resp.setNextPageAnchor(locator.getAnchor());
-		return null;
+	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor) {
+		return allianceFaqTypeProvider.listFAQTypes(cmd, locator, pageSize, pageAnchor);
 	}
 
 	@Override
 	public void createFAQ(AllianceFAQ faq) {
-		allianceFaqProvider.createFAQ(faq);
+		allianceFaqsProvider.createFAQ(faq);
 	}
 
 	@Override
 	public void updateFAQ(AllianceFAQ faq) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqsProvider.updateFAQ(faq);
 	}
 
 	@Override
 	public void updateTopFAQFlag(Long faqId, byte topFlag) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqsProvider.updateTopFAQFlag(faqId, topFlag);
 	}
 
 	@Override
 	public void deleteFAQ(Long faqId) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqsProvider.deleteFAQ(faqId);
 	}
 
 	@Override
 	public AllianceFAQ getFAQ(Long faqId) {
-		// TODO Auto-generated method stub
-		return null;
+		return allianceFaqsProvider.getFAQ(faqId);
 	}
 
 	@Override
-	public ListFAQsResponse listFAQs(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor, Long faqType,
-			Byte topFlag, String keyword, Byte orderType) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator,  Integer pageSize, Long pageAnchor, Long faqType,
+			Byte topFlag, String keyword, Byte orderType, Byte sortType) {
+		return allianceFaqsProvider.listFAQs(cmd, locator, pageSize, pageAnchor, faqType, topFlag, keyword, orderType, sortType);
 	}
 
 	@Override
-	public ListTopFAQsResponse listTopFAQs(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor) {
+		return allianceFaqsProvider.listTopFAQs(cmd, locator, pageSize, pageAnchor);
 	}
 
 	@Override
 	public void updateTopFAQOrders(Long upFAQId, Long lowFAQId) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public ListOperateServicesResponse listOperateServices(AllianceCommonCommand cmd) {
-		// TODO Auto-generated method stub
+	public List<OperateServiceDTO> listOperateServices(AllianceCommonCommand cmd) {
 		return null;
 	}
 

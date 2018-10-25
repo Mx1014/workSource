@@ -11,7 +11,10 @@ import com.everhomes.util.StringHelper;
  * <li>currentStatus : 当前状态</li>
  * <li>channelPos :当前步骤下标</li>
  * <li>channels : 泳道列表</li>
- * <li>squareInfos : 广场数据 </li>
+ * <li>serviceListUrl : 开工单 </li>
+ * <li>topFAQUrl : 常见问题 </li>
+ * <li>serviceCustomerId : kefu id </li>
+ * <li>phoneNumber : 热线 </li>
  * </ul>
  * @author huangmingbo 
  * @date 2018年10月23日
@@ -22,7 +25,10 @@ public class GetLatestServiceStateResponse {
 	private String currentStatus;
 	private Byte channelPos;
 	private List<String> channels;
-	private List<String> squareInfos;
+	private String serviceListUrl;
+	private String topFAQUrl;
+	private Long serviceCustomerId;
+	private String phoneNumber;
 	
 	public Long getServiceId() {
 		return serviceId;
@@ -58,10 +64,28 @@ public class GetLatestServiceStateResponse {
 	public void setCurrentStatus(String currentStatus) {
 		this.currentStatus = currentStatus;
 	}
-	public List<String> getSquareInfos() {
-		return squareInfos;
+	public String getServiceListUrl() {
+		return serviceListUrl;
 	}
-	public void setSquareInfos(List<String> squareInfos) {
-		this.squareInfos = squareInfos;
+	public void setServiceListUrl(String serviceListUrl) {
+		this.serviceListUrl = serviceListUrl;
+	}
+	public String getTopFAQUrl() {
+		return topFAQUrl;
+	}
+	public void setTopFAQUrl(String topFAQUrl) {
+		this.topFAQUrl = topFAQUrl;
+	}
+	public Long getServiceCustomerId() {
+		return serviceCustomerId;
+	}
+	public void setServiceCustomerId(Long serviceCustomerId) {
+		this.serviceCustomerId = serviceCustomerId;
+	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 }

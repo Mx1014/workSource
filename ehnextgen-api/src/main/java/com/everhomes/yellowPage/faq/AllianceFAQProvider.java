@@ -1,5 +1,8 @@
 package com.everhomes.yellowPage.faq;
 
+import java.util.List;
+
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 
 public interface AllianceFAQProvider {
@@ -15,7 +18,7 @@ public interface AllianceFAQProvider {
 	
 	void updateFAQTypeOrders(Long upFAQTypeId, Long lowFAQTypeId);
 	
-	ListFAQTypesResponse listFAQTypes(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 
 	/*************问题******************/
 	void createFAQ(AllianceFAQ faq);
@@ -28,16 +31,17 @@ public interface AllianceFAQProvider {
 	
 	AllianceFAQ getFAQ(Long faqId);
 	
-	ListFAQsResponse listFAQs(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType);
+	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor,
+			Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
 
 	//热门问题
-	ListTopFAQsResponse listTopFAQs(AllianceCommonCommand cmd, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 	
 	void updateTopFAQOrders(Long upFAQId, Long lowFAQId);
 
 	
 	//运营商模块
-	ListOperateServicesResponse listOperateServices(AllianceCommonCommand cmd);
+	List<OperateServiceDTO> listOperateServices(AllianceCommonCommand cmd);
 
 	void deleteOperateServices(AllianceCommonCommand cmd);
 	
@@ -54,5 +58,6 @@ public interface AllianceFAQProvider {
 	void createFAQOnlineService(AllianceFAQServiceCustomer onlineService);
 	
 	AllianceFAQServiceCustomer getFAQOnlineService(AllianceCommonCommand cmd);
+
 
 }

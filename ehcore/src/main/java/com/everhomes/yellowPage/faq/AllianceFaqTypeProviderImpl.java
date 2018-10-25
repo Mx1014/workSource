@@ -109,7 +109,7 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, CrossShardListingLocator locator,
+	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator,
 			Integer pageSize, Long pageAnchor) {
 		return listTool(pageSize, locator, (l,q)-> {
 			q.addConditions(TABLE.NAMESPACE_ID.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));

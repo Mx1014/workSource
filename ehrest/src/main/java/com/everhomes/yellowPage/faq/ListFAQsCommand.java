@@ -17,6 +17,7 @@ import com.everhomes.rest.yellowPage.AllianceAdminCommand;
  * <li>topFlag: 空-都显示 0-非热门 1-热门</li>
  * <li>keyword: 关键字</li>
  * <li>orderType: 空-按默认排序 0-以解决次数 1-以未解决次数</li>
+ * <li>sortType: 空或<0-降序  >0-升序</li>
  * </ul>
  **/
 public class ListFAQsCommand extends AllianceAdminCommand{
@@ -26,6 +27,7 @@ public class ListFAQsCommand extends AllianceAdminCommand{
 	private Byte topFlag;
 	private String keyword;
 	private Byte orderType;
+	private Byte sortType;
 	
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -62,5 +64,11 @@ public class ListFAQsCommand extends AllianceAdminCommand{
 	}
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+	public Byte getSortType() {
+		return sortType;
+	}
+	public void setSortType(Byte sortType) {
+		this.sortType = sortType;
 	}
 }

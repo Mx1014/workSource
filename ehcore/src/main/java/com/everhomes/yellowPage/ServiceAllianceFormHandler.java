@@ -10,6 +10,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFormHandler;
@@ -87,6 +88,9 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	FlowProvider flowProvider;
 
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
@@ -103,7 +107,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 				this.generalFormProvider.updateGeneralForm(form);
 			}
 
-			FlowDTO flow = sa.getFlowId() == null ? null : flowService.getFlowById(sa.getFlowId());
+			Flow flow = sa.getFlowId() == null ? null : flowProvider.getSnapshotFlowById(sa.getFlowId());
 			if (null == flow || !flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
 				flow = null;
 			}

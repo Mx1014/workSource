@@ -5,9 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -107,16 +110,52 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 
 	@Override
 	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor) {
-		return listTool(pageSize, locator, (l,q)-> {
-			q.addConditions(TABLE.NAMESPACE_ID.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType) {
+		return listTool(pageSize, locator, (l, q) -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
 			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
 			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
 			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+			if (null != faqType) {
+				q.addConditions(TABLE.TYPE_ID.eq(faqType));
+			}
+			
+			if (null != topFlag) {
+				q.addConditions(TABLE.TOP_FLAG.eq(topFlag));
+			}
+			
+			if (StringUtils.isBlank(keyword)) {
+				q.addConditions(TABLE.TITLE.like(DSL.concat("%", keyword, "%")));
+			}
+			
+			if (null != orderType) {
+				buildOrderBy(q, orderType, sortType);
+			}
+			
 			return null;
 		});
 	}
 	
+	private void buildOrderBy(SelectQuery<? extends Record> q, Byte orderType, Byte sortType) {
+		
+		if (AllianceFaqOrderType.SOLVE_TIMES.getCode().equals(orderType)) {
+			if (null == sortType || sortType < 0) {
+				q.addOrderBy(TABLE.SOLVE_TIMES.desc());
+			} else {
+				q.addOrderBy(TABLE.SOLVE_TIMES.asc());
+			}
+			
+			return;
+		}
+		
+		if (null == sortType || sortType < 0) {
+			q.addOrderBy(TABLE.UN_SOLVE_TIMES.desc());
+		} else {
+			q.addOrderBy(TABLE.UN_SOLVE_TIMES.asc());
+		}
+	}
+
 	private EhAllianceFaqsDao getAllianceFAQDao(AccessSpec arg0) {
 		DSLContext context = dbProvider.getDslContext(arg0);
 		return new EhAllianceFaqsDao(context.configuration());
@@ -208,6 +247,26 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 
 	private UpdateQuery<EhAllianceFaqsRecord> updateQuery() {
 		return readWriteContext().updateQuery(TABLE);
+	}
+
+	@Override
+	public void updateTopFAQFlag(Long faqId, byte topFlag) {
+		
+	}
+
+	@Override
+	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
+			Long pageAnchor) {
+		return listTool(pageSize, locator, (l, q) -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+			q.addConditions(TABLE.TOP_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+			q.addOrderBy(TABLE.TOP_ORDER);
+			return null;
+		});
 	}
 	
 }

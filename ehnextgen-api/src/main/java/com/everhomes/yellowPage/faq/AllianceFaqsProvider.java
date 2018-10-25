@@ -18,6 +18,10 @@ public interface AllianceFaqsProvider {
 	void updateFAQOrder(Long itemId, Long defaultOrderId);
 
 	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor);
+			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
+
+	void updateTopFAQFlag(Long faqId, byte topFlag);
+
+	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 
 }

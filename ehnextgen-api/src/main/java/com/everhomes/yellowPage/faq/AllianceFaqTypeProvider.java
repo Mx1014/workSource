@@ -3,6 +3,7 @@ package com.everhomes.yellowPage.faq;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 
 public interface AllianceFaqTypeProvider {
@@ -16,5 +17,5 @@ public interface AllianceFaqTypeProvider {
 	
 	void updateFAQTypeOrder(Long faqTypeId, Long defaultOrderId);
 	
-	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, CrossShardListingLocator locator, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 }
