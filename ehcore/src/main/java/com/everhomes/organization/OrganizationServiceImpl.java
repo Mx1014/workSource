@@ -13540,6 +13540,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (isCreate && find_detail == null) {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
             detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
+            detail.setContactName(member.getRegionCode());
             detail.setContactName(member.getContactName());
             detail.setGender(member.getGender());
             detail.setContactToken(member.getContactToken());
