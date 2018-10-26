@@ -1601,14 +1601,18 @@ public class ArchivesServiceImpl implements ArchivesService {
             queryBuilderCallback.buildCondition(locator, query);
             if (departmentId != null) {
                 Organization department = organizationProvider.findOrganizationById(departmentId);
-                if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-                    // get the hidden department of the company which has the same name
-                    Organization under_department = organizationProvider.findUnderOrganizationByParentOrgId(department.getId());
-                    if (under_department != null)
-                        department = under_department;
-                }
-                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentId(department.getId());
-                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(department.getId());
+
+    			List<String> groupTypes = new ArrayList<>();
+    			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+    			groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+    			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+                List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+                List<Long> subDptIds = new ArrayList<>();
+                subDeparts.forEach(r -> {
+                	subDptIds.add(r.getId());
+                });
+                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
+                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
                 Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
                 Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
                 if (workGroups != null)

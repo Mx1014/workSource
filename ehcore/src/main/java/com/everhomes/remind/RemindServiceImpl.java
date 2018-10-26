@@ -285,6 +285,8 @@ public class RemindServiceImpl implements RemindService  {
         if (CollectionUtils.isEmpty(shareMemberDTOS)) {
             return Collections.emptyList();
         }
+        //2018-10-23 5.10.0 增加创建日程向共享人发送提醒
+        List<Remind> trackReminds = new ArrayList<>();
         List<EhRemindShares> shares = new ArrayList<>();
         shareMemberDTOS.stream().forEach(shareMember -> {
             RemindShare remindShare = new RemindShare();
@@ -298,7 +300,19 @@ public class RemindServiceImpl implements RemindService  {
             remindShare.setSharedSourceType(shareMember.getSourceType());
             remindShare.setSharedSourceName(shareMember.getSourceName());
             shares.add(remindShare);
+            if(ShareMemberSourceType.MEMBER_DETAIL == ShareMemberSourceType.fromCode(shareMember.getSourceType())){
+	            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(shareMember.getSourceId());
+	            if(null != detail && !detail.getTargetId().equals(0L)){
+		            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
+		            trackRemind.setUserId(detail.getTargetId());
+		            trackRemind.setTrackRemindId(remind.getId());
+		            trackRemind.setTrackContractName(remind.getContactName());
+		            trackRemind.setTrackRemindUserId(remind.getUserId());
+		            trackReminds.add(trackRemind);
+	            }
+            }
         });
+        sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.CREATE_SUBSCRIBE);
         return shares;
     }
 
@@ -1414,6 +1428,10 @@ public class RemindServiceImpl implements RemindService  {
                 		RemindContants.MSG_UN_SUBSCRIBE, RemindContants.LOCALE, map, "");
                 isDeleted = true;
                 break;
+            case CREATE_SUBSCRIBE:
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_CREATE_SUBSCRIBE, RemindContants.LOCALE, map, "");
+                break;
             default:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_SETTING_UPDATE, RemindContants.LOCALE, map, "");
@@ -1421,6 +1439,7 @@ public class RemindServiceImpl implements RemindService  {
         }
         sendMessage(trackRemind.getUserId(), content, trackRemind, isDeleted);
     }
+    
     @Override
     public void sendRemindMessage(Remind remind) {
     	SimpleDateFormat timeDF = new SimpleDateFormat("HH:mm");

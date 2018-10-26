@@ -6,63 +6,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.techpark.punch.AddPunchPointsCommand;
-import com.everhomes.rest.techpark.punch.AddPunchWifisCommand;
-import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
-import com.everhomes.rest.techpark.punch.CheckAbnormalStatusResponse;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
-import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
-import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeCommand;
-import com.everhomes.rest.techpark.punch.CheckUserStatisticPrivilegeResponse;
-import com.everhomes.rest.techpark.punch.FileMonthReportCommand;
-import com.everhomes.rest.techpark.punch.GetAdjustRuleUrlResponse;
-import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessCommand;
-import com.everhomes.rest.techpark.punch.GetMonthReportProcessResponse;
-import com.everhomes.rest.techpark.punch.GetOvertimeInfoCommand;
-import com.everhomes.rest.techpark.punch.GetOvertimeInfoResponse;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusCommand;
-import com.everhomes.rest.techpark.punch.GetPunchDayStatusResponse;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
-import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
-import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlCommand;
-import com.everhomes.rest.techpark.punch.GetUserPunchRuleInfoUrlResponse;
-import com.everhomes.rest.techpark.punch.ListApprovalCategoriesCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
-import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestItemDetailCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestItemDetailResponse;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthReportsResponse;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusCommand;
-import com.everhomes.rest.techpark.punch.ListPunchMonthStatusResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatusItemDetailCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatusItemDetailResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatusMembersCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatusMembersResponse;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommand;
-import com.everhomes.rest.techpark.punch.ListPunchSupportiveAddressCommandResponse;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
-import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
-import com.everhomes.rest.techpark.punch.PunchClockCommand;
-import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentCommand;
-import com.everhomes.rest.techpark.punch.PunchDailyStatisticsByDepartmentResponse;
-import com.everhomes.rest.techpark.punch.PunchLogsDay;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentCommand;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByDepartmentResponse;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberCommand;
-import com.everhomes.rest.techpark.punch.PunchMonthlyStatisticsByMemberResponse;
-import com.everhomes.rest.techpark.punch.RefreshMonthReportCommand;
-import com.everhomes.rest.techpark.punch.UpdateMonthReportCommand;
+import com.everhomes.rest.techpark.punch.*;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
 
 import org.slf4j.Logger;
@@ -708,5 +652,72 @@ public class PunchController extends ControllerBase {
 		return new RestResponse(resp);
 	}
 	
-	
+
+	/**
+	 * <b>URL: /techpark/punch/thirdPartPunchClock</b>
+	 * <p>
+	 * 第三方调用的打卡服务
+	 * </p>
+	 */
+	@RequestMapping("thirdPartPunchClock")
+	@RestReturn(value = String.class)
+	public RestResponse thirdPartPunchClock(@Valid ThirdPartPunchClockCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(punchService.thirdPartPunchClock(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/punch/goOutPunchClock</b>
+	 * <p>
+	 * 外出打卡
+	 * </p>
+	 */
+	@RequestMapping("goOutPunchClock")
+	@RestReturn(GoOutPunchLogDTO.class)
+	public RestResponse goOutPunchClock(@Valid GoOutPunchClockCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(
+				punchService.goOutPunchClock(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/punch/updateGoOutPunchLog</b>
+	 * <p>
+	 * 更新外出打卡备注
+	 * </p>
+	 */
+	@RequestMapping("updateGoOutPunchLog")
+	@RestReturn(GoOutPunchLogDTO.class)
+	public RestResponse updateGoOutPunchLog(@Valid UpdateGoOutPunchLogCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(
+				punchService.updateGoOutPunchLog(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/punch/getGoOutPunchLog</b>
+	 * <p>
+	 * 查看外出打卡详情
+	 * </p>
+	 */
+	@RequestMapping("getGoOutPunchLog")
+	@RestReturn(GoOutPunchLogDTO.class)
+	public RestResponse getGoOutPunchLog(@Valid GetGoOutPunchLogCommand cmd) {
+		// 打卡返回打卡时间
+		RestResponse response = new RestResponse(
+				punchService.getGoOutPunchLog(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }
