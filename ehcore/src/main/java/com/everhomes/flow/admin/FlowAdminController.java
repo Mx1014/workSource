@@ -96,13 +96,6 @@ public class FlowAdminController extends ControllerBase {
     @RequestMapping("createFlow")
     @RestReturn(value = FlowDTO.class)
     public RestResponse createFlow(@Valid CreateFlowCommand cmd) {
-    	
-		// cmd.setModuleType("any-module"); //默认的审批
-		// cmd.setModuleType("review_contract"); //发起审批
-		// cmd.setModuleType("denunciation_contract"); //合同退约
-		// cmd.setModuleType("change_contract"); //合同变更
-		// cmd.setModuleType("renew_contract"); //合同续约 	
-    	
         RestResponse response = new RestResponse(flowService.createFlow(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -131,13 +124,6 @@ public class FlowAdminController extends ControllerBase {
     @RequestMapping("listFlows")
     @RestReturn(value = ListFlowBriefResponse.class)
     public RestResponse listFlows(@Valid ListFlowCommand cmd) {
-    	
-		// cmd.setModuleType("any-module"); //默认的审批
-		// cmd.setModuleType("review_contract"); //发起审批
-		// cmd.setModuleType("denunciation_contract"); //合同退约
-		// cmd.setModuleType("change_contract"); //合同变更
-		// cmd.setModuleType("renew_contract"); //合同续约 	
-    	
         RestResponse response = new RestResponse(flowService.listBriefFlows(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

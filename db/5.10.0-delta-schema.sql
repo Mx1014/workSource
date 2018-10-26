@@ -16,7 +16,7 @@ ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFA
 
 -- AUTHOR: djm
 -- REMARK: 合同添加押金状态字段
-ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
+-- ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
 
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
