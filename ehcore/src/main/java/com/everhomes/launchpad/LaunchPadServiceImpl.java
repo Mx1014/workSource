@@ -3256,9 +3256,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
 					host = "app-management";
 					path = "/more";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
 					host = "app-management";
 					path = "/all";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}
 
 				//填充路由信息

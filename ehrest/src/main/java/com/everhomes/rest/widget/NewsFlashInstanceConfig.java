@@ -19,6 +19,10 @@ public class NewsFlashInstanceConfig implements Serializable  {
     
     private Integer newsSize;
 
+	private Long moduleId;
+
+	private Long appId;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -56,4 +60,19 @@ public class NewsFlashInstanceConfig implements Serializable  {
 		this.timeWidgetStyle = timeWidgetStyle;
 	}
 
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }
