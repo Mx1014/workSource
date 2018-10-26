@@ -1002,7 +1002,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	private Long getAppOriginId() {
 		List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
-				2, 
+				UserContext.getCurrentNamespaceId(), 
 				ServiceModuleConstants.PARKING_MODULE, 
 				null, null, null);
 		
