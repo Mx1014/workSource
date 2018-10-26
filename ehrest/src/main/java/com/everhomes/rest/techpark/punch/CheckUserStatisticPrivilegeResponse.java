@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>queryPrivilege: 是否有查询统计权限 1是 0否</li>
  * <li>deptName: 部门经理- 部门名称</li>
  * <li>deptId: 部门经理- 部门id</li>
+ * <li>hasSubDpts: 是否有下级部门,0-否 1-是 只有部门经理有这个字段</li>
  * </ul>
  */
 public class CheckUserStatisticPrivilegeResponse {
@@ -15,7 +16,7 @@ public class CheckUserStatisticPrivilegeResponse {
     private Byte queryPrivilege;
     private String deptName;
     private Long deptId;
-
+    private Byte hasSubDpts;
     public Byte getAdminFlag() {
         return adminFlag;
     }
@@ -52,5 +53,13 @@ public class CheckUserStatisticPrivilegeResponse {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getHasSubDpts() {
+		return hasSubDpts;
+	}
+
+	public void setHasSubDpts(Byte hasSubDpts) {
+		this.hasSubDpts = hasSubDpts;
+	}
 
 }
