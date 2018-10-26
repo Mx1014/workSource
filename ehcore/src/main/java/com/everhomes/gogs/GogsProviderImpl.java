@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +67,37 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
             return;
         }
         init();
+
+        getOrCreateOrganization();
+    }
+
+    private void getOrCreateOrganization() {
+        try {
+            String api = String.format("/orgs/%s", gogsAdmin);
+            ResponseEntity<GogsOrganization> response = restCall(HttpMethod.GET, api, null, GogsOrganization.class);
+            if (response.getBody() == null) {
+                throw new GogsNotExistException(GogsServiceErrorCode.SCOPE, GogsServiceErrorCode.ERROR_NOT_EXIST,
+                        "org or repo or file not exist");
+            }
+        } catch (GogsNotExistException e) {
+            // "username": "gogs2",
+            // "full_name": "Gogs2",
+            // "description": "Gogs is a painless self-hosted Git Service.",
+            // "website": "https://gogs.io",
+            // "location": "USA"
+
+            Map<String, String> param = new HashMap<>(1);
+            param.put("username", gogsAdmin);
+
+            String api = String.format("/admin/users/%s/orgs", "zuolin");
+            try {
+                restCall(HttpMethod.POST, api, param, GogsOrganization.class);
+            } catch (Exception e1) {
+                LOGGER.warn("Gogs create organization failed. {}", e.getMessage());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Gogs get organization failed. {}", e.getMessage());
+        }
     }
 
     @Scheduled(fixedRate = 10 * 60 * 1000L)
@@ -80,9 +110,9 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     // POST /admin/users/:username/repos
     @Override
     public <T> T createRepo(CreateGogsRepoParam param, Class<T> type) {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         String api = String.format("/admin/users/%s/repos", gogsAdmin);
         ResponseEntity<String> response = restCall(HttpMethod.POST, api, param, String.class);
         return GsonUtil.fromJson(response.getBody(), type);
@@ -91,9 +121,9 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     // GET /repos/:username/:reponame/objects/:ref/:path
     @Override
     public <T> List<T> listObjects(String repoName, String path, GogsRawFileParam param, Type type) {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         String api = String.format("/repos/%s/%s/objects/%s/%s", gogsAdmin, repoName, "master", path);
         ResponseEntity<String> response = restCall(HttpMethod.GET, api, param, String.class);
         return GsonUtil.fromJson(response.getBody(), type);
@@ -101,10 +131,10 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
 
     // GET /repos/:username/:reponame/commits/:ref/:path
     @Override
-    public <T> List<T> listCommits(String repoName, String path, GogsPaginationParam param, Type type) throws GogsFileNotExistException {
-		if (gogsAdmin.length() == 0) {
-			init();
-		}
+    public <T> List<T> listCommits(String repoName, String path, GogsPaginationParam param, Type type) throws GogsNotExistException {
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         String api = String.format("/repos/%s/%s/commits/%s/%s", gogsAdmin, repoName, "master", path);
         ResponseEntity<String> response = restCall(HttpMethod.GET, api, param, String.class);
 
@@ -120,20 +150,20 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
 
     // DELETE /repos/:username/:reponame/raw/:ref/:path
     @Override
-    public GogsCommit deleteFile(String repoName, String path, GogsRawFileParam param) throws GogsFileNotExistException {
+    public GogsCommit deleteFile(String repoName, String path, GogsRawFileParam param) throws GogsNotExistException {
         return rawFile(HttpMethod.DELETE, repoName, path, param, GogsCommit.class);
     }
 
     // GET /repos/:username/:reponame/raw/:ref/:path
     @Override
-    public byte[] getFile(String repoName, String path, GogsRawFileParam param) throws GogsFileNotExistException {
+    public byte[] getFile(String repoName, String path, GogsRawFileParam param) throws GogsNotExistException {
         return rawFile(HttpMethod.GET, repoName, path, param, byte[].class);
     }
 
     private <T> T rawFile(HttpMethod method, String repoName, String path, GogsRawFileParam param, Class<T> type) {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         if (param != null && param.getTreePath() == null) {
             param.setTreePath(path);
         }
@@ -145,9 +175,9 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     // GET /repos/:username/:reponame/archive/:ref:format
     @Override
     public byte[] downloadArchive(String repoName) {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         String api = String.format("/repos/%s/%s/archive/%s.%s", gogsAdmin, repoName, "master", "zip");
         ResponseEntity<byte[]> response = restCall(HttpMethod.GET, api, null, byte[].class);
         return response.getBody();
@@ -156,39 +186,35 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
     // POST /repos/:username/:reponame/hooks
     @Override
     public <T> T createHook(String repoName, CreateGogsHookParam param, Class<T> type) {
-    	if (gogsAdmin.length() == 0) {
-    		init();
-    	}
+        if (gogsAdmin.length() == 0) {
+            init();
+        }
         String api = String.format("/repos/%s/%s/hooks", gogsAdmin, repoName);
         ResponseEntity<T> response = restCall(HttpMethod.POST, api, param, type);
         return response.getBody();
     }
 
     private <T> ResponseEntity<T> restCall(HttpMethod method, String api, Object param, Class<T> responseType) {
-        try {
-            String body = param != null ? StringHelper.toJsonString(param) : "";
-            URI uri = new URI(gogsServer + api);
+        String body = param != null ? StringHelper.toJsonString(param) : "";
+        URI uri = URI.create(gogsServer + api);
 
-            if (method == HttpMethod.GET) {
-                uri = buildURI(param, uri);
-                body = "";
-            }
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.put(HttpHeaders.AUTHORIZATION, Collections.singletonList("token " + gogsToken));
-            headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_UTF8.toString()));
-
-            RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, method, uri);
-            ResponseEntity<T> responseEntity = restTemplate.exchange(requestEntity, responseType);
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("gogs rest call, request = {}", requestEntity.toString());
-                LOGGER.debug("gogs rest call, response = {}", responseEntity.toString());
-            }
-            return responseEntity;
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("URI syntax exception", e);
+        if (method == HttpMethod.GET) {
+            uri = buildURI(param, uri);
+            body = "";
         }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.put(HttpHeaders.AUTHORIZATION, Collections.singletonList("token " + gogsToken));
+        headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_UTF8.toString()));
+
+        RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, method, uri);
+        ResponseEntity<T> responseEntity = restTemplate.exchange(requestEntity, responseType);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("gogs rest call, request = {}", requestEntity.toString());
+            LOGGER.debug("gogs rest call, response = {}", responseEntity.toString());
+        }
+        return responseEntity;
     }
 
     private URI buildURI(Object param, URI uri) {
@@ -216,7 +242,7 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
         }
 
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(param.getClass() ,Object.class);
+            BeanInfo beanInfo = Introspector.getBeanInfo(param.getClass(), Object.class);
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 
             Map<String, Object> values = new HashMap<>(propertyDescriptors.length);
@@ -233,33 +259,33 @@ public class GogsProviderImpl implements GogsProvider, ApplicationListener<Conte
         return new HashMap<>(0);
     }
 
-    private static class ErrorHandler implements ResponseErrorHandler{
+    private static class ErrorHandler implements ResponseErrorHandler {
         @Override
         public boolean hasError(ClientHttpResponse response) throws IOException {
-            return response.getStatusCode().series()  == HttpStatus.Series.SERVER_ERROR
+            return response.getStatusCode().series() == HttpStatus.Series.SERVER_ERROR
                     || response.getStatusCode().series() == HttpStatus.Series.CLIENT_ERROR;
         }
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
             StringBuilder sb = new StringBuilder();
-			try {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()));
-				String line;
-				while ((line = reader.readLine()) != null) {
-				    sb.append(line);
-				}
-			} catch (Exception e) {
-				LOGGER.error("Gogs rest call getBody error.", e);
-			}
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Gogs rest call getBody error.", e);
+            }
             LOGGER.error("Gogs rest call error: {}", sb.toString());
             switch (response.getStatusCode()) {
                 case CONFLICT:
                     throw new GogsConflictException(GogsServiceErrorCode.SCOPE, GogsServiceErrorCode.ERROR_CONFLICT,
                             "conflict");
                 case NOT_FOUND:
-                    throw new GogsFileNotExistException(GogsServiceErrorCode.SCOPE, GogsServiceErrorCode.ERROR_NOT_EXIST,
-                            "file not exist");
+                    throw new GogsNotExistException(GogsServiceErrorCode.SCOPE, GogsServiceErrorCode.ERROR_NOT_EXIST,
+                            "org or repo or file not exist");
                 default:
                     throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                             "unexpected error from gogs, error = %s", sb.toString());
