@@ -76,7 +76,6 @@ public interface FlowEventLogProvider {
 
     List<FlowEventLog> findCurrentNodeNotCompleteEnterLogs(Long nodeId, Long caseId, Long stepCount);
 
-    /**
     List<FlowEventLog> findNodeEnterLogs(Long nodeId, Long caseId, Long stepCount);
 
 	/**
