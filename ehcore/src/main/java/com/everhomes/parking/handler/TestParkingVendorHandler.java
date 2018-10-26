@@ -149,14 +149,18 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		boolean notifyresult = configProvider.getBooleanValue("parking.test.notifyresult", true);
 		ParkingCardRequest request;
-		if (null != order.getCardRequestId()) {
-            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
-
-        }else {
-            request = getParkingCardRequestByOrder(order);
-            order.setCardRequestId(request.getId()); //补上id
+		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+			if (order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+				if (null != order.getCardRequestId()) {
+		            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+		
+		        }else {
+		            request = getParkingCardRequestByOrder(order);
+		            order.setCardRequestId(request.getId()); //补上id
+		        }
+		        updateFlowStatus(request);
+		    }
         }
-        updateFlowStatus(request);
 		return notifyresult;
 
 	}
