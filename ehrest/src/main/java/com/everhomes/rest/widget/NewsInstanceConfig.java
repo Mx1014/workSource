@@ -17,6 +17,10 @@ public class NewsInstanceConfig implements Serializable  {
     
     private String timeWidgetStyle ;
 
+	private Long moduleId;
+
+	private Long appId;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -46,4 +50,19 @@ public class NewsInstanceConfig implements Serializable  {
 		this.timeWidgetStyle = timeWidgetStyle;
 	}
 
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }

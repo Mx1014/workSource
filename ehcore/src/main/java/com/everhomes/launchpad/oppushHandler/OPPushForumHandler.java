@@ -82,7 +82,7 @@ public class OPPushForumHandler implements OPPushHandler{
         }
         listTopicCommand.setVisibilityScope(VisibilityScope.COMMUNITY.getCode());
         listTopicCommand.setCommunityId(context.getCommunityId());
-        listTopicCommand.setPageSize(config.getEntityCount());
+        listTopicCommand.setPageSize(config.getNewsSize());
         List<Long> excludeCategories = new ArrayList<>();
         excludeCategories.add(1010L);
         listTopicCommand.setExcludeCategories(excludeCategories);
