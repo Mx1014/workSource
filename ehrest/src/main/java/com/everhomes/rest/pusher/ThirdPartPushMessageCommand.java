@@ -4,10 +4,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>identifierToken:token</li>
- * <li>content:消息文本</li>
+ * <li>identifierToken:手机号</li>
+ * <li>routeName:路线名称</li>
+ * <li>nextStation:下一站名称</li>
  * <li>msgType:消息类型：1，只发应用内消息；2，只推送；3，同时推送兼发应用内消息</li>
- * <li>namespaceId:用户域id</li>
+ * <li>appkey: (必填)appkey</li>
+ * <li>appsecret: 应用密钥AppSecret</li>
  * </ul>
  * 
  * @author moubinmo
@@ -16,10 +18,11 @@ import com.everhomes.util.StringHelper;
 
 public class ThirdPartPushMessageCommand {
 	private String identifierToken;
-	private String content;
+	private String routeName;
+	private String nextStation;
 	private Integer msgType;
-	private Integer namespaceId;
-	
+	private String appkey;
+	private String appsecret;
 	
 	public String getIdentifierToken() {
 		return identifierToken;
@@ -27,11 +30,17 @@ public class ThirdPartPushMessageCommand {
 	public void setIdentifierToken(String identifierToken) {
 		this.identifierToken = identifierToken;
 	}
-	public String getContent() {
-		return content;
+	public String getRouteName() {
+		return routeName;
 	}
-	public void setContent(String content) {
-		this.content = content;
+	public void setRouteName(String routeName) {
+		this.routeName = routeName;
+	}
+	public String getNextStation() {
+		return nextStation;
+	}
+	public void setNextStation(String nextStation) {
+		this.nextStation = nextStation;
 	}
 	public Integer getMsgType() {
 		return msgType;
@@ -39,13 +48,18 @@ public class ThirdPartPushMessageCommand {
 	public void setMsgType(Integer msgType) {
 		this.msgType = msgType;
 	}
-    public Integer getNamespaceId() {
-		return namespaceId;
+	public String getAppkey() {
+		return appkey;
 	}
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
+	public void setAppkey(String appkey) {
+		this.appkey = appkey;
 	}
-	
+	public String getAppsecret() {
+		return appsecret;
+	}
+	public void setAppsecret(String appsecret) {
+		this.appsecret = appsecret;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

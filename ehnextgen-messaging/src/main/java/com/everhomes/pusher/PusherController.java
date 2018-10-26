@@ -32,6 +32,7 @@ import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartResponseMessage;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -257,7 +258,7 @@ public class PusherController extends ControllerBase {
      * @return
      * */
     @RequestMapping("thirdPartPushMessage")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ThirdPartResponseMessage.class)
     public RestResponse thirdPartPushMessage(@Valid ThirdPartPushMessageCommand cmd){
     	 RestResponse response = new RestResponse();
          response.setResponseObject(pusherService.thirdPartPushMessage(cmd));
