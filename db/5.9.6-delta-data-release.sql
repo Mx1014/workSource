@@ -158,6 +158,10 @@ DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  --删除该存储过程
 -- 迁移 end
 
 
+-- AUTHOR:黄明波
+-- REMARK:云打印账号迁移
+update eh_siyin_print_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
+
 
 
 -- AUTHOR:杨崇鑫 20181018
