@@ -153,7 +153,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
             builder.field("partyAId", contract.getPartyAId());
-            builder.field("depositStatus", contract.getDepositStatus());
+            //builder.field("depositStatus", contract.getDepositStatus());
             if(contract.getPaymentFlag() == null){
                 builder.field("paymentFlag", 0);
             }else{
