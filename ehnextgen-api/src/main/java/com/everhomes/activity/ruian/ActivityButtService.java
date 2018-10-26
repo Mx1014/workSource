@@ -14,6 +14,6 @@ public interface ActivityButtService {
 
     public ActivityDetailModel getActivityDetail(Integer namespaceId, Long communityId , Long activityId);
 
-    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene();
+    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene(Integer size);
 
 }

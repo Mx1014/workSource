@@ -50,13 +50,14 @@ public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
     @Autowired
     private ActivityButtService activityButtService ;
 
-    private final String defaultUrl = "https://m.mallcoo.cn/a/custom/10764/xtd/activitylist";
+    private final String DEFAULT_URL = "https://m.mallcoo.cn/a/custom/10764/xtd/activitylist";
+    private final String DEFAULT_MALLID = "10764";
 
     @Override
     public boolean checkUrl(Object instanceConfig) {
         //客户端传来的url应该长这个样子：
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        String url = configProvider.getValue(namespaceId,"mall.ruian.url.activity", defaultUrl) ;
+        String url = configProvider.getValue(namespaceId,"mall.ruian.url.activity", DEFAULT_URL) ;
         LOGGER.info("checkUrl　get defaultUrl :{}",url);
         OPPushUrlInstanceConfig config = (OPPushUrlInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushUrlInstanceConfig.class);
         if(config == null){
@@ -73,7 +74,9 @@ public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
     @Override
     public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
 
-        ListRuianActivityBySceneReponse res = activityButtService.listActivityRuiAnEntitiesByScene();
+        OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
+        Integer size  = config.getNewsSize()==null?3:config.getNewsSize();
+        ListRuianActivityBySceneReponse res = activityButtService.listActivityRuiAnEntitiesByScene(size);
 
         List<OPPushCard> listCards = new ArrayList<>();
         if(res != null && res.getEntities() != null){
@@ -97,6 +100,31 @@ public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
 
     @Override
     public String refreshInstanceConfig( String instanceConfig) {
-        return null;
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String url = configProvider.getValue(namespaceId,"mall.ruian.url.activity", DEFAULT_URL) ;
+        OPPushUrlInstanceConfig config = (OPPushUrlInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushUrlInstanceConfig.class);
+        if(config == null){
+            LOGGER.info("checkUrl　OPPushUrlInstanceConfig is null");
+            return instanceConfig;
+        }
+        LOGGER.info("checkUrl　get OPPushUrlInstanceConfig :{}",config.getUrl());
+        String str = "ruian.mall.id";
+        AppContext appContext = UserContext.current().getAppContext();
+        Long communityId = null;
+        if(appContext != null){
+            communityId = appContext.getCommunityId() ;
+        }
+
+        if(communityId != null && communityId != 0){
+            str = str + "."+ communityId ;
+        }
+
+        if(url.equals(config.getUrl())){//检测链接一致则返回true
+            String mallId = configProvider.getValue(namespaceId,str, DEFAULT_MALLID) ;
+            //https://m.mallcoo.cn/a/custom/10764/xtd/activitylist
+            instanceConfig =  instanceConfig.replace("10764",mallId);
+            return instanceConfig;
+        }
+        return instanceConfig;
     }
 }

@@ -134,7 +134,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
     }
 
     @Override
-    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene() {
+    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene(Integer size) {
         //先查询出所有分类
         //List<ActivityCategoryModel> cateGorys = this.getCategoryList(null , null);
         //获取活动列表
@@ -143,7 +143,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         if(appContext != null){
             communityId = appContext.getCommunityId() ;
         }
-        List<ActivityModel> activitys = this.getActivityList(null, communityId,null, null, null, 10, 1);
+        List<ActivityModel> activitys = this.getActivityList(null, communityId,null, null, null, size, 1);
         ListRuianActivityBySceneReponse res = new ListRuianActivityBySceneReponse();
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
