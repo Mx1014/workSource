@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.jooq.tools.StringUtils;
 import org.json.simple.parser.ParseException;
@@ -63,13 +62,20 @@ import com.everhomes.rest.messaging.DeviceMessage;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartResponseMessage;
 import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
@@ -127,6 +133,12 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Autowired
     PusherVendorService pusherVendorService;
+    
+    @Autowired
+    UserProvider userProvider;
+    
+    @Autowired
+    UserService userService;
     
     /**
      * add by huanglm for IOS pusher update
@@ -864,4 +876,50 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     	}
     	
     }
+    
+    /**
+     * 第三方调用发送消息，add by moubinmo
+     * */
+	@Override
+	public ThirdPartResponseMessage thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
+		// 1.验证接受者在左邻系统是否存在(tocken/namespace确定一个用户)
+		UserIdentifier u = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getIdentifierToken(),cmd.getNamespaceId());
+		
+		// 2.响应内容
+		ThirdPartResponseMessage response = new ThirdPartResponseMessage();
+		
+		if(u != null){
+			// 3.1 找到该用户信息
+		    List<UserLogin> logins = userService.listUserLogins(u.getOwnerUid());
+	        
+		    for (UserLogin login : logins) {
+		    	// 3.2 消息构造
+		    	Message msg = new Message();
+		    	msg.setAppId(AppConstants.APPID_MESSAGING);
+		    	msg.setSenderUid(User.SYSTEM_UID);
+		    	msg.setChannelToken(String.valueOf(login.getUserId()));
+		    	msg.setChannelType(MessageChannelType.USER.toString());
+		    	msg.setContent(cmd.getContent());
+		    	msg.setMetaAppId(AppConstants.APPID_MESSAGING);
+		    	msg.setCreateTime(System.currentTimeMillis());
+		    	msg.setNamespaceId(login.getNamespaceId());
+		        Map<String, String> meta = new HashMap<String, String>();
+		        meta.put("bodyType", "TEXT");
+		    	msg.setMeta(meta);
+		    	
+		    	// 3.3 根据 msgType 推送方式推送给用户
+	        	this.pushMessage(User.SYSTEM_USER_LOGIN, login, 0, msg);
+	        	
+	        	// 3.4 成功则返回标志位1
+	        	response.setCode(1);
+	        	response.setMsg("SUCCESS");
+	        	return response;
+	        }
+		}
+		
+		// 4 发送失败返回标志位0
+		response.setCode(2);
+		response.setMsg("FAIL");
+		return response;
+	}
 }
