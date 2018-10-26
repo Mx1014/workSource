@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *
+ * </ul>
+ */
 public class BannersInstanceConfig implements Serializable  {
 
 	/**
@@ -13,7 +18,17 @@ public class BannersInstanceConfig implements Serializable  {
 
     private String itemGroup;
 
-	@Override
+	private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
