@@ -296,8 +296,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 			rentRate = BigDecimal.ZERO;
 			freeRate = BigDecimal.ZERO;
 		}else {
-			rentRate = buildingStatistics.getRentArea().divide(buildingStatistics.getAreaSize()).multiply(new BigDecimal("100"));
-			freeRate = buildingStatistics.getFreeArea().divide(buildingStatistics.getAreaSize()).multiply(new BigDecimal("100"));
+			rentRate = buildingStatistics.getRentArea().divide(buildingStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+			freeRate = buildingStatistics.getFreeArea().divide(buildingStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 		}
 		buildingStatistics.setRentRate(rentRate);
 		buildingStatistics.setFreeRate(freeRate);
