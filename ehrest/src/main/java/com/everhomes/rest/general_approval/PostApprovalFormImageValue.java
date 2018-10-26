@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>uris: 图片的链接</li>
+ * <li>imageNames: 图片的名称</li>
  * </ul>
  * @author janson
  *
@@ -18,6 +19,7 @@ public class  PostApprovalFormImageValue {
 	
 	@ItemType(String.class)
 	private List<String> urls;
+	private List<String> imageNames;
 
 	public List<String> getUris() {
 		return uris;
@@ -33,6 +35,14 @@ public class  PostApprovalFormImageValue {
 
 	public void setUrls(List<String> urls) {
 		this.urls = urls;
+	}
+
+	public List<String> getImageNames() {
+		return imageNames;
+	}
+
+	public void setImageNames(List<String> imageNames) {
+		this.imageNames = imageNames;
 	}
 
 	@Override
