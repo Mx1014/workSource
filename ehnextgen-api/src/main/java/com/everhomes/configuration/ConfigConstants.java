@@ -223,4 +223,5 @@ public interface ConfigConstants {
     public static final String RUIAN_POINT_URL = "ruian.point.url";
     public static final String RUIAN_VIP_URL = "ruian.vip.url";
     public static final String RUIAN_ORDER_URL = "ruian.order.url";
+    public static final String RUIAN_COUPON_URL = "ruian.coupon.url";
 }

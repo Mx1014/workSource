@@ -142,7 +142,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 							LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider;
 							localBusSubscriber.onLocalBusMessage(null, "Parking-Recharge" + orderId, JSONObject.toJSONString(dto), null);
 
-							localBus.publish(this, "Parking-Recharge" + cmd.getBizOrderNum(), JSONObject.toJSONString(dto));
+							localBus.publish(this, "Parking-Recharge" + orderId, JSONObject.toJSONString(dto));
 						}
 					});
 				}

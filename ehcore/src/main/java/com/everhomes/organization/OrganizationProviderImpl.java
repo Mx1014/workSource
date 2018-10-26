@@ -536,6 +536,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             if(OrganizationTypeEnum.ENTERPRISE.getCode().equals(organizationType)){
                 query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())
                         .or(Tables.EH_ORGANIZATIONS.PM_FLAG.isNull()));
+                query.addConditions(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG.eq(TrueOrFalseFlag.FALSE.getCode())
+                        .or(Tables.EH_ORGANIZATIONS.SERVICE_SUPPORT_FLAG.isNull()));
             }else if(OrganizationTypeEnum.PM.getCode().equals(organizationType)){
                 query.addConditions(Tables.EH_ORGANIZATIONS.PM_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
             }else if(OrganizationTypeEnum.SERVICE.getCode().equals(organizationType)){
