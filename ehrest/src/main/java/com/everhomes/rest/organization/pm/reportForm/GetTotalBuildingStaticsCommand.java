@@ -3,7 +3,14 @@ package com.everhomes.rest.organization.pm.reportForm;
 import java.util.List;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ *<ul>
+ * 	<li>namespaceId</li>
+ *	<li>communityId</li>
+ *  <li>buildingIds：buildingId的数组</li>
+ *	<li>dateStr : 时间（传年份例子：2018，传月份例子：2018-07）</li>
+ *</ul>
+ */
 public class GetTotalBuildingStaticsCommand {
 	
 	private Integer namespaceId;

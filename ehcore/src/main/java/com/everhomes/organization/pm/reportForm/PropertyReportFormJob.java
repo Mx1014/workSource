@@ -1,6 +1,7 @@
 package com.everhomes.organization.pm.reportForm;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -67,27 +68,27 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	//定时统计园区数据的接口
 	public void generateReportFormStatics() {
 		
-		dbProvider.execute((TransactionStatus status) -> {
+		//dbProvider.execute((TransactionStatus status) -> {
 			//先删掉这个月的的统计数据
 			String todayDateStr = getTodayDateStr();
 			propertyReportFormProvider.deleteCommunityDataByDateStr(todayDateStr);
 			propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
 			
-			int pageSize = 100;
-//			int totalCount = addressProvider.getTotalApartmentCount();
-//			int totalPage = 0;
-//			if (totalCount%pageSize==0) {
-//				totalPage = totalCount/pageSize;
-//			}else {
-//				totalPage = totalCount/pageSize + 1;
-//			}
-			
-			int totalPage = 1;
+
+//			int totalPage = 2;
+			int pageSize = 500;
+			int totalCount = addressProvider.getTotalApartmentCount();
+			int totalPage = 0;
+			if (totalCount%pageSize==0) {
+				totalPage = totalCount/pageSize;
+			}else {
+				totalPage = totalCount/pageSize + 1;
+			}
 			
 			Map<Long, CommunityStatistics> communityResultMap = new HashMap<>();
 			Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
 			
-			for (int currentPage = 0; currentPage < totalPage; currentPage++) {
+			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
 				
 				long startTime = System.currentTimeMillis();
 				if (LOGGER.isDebugEnabled()) {
@@ -97,9 +98,9 @@ public class PropertyReportFormJob extends QuartzJobBean{
 				int startIndex = currentPage * pageSize;
 				List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
 				
-				if (currentPage != 0 && apartments != null && apartments.size() > 0) {
+				if (currentPage != 0 ) {
 					//插入园区信息统计数据
-					if (communityResultMap.containsKey(apartments.get(0).getCommunityId())) {
+					if (apartments != null && apartments.size() > 0 && communityResultMap.containsKey(apartments.get(0).getCommunityId())) {
 						CommunityStatistics remove = communityResultMap.remove(apartments.get(0).getCommunityId());
 						createCommunityStatics(communityResultMap);
 						communityResultMap.put(remove.getCommunityId(), remove);
@@ -107,7 +108,7 @@ public class PropertyReportFormJob extends QuartzJobBean{
 						createCommunityStatics(communityResultMap);
 					}
 					//插入楼宇信息统计数据
-					if (buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
+					if (apartments != null && apartments.size() > 0 && buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
 						BuildingStatistics remove = buildingResultMap.remove(apartments.get(0).getBuildingId());
 						createBuildingStatics(buildingResultMap);
 						buildingResultMap.put(remove.getBuildingId(), remove);
@@ -123,15 +124,21 @@ public class PropertyReportFormJob extends QuartzJobBean{
 						countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
 					}else{
 						CommunityStatistics communityStatistics = initCommunityStatistics(apartment.getCommunityId());
+						communityResultMap.put(apartment.getCommunityId(), communityStatistics);
 						countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
 					}
 					//楼宇信息统计数据
 					if (buildingResultMap.containsKey(apartment.getBuildingId())) {
-						BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
-						countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+						if (apartment.getBuildingId() != null) {
+							BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
+							countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+						}
 					}else{
-						BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
-						countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+						if(apartment.getBuildingId() != null){
+							BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
+							buildingResultMap.put(apartment.getBuildingId(), buildingStatistics);
+							countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+						}
 					}
 				}
 				
@@ -142,8 +149,8 @@ public class PropertyReportFormJob extends QuartzJobBean{
 				}
 				
 			}
-			return null;
-		});
+			//return null;
+		//});
 	}
 
 	private void createBuildingStatics(Map<Long, BuildingStatistics> buildingResultMap) {
@@ -246,12 +253,12 @@ public class PropertyReportFormJob extends QuartzJobBean{
 		
 		BigDecimal rentRate;
 		BigDecimal freeRate;
-		if (communityStatistics.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
+		if (communityStatistics.getAreaSize() == null || communityStatistics.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
 			rentRate = BigDecimal.ZERO;
 			freeRate = BigDecimal.ZERO;
 		}else {
-			rentRate = communityStatistics.getRentArea().divide(communityStatistics.getAreaSize()).multiply(new BigDecimal("100"));
-			freeRate = communityStatistics.getFreeArea().divide(communityStatistics.getAreaSize()).multiply(new BigDecimal("100"));
+			rentRate = communityStatistics.getRentArea().divide(communityStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+			freeRate = communityStatistics.getFreeArea().divide(communityStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 		}
 		communityStatistics.setRentRate(rentRate);
 		communityStatistics.setFreeRate(freeRate);

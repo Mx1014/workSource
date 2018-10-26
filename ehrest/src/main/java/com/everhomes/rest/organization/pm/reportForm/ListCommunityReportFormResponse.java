@@ -3,7 +3,12 @@ package com.everhomes.rest.organization.pm.reportForm;
 import java.util.List;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ *<ul>
+ * 	<li>resultList：结果集</li>
+ *	<li>nextPageAnchor</li>
+ *</ul>
+ */
 public class ListCommunityReportFormResponse {
 	
 	private List<CommunityReportFormDTO> resultList;

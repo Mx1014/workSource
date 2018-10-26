@@ -3,7 +3,28 @@ package com.everhomes.rest.organization.pm.reportForm;
 import java.math.BigDecimal;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ *<ul>
+ *	<li>communityCount：项目总数</li>
+ *	<li>buildingCount：楼宇总数</li>
+ *	<li>totalApartmentCount：房源总数</li>
+ *	<li>freeApartmentCount：待租房源数</li>
+ *	<li>rentApartmentCount：已出租房源数</li>
+ *	<li>occupiedApartmentCount：已占用房源数</li>
+ *	<li>livingApartmentCount：自用房源数</li>
+ *	<li>saledApartmentCount：已售房源数</li>
+ *	<li>areaSize：建筑面积(㎡)</li>
+ *	<li>rentArea：在租面积(㎡)</li>
+ *	<li>freeArea：可招租面积(㎡)</li>
+ *	<li>rentRate：出租率(%)</li>
+ *	<li>freeRate：空置率(%)</li>
+ *	<li>amountReceivable：应收含税金额(元)</li>
+ *	<li>amountReceived：已收金额(元)</li>
+ *	<li>amountOwed：待收金额(元)</li>
+ *	<li>dueDayCount：总欠费天数(天)</li>
+ *	<li>collectionRate：收缴率(%)</li>
+ *</ul>
+ */
 public class TotalCommunityStaticsDTO {
 	
 	private Long communityCount;

@@ -36,6 +36,7 @@ public class PropertyReportFormController extends ControllerBase{
 	@Autowired
 	private PropertyReportFormService propertyReportFormService;
 	
+	@Autowired
 	private PropertyReportFormJob propertyReportFormJob;
 	
 	/**
@@ -135,7 +136,5 @@ public class PropertyReportFormController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
     
 }

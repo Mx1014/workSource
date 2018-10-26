@@ -1,8 +1,11 @@
 package com.everhomes.organization.pm.reportForm;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +39,12 @@ import com.everhomes.server.schema.tables.EhBuildings;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhPropertyStatisticBuilding;
 import com.everhomes.server.schema.tables.EhPropertyStatisticCommunity;
+import com.everhomes.server.schema.tables.daos.EhInvestmentAdvertisementsDao;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticBuildingDao;
 import com.everhomes.server.schema.tables.daos.EhPropertyStatisticCommunityDao;
-import com.everhomes.server.schema.tables.records.EhPropertyStatisticCommunityRecord;
+import com.everhomes.server.schema.tables.pojos.EhInvestmentAdvertisements;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class PropertyReportFormProviderImpl implements PropertyReportFormProvider{
@@ -51,19 +57,21 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 
 	@Override
 	public void createBuildingStatistics(BuildingStatistics buildingStatistics) {
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(BuildingStatistics.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.pojos.EhPropertyStatisticBuilding.class));
+		EhPropertyStatisticBuildingDao dao = new EhPropertyStatisticBuildingDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPropertyStatisticBuilding.class));
 		buildingStatistics.setId(id);
 		buildingStatistics.setStatus(PropertyReportFormStatus.ACTIVE.getCode());
-		EhPropertyStatisticBuildingDao dao = new EhPropertyStatisticBuildingDao();
 		dao.insert(buildingStatistics);
 	}
 
 	@Override
 	public void createCommunityStatics(CommunityStatistics communityStatistics) {
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(CommunityStatistics.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.pojos.EhPropertyStatisticCommunity.class));
+		EhPropertyStatisticCommunityDao dao = new EhPropertyStatisticCommunityDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.pojos.EhPropertyStatisticCommunity.class));
 		communityStatistics.setId(id);
-		communityStatistics.setStatus(PropertyReportFormStatus.ACTIVE.getCode());
-		EhPropertyStatisticCommunityDao dao = new EhPropertyStatisticCommunityDao();
+		communityStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(communityStatistics);
 	}
 
@@ -231,7 +239,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
 		query.addFrom(a);
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(a.ID.in(communityIds));
+		query.addConditions(a.COMMUNITY_ID.in(communityIds));
 		query.addConditions(a.DATE_STR.eq(dateStr));
 		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
@@ -257,12 +265,12 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			
 			BigDecimal rentRate;
 			BigDecimal freeRate;
-			if (result.getAreaSize() == null && result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
+			if (result.getAreaSize() == null || result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
 				rentRate = BigDecimal.ZERO;
 				freeRate = BigDecimal.ZERO;
 			}else {
-				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
-				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 			}
 			result.setRentRate(rentRate);
 			result.setFreeRate(freeRate);
@@ -359,8 +367,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 				rentRate = BigDecimal.ZERO;
 				freeRate = BigDecimal.ZERO;
 			}else {
-				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
-				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize()).multiply(new BigDecimal("100"));
+				rentRate = (result.getRentArea()==null ? BigDecimal.ZERO : result.getRentArea()).divide(result.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+				freeRate = (result.getFreeArea()==null ? BigDecimal.ZERO : result.getFreeArea()).divide(result.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 			}
 			result.setRentRate(rentRate);
 			result.setFreeRate(freeRate);

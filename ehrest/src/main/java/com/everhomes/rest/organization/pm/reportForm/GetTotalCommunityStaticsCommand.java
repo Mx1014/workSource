@@ -4,6 +4,13 @@ import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ *<ul>
+ * 	<li>namespaceId</li>
+ *	<li>communityIds : communityId的数组</li>
+ *	<li>dateStr : 时间（传年份例子：2018，传月份例子：2018-07）</li>
+ *</ul>
+ */
 public class GetTotalCommunityStaticsCommand {
 	
 	private Integer namespaceId;
