@@ -69,7 +69,7 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
-import com.everhomes.rest.pusher.ThirdPartResponseMessage;
+import com.everhomes.rest.pusher.ThirdPartResponseMessageDTO;
 import com.everhomes.rest.rpc.server.DeviceRequestPdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.MessageChannelType;
@@ -905,7 +905,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	 * 第三方调用发送消息，add by moubinmo 20181026
 	 */
 	@Override
-	public ThirdPartResponseMessage thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
+	public ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
 		// 1.1 验证接受者在左邻系统是否存在,由 appkey/appsecret确定namespace
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
 		
@@ -914,7 +914,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				appNamespaceMapping.getNamespaceId());
 
 		// 2.响应内容
-		ThirdPartResponseMessage response = new ThirdPartResponseMessage();
+		ThirdPartResponseMessageDTO response = new ThirdPartResponseMessageDTO();
 
 		if (user != null) {
 			// 3.1 消息构造

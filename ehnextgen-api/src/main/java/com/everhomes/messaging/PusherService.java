@@ -9,6 +9,7 @@ import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartResponseMessage;
+import com.everhomes.rest.pusher.ThirdPartResponseMessageDTO;
 import com.everhomes.user.UserLogin;
 
 public interface PusherService {
@@ -24,6 +25,6 @@ public interface PusherService {
      */
     void  stophttp2Client(String bundleId);
     void flushHttp2ClientMaps();
-	ThirdPartResponseMessage thirdPartPushMessage(ThirdPartPushMessageCommand cmd);
+    ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd);
 
 }

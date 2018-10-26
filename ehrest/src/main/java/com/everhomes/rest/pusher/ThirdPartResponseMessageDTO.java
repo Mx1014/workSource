@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 
-public class ThirdPartResponseMessage {
+public class ThirdPartResponseMessageDTO {
 	private Integer code;
 	private String msg;
 	public Integer getCode() {
