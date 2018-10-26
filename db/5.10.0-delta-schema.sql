@@ -16,7 +16,7 @@ ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFA
 
 -- AUTHOR: djm
 -- REMARK: 合同添加押金状态字段
-ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 0-未缴, 2-已缴' AFTER deposit;
+-- ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
 
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
@@ -359,4 +359,13 @@ ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COM
 ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
 
 ALTER TABLE `eh_door_access` ADD COLUMN `adress_detail` varchar(64) NULL COMMENT '办公地点/楼栋_楼层' AFTER `address`;
+
+-- AUTHOR: 张智伟 20180914
+-- REMARK: ISSUE-37602 表单关联工作流节点
+ALTER TABLE eh_general_approval_vals ADD COLUMN flow_node_id BIGINT COMMENT '表单绑定的工作流节点ID' AFTER flow_case_id;
+ALTER TABLE eh_general_approval_vals ADD COLUMN creator_uid BIGINT COMMENT '创建人uid' AFTER create_time;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operator_uid BIGINT COMMENT '操作人Uid' AFTER creator_uid;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '编辑时间' AFTER operator_uid;
+
+ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
 
