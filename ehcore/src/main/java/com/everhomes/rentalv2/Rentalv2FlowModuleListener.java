@@ -452,7 +452,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
                 fileDTOS.add(fileDTO);
             }
             value.setFiles(fileDTOS);
-            e.setKey("显示内容");
+            e.setKey("查看附件");
             e.setValue(JSON.toJSONString(value));
             entities.add(e);
         }
