@@ -2855,68 +2855,10 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
-    private CustomerEntryInfoDTO convertCustomerEntryInfoDTO(OfficeSiteDTO entryInfo) {
-        CustomerEntryInfoDTO dto = ConvertHelper.convert(entryInfo, CustomerEntryInfoDTO.class);
-        entryInfo.getSiteDtos().forEach(r->r.getApartmentName());
-
-        if (dto.getAddressId() != null) {
-            Address address = addressProvider.findAddressById(dto.getAddressId());
-            // (old) only hook active address info
-            // (old) if (address != null && AddressAdminStatus.ACTIVE.equals(AddressAdminStatus.fromCode(address.getStatus()))) {
-            //hook every address info
-            if (address != null) {
-                dto.setAddressName(address.getAddress());
-                dto.setBuilding(address.getBuildingName());
-                dto.setAddressId(address.getId());
-                dto.setApartment(address.getApartmentName());
-                dto.setChargeArea(address.getChargeArea());
-                dto.setOrientation(address.getOrientation());
-
-                if (address.getStatus().byteValue() == AddressAdminStatus.ACTIVE.getCode()) {
-                    dto.setAddressExists((byte)1);
-                }else {
-                    dto.setAddressExists((byte)0);
-                }
-
-                if (address.getLivingStatus() == null) {
-                    CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(address.getId());
-                    if (mapping != null) {
-                        address.setLivingStatus(mapping.getLivingStatus());
-                    } else {
-                        address.setLivingStatus(AddressMappingStatus.LIVING.getCode());
-                    }
-                }
-                dto.setApartmentLivingStatus(address.getLivingStatus());
-
-                //issue-34394,添加buildingId信息，避免前端无法获取buildingId，导致没办法和楼栋门牌匹配上
-                dto.setBuildingId(address.getBuildingId());
-//                Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
-//                if(building != null) {
-//                    dto.setBuildingId(building.getId());
-//                }
-            }
-        }
-        return dto;
-    }
 
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
-        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        List<OfficeSiteDTO> workspaces = new ArrayList<>();
-        if(customer != null){
-            FindEnterpriseDetailCommand cmd2 = new FindEnterpriseDetailCommand();
-            cmd2.setOrganizationId(customer.getOrganizationId());
-            cmd2.setNamespaceId(customer.getNamespaceId());
-            OrganizationAndDetailDTO orgDTO = organizationService.getOrganizationDetailByOrgId(cmd2);
-            if(orgDTO != null && orgDTO.getOfficeSites() != null && orgDTO.getOfficeSites().size() > 0){
-                workspaces = orgDTO.getOfficeSites();
-            }
-        }
-
-        if(workspaces != null && workspaces.size() > 0){
-            return workspaces.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
-        }
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
         entryInfos = removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos.size() > 0) {
