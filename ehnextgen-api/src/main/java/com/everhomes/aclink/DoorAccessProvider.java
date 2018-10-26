@@ -49,7 +49,7 @@ public interface DoorAccessProvider {
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlace(DoorStatisticEhCommand cmd);
 
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlaceNew (DoorStatisticEhCommand cmd);
-//add bu liqingyan
+//add by liqingyan
     List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
 
     DoorAccess findDoorAccessById(Long id);
@@ -60,4 +60,12 @@ public interface DoorAccessProvider {
 
 	List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
 			ListDoorAccessGroupCommand cmd);
+	//门禁v3.0.2 创建自定义表单
+    Long createAclinkFormTitles(AclinkFormTitles form);
+
+    List<AclinkFormTitlesDTO> searchAclinkFormTitles (ListingLocator locator,Integer count,ListingQueryBuilderCallback queryBuilderCallback);
+
+    AclinkFormTitles findAclinkFormTitlesById (Long id);
+
+    Long updateAclinkFormTitles(AclinkFormTitles form);
 }

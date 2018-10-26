@@ -66,6 +66,26 @@ public class DoorAuthDTO {
     private String localAuthKey;
     private String qrString;
     private Byte rightOpen;
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    @ItemType(FaceRecognitionPhotoDTO.class)
+    FaceRecognitionPhotoDTO face;
+
+    public FaceRecognitionPhotoDTO getFace() {
+        return face;
+    }
+
+    public void setFace(FaceRecognitionPhotoDTO face) {
+        this.face = face;
+    }
 
     public String getAddress() {
         return address;

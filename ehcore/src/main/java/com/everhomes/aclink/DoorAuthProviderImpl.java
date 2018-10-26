@@ -269,7 +269,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             auth.setTotalAuthAmount(r.getValue(t.TOTAL_AUTH_AMOUNT));
             auth.setValidAuthAmount(r.getValue(t.VALID_AUTH_AMOUNT));
             auth.setDescription(r.getValue(t.DESCRIPTION));
-            
             return auth;
         });
 

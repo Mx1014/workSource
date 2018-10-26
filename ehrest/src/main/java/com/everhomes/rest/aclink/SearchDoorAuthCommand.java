@@ -11,6 +11,9 @@ import java.sql.Timestamp;
  * <ul>
  * <li>doorId: 门禁id</li>
  * <li>keyword: 搜索关键字，名称或电话号码模糊查询</li>
+ * <li>createTimeStart:创建时间起点</li>
+ * <li>createTimeEnd:创建时间终点</li>
+ * <li>userName:创建者姓名</li>
  * <li>status: 门禁授权状态，{@link com.everhomes.rest.aclink.DoorAuthStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页数量</li>

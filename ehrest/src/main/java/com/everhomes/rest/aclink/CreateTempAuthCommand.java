@@ -18,18 +18,18 @@ import javax.validation.constraints.NotNull;
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
  * <li>totalAuthAmount: 有效开门次数</li>
+ * <li>headImgUri:[String ]头像照片地址</li>
  * </ul>
- * @author janson
  *
  */
 public class CreateTempAuthCommand {
-    @NotNull
+
     private String phone;
     
-    @NotNull
+
     private Long     doorId;
     
-    @NotNull
+
     private Integer namespaceId;
 
     private String userName;
@@ -42,6 +42,7 @@ public class CreateTempAuthCommand {
 	private Long validEndMs;
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
+    private String headImgUri;
     
     public String getPhone() {
         return phone;
@@ -122,6 +123,12 @@ public class CreateTempAuthCommand {
 	public void setTotalAuthAmount(Integer totalAuthAmount) {
 		this.totalAuthAmount = totalAuthAmount;
 	}
+    public String getHeadImgUri() {
+        return headImgUri;
+    }
+    public void setHeadImgUri(String headImgUri) {
+        this.headImgUri = headImgUri;
+    }
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

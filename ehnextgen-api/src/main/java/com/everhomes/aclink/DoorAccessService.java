@@ -250,5 +250,10 @@ public interface DoorAccessService {
 	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
 
 	public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
+    //添加门禁自定义字段 add by liqingyan
+    void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd);
 
+    ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd);
+
+    AclinkFormTitlesDTO changeTempAuthCustomField (ChangeTempAuthCustomFieldCommand cmd);
 }

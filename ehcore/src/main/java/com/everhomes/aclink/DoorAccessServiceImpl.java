@@ -2300,6 +2300,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(auth.getId());
+            if(photo != null) {
+                FaceRecognitionPhotoDTO photoDTO = ConvertHelper.convert(photo, FaceRecognitionPhotoDTO.class);
+                if (photo.getSyncTime() != null && photo.getSyncTime().getTime() > photo.getOperateTime().getTime()) {
+                    photoDTO.setSyncStatus((byte) 1);
+                }
+                dto.setFace(photoDTO);
+            }
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
@@ -5770,7 +5778,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add bu liqingyan 添加临时授权
     @Override
     public DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd){
-	    return null;
+	    CreateLocalVistorCommand itemCmd = ConvertHelper.convert(cmd,CreateLocalVistorCommand.class);
+	    itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+        if(itemCmd.getValidEndMs() == null) {
+            if(cmd.getValidEndMs() == null){
+                itemCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+            }else{
+                itemCmd.setValidEndMs(cmd.getValidEndMs());
+            }
+        }
+        if(itemCmd.getValidFromMs() == null) {
+            if(cmd.getValidFromMs() == null){
+                itemCmd.setValidFromMs(System.currentTimeMillis());
+            }else{
+                itemCmd.setValidFromMs(cmd.getValidFromMs());
+            }
+        }
+        return createLocalVisitorAuth(itemCmd);
     }
 
 
@@ -6549,6 +6573,104 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 		return rsp;
 	}
+
+	@Override
+    public void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd){
+	    AclinkFormTitles form = new AclinkFormTitles();
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
+        form.setNamespaceId(namespaceId);
+	    form.setOwnerType(cmd.getOwnerType());
+	    form.setOwnerId(cmd.getOwnerId());
+	    form.setName(cmd.getName());
+	    form.setPath(cmd.getPath());
+	    form.setItemType(cmd.getType());
+	    if(cmd.getStatus() != null){
+            form.setStatus(cmd.getStatus());
+        }
+	    form.setCreatorUid(user.getId());
+	    form.setCreateTime(time);
+	    Long id = doorAccessProvider.createAclinkFormTitles(form);
+        //自定义字段为单选
+        if(cmd.getType()!= null && cmd.getType() == 2 && cmd.getItemName() != null && cmd.getItemName().size()>0){
+            for(String itemName:cmd.getItemName()){
+                if(itemName == null || itemName.length() <= 0)break;
+                AclinkFormTitles itemForm = new AclinkFormTitles();
+                itemForm.setNamespaceId(namespaceId);
+                itemForm.setOwnerType(cmd.getOwnerType());
+                itemForm.setOwnerId(cmd.getOwnerId());
+                itemForm.setName(itemName);
+                itemForm.setPath(id.toString());
+                itemForm.setItemType(AclinkFormTitlesItemType.NODE.getCode());
+                if(cmd.getStatus() != null){
+                    itemForm.setStatus(cmd.getStatus());
+                }
+                itemForm.setCreatorUid(user.getId());
+                itemForm.setCreateTime(time);
+                doorAccessProvider.createAclinkFormTitles(itemForm);
+            }
+        }
+    }
+
+    @Override
+    public ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd){
+        ListingLocator locator = new ListingLocator();
+        int count = 0;
+	    ListTempAuthCustomFieldResponse resp = new ListTempAuthCustomFieldResponse();
+	    List<AclinkFormTitlesDTO> dtos = doorAccessProvider.searchAclinkFormTitles(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                SelectQuery<? extends Record> query) {
+                if(cmd.getNamespaceId() != null){
+                    query.addConditions(Tables.EH_ACLINK_FORM_TITLES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                }
+                if(cmd.getOwnerId() != null){
+                    query.addConditions(Tables.EH_ACLINK_FORM_TITLES.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+                if(cmd.getOwnerType() != null){
+                    query.addConditions(Tables.EH_ACLINK_FORM_TITLES.OWNER_TYPE.eq(cmd.getOwnerType()));
+                }
+                return query;
+            }
+        });
+
+        List<AclinkFormTitlesDTO> newDto = new ArrayList<AclinkFormTitlesDTO>();
+        for(AclinkFormTitlesDTO dto: dtos){
+            if(dto.getPath() == null || dto.getPath().length() <=0){
+                List<AclinkFormTitlesDTO> newDto1 = new ArrayList<AclinkFormTitlesDTO>();
+                for(AclinkFormTitlesDTO dto1: dtos){
+                    if(dto1.getPath() !=null && dto1.getPath().equals(dto.getId().toString())){
+                        newDto1.add(dto1);
+                    }
+                }
+                dto.setDto(newDto1);
+                newDto.add(dto);
+            }
+        }
+        resp.setDto(newDto);
+        return resp;
+//	    resp.setDto(dtos);
+//	    return resp;
+    }
+
+    @Override
+    public AclinkFormTitlesDTO changeTempAuthCustomField (ChangeTempAuthCustomFieldCommand cmd){
+	    AclinkFormTitles form =doorAccessProvider.findAclinkFormTitlesById(cmd.getId());
+        User user = UserContext.current().getUser();
+        Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
+	    if(cmd.getName() != null && cmd.getName().length() >0){
+	        form.setName(cmd.getName());
+        }
+        if(cmd.getStatus() != null){
+            form.setStatus(cmd.getStatus());
+        }
+	    form.setOperateTime(time);
+	    form.setOperatorUid(user.getId());
+	    doorAccessProvider.updateAclinkFormTitles(form);
+        return ConvertHelper.convert(form,AclinkFormTitlesDTO.class);
+    }
 	
 	private ListAuthsByLevelandLocationCommand getLevelQryCmdByUser(User user){
 		GetUserDefaultAddressCommand addressCmd = new GetUserDefaultAddressCommand();

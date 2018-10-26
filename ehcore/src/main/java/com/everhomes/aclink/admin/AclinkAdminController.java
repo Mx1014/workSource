@@ -365,7 +365,55 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("createTempAuth")
     @RestReturn(value=String.class)
     public RestResponse createTempAuth (@Valid CreateTempAuthCommand cmd){
-        return null;
+        RestResponse response = new RestResponse();
+        doorAccessService.createTempAuth(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /admin/aclink/createTempAuthCustomField</b>
+     * <p>创建临时授权自定义字段</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createTempAuthCustomField")
+    @RestReturn(value=String.class)
+    public RestResponse createTempAuthCustomField (@Valid CreateTempAuthCustomFieldCommand cmd){
+        RestResponse response = new RestResponse();
+        doorAccessService.createTempAuthCustomField(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listTempAuthCustomField</b>
+     * <p>查询临时授权自定义字段</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listTempAuthCustomField")
+    @RestReturn(value=ListTempAuthCustomFieldResponse.class)
+    public RestResponse listTempAuthCustomField (@Valid ListTempAuthCustomFieldCommand cmd){
+        RestResponse response = new RestResponse();
+        response.setResponseObject(doorAccessService.listTempAuthCustomField(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/changeTempAuthCustomField</b>
+     * <p>修改临时授权自定义字段</p>
+     * @return OK 成功
+     */
+    @RequestMapping("changeTempAuthCustomField")
+    @RestReturn(value=String.class)
+    public RestResponse listTempAuthCustomField (@Valid ChangeTempAuthCustomFieldCommand cmd){
+        RestResponse response = new RestResponse();
+        doorAccessService.changeTempAuthCustomField(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 
