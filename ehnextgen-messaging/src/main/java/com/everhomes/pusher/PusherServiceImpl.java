@@ -910,9 +910,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
 		
 		// 1.2(tocken/namespace确定一个用户)
-		UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getIdentifierToken(),
-				appNamespaceMapping.getNamespaceId());
-
+		UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getIdentifierToken(),appNamespaceMapping.getNamespaceId());
+		LOGGER.debug("appNamespaceMapping : "+appNamespaceMapping.toString());
+		
 		// 2.响应内容
 		ThirdPartResponseMessageDTO response = new ThirdPartResponseMessageDTO();
 
@@ -925,12 +925,28 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setCreateTime(System.currentTimeMillis());
 			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-			messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好乘车准备！"));
-			LOGGER.debug("调用第三方信息推送接口： "+messageDto.toString());
+			if(cmd.getMsgType() == 1){
+				messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好乘车准备！"));				
+			}else if(cmd.getMsgType() == 2){
+				messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好下车准备！"));				
+			}else{
+				messageDto.setBody("班车信息类型有误，请稍后重试！");
+				response.setCode(3);
+				response.setMsg("FAIL");
+				return response;
+			}
+			
+			if(cmd.getMsgSendType() > 3 || cmd.getMsgSendType() < 1){
+				response.setCode(4);
+				response.setMsg("FAIL");
+				return response;
+			}
+			
 			
 			// 3.2 根据 msgType 推送方式推送给用户
 			messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,
-					ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, cmd.getMsgType());
+					ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, cmd.getMsgSendType());
+			LOGGER.debug("调用第三方信息推送接口： "+messageDto.toString());
 			
 			// 3.3 成功则返回标志位1
 			response.setCode(1);
