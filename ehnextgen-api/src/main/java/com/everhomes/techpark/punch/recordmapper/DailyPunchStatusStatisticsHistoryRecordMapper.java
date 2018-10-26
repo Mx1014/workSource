@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch.recordmapper;
 
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
 import com.everhomes.util.StringHelper;
+
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
@@ -18,15 +19,19 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.FORGOT_PUNCH)
     private Integer forgotPunchMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.NORMAL)
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+    
+    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.NORMAL)
     private Integer normalMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 6, type = PunchStatusStatisticsItemType.CHECKING)
+    @PunchStatusStatisticsItem(defaultOrder = 7, type = PunchStatusStatisticsItemType.CHECKING)
     private Integer checkingMemberCount;
 
-    @PunchStatusStatisticsItem(defaultOrder = 7, type = PunchStatusStatisticsItemType.REST)
+    @PunchStatusStatisticsItem(defaultOrder = 8, type = PunchStatusStatisticsItemType.REST)
     private Integer restMemberCount;
 
+    
     public Integer getBelateMemberCount() {
         return belateMemberCount;
     }
@@ -93,6 +98,7 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
         data.setNormalMemberCount(record.getValue("normalMemberCount", Integer.class));
         data.setRestMemberCount(record.getValue("restMemberCount", Integer.class));
         data.setCheckingMemberCount(record.getValue("checkingMemberCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         return data;
     }
 
@@ -100,4 +106,12 @@ public class DailyPunchStatusStatisticsHistoryRecordMapper implements RecordMapp
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getGoOutPunchDayCount() {
+		return goOutPunchDayCount;
+	}
+
+	public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+		this.goOutPunchDayCount = goOutPunchDayCount;
+	}
 }

@@ -474,5 +474,21 @@ public interface PunchProvider {
 	void updatePunchNotification(PunchNotification punchNotification);
 
 	int deleteAllPunchNotificationsBeforeDate(Date beforePunchDate);
- 
+
+	Integer countPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			String queryByMonth);
+
+	Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			java.util.Date queryDate);
+
+	void createPUnchGoOutLog(PunchGoOutLog log);
+
+	PunchGoOutLog findPunchGoOutLogById(Long id);
+
+	void updatePunchGoOutLog(PunchGoOutLog log);
+
+	Byte processGoOutPunchFlag(Date punchDate, Long targetId);
+
+	List<PunchGoOutLog> listPunchGoOutLogs(Long userId, Long enterpriseId,
+			java.sql.Date pDate);
 }
