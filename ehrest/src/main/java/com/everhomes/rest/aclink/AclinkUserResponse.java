@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>users:用户{@link com.everhomes.rest.aclink.AclinkUserDTO}</li>
  * <li>nextPageAnchor:下一页锚点</li>
+ * <li>若用户无权限，抛出异常"errorCode":100055,"errorDescription":"校验应用权限失败"</li>
  * </ul>
  */
 public class AclinkUserResponse {

@@ -36,10 +36,12 @@ import com.everhomes.discover.ItemType;
  * <li>enableAmount:门禁是否允许授权按次开门，1是0否{@link com.everhomes.rest.aclink.DoorAuthEnableAmount}</li>
  * <li>enableDuration:门禁是否允许授权按时间开门，1是0否</li>
  * <li>server：门禁关联服务器{@link com.everhomes.rest.aclink.AclinkServerDTO}</li>
+ * <li>recDevices:门禁关联人脸识别设备(ipad,摄像头,前端都算作摄像头){@link com.everhomes.rest.aclink.AclinkServerRelDTO}</li>
  * <li>hasQr:门禁是否支持二维码0否1是</li>
  * <li>maxDuration:访客授权最长有效期</li>
  * <li>maxCount:访客授权最大次数</li>
  * <li>defualtInvalidDuration:按次开门授权默认有效期</li>
+ * <li>useCustomAuthConfig:是否启用自定义授权规则</li>
  * </ul>
  * @author janson
  *
@@ -72,15 +74,43 @@ public class DoorAccessDTO {
     private Byte enableAmount;
     private Byte enableDuration;
     private AclinkServerDTO server;
+    private List<AclinkServerRelDTO> recDevices;
     private String localUUid;
     private String localAesKey;
     private Long localServerId;
     private Byte hasQr;
     private Integer maxDuration;
     private Integer maxCount;
+    private Byte useCustomAuthConfig;
     private Integer defualtInvalidDuration;
 
-    public Byte getEnableDuration() {
+
+
+	public Byte getUseCustomAuthConfig() {
+		return useCustomAuthConfig;
+	}
+
+
+
+	public void setUseCustomAuthConfig(Byte useCustomAuthConfig) {
+		this.useCustomAuthConfig = useCustomAuthConfig;
+	}
+
+
+
+	public List<AclinkServerRelDTO> getRecDevices() {
+		return recDevices;
+	}
+
+
+
+	public void setRecDevices(List<AclinkServerRelDTO> recDevices) {
+		this.recDevices = recDevices;
+	}
+
+
+
+	public Byte getEnableDuration() {
 		return enableDuration;
 	}
 

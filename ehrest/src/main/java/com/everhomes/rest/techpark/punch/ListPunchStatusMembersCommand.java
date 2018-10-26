@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId: 总公司ID，必填</li>
+ * <li>appId: 应用id</li>
  * <li>departmentId: 查询的部门，必填</li>
  * <li>queryByDate: 查询的统计日期，日期时间戳，空值时默认当天，和queryByMonth二选一</li>
  * <li>queryByMonth: 查询的统计月份，格式:yyyy-MM ，空值时默认当月，和queryByDate二选一</li>
@@ -19,6 +20,7 @@ public class ListPunchStatusMembersCommand {
     private Long queryByDate;
     private String queryByMonth;
     private Byte punchStatusStatisticsItemType;
+    private Long appId;
     private Integer pageOffset;
     private Integer pageSize;
 
@@ -82,4 +84,12 @@ public class ListPunchStatusMembersCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }

@@ -4363,7 +4363,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
 		cmd1.setPageSize(99999);
-		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
+		List<PmTaskDTO> list = this.searchTasksWithoutAuth(cmd1).getRequests();
 		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
 	}
 

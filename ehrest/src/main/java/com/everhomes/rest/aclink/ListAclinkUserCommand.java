@@ -15,6 +15,9 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: /community/listBuildings </li>
  * <li>communityType: 小区类型 0:住宅类型小区， 1: 商用类型园区  @{link com.everhomes.rest.communityCommunityType}</li>
  * <li>communityId: 小区 ID</li>
+ * <li>currentPMId: 当前管理公司ID(organizationID)</li>
+ * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>appId: 应用id</li>
  * <li></li>
  * </ul>
  * 
@@ -24,12 +27,12 @@ import com.everhomes.util.StringHelper;
 public class ListAclinkUserCommand {
     private Long pageAnchor;
     
-    @NotNull
+
     private Long doorId;
     
     private Integer pageSize;
     
-    @NotNull
+
     private Integer namespaceId;
     
     private String keyword;
@@ -45,6 +48,44 @@ public class ListAclinkUserCommand {
     private Byte isAuth;
     
     private Byte isOpenAuth;
+
+    private Byte ownerType;
+    //权限
+    private Long appId;
+    private Long currentPMId;
+    private Long currentProjectId;
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public Long getCurrentPMId() {
+        return currentPMId;
+    }
+
+    public void setCurrentPMId(Long currentPMId) {
+        this.currentPMId = currentPMId;
+    }
+
+    public Long getCurrentProjectId() {
+        return currentProjectId;
+    }
+
+    public void setCurrentProjectId(Long currentProjectId) {
+        this.currentProjectId = currentProjectId;
+    }
+
+    public Byte getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(Byte ownerType) {
+        this.ownerType = ownerType;
+    }
 
     public Long getPageAnchor() {
         return pageAnchor;
