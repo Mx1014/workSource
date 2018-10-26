@@ -114,7 +114,7 @@ public class ArchivesServiceImpl implements ArchivesService {
     @Override
     public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) { 
     	if(cmd.getUpdateDetailId()!=null || cmd.getDetailId() != null){
-    		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailIdAndOrgId(cmd.getDetailId(),cmd.getOrganizationId(),
+    		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailId(cmd.getDetailId(),
     				Arrays.asList(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode(),OrganizationGroupType.DEPARTMENT.getCode(),OrganizationGroupType.GROUP.getCode()));
     		if(CollectionUtils.isNotEmpty(members)){
     			//当编辑后的部门和现在的部门不一样,取消置顶
