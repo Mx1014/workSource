@@ -4937,6 +4937,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             Integer namespaceId = UserContext.getCurrentNamespaceId(null);
             organizationMemberDetails.setNamespaceId(namespaceId);
         }
+        if(organizationMemberDetails.getRegionCode() == null){
+        	organizationMemberDetails.setRegionCode("86");
+        }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberDetails.class));
         organizationMemberDetails.setId(id);
