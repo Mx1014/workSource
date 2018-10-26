@@ -100,8 +100,12 @@ public interface PmTaskProvider {
 	PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid);
 
 //	服务类型
-	void createCategory(PmTaskCategory bean);
+	Long createCategory(PmTaskCategory bean);
 	void updateCategory(PmTaskCategory bean);
 	PmTaskCategory findCategoryById(Long id);
+	List<PmTaskCategory> listTaskCategories(Integer namespaceId, String ownerType, Long ownerId, Long appId,Long parentId,
+										String keyword, Long pageAnchor, Integer pageSize);
+	PmTaskCategory findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,
+											Long ownerId,Long appId,String categoryName);
 
 }

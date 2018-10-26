@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.daos.*;
@@ -720,4 +721,94 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		PmTaskArchibusUserMapping result = query.fetchOneInto(PmTaskArchibusUserMapping.class);
 		return result;
 	}
+
+	@Override
+	public Long createCategory(PmTaskCategory bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskCategories.class));
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		bean.setId(id);
+		dao.insert(bean);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskCategories.class, null);
+		return id;
+	}
+
+	@Override
+	public void updateCategory(PmTaskCategory bean) {
+		assert(bean.getId() != null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		dao.update(ConvertHelper.convert(bean, EhPmTaskCategories.class));
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskCategories.class, bean.getId());
+	}
+
+	@Override
+	public PmTaskCategory findCategoryById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PmTaskCategory.class);
+	}
+
+	@Override
+	public List<PmTaskCategory> listTaskCategories(Integer namespaceId, String ownerType, Long ownerId,Long appId, Long parentId,
+											 String keyword, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+		SelectQuery<EhPmTaskCategoriesRecord> query = context.selectQuery(Tables.EH_PM_TASK_CATEGORIES);
+		if(null != namespaceId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+		if (null!=ownerType)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_TYPE.eq(ownerType));
+		if (null!=ownerId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_ID.eq(ownerId));
+		if (null!=appId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.APP_ID.eq(appId));
+		if(null != parentId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PARENT_ID.eq(parentId));
+		if(StringUtils.isNotBlank(keyword))
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PATH.like("%" + keyword + "%"));
+		if(null != pageAnchor && pageAnchor != 0)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.ID.gt(pageAnchor));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_PM_TASK_CATEGORIES.ID.asc());
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		List<PmTaskCategory> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskCategory.class))
+				.collect(Collectors.toList());
+
+		return result;
+	}
+
+
+	@Override
+	public PmTaskCategory findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,
+												   Long ownerId,Long appId,String categoryName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskCategories.class));
+
+		SelectQuery<EhPmTaskCategoriesRecord> query = context.selectQuery(Tables.EH_PM_TASK_CATEGORIES);
+
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAME.eq(categoryName));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+
+		if (ownerType!=null){
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_TYPE.eq(ownerType));
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_ID.eq(ownerId));
+		}
+		if(appId!=null){
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.APP_ID.eq(appId));
+		}
+
+		EhPmTaskCategoriesRecord record = query.fetchAny();
+
+		if (record != null) {
+			return ConvertHelper.convert(record, PmTaskCategory.class);
+		}
+
+		return null;
+	}
+
 }
