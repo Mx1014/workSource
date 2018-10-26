@@ -19,6 +19,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.AclinkListLocalServersCommand;
+import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
 import com.everhomes.rest.aclink.DoorAccessStatus;
@@ -160,7 +162,9 @@ public class AclinkServerProviderImpl implements AclinkServerProvider{
 							.in(context.select(Tables.EH_DOOR_ACCESS.LOCAL_SERVER_ID).from(Tables.EH_DOOR_ACCESS)
 									.where(Tables.EH_DOOR_ACCESS.ID
 											.in(context.select(Tables.EH_DOOR_AUTH.DOOR_ID).from(Tables.EH_DOOR_AUTH)
-													.where(Tables.EH_DOOR_AUTH.USER_ID.eq(userId)))
+													.where(Tables.EH_DOOR_AUTH.USER_ID.eq(userId)
+															//LICENSEE_TYPE
+															.and(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.eq((byte)0).or(Tables.EH_DOOR_AUTH.LICENSEE_TYPE.isNull()))))
 											.and(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode())))));
                 	
                 }
@@ -169,5 +173,47 @@ public class AclinkServerProviderImpl implements AclinkServerProvider{
 			}
 			
 		});
+	}
+
+	@Override
+	public List<AclinkServer> queryLocalServers(CrossShardListingLocator locator,
+			AclinkListLocalServersCommand cmd) {
+		List<AclinkServer> servers = queryAclinkServer(locator,cmd.getPageSize(),new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				if(cmd.getOwnerId() != null) {
+                    query.addConditions(Tables.EH_ACLINK_SERVERS.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+
+                if(cmd.getOwnerType() != null) {
+                    query.addConditions(Tables.EH_ACLINK_SERVERS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                }
+
+                if(cmd.getUuid() != null && !cmd.getUuid().isEmpty()) {
+                    query.addConditions(Tables.EH_ACLINK_SERVERS.UUID.like("%" + cmd.getUuid() + "%"));
+                }
+                
+                if(cmd.getName() != null && !cmd.getName().isEmpty()){
+                	query.addConditions(Tables.EH_ACLINK_SERVERS.NAME.like("%" + cmd.getName() + "%"));
+                }
+                
+                if(cmd.getIpAddress() != null && !cmd.getIpAddress().isEmpty()){
+                	query.addConditions(Tables.EH_ACLINK_SERVERS.IP_ADDRESS.like("%" + cmd.getIpAddress() + "%"));
+                }
+                
+                if(cmd.getVersion() != null && !cmd.getVersion().isEmpty()){
+                	query.addConditions(Tables.EH_ACLINK_SERVERS.VERSION.like("%" + cmd.getVersion() + "%"));
+                }
+                
+                if(cmd.getLinkStatus() != null){
+                	query.addConditions(Tables.EH_ACLINK_SERVERS.LINK_STATUS.eq(cmd.getLinkStatus()));
+                }
+                return query;
+			}
+			
+		});
+		return servers;
 	}
 }
