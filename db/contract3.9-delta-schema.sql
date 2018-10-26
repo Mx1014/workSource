@@ -16,7 +16,7 @@ ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFA
 
 -- AUTHOR: djm
 -- REMARK: 合同添加押金状态字段
-ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
+-- ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) DEFAULT 1 COMMENT '押金状态, 1-未缴, 2-已缴' AFTER deposit;
 
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
@@ -212,7 +212,6 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMEN
 ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(64) COMMENT '统一订单ID';
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
-
  
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
@@ -243,13 +242,4 @@ CREATE TABLE `eh_punch_go_out_logs` (
 ALTER TABLE `eh_punch_day_logs` ADD COLUMN `go_out_punch_flag` TINYINT DEFAULT 0 COMMENT '是否外出打卡，1：是 0：否' AFTER `normal_flag`;
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `go_out_punch_day_count` INT DEFAULT 0 COMMENT '当月外出打卡天数' AFTER `rest_day_count`;
 
-
--- AUTHOR: 张智伟 20180914
--- REMARK: ISSUE-37602 表单关联工作流节点
-ALTER TABLE eh_general_approval_vals ADD COLUMN flow_node_id BIGINT COMMENT '表单绑定的工作流节点ID' AFTER flow_case_id;
-ALTER TABLE eh_general_approval_vals ADD COLUMN creator_uid BIGINT COMMENT '创建人uid' AFTER create_time;
-ALTER TABLE eh_general_approval_vals ADD COLUMN operator_uid BIGINT COMMENT '操作人Uid' AFTER creator_uid;
-ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '编辑时间' AFTER operator_uid;
-
-ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
 
