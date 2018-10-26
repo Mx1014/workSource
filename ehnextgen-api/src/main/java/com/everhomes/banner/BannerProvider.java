@@ -73,4 +73,12 @@ public interface BannerProvider {
     List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator);
 
     Map<Long,Integer> countEnabledBannersByScope(Integer namespaceId);
+
+    //广告应用入口
+    void createBannerCategory(BannerCategory bannerCategory);
+
+    BannerCategory findBannerCategoryById(Long id);
+
+    void updateBannerCategory(BannerCategory bannerCategory);
+    //广告应用入口END
 }

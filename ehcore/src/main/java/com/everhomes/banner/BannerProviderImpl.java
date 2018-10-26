@@ -15,9 +15,11 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhBannerCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhBannerClicksDao;
 import com.everhomes.server.schema.tables.daos.EhBannerOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhBannersDao;
+import com.everhomes.server.schema.tables.pojos.EhBannerCategories;
 import com.everhomes.server.schema.tables.pojos.EhBannerClicks;
 import com.everhomes.server.schema.tables.pojos.EhBannerOrders;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
@@ -490,5 +492,33 @@ public class BannerProviderImpl implements BannerProvider {
                 .and(t.STATUS.eq(BannerStatus.ACTIVE.getCode()))
                 .groupBy(t.SCOPE_ID)
                 .fetchMap(t.SCOPE_ID, DSL.count(t.ID));
+    }
+
+    @Override
+    public void createBannerCategory(BannerCategory bannerCategory) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class));
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBannerCategories.class));
+        bannerCategory.setId(id);
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        dao.insert(bannerCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBannerOrders.class, null);
+    }
+
+    @Override
+    public BannerCategory findBannerCategoryById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+
+        assert(id != null);
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), BannerCategory.class);
+    }
+
+    @Override
+    public void updateBannerCategory(BannerCategory bannerCategory) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class));
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        dao.update(bannerCategory);
     }
 }
