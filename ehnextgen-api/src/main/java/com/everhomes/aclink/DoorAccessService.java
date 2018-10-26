@@ -189,5 +189,7 @@ public interface DoorAccessService {
 	void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
 	OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+	
+	public String getVisitorUrlById(GetVisitorCommand cmd);
 
 }
