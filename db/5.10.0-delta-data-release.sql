@@ -431,9 +431,6 @@ INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT) VALUE( 'PunchStatusStatist
 SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','6','zh_CN','创建给被共享人发消息','${trackContractName}共享了日程“${planDescription}” ','0');
 
--- AUTHOR: 黄鹏宇 2018-10-26
--- REMARK: 添加module的clienthandler类型
-update eh_service_modules set client_handler_type = 1 where id in (25000,150020);
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
