@@ -421,6 +421,10 @@ INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT) VALUE( 'PunchStatusStatist
 SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','6','zh_CN','创建给被共享人发消息','${trackContractName}共享了日程“${planDescription}” ','0');
 
+-- AUTHOR: 马世亨
+-- REMARK: 邀请者查看邀请详情路由修改
+UPDATE `eh_configurations` SET `value`='%s/visitor-appointment/build/index.html?detailId=%s&ns=%s#/appointment-detail#sign_suffix' WHERE `name`='visitorsys.inviter.route';
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
