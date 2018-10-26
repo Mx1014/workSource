@@ -1,8 +1,10 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -26,6 +28,8 @@ public class SearchEnergyMeterReadingLogsCommand {
     @NotNull private Long organizationId;
     private Integer namespaceId;
     private Long communityId;
+    @ItemType(Long.class)
+    private List<Long> communityIds;
     private String keyword;
     private String meterNumber;
     private String operatorName;
@@ -168,6 +172,15 @@ public class SearchEnergyMeterReadingLogsCommand {
 
     public void setStartTime(Long startTime) {
         this.startTime = startTime;
+    }
+
+
+    public List<Long> getCommunityIds() {
+        return communityIds;
+    }
+
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
     }
 
     @Override

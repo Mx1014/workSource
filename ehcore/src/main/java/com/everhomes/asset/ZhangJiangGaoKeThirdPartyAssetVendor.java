@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.zjgkVOs.BillCountResponse;
 import com.everhomes.asset.zjgkVOs.BillDetailResponse;
 import com.everhomes.asset.zjgkVOs.CommunityAddressDTO;
@@ -38,14 +39,58 @@ import com.everhomes.asset.zjgkVOs.PaymentStatus;
 import com.everhomes.asset.zjgkVOs.SearchBillsResponse;
 import com.everhomes.asset.zjgkVOs.SearchEnterpriseBillsDTO;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.equipment.EquipmentService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AssetTargetType;
+import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BillDTO;
 import com.everhomes.rest.asset.BillDetailDTO;
+import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillIdAndType;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentDTO;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.ListAllBillsForClientCommand;
+import com.everhomes.rest.asset.ListAllBillsForClientDTO;
+import com.everhomes.rest.asset.ListBillDetailCommand;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillGroupsDTO;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PlaceAnAssetOrderCommand;
+import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
+import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
+import com.everhomes.rest.asset.ShowBillForClientDTO;
+import com.everhomes.rest.asset.ShowBillForClientV2Command;
+import com.everhomes.rest.asset.ShowBillForClientV2DTO;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.asset.BillIdAndType;
 import com.everhomes.rest.asset.BillIdCommand;
 import com.everhomes.rest.asset.BillItemIdCommand;
@@ -81,11 +126,33 @@ import com.everhomes.rest.asset.ShowBillForClientV2DTO;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+import static com.everhomes.util.SignatureHelper.computeSignature;
 
 /**
  * Created by Wentian Wang on 2017/8/10.
@@ -108,10 +175,17 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
     @Autowired
     private UserProvider userProvider;
 
+    @Autowired
+    private EquipmentService equipmentService;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
+    
+
     @Override
     public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOwedBill,String contractNum, Integer namespaceID) {
         ShowBillForClientDTO finalDto = new ShowBillForClientDTO();
-        PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+        PaymentBillGroup group = assetGroupProvider.getBillGroupById(billGroupId);
         if(!group.getName().equals("租金")) return finalDto;
         List<BillDetailDTO> dtos = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -858,7 +932,12 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
         if(pageSize == null){
             pageSize = 20;
         }
-        List<ListBillGroupsDTO> listBillGroupsDTOS = assetProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId());
+        Long orgId = 0L;
+        // asset zuolin base
+        OrganizationDTO organization = equipmentService.getAuthOrgByProjectIdAndModuleId(ownerId, cmd.getNamespaceId(), PrivilegeConstants.ASSET_MODULE_ID);
+        if(organization!=null)
+            orgId = organization.getId();
+        List<ListBillGroupsDTO> listBillGroupsDTOS = assetGroupProvider.listBillGroups(ownerId, ownerType, cmd.getCategoryId(), orgId, false);
         List<ListBillsDTO> list = new ArrayList<>();
         if(status!=1){
             LOGGER.error("Insufficient privilege, zjgkhandler listNotSettledBills");
@@ -1196,7 +1275,8 @@ public class ZhangJiangGaoKeThirdPartyAssetVendor extends AssetVendorHandler{
             throw new RuntimeException(fieldName+":"+fieldValue+"为必填，不能为空");
         }
     }
-    
+
+
 
 }
 

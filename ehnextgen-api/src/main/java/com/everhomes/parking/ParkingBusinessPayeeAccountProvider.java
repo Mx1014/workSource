@@ -18,4 +18,5 @@ public interface ParkingBusinessPayeeAccountProvider {
 	List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,String businessType);
 
     void deleteParkingBusinessPayeeAccount(Long id);
+
 }

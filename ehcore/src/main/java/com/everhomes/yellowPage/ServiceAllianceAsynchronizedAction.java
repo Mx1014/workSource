@@ -158,23 +158,17 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 
 		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(namespaceId,
 				ContactType.EMAIL.getCode(), sa.getParentId(), new CrossShardListingLocator(), Integer.MAX_VALUE);
-		if (CollectionUtils.isEmpty(targets)) {
+		if (CollectionUtils.isEmpty(targets) && StringUtils.isBlank(sa.getEmail())) {
 			return;
 		}
-
+		
 		List<File> files = new ArrayList<>(10);
 		GeneralForm form = null;
-		GeneralApproval ga = null;
 		List<PostApprovalFormItem> values = null;
-		PostApprovalFormCommand cmd = JSONObject.parseObject(this.formItemsInfo, PostApprovalFormCommand.class);
+		PostGeneralFormValCommand cmd = JSONObject.parseObject(this.formItemsInfo, PostGeneralFormValCommand.class);
 		if (null != cmd) {
-			 ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
-	                 .getApprovalId());
-			 
-	         form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
-	                 .getFormOriginId());
-	         
-	         values = cmd.getValues();
+			form = this.generalFormProvider.getActiveGeneralFormByOriginId(sa.getFormId());
+			values = cmd.getValues();
 		}
 
 		

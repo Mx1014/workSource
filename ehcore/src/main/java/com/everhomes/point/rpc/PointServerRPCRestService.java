@@ -32,11 +32,11 @@ public class PointServerRPCRestService {
     RestTemplate  template;
     {
     	SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    	factory.setConnectTimeout(60000);
-        factory.setReadTimeout(60000);
+    	factory.setConnectTimeout(5000);
+        factory.setReadTimeout(5000);
         template = new RestTemplate(factory);
     }
-    
+
   /*  @Autowired
     private RestTemplate template;*/
 
@@ -61,8 +61,6 @@ public class PointServerRPCRestService {
         HttpHeaders headers = new HttpHeaders();
         headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
 
-        //SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        
         RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(getRestUri(api)));
         Timestamp start = new Timestamp(DateHelper.currentGMTTime().getTime());
         LOGGER.debug("start time, start = {}", start);
@@ -103,7 +101,7 @@ public class PointServerRPCRestService {
         if (resp.getErrorCode() == 403 && Objects.equals("user", resp.getErrorScope())) {
             return RuntimeErrorException.errorWith("user", 403, resp.getErrorDescription());
         }
-        LOGGER.error("call core server failed, api = {}, resp = {}", api, StringHelper.toJsonString(resp));
-        return RuntimeErrorException.errorWith("core", 500, "call core server error");
+        LOGGER.error("call point server failed, api = {}, resp = {}", api, StringHelper.toJsonString(resp));
+        return RuntimeErrorException.errorWith("core", 500, "call point server error");
     }
 }

@@ -343,10 +343,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
     }
 
     @Override
-    public void deleteReportValReceiverMsg(Timestamp time) {
+    public void deleteReportValReceiverMsg() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportValReceiverMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(time));
+        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
         query.execute();
     }
 
@@ -393,4 +393,10 @@ public class WorkReportValProviderImpl implements WorkReportValProvider {
         return query.fetchInto(WorkReportValReceiverMap.class);
     }
 
+    @Override
+    public List<WorkReportVal> listWorkReportVals(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWorkReportValsRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_VALS);
+        return query.fetchInto(WorkReportVal.class);
+    }
 }

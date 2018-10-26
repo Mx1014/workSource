@@ -97,10 +97,21 @@ public interface GeneralFormProvider {
     void deleteGeneralFormFilter(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, String userUuid, Long formOriginId, Long formVersion);
 
 
+    List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+                                      String projectType, Long projectId, String ownerType, Long ownerId);
+
+    GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName);
+
 	Long createGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
 
 	void updateGeneralFormPrintTemplate(GeneralFormPrintTemplate generalFormPrintTemplate);
 
 	GeneralFormPrintTemplate getGeneralFormPrintTemplateById(Long id);
 	GeneralFormPrintTemplate getGeneralFormPrintTemplate(Integer namespaceId, Long ownerId, String ownerType);
+
+	void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus);
+
+	void setInvestmentAdId(Long id, Long investmentAdId);
+
+	List<GeneralFormVal> getGeneralFormValBySourceId(Long sourceId);
 }

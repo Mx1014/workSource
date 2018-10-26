@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
@@ -13,7 +12,6 @@ import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAttachment;
@@ -45,7 +43,9 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.investment.CreateInvitedCustomerCommand;
@@ -57,11 +57,14 @@ import com.everhomes.rest.investment.CustomerRequirementDTO;
 import com.everhomes.rest.investment.InvitedCustomerDTO;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.techpark.expansion.OpenCustomRequestFormCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
@@ -72,7 +75,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
@@ -140,7 +142,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private UserPrivilegeMgr userPrivilegeMgr;
 	@Autowired
 	private InvitedCustomerService invitedCustomerService;
-	
+
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd) {
 
@@ -213,7 +215,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), null,cmd.getCommunityId());//申请记录
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040140L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//申请记录
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -323,7 +326,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("exportApplyEntrys is fail. {}",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXPORT_FILE_FAILURE,
 					"exportApplyEntrys is fail.");
 		}
 
@@ -507,7 +510,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//1.保存合同带的地址
 			Contract contract = contractProvider.findContractById(request.getContractId());
 			if(null == contract )
-				throw errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"can not find contract!!");
+				throw errorWith(ContractErrorCode.SCOPE,ContractErrorCode.ERROR_CONTRACT_NOT_EXIST,"can not find contract!!");
 			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
 					contract.getContractNumber());
 
@@ -839,7 +842,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,cmd.getCommunityId());//房源招租权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());//房源招租权限
 		}
 		if (null == cmd.getNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -995,7 +999,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd, Byte adminFlag){
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCommunityId());
 		}
 		if (null == cmd.getCategoryId()) {
 			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
@@ -1514,7 +1519,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), null,0L);//楼栋介绍权限
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040120L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 
 		if (null == cmd.getCategoryId()) {
@@ -1570,16 +1576,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
 		}
 
-		if (null != organizationId) {
-			//检查是不是招租发行公司
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
-				}
-			}
-		}
+		// by lei.lv 去除了普通企业管理员
+//		if (null != organizationId) {
+//			//检查是不是招租发行公司
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+//				}
+//			}
+//		}
 
         return dto;
     }
@@ -1621,26 +1628,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			});
 		}
 
-		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
-
-					organizationAddresses.stream().map(a -> {
-						Address address = addressProvider.findAddressById(a.getAddressId());
-						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
-								address.getCommunityId(), address.getBuildingName());
-						return ConvertHelper.convert(building, BuildingDTO.class);
-					}).collect(Collectors.toSet()).forEach(b -> {
-						if (null != b) {
-							buildingDTOs.add(b);
-						}
-					});
-				}
-			}
-		}
+//		if (null != organizationId)  {
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+//
+//					organizationAddresses.stream().map(a -> {
+//						Address address = addressProvider.findAddressById(a.getAddressId());
+//						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+//								address.getCommunityId(), address.getBuildingName());
+//						return ConvertHelper.convert(building, BuildingDTO.class);
+//					}).collect(Collectors.toSet()).forEach(b -> {
+//						if (null != b) {
+//							buildingDTOs.add(b);
+//						}
+//					});
+//				}
+//			}
+//		}
 
 		response.setBuildings(buildingDTOs);
         return response;
@@ -1673,24 +1680,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}).collect(Collectors.toList()));
 		}
 
-		if (null != organizationId)  {
-			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
-					cmd.getCategoryId())) {
-				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
-
-					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
-
-					dtos.addAll(organizationAddresses.stream().filter(a -> {
-						return a.getBuildingName().equals(building.getName());
-					}).map(a -> {
-						Address address = addressProvider.findAddressById(a.getAddressId());
-						return ConvertHelper.convert(address, AddressDTO.class);
-					}).collect(Collectors.toSet()));
-				}
-			}
-		}
+		// by lei.lv 去除了普通企业管理员
+//		if (null != organizationId)  {
+//			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssuersByOrganizationId(cmd.getNamespaceId(), organizationId,
+//					cmd.getCategoryId())) {
+//				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+//					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+//
+//					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
+//
+//					dtos.addAll(organizationAddresses.stream().filter(a -> {
+//						return a.getBuildingName().equals(building.getName());
+//					}).map(a -> {
+//						Address address = addressProvider.findAddressById(a.getAddressId());
+//						return ConvertHelper.convert(address, AddressDTO.class);
+//					}).collect(Collectors.toSet()));
+//				}
+//			}
+//		}
 
 		return dtos;
 	}
@@ -1707,7 +1715,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
 
 		if (null == request) {
 			if (null != cmd.getSourceId()) {
@@ -1720,8 +1728,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				request.setSourceId(cmd.getSourceId());
 				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
 			}else {
-				//当没有sourced的时候表示没有设置表单，即删除关联关系
-				enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+				//当没有sourced的时候表示没有设置表单，将表单id置空 与复用统一表单区分开
+				request.setSourceId(null);
+				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
+			//	enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
 			}
 		}
 
@@ -1739,7 +1749,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				null, null, cmd.getSourceType(), cmd.getCategoryId());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+
+		//查询公司模板
+		if (request == null)
+			request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd.getSourceType(), cmd.getCategoryId());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
@@ -1770,7 +1785,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public void updateLeasePromotionOrder(UpdateLeasePromotionOrderCommand cmd) {
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)){
-			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+//			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), null,0L);
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040130L, cmd.getAppId(), cmd.getCurrentPMId(),cmd.getCurrentProjectId());
 		}
 		if (null == cmd.getId()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -1851,21 +1867,140 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
+	public LeaseFormRequest getFormRequestByCommunityId(Integer namespaceId, Long communityId, String sourceType, Long categoryId) {
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(namespaceId,
+				communityId, EntityType.COMMUNITY.getCode(), sourceType, categoryId);
+		if (request == null){
+			//尝试从园区管理公司获取表单
+			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+			listServiceModuleAppsCommand.setModuleId(40100l);
+			listServiceModuleAppsCommand.setCustomTag(String.valueOf(categoryId));
+			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			Long appId = null;
+			if (apps != null){
+				appId = apps.getServiceModuleApps().get(0).getOriginId();
+			}else{ //尝试获取 默认应用
+				listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+				listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+				listServiceModuleAppsCommand.setModuleId(40100l);
+				apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+				if (apps != null)
+					appId = apps.getServiceModuleApps().get(0).getOriginId();
+			}
+
+			if (appId == null)
+				return null;
+			GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+			cmd.setProjectId(communityId);
+			cmd.setAppId(appId);
+			OrganizationDTO org = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+			if (org != null){
+				request = enterpriseApplyEntryProvider.findLeaseRequestForm(namespaceId,
+						org.getId(), EntityType.ORGANIZATIONS.getCode(), sourceType, categoryId);
+			}
+
+		}
+		return request;
+	}
+
+	@Override
+	public void openCustomRequestForm(OpenCustomRequestFormCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
+		OpenCustomRequestFormCommand cmd2 = ConvertHelper.convert(cmd,OpenCustomRequestFormCommand.class);
+		UpdateLeasePromotionRequestFormCommand closeCmd = ConvertHelper.convert(cmd,UpdateLeasePromotionRequestFormCommand.class);
+		//先删除所有表单
+		closeCustomRequestForm(closeCmd);
+
+		cmd2.setSourceType(EntityType.LEASE_PROJECT.getCode());
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		Long formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_BUILDING.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+		cmd2.setSourceType(EntityType.LEASE_PROMOTION.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOrganizationId(), EntityType.ORGANIZATIONS.getCode(), cmd2.getSourceType(), cmd.getCategoryId());
+		formId = request == null ? null : request.getSourceId();
+		copyCustomRequestForm(cmd2,formId);
+
+
+	}
+
+	private void copyCustomRequestForm(OpenCustomRequestFormCommand cmd,Long formId){
+
+		if (formId == null){ //sourceId值为空
+			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		}else {
+			GeneralForm generalForm = generalFormService.mirrorGeneralForm(formId, null, null,null,null,cmd.getOwnerType(), cmd.getOwnerId());
+			LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+			request.setSourceId(generalForm.getId());
+			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		}
+	}
+
+	@Override
+	public void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
+		if (null == cmd.getNamespaceId()) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+
+		if (null == cmd.getCategoryId()) {
+			cmd.setCategoryId(DEFAULT_CATEGORY_ID);
+		}
+
+		cmd.setSourceType(EntityType.LEASE_PROJECT.getCode());
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+
+		cmd.setSourceType(EntityType.LEASE_BUILDING.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+
+		cmd.setSourceType(EntityType.LEASE_PROMOTION.getCode());
+		request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType(), cmd.getCategoryId());
+		if (request != null)
+			enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+	}
+
+	@Override
 	public List<Long> transformToCustomer(TransformToCustomerCommand cmd) {
 		List<IntentionCustomerDTO> intentionCustomers = cmd.getIntentionCustomers();
-		
+
 		Map<String, CreateInvitedCustomerCommand> finalCommandMap = new HashMap<>();
 		for (IntentionCustomerDTO dto : intentionCustomers) {
 			if (finalCommandMap.containsKey(dto.getCustomerName())) {
 				CreateInvitedCustomerCommand cmd2 = finalCommandMap.get(dto.getCustomerName());
 				//企业客户意向房源
 				//TODO 得考虑addressId重复的问题,目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:08
-				CustomerRequirementDTO requirement = cmd2.getRequirement();
-				List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
-				CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-				addressDTO.setAddressId(dto.getAddressId());
-				addresses.add(addressDTO);
-				requirement.setAddresses(addresses);
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementDTO requirement = cmd2.getRequirement();
+					List<CustomerRequirementAddressDTO> addresses = requirement.getAddresses();
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addresses.add(addressDTO);
+					requirement.setAddresses(addresses);
+				}
 				//企业客户联系人
 				//TODO 得考虑联系人重复的问题，目前招商客户管理和此处都未考虑该问题，2018年9月20日17:23:12
 				List<CustomerContactDTO> contacts = cmd2.getContacts();
@@ -1875,7 +2010,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				contactDTO.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
-				
+
 				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
 			}else {
 				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
@@ -1886,11 +2021,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				//企业客户意向房源
 				List<CustomerRequirementAddressDTO> addressDTOs = new ArrayList<>();
 				CustomerRequirementDTO requirementDTO = new CustomerRequirementDTO();
-				CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
-				addressDTO.setAddressId(dto.getAddressId());
-				addressDTOs.add(addressDTO);
-				requirementDTO.setAddresses(addressDTOs);
+				//如果不存在addressId，有时addressId前端会传0
+				if (dto.getAddressId()!=null && dto.getAddressId()!=0) {
+					CustomerRequirementAddressDTO addressDTO = new CustomerRequirementAddressDTO();
+					addressDTO.setAddressId(dto.getAddressId());
+					addressDTOs.add(addressDTO);
+				}
 				cmd2.setRequirement(requirementDTO);
+				requirementDTO.setAddresses(addressDTOs);
 				//企业客户联系人
 				List<CustomerContactDTO> contacts = new ArrayList<>();
 				CustomerContactDTO contactDTO = new  CustomerContactDTO();
@@ -1900,14 +2038,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
 				cmd2.setContacts(contacts);
-				
+
 				finalCommandMap.put(dto.getCustomerName(), cmd2);
-				
+
 				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
 			}
 		}
-		
-		List<Long> customerIds = new ArrayList<>(); 
+
+		List<Long> customerIds = new ArrayList<>();
 		Set<String> customerNameSet = finalCommandMap.keySet();
 		for (String customerName : customerNameSet) {
 			CreateInvitedCustomerCommand createInvitedCustomerCommand = finalCommandMap.get(customerName);

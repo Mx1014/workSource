@@ -64,6 +64,7 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
     @Override
     public void execute(Map<String, Object> params) {
         ListCommunityUsersCommand cmd = (ListCommunityUsersCommand)mapToObjeact(params, ListCommunityUsersCommand.class);
+        cmd.setPageSize(10000);
         CommunityUserResponse resp = this.communityService.listUserCommunitiesV2(cmd);
 
         List<CommunityUserDto> dtos = resp.getUserCommunities();
@@ -196,6 +197,12 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
                 if (field.getType().equals(Integer.class)) {
                     if (map.get(field.getName()) != null){
                         field.set(obj, Integer.valueOf(map.get(field.getName()).toString()));
+                        continue;
+                    }
+                }
+                if (field.getType().equals(Byte.class)) {
+                    if (map.get(field.getName()) != null){
+                        field.set(obj, Byte.valueOf(map.get(field.getName()).toString()));
                         continue;
                     }
                 }

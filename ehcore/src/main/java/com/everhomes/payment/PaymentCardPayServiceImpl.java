@@ -1,15 +1,20 @@
 package com.everhomes.payment;
 
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
-import com.everhomes.rest.gorder.order.*;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.order.*;
+import com.everhomes.rest.order.PayMethodDTO;
+import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.GetAccountSettingCommand;
 import com.everhomes.rest.payment.PaymentCardStatus;
@@ -51,6 +56,8 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     protected GeneralOrderService orderService;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private ContentServerService contentServerService;
     @Autowired
     private ConfigurationProvider configurationProvider;
     @Value("${server.contextPath:}")
@@ -163,6 +170,8 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
         if (paymentMethods != null)
             dto.setPayMethod(paymentMethods.stream().map(r->{
                 PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
+                String paymentLogo = contentServerService.parserUri(r.getPaymentLogo());
+                convert.setPaymentLogo(paymentLogo);
                 if (r.getPaymentParams() != null) {
                     PaymentParamsDTO paymentParamsDTO = new PaymentParamsDTO();
                     paymentParamsDTO.setPayType(r.getPaymentParams().getPayType());
@@ -237,7 +246,7 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
         return preOrderCommand;
@@ -256,7 +265,7 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -286,7 +295,7 @@ public class PaymentCardPayServiceImpl implements  PaymentCardPayService {
     public void refundOrder(PaymentCardRechargeOrder order) {
         Long amount = order.getAmount().multiply(new BigDecimal(100)).longValue();
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         String sNamespaceId = "NS"+UserContext.getCurrentNamespaceId();
         createRefundOrderCommand.setAccountCode(sNamespaceId);

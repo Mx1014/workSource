@@ -38,6 +38,11 @@ public interface AuthorizationProvider {
     //根据targets获取关联的应用管理员记录
     List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTarget(List<Target> targets);
 
+    //根据targets获取关联的应用管理员记录
+    List<Tuple<Long,String>> getAuthorizationAppModuleIdsByTargetWithTypes(List<Target> targets, List<String> types);
+
+    List<Tuple<Long, String>> getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(List<Target> targets, List<String> types, List<Long> configIds);
+
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
 
     List<Authorization> listManageAuthorizations(String ownerType, Long ownerId, String authType, Long authId);

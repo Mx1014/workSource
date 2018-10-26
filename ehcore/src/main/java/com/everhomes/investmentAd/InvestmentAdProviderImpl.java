@@ -146,6 +146,9 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		if (cmd.getCommunityId()!=null) {
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 		}
+		if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.COMMUNITY_ID.in(cmd.getCommunityIds()));
+		}
 		if (cmd.getInvestmentStatus()!=null) {
 			query.addConditions(Tables.EH_INVESTMENT_ADVERTISEMENTS.INVESTMENT_STATUS.eq(cmd.getInvestmentStatus()));
 		}
@@ -179,24 +182,21 @@ public class InvestmentAdProviderImpl implements InvestmentAdProvider{
 		//排序
 		if (cmd.getSortField() != null) {
 			if(cmd.getSortField().equals("availableAreaMin")){
-				query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN);
+				if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
+					query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN.asc());
+				}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
+					query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.AVAILABLE_AREA_MIN.desc());
+				}
 			}else if (cmd.getSortField().equals("assetPriceMin")) {
-				query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN);
+				if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
+					query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN.asc());
+				}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
+					query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.ASSET_PRICE_MIN.desc());
+				}
 			}
 		}else {
-			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER);
+			query.addOrderBy(Tables.EH_INVESTMENT_ADVERTISEMENTS.DEFAULT_ORDER.desc());
 		}
-		
-		if (cmd.getSortType() != null) {
-			if (cmd.getSortType() == InvestmentAdSortType.ASC.getCode()) {
-				query.addOrderBy(DSL.val(1).asc());
-			}else if (cmd.getSortType() == InvestmentAdSortType.DESC.getCode()) {
-				query.addOrderBy(DSL.val(1).desc());
-			}
-		}else {
-			query.addOrderBy(DSL.val(1).desc()); 
-		}
-		
 		query.addLimit(cmd.getPageAnchor().intValue(),cmd.getPageSize() + 1);
 		
 		return query.fetchInto(InvestmentAd.class);

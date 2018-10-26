@@ -248,10 +248,19 @@ public class WorkReportProviderImpl implements WorkReportProvider {
     }
 
     @Override
-    public void deleteWorkReportScopeMsg(Timestamp time) {
+    public void deleteWorkReportScopeMsg() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_VAL_RECEIVER_MSG.REMINDER_TIME.lt(time));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
+        query.execute();
+    }
+
+    @Override
+    public void deleteWorkReportScopeMsgByReportId(Long reportId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        DeleteQuery<EhWorkReportScopeMsgRecord> query = context.deleteQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_ID.eq(reportId));
+        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REMINDER_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
         query.execute();
     }
 
@@ -261,15 +270,6 @@ public class WorkReportProviderImpl implements WorkReportProvider {
         EhWorkReportScopeMsgDao dao = new EhWorkReportScopeMsgDao(context.configuration());
         dao.update(msg);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWorkReportScopeMsg.class, msg.getId());
-    }
-
-    @Override
-    public WorkReportScopeMsg findWorkReportScopeMsg(Long reportId, java.sql.Date reportTime){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhWorkReportScopeMsgRecord> query = context.selectQuery(Tables.EH_WORK_REPORT_SCOPE_MSG);
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_ID.eq(reportId));
-        query.addConditions(Tables.EH_WORK_REPORT_SCOPE_MSG.REPORT_TIME.eq(reportTime));
-        return query.fetchAnyInto(WorkReportScopeMsg.class);
     }
 
     @Override

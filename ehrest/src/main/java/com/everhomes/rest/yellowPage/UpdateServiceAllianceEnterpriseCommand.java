@@ -34,7 +34,7 @@ import com.everhomes.util.StringHelper;
  *  <li>type:类型  </li>
  *  <li>email: 邮箱地址</li>
  *  <li>templateType : 模板类型</li>
- *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：表单/表单+工作流 3：转应用 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>jumpId : 跳转模块id</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
@@ -46,6 +46,8 @@ import com.everhomes.util.StringHelper;
  *  <li>startDate : 用于policydeclare样式 开始日期</li>
  *  <li>endDate : 用于policydeclare样式 结束日期</li>
  *  <li>tagGroups: 筛选对象组（list） 服务联盟v3.4 {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO} </li>
+ *  <li>formId : 表单id</li>
+ *  <li>flowId : 工作流id</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -92,6 +94,10 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	private String   endDate;
 	
+	private Long     formId;
+	
+	private Long     flowId;
+	
  	@ItemType(AllianceTagGroupDTO.class)
 	private List<AllianceTagGroupDTO> tagGroups;
 	
@@ -135,6 +141,22 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	private String moduleUrl;
 	
+	public Long getFormId() {
+		return formId;
+	}
+
+	public void setFormId(Long formId) {
+		this.formId = formId;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
+
 	private Byte supportType;
 
 	private String buttonTitle;

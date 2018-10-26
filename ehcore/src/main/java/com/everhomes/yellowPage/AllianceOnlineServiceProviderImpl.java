@@ -57,6 +57,7 @@ public class AllianceOnlineServiceProviderImpl implements AllianceOnlineServiceP
 	public void updateOnlineService(AllianceOnlineService onlineService) {
 		
 		// 使用dao方法
+		onlineService.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		getAllianceOnlineServiceDao(AccessSpec.readWrite()).update(onlineService);
 
 		// 广播给从数据库

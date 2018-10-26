@@ -287,8 +287,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      */
     @Scheduled(cron = "0 0 11 * * ?")
     private void deleteWorkReportRxMessage(){
-        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
-        workReportValProvider.deleteReportValReceiverMsg(currentTime);
+        workReportValProvider.deleteReportValReceiverMsg();
     }
 
     /**
@@ -356,27 +355,20 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
                 auMsgSetting.getMsgTimeType(), auMsgSetting.getMsgTimeMark(), auMsgSetting.getMsgTime()));
         Timestamp endTime = Timestamp.valueOf(workReportTimeService.getSettingTime(report.getReportType(), reportTime.getTime(),
                 validitySetting.getEndType(), validitySetting.getEndMark(), validitySetting.getEndTime()));
-        //  生成提醒数据
-        WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
-        if (msg != null) {
-            msg.setReminderTime(reminderTime);
-            msg.setReportName(report.getReportName());
-            msg.setEndTime(endTime);
-            msg.setScopeIds(listScopeIds(report));
-            workReportProvider.updateWorkReportScopeMsg(msg);
-        } else {
-            msg = new WorkReportScopeMsg();
-            msg.setNamespaceId(report.getNamespaceId());
-            msg.setOrganizationId(report.getOrganizationId());
-            msg.setReportId(report.getId());
-            msg.setReportName(report.getReportName());
-            msg.setReportType(report.getReportType());
-            msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
-            msg.setReminderTime(reminderTime);
-            msg.setEndTime(endTime);
-            msg.setScopeIds(listScopeIds(report));
-            workReportProvider.createWorkReportScopeMsg(msg);
-        }
+        //  删除已生成提醒数据
+        workReportProvider.deleteWorkReportScopeMsgByReportId(report.getId());
+        // WorkReportScopeMsg msg = workReportProvider.findWorkReportScopeMsg(report.getId(), workReportTimeService.toSqlDate(reportTime.getTime()));
+        WorkReportScopeMsg msg = new WorkReportScopeMsg();
+        msg.setNamespaceId(report.getNamespaceId());
+        msg.setOrganizationId(report.getOrganizationId());
+        msg.setReportId(report.getId());
+        msg.setReportName(report.getReportName());
+        msg.setReportType(report.getReportType());
+        msg.setReportTime(workReportTimeService.toSqlDate(reportTime.getTime()));
+        msg.setReminderTime(reminderTime);
+        msg.setEndTime(endTime);
+        msg.setScopeIds(listScopeIds(report));
+        workReportProvider.createWorkReportScopeMsg(msg);
         return msg;
     }
 
@@ -403,8 +395,7 @@ public class WorkReportMessageServiceImpl implements WorkReportMessageService {
      */
     @Scheduled(cron = "0 0 12 * * ?")
     private void deleteWorkReportAuMessage(){
-        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
-        workReportProvider.deleteWorkReportScopeMsg(currentTime);
+        workReportProvider.deleteWorkReportScopeMsg();
     }
 
     private void sendIndexMessage(String content, String title, String displayName, Long organizationId, Long tabIndex, Long receiverId){

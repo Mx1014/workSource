@@ -121,6 +121,8 @@ public class SearchEnterpriseCustomerCommand {
 
     private Byte convertFlag;
 
+    private String trackerName;
+
 
     public Long getMinTrackingPeriod() {
         return minTrackingPeriod;
@@ -450,5 +452,13 @@ public class SearchEnterpriseCustomerCommand {
 
     public void setCustomerIds(List<Long> customerIds) {
         this.customerIds = customerIds;
+    }
+
+    public String getTrackerName() {
+        return trackerName;
+    }
+
+    public void setTrackerName(String trackerName) {
+        this.trackerName = trackerName;
     }
 }

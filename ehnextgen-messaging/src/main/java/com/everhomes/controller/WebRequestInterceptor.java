@@ -17,24 +17,21 @@ import com.everhomes.portal.PortalVersionUser;
 import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.domain.DomainDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.tool.BlutoAccessor;
 import com.everhomes.user.*;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
-import net.sf.cglib.beans.BeanMap;
-import org.apache.poi.util.StringUtil;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -91,7 +88,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
+    @Autowired
+    private SdkUserService sdkUserService;
+
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
 
     public WebRequestInterceptor() {
     }
@@ -157,6 +158,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupVersionContext(userAgents);
             setupScheme(userAgents);
             setupDomain(request);
+
+            //设置上下文信息
+            setAppContext(request.getParameterMap());
+
             //加上频率控制
             frequencyControlHandler(request,handler);
             if (isProtected(handler)) {
@@ -186,9 +191,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
 //                    }
                     if (this.isInnerSignLogon(request)) {
+                        LOGGER.debug("this is inner sign logon before");
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                        LOGGER.debug("this is inner sign logon, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -205,6 +212,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
+                        LOGGER.debug("check request signature success, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -221,6 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     setupUserContext(token);
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    LOGGER.debug("token check success, setup user context: {}, uid={}", token, String.valueOf(UserContext.current().getUser().getId()));
                 }
 
             } else {
@@ -450,7 +459,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
 
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
-        App app = this.appProvider.findAppByKey(appKey);
+        App app = getAppByKey(appKey);
         if (app == null) {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
@@ -470,6 +479,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
     }
 
+    private App getAppByKey(String appKey) {
+        // 给 SDK 调用提供的便捷方式
+        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+            App app = new App();
+            app.setAppKey(appKey);
+            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setName("SDK");
+            app.setId(0L);
+            return app;
+        }
+        return this.appProvider.findAppByKey(appKey);
+    }
+
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
         String[] values = paramMap.get(paramName);
         if (values != null)
@@ -481,7 +503,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
      * 优先从 Header 的 userAgents 判断 namespaceId，若没有，则从请求信息确认
      * 请求内容如果有 namespaceId 这个值，则设置域空间 ID;
      * 如果已经从 userAgent 知道域空间 ID，则忽略
-     * @param requestMap
+     * @param
      */
     private void setupNamespaceIdContext(Map<String, String> userAgents, Map<String, String[]> paramMap) {
         UserContext context = UserContext.current();
@@ -509,12 +531,46 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     }
 
+
+    /**
+     * 标准版之后去除sceneToken设置上下文信息
+     * @param
+     */
+    private void setAppContext(Map<String, String[]> paramMap) {
+
+        UserContext context = UserContext.current();
+
+        String[] sceneTokens = paramMap.get("sceneToken");
+
+        if(sceneTokens != null && sceneTokens.length > 0){
+            String sceneToken = sceneTokens[0];
+            AppContext appContext = AppContextGenerator.fromWebToken(sceneToken);
+            context.setAppContext(appContext);
+        }
+    }
+
     private void setupUserContext(LoginToken loginToken) {
         UserLogin login = this.userService.findLoginByToken(loginToken);
         UserContext context = UserContext.current();
         context.setLogin(login);
 
         User user = this.userProvider.findUserById(login.getUserId());
+        if (user == null) {
+            //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+            //如果core server和统一用户都没有用户，说明真的没有该用户
+            // add by yanlong.liang 20180928
+            user = ConvertHelper.convert(this.sdkUserService.getUser(login.getUserId()), User.class);
+            this.userProvider.createUserFromUnite(user);
+            UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(login.getUserId()), UserIdentifier.class);
+            if (userIdentifier != null) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifier(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }
         context.setUser(user);
 
         PortalVersionUser portalVersionUserByUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(login.getUserId());

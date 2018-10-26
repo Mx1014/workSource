@@ -43,6 +43,10 @@ public class ScopeFieldInfo {
     
     private Long categoryId;
 
+    private Long ownerId;
+
+    private String ownerType;
+
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -137,6 +141,22 @@ public class ScopeFieldInfo {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

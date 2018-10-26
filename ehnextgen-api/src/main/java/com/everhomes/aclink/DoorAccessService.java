@@ -256,4 +256,11 @@ public interface DoorAccessService {
     ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd);
 
     AclinkFormTitlesDTO changeTempAuthCustomField (ChangeTempAuthCustomFieldCommand cmd);
+
+	BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd);
+
+	void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
+
+	OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+
 }

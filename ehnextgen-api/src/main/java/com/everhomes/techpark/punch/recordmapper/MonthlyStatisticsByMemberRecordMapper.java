@@ -28,6 +28,9 @@ public class MonthlyStatisticsByMemberRecordMapper implements RecordMapper<Recor
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.FORGOT_PUNCH)
     private Integer forgotCount;
 
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+
     @PunchExceptionRequestStatisticsItem(defaultOrder = 1, type = PunchExceptionRequestStatisticsItemType.ASK_FOR_LEAVE)
     private Integer askForLeaveRequestCount;
 
@@ -200,11 +203,20 @@ public class MonthlyStatisticsByMemberRecordMapper implements RecordMapper<Recor
         data.setBusinessTripRequestCount(record.getValue("businessTripRequestCount", Integer.class));
         data.setOvertimeRequestCount(record.getValue("overtimeRequestCount", Integer.class));
         data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         return data;
     }
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getGoOutPunchDayCount() {
+        return goOutPunchDayCount;
+    }
+
+    public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+        this.goOutPunchDayCount = goOutPunchDayCount;
     }
 }

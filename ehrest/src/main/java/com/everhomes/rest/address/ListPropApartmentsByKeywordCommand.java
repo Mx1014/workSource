@@ -35,22 +35,15 @@ public class ListPropApartmentsByKeywordCommand {
     private String keyword;
     private Integer namespaceId;
     private Byte livingStatus;
+
     private Double areaSizeFrom;
     private Double areaSizeTo;
     private Double rentAreaFrom;
     private Double rentAreaTo;
     private Double chargeAreaFrom;
     private Double chargeAreaTo;
-    private Double freeAreaFrom; 
+    private Double freeAreaFrom;
     private Double freeAreaTo;
-    
-	public Long getBuildingId() {
-		return buildingId;
-	}
-
-	public void setBuildingId(Long buildingId) {
-		this.buildingId = buildingId;
-	}
 
 	public Double getRentAreaFrom() {
 		return rentAreaFrom;
@@ -173,6 +166,14 @@ public class ListPropApartmentsByKeywordCommand {
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
 	}
 
 	@Override

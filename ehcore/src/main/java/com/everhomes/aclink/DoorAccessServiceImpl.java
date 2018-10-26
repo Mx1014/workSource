@@ -8,8 +8,10 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipayLogger;
+import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
+import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.atomikos.util.FastDateFormat;
@@ -56,6 +58,8 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -72,19 +76,10 @@ import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
 import com.everhomes.rest.openapi.OrganizationAddressDTO;
 import com.everhomes.rest.openapi.UserAddressDTO;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.*;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -95,7 +90,8 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
-import com.everhomes.util.excel.ExcelUtils;
+import com.google.gson.JsonArray;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -116,11 +112,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -144,6 +143,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     BigCollectionProvider bigCollectionProvider;
     
     @Autowired
+    AppNamespaceMappingProvider appNamespaceMappingProvider;
+
+    @Autowired
     DoorAccessProvider doorAccessProvider;
     
     @Autowired
@@ -163,6 +165,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private AclinkProvider aclinkProvider;
+    
+    @Autowired
+    private AesServerKeyProvider aesServerKeyProvider;
     
     @Autowired
     private AclinkMessageSequence aclinkMessageSequence;
@@ -4424,6 +4429,57 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
+    
+    @Override
+    public OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd){
+    	AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"not exist app namespace mapping");
+		}
+		Integer namespaceId = appNamespaceMapping.getNamespaceId();
+
+    	OpenQueryLogResponse resp = new OpenQueryLogResponse();
+        resp.setDtos(new ArrayList<AclinkLogDTO>());
+        if(CollectionUtils.isEmpty(cmd.getMacAddresses())){
+			return resp;
+		}
+
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(cmd.getOwnerType() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                }
+                if(cmd.getOwnerId() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+                if(cmd.getEventType() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.eq(cmd.getEventType()));
+                }
+                if(cmd.getKeyword() != null) {
+                    query.addConditions(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER.like(cmd.getKeyword() + "%")
+                            .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
+                }
+                query.addConditions(Tables.EH_ACLINK_LOGS.HARDWARE_ID.in(cmd.getMacAddresses()));
+                query.addConditions(Tables.EH_ACLINK_LOGS.NAMESPACE_ID.eq(namespaceId));
+                return query;
+            }
+
+        });
+
+        for(AclinkLog obj : objs) {
+            AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
+            resp.getDtos().add(dto);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
+    }
+    
      //add by liqingyan
     @Override
     public DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd){
@@ -5526,6 +5582,37 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
+	public void invalidVistorAuths(InvalidVistorAuthsCommand cmd){
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"not exist app namespace mapping");
+		}
+		Integer namespaceId = appNamespaceMapping.getNamespaceId();
+		if(CollectionUtils.isEmpty(cmd.getMacAddresses()) || CollectionUtils.isEmpty(cmd.getAuthList())){
+			return;
+		}
+		List<DoorAccess> doorAccesses = cmd.getMacAddresses().stream().filter(mac -> mac != null).map(mac->{
+			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
+			if(null == doorAccess)
+				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+			if(!doorAccess.getNamespaceId().equals(namespaceId)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"door's namespace not equal appKey's namespace");
+			}
+			return doorAccess;
+		}).collect(Collectors.toList());
+
+		for(DoorAccess doorAccess : doorAccesses){
+			for(OpenAuthDTO dto : cmd.getAuthList()){
+				if(!StringUtils.isEmpty(dto.getPhone())){
+					invalidVistorAuth(doorAccess.getId(), dto.getPhone());
+				}
+			}
+		}
+	}
+
+	@Override
 	public void updateAccessType(Long doorId, byte doorType) {
 		DoorAccess da = doorAccessProvider.getDoorAccessById(doorId);
 		if(da == null){
@@ -5818,6 +5905,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         return createLocalVisitorAuth(itemCmd);
     }
+    
+
 
 
     @Override
@@ -5891,6 +5980,78 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				}
 			}
 		}
+	}
+
+	@Override
+	public BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd){
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"not exist app namespace mapping");
+		}
+		Integer namespaceId = appNamespaceMapping.getNamespaceId();
+
+		BatchCreateVisitorsResponse response = new BatchCreateVisitorsResponse();
+		response.setAuthList(new ArrayList<OpenAuthDTO>());
+		if(CollectionUtils.isEmpty(cmd.getMacAddresses()) || CollectionUtils.isEmpty(cmd.getAuthList())){
+			return response;
+		}
+		List<DoorAccess> doorAccesses = cmd.getMacAddresses().stream().filter(mac -> mac != null).map(mac->{
+			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
+			if(null == doorAccess)
+				throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+			return doorAccess;
+		}).collect(Collectors.toList());
+
+		for(DoorAccess doorAccess : doorAccesses){
+			for(OpenAuthDTO dto : cmd.getAuthList()){
+				//创建auth
+				CreateDoorVisitorCommand doorCmd = ConvertHelper.convert(dto, CreateDoorVisitorCommand.class);
+				doorCmd.setNamespaceId(namespaceId);
+				doorCmd.setDoorId(doorAccess.getId());
+				doorCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+				doorCmd.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+		        if(doorCmd.getValidEndMs() == null) {
+		        	if(cmd.getValidEndMs() == null){
+		        		doorCmd.setValidEndMs(System.currentTimeMillis() +  KEY_TICK_ONE_DAY);
+		        	}else{
+		        		doorCmd.setValidEndMs(cmd.getValidEndMs());
+		        	}
+		        }
+		        if(doorCmd.getValidFromMs() == null) {
+		        	if(cmd.getValidFromMs() == null){
+		        		doorCmd.setValidFromMs(System.currentTimeMillis());
+		        	}else{
+		        		doorCmd.setValidFromMs(cmd.getValidFromMs());
+		        	}
+		        }
+		        DoorAuth auth = createZuolinQrAuth(UserContext.current().getUser(), doorAccess, doorCmd);
+
+				//设置照片
+	            SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
+	            createPhotoCmd.setUserType((byte) 1);
+	            createPhotoCmd.setImgUri(dto.getHeadImgUri());
+	            createPhotoCmd.setImgUrl(dto.getHeadImgUri());
+	            createPhotoCmd.setAuthId(auth.getId());
+	            faceRecognitionPhotoService.setFacialRecognitionPhoto(createPhotoCmd);
+
+	            //返回值增加authid
+		        OpenAuthDTO dto1 = ConvertHelper.convert(dto, OpenAuthDTO.class);
+		        dto1.setMacAddresses(doorAccess.getHardwareId());
+		        dto1.setAuthId(auth.getId());
+		        response.getAuthList().add(dto1);
+			}
+			//一个door 批量处理完一起更新
+	        NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
+            cmd1.setDoorId(doorAccess.getId());
+            try{
+            	faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
+            }catch(Exception e){
+            	LOGGER.error("notify sync vistors error", e);
+            }
+		}
+
+		return response;
 	}
 
 	@Override

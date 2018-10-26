@@ -21,10 +21,28 @@ import java.sql.Timestamp;
  */
 public class CustomerRequirementAddressDTO {
     private Long requirementId;
+    private Long communityId;
+    private String communityName;
     private Long customerId;
     private Long addressId;
     private String addressName;
     private Double addressArea;
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
 
     public Double getAddressArea() {
         return addressArea;

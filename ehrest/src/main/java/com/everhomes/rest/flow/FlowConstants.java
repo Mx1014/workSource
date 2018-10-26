@@ -1,7 +1,11 @@
 package com.everhomes.rest.flow;
 
 public interface FlowConstants {
+
     String FLOW_STEP_NAME_PREFIX = "flow.stepname.";
+
+    String KV_CONFIG_PROJECT_CUSTOMIZE = "project-customize";
+
     String EVALURTE_TITLE = "evaluate";
     Integer FLOW_CONFIG_VER = 0;
     Integer FLOW_CONFIG_START = 1;

@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  */
 public class IdNameDTO {
 	
+	private Long parentId;
 	private Long id;
 	private String name;
 
@@ -32,6 +33,14 @@ public class IdNameDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 
 }

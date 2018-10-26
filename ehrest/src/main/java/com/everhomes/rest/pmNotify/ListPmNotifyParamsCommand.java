@@ -15,6 +15,10 @@ public class ListPmNotifyParamsCommand {
     private Long communityId;
 
     private String ownerType;
+    // organization id
+    private Long targetId;
+
+    private String targetType;
 
     public Long getCommunityId() {
         return communityId;
@@ -38,6 +42,22 @@ public class ListPmNotifyParamsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     @Override

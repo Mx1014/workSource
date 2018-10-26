@@ -32,11 +32,13 @@ public interface ServiceModuleConstants {
 
     long REQUISITION_MODULE = 25000L; // 请示单模块
     
-    long BUSINESS_INVITATION = 150000L;//招商管理模块
     long INVESTMENT_AD = 150010L;//子模块，房源招商模块
     long INVITED_CUSTOMER = 150020L;//子模块，客户管理模块
 	
 	long PAYMENT_CARD_MODULE = 41200L;
     
 
+    long OFFICE_CUBICLE = 40200L; //工位预订
+
+    long PRINT_MODULE = 41400L; // 云打印模块
 }

@@ -1,5 +1,6 @@
 package com.everhomes.asset.pmsy;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +216,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 	@Override
 	public void createPmsyOrder(PmsyOrder pmsyOrder){
 		Long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPmsyOrderItems.class));
+				.getSequenceDomainFromTablePojo(EhPmsyOrders.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPmsyOrdersDao dao = new EhPmsyOrdersDao(context.configuration());
 		pmsyOrder.setId(id);
@@ -301,4 +302,27 @@ public class PmsyProviderImpl implements PmsyProvider {
 		}
 		return results;
 	}
+	
+	public void updatePmsyOrderItemByOrderId(Long orderId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_PMSY_ORDER_ITEMS)
+	        .set(Tables.EH_PMSY_ORDER_ITEMS.STATUS,(byte)1) //1 ：表示已支付
+	        .where(Tables.EH_PMSY_ORDER_ITEMS.ORDER_ID.eq(orderId))
+	        .execute();
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmsyOrderItems.class,null);
+	}
+	
+	public List<PmsyOrder> findPmsyOrderItemsByOrderId(String billId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
+		List<PmsyOrder> results = new ArrayList<PmsyOrder>();
+		SelectQuery<EhPmsyOrderItemsRecord> query = context.selectQuery(Tables.EH_PMSY_ORDER_ITEMS);
+		query.addConditions(Tables.EH_PMSY_ORDER_ITEMS.BILL_ID.eq(billId));
+		query.addConditions(Tables.EH_PMSY_ORDER_ITEMS.STATUS.eq((byte)1));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, PmsyOrder.class));
+			return null;
+		});
+		return results;
+	}	
 }

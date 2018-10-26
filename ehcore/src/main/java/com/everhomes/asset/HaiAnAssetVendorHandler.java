@@ -17,14 +17,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.organization.pmsy.PmsyProvider;
 import com.everhomes.organization.pmsy.PmsyService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
-import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.PurchaseOrderDTO;
+import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.user.UserContext;
@@ -52,6 +53,9 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
     @Autowired
 	private PmsyService pmsyService;
     
+    @Autowired
+    private PmsyProvider pmsyProvider;
+    
     protected void checkPaymentBillOrderPaidStatus(CreatePaymentBillOrderCommand cmd) {
     	
     }
@@ -63,6 +67,7 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
     protected void afterBillOrderCreated(CreatePaymentBillOrderCommand cmd, PurchaseOrderCommandResponse orderResponse) {
         List<PaymentBillOrder> billOrderList = new ArrayList<PaymentBillOrder>();
         PaymentBillOrder orderBill  = new PaymentBillOrder();
+        orderBill.setBillId(cmd.getPmsyOrderId());
         orderBill.setNamespaceId(cmd.getNamespaceId());
         orderBill.setAmount(new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100)));
         orderBill.setOrderNumber(orderResponse.getBusinessOrderNumber());
@@ -108,7 +113,7 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
         }
         
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
         getPurchaseOrderCommand.setAccountCode(accountCode);
@@ -154,9 +159,18 @@ public class HaiAnAssetVendorHandler extends DefaultAssetVendorHandler{
             		purchaseOrderDTO.getPaymentType(), purchaseOrderDTO.getPaymentSucessTime(), purchaseOrderDTO.getPaymentChannel());
             return null;
         });
+        List<PaymentBillOrder> paymentBillOrderList = assetProvider.findPaymentBillOrderRecordByOrderNum(purchaseOrderDTO.getBusinessOrderNumber());
         PayCallbackCommand cmd2 = new PayCallbackCommand();
-		if(purchaseOrderDTO.getId() != null) {
-			cmd2.setOrderNo(purchaseOrderDTO.getId().toString());
+		if(paymentBillOrderList != null) {
+			PaymentBillOrder paymentBillOrder = paymentBillOrderList.get(0);
+			if(paymentBillOrder != null) {
+				cmd2.setOrderNo(paymentBillOrder.getBillId());
+				this.dbProvider.execute((TransactionStatus status) -> {
+		        	//更新eh_pmsy_order_items表的支付状态
+					pmsyProvider.updatePmsyOrderItemByOrderId(Long.parseLong(paymentBillOrder.getBillId()));
+		            return null;
+		        });
+			}
 		}
 		cmd2.setOrderType(purchaseOrderDTO.getPaymentOrderType().toString());
 		if(purchaseOrderDTO.getBusinessPayerId() != null) {

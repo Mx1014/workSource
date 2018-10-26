@@ -44,10 +44,7 @@ import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import com.mysql.jdbc.log.Log;
 import org.jooq.*;
 import org.slf4j.Logger;
@@ -903,6 +900,29 @@ public class FamilyProviderImpl implements FamilyProvider {
 	}
 
 
+	@Override
+	public List<Family> listFamilByCommunityIdAndUid(Long communityId, Long uid) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+
+		SelectQuery<Record> query = context.select(Tables.EH_GROUPS.fields()).from(Tables.EH_GROUPS).getQuery();
+		query.addJoin(Tables.EH_GROUP_MEMBERS, JoinType.JOIN, Tables.EH_GROUP_MEMBERS.GROUP_ID.eq(Tables.EH_GROUPS.ID));
+		query.addConditions(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId));
+		query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()));
+		query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.eq(uid));
+
+		List<Group> groups = query.fetch().map(r -> RecordHelper.convert(r, Group.class));
+
+		List<Family> families = new ArrayList<>();
+		if(groups != null){
+			for (Group group:  groups){
+				families.add(ConvertHelper.convert(group, Family.class));
+			}
+		}
+
+		return families;
+	}
 
 
 }

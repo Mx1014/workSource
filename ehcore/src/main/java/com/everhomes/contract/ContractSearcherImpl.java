@@ -15,11 +15,17 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -369,17 +375,21 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
                 }
                 if(contract.getCategoryItemId() != null) {
-                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), contract.getCategoryItemId());
+                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),cmd.getOrgId(), contract.getCommunityId(), contract.getCategoryItemId());
                     if(item != null) {
                         dto.setCategoryItemName(item.getItemDisplayName());
                     }
                 }
                 
 				if (contract.getSponsorUid() != null) {
-					// 用户可能不在组织架构中 所以用nickname
-					User user = userProvider.findUserById(contract.getSponsorUid());
-					if (user != null) {
-						dto.setSponsorName(user.getNickName());
+					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+					if (cmd.getNamespaceId() == 999929) {
+						dto.setSponsorName(contract.getSponsorUid());
+					} else {
+						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));
+						if (user != null) {
+							dto.setSponsorName(user.getNickName());
+						}
 					}
 				}
                 

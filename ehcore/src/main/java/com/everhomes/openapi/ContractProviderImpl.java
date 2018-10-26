@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
@@ -81,9 +82,35 @@ import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -113,6 +140,9 @@ public class ContractProviderImpl implements ContractProvider {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 	
+	@Autowired
+    private OrganizationService organizationService;
+
 	@Override
 	public void createContract(Contract contract) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContracts.class));
@@ -641,7 +671,7 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long categoryId) {
+	public ContractParam findContractParamByCommunityId(Integer namespaceId, Long communityId, Byte payorreceiveContractType, Long ownerId,Long categoryId, Long appId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractParamsRecord> query = context.selectQuery(Tables.EH_CONTRACT_PARAMS);
 		query.addConditions(Tables.EH_CONTRACT_PARAMS.NAMESPACE_ID.eq(namespaceId));
@@ -660,8 +690,15 @@ public class ContractProviderImpl implements ContractProvider {
 		if(communityId == null) {
 			query.addConditions(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.eq(0L)
 					.or(Tables.EH_CONTRACT_PARAMS.COMMUNITY_ID.isNull()));
+			
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
+			
 		}
-
+		// zuolin base 
+		/*if(ownerId!=null){
+			query.addConditions(Tables.EH_CONTRACT_PARAMS.OWNER_ID.eq(ownerId));
+		}*/
+		
 		List<ContractParam> result = new ArrayList<>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, ContractParam.class));
@@ -737,13 +774,27 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public Timestamp findLastContractVersionByCommunity(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.UPDATE_TIME);
+		}
+		return null;
+	}
+
+
+	@Override
 	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
-		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
-		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		/*query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -752,6 +803,28 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 
 		return result;
+	}
+	
+	@Override
+	public Contract findContractByNamespaceToken(Integer namespaceId, String namespaceContractType, Long namespaceContractToken, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceContractType));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		if (namespaceContractToken != null || "".equals(namespaceContractToken)) {
+			query.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(namespaceContractToken.toString()));
+		}
+		
+		Record result = query.fetchAny();
+		if (result != null) {
+			return ConvertHelper.convert(result, Contract.class);
+		}
+		return null;
 	}
 
 	@Override
@@ -1075,11 +1148,11 @@ public class ContractProviderImpl implements ContractProvider {
                                 field.getFieldName(), newData, oldData);
 						
                         if(field.getFieldName().lastIndexOf("ItemId") > -1){
-							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+							ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),contract.getOrgId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
 					        if(levelItemNew != null) {
 					        	newData = levelItemNew.getItemDisplayName();
 					        }
-					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+					        ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),contract.getOrgId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
 					        if(levelItemOld != null) {
 					        	oldData = levelItemOld.getItemDisplayName();
 					        }
@@ -1141,11 +1214,11 @@ public class ContractProviderImpl implements ContractProvider {
 						}
                         FieldParams params = (FieldParams) StringHelper.fromJsonString(field.getFieldParam(), FieldParams.class);
                         if((params.getFieldParamType().equals("select") || params.getFieldParamType().equals("customizationSelect")) && field.getFieldName().lastIndexOf("Id") > -1){
-                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
+                            ScopeFieldItem levelItemNew = fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCreateOrgId(),contract.getCommunityId(),(objNew == null ? -1l : Long.parseLong(objNew.toString())));
                             if(levelItemNew != null) {
                                 newData = levelItemNew.getItemDisplayName();
                             }
-                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
+                            ScopeFieldItem levelItemOld = fieldProvider.findScopeFieldItemByFieldItemId(exist.getNamespaceId(),contract.getCreateOrgId(),exist.getCommunityId(), (objOld == null ? -1l : Long.parseLong(objOld.toString())));
                             if(levelItemOld != null) {
                                 oldData = levelItemOld.getItemDisplayName();
                             }
@@ -1235,8 +1308,8 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
-	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,
-			Long categoryId, String name, Long pageAnchor, Integer pageSize) {
+	public List<ContractTemplate> listContractTemplates(Integer namespaceId, Long ownerId, String ownerType,Long orgId,
+			Long categoryId, String name, Long pageAnchor, Integer pageSize, Long appId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractTemplates.class));
         EhContractTemplates t1 = Tables.EH_CONTRACT_TEMPLATES.as("t1");
         EhContractTemplates t2 = Tables.EH_CONTRACT_TEMPLATES.as("t2");
@@ -1262,14 +1335,25 @@ public class ContractProviderImpl implements ContractProvider {
 			
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.eq(ownerId)))));
+			
+			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
 		}else {
 			//查询所有的通用模板
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t2.OWNER_ID.eq(0L)))));
 			cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ID
 					.notIn(context.select(t1.ID).from(t1, t2).where(t1.ID.eq(t2.PARENT_ID).and(t1.OWNER_ID.notEqual(0L)))));
+			// get all communities data and all organization owner general data
+			if (orgId != null) {
+				cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).or(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(0L)));
+				//cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.ORG_ID.eq(orgId).and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.ne(0L)));
+			}
+			
+			 List<Long> communityIds = new ArrayList<>();
+		     communityIds =  organizationService.getOrganizationProjectIdsByAppId(orgId, appId);
+		     cond = cond.and(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.in(communityIds).or(Tables.EH_CONTRACT_TEMPLATES.OWNER_ID.eq(0L)));
 		}
-		
+
 		query.orderBy(Tables.EH_CONTRACT_TEMPLATES.CREATE_TIME.desc());
 		
 		if(null != pageSize)
@@ -1330,7 +1414,7 @@ public class ContractProviderImpl implements ContractProvider {
 		
 		return true;
 	}
-	
+
 	@Override
 	public Long findCategoryIdByNamespaceId(Integer namespaceId) {
 		DSLContext context = getReadOnlyContext();
@@ -1365,13 +1449,13 @@ public class ContractProviderImpl implements ContractProvider {
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 										.fetchInto(Long.class);
-		
+
 		List<Long> addressIdsInCommunity = context.select(Tables.EH_ADDRESSES.ID)
 													.from(Tables.EH_ADDRESSES)
 													.where(Tables.EH_ADDRESSES.ID.in(addressIds))
 													.and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
 													.fetchInto(Long.class);
-		
+
 		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.leftOuterJoin(Tables.EH_CONTRACTS)
@@ -1379,7 +1463,7 @@ public class ContractProviderImpl implements ContractProvider {
 										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdsInCommunity))
 										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
-										
+
 		if (contractIds!=null && contractIds.size()>0) {
 			return contractIds.size();
 		}
@@ -1389,7 +1473,7 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Double getTotalRentInBuilding(String buildingName) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.leftOuterJoin(Tables.EH_CONTRACTS)
@@ -1397,7 +1481,7 @@ public class ContractProviderImpl implements ContractProvider {
 										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
-		
+
 		List<Double> rentList =  context.select(Tables.EH_CONTRACTS.RENT)
 										.from(Tables.EH_CONTRACTS)
 										.where(Tables.EH_CONTRACTS.ID.in(contractIds))
@@ -1420,7 +1504,7 @@ public class ContractProviderImpl implements ContractProvider {
 						.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 						.fetchInto(Contract.class);
 	}
-	
+
 	@Override
 	public Byte filterAptitudeCustomer(Long ownerId, Integer namespaceId){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEnterpriseCustomerAptitudeFlag.class));
@@ -1474,7 +1558,7 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Integer getRelatedContractCountByAddressIds(List<Long> addressIdList) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		
+
 		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.leftOuterJoin(Tables.EH_CONTRACTS)
@@ -1482,7 +1566,7 @@ public class ContractProviderImpl implements ContractProvider {
 										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdList))
 										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
-		
+
 		if (contractIds!=null && contractIds.size()>0) {
 			return contractIds.size();
 		}
@@ -1492,7 +1576,7 @@ public class ContractProviderImpl implements ContractProvider {
 	@Override
 	public Double getTotalRentByAddressIds(List<Long> addressIdList) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-				
+
 		List<Long> contractIds = context.selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_ID)
 										.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 										.leftOuterJoin(Tables.EH_CONTRACTS)
@@ -1500,7 +1584,7 @@ public class ContractProviderImpl implements ContractProvider {
 										.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.in(addressIdList))
 										.and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 										.fetchInto(Long.class);
-		
+
 		List<Double> rentList =  context.select(Tables.EH_CONTRACTS.RENT)
 										.from(Tables.EH_CONTRACTS)
 										.where(Tables.EH_CONTRACTS.ID.in(contractIds))
@@ -1521,6 +1605,17 @@ public class ContractProviderImpl implements ContractProvider {
 					  .where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 					  .and(Tables.EH_CONTRACTS.STATUS.eq(statusCode))
 					  .fetchInto(Contract.class);
+	}
+	
+	@Override
+	public List<ContractCategory> listContractAppCategory(Integer namespaceId) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ContractCategory> list = dslContext.select()
+	        .from(Tables.EH_CONTRACT_CATEGORIES)
+	        .where(Tables.EH_CONTRACT_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_CONTRACT_CATEGORIES.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+	        .fetchInto(ContractCategory.class);
+		return list;
 	}
 
 }

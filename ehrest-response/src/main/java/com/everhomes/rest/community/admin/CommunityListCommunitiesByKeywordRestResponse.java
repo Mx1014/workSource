@@ -4,20 +4,20 @@ package com.everhomes.rest.community.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 
 public class CommunityListCommunitiesByKeywordRestResponse extends RestResponseBase {
 
-    private ListCommunitiesByKeywordCommandResponse response;
+    private ListCommunitiesByKeywordResponse response;
 
     public CommunityListCommunitiesByKeywordRestResponse () {
     }
 
-    public ListCommunitiesByKeywordCommandResponse getResponse() {
+    public ListCommunitiesByKeywordResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListCommunitiesByKeywordCommandResponse response) {
+    public void setResponse(ListCommunitiesByKeywordResponse response) {
         this.response = response;
     }
 }

@@ -1,11 +1,10 @@
-ehapp.version=master-SNAPSHOT
+ehapp.version=5.6.0-SNAPSHOT
 codegen.version=0.0.3-SNAPSHOT
 ehutil.version=1.0.0-SNAPSHOT
 ehutil-common.version=1.0.0-SNAPSHOT
 ehplatform.version=1.0.1-SNAPSHOT
 ehplatform-persist.version=1.0.0-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
-ehorder-sdk.version=1.0.0-SNAPSHOT
 
 bluto.version=1.0.3
 scrabbler.version=1.0.0
@@ -93,3 +92,9 @@ pay-sdk.version=5.8.0-SNAPSHOT
 sensitive-word.version=1.2.0
 
 spring-kafka.version=1.2.2.RELEASE
+
+ehuser-sdk.version=5.10.0-SNAPSHOT
+
+ehpromotion-sdk.version=1.1.0-SNAPSHOT
+
+

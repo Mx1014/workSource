@@ -361,7 +361,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         ParkingClearanceLog log = new ParkingClearanceLog();
         log.setNamespaceId(cmd.getNamespaceId());
         log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-        if(configurationProvider.getBooleanValue("parking.zijing.directcompleted",true)) {
+        if(configurationProvider.getBooleanValue("parking.zijing.directcompleted",false)) {
             log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
         }
         log.setParkingLotId(cmd.getParkingLotId());
@@ -522,7 +522,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (cmd.getParkingLotId() != null) {
             ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
             if (parkingLot != null) {
-                parkingLots.add(parkingLot);
+//                parkingLots.add(parkingLot);
+            	checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
             }
         } else {
             parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());

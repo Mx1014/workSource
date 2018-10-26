@@ -1,24 +1,35 @@
 package com.everhomes.rest.portal;
 
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 
 /**
  * <ul>
- * <li>id: 门户itemGroup的id</li>
- * <li>layoutId: 门户layout的id</li>
- * <li>label: 门户itemGroup名称</li>
- * <li>description: 门户itemGroup描述</li>
- * <li>separatorFlag: 底部隔栏flag</li>
- * <li>separatorHeight: 底部隔栏高度</li>
- * <li>widget: 组件</li>
- * <li>style: 组件样式</li>
- * <li>instanceConfig: 组件的配置参数，具体参数具体定义</li>
- * <li>createTime: 创建时间</li>
- * <li>updateTime: 修改时间</li>
- * <li>creatorUid: 创建人id</li>
- * <li>creatorUName: 创建人名称</li>
- * <li>operatorUid: 操作人id</li>
- * <li>operatorUName: 操作人名称</li>
+ *     <li>id: 门户itemGroup的id</li>
+ *     <li>layoutId: 门户layout的id</li>
+ *     <li>label: 门户itemGroup名称</li>
+ *     <li>separatorFlag: 底部隔栏flag</li>
+ *     <li>separatorHeight: 底部隔栏高度</li>
+ *     <li>widget: 组件</li>
+ *     <li>style: 组件样式</li>
+ *     <li>instanceConfig: 组件的配置参数，具体参数具体定义</li>
+ *     <li>defaultOrder: defaultOrder</li>
+ *     <li>createTime: 创建时间</li>
+ *     <li>updateTime: 修改时间</li>
+ *     <li>operatorUid: 操作人id</li>
+ *     <li>creatorUid: 创建人id</li>
+ *     <li>creatorUName: 创建人名称</li>
+ *     <li>operatorUName: 操作人名称</li>
+ *     <li>description: 门户itemGroup描述</li>
+ *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
+ *     <li>title: 标题</li>
+ *     <li>titleUri: 标题uri</li>
+ *     <li>titleUrl: 标题url</li>
+ *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
+ *     <li>subTitle: 副标题</li>
+ *     <li>titleSize: 标题大小，0-小，1-中，2-大，参考{@link TitleSize}</li>
+ *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class PortalItemGroupDTO {
@@ -39,6 +50,22 @@ public class PortalItemGroupDTO {
     private String creatorUName;
     private String operatorUName;
     private String description;
+
+    private Byte titleFlag;
+
+    private String title;
+
+    private String titleUri;
+
+    private String titleUrl;
+
+    private Integer titleStyle;
+
+    private String subTitle;
+
+    private Byte titleSize;
+
+    private Byte titleMoreFlag;
 
     public Long getId() {
         return id;
@@ -166,5 +193,74 @@ public class PortalItemGroupDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Byte getTitleFlag() {
+        return titleFlag;
+    }
+
+    public void setTitleFlag(Byte titleFlag) {
+        this.titleFlag = titleFlag;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitleUri() {
+        return titleUri;
+    }
+
+    public void setTitleUri(String titleUri) {
+        this.titleUri = titleUri;
+    }
+
+    public String getTitleUrl() {
+        return titleUrl;
+    }
+
+    public void setTitleUrl(String titleUrl) {
+        this.titleUrl = titleUrl;
+    }
+
+    public Integer getTitleStyle() {
+        return titleStyle;
+    }
+
+    public void setTitleStyle(Integer titleStyle) {
+        this.titleStyle = titleStyle;
+    }
+
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
+    public Byte getTitleSize() {
+        return titleSize;
+    }
+
+    public void setTitleSize(Byte titleSize) {
+        this.titleSize = titleSize;
+    }
+
+    public Byte getTitleMoreFlag() {
+        return titleMoreFlag;
+    }
+
+    public void setTitleMoreFlag(Byte titleMoreFlag) {
+        this.titleMoreFlag = titleMoreFlag;
+    }
+
+    @Override
+    public String toString(){
+        return StringHelper.toJsonString(this);
     }
 }

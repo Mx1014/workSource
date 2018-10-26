@@ -6,10 +6,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 {
 	"contract": {
 		"properties": {
-			"name":{
-                "type":"string",
-                "index":"not_analyzed"
-            },
+			"name":{ "type":"string","index":"not_analyzed"},
 			"customerName":{"type":"string","index":"not_analyzed"},
             "contractNumber":{
                 "type":"string", 

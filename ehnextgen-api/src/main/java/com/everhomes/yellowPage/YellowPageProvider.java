@@ -31,7 +31,7 @@ public interface YellowPageProvider {
 												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag);
 
 	List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
 
 	void createYellowPage(YellowPage yellowPage);
 
@@ -55,6 +55,7 @@ public interface YellowPageProvider {
 	YellowPage findYellowPageById(Long id, String ownerType, Long ownerId);
 	
 	ServiceAllianceCategories findCategoryById(Long id);
+	ServiceAllianceCategories findMainCategory(String ownerTye, Long ownerId, Long type);
 	ServiceAllianceCategories findCategoryByName(Integer namespaceId, String name);
 	ServiceAllianceCategories findCategoryByEntryId(Integer namespaceId, Integer EntryId);
 	void createCategory(ServiceAllianceCategories category);
@@ -64,14 +65,11 @@ public interface YellowPageProvider {
 	void createServiceAllianceAttachments(ServiceAllianceAttachment attachment);
 	void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId);
 	
-	ServiceAlliances queryServiceAllianceTopic(String ownerType, Long ownerId, Long type);
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
+	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, List<Byte> displayDestination, boolean queryAllChilds);
 
-	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
-	
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
 	void deleteNotifyTarget(Long id);
@@ -95,8 +93,6 @@ public interface YellowPageProvider {
 	Long createApartmentRequests(ServiceAllianceApartmentRequests request);
 	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
 	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
-	
-	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
 	Long createInvestRequests(ServiceAllianceInvestRequests request);
 	ServiceAllianceInvestRequests findInvestRequests(Long id);
@@ -106,6 +102,8 @@ public interface YellowPageProvider {
 	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
+
+	List<ServiceAllianceAttachment> listAttachments(Long ownerId, Byte attachmentType);
 
 	Long createGolfRequest(ServiceAllianceGolfRequest request);
 
@@ -141,13 +139,6 @@ public interface YellowPageProvider {
 
 	void updateServiceAllianceCategory(ServiceAllianceCategories serviceAllianceCategories);
 
-	void createServiceAllianceSkipRule(ServiceAllianceSkipRule serviceAllianceSkipRule);
-
-	void deleteServiceAllianceSkipRule(Long id);
-
-	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId, Integer namespaceId);
-
-
 	List<Integer> listAscEntryIds(int namespaceId);
 
 
@@ -167,4 +158,16 @@ public interface YellowPageProvider {
 	void updateServiceTypeOrders(Long id, Long order);
 
 
+
+	void deleteProjectMainConfig(Long projectId, Long type);
+
+	void deleteProjectCategories(Long projectId, Long type);
+
+	List<ServiceAllianceCategories> listChildCategories(Long parentId);
+
+
+	void updateMainCategorysByType(Long type, Byte enableComment, Byte enableProvider, String name);
+
+
+	List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
 }

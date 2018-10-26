@@ -293,7 +293,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                             for(DynamicColumnDTO column : columns) {
                                 LOGGER.warn("CUSTOMER_TAX: cellvalue: {}, namespaceId: {}, communityId: {}, moduleName: {}", column.getValue(), namespaceId, communityId, moduleName);
                                 if("taxPayerTypeId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(),customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -320,7 +320,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("accountNumberTypeId".equals(column.getFieldName()) || "accountTypeId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -351,7 +351,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                                         || "degreeItemId".equals(column.getFieldName()) || "returneeFlag".equals(column.getFieldName())
                                         || "abroadItemId".equals(column.getFieldName()) || "technicalTitleItemId".equals(column.getFieldName())
                                         || "individualEvaluationItemId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -380,7 +380,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("trademarkTypeItemId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -417,7 +417,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                                     if(sources.length > 0) {
                                         column.setValue("");
                                         for(int i = 0; i < sources.length; i++) {
-                                            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                             if(item != null) {
                                                 if("".equals(column.getValue())) {
                                                     column.setValue(item.getItemId().toString());
@@ -431,7 +431,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                                 if("status".equals(column.getFieldName())) {
                                     ScopeField field = fieldProvider.findScopeField(namespaceId, communityId, ds.getGroupId(), column.getHeaderDisplay());
                                     if(field != null) {
-                                        ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                        ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                         if(item != null) {
                                             column.setValue(item.getBusinessValue().toString());
                                         }
@@ -462,7 +462,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                             for(DynamicColumnDTO column : columns) {
                                 if("enterpriseTypeItemId".equals(column.getFieldName()) || "shareTypeItemId".equals(column.getFieldName())
                                         || "propertyType".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -536,7 +536,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("patentStatusItemId".equals(column.getFieldName()) || "patentTypeItemId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -586,7 +586,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("trackingType".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getBusinessValue().toString());
                                     }
@@ -631,7 +631,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("trackingType".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getBusinessValue().toString());
                                     }
@@ -703,7 +703,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         if(columns != null && columns.size() > 0) {
                             for(DynamicColumnDTO column : columns) {
                                 if("departureNatureId".equals(column.getFieldName()) || "departureDirectionId".equals(column.getFieldName())) {
-                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+                                    ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
                                     if(item != null) {
                                         column.setValue(item.getItemId().toString());
                                     }
@@ -894,7 +894,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setGeohash(geohash);
             }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
                         updateEnterpriseCustomer(customer, enterpriseCustomer, customerContactString, trackerUidString, channelContactString);
@@ -946,7 +946,7 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                 || "dropBox8ItemId".equals(column.getFieldName()) || "dropBox9ItemId".equals(column.getFieldName())
                 || "aptitudeFlagItemId".equals(column.getFieldName())) {
             // 历史bug
-            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
+            ScopeFieldItem item = fieldService.findScopeFieldItemByDisplayNameAndFieldId(customerInfo.getNamespaceId(), customerInfo.getOwnerId(), customerInfo.getCommunityId(), customerInfo.getModuleName(), column.getValue(), column.getFieldId());
             if(item != null) {
                 if(!column.getFieldName().equals("aptitudeFlagItemId")) {
                     column.setValue(item.getItemId().toString());
@@ -1121,7 +1121,9 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(enterpriseCustomer.getId());
                         tracker.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     }
                 }
             }
@@ -1143,14 +1145,18 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(Long.valueOf(contactPhone));
+
+                    contact.setPhoneNumber(contactPhone);
                     contact.setContactType(CustomerContactType.CUSTOMER_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
                     contact.setCustomerId(enterpriseCustomer.getId());
                     contact.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                    invitedCustomerProvider.createContact(contact);
+                    if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                        invitedCustomerProvider.createContact(contact);
+
+                    }
 
                 }
             }
@@ -1172,14 +1178,19 @@ public class InvitedCustomerDynamicExcelHandler implements DynamicExcelHandler {
 
                     CustomerContact contact = new CustomerContact();
                     contact.setName(name);
-                    contact.setPhoneNumber(Long.valueOf(contactPhone));
+
+
+                    contact.setPhoneNumber(contactPhone);
                     contact.setContactType(CustomerContactType.CHANNEL_CONTACT.getCode());
                     contact.setCommunityId(enterpriseCustomer.getCommunityId());
                     contact.setNamespaceId(enterpriseCustomer.getNamespaceId());
                     contact.setStatus(CommonStatus.ACTIVE.getCode());
                     contact.setCustomerId(enterpriseCustomer.getId());
                     contact.setCustomerSource(enterpriseCustomer.getCustomerSource());
-                    invitedCustomerProvider.createContact(contact);
+                    if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                        invitedCustomerProvider.createContact(contact);
+
+                    }
 
                 }
             }

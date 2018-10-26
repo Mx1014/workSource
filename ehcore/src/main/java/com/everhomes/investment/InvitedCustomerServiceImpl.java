@@ -1,22 +1,31 @@
 package com.everhomes.investment;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.*;
+import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ListFieldItemCommand;
 import com.everhomes.search.EnterpriseCustomerSearcher;
@@ -27,11 +36,17 @@ import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.varField.FieldService;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
@@ -45,6 +60,9 @@ import java.util.stream.Collectors;
 public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerServiceImpl.class);
+    private static final String CreateCustomer = "/CreateCustomer";
+    private static final Integer SUCCESS_CODE = 0;
+    private static final String CreateContract = "/CreateContract";
 
     @Autowired
     private EnterpriseCustomerSearcher customerSearcher;
@@ -85,6 +103,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Autowired
     private LocaleStringService localeStringService;
 
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+
 
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.INVITED_CUSTOMER, null, null, null, communityId);
@@ -122,7 +147,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -166,7 +193,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
@@ -208,6 +237,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         try {
             cmd2.setCheckAuthFlag(null);
             cmd2.setModuleName("investment_promotion");
+            if (cmd.getTransCommunityId() != null && cmd.getTransCommunityId() != 0) {
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(cmd2.getNamespaceId(), cmd.getTransCommunityId(), cmd2.getName());
+                if(customers.size() > 0){
+                    LOGGER.error("the community you want to change has already existed ");
+                    throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,
+                            "the community you want to change has already existed");
+                }
+                cmd2.setCommunityId(cmd.getTransCommunityId());
+                cmd2.setTransCommunityId(cmd.getTransCommunityId());
+            }
             customerDTO = customerService.updateEnterpriseCustomer(cmd2);
         }catch (RuntimeErrorException e){
             LOGGER.error(e.getMessage());
@@ -225,7 +264,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 contact.setNamespaceId(cmd.getNamespaceId());
                 contact.setStatus(CommonStatus.ACTIVE.getCode());
                 contact.setCustomerSource(cmd.getCustomerSource());
-                invitedCustomerProvider.createContact(contact);
+                if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                    invitedCustomerProvider.createContact(contact);
+                }
             });
         }
         // reflush requirement
@@ -270,7 +311,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 tracker.setNamespaceId(cmd.getNamespaceId());
                 tracker.setStatus(CommonStatus.ACTIVE.getCode());
                 tracker.setCustomerId(cmd.getId());
-                invitedCustomerProvider.createTracker(tracker);
+                if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                    invitedCustomerProvider.createTracker(tracker);
+                }
             });
         }
         EnterpriseCustomer customer = ConvertHelper.convert(customerDTO, EnterpriseCustomer.class);
@@ -320,7 +363,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
         customerSearcher.deleteById(cmd.getId());
         DeleteEnterpriseCustomerCommand cmd2 = ConvertHelper.convert(cmd, DeleteEnterpriseCustomerCommand.class);
-        customerService.deleteEnterpriseCustomer(cmd2, true);
+        customerService.deleteEnterpriseCustomer(cmd2, false);
         invitedCustomerProvider.deleteCustomerTrackersByCustomerId(cmd.getId());
         invitedCustomerProvider.deleteCustomerContacts(cmd.getId());
 
@@ -353,6 +396,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             fieldItemCommand.setCommunityId(cmd.getCommunityId());
             // this field id menus investment enterprise levelItemId private key
             fieldItemCommand.setFieldId(5L);
+            fieldItemCommand.setModuleName("investment_promotion");
             List<FieldItemDTO> items = fieldService.listFieldItems(fieldItemCommand);
             Map<Long, FieldItemDTO> itemsMap = transferCurrentCommunityItemsMap(items);
             if (itemsMap != null && itemsMap.size() > 0) {
@@ -457,16 +501,29 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 List<CustomerRequirementAddress> addresses = invitedCustomerProvider.findRequirementAddressByRequirementId(requirement.getId());
                 if(addresses != null){
                     List<CustomerRequirementAddressDTO> dtos = addresses.stream().map(r -> ConvertHelper.convert(r, CustomerRequirementAddressDTO.class)).collect(Collectors.toList());
-                    dtos.forEach(r ->{
-                        Address address = addressProvider.findAddressById(r.getAddressId());
-                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
-                        }else{
-                            r.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                            r.setAddressArea(address.getBuildArea());
+                    if(dtos != null && dtos.size() > 0){
+                        dtos.forEach(r ->{
+                            Address address = addressProvider.findAddressById(r.getAddressId());
+                            if(address != null){
+                                if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                                    r.setCommunityId(address.getCommunityId());
+                                    r.setCommunityName(address.getCommunityName());
+                                    r.setAddressArea(address.getBuildArea());
+                                }else{
+                                    r.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName());
+                                    r.setAddressArea(address.getBuildArea());
+                                    r.setCommunityId(address.getCommunityId());
+                                    r.setCommunityName(address.getCommunityName());
+                                }
+                            }else{
+                                dtos.remove(r);
+                            }
+                        });
+                        if(dtos.size() > 0) {
+                            requirementDTO.setAddresses(dtos);
                         }
-                    });
-                    requirementDTO.setAddresses(dtos);
+                    }
                 }
 
 
@@ -500,15 +557,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                 addresses.forEach(a -> {
                     CustomerRequirementAddressDTO addressDTO = ConvertHelper.convert(a, CustomerRequirementAddressDTO.class);
                     Address address = addressProvider.findAddressById(addressDTO.getAddressId());
-                    if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
+                    if(address != null){
+                        if(address.getStatus().equals(AddressAdminStatus.INACTIVE.getCode())){
+                            addressDTO.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName() + "(房源已删除)");
 
-                    }else{
-                        addressDTO.setAddressName(address.getBuildingName() + "/" + address.getApartmentName());
-                        addressDTO.setAddressArea(address.getRentArea());
+                        }else{
+                            addressDTO.setAddressName(address.getCommunityName() + "/" + address.getBuildingName() + "/" + address.getApartmentName());
+                            addressDTO.setAddressArea(address.getRentArea());
+                        }
                     }
-
-
                     addressesDTO.add(addressDTO);
 
                 });
@@ -522,6 +579,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public List<Long> changeInvestmentToCustomer(ChangeInvestmentToCustomerCommand cmd){
+
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_ENTERPRISE_CUSTOMER, cmd.getOrgId(), cmd.getCommunityId());
+
+
         List<Long> customerIds = cmd.getCustomerIds();
         List<EnterpriseCustomer> customers = new ArrayList<>();
 
@@ -576,7 +637,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                     tracker.setStatus(CommonStatus.ACTIVE.getCode());
                     tracker.setCustomerId(invitedCustomerDTO.getId());
                     tracker.setCustomerSource(invitedCustomerDTO.getCustomerSource());
-                    invitedCustomerProvider.createTracker(tracker);
+                    if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                        invitedCustomerProvider.createTracker(tracker);
+                    }
                 });
             }
             invitedCustomerDTO.setTrackers(trackers);
@@ -602,6 +665,20 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         cmd.setIsAdmin(isAdmin);
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
+
+
+    @Override
+    public DynamicImportResponse importEnterpriseCustomer(ImportFieldExcelCommand cmd, MultipartFile mfile){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, cmd.getOrgId(), cmd.getCommunityId());
+        return fieldService.importDynamicExcel(cmd,mfile);
+    }
+
+    @Override
+    public void exportContractListByContractList(ExportEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(UserContext.getCurrentNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_EXPORT, cmd.getOrgId(), cmd.getCommunityId());
+        customerService.exportContractListByContractList(cmd);
+    }
+
 
     @Override
     public InvitedCustomerDTO createInvitedCustomerWithoutAuth(CreateInvitedCustomerCommand cmd) {
@@ -633,7 +710,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         contact.setNamespaceId(cmd.getNamespaceId());
                         contact.setStatus(CommonStatus.ACTIVE.getCode());
                         contact.setCustomerSource(cmd.getCustomerSource());
-                        invitedCustomerProvider.createContact(contact);
+                        if(StringUtils.isNotBlank(contact.getName()) && StringUtils.isNotBlank(contact.getPhoneNumber())){
+                            invitedCustomerProvider.createContact(contact);
+                        }
                     });
                 }
                 // reflush requirement
@@ -677,7 +756,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
                         tracker.setNamespaceId(cmd.getNamespaceId());
                         tracker.setStatus(CommonStatus.ACTIVE.getCode());
                         tracker.setCustomerId(cmd.getId());
-                        invitedCustomerProvider.createTracker(tracker);
+                        if(tracker.getTrackerUid() != null && tracker.getTrackerUid() != 0){
+                            invitedCustomerProvider.createTracker(tracker);
+                        }
                     });
                 }
 
@@ -695,6 +776,114 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         }
 
         return null;
+    }
+
+
+    @Override
+    public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
+        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        SearchEnterpriseCustomerResponse res = null;
+        if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
+            res = customerSearcher.queryEnterpriseCustomersById(cmd);
+        }else{
+            res = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
+
+        }
+        for(EnterpriseCustomerDTO dto : res.getDtos()){
+            customerProvider.updateCustomerAptitudeFlag(dto.getId(), 1l);
+        }
+    }
+
+    @Override
+    public String signCustomerDataToThird(SignCustomerDataToThirdCommand cmd){
+        ViewInvestmentDetailCommand cmd2 = new ViewInvestmentDetailCommand();
+        cmd2.setIsAdmin(true);
+        cmd2.setId(cmd.getId());
+        cmd2.setOrgId(cmd.getOrgId());
+        cmd2.setCommunityId(cmd.getCommunityId());
+        InvitedCustomerDTO customer = viewInvestmentDetail(cmd2);
+
+        Map<String, String> params= new HashMap<>();
+        Map<String, String> codeString= new HashMap<>();
+
+        Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+
+
+
+        if(customer.getContacts() != null && customer.getContacts().size() > 0){
+            for (CustomerContactDTO contactDTO : customer.getContacts()) {
+                if(contactDTO.getContactType().equals(CustomerContactType.CUSTOMER_CONTACT.getCode())){
+                    params.put("TakerName", contactDTO.getName());
+                    params.put("TakerPhone", contactDTO.getPhoneNumber());
+                    params.put("TakerEmail", contactDTO.getEmail());
+                    break;
+                }
+            }
+        }
+
+        params.put("CustomerName",customer.getName());
+        params.put("propertyid", community.getNamespaceCommunityToken());
+        params.put("AccountNo", customer.getId().toString());
+        params.put("OA-AccountID", customer.getId().toString());
+        params.put("IsCompany", RACustomerType.CUSTOMER_COMPANY);
+
+        String Sales = organizationService.getAccountByTargetIdAndOrgId(UserContext.current().getUser().getId(), cmd.getOrgId());
+        if(StringUtils.isNotBlank(Sales)){
+            params.put("Sales", Sales);
+        }else{
+            params.put("Sales", "office.app");
+        }
+
+
+
+        String account = null;
+        String url = configurationProvider.getValue("RuiAnCM.sync.url", "");
+
+        try {
+            String codeStr = JSONObject.toJSONString(params);
+            codeString.put("CodeStr", codeStr);
+            LOGGER.info("create Customer for RuiAnCM param: {}", codeString);
+            account = HttpUtils.get(url+CreateCustomer, codeString, 60, "UTF-8");
+        } catch (Exception e) {
+            LOGGER.error("create Customer for RuiAnCM error: {}", e);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync customer from RuiAnCM error");
+        }
+        account = account.substring(account.indexOf(">{")+1, account.indexOf("</string>"));
+
+        LOGGER.info("create Customer from RuiAnCM is complete. ");
+
+        RAAccountObject raAccountObject =
+                (RAAccountObject) StringHelper.fromJsonString(account, RAAccountObject.class);
+
+        LOGGER.info("receive syncCustomer for RuiAnCM param: {}", account);
+
+        if(raAccountObject.getErrorCode().equals(SUCCESS_CODE) || raAccountObject.getErrorCode().equals(1)){
+            try {
+                String codeStr = JSONObject.toJSONString(params);
+                codeString.put("CodeStr", codeStr);
+                LOGGER.info("get create contract url for RuiAnCM param: {}", codeString);
+                //jumpUrl = HttpUtils.get(url+CreateContract, codeString, 60, "UTF-8");
+
+                List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+                for (Map.Entry<String, String> param : codeString.entrySet()) {
+                    qparams.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+                }
+                String paramstr = URLEncodedUtils.format(qparams, "UTF-8");
+                if (StringUtils.isNotEmpty(paramstr)) {
+                    url = url + CreateContract + "?" + paramstr;
+                }
+
+                return url;
+            } catch (Exception e) {
+                LOGGER.error("get create contract url  RuiAnCM error: {}", e);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_UNKNOW_ERROR, "sync customer from RuiAnCM error");
+            }
+        }else{
+            LOGGER.error("sync from RuiAnCM error code : {}, error description : {}, error detail : {}", raAccountObject.getErrorCode(), raAccountObject.getErrorDescription(), raAccountObject.getErrorDetails());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, raAccountObject.getErrorCode(), raAccountObject.getErrorDescription());
+        }
+
     }
 
 }

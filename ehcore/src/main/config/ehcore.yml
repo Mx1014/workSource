@@ -49,7 +49,7 @@ endpoint.dump: true
 endpoint.metrics: true
 endpoint.configprops: true
 endpoint.beans: true
-endpoint.trace: trueN
+endpoint.trace: true
 endpoint.mappings: true
             
 management.security.enabled: false
@@ -97,9 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-
-db.master: jdbc:mysql://root:123456@db-master:13306/ehcore?characterEncoding=UTF-8&encrypted=0
-
+db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -161,3 +159,37 @@ nashorn.class.includes:
 #pay.secretKey: zChUBcTTn0CPR31fwRr96qdEmkn53SCZCMzNGwnBa7yREcC2a/Phlxsml4dmFBZnuuLRjPiSoJxJRA2GtsIkpg==
 #pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
 #pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
+
+# kafka
+spring.kafka:
+  enabled: true # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
+  bootstrap-servers: localhost:9092
+  properties:
+    request.timeout.ms: 20000
+  producer:
+    retries: 0
+    batch-size: 16384
+    buffer-memory: 33554432
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  consumer:
+    group-id: ${spring.application.name}-group
+    auto-offset-reset: earliest
+    enable-auto-commit: true
+    auto-commit-interval: 100
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+spring:
+  application:
+    name: ehcore
+
+server:
+  port: 8080
+
+eurekacli:
+  enabled: false
+  service-url: ${EUREKA_SERVICE_URL}
+
+# 配置 xssFilter 的开关
+xss.enabled: true

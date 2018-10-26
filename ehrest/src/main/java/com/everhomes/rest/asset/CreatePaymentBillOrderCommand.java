@@ -14,14 +14,15 @@ import java.util.List;
  * <li>billGroupId: 帐单组ID</li>
  * <li>contactNumber: 合同编号</li>
  * <li>amount: 缴纳金额，单位元</li>
- * <li>businessOrderType: 订单类型，参考统一订单系统里的定义{@link com.everhomes.rest.gorder.order.BusinessOrderType}</li>
- * <li>businessPayerType: 付款方的类型，参考统一订单系统里的定义{@link com.everhomes.rest.gorder.order.BusinessPayerType}</li>
+ * <li>businessOrderType: 订单类型，参考统一订单系统里的定义{@link com.everhomes.rest.promotion.order.BusinessOrderType}</li>
+ * <li>businessPayerType: 付款方的类型，参考统一订单系统里的定义{@link com.everhomes.rest.promotion.order.BusinessPayerType}</li>
  * <li>businessPayerId: 付款方的id，如个人ID、企业ID</li>
  * <li>businessPayerName: 付款方名称</li>
  * <li>paymentType: 支付方式，微信公众号支付方式必填，9-公众号支付，参考{@link com.everhomes.rest.order.PaymentType}</li>
  * <li>sourceType: 支付来源，如手机或PC之类，参考{@link com.everhomes.pay.order.SourceType}</li>
  * <li>extendInfo: 扩展信息，传给支付系统而支付系统会原样返回</li>
  * <li>billIds: 账单id列表</li>
+ * <li>pmsyOrderId: eh_pmsy_orders表的ID</li>
  *</ul>
  */
 public class CreatePaymentBillOrderCommand {
@@ -42,6 +43,8 @@ public class CreatePaymentBillOrderCommand {
     
     @ItemType(BillIdAndAmount.class)
     private List<BillIdAndAmount> bills;
+    
+    private String pmsyOrderId;
     
     public Integer getNamespaceId() {
         return namespaceId;
@@ -167,4 +170,12 @@ public class CreatePaymentBillOrderCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getPmsyOrderId() {
+		return pmsyOrderId;
+	}
+
+	public void setPmsyOrderId(String pmsyOrderId) {
+		this.pmsyOrderId = pmsyOrderId;
+	}
 }

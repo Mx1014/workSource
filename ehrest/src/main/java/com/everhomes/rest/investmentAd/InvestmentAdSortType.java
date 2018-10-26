@@ -1,5 +1,9 @@
 package com.everhomes.rest.investmentAd;
-
+/**
+ * ASC:1,DESC:2
+ * @author steve
+ *
+ */
 public enum InvestmentAdSortType {
 	ASC((byte)1),DESC((byte)2);
     

@@ -337,41 +337,13 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
-     * <b>URL: /workReport/rxMessageTest</b>
-     * <p>测试接收信息(当版本高于5.9.0后可以删除该接口) </p>
+     * <b>URL: /workReport/updateWorkReportValAvatar</b>
+     * <p>更新工作汇值头像 </p>
      */
-    @RequestMapping("rxMessageTest")
+    @RequestMapping("updateWorkReportValAvatar")
     @RestReturn(value=String.class)
-    public RestResponse rxMessageTest() {
-        workReportMessageService.workReportRxMessage();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /workReport/auMessageTest</b>
-     * <p>测试提醒信息(当版本高于5.9.0后可以删除该接口) </p>
-     */
-    @RequestMapping("auMessageTest")
-    @RestReturn(value=String.class)
-    public RestResponse auMessageTest() {
-        workReportMessageService.workReportAuMessage();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /workReport/createAuMessageTest</b>
-     * <p>创建提醒信息(当版本高于5.9.0后可以删除该接口) </p>
-     */
-    @RequestMapping("createAuMessageTest")
-    @RestReturn(value=String.class)
-    public RestResponse createAuMessageTest() {
-        workReportMessageService.createWorkReportAuMessage();
+    public RestResponse updateWorkReportValAvatar() {
+        workReportService.updateWorkReportValAvatar();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

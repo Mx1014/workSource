@@ -283,9 +283,17 @@ public class CommunityAllUserApplyExportTaskHandler implements FileDownloadTaskH
                     continue;
                 }
                 field.setAccessible(true);
-                if (field.getName().equals("namespaceId")) {
-                    field.set(obj, Integer.valueOf(map.get(field.getName()).toString()));
-                    continue;
+                if (field.getType().equals(Integer.class)) {
+                    if (map.get(field.getName()) != null){
+                        field.set(obj, Integer.valueOf(map.get(field.getName()).toString()));
+                        continue;
+                    }
+                }
+                if (field.getType().equals(Byte.class)) {
+                    if (map.get(field.getName()) != null){
+                        field.set(obj, Byte.valueOf(map.get(field.getName()).toString()));
+                        continue;
+                    }
                 }
                 field.set(obj, map.get(field.getName()));
             }

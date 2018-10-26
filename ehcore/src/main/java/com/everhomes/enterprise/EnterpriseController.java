@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.enterprise.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,21 +21,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.CommunityDoc;
-import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityResponse;
-import com.everhomes.rest.enterprise.EnterpriseDTO;
-import com.everhomes.rest.enterprise.FindEnterpriseByAddressCommand;
-import com.everhomes.rest.enterprise.GetEnterpriseInfoCommand;
-import com.everhomes.rest.enterprise.JoinEnterpriseToCommunityCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByPhoneCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseResponse;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.QueryEnterpriseByPhoneResponse;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
-import com.everhomes.rest.enterprise.SetCurrentEnterpriseCommand;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
@@ -81,7 +67,40 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("listEnterpriseByCommunityId")
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse listEnterpriseByCommunityId(@Valid ListEnterpriseByCommunityIdCommand cmd) {
-        RestResponse res = new RestResponse(enterpriseService.listEnterpriseByCommunityId(cmd));
+        RestResponse res = new RestResponse(enterpriseService.listEnterprisesByCommunityId(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+
+    /**
+     * <b>URL: /enterprise/listEnterpriseNoReleaseWithCommunityId</b>
+     * <p>查询该域空间下不在该项目中的所有企业</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("listEnterpriseNoReleaseWithCommunityId")
+    @RestReturn(value = ListEnterpriseResponse.class)
+    public RestResponse listEnterpriseNoReleaseWithCommunityId(listEnterpriseNoReleaseWithCommunityIdCommand cmd){
+        RestResponse res = new RestResponse(enterpriseService.listEnterpriseNoReleaseWithCommunityId(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     *
+     * <b>URL: /enterprise/deleteEnterpriseByOrgIdAndCommunityId</b>
+     * <p>根据组织ID和项目Id来删除该项目下面的公司</p>
+     * @param cmd
+     * @return
+     */
+    @RequestMapping("deleteEnterpriseByOrgIdAndCommunityId")
+    @RestReturn(value = String.class)
+    public RestResponse deleteEnterpriseByOrgIdAndCommunityId(DeleteEnterpriseCommand cmd){
+        RestResponse res = new RestResponse();
+        enterpriseService.deleteEnterpriseByOrgIdAndCommunityId(cmd);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

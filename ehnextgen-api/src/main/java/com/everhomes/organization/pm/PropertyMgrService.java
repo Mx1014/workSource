@@ -543,4 +543,6 @@ public interface PropertyMgrService {
 
 	List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd);
 
+	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
+
 }

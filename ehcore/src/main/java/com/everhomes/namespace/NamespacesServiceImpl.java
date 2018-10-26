@@ -107,4 +107,28 @@ public class NamespacesServiceImpl implements NamespacesService {
 
 		return dtos;
 	}
+
+	@Override
+	public Boolean isWechatNamespace(Integer namespaceId) {
+
+
+		//for test
+		if(namespaceId == 999964 || namespaceId == 999957){
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public Boolean isStdNamespace(Integer namespaceId) {
+
+
+		//for test
+		if(namespaceId == 2){
+			return true;
+		}
+
+		return false;
+	}
 }
