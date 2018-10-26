@@ -75,8 +75,11 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
 			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 			if (order == null) { //做一下兼容
-				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
-				order = checkOrder(orderId);
+				 order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+				if (order == null ){
+					Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+					order = checkOrder(orderId);
+				}
 			}
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
