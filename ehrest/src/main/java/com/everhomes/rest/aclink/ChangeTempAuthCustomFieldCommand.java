@@ -4,10 +4,10 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul> 添加访客授权。
+ * <ul> 修改临时授权自定义字段。
  * <li>id: 字段id</li>
  * <li>name: 字段名</li>
- * <li>status: 状态：0删除 1必填 2非必填 3 失效</li>
+ * <li>status: 状态：0删除 1生效必填 2生效非必填 3失效必填 4 失效非必填</li>
  * </ul>
  *
  */

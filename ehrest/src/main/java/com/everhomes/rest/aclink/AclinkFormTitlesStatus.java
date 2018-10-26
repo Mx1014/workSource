@@ -9,7 +9,7 @@ package com.everhomes.rest.aclink;
  *
  */
 public enum AclinkFormTitlesStatus {
-	DELETE((byte)0), NECESSARY((byte)1),OPTIONAL((byte)2),INVALID((byte)3);
+	DELETE((byte)0), NECESSARY((byte)1),OPTIONAL((byte)2),INVALID_NECESSARY((byte)3),INVALID_OPTIONAL((byte)4);
 
     private byte code;
 
@@ -33,7 +33,9 @@ public enum AclinkFormTitlesStatus {
             case 2 :
                 return  OPTIONAL;
             case 3 :
-                return INVALID;
+                return INVALID_NECESSARY;
+            case 4:
+                return  INVALID_OPTIONAL;
         }
         
         return null;

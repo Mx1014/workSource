@@ -2300,6 +2300,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            //查询人脸识别照片
             FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(auth.getId());
             if(photo != null) {
                 FaceRecognitionPhotoDTO photoDTO = ConvertHelper.convert(photo, FaceRecognitionPhotoDTO.class);
@@ -2308,6 +2309,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 dto.setFace(photoDTO);
             }
+            //查询自定义表单
+            List<AclinkFormValuesDTO> values = doorAccessProvider.findAclinkFormValuesByAuthId(auth.getId());
+            dto.setValues(values);
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
@@ -5472,7 +5476,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		User user = UserContext.current().getUser();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         DoorAuth auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
-
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //创建自定义表单记录
+        for(CreateCustomFieldCommand itemCmd:cmd.getList()){
+            if(itemCmd == null || itemCmd.getId() == null) continue;
+            AclinkFormValues value = new AclinkFormValues();
+            value.setNamespaceId(namespaceId);
+            value.setTitleId(itemCmd.getId());
+            value.setValue(itemCmd.getName());
+            value.setType((byte)2);
+            //表单记录ownerId对应授权Id
+            value.setOwnerId(auth.getId());
+            value.setOwnerType((byte)5);
+            value.setCreatorUid(user.getId());
+            doorAccessProvider.createAclinkFormValues(value);
+        }
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
         if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
@@ -5571,6 +5589,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
                 if(cmd.getOwnerId() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
+                }
+                if(null != cmd.getOwnerName() && cmd.getOwnerName().length() >0 ){
+                    query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(cmd.getOwnerName() + "%")
+                            .or(Tables.EH_COMMUNITIES.NAME.like(cmd.getOwnerName()+"%")));
                 }
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));

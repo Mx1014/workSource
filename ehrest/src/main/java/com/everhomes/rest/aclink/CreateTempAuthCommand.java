@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+import com.everhomes.rest.aclink.CreateCustomFieldCommand;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -25,13 +28,8 @@ import javax.validation.constraints.NotNull;
 public class CreateTempAuthCommand {
 
     private String phone;
-    
-
     private Long     doorId;
-    
-
     private Integer namespaceId;
-
     private String userName;
     private String visitorEvent;
     private String organization;
@@ -43,7 +41,18 @@ public class CreateTempAuthCommand {
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
     private String headImgUri;
-    
+
+    @ItemType(CreateCustomFieldCommand.class)
+    private List<CreateCustomFieldCommand> list;
+
+    public List<CreateCustomFieldCommand> getList() {
+        return list;
+    }
+
+    public void setList(List<CreateCustomFieldCommand> list) {
+        this.list = list;
+    }
+
     public String getPhone() {
         return phone;
     }

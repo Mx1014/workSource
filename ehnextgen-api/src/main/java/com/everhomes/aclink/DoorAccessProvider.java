@@ -68,4 +68,8 @@ public interface DoorAccessProvider {
     AclinkFormTitles findAclinkFormTitlesById (Long id);
 
     Long updateAclinkFormTitles(AclinkFormTitles form);
+
+    Long createAclinkFormValues(AclinkFormValues value);
+
+    List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id);
 }

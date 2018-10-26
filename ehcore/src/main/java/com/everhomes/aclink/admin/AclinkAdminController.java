@@ -371,6 +371,22 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /admin/aclink/listTempAuth</b>
+     * <p>获取门禁授权列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listTempAuth")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse listTempAuth(@Valid SearchDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listTempAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/createTempAuthCustomField</b>
      * <p>创建临时授权自定义字段</p>
@@ -600,19 +616,6 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /admin/aclink/listTempAuth</b>
-     * <p>获取门禁授权列表</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("listTempAuth")
-    @RestReturn(value=ListDoorAuthResponse.class)
-    public RestResponse listTempAuth(@Valid SearchDoorAuthCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.listTempAuth(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 
     /**
      * <b>URL: /admin/aclink/exportVisitorDoorAuthByAdmin</b>

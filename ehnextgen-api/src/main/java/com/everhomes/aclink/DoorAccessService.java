@@ -82,8 +82,6 @@ public interface DoorAccessService {
     ListDoorAuthResponse createDoorAuthList(AclinkCreateDoorAuthListCommand cmd);
 
     ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd);
-    //add by liqingyan
-    ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd);
 
     void sendMessageToUser(Long uid, Long doorId, Byte doorType);
 
@@ -198,7 +196,7 @@ public interface DoorAccessService {
 	public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd);
 
 	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
-    //add by liqingyan
+    //门禁v3.0.6 add by liqingyan
     Long deleteDoorAccessEh(Long doorAccessId);
 
     void changeDoorName(ChangeDoorNameCommand cmd);
@@ -212,11 +210,11 @@ public interface DoorAccessService {
     FirmwareNewDTO addFirmware (AddFirmwareCommand cmd);
 
     FirmwareNewDTO deleteFirmware (DeleteFirmwareCommand cmd);
-    //add by liqingyan
+
     ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
-    //add by liqingyan
+
     FirmwarePackageDTO uploadFirmwarePackage(UploadFirmwarePackageCommand cmd);
-    //add by liqingyan
+
     FirmwarePackageDTO deleteFirmwarePackage (DeleteFirmwarePackageCommand cmd);
 
     void uploadWifi(UploadFirmwarePackageCommand cmd);
@@ -234,11 +232,13 @@ public interface DoorAccessService {
     ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd);
 
     ListFirmwareResponse listFirmware (ListFirmwareCommand cmd);
-    //add by liqingyan
-    DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
 
+    DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
+    //门禁v3.0.2 创建临时授权 add by liqingyan
     DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd);
-//门禁v3.0.1
+
+    ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd);
+    //门禁v3.0.1
 	public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
 
 	public void updateAuthBatch(UpdateAuthBatchCommand cmd);

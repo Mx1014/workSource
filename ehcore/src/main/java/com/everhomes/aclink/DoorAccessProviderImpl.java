@@ -13,8 +13,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinkFormTitlesDao;
-import com.everhomes.server.schema.tables.pojos.EhAclinkFirmwareNew;
-import com.everhomes.server.schema.tables.pojos.EhAclinkFormTitles;
+import com.everhomes.server.schema.tables.daos.EhAclinkFormValuesDao;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,8 +37,6 @@ import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
-import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
-import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.records.EhDoorAccessRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
@@ -528,6 +526,18 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), DoorAccess.class);
     }
+    @Override
+    public List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(id));
+        query.addOrderBy(Tables.EH_ACLINK_FORM_VALUES.ID.desc());
+        List<AclinkFormValuesDTO> values = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, AclinkFormValuesDTO.class);
+        });
+        return values;
+    }
 
     @Override
     public AclinkFormTitles findAclinkFormTitlesById (Long id){
@@ -703,23 +713,30 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         dao.insert(form);
         return id;
     }
+
+    @Override
+    public Long createAclinkFormValues(AclinkFormValues value){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFormValues.class));
+        value.setId(id);
+        value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhAclinkFormValuesDao dao = new EhAclinkFormValuesDao(context.configuration());
+        dao.insert(value);
+        return null;
+    }
+
     @Override
     public List<AclinkFormTitlesDTO> searchAclinkFormTitles (ListingLocator locator,Integer count,ListingQueryBuilderCallback queryBuilderCallback){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_FORM_TITLES);
         query.addConditions(Tables.EH_ACLINK_FORM_TITLES.STATUS.ne(AclinkFormTitlesStatus.DELETE.getCode()));
-//        query.addConditions(Tables.EH_ACLINK_FORM_TITLES.PATH.isNull());
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
         List<AclinkFormTitlesDTO> dtos = query.fetch().map((r) -> {
-//            SelectQuery<Record> query1 = context.selectQuery();
-//            query1.addFrom(Tables.EH_ACLINK_FORM_TITLES);
-//            query1.addConditions(Tables.EH_ACLINK_FORM_TITLES.PATH.eq(r.getValue(Tables.EH_ACLINK_FORM_TITLES.ID));
             AclinkFormTitlesDTO dto = ConvertHelper.convert(r ,AclinkFormTitlesDTO.class );
             return dto;
         });
-//        List<AclinkFormTitlesDTO> dto = new List<AclinkFormTitlesDTO>();
         return dtos;
     }
 

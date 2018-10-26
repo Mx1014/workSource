@@ -79,6 +79,17 @@ public class DoorAuthDTO {
     @ItemType(FaceRecognitionPhotoDTO.class)
     FaceRecognitionPhotoDTO face;
 
+    @ItemType(AclinkFormValuesDTO.class)
+    private List<AclinkFormValuesDTO> values;
+
+    public List<AclinkFormValuesDTO> getValues() {
+        return values;
+    }
+
+    public void setValues(List<AclinkFormValuesDTO> values) {
+        this.values = values;
+    }
+
     public FaceRecognitionPhotoDTO getFace() {
         return face;
     }
