@@ -1,6 +1,8 @@
 package com.everhomes.rentalv2.message_handler;
 
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -8,6 +10,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     private RentalCommonServiceImpl rentalCommonService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private DoorAccessService doorAccessService;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
@@ -110,7 +115,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
         smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
         smsProvider.addToTupleList(variables, "orderNum", order.getOrderNo());
-        smsProvider.addToTupleList(variables, "aclink", "");
+        smsProvider.addToTupleList(variables, "aclink", getAclinkInfo(order));
 
         UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
                 IdentifierType.MOBILE.getCode());
@@ -120,6 +125,23 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
             smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
                     templateId, templateLocale, variables);
         }
+    }
+
+    private String  getAclinkInfo(RentalOrder order){
+        if (StringHelper.hasContent(order.getDoorAuthId())){
+            StringBuilder sb = new StringBuilder().append("请点击以下链接使用门禁二维码：");
+            String [] authes = order.getDoorAuthId().split(",");
+            for (String aclinkId : authes){
+                GetVisitorCommand cmd = new GetVisitorCommand();
+                cmd.setId(aclinkId);
+                String url = doorAccessService.getVisitorUrlById(cmd);
+                if (StringHelper.hasContent(url)){
+                    sb.append(url).append("\n");
+                }
+            }
+            return sb.deleteCharAt(sb.length()-1).toString();
+        }
+        return "";
     }
 
     @Override

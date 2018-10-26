@@ -6714,6 +6714,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			resource.setResourceCounts(1.0);
 			resource.setAutoAssign((byte) 0);
 			resource.setMultiUnit((byte) 0);
+			if (resource.getPeopleSpec() != null)
+				resource.setSpec(resource.getPeopleSpec() + "人");
 
 			rentalv2Provider.createRentalSite(resource);
 			//添加资源时，才添加场所编号 TODO:新的对接需要添加
@@ -6946,6 +6948,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			//TODO: 权限校验
 			rentalSite.setResourceName(cmd.getSiteName());
 			rentalSite.setSpec(cmd.getSpec());
+			rentalSite.setPeopleSpec(cmd.getPeopleSpec());
+			if (rentalSite.getPeopleSpec() != null)
+				rentalSite.setSpec(rentalSite.getPeopleSpec() + "人");
 			rentalSite.setAddress(cmd.getAddress());
 			rentalSite.setLatitude(cmd.getLatitude());
 			rentalSite.setLongitude(cmd.getLongitude());
