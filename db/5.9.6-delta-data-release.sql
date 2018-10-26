@@ -330,6 +330,7 @@ update eh_service_modules set host = 'bulletin'  where id = 	10300;
 update eh_service_modules set host = 'activity'  where id = 	10600;
 update eh_service_modules set host = 'post'  where id = 	10100;
 update eh_service_modules set host = 'group'  where id = 	10750;
+update eh_service_modules set host = 'group'  where id = 	10760;
 update eh_service_modules set host = 'approval'  where id = 	52000;
 update eh_service_modules set host = 'work-report'  where id = 	54000;
 update eh_service_modules set host = 'file-management'  where id = 	55000;
@@ -400,6 +401,11 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 DELETE FROM `eh_service_modules` WHERE parent_id = 41400 AND id = 41430;
 DELETE FROM `eh_acl_privileges` WHERE id = 4140041430;
 DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
+
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 行业协会路由修改
+UPDATE eh_service_modules SET instance_config = '{"isGuild":1}' WHERE id = 10760;
+UPDATE eh_service_module_apps SET instance_config = '{"isGuild":1}' WHERE module_id = 10760;
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
