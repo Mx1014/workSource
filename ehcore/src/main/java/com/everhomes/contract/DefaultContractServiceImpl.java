@@ -1252,7 +1252,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
 					// 物业合同不修改资产状态
-					if (!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
+					if (!parentAddressIds.contains(buildingApartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 						// 26058 已售的状态不变
 						if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
@@ -1275,8 +1275,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
-				if (!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY
-						.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
+				if (!finalParents.contains(apartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY
+						.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider
 							.findAddressMappingByAddressId(apartment.getAddressId());
 					// 26058 已售的状态不变
@@ -1795,7 +1795,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //			assetService.deleteUnsettledBillsOnContractId(contract.getId());
 
 			//作废合同关联资产释放,by dingjianmin 如果是物业合同场景不释放资产
-			if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+			if(((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene())))){
 				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 				if(contractApartments != null && contractApartments.size() > 0) {
 					boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
@@ -1848,7 +1848,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					}
 					
 					//如果不是物业场景，合同发起审批会把门牌置为已占用状态
-					if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+					if((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 						List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 						if(mappings != null && mappings.size() > 0) {
 							//对于审批不通过合同 先检查是否全是待租的，不是的话报错
@@ -1921,7 +1921,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
 		//物业合同不修改门牌状态
-		if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+		if((contractCategory== null && exist.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 			
 			if(contractApartments != null && contractApartments.size() > 0) {
 				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
@@ -1973,7 +1973,7 @@ long assetCategoryId = 0l;
 					parentContract.setRent(totalAmount);
 				}
 
-				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+				if((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
 					if(parentContractApartments != null && parentContractApartments.size() > 0) {
 						List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
@@ -2202,9 +2202,12 @@ long assetCategoryId = 0l;
 		//查询合同适用场景，物业合同不修改资产状态。
         ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
 
-		if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+        if (contractCategory== null && contract.getPaymentFlag()==1) {
+        	flag = true;
+		} else if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 			flag = false;
 		}
+        
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
