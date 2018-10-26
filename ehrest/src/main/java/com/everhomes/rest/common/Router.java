@@ -257,6 +257,9 @@ public enum Router {
     ATTENDANCE_PUNCH(ActionType.PUNCH,
             "zl://attendance/index", PunchNotificationActionData.class),
 
+    ATTENDANCE_PUNCHCLOCK_RECORD(ActionType.PUNCH,
+                    "zl://attendance/punchClockRecord", PunchClockRecordData.class),
+            
     /**
      * video-conference
      */
