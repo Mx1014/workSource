@@ -9161,4 +9161,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			updateStructure(cmd2);
 		}
 	}
+
+	@Override
+	public GetUserClosestBillResponse getUserClosestBill(GetUserClosestBillCommand cmd) {
+		RentalOrder order = rentalv2Provider.getUserClosestBill(UserContext.currentUserId(),cmd.getResourceTypeId());
+		GetUserClosestBillResponse response = new GetUserClosestBillResponse();
+		response.setOrderId(order.getId());
+		response.setResourceName(order.getResourceName());
+		response.setUserDetail(order.getUseDetail());
+		return response;
+	}
 }

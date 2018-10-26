@@ -2781,4 +2781,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalStructure.class,
 				rentalStructure.getId());
 	}
+
+	@Override
+	public RentalOrder getUserClosestBill(Long userId, Long resourceTypeId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS).where(Tables.EH_RENTALV2_ORDERS.CREATOR_UID.eq(userId).
+				and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId)).and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode()).
+				or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()))));
+		Record record = step.orderBy(Tables.EH_RENTALV2_ORDERS.START_TIME, Tables.EH_RENTALV2_ORDERS.CREATE_TIME).fetchAny();
+		if (record == null)
+			return null;
+		return ConvertHelper.convert(record,RentalOrder.class);
+
+	}
 }

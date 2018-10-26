@@ -224,6 +224,8 @@ public interface Rentalv2Service {
 
 	void updateStructures(UpdateStructuresAdminCommand cmd);
 
+	GetUserClosestBillResponse getUserClosestBill(GetUserClosestBillCommand cmd);
+
 	void test();
 
 }

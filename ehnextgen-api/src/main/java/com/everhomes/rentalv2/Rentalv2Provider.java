@@ -263,4 +263,6 @@ public interface Rentalv2Provider {
 	void createRentalStructure(RentalStructure rentalStructure);
 
 	void updateRentalStructure(RentalStructure rentalStructure);
+
+	RentalOrder getUserClosestBill(Long userId,Long resourceTypeId);
 }

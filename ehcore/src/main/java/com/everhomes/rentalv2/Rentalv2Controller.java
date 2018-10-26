@@ -452,7 +452,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("getUserClosestBill")
 	@RestReturn(value = GetUserClosestBillResponse.class)
 	public RestResponse getUserClosestBill(@Valid GetUserClosestBillCommand cmd) {
-		GetUserClosestBillResponse getUserClosestBillResponse = null;
+		GetUserClosestBillResponse getUserClosestBillResponse = rentalService.getUserClosestBill(cmd);
 		RestResponse response = new RestResponse(
 				getUserClosestBillResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
