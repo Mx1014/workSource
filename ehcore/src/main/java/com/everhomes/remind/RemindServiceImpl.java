@@ -1306,8 +1306,7 @@ public class RemindServiceImpl implements RemindService  {
             remindProvider.createRemind(repeatRemind);
             setRemindRedis(repeatRemind);
 
-            List<RemindShare> historyShareReminds = remindProvider.findShareMemberDetailsByRemindId(originRemind.getId());
-            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind, historyShareReminds));
+            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind, null));
             //origin日程点完成后,origin日程被追踪的日程也会重复一份
             originSubscribeReminds.forEach(remind -> {
                 createSubscribeRemind(repeatRemind, remind.getContactName(), remind.getUserId());
