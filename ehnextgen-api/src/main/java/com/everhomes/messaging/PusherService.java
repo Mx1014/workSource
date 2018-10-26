@@ -8,7 +8,6 @@ import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
-import com.everhomes.rest.pusher.ThirdPartResponseMessage;
 import com.everhomes.rest.pusher.ThirdPartResponseMessageDTO;
 import com.everhomes.user.UserLogin;
 
