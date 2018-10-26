@@ -1049,11 +1049,13 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         //订单
         BizMyUserCenterCountResponse biz = fetchBizMyUserCenterCount(user);
-        response.setOrder(0L);
         if (biz != null && biz.getResponse() != null) {
 
             long orderCount = biz.getResponse().orderCount;
             response.setOrder(orderCount);
+        }
+        if (response.getOrder() == null) {
+            response.setOrder(0L);
         }
         String orderHomeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
         String url = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),ConfigConstants.RUIAN_ORDER_URL,
@@ -1065,7 +1067,12 @@ public class UserActivityServiceImpl implements UserActivityService {
         GetAllCouponsForUserCommand couponsForUserCommand = new GetAllCouponsForUserCommand();
         couponsForUserCommand.setNamespaceId(user.getNamespaceId());
         couponsForUserCommand.setUserId(user.getId());
-        GetAllCouponsForUserRestResponse couponsForUserRestResponse = this.generalOrderService.getCouponsNumberForUser(couponsForUserCommand);
+        GetAllCouponsForUserRestResponse couponsForUserRestResponse = null;
+        try {
+            couponsForUserRestResponse = this.generalOrderService.getCouponsNumberForUser(couponsForUserCommand);
+        }catch (Exception e) {
+            LOGGER.error("get user coupon error",e);
+        }
         if (couponsForUserRestResponse != null && couponsForUserRestResponse.getResponse() != null) {
             response.setCoupon(couponsForUserRestResponse.getResponse().getCouponAmount());
         }
