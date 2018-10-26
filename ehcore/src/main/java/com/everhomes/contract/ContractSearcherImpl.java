@@ -421,9 +421,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		        if (contractCategory != null) {
 		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
-		        if (contract.getDepositStatus() != null) {
+		        /*if (contract.getDepositStatus() != null) {
 					dto.setDepositStatus(contract.getDepositStatus());
-				}
+				}*/
 		        
                 dtos.add(dto);
             });

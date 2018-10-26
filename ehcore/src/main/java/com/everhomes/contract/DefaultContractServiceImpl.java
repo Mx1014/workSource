@@ -3107,7 +3107,6 @@ long assetCategoryId = 0l;
 	}
 
 	//导出合同列表对接下载中心
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId) {
 		// 公用字段
@@ -3126,15 +3125,15 @@ long assetCategoryId = 0l;
 		taskService.updateTaskProcess(taskId, 30);
 		
 		//下载列表的所有字段
-		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName", "deposit", "depositStatus" };
+		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName", "deposit" };
 
 		//用户自定义字段
 		Map<String,String>  customFields = new HashMap<String,String>();
 		customFields.put("rent", "租赁总额");
 		customFields.put("sponsorName", "发起人");
-		customFields.put("depositStatus", "押金支付状态");
+		//customFields.put("depositStatus", "押金支付状态");
 		//设置自定义字段的长度
-		int[] titleSizes = { 20,20,10};
+		int[] titleSizes = { 20,20};
 		
 		ExcelPropertyInfo excelPropertyInfo = exportPropertyInfo(customFields, dtos , propertyNamesAll, titleSizes);
 				
