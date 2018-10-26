@@ -1328,7 +1328,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                     LOGGER.error(e.getMessage());
                 }
 
-                organizationService.insertWorkPlacesAndBuildings(cmd);
                 Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
                 if (organization != null)
                     organizationSearcher.feedDoc(organization);

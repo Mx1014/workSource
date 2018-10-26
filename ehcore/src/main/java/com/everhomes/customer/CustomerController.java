@@ -1723,19 +1723,19 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
-   /* *//**
+    /**
      * <b>URL: /customer/createSuperAdmin</b>
      * <p>创建企业管理员</p>
-     *//*
+     */
     @RequestMapping("createSuperAdmin")
     @RestReturn(value = String.class)
-    public RestResponse createSuperAdmin(@Valid UpdateSuperAdminCommand cmd) {
-        customerService.
-        RestResponse response = new RestResponse(dto);
+    public RestResponse createSuperAdmin(createSuperAdminCommand cmd) {
+        customerService.updateSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-*/
+
 
 }
