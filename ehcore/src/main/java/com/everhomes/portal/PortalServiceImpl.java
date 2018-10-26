@@ -2041,6 +2041,13 @@ public class PortalServiceImpl implements PortalService {
 				}
 				config.setItemGroup(itemGroup.getName());
 				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
+
+				ServiceModuleApp serviceModuleApp = getServiceModuleApp(itemGroup);
+				if(serviceModuleApp != null){
+					config.setModuleId(serviceModuleApp.getModuleId());
+					config.setAppId(serviceModuleApp.getOriginId());
+				}
+
 				group.setInstanceConfig(config);
 
 			}else if(Widget.fromCode(group.getWidget()) == Widget.NEWS_FLASH){
@@ -2055,6 +2062,13 @@ public class PortalServiceImpl implements PortalService {
 				config.setItemGroup(itemGroup.getName());
 				config.setTimeWidgetStyle(instanceConfig.getTimeWidgetStyle());
 				config.setNewsSize(instanceConfig.getNewsSize());
+
+				ServiceModuleApp serviceModuleApp = getServiceModuleApp(itemGroup);
+				if(serviceModuleApp != null){
+					config.setModuleId(serviceModuleApp.getModuleId());
+					config.setAppId(serviceModuleApp.getOriginId());
+				}
+
 				group.setInstanceConfig(config);
 
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BULLETINS){
@@ -2088,6 +2102,13 @@ public class PortalServiceImpl implements PortalService {
 				publishOPPushItem(itemGroup, versionId, layout.getLocation(), publishType);
 				config.setItemGroup(itemGroup.getName());
 //				group.setInstanceConfig(StringHelper.toJsonString(config));
+
+				ServiceModuleApp serviceModuleApp = getServiceModuleApp(itemGroup);
+				if(serviceModuleApp != null){
+					config.setModuleId(serviceModuleApp.getModuleId());
+					config.setAppId(serviceModuleApp.getOriginId());
+				}
+
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.TAB){
 				TabInstanceConfig config = new TabInstanceConfig();
@@ -2238,6 +2259,33 @@ public class PortalServiceImpl implements PortalService {
 //			group.setIconUrl(url);
 //		}
 //	}
+
+
+	private ServiceModuleApp getServiceModuleApp(PortalItemGroup itemGroup){
+
+		if(itemGroup == null){
+			return null;
+		}
+
+		ItemGroupInstanceConfig instanceConfig = (ItemGroupInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), ItemGroupInstanceConfig.class);
+
+		if(instanceConfig != null && instanceConfig.getModuleAppId() != null){
+			ServiceModuleApp serviceModuleApp = serviceModuleAppProvider.findServiceModuleAppById(instanceConfig.getModuleAppId());
+
+			if(serviceModuleApp != null){
+				return serviceModuleApp;
+			}
+		}
+
+		if(instanceConfig != null && instanceConfig.getAppOriginId() != null){
+			ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(instanceConfig.getAppOriginId());
+			if(serviceModuleApp != null){
+				return serviceModuleApp;
+			}
+		}
+		return null;
+	}
+
 
 	//暂时没有用到
 	private void publishNavigationBar(Long versionId, Byte publishType){

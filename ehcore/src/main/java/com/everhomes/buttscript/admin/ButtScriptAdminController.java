@@ -5,6 +5,7 @@ import com.everhomes.buttscript.ButtScriptService;
 import com.everhomes.configurations.ConfigurationsService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -48,6 +49,7 @@ public class ButtScriptAdminController extends ControllerBase{
      * <b>URL: /admin/buttScript/saveScript</b>
      * <p>2)保存脚本信息接口(含保存并发布)</p>
      */
+	@XssExclude
 	@RequestMapping("saveScript")
     @RestReturn(value=ScriptVersionInfoDTO.class)
 	public RestResponse saveScript( SaveScriptCommand cmd ) {
