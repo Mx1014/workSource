@@ -1253,4 +1253,25 @@ public class YellowPageController  extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferApprovalToForm</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferApprovalToForm")
+	@RestReturn(value = String.class)
+	public RestResponse transferApprovalToForm(ListUiServiceRecordsCommand cmd) {
+		if (cmd.getNamespaceId() == null || !cmd.getNamespaceId().equals(1802)) {
+			return new RestResponse();
+		}
+		
+		allianceStandardService.transferApprovalToForm();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

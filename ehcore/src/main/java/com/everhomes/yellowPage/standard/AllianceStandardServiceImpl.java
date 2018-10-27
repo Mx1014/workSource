@@ -5,15 +5,36 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSON;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApproval;
+import com.everhomes.general_approval.GeneralApprovalProvider;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.general_form.GeneralFormVal;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
@@ -28,6 +49,11 @@ import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.user.UserContext;
@@ -80,6 +106,16 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
+	@Autowired
+	private GeneralApprovalProvider generalApprovalProvider;
+	@Autowired
+	private FlowService flowService;
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private GeneralApprovalValProvider generalApprovalValProvider;
 	
 
 	@Override
@@ -480,6 +516,142 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		cmd.setOwnerId(ownerId);
 	}
 	
+	
+	@Override
+	public void transferApprovalToForm() {
+		
+		dbProvider.execute(r->{
+			saveFormFlowId();
+			transferToFormVal();
+			transferFlowCases();
+			return null;
+		});
 
+	}
+
+	private void transferFlowCases() {
+		List<FlowCase> flowCases = queryFlowCases();
+		for(FlowCase flowCase : flowCases) {
+			
+			flowCase.setOwnerId(0L);
+			
+			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.SOURCE_ID.getCode());
+			Long serviceId = null;
+			if (null != val && null != val.getFieldStr3()) {
+				PostApprovalFormTextValue valItem = JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class);
+				if (null != valItem && null != valItem.getText()) {
+					serviceId = Long.valueOf(valItem.getText());
+				}
+			}
+			
+			if (null != serviceId) {
+				ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(serviceId, null, null);
+				if (null != yellowPage) {
+					flowCase.setOwnerId(yellowPage.getType());
+
+				}
+			}
+			
+			
+			flowCase.setOwnerType(FlowOwnerType.SERVICE_ALLIANCE.getCode());
+			
+			
+		}    
+		
+	}
+
+	private void transferToFormVal() {
+		
+		List<GeneralApprovalVal> vals = queryApprovalVals();
+		for (GeneralApprovalVal val : vals) {
+			GeneralForm form = generalFormProvider.getGeneralFormByApproval(val.getFormOriginId(), val.getFormVersion());
+			if (null == form) {
+				continue;
+			}
+			
+			GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+			obj.setSourceType(EhFlowCases.class.getSimpleName());
+			obj.setSourceId(val.getFlowCaseId());
+			obj.setFieldName(val.getFieldName());
+			obj.setFieldType(val.getFieldType());
+			obj.setFieldValue(val.getFieldStr3());
+			obj.setStringTag5("t");
+			generalFormValProvider.createGeneralFormVal(obj);
+		}
+	}
+
+	private void saveFormFlowId() {
+		//获取所有的sheji了工作流或表单的服务
+		List<ServiceAlliances> sas = queryFormServiceAlliances();
+		for (ServiceAlliances sa : sas) {
+			//zl://approval/create?approvalId=4997&sourceId=218055
+			String moduleUrl = sa.getModuleUrl();
+			int start = moduleUrl.indexOf('?');
+			String s[] = moduleUrl.substring(start+1).split("&");
+			s = s[0].split("=");
+			if (s.length < 2) {
+				continue;
+			}
+			
+			Long approvalId = Long.parseLong(s[1]);
+			if (approvalId < 1) {
+				continue;
+			}
+			
+			GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approvalId);
+			if (null == approval) {
+				continue;
+			}
+			
+	        Flow flow = flowService.getEnabledFlow(approval.getNamespaceId(), 40500L,
+	                FlowModuleType.NO_MODULE.getCode(), approval.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+			
+			sa.setFormId(approval.getFormOriginId());
+
+			Long baseFlowId = 0L;
+			if (moduleUrl.contains("formId=")) {
+				baseFlowId = null;
+			}
+			sa.setFlowId(null == flow ? baseFlowId : flow.getId());
+			
+			//转成zl://form/create?sourceType=service_alliance&sourceId={id}
+			sa.setModuleUrl("zl://form/create?sourceType=service_alliance&sourceId="+sa.getId());
+			yellowPageProvider.updateServiceAlliances(sa);
+		}
+	}
+	
+	
+	private List<ServiceAlliances> queryFormServiceAlliances() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.INTEGRAL_TAG1.eq(2L));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.MODULE_URL.like(DSL.concat("zl://approval/create", "%")));
+		return query.fetchInto(ServiceAlliances.class);
+	}
+	
+	private List<FlowCase> queryFlowCases() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhFlowCasesRecord> query = context.selectQuery(Tables.EH_FLOW_CASES);
+		query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(40500L).or(Tables.EH_FLOW_CASES.MODULE_TYPE.eq("service_alliance")));
+		return query.fetchInto(FlowCase.class);
+	}
+	
+	private List<GeneralApprovalVal> queryApprovalVals() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		com.everhomes.server.schema.tables.EhGeneralApprovalVals VAL = Tables.EH_GENERAL_APPROVAL_VALS;
+		com.everhomes.server.schema.tables.EhGeneralApprovals APPV = Tables.EH_GENERAL_APPROVALS;
+		com.everhomes.server.schema.tables.EhGeneralForms FORM = Tables.EH_GENERAL_FORMS;
+		
+		return context.select(VAL.fields()).from(VAL)
+			.leftOuterJoin(APPV).on(APPV.ID.eq(VAL.APPROVAL_ID))
+			.leftOuterJoin(FORM).on(VAL.FORM_ORIGIN_ID.eq(FORM.ID))
+			.where(
+					 APPV.ID.isNotNull()
+					.and(FORM.ID.isNotNull())
+					.and(APPV.MODULE_ID.eq(40500L).or(APPV.MODULE_TYPE.eq("service_alliance")))
+				).fetchInto(GeneralApprovalVal.class);
+	}
+	
 	
 }

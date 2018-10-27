@@ -164,12 +164,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(yellowPage.getOwnerType(),
-				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
-		if (null != match) {
-			flowCase.setTitle(match.getCategoryName());
-		}
-		
 		StringBuffer contentBuffer = new StringBuffer();
 		contentBuffer.append("服务名称 : ");
 		contentBuffer.append(yellowPage.getName());
@@ -645,7 +639,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		}
 
 		Byte enableProvider = (byte) 0;
-		ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(flowCase.getReferId(), flowCase.getOwnerId());
+		ServiceAllianceCategories sc = allianceStandardService.queryHomePageCategoryByScene(flowCase.getOwnerId(), flowCase.getProjectId());
 		if (null != sc && null != sc.getEnableProvider()) {
 			enableProvider = sc.getEnableProvider();
 		}
@@ -730,7 +724,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
     protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
-        if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
+        if (flowCase.getReferType().equals(FlowReferType.SERVICE_ALLIANCE.getCode())) {
             List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(FORM_VAL_SOURCE_TYPE_NAME, flowCase.getId());
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());

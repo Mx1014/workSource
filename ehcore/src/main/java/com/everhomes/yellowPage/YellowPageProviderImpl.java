@@ -499,7 +499,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if (null != sa.getEndTime()) {
 			sa.setDefaultOrder(getDateDefaultOrder(sa));
 		}
-		
+		sa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		sa.setUpdateUid(UserContext.currentUserId());
         dao.update(sa);
 	}
 

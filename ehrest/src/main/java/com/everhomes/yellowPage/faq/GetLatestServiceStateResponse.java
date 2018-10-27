@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>serviceId : 服务id，未找到时为空</li>
  * <li>serviceName : 服务名称</li>
+ * <li>flowCaseId : 工作流id</li>
  * <li>currentStatus : 当前状态</li>
  * <li>channelPos :当前步骤下标</li>
  * <li>channels : 泳道列表</li>
@@ -22,6 +23,7 @@ import com.everhomes.util.StringHelper;
 public class GetLatestServiceStateResponse {
 	private Long serviceId;
 	private String serviceName;
+	private Long flowCaseId;
 	private String currentStatus;
 	private Byte channelPos;
 	private List<String> channels;
@@ -87,5 +89,11 @@ public class GetLatestServiceStateResponse {
 	}
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
 	}
 }

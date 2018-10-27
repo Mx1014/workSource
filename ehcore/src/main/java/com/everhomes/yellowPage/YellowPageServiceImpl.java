@@ -17,6 +17,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
@@ -25,6 +26,7 @@ import com.everhomes.flow.FlowEvaluateItem;
 import com.everhomes.flow.FlowEvaluateItemProvider;
 import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
@@ -385,6 +387,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	AllianceStandardService allianceStandardService;
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
+	@Autowired
+	private FlowProvider flowProvider;
 	
 	
 	private void populateYellowPage(YellowPage yellowPage) {
@@ -1025,8 +1029,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		if (null != dto.getFlowId()) {
-			FlowDTO flow = flowService.getFlowById(dto.getFlowId());
-			if (null == flow || FlowStatusType.RUNNING.getCode() != flow.getStatus()) {
+			Flow flow = flowProvider.getSnapshotFlowById(dto.getFlowId());
+			if (null == flow) {
 				return false;
 			}
 		}
