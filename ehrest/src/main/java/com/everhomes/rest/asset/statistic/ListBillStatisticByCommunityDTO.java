@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  * <li>ownerType: 所属项目类型</li>
  * <li>ownerId: 所属项目ID</li>
  * <li>projectName:项目名称</li>
+ * <li>projectCount:项目总数-合计</li>
  * <li>projectClassify:项目分类</li>
  * <li>buildingCount:楼宇总数</li>
  * <li>areaSize:建筑面积</li>
@@ -31,6 +32,7 @@ public class ListBillStatisticByCommunityDTO {
 	private Long ownerId;
 	private String ownerType;
     private String projectName;
+    private Integer projectCount;
     private String projectClassify;
     private Integer buildingCount;
     private BigDecimal areaSize;
@@ -160,6 +162,12 @@ public class ListBillStatisticByCommunityDTO {
 	}
 	public void setCollectionRate(BigDecimal collectionRate) {
 		this.collectionRate = collectionRate;
+	}
+	public Integer getProjectCount() {
+		return projectCount;
+	}
+	public void setProjectCount(Integer projectCount) {
+		this.projectCount = projectCount;
 	}
     
 }

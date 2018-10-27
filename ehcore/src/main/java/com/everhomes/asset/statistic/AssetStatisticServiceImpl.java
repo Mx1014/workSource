@@ -322,7 +322,11 @@ public class AssetStatisticServiceImpl implements AssetStatisticService {
 		//项目名称
 		Cell cell2 = tempRow.createCell(1);
 		cell2.setCellStyle(style);
-		cell2.setCellValue(dto.getProjectName());
+		if(isLastRow) {
+			cell2.setCellValue(dto.getProjectCount() != null ? dto.getProjectCount() : 0);
+		}else {
+			cell2.setCellValue(dto.getProjectName());
+		}
 		//项目分类
 		Cell cell3 = tempRow.createCell(2);
 		cell3.setCellStyle(style);
