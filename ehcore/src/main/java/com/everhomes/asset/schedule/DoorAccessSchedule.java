@@ -44,7 +44,7 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 	static final String TASK_EXECUTE = "energyTask.isexecute";
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
-	//定时任务时间
+	//定时任务时间  每天早上3点，5点刷自动读表
 	//static final String cronExpression = "0/10 * *  * * ?";
 	static final String cronExpression = "0 0 3,5 * * ?";
 
@@ -54,11 +54,6 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 			init();
 		}
 	}
-
-	// 每天早上5点10分刷自动读表
-	// "0 10 5 L * ?"
-	// @Scheduled(cron = "0 0 0 * * ?")
-	// @Scheduled(cron="0/10 * * * * ? ") //每10秒执行一次
 
 	public void init() {
 		String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
