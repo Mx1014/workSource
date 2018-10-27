@@ -49,4 +49,6 @@ public interface AllianceStandardService {
 	Long getOrgIdByTypeAndProjectId(Long type, Long projectId);
 
 	String transferApprovalToForm();
+
+	String transferPadItems();
 }
