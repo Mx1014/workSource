@@ -20,8 +20,8 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
--- REMARK: 执行接口 /yellowPage/transferApprovalToForm 
--- REMARK: 参数 namespaceId 填 1802， 并且将返回的字符串发给黄明波确认
+-- REMARK: /yellowPage/transferApprovalToForm 参数ownerId 填 1802， 将返回的字符串发给我确认
+-- REMARK: /yellowPage/transferPadItems 参数ownerId 填 1802， 将返回的字符串发给我确认
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
