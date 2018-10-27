@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1159,13 +1160,36 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 
 	protected void addToFlowCase(Contract contract, String flowcaseOwnerType) {
-//		Flow flow = flowService.getEnabledFlow(contract.getNamespaceId(), FlowConstants.CONTRACT_MODULE,
-//				FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), FlowOwnerType.CONTRACT.getCode());
+
 		Flow flow = null;
+		String contractType="";
 		
 		if ("CONTRACT".equals(flowcaseOwnerType)) {
-			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
-					FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			//多工作流
+			if(contract.getContractType() == 0){
+				contractType ="新签";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.REVIEW_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			
+			} else if(contract.getContractType() == 1){
+				contractType ="续约";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.RENEW_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			
+			}else if (contract.getContractType() == 2){
+				contractType ="变更";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.CHANGE_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
+			else if(contract.getContractType() == 3){
+				contractType ="退约";
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.DENUNCIATION_CONTRACT.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
+			if (flow == null) {
+				flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
+						FlowConstants.CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCategoryId(), flowcaseOwnerType);
+			}
 		}else if ("PAYMENT_CONTRACT".equals(flowcaseOwnerType)) {
 			flow = flowService.getEnabledFlow(contract.getNamespaceId(),EntityType.COMMUNITY.getCode(),contract.getCommunityId(),
 					FlowConstants.PAYMENT_CONTRACT_MODULE, FlowModuleType.NO_MODULE.getCode(), contract.getCommunityId(), flowcaseOwnerType);
@@ -1183,14 +1207,14 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 		createFlowCaseCommand.setCurrentOrganizationId(contract.getPartyAId());
-		createFlowCaseCommand.setTitle(contract.getCustomerName() + "的合同申请");
+		createFlowCaseCommand.setTitle(contract.getCustomerName() + contractType + "的合同申请");
 		createFlowCaseCommand.setApplyUserId(contract.getCreateUid());
 		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 		createFlowCaseCommand.setReferId(contract.getId());
 		createFlowCaseCommand.setReferType(EntityType.CONTRACT.getCode());
 		createFlowCaseCommand.setContent(contract.getContractNumber());
-		createFlowCaseCommand.setServiceType("合同管理");
+		createFlowCaseCommand.setServiceType("合同管理-"+contractType);
 		createFlowCaseCommand.setProjectId(contract.getCommunityId());
 		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
@@ -1252,7 +1276,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					mapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					contractBuildingMappingProvider.createContractBuildingMapping(mapping);
 					// 物业合同不修改资产状态
-					if (!parentAddressIds.contains(buildingApartment.getAddressId()) && !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
+					if (!parentAddressIds.contains(buildingApartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
 						CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(buildingApartment.getAddressId());
 						// 26058 已售的状态不变
 						if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
@@ -1275,8 +1299,8 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			List<Long> finalParents = parentAddressIds;
 			map.forEach((id, apartment) -> {
 				contractBuildingMappingProvider.deleteContractBuildingMapping(apartment);
-				if (!finalParents.contains(apartment.getAddressId()) && !ContractApplicationScene.PROPERTY
-						.equals(ContractApplicationScene.fromStatus(contractApplicationScene))) {
+				if (!finalParents.contains(apartment.getAddressId()) && ((contractApplicationScene== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY
+						.equals(ContractApplicationScene.fromStatus(contractApplicationScene)))) {
 					CommunityAddressMapping addressMapping = propertyMgrProvider
 							.findAddressMappingByAddressId(apartment.getAddressId());
 					// 26058 已售的状态不变
@@ -1795,7 +1819,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 //			assetService.deleteUnsettledBillsOnContractId(contract.getId());
 
 			//作废合同关联资产释放,by dingjianmin 如果是物业合同场景不释放资产
-			if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+			if(((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene())))){
 				List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 				if(contractApartments != null && contractApartments.size() > 0) {
 					boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
@@ -1848,7 +1872,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 					}
 					
 					//如果不是物业场景，合同发起审批会把门牌置为已占用状态
-					if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+					if((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 						List<CommunityAddressMapping> mappings = propertyMgrProvider.listCommunityAddressMappingByAddressIds(addressIds);
 						if(mappings != null && mappings.size() > 0) {
 							//对于审批不通过合同 先检查是否全是待租的，不是的话报错
@@ -1921,7 +1945,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		List<ContractBuildingMapping> contractApartments = contractBuildingMappingProvider.listByContract(contract.getId());
 		List<Long> contractAddressIds = new ArrayList<>();
 		//物业合同不修改门牌状态
-		if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+		if((contractCategory== null && exist.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 			
 			if(contractApartments != null && contractApartments.size() > 0) {
 				boolean individualFlag = CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType())) ? true : false;
@@ -1973,7 +1997,7 @@ long assetCategoryId = 0l;
 					parentContract.setRent(totalAmount);
 				}
 
-				if(!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
+				if((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))){
 					List<ContractBuildingMapping> parentContractApartments = contractBuildingMappingProvider.listByContract(parentContract.getId());
 					if(parentContractApartments != null && parentContractApartments.size() > 0) {
 						List<Long> addressIds = parentContractApartments.stream().map(contractApartment -> contractApartment.getAddressId()).collect(Collectors.toList());
@@ -2202,9 +2226,12 @@ long assetCategoryId = 0l;
 		//查询合同适用场景，物业合同不修改资产状态。
         ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
 
-		if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+        if (contractCategory== null && contract.getPaymentFlag()==1) {
+        	flag = true;
+		} else if (ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 			flag = false;
 		}
+        
 		contract.setStatus(ContractStatus.INACTIVE.getCode());
 		contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		contractProvider.updateContract(contract);
@@ -3083,7 +3110,6 @@ long assetCategoryId = 0l;
 	}
 
 	//导出合同列表对接下载中心
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId) {
 		// 公用字段
@@ -3098,39 +3124,22 @@ long assetCategoryId = 0l;
 		command.setModuleName("contract");
 		command.setGroupPath(null);
 		// 页面上所有的动态字段
-		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName" };
 		List<FieldDTO> dtos = fieldService.listFields(command);
 		taskService.updateTaskProcess(taskId, 30);
-		// 属性字段
-		String[] fieldpropertyNames = new String[dtos.size() + 2];
+		
+		//下载列表的所有字段
+		String[] propertyNamesAll = { "contractNumber", "name", "contractType", "contractStartDate", "contractEndDate", "customerId", "apartments", "status", "rent", "sponsorName", "deposit" };
 
-		for (int i = 0; i < dtos.size(); i++) {
-			fieldpropertyNames[i] = dtos.get(i).getFieldName();
-		}
-		fieldpropertyNames[fieldpropertyNames.length - 2] = "rent";
-		fieldpropertyNames[fieldpropertyNames.length - 1] = "sponsorName";
-
-		List propertyNamesListAll = Arrays.asList(propertyNamesAll); // 将数组转化为list
-		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
-
-		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
-		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
-		// 标题
-		String[] titleNames = new String[ExcelPropertyNames.length];
-		for (int i = 0; i < ExcelPropertyNames.length; i++) {
-			for (int j = 0; j < dtos.size(); j++) {
-				if (ExcelPropertyNames[i].equals(dtos.get(j).getFieldName())) {
-					titleNames[i] = dtos.get(j).getFieldDisplayName();
-				}
-			}
-		}
-		taskService.updateTaskProcess(taskId, 50);
-		titleNames[titleNames.length - 2] = "租赁总额";
-		titleNames[titleNames.length - 1] = "发起人";
-		int[] titleSizes = new int[ExcelPropertyNames.length + 2];
-		for (int i = 0; i < ExcelPropertyNames.length; i++) {
-			titleSizes[i] = 30;
-		}
+		//用户自定义字段
+		Map<String,String>  customFields = new HashMap<String,String>();
+		customFields.put("rent", "租赁总额");
+		customFields.put("sponsorName", "发起人");
+		//customFields.put("depositStatus", "押金支付状态");
+		//设置自定义字段的长度
+		int[] titleSizes = { 20,20};
+		
+		ExcelPropertyInfo excelPropertyInfo = exportPropertyInfo(customFields, dtos , propertyNamesAll, titleSizes);
+				
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if (community == null) {
 			LOGGER.error("Community is not exist.");
@@ -3143,10 +3152,65 @@ long assetCategoryId = 0l;
 
 			List<ContractExportDetailDTO> data = contractListDTO.stream().map(this::convertToExportDetail).collect(Collectors.toList());
 			taskService.updateTaskProcess(taskId, 90);
-			return excelUtils.getOutputStream(ExcelPropertyNames, titleNames, titleSizes, data);
+			return excelUtils.getOutputStream(excelPropertyInfo.getPropertyNames(), excelPropertyInfo.getTitleName(), excelPropertyInfo.getTitleSize(), data);
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes) {
+		ExcelPropertyInfo excelPropertyInfo = new ExcelPropertyInfo();
+		String[] fieldpropertyNames = new String[dynamicField.size() + customFields.size()];
+
+		List customFieldsList = new ArrayList<>();
+		Iterator iter = customFields.entrySet().iterator();
+		while (iter.hasNext()) {
+			Map.Entry entry = (Map.Entry) iter.next();
+			customFieldsList.add(entry.getKey());
+		}
+
+		for (int i = 0; i < dynamicField.size(); i++) {
+			fieldpropertyNames[i] = dynamicField.get(i).getFieldName();
+		}
+
+		for (int i = 0; i < customFieldsList.size(); i++) {
+			fieldpropertyNames[dynamicField.size() + i] = (String) customFieldsList.get(i);
+		}
+
+		List propertyNamesListAll = Arrays.asList(exportfield); // 将数组转化为list
+		List fieldpropertyNamesList = Arrays.asList(fieldpropertyNames);
+
+		List list = (List) propertyNamesListAll.stream().filter(a -> fieldpropertyNamesList.contains(a)).collect(Collectors.toList());
+		String[] ExcelPropertyNames = (String[]) list.toArray(new String[list.size()]); // 转化为数组
+		// 标题
+		String[] titleNames = new String[ExcelPropertyNames.length];
+		for (int i = 0; i < titleNames.length; i++) {
+			for (int j = 0; j < dynamicField.size(); j++) {
+				if (ExcelPropertyNames[i].equals(dynamicField.get(j).getFieldName())) {
+					titleNames[i] = dynamicField.get(j).getFieldDisplayName();
+				}
+			}
+			if (titleNames[i] == null) {
+				titleNames[i] = customFields.get(ExcelPropertyNames[i]);
+			}
+		}
+
+		int dynamicFieldsize = ExcelPropertyNames.length - customFields.size();
+		int[] titleSizes = new int[ExcelPropertyNames.length];
+		for (int i = 0; i < dynamicFieldsize ; i++) {
+			titleSizes[i] = 30;
+		}
+		for (int i = 0; i < customFieldtitleSizes.length; i++) {
+			titleSizes[dynamicFieldsize + i] = customFieldtitleSizes[i];
+		}
+
+		excelPropertyInfo.setTitleName(titleNames);
+		excelPropertyInfo.setPropertyNames(ExcelPropertyNames);
+		excelPropertyInfo.setTitleSize(titleSizes);
+
+		return excelPropertyInfo;
 	}
 
 	protected ContractExportDetailDTO convertToExportDetail(ContractDTO dto) {
@@ -3179,6 +3243,11 @@ long assetCategoryId = 0l;
 			if (dto.getContractEndDate() != null) {
 				exportDetailDTO.setContractEndDate(new SimpleDateFormat("yyyy-MM-dd").format(dto.getContractEndDate()));
 			}
+			if (dto.getDepositStatus() != null) {
+				ContractDepositType depositStatus = ContractDepositType.fromCode(dto.getDepositStatus());
+				exportDetailDTO.setDepositStatus(depositStatus.getDesc());
+			}
+			
 		} catch (Exception e) {
 			LOGGER.error("dto : {}", dto);
 			throw e;

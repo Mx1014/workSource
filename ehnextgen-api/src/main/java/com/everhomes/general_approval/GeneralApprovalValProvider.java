@@ -9,6 +9,8 @@ public interface GeneralApprovalValProvider {
 
 	Long createGeneralApprovalVal(GeneralApprovalVal obj);
 
+	void updateGeneralApprovalVal(GeneralApprovalVal obj);
+
 	GeneralApprovalVal getSpecificApprovalValByFlowCaseId(Long flowCaseId, String filedType);
 
 	List<GeneralApprovalVal> queryGeneralApprovalVals(ListingLocator locator,
@@ -20,7 +22,10 @@ public interface GeneralApprovalValProvider {
 
 	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
 
-    GeneralApprovalVal getGeneralApprovalVal(Long formOriginId, Long formVersion,
-                                             Long flowCaseId, String fieldName);
+	GeneralApprovalVal getGeneralApprovalVal(Long flowCaseId, Long formOriginId, Long formVersion, String fieldName);
+
+	List<GeneralApprovalVal> getGeneralApprovalVal(Long formOriginId, Long formVersion, Long flowCaseId, Long flowNodeId);
+
 	GeneralApprovalVal getGeneralApprovalById(Long id);
+
 }

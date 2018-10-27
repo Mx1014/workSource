@@ -74,7 +74,7 @@ public class OPPushNewsHandler implements OPPushHandler{
         UserContext.current().setAppContext(context);
         ListNewsBySceneCommand cmd = new ListNewsBySceneCommand();
         cmd.setCategoryId(categoryId);
-        cmd.setPageSize(config.getEntityCount());
+        cmd.setPageSize(config.getNewsSize());
         ListNewsBySceneResponse resp = newsService.listNewsByScene(cmd);
         
         

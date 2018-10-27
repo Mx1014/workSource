@@ -40,6 +40,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -651,7 +652,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
@@ -701,7 +702,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(merchantId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
@@ -2084,6 +2085,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}else{
 			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
 			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
 			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
 		}
 	}
@@ -2100,7 +2102,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(account.getMerchantId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 

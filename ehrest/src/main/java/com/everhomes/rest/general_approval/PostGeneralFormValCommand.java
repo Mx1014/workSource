@@ -15,6 +15,9 @@ import java.util.List;
  * <li>communityId : 项目id</li>
  * <li>currentOrganizationId：用户当前公司id</li>
  * <li>requisitionId : 表单Id</li>
+ * <li>formOriginId: 表单id</li>
+ * <li>formVersion: 表单版本</li>
+ * <li>flowNodeId: 工作流节点ID</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>
  * @author janson
@@ -23,21 +26,18 @@ import java.util.List;
 public class PostGeneralFormValCommand {
 	private Integer namespaceId;
 	private Long ownerId;
-
 	private String ownerType;
-
-
 	private Long approvalId;
-
 	private String sourceType;
 	private Long sourceId;
-
 	private Long requisitionId;
-
 	private Long communityId;
     private Long currentOrganizationId;
     
     private Long investmentAdId;
+	private Long formOriginId;
+	private Long formVersion;
+	private Long flowNodeId;
 
     private Long orgId;
 
@@ -149,6 +149,31 @@ public class PostGeneralFormValCommand {
 	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
 	}
+
+	public Long getFormOriginId() {
+		return formOriginId;
+	}
+
+	public void setFormOriginId(Long formOriginId) {
+		this.formOriginId = formOriginId;
+	}
+
+	public Long getFormVersion() {
+		return formVersion;
+	}
+
+	public void setFormVersion(Long formVersion) {
+		this.formVersion = formVersion;
+	}
+
+	public Long getFlowNodeId() {
+		return flowNodeId;
+	}
+
+	public void setFlowNodeId(Long flowNodeId) {
+		this.flowNodeId = flowNodeId;
+	}
+
 
 	@Override
     public String toString() {

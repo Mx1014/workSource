@@ -76,7 +76,9 @@ public interface FlowEventLogProvider {
 
     List<FlowEventLog> findCurrentNodeNotCompleteEnterLogs(Long nodeId, Long caseId, Long stepCount);
 
-    /**
+    List<FlowEventLog> findNodeEnterLogs(Long nodeId, Long caseId, Long stepCount);
+
+	/**
      * 查询flowCase的某个节点的最大stepCount
      */
     Long findMaxStepCountByNodeEnterLog(Long nodeId, Long caseId);

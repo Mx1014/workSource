@@ -19,7 +19,16 @@ public interface GeneralApprovalFieldProcessor {
 
     void processSubFormField(List<FlowCaseEntity> entities, GeneralFormFieldDTO dto, String jsonVal);
 
+    void processSubFormField4EnterpriseApproval(List<FlowCaseEntity> entities, GeneralFormFieldDTO dto, String jsonVal);
+
+    void processNullSubFormField(List<FlowCaseEntity> entities, GeneralFormFieldDTO dto);
+
     void processContactField(List<FlowCaseEntity> entities, FlowCaseEntity e, String jsonVal);
+
+    boolean requiredFlag(List<GeneralFormFieldDTO> formFields);
+
+    boolean sinceVersion510();
+
 }
 
 

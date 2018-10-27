@@ -23,12 +23,52 @@ public class AclinkListLocalServersCommand {
 	private Byte ownerType;
 
 	private String search;
-
+	
+	private String name;
+	
+	private String ipAddress;
+	
+	private String version;
+	
+	private Byte linkStatus;
+	
 	private Long pageAnchor;
 
 	private Integer pageSize;
 	
 	private String uuid;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public Byte getLinkStatus() {
+		return linkStatus;
+	}
+
+	public void setLinkStatus(Byte linkStatus) {
+		this.linkStatus = linkStatus;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;
