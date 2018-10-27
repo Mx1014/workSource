@@ -47,4 +47,6 @@ public interface AllianceStandardService {
 	boolean isEnableSelfConfig(AllianceConfigState state);
 
 	Long getOrgIdByTypeAndProjectId(Long type, Long projectId);
+
+	String transferApprovalToForm();
 }

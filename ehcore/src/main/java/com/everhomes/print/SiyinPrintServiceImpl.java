@@ -2246,8 +2246,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 		//检查签名
 		if (!PayUtil.verifyCallbackSignature(cmd)) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sign verify faild");
+			LOGGER.error("sign error:"+(null == cmd ? "cmd is null" : StringHelper.toJsonString(cmd)));
+			
+			boolean signS = configurationProvider.getBooleanValue("print.notify.signswitch", true);
+			if (signS) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sign verify faild");
+			}
 		}
 
 		// * RAW(0)：
