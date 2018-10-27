@@ -15,6 +15,10 @@
 -- REMARK：备份eh_payment_variables表
 -- select * from eh_payment_variables;
 
+-- AUTHOR:杨崇鑫 20181027
+-- REMARK:解决缺陷 #39571: 
+-- 第一步请执行在es上执行db/search/energy_task.sh
+-- 第二步执行同步接口/energy/syncEnergyTaskIndex
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
