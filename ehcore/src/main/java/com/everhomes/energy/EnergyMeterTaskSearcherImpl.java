@@ -121,7 +121,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasks(pageAnchor, pageSize);
         while (tasks != null && tasks.size() > 0) {
             bulkUpdate(tasks);
-            pageAnchor += (tasks.size() + 1);
+            pageAnchor = tasks.get(tasks.size() - 1).getId() + 1;
             tasks = energyMeterTaskProvider.listEnergyMeterTasks(pageAnchor, pageSize);
         }
         this.optimize(1);

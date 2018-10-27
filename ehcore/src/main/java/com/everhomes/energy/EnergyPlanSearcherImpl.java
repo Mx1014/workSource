@@ -173,7 +173,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
         List<EnergyPlan> plans = energyPlanProvider.listEnergyPlans(pageAnchor, pageSize);
         while (plans != null && plans.size() > 0) {
             bulkUpdate(plans);
-            pageAnchor += (plans.size() + 1);
+            pageAnchor = plans.get(plans.size() - 1).getId() + 1;
             plans = energyPlanProvider.listEnergyPlans(pageAnchor, pageSize);
         }
         this.optimize(1);
