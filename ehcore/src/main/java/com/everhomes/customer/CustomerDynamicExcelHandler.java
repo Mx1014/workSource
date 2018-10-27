@@ -628,6 +628,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
                         if(flag) {
+                            tracking.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
                             customerProvider.createCustomerTracking(tracking);
                             EnterpriseCustomer customer = customerProvider.findById(customerId);
                             if(customer != null) {
