@@ -181,7 +181,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         List<EnergyMeter> meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);
         while (meters != null && meters.size() > 0) {
             bulkUpdate(meters);
-            pageAnchor += (meters.size() + 1);
+            pageAnchor = meters.get(meters.size() - 1).getId() + 1;
             meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);
         }
         this.optimize(1);
@@ -190,22 +190,23 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     }
 
     private SearchResponse query(SearchEnergyMeterCommand cmd) {        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-        QueryBuilder qb;
-        if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
-        } else {
-//            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
-////                    .field("meterNumber", 5.0f)
-//                    .field("name", 5.0f);
-            
-            qb = QueryBuilders.boolQuery()
-					.should(QueryBuilders.wildcardQuery("meterNumber", "*" + cmd.getKeyword() + "*"));
-            
-            if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
-                qb = QueryBuilders.boolQuery().must(qb).must( QueryBuilders.queryString("*" + cmd.getMeterNumber() + "*"));
-            }
-        }
-
+    	QueryBuilder qb = null;
+//        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+//            //qb = QueryBuilders.boolQuery().must(qb).must( QueryBuilders.queryString("*" + cmd.getMeterNumber() + "*"));
+//            qb = QueryBuilders.boolQuery().should(QueryBuilders.wildcardQuery("meterNumber", "*" + cmd.getMeterNumber() + "*"));
+//        }
+        
+//        if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+//            qb = QueryBuilders.matchAllQuery();
+//        } else {
+////            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
+//////                    .field("meterNumber", 5.0f)
+////                    .field("name", 5.0f);
+//            
+//            qb = QueryBuilders.boolQuery()
+//					.should(QueryBuilders.wildcardQuery("name", "*" + cmd.getKeyword() + "*"));
+//        }
+        
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(addressId);
