@@ -208,6 +208,18 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 builder.field("requirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
 
             }
+            List<CustomerContact> contact = invitedCustomerProvider.findContactByCustomerIdAndType(customer.getId(), CustomerContactType.CUSTOMER_CONTACT.getCode());
+            if(contact != null && contact.size() > 0){
+                List<String> customerContactName = new ArrayList<>();
+                List<Long> customerContactIds = new ArrayList<>();
+
+                contact.forEach(r -> {
+                    if(StringUtils.isNotBlank(r.getName())){
+                        customerContactName.add(r.getName());
+                    }
+                });
+                builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
+            }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -313,6 +325,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             if(StringUtils.isNotBlank(cmd.getKeyword())) {
                 qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName",5.0f)
                         .field("contactName", 5.0f)
+                        .field("customerContactName", 4.0f)
                         .field("contactAddress", 4.0f)
                         .field("contactPhone", 3.0f)
                         .field("name", 5.0f)

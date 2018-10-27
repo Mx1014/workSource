@@ -153,7 +153,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
             builder.field("partyAId", contract.getPartyAId());
-            builder.field("depositStatus", contract.getDepositStatus());
+            //builder.field("depositStatus", contract.getDepositStatus());
             if(contract.getPaymentFlag() == null){
                 builder.field("paymentFlag", 0);
             }else{
@@ -422,9 +422,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		        if (contractCategory != null) {
 		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
-		        if (contract.getDepositStatus() != null) {
+		        /*if (contract.getDepositStatus() != null) {
 					dto.setDepositStatus(contract.getDepositStatus());
-				}
+				}*/
 		        
                 dtos.add(dto);
             });

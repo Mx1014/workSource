@@ -189,15 +189,18 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         LOGGER.info("sync for energy meter ok");
     }
 
-    private SearchResponse query(SearchEnergyMeterCommand cmd) {
-        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+    private SearchResponse query(SearchEnergyMeterCommand cmd) {        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb;
         if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
-//                    .field("meterNumber", 5.0f)
-                    .field("name", 5.0f);
+//            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
+////                    .field("meterNumber", 5.0f)
+//                    .field("name", 5.0f);
+            
+            qb = QueryBuilders.boolQuery()
+					.should(QueryBuilders.wildcardQuery("meterNumber", "*" + cmd.getKeyword() + "*"));
+            
             if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
                 qb = QueryBuilders.boolQuery().must(qb).must( QueryBuilders.queryString("*" + cmd.getMeterNumber() + "*"));
             }

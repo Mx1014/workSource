@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
@@ -28,6 +29,7 @@ import com.everhomes.rest.aclink.ListDoorAuthLevelCommand;
 import com.everhomes.rest.aclink.ListDoorAuthLevelResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthLevelDao;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuthLevel;
@@ -323,6 +325,20 @@ public class DoorAuthLevelProviderImpl implements DoorAuthLevelProvider {
         
         return resp;
     }
+    
+	@Override
+	public void createDoorAuthLevelBatch(List<DoorAuthLevel> clevels) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhDoorAuthLevelDao dao = new EhDoorAuthLevelDao(context.configuration());
+		long id = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuthLevel.class), clevels.size());
+		List<EhDoorAuthLevel> list = new ArrayList<>();
+		for(DoorAuthLevel auth : clevels){
+			list.add(ConvertHelper.convert(auth, EhDoorAuthLevel.class));
+		}
+		dao.insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhDoorAuth.class, null);
+		
+	}
 
 	@Override
 	public void updateDoorAuthLevelBatch(List<DoorAuthLevel> ulevels) {

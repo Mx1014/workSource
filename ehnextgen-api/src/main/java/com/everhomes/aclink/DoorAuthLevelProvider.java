@@ -30,6 +30,7 @@ public interface DoorAuthLevelProvider {
 
     ListDoorAuthLevelResponse findAuthLevelsWithBuilding(ListDoorAuthLevelCommand cmd);
 
-	void updateDoorAuthLevelBatch(List<DoorAuthLevel> ulevels);
+	void createDoorAuthLevelBatch(List<DoorAuthLevel> clevels);
 
+	void updateDoorAuthLevelBatch(List<DoorAuthLevel> ulevels);
 }

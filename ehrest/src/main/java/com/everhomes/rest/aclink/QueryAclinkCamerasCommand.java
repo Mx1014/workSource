@@ -28,9 +28,20 @@ public class QueryAclinkCamerasCommand {
 	private Long serverId;
 	private Long doorAccessId;
 	private Byte enterStatus;
+	private String name;
 	private Byte linkStatus;
 	private Long pageAnchor;
 	private Integer pageSize;
+	
+	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;

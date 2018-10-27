@@ -5,14 +5,14 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.ListLocalIpadCommand;
 
 public interface AclinkIpadProvider {
 
 	List<AclinkIpad> queryLocalIpads(CrossShardListingLocator locator, Integer count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
-	List<AclinkIpad> listLocalIpads(CrossShardListingLocator locator, Long serverId, List<Long> serverIds,
-			Long doorAccessId, Byte enterStatus, Byte linkStatus, Byte activeStatus, String uuid, Integer count);
+	List<AclinkIpad> listLocalIpads(CrossShardListingLocator locator, ListLocalIpadCommand cmd);
 
 	void createLocalIpad(AclinkIpad ipad);
 
@@ -21,5 +21,9 @@ public interface AclinkIpadProvider {
 	void updateLocalIpad(AclinkIpad ipad);
 
 	void deleteLocalIpad(Long id);
+
+	List<AclinkIpad> listLocalIpadByIds(List<Long> reqIpadIds);
+
+	void updateIpadBatch(List<AclinkIpad> updateIpads);
 
 }
