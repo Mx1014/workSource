@@ -18,6 +18,11 @@
 -- AUTHOR: 唐岑 2018年10月8日19:56:37
 -- REMARK: 在瑞安CM部署时，需执行该任务（issue-38706）同步资产数据。详细步骤咨询 唐岑
 
+
+-- AUTHOR: 黄明波 2018年10月27日17:31:00
+-- REMARK: 执行接口 /yellowPage/transferApprovalToForm 
+-- REMARK: 参数 namespaceId 填 1802， 并且将返回的字符串发给黄明波确认
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
 
@@ -27,7 +32,7 @@
 
 
 -- AUTHOR:黄明波
--- REMARK:服务联盟数据迁移，待续
+-- REMARK:服务联盟数据迁移 迁移1~迁移8
 -- 迁移 start
 -- 迁移1.调整ca表的ownerType和ownerId
 update eh_service_alliance_categories ca, eh_service_alliances sa 
@@ -57,8 +62,13 @@ update eh_service_alliances
 set  integral_tag1 = 3
 where module_url not like 'zl://approva%' and  module_url not like 'zl://form%' and  module_url is not null and integral_tag1 = 2;
 
+-- 迁移6.工作流
+update eh_flows fl, eh_general_approvals ap 
+set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE'
+where fl.owner_type = 'GENERAL_APPROVAL' and fl.module_id = 40500 and fl.owner_id = ap.id and fl.owner_type <> 'SERVICE_ALLIANCE' ;
 
--- 迁移6.添加基础数据
+
+-- 迁移7.添加基础数据
 DELIMITER $$  -- 开始符
 
 CREATE PROCEDURE alliance_transfer_add_base_ca(
@@ -103,7 +113,7 @@ call alliance_transfer_add_base_ca();
 DROP PROCEDURE IF EXISTS alliance_transfer_add_base_ca;
 
 
--- 迁移7.添加服务与类型的关联到match表
+-- 迁移8.添加服务与类型的关联到match表
 DELIMITER $$  -- 开始符
 
 CREATE PROCEDURE alliance_transfer_add_match(
@@ -155,7 +165,7 @@ DELIMITER ; -- 结束符
 
 call alliance_transfer_add_match(); -- 执行
 
-DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  --删除该存储过程
+DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  -- 删除该存储过程
 -- 迁移 end
 
 
