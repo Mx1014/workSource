@@ -728,9 +728,13 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
 
     @Override
     public void payNotify(MerchantPaymentNotificationCommand cmd) {
-        if (!verifyCallbackSignature(cmd))
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
-                    "signature wrong");
+//        if (!verifyCallbackSignature(cmd))
+//            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+//                    "signature wrong");
+        Map<String, String> params = new HashMap();
+        StringHelper.toStringMap(null, cmd, params);
+        params.remove("signature");
+        LOGGER.info("the cmd is {}  the pre signature is {} the after signature is {}",cmd,cmd.getSignature(),SignatureHelper.computeSignature(params,PaySettings.getSecretKey()));
         if(cmd.getPaymentStatus() == null) {
             LOGGER.info(" ----------------- - - - PAY FAIL command is "+cmd.toString());
         }
