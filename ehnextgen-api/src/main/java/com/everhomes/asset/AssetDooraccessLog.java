@@ -9,10 +9,10 @@ import com.everhomes.server.schema.tables.pojos.EhAssetDooraccessLogs;
 
 public class AssetDooraccessLog extends EhAssetDooraccessLogs {
     
+	private static final long serialVersionUID = 7492685420500802590L;
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5272927229744806162L;
 	private String msg = "";
 
 	public String getMsg() {

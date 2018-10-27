@@ -1594,7 +1594,7 @@ public class AssetController extends ControllerBase {
      * <b>URL: /asset/getDoorAccessInfo</b>
      */
     @RequestMapping("getDoorAccessInfo")
-    @RestReturn(value=AssetDooraccessLog.class)
+    @RestReturn(value=String.class)
     public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
     	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
