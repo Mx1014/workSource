@@ -3044,8 +3044,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 		//删除门牌
-		//// TODO: 2018/5/11
-		addressProvider.deleteAddressById(cmd.getId());
+		//// TODO: 2018/5/11 
+        //删除门牌应该以置状态的方式，而不能直接去删除数据库里的记录，不然会对房源招商，租户管理，个人客户管理等模块的业务产生影响，by 唐岑
+		//addressProvider.deleteAddressById(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
