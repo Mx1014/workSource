@@ -31,7 +31,7 @@ public class ListBillStatisticByBuildingDTO {
 	private Long ownerId;
 	private String ownerType;
 	private String buildingName;
-	private Integer buildindCount;
+	private Integer buildingCount;
     private Integer addressCount;
     private BigDecimal areaSize;
     private BigDecimal amountReceivable;
@@ -70,11 +70,11 @@ public class ListBillStatisticByBuildingDTO {
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
 	}
-	public Integer getBuildindCount() {
-		return buildindCount;
+	public Integer getBuildingCount() {
+		return buildingCount;
 	}
-	public void setBuildindCount(Integer buildindCount) {
-		this.buildindCount = buildindCount;
+	public void setBuildingCount(Integer buildingCount) {
+		this.buildingCount = buildingCount;
 	}
 	public Integer getAddressCount() {
 		return addressCount;
