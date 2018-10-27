@@ -68,6 +68,7 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
                 throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_CREATE_FLOW_CASE,
                         "requistion flow case not found.");
             }
+
             CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
             createFlowCaseCommand.setReferId(referId);
             createFlowCaseCommand.setReferType("requisitionId");
@@ -79,6 +80,13 @@ public class RequisitionFormHandler implements GeneralFormModuleHandler {
             createFlowCaseCommand.setServiceType("请示单申请");
             createFlowCaseCommand.setProjectId(cmd.getOwnerId());
             createFlowCaseCommand.setProjectType(cmd.getOwnerType());
+
+            FlowCaseDetailDTOV2 flowCase = flowService.getFlowCaseDetailByRefer(cmd.getModuleId(), FlowUserType.NO_USER, UserContext.currentUserId(), createFlowCaseCommand.getReferType(), referId, false);
+            if(flowCase != null){
+                LOGGER.error("this requisition is being approval, please check . sourceId ={}", referId);
+                throw RuntimeErrorException.errorWith(RequistionErrorCodes.SCOPE, RequistionErrorCodes.ERROR_FLOW_BEING_APPROVAL,
+                        "this requisition is being approval, please check .");
+            }
 
             flowService.createFlowCase(createFlowCaseCommand);
             PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);

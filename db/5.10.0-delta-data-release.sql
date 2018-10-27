@@ -448,6 +448,17 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
 
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:将计划任务中的拜访时间改为计划时间
+update eh_var_fields set display_name = '计划时间' where display_name='拜访时间' and group_id = 20;
+update eh_var_field_scopes set field_display_name = '计划时间' where field_display_name='拜访时间' and group_id = 20;
+
+
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:更改module表中的client_handler_type类型为外部链接
+update eh_service_modules set client_handler_type = 2 where id = 25000;
+update eh_service_modules set client_handler_type = 2 where id = 150020;
+
 -- 资产管理系统
 UPDATE eh_web_menus set parent_id = 15000000, sort_num = 25 WHERE id = 20000000;
 UPDATE eh_web_menus set parent_id = 15000000, sort_num = 5 WHERE id = 21000000;
@@ -776,6 +787,7 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 -- REMARK: issue-37602 审批单支持编辑
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
