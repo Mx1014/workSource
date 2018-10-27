@@ -1397,13 +1397,10 @@ public class FieldServiceImpl implements FieldService {
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         // get params ownerId and ownerType
         PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
-        Long ownerId = null;
-        if(dtoDes != null){
-            ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
-        }
+        Long ownerId = (long)dtoDes.getReadMethod().invoke(dto);
         PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
-        String  ownerType = "";
-        if(dtoDesOwnerType != null){
+        String ownerType = "";
+        if(dtoDesOwnerType.getReadMethod().invoke(dto) != null){
             ownerType = dtoDesOwnerType.getReadMethod().invoke(dto).toString();
         }
         Class<?> clz = dto.getClass();
