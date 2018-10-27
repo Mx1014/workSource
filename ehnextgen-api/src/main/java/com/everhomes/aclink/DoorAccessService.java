@@ -246,8 +246,6 @@ public interface DoorAccessService {
 
 	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
 
-	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
-
 	public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
 
 	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
@@ -259,7 +257,6 @@ public interface DoorAccessService {
     ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd);
 
     AclinkFormTitlesDTO changeTempAuthCustomField (ChangeTempAuthCustomFieldCommand cmd);
->>>>>>> 3d6937ed8763240dbaa3a6cd9085b630e6733968
 
 	BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd);
 

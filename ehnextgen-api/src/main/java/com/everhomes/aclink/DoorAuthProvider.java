@@ -121,8 +121,6 @@ public interface DoorAuthProvider {
 
 	void updateDoorAuthBatch(List<DoorAuth> uAuths);
 
-	void createDoorAuthLogBatch(List<DoorAuthLog> logs);
-
 	List<OrganizationMember> getOrganizationMemberByUserId(Long id);
 
 	/**
@@ -143,5 +141,4 @@ public interface DoorAuthProvider {
 
 	List<DoorAuth> listValidDoorAuthForever(QueryValidDoorAuthForeverCommand qryCmd);
 
->>>>>>> 3d6937ed8763240dbaa3a6cd9085b630e6733968
 }

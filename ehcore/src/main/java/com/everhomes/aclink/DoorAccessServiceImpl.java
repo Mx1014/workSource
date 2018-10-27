@@ -6151,21 +6151,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	}
 
 	@Override
-	public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd) {
-		ListDoorAccessResponse rsp = searchDoorAccessByAdmin(cmd);
-		List<DoorAccessDTO> dtos = rsp.getDoors();
-		List<DoorAccessLiteDTO> dtosL = new ArrayList<DoorAccessLiteDTO>();
-		if(dtos != null && dtos.size() > 0){
-			for(DoorAccessDTO dto : dtos){
-				dtosL.add(ConvertHelper.convert(dto, DoorAccessLiteDTO.class));
-			}
-		}
-		ListDoorAccessLiteResponse rspL = ConvertHelper.convert(rsp, ListDoorAccessLiteResponse.class);
-		rspL.setDoors(dtosL);
-		return rspL;
-	}
-
-	@Override
 	public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd) {
 		DoorAccess da = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
 		if(da == null){
@@ -7017,12 +7002,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		ListDoorAccessLiteResponse rspL = ConvertHelper.convert(rsp, ListDoorAccessLiteResponse.class);
 		rspL.setDoors(dtosL);
 		return rspL;
-	}
-
-	@Override
-	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
