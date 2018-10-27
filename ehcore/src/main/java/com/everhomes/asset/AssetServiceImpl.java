@@ -5360,18 +5360,20 @@ public class AssetServiceImpl implements AssetService {
 										updateFormalAuthByCommunityCommand.setTargetId(targetId);
 										updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
 
-										UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunityResponse = doorAccessService
-												.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+										
+										UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
+										rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
 										assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());
 										existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 
 										// 更新门禁为开启
-										// 更新门禁为开启
 										if (existDooraccessLog == null) {
+											assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 											assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 											assetProvider.createDoorAccessLog(assetDooraccessLog);
 										} else {
+											existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 											existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 											assetProvider.updateDoorAccessLog(existDooraccessLog);
 										}
@@ -5388,18 +5390,20 @@ public class AssetServiceImpl implements AssetService {
 								updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
 								updateFormalAuthByCommunityCommand.setTargetId(targetId);
 								updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
-
-								UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunityResponse = doorAccessService
-										.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+								
+								UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
+								rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
 								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());
 								existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 
 								// 更新门禁为开启
 								if (existDooraccessLog == null) {
+									assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 									assetProvider.createDoorAccessLog(assetDooraccessLog);
 								} else {
+									existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 									assetProvider.updateDoorAccessLog(existDooraccessLog);
 								}
@@ -5496,8 +5500,8 @@ public class AssetServiceImpl implements AssetService {
 								updateFormalAuthByCommunityCommand.setTargetId(targetId);
 								updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
 
-								UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunityResponse = doorAccessService
-										.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+								UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
+								rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
 								//原来的门禁开启状态，欠费后更新门禁状态，不存在则新增
 								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());
@@ -5506,9 +5510,11 @@ public class AssetServiceImpl implements AssetService {
 								//更新门禁为开启
 								
 								if (existDooraccessLog == null) {
+									assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
 									assetProvider.createDoorAccessLog(assetDooraccessLog);
 								}else {
+									existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
 									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
 									assetProvider.updateDoorAccessLog(existDooraccessLog);
 								}
