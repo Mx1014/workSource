@@ -164,6 +164,9 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
         billStatisticList.stream().forEach(b->billStatisticMap.put(b.getOwnerId(), b));
         
         for (CommunityReportFormDTO result : resultList) {
+        	String category = communityProvider.findCommunityCategoryByCommunityId(result.getCommunityId());
+        	result.setCategory(category);
+        	
         	ListBillStatisticByCommunityDTO billStatistic = billStatisticMap.get(result.getCommunityId());
         	if (billStatistic != null) {
 				result.setAmountReceivable(billStatistic.getAmountReceivable());

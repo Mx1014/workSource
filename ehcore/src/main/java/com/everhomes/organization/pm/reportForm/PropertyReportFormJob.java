@@ -57,7 +57,7 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	@Override
 	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 		if(LOGGER.isInfoEnabled()) {
-	        LOGGER.info("start PropertyReportFormJob at" + new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        LOGGER.info("start PropertyReportFormJob at " + new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    }
 	    //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -68,18 +68,16 @@ public class PropertyReportFormJob extends QuartzJobBean{
 	//定时统计园区数据的接口
 	public void generateReportFormStatics() {
 		
-		//dbProvider.execute((TransactionStatus status) -> {
+		dbProvider.execute((TransactionStatus status) -> {
 			//先删掉这个月的的统计数据
 			String todayDateStr = getTodayDateStr();
 			propertyReportFormProvider.deleteCommunityDataByDateStr(todayDateStr);
 			propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
 			
-
-//			int totalPage = 2;
-			int pageSize = 500;
+			int pageSize = 5000;
 			int totalCount = addressProvider.getTotalApartmentCount();
 			int totalPage = 0;
-			if (totalCount%pageSize==0) {
+			if (totalCount%pageSize == 0) {
 				totalPage = totalCount/pageSize;
 			}else {
 				totalPage = totalCount/pageSize + 1;
@@ -92,7 +90,7 @@ public class PropertyReportFormJob extends QuartzJobBean{
 				
 				long startTime = System.currentTimeMillis();
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("Start PropertyReportFormJob for"+ currentPage+1 +" time.........");
+					LOGGER.debug("Start PropertyReportFormJob for "+ (currentPage+1) +" time.........");
 				}
 				
 				int startIndex = currentPage * pageSize;
@@ -144,13 +142,13 @@ public class PropertyReportFormJob extends QuartzJobBean{
 				
 				long endTime = System.currentTimeMillis();
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("End PropertyReportFormJob for"+ currentPage+1 +" time.........");
-					LOGGER.debug(currentPage+1 +" time spend " + (endTime-startTime)/1000 + "s");
+					LOGGER.debug("End PropertyReportFormJob for "+ (currentPage+1) +" time.........");
+					LOGGER.debug("PropertyReportFormJob progress for " + (currentPage+1) +" time spend " + (endTime-startTime) + "ms");
 				}
 				
 			}
-			//return null;
-		//});
+			return null;
+		});
 	}
 
 	private void createBuildingStatics(Map<Long, BuildingStatistics> buildingResultMap) {
