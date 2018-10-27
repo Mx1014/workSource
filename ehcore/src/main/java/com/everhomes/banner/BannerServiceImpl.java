@@ -467,7 +467,7 @@ public class BannerServiceImpl implements BannerService {
 
 
         if (appContext != null && appContext.getCommunityId() != null) {
-            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId());
+            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId(),cmd.getCategoryId());
             return bannerList.stream().map(r -> {
                 BannerDTO dto = toBannerDTO(r);
                 // 本来posterPath是 cs:// 开头的
@@ -854,7 +854,7 @@ public class BannerServiceImpl implements BannerService {
             banner.setStatus(BannerStatus.ACTIVE.getCode());
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
-
+            banner.setCategoryId(cmd.getCategoryId());
             Integer minOrder = bannerProvider.getMinOrderByCommunityId(UserContext.getCurrentNamespaceId(), communityId);
             banner.setOrder(minOrder == null ? 10 : minOrder - 1);
             bannerProvider.createBanner(banner);
@@ -964,7 +964,7 @@ public class BannerServiceImpl implements BannerService {
         locator.setAnchor(cmd.getPageAnchor());
 
         List<Banner> bannerList = bannerProvider.listBannersByCommunityId(
-                cmd.getNamespaceId(), cmd.getScope(), pageSize, locator);
+                cmd.getNamespaceId(), cmd.getScope(), cmd.getCategoryId(), pageSize, locator);
 
         List<BannerDTO> dtoList = bannerList.stream().map(this::toBannerDTO).collect(Collectors.toList());
 

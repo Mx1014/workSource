@@ -31,6 +31,9 @@ public class BannerPortalPublishHandler implements PortalPublishHandler {
     public String publish(Integer namespaceId, String instanceConfig, String appName) {
         LOGGER.error("publish news. instanceConfig = {}, itemLabel = {}", instanceConfig, appName);
         BannersInstanceConfig bannersInstanceConfig = (BannersInstanceConfig) StringHelper.fromJsonString(instanceConfig, BannersInstanceConfig.class);
+        if (bannersInstanceConfig == null) {
+            bannersInstanceConfig = new BannersInstanceConfig();
+        }
         if(null == bannersInstanceConfig.getCategoryId()){
             BannerCategory bannerCategory = createBannerCategory(namespaceId, appName);
             bannersInstanceConfig.setCategoryId(bannerCategory.getId());

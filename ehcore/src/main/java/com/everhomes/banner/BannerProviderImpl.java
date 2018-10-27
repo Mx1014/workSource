@@ -397,13 +397,18 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId) {
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
         SelectQuery<EhBannersRecord> query = context.selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-
+        if (categoryId == null) {
+            //兼容旧数据
+            query.addConditions(t.CATEGORY_ID.eq(0L));
+        }else {
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
         query.addConditions(t.SCOPE_ID.eq(communityId));
 
@@ -443,7 +448,7 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator) {
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId, int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
@@ -451,7 +456,12 @@ public class BannerProviderImpl implements BannerProvider {
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
         query.addConditions(t.STATUS.ne(BannerStatus.DELETE.getCode()));
-
+        if (categoryId == null) {
+            //兼容旧数据
+            query.addConditions(t.CATEGORY_ID.eq(0L));
+        }else {
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
         query.addOrderBy(t.STATUS);
 
         if (communityId != null && communityId != 0) {

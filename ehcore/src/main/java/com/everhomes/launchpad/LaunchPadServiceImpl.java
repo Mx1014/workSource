@@ -2899,9 +2899,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			UserContext.current().setAppContext(cmd.getContext());
 		}
 
-		//GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
+		GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
+		bannerCmd.setCategoryId(cmd.getCategoryId());
 		//bannerCmd.setSceneToken(sceneToken);
-		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(null);
+		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(bannerCmd);
 
 		ListBannersResponse response = new ListBannersResponse();
 		response.setDtos(bannerDTOS);
