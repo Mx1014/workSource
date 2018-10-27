@@ -906,12 +906,14 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	 */
 	@Override
 	public ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
+//		LOGGER.debug("cmd: "+cmd.getAppkey()+" "+cmd.getIdentifierToken()+" "+cmd.getMsgSendType()+" "+ cmd.getMsgType());
+		
 		// 1.1 验证接受者在左邻系统是否存在,由 appkey/appsecret确定namespace
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
 		
 		// 1.2(tocken/namespace确定一个用户)
 		UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getIdentifierToken(),appNamespaceMapping.getNamespaceId());
-		LOGGER.debug("appNamespaceMapping : "+appNamespaceMapping.toString());
+//		LOGGER.debug("appNamespaceMapping : "+appNamespaceMapping.toString());
 		
 		// 2.响应内容
 		ThirdPartResponseMessageDTO response = new ThirdPartResponseMessageDTO();
