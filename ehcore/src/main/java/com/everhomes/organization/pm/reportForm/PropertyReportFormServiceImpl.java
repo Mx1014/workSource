@@ -182,10 +182,13 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		String dateStr = cmd.getDateStr();
 	    String formatDateStr = formatDateStr(dateStr);
 		
-		TotalCommunityStaticsDTO result = propertyReportFormProvider.getTotalCommunityStatics(cmd.getNamespaceId(),cmd.getCommunityIds(),formatDateStr);
+	    List<Long> communityIds = cmd.getCommunityIds();
+	    
+		TotalCommunityStaticsDTO result = propertyReportFormProvider.getTotalCommunityStatics(cmd.getNamespaceId(),communityIds,formatDateStr);
 		ListBillStatisticByCommunityDTO billTotalStatistic = assetStatisticService.listBillStatisticByCommunityTotalForProperty(cmd.getNamespaceId(), 
-				                                                           cmd.getCommunityIds(), "community", null, formatDateStr);
+				                                                           communityIds, "community", null, formatDateStr);
 		
+		result.setCommunityCount(communityIds==null ? 0 : communityIds.size());
 		result.setAmountReceivable(billTotalStatistic.getAmountReceivable());
 		result.setAmountReceived(billTotalStatistic.getAmountReceived());
 		result.setAmountOwed(billTotalStatistic.getAmountOwed());
@@ -251,16 +254,19 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		String dateStr = cmd.getDateStr();
 	    String formatDateStr = formatDateStr(dateStr);
 		
-	    TotalBuildingStaticsDTO result = propertyReportFormProvider.getTotalBuildingStatics(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingIds(),formatDateStr);
-		
-	    List<Building> buildingList = communityProvider.findBuildingsByIds(cmd.getBuildingIds());
+	    List<Long> buildingIds = cmd.getBuildingIds();
+	    
+	    TotalBuildingStaticsDTO result = propertyReportFormProvider.getTotalBuildingStatics(cmd.getNamespaceId(),cmd.getCommunityId(),buildingIds,formatDateStr);
+	    
+	    List<Building> buildingList = communityProvider.findBuildingsByIds(buildingIds);
         List<String> buildingNameList = new ArrayList<>();
         for (Building building : buildingList) {
         	buildingNameList.add(building.getName());
 		}
         ListBillStatisticByBuildingDTO billTotalStatistic = assetStatisticService.listBillStatisticByBuildingTotalForProperty(cmd.getNamespaceId(), 
 				                                                           cmd.getCommunityId(), "building", null, formatDateStr,buildingNameList);
-		result.setAmountReceivable(billTotalStatistic.getAmountReceivable());
+		result.setBuildingCount(buildingIds==null ? 0 : buildingIds.size());
+        result.setAmountReceivable(billTotalStatistic.getAmountReceivable());
 		result.setAmountReceived(billTotalStatistic.getAmountReceived());
 		result.setAmountOwed(billTotalStatistic.getAmountOwed());
 		result.setDueDayCount(billTotalStatistic.getDueDayCount());
@@ -657,7 +663,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		//序号
 		Cell cell0 = tempRow.createCell(0);
 		cell0.setCellStyle(style);
-		cell0.setCellValue("合计(总数)");
+		cell0.setCellValue("合计");
 			
 		//项目总数
 		Cell cell2 = tempRow.createCell(1);
@@ -853,7 +859,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 		//序号
 		Cell cell0 = tempRow.createCell(0);
 		cell0.setCellStyle(style);
-		cell0.setCellValue("合计(总数)");
+		cell0.setCellValue("合计");
 			
 		//楼宇名称
 		Cell cell2 = tempRow.createCell(1);

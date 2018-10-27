@@ -636,6 +636,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		//调用资产的接口提供给缴费报表的楼宇信息列表的接口
 		BuildingTotalStaticsDTO buildingTotalStaticsDTO = propertyReportFormService.getTotalBuildingBriefStaticsForBill(
 				namespaceId, ownerId, buildingNameList, dateStrEnd);
+		dto.setBuildindCount(buildingTotalStaticsDTO.getBuildindCount());
 		dto.setBuildingName(buildingTotalStaticsDTO.getBuildindCount() != null ? buildingTotalStaticsDTO.getBuildindCount().toString() : "0");
 		dto.setAddressCount(buildingTotalStaticsDTO.getTotalApartmentCount() != null ? buildingTotalStaticsDTO.getTotalApartmentCount() : 0);
 		dto.setAreaSize(buildingTotalStaticsDTO.getAreaSize() != null ? buildingTotalStaticsDTO.getAreaSize() : BigDecimal.ZERO);

@@ -170,8 +170,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.DATE_STR.eq(dateStr));
 		query.addConditions(Tables.EH_PROPERTY_STATISTIC_BUILDING.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
-			BigDecimal totalApartmentCount = r.getValue(DSL.sum(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT)));
-			BigDecimal areaSize = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_COMMUNITY.AREA_SIZE));
+			BigDecimal totalApartmentCount = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.TOTAL_APARTMENT_COUNT));
+			BigDecimal areaSize = r.getValue(DSL.sum(Tables.EH_PROPERTY_STATISTIC_BUILDING.AREA_SIZE));
 			
 			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
 			result.setAreaSize(areaSize);

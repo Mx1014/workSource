@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
@@ -13,6 +14,7 @@ import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsComm
 import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
 import com.everhomes.util.StringHelper;
 
+@Component
 public class BuildingReportFormExportHandler implements FileDownloadTaskHandler{
 	
 	@Autowired

@@ -27,7 +27,7 @@ import com.everhomes.util.StringHelper;
  */
 public class TotalCommunityStaticsDTO {
 	
-	private Long communityCount;
+	private Integer communityCount;
 	private Integer buildingCount;
 	private Integer totalApartmentCount;
 	private Integer freeApartmentCount;
@@ -46,10 +46,10 @@ public class TotalCommunityStaticsDTO {
 	private BigDecimal dueDayCount;
 	private BigDecimal collectionRate;
 	
-	public Long getCommunityCount() {
+	public Integer getCommunityCount() {
 		return communityCount;
 	}
-	public void setCommunityCount(Long communityCount) {
+	public void setCommunityCount(Integer communityCount) {
 		this.communityCount = communityCount;
 	}
 	public Integer getBuildingCount() {
