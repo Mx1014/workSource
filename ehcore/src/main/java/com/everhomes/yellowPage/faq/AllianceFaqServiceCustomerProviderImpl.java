@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,25 +16,22 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
-import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAllianceFaqTypesDao;
-import com.everhomes.server.schema.tables.records.EhAllianceFaqTypesRecord;
-import com.everhomes.server.schema.tables.records.EhAllianceTagRecord;
+import com.everhomes.server.schema.tables.daos.EhAllianceFaqServiceCustomersDao;
+import com.everhomes.server.schema.tables.records.EhAllianceFaqServiceCustomersRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
-import com.everhomes.yellowPage.AllianceTag;
+import com.everhomes.yellowPage.DeleteQueryBuilderCallback;
 import com.everhomes.yellowPage.UpdateQueryBuilderCallback;
 
 @Component
-public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
+public class AllianceFaqServiceCustomerProviderImpl implements AllianceFaqServiceCustomerProvider {
+
 	
 	@Autowired
 	DbProvider dbProvider;
@@ -41,24 +39,22 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	@Autowired
 	SequenceProvider sequenceProvider;
 	
-	com.everhomes.server.schema.tables.EhAllianceFaqTypes TABLE = Tables.EH_ALLIANCE_FAQ_TYPES;
+	com.everhomes.server.schema.tables.EhAllianceFaqServiceCustomers TABLE = Tables.EH_ALLIANCE_FAQ_SERVICE_CUSTOMERS;
 	
-	Class<AllianceFAQType> CLASS = AllianceFAQType.class;
+	Class<AllianceFAQServiceCustomer> CLASS = AllianceFAQServiceCustomer.class;
 	
 
 	@Override
-	public void createFAQType(AllianceFAQType faqType) {
+	public void createServiceCustomer(AllianceFAQServiceCustomer createItem) {
 		// 设置动态属性 如id，createTime
 		Long id = sequenceProvider
 				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(CLASS));
-		faqType.setId(id);
-		faqType.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		faqType.setCreateUid(UserContext.currentUserId());
-		faqType.setDefaultOrder(id);
-		faqType.setStatus(YellowPageStatus.ACTIVE.getCode());
+		createItem.setId(id);
+		createItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		createItem.setCreateUid(UserContext.currentUserId());
 
 		// 使用dao方法
-		writeDao().insert(faqType);
+		writeDao().insert(createItem);
 
 		// 广播给从数据库
 		DaoHelper.publishDaoAction(DaoAction.CREATE, CLASS, null);
@@ -66,64 +62,45 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	}
 
 	@Override
-	public void updateFAQType(AllianceFAQType faqType) {
+	public void updateServiceCustomer(AllianceFAQServiceCustomer updateItem) {
 		// 使用dao方法
-		writeDao().update(faqType);
+		writeDao().update(updateItem);
 
 		// 广播给从数据库
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, CLASS, null);
 	}
 
 	@Override
-	public void deleteFAQType(Long faqTypeId) {
+	public void deleteServiceCustomer(Long itemId) {
 
-		// 当前 item只能更新name,showFlag,order
-		int updateCnt = updateSingle(faqTypeId, query -> {
-			query.addValue(TABLE.STATUS, YellowPageStatus.INACTIVE.getCode());
+		int deleteCnt = deleteTool(query -> {
+			query.addConditions(TABLE.ID.eq(itemId));
 		});
 
-		if (updateCnt > 0) {
+		if (deleteCnt > 0) {
 			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
 		}
 	}
 
 	@Override
-	public AllianceFAQType getFAQType(Long faqTypeId) {
+	public AllianceFAQServiceCustomer getServiceCustomer(AllianceCommonCommand cmd) {
 		
-		List<AllianceFAQType> types =  listTool(null, null, (l, q) -> {
-			q.addConditions(TABLE.ID.eq(faqTypeId));
-			return q;
-		});
-		
-		return types.size() > 0 ? types.get(0) : null;
-	}
-
-	@Override
-	public void updateFAQTypeOrder(Long faqTypeId, Long defaultOrderId) {
-		int updateCnt = updateSingle(faqTypeId, query -> {
-			query.addValue(TABLE.DEFAULT_ORDER, defaultOrderId);
-		});
-
-		if (updateCnt > 0) {
-			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
-		}
-	}
-
-	@Override
-	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator,
-			Integer pageSize, Long pageAnchor) {
-		return listTool(pageSize, locator, (l,q)-> {
-			q.addConditions(TABLE.NAMESPACE_ID.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+		List<AllianceFAQServiceCustomer> items =  listTool(null, null, (l, q) -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
 			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
 			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
 			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
-			return null;
+			return q;
 		});
+		
+		return items.size() > 0 ? items.get(0) : null;
 	}
-	
-	private EhAllianceFaqTypesDao getAllianceFAQTypeDao(AccessSpec arg0) {
+
+
+	private EhAllianceFaqServiceCustomersDao getAllianceFAQServiceCustomerDao(AccessSpec arg0) {
 		DSLContext context = dbProvider.getDslContext(arg0);
-		return new EhAllianceFaqTypesDao(context.configuration());
+		return new EhAllianceFaqServiceCustomersDao(context.configuration());
 	}
 	
 	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
@@ -132,33 +109,42 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 			return 0;
 		}
 
-		UpdateQuery<EhAllianceFaqTypesRecord> query = updateQuery();
+		UpdateQuery<EhAllianceFaqServiceCustomersRecord> query = updateQuery();
 
 		if (callback != null) {
 			callback.buildCondition(query);
 		}
 
-		// 必须是未被删除且非固定的才可以更新
-		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 		query.addConditions(TABLE.ID.in(updateIds));
 		return query.execute();
 	}
+	
+	private int deleteTool(DeleteQueryBuilderCallback callback) {
 
-	private EhAllianceFaqTypesDao readDao() {
-		return getAllianceFAQTypeDao(AccessSpec.readOnly());
+		DeleteQuery<EhAllianceFaqServiceCustomersRecord> query = deleteQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		return query.execute();
 	}
 
-	private EhAllianceFaqTypesDao writeDao() {
-		return getAllianceFAQTypeDao(AccessSpec.readWrite());
+	private EhAllianceFaqServiceCustomersDao readDao() {
+		return getAllianceFAQServiceCustomerDao(AccessSpec.readOnly());
 	}
 
-	public List<AllianceFAQType> listTool(Integer pageSize, ListingLocator locator,
+	private EhAllianceFaqServiceCustomersDao writeDao() {
+		return getAllianceFAQServiceCustomerDao(AccessSpec.readWrite());
+	}
+
+	public List<AllianceFAQServiceCustomer> listTool(Integer pageSize, ListingLocator locator,
 			ListingQueryBuilderCallback callback) {
 		
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
         int realPageSize = null == pageSize ? 0 : pageSize;
         
-        SelectQuery<EhAllianceFaqTypesRecord> query = context.selectQuery(TABLE);
+        SelectQuery<EhAllianceFaqServiceCustomersRecord> query = context.selectQuery(TABLE);
         if(callback != null)
         	callback.buildCondition(locator, query);
 
@@ -171,11 +157,9 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		}
 		
 		// 必须获取未删除的
-		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
-		query.addOrderBy(TABLE.DEFAULT_ORDER.asc());
 		query.addOrderBy(TABLE.ID.asc());
         
-        List<AllianceFAQType> list = query.fetchInto(CLASS);
+        List<AllianceFAQServiceCustomer> list = query.fetchInto(CLASS);
         
         // 设置锚点
         if (null != locator && null != list) {
@@ -206,12 +190,16 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 		return dbProvider.getDslContext(AccessSpec.readWrite());
 	}
 
-	private SelectQuery<EhAllianceFaqTypesRecord> selectQuery() {
+	private SelectQuery<EhAllianceFaqServiceCustomersRecord> selectQuery() {
 		return readOnlyContext().selectQuery(TABLE);
 	}
 
-	private UpdateQuery<EhAllianceFaqTypesRecord> updateQuery() {
+	private UpdateQuery<EhAllianceFaqServiceCustomersRecord> updateQuery() {
 		return readWriteContext().updateQuery(TABLE);
+	}
+	
+	private DeleteQuery<EhAllianceFaqServiceCustomersRecord> deleteQuery() {
+		return readWriteContext().deleteQuery(TABLE);
 	}
 	
 }

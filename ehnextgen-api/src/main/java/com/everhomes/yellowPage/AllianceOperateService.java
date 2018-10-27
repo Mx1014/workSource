@@ -1,4 +1,4 @@
-package com.everhomes.yellowPage.faq;
+package com.everhomes.yellowPage;
 
 import com.everhomes.server.schema.tables.pojos.EhAllianceOperateServices;
 

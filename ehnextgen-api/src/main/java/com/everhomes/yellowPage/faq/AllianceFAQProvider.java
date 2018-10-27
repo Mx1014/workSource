@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.yellowPage.AllianceOperateService;
 
 public interface AllianceFAQProvider {
 
@@ -41,16 +42,16 @@ public interface AllianceFAQProvider {
 
 	
 	//运营商模块
-	List<OperateServiceDTO> listOperateServices(AllianceCommonCommand cmd);
+	List<AllianceOperateService> listOperateServices(AllianceCommonCommand cmd);
 
 	void deleteOperateServices(AllianceCommonCommand cmd);
 	
-	AllianceOperateService getOperateServices(AllianceCommonCommand cmd);
-	
 	void createOperateService(AllianceOperateService operateService);
 	
-	void updateOperateServiceOrders(AllianceCommonCommand cmd, Long upServiceId, Long lowServiceId);
+	AllianceOperateService getOperateService(Long itemId);
 
+	void updateOperateServiceOrder(Long itemId, Long newOrder);
+	
 	
 	//热线
 	void updateFAQOnlineService(AllianceFAQServiceCustomer onlineService);
@@ -58,6 +59,10 @@ public interface AllianceFAQProvider {
 	void createFAQOnlineService(AllianceFAQServiceCustomer onlineService);
 	
 	AllianceFAQServiceCustomer getFAQOnlineService(AllianceCommonCommand cmd);
+
+	void updateFAQSolveTimes(Long faqId, Byte solveStaus);
+
+
 
 
 }

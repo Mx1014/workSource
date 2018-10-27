@@ -1,4 +1,4 @@
-package com.everhomes.yellowPage.faq;
+package com.everhomes.yellowPage;
 
 import org.jooq.Record;
 import org.jooq.UpdateQuery;

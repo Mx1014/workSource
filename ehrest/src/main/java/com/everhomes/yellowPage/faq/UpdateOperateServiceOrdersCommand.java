@@ -11,23 +11,24 @@ import com.everhomes.rest.yellowPage.AllianceAdminCommand;
  * <li>currentPMId: 当前管理公司</li>
  * <li>currentProjectId: 当前项目id</li>
  * <li>appId: 当前应用originId</li>
- * <li>upServiceId: 更换到上方的服务id</li>
- * <li>lowServiceId: 更换到下方的服务id</li>
+ * <li>upOperateServiceId: 更换到上方的id</li>
+ * <li>lowOperateServiceId: 更换到下方的id</li>
  * </ul>
  **/
 public class UpdateOperateServiceOrdersCommand extends AllianceAdminCommand{
-	private Long upServiceId;
-	private Long lowServiceId;
-	public Long getUpServiceId() {
-		return upServiceId;
+	private Long upOperateServiceId;
+	private Long lowOperateServiceId;
+	
+	public Long getUpOperateServiceId() {
+		return upOperateServiceId;
 	}
-	public void setUpServiceId(Long upServiceId) {
-		this.upServiceId = upServiceId;
+	public void setUpOperateServiceId(Long upOperateServiceId) {
+		this.upOperateServiceId = upOperateServiceId;
 	}
-	public Long getLowServiceId() {
-		return lowServiceId;
+	public Long getLowOperateServiceId() {
+		return lowOperateServiceId;
 	}
-	public void setLowServiceId(Long lowServiceId) {
-		this.lowServiceId = lowServiceId;
+	public void setLowOperateServiceId(Long lowOperateServiceId) {
+		this.lowOperateServiceId = lowOperateServiceId;
 	}
 }

@@ -24,4 +24,6 @@ public interface AllianceFaqsProvider {
 
 	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 
+	void updateTopFAQOrder(Long faqId, Long newTopOrder);
+
 }

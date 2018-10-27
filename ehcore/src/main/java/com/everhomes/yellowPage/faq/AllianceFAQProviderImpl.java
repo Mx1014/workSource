@@ -1,16 +1,12 @@
 package com.everhomes.yellowPage.faq;
-
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.common.IdNameDTO;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.yellowPage.AllianceOperateService;
+import com.everhomes.yellowPage.AllianceOperateServiceProvider;
 
 @Component
 public class AllianceFAQProviderImpl implements AllianceFAQProvider{
@@ -23,7 +19,10 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	private AllianceFaqsProvider allianceFaqsProvider;
 	
 	@Autowired
-	private DbProvider dbProvider;
+	private AllianceOperateServiceProvider allianceOperateServiceProvider;
+	
+	@Autowired
+	private AllianceFaqServiceCustomerProvider allianceFaqServiceCustomerProvider;
 	
 
 	@Override
@@ -48,8 +47,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public void updateFAQTypeOrder(Long FAQTypeId, Long newDefaultOrderId) {
-//		dbProvider.execute(arg0)
-//		allianceFaqTypeProvider.updateFAQTypeOrder(upFAQTypeId, lowFAQTypeId); 
+		allianceFaqTypeProvider.updateFAQTypeOrder(FAQTypeId, newDefaultOrderId);
 	}
 
 	@Override
@@ -95,54 +93,52 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public void updateTopFAQOrder(Long faqId, Long newTopOrder) {
-		
+		allianceFaqsProvider.updateTopFAQOrder(faqId, newTopOrder);
 	}
 
 	@Override
-	public List<OperateServiceDTO> listOperateServices(AllianceCommonCommand cmd) {
-		return null;
+	public List<AllianceOperateService> listOperateServices(AllianceCommonCommand cmd) {
+		return allianceOperateServiceProvider.listOperateServices(cmd);
 	}
 
 	@Override
 	public void deleteOperateServices(AllianceCommonCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		allianceOperateServiceProvider.deleteOperateServices(cmd);
 	}
 
 	@Override
-	public AllianceOperateService getOperateServices(AllianceCommonCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public AllianceOperateService getOperateService(Long itemId) {
+		return allianceOperateServiceProvider.getOperateService(itemId);
 	}
 
 	@Override
 	public void createOperateService(AllianceOperateService operateService) {
-		// TODO Auto-generated method stub
-		
+		allianceOperateServiceProvider.createOperateService(operateService);
 	}
 
 	@Override
-	public void updateOperateServiceOrders(AllianceCommonCommand cmd, Long upServiceId, Long lowServiceId) {
-		// TODO Auto-generated method stub
-		
+	public void updateOperateServiceOrder(Long itemId, Long newOrder) {
+		allianceOperateServiceProvider.updateOperateServiceOrder(itemId, newOrder);
 	}
 
 	@Override
 	public void updateFAQOnlineService(AllianceFAQServiceCustomer onlineService) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqServiceCustomerProvider.updateServiceCustomer(onlineService);
 	}
 
 	@Override
 	public void createFAQOnlineService(AllianceFAQServiceCustomer onlineService) {
-		// TODO Auto-generated method stub
-		
+		allianceFaqServiceCustomerProvider.createServiceCustomer(onlineService);
 	}
 
 	@Override
 	public AllianceFAQServiceCustomer getFAQOnlineService(AllianceCommonCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		return allianceFaqServiceCustomerProvider.getServiceCustomer(cmd);
+	}
+
+	@Override
+	public void updateFAQSolveTimes(Long faqId, Byte solveStaus) {
+		
 	}
 
 }

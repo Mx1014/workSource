@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id : id</li>
  * <li>serviceId : 服务id</li>
  * <li>serviceName : 服务名称</li>
  * <li>serviceTypeName : 服务类型名称</li>
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * @date 2018年10月23日
  */
 public class OperateServiceDTO {
+	private Long id;
 	private Long serviceId;
 	private String serviceName;
 	private String serviceTypeName;
@@ -36,5 +38,11 @@ public class OperateServiceDTO {
 	}
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

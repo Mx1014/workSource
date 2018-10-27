@@ -1,4 +1,4 @@
-package com.everhomes.yellowPage.faq;
+package com.everhomes.yellowPage;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
@@ -27,14 +28,14 @@ import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhAllianceFaqsDao;
-import com.everhomes.server.schema.tables.records.EhAllianceFaqsRecord;
+import com.everhomes.server.schema.tables.daos.EhAllianceOperateServicesDao;
+import com.everhomes.server.schema.tables.records.EhAllianceOperateServicesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
-import com.everhomes.yellowPage.UpdateQueryBuilderCallback;
 
 @Component
-public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
+public class AllianceOperateServiceProviderImpl implements AllianceOperateServiceProvider {
+
 	
 	@Autowired
 	DbProvider dbProvider;
@@ -42,20 +43,19 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	@Autowired
 	SequenceProvider sequenceProvider;
 	
-	com.everhomes.server.schema.tables.EhAllianceFaqs TABLE = Tables.EH_ALLIANCE_FAQS;
+	com.everhomes.server.schema.tables.EhAllianceOperateServices TABLE = Tables.EH_ALLIANCE_OPERATE_SERVICES;
 	
-	Class<AllianceFAQ> CLASS = AllianceFAQ.class;
+	Class<AllianceOperateService> CLASS = AllianceOperateService.class;
 	
 
 	@Override
-	public void createFAQ(AllianceFAQ createItem) {
+	public void createOperateService(AllianceOperateService createItem) {
 		// 设置动态属性 如id，createTime
 		Long id = sequenceProvider
 				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(CLASS));
 		createItem.setId(id);
 		createItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		createItem.setCreateUid(UserContext.currentUserId());
-		createItem.setStatus(YellowPageStatus.ACTIVE.getCode());
 		createItem.setDefaultOrder(id);
 
 		// 使用dao方法
@@ -67,7 +67,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void updateFAQ(AllianceFAQ updateItem) {
+	public void updateOperateService(AllianceOperateService updateItem) {
 		// 使用dao方法
 		writeDao().update(updateItem);
 
@@ -76,21 +76,36 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void deleteFAQ(Long itemId) {
+	public void deleteOperateService(Long itemId) {
 
-		int updateCnt = updateSingle(itemId, query -> {
-			query.addValue(TABLE.STATUS, YellowPageStatus.INACTIVE.getCode());
+		int deleteCnt = deleteTool(query -> {
+			query.addConditions(TABLE.ID.eq(itemId));
 		});
 
-		if (updateCnt > 0) {
+		if (deleteCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
+	
+	@Override
+	public void deleteOperateServices(AllianceCommonCommand cmd) {
+		int deleteCnt = deleteTool(q -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+		});
+
+		if (deleteCnt > 0) {
 			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
 		}
 	}
 
 	@Override
-	public AllianceFAQ getFAQ(Long itemId) {
+	public AllianceOperateService getOperateService(Long itemId) {
 		
-		List<AllianceFAQ> types =  listTool(null, null, (l, q) -> {
+		List<AllianceOperateService> types =  listTool(null, null, (l, q) -> {
 			q.addConditions(TABLE.ID.eq(itemId));
 			return q;
 		});
@@ -99,7 +114,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void updateFAQOrder(Long itemId, Long defaultOrderId) {
+	public void updateOperateServiceOrder(Long itemId, Long defaultOrderId) {
 		int updateCnt = updateSingle(itemId, query -> {
 			query.addValue(TABLE.DEFAULT_ORDER, defaultOrderId);
 		});
@@ -110,56 +125,21 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType) {
-		return listTool(pageSize, locator, (l, q) -> {
+	public List<AllianceOperateService> listOperateServices(AllianceCommonCommand cmd) {
+		return listTool(null, null, (l, q) -> {
 			q.addConditions(TABLE.NAMESPACE_ID
 					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
 			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
 			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
 			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
-			if (null != faqType) {
-				q.addConditions(TABLE.TYPE_ID.eq(faqType));
-			}
-			
-			if (null != topFlag) {
-				q.addConditions(TABLE.TOP_FLAG.eq(topFlag));
-			}
-			
-			if (StringUtils.isBlank(keyword)) {
-				q.addConditions(TABLE.TITLE.like(DSL.concat("%", keyword, "%")));
-			}
-			
-			if (null != orderType) {
-				buildOrderBy(q, orderType, sortType);
-			}
-			
 			return null;
 		});
 	}
 	
-	private void buildOrderBy(SelectQuery<? extends Record> q, Byte orderType, Byte sortType) {
-		
-		if (AllianceFaqOrderType.SOLVE_TIMES.getCode().equals(orderType)) {
-			if (null != sortType && sortType > 0) {
-				q.addOrderBy(TABLE.SOLVE_TIMES.asc());
-			} else {
-				q.addOrderBy(TABLE.SOLVE_TIMES.desc());
-			}
-			
-			return;
-		}
-		
-		if (null != sortType && sortType > 0) {
-			q.addOrderBy(TABLE.UN_SOLVE_TIMES.asc());
-		} else {
-			q.addOrderBy(TABLE.UN_SOLVE_TIMES.desc());
-		}
-	}
 
-	private EhAllianceFaqsDao getAllianceFAQDao(AccessSpec arg0) {
+	private EhAllianceOperateServicesDao getAllianceOperateServiceDao(AccessSpec arg0) {
 		DSLContext context = dbProvider.getDslContext(arg0);
-		return new EhAllianceFaqsDao(context.configuration());
+		return new EhAllianceOperateServicesDao(context.configuration());
 	}
 	
 	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
@@ -168,33 +148,42 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 			return 0;
 		}
 
-		UpdateQuery<EhAllianceFaqsRecord> query = updateQuery();
+		UpdateQuery<EhAllianceOperateServicesRecord> query = updateQuery();
 
 		if (callback != null) {
 			callback.buildCondition(query);
 		}
 
-		// 必须是未被删除且非固定的才可以更新
-		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 		query.addConditions(TABLE.ID.in(updateIds));
 		return query.execute();
 	}
+	
+	private int deleteTool(DeleteQueryBuilderCallback callback) {
 
-	private EhAllianceFaqsDao readDao() {
-		return getAllianceFAQDao(AccessSpec.readOnly());
+		DeleteQuery<EhAllianceOperateServicesRecord> query = deleteQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		return query.execute();
 	}
 
-	private EhAllianceFaqsDao writeDao() {
-		return getAllianceFAQDao(AccessSpec.readWrite());
+	private EhAllianceOperateServicesDao readDao() {
+		return getAllianceOperateServiceDao(AccessSpec.readOnly());
 	}
 
-	public List<AllianceFAQ> listTool(Integer pageSize, ListingLocator locator,
+	private EhAllianceOperateServicesDao writeDao() {
+		return getAllianceOperateServiceDao(AccessSpec.readWrite());
+	}
+
+	public List<AllianceOperateService> listTool(Integer pageSize, ListingLocator locator,
 			ListingQueryBuilderCallback callback) {
 		
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
         int realPageSize = null == pageSize ? 0 : pageSize;
         
-        SelectQuery<EhAllianceFaqsRecord> query = context.selectQuery(TABLE);
+        SelectQuery<EhAllianceOperateServicesRecord> query = context.selectQuery(TABLE);
         if(callback != null)
         	callback.buildCondition(locator, query);
 
@@ -207,11 +196,10 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 		}
 		
 		// 必须获取未删除的
-		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 		query.addOrderBy(TABLE.DEFAULT_ORDER.asc());
 		query.addOrderBy(TABLE.ID.asc());
         
-        List<AllianceFAQ> list = query.fetchInto(CLASS);
+        List<AllianceOperateService> list = query.fetchInto(CLASS);
         
         // 设置锚点
         if (null != locator && null != list) {
@@ -242,52 +230,16 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 		return dbProvider.getDslContext(AccessSpec.readWrite());
 	}
 
-	private SelectQuery<EhAllianceFaqsRecord> selectQuery() {
+	private SelectQuery<EhAllianceOperateServicesRecord> selectQuery() {
 		return readOnlyContext().selectQuery(TABLE);
 	}
 
-	private UpdateQuery<EhAllianceFaqsRecord> updateQuery() {
+	private UpdateQuery<EhAllianceOperateServicesRecord> updateQuery() {
 		return readWriteContext().updateQuery(TABLE);
 	}
-
-	@Override
-	public void updateTopFAQFlag(Long itemId, byte topFlag) {
-
-		int updateCnt = updateSingle(itemId, query -> {
-			query.addValue(TABLE.TOP_FLAG, topFlag);
-		});
-
-		if (updateCnt > 0) {
-			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
-		}
 	
-	}
-
-	@Override
-	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor) {
-		return listTool(pageSize, locator, (l, q) -> {
-			q.addConditions(TABLE.NAMESPACE_ID
-					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
-			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
-			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
-			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
-			q.addConditions(TABLE.TOP_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
-			q.addOrderBy(TABLE.TOP_ORDER);
-			return null;
-		});
-	}
-
-	@Override
-	public void updateTopFAQOrder(Long itemId, Long newTopOrder) {
-		
-		int updateCnt = updateSingle(itemId, query -> {
-			query.addValue(TABLE.TOP_ORDER, newTopOrder);
-		});
-
-		if (updateCnt > 0) {
-			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
-		}
+	private DeleteQuery<EhAllianceOperateServicesRecord> deleteQuery() {
+		return readWriteContext().deleteQuery(TABLE);
 	}
 	
 }

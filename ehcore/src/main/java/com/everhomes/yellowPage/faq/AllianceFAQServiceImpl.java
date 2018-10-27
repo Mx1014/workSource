@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.yellowPage.AllianceOperateService;
 import com.everhomes.yellowPage.ListUiFAQsCommand;
 import com.everhomes.yellowPage.YellowPageUtils;
 
@@ -231,30 +233,65 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		return allianceFAQProvider.listFAQs(cmd, null, null, null,  faqTypeId, null, null, null, null);
 	}
 
-
 	@Override
 	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
-//		private Long FAQId;
-//		private Byte solveStaus;
-//		allianceFAQProvider.updateFAQSolveTimes
+		allianceFAQProvider.updateFAQSolveTimes(cmd.getFAQId(), cmd.getSolveStaus());
 	}
-
 
 	@Override
 	public ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<AllianceOperateService> list = allianceFAQProvider.listOperateServices(cmd);
+//		List<OperateServiceDTO> dtos = 
+		ListOperateServicesResponse resp = new ListOperateServicesResponse();
+//		resp.setDtos();
+		return resp;
 	}
 
 	@Override
 	public void updateOperateServices(UpdateOperateServicesCommand cmd) {
-		// TODO Auto-generated method stub
+		
+		dbProvider.execute(r -> {
+
+			// 删除所有
+			allianceFAQProvider.deleteOperateServices(cmd);
+
+			if (CollectionUtils.isEmpty(cmd.getServiceIds())) {
+				return null;
+			}
+
+			// 添加所有
+		for (Long serviceId : cmd.getServiceIds()) {
+			AllianceOperateService op = new AllianceOperateService();
+			allianceFAQProvider.createOperateService(op);
+		}
+
+			return null;
+		});
+
+		
+		
 	}
 
 	@Override
 	public void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
-		// TODO Auto-generated method stub
+
+		AllianceOperateService upItem = allianceFAQProvider.getOperateService(cmd.getUpOperateServiceId());
+		AllianceOperateService lowItem = allianceFAQProvider.getOperateService(cmd.getLowOperateServiceId());
+		if (null == upItem ||null == lowItem) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
+		}		
 		
+		if (upItem.getDefaultOrder() < lowItem.getDefaultOrder()) {
+			return;
+		}
+		
+		dbProvider.execute(r->{
+			allianceFAQProvider.updateTopFAQOrder(upItem.getId(), lowItem.getDefaultOrder());
+			allianceFAQProvider.updateTopFAQOrder(lowItem.getId(), upItem.getDefaultOrder());
+			return null;
+		});
+	
 	}
 
 	@Override

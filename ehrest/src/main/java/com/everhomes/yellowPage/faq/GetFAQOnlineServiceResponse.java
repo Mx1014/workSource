@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id : id</li>
  * <li>userId : 客服id</li>
  * <li>userName : 客服名称</li>
  * <li>hotlineNumber : 热线电话</li>
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * @date 2018年10月23日
  */
 public class GetFAQOnlineServiceResponse {
+	private Long id;
 	private Long userId;
 	private String userName;
 	private String hotlineNumber;
@@ -42,5 +44,13 @@ public class GetFAQOnlineServiceResponse {
 
 	public void setHotlineNumber(String hotlineNumber) {
 		this.hotlineNumber = hotlineNumber;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }
