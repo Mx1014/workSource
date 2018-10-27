@@ -585,7 +585,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 				namespaceId, ownerIdList, ownerType, dateStrBegin, dateStrEnd);
 		//调用资产提供给缴费报表的项目信息列表的接口
 		CommunityTotalStaticsDTO communityTotalStaticsDTO = propertyReportFormService.getTotalCommunityBriefStaticsForBill(namespaceId, ownerIdList, dateStrEnd);
-		dto.setProjectName(communityTotalStaticsDTO.getCommunityCount() != null ? communityTotalStaticsDTO.getCommunityCount().toString() : "0");
+		dto.setProjectCount(communityTotalStaticsDTO.getCommunityCount() != null ? communityTotalStaticsDTO.getCommunityCount() : 0);
 		dto.setProjectClassify("--");
 		dto.setBuildingCount(communityTotalStaticsDTO.getBuildingCount() != null ? communityTotalStaticsDTO.getBuildingCount() : 0);
 		dto.setAreaSize(communityTotalStaticsDTO.getAreaSize() != null ? communityTotalStaticsDTO.getAreaSize() : BigDecimal.ZERO);
