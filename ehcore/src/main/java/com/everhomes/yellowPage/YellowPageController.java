@@ -1267,10 +1267,10 @@ public class YellowPageController  extends ControllerBase {
 			return new RestResponse();
 		}
 		
-		allianceStandardService.transferApprovalToForm();
+		String ret = allianceStandardService.transferApprovalToForm();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
+		response.setErrorDescription(ret);
 		return response;
 	}
 	

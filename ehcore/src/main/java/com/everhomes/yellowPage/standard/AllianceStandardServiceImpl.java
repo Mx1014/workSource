@@ -9,6 +9,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
+import org.jooq.impl.UpdatableRecordImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
@@ -33,6 +35,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -52,6 +55,7 @@ import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
+import com.everhomes.server.schema.tables.records.EhFlowsRecord;
 import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
@@ -116,7 +120,9 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	private GeneralApprovalValProvider generalApprovalValProvider;
-	
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
+
 
 	@Override
 	public void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
@@ -518,23 +524,30 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	
 	
 	@Override
-	public void transferApprovalToForm() {
+	public String transferApprovalToForm() {
+		
+		StringBuilder totalUpdate = new StringBuilder();
 		
 		dbProvider.execute(r->{
-			saveFormFlowId();
-			transferToFormVal();
-			transferFlowCases();
+			totalUpdate.append(" service:").append(saveFormFlowId()); //更新serviceAlliance的moduleUrl
+			totalUpdate.append(" approval:").append(transferToFormVal()); //保存approvalVal
+			totalUpdate.append(" flowcase").append(transferFlowCases());//更新flowcase
 			return null;
 		});
-
+		
+		return totalUpdate.toString();
 	}
 
-	private void transferFlowCases() {
+
+	private String transferFlowCases() {
+		int update = 0;
+		int noServiceId = 0;
 		List<FlowCase> flowCases = queryFlowCases();
 		for(FlowCase flowCase : flowCases) {
-			
+			update++;
 			flowCase.setOwnerId(0L);
-			
+			flowCase.setOwnerType(FlowOwnerType.SERVICE_ALLIANCE.getCode());
+			flowCase.setModuleType(FlowModuleType.NO_MODULE.getCode());
 			GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 					GeneralFormDataSourceType.SOURCE_ID.getCode());
 			Long serviceId = null;
@@ -548,23 +561,33 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			if (null != serviceId) {
 				ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(serviceId, null, null);
 				if (null != yellowPage) {
-					flowCase.setOwnerId(yellowPage.getType());
-
+					flowCase.setOwnerId(yellowPage.getParentId());
+					flowCase.setReferType(FlowReferType.SERVICE_ALLIANCE.getCode());
+					flowCase.setReferId(yellowPage.getId());
 				}
+			} else {
+				noServiceId++;
 			}
 			
-			
-			flowCase.setOwnerType(FlowOwnerType.SERVICE_ALLIANCE.getCode());
-			
-			
+			flowCaseProvider.updateFlowCase(flowCase);
 		}    
+		
+		return " t:"+update+" err:"+noServiceId;
 		
 	}
 
-	private void transferToFormVal() {
-		
+	private String transferToFormVal() {
+		int update = 0;
+		int total = 0;
 		List<GeneralApprovalVal> vals = queryApprovalVals();
 		for (GeneralApprovalVal val : vals) {
+			total++;
+			List<GeneralFormVal> fVals = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(),
+					val.getFlowCaseId());
+			if (!StringUtils.isEmpty(fVals)) {
+				continue;
+			}
+			
 			GeneralForm form = generalFormProvider.getGeneralFormByApproval(val.getFormOriginId(), val.getFormVersion());
 			if (null == form) {
 				continue;
@@ -576,15 +599,21 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			obj.setFieldName(val.getFieldName());
 			obj.setFieldType(val.getFieldType());
 			obj.setFieldValue(val.getFieldStr3());
-			obj.setStringTag5("t");
 			generalFormValProvider.createGeneralFormVal(obj);
+			update++;
 		}
+		
+		return " t:"+total+" u:"+update;
 	}
 
-	private void saveFormFlowId() {
+	private String saveFormFlowId() {
+		
+		int update = 0;
+		int total = 0;
 		//获取所有的sheji了工作流或表单的服务
 		List<ServiceAlliances> sas = queryFormServiceAlliances();
 		for (ServiceAlliances sa : sas) {
+			total++;
 			//zl://approval/create?approvalId=4997&sourceId=218055
 			String moduleUrl = sa.getModuleUrl();
 			int start = moduleUrl.indexOf('?');
@@ -618,7 +647,10 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			//转成zl://form/create?sourceType=service_alliance&sourceId={id}
 			sa.setModuleUrl("zl://form/create?sourceType=service_alliance&sourceId="+sa.getId());
 			yellowPageProvider.updateServiceAlliances(sa);
+			update++;
 		}
+		
+		return " t:"+total+" u:"+update;
 	}
 	
 	
@@ -634,6 +666,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhFlowCasesRecord> query = context.selectQuery(Tables.EH_FLOW_CASES);
 		query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(40500L).or(Tables.EH_FLOW_CASES.MODULE_TYPE.eq("service_alliance")));
+		query.addConditions(Tables.EH_FLOW_CASES.OWNER_TYPE.ne(FlowOwnerType.SERVICE_ALLIANCE.getCode()));
 		return query.fetchInto(FlowCase.class);
 	}
 	
