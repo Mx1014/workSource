@@ -75,7 +75,7 @@ CREATE TABLE `eh_alliance_faq_service_customers` (
 	`type` BIGINT(20) NOT NULL,
 	`user_id` BIGINT(20) NOT NULL,
 	`user_name` VARCHAR(50) NOT NULL,
-	`hotline` VARCHAR(50) NOT NULL,
+	`hotline_number` VARCHAR(50) NOT NULL,
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 	`create_uid` BIGINT(20) NOT NULL COMMENT '创建人',
 	PRIMARY KEY (`id`)
