@@ -4,6 +4,7 @@ import com.everhomes.dynamicExcel.DynamicField;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -411,7 +412,8 @@ public class ExcelUtils {
         Sheet sheet = workbook.getSheet(this.sheetName);
         sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
         // 合并首行单元格
-        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
+//        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
+        sheet.addMergedRegion(new CellRangeAddress(0,0,0,13));
         // 表头
         Row titleRemarkRow = sheet.createRow(0);
         titleRemarkRow.setHeight(titleRemarkCellHeight);
@@ -419,7 +421,10 @@ public class ExcelUtils {
         XSSFCellStyle titleRemarkStyle = workbook.createCellStyle();
         setTitleRemarkFont(titleRemarkStyle);
         if(titleRemarkBackGroundColorIndex != null){
-            titleRemarkStyle.setFillBackgroundColor(titleRemarkBackGroundColorIndex.shortValue());
+//			设置背景色没有起作用，设置前景色和填充模式（这里我们设置为全填充），才能使单元格变颜色
+//          titleRemarkStyle.setFillBackgroundColor(titleRemarkBackGroundColorIndex.shortValue());
+            titleRemarkStyle.setFillForegroundColor(titleRemarkBackGroundColorIndex.shortValue());
+            titleRemarkStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
         }
         // 加入内容
         Cell cell = titleRemarkRow.createCell(0);
