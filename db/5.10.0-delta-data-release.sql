@@ -15,6 +15,10 @@
 -- REMARK：备份eh_payment_variables表
 -- select * from eh_payment_variables;
 
+-- AUTHOR:杨崇鑫 20181027
+-- REMARK:解决缺陷 #39571: 
+-- 第一步请执行在es上执行db/search/energy_task.sh
+-- 第二步执行同步接口/energy/syncEnergyTaskIndex
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -289,7 +293,8 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '508', 'zh_CN', '资源或资源规则缺失', '资源或资源规则缺失', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '509', 'zh_CN', '找不到订单或订单状态错误', '找不到订单或订单状态错误', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '510', 'zh_CN', '下单失败', '下单失败', '0');
-
+ALTER TABLE `eh_rentalv2_site_resources`
+MODIFY COLUMN `name`  varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `type`;
 
 
 -- AUTHOR: 黄明波 20181008
@@ -446,6 +451,17 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('23040000', '支付管理', '23000000', NULL, NULL, '1', '2', '/23000000/23040000', 'zuolin', '50', NULL, '2', 'system', 'classify', NULL, '1');
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
+
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:将计划任务中的拜访时间改为计划时间
+update eh_var_fields set display_name = '计划时间' where display_name='拜访时间' and group_id = 20;
+update eh_var_field_scopes set field_display_name = '计划时间' where field_display_name='拜访时间' and group_id = 20;
+
+
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:更改module表中的client_handler_type类型为外部链接
+update eh_service_modules set client_handler_type = 2 where id = 25000;
+update eh_service_modules set client_handler_type = 2 where id = 150020;
 
 -- 资产管理系统
 UPDATE eh_web_menus set parent_id = 15000000, sort_num = 25 WHERE id = 20000000;
@@ -775,6 +791,7 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 -- REMARK: issue-37602 审批单支持编辑
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
