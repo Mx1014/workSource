@@ -16,14 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetProvider;
-import com.everhomes.contract.ContractService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.reportForm.PropertyReportFormService;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
@@ -40,8 +37,6 @@ import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticBuildingDao
 import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticCommunityDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticBuilding;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity;
-import com.everhomes.server.schema.tables.records.EhPaymentBillStatisticCommunityRecord;
-import com.everhomes.server.schema.tables.records.EhStatEventParamLogsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 /**
@@ -630,10 +625,17 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addFrom(statistic);
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
         query.addSelect(statistic.NAMESPACE_ID, 
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
-        		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+        		DSL.sum(statistic.AMOUNT_OWED).as("AMOUNT_OWED"),
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+        		DSL.sum(statistic.TAX_AMOUNT).as("TAX_AMOUNT"),
+        		DSL.sum(statistic.AMOUNT_EXEMPTION).as("AMOUNT_EXEMPTION"),
+        		DSL.sum(statistic.AMOUNT_SUPPLEMENT).as("AMOUNT_SUPPLEMENT"),
+        		DSL.sum(statistic.DUE_DAY_COUNT).as("DUE_DAY_COUNT"), 
+        		DSL.sum(statistic.NOTICE_TIMES).as("NOTICE_TIMES"));
         query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(statistic.OWNER_ID.in(ownerIdList));
         query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
