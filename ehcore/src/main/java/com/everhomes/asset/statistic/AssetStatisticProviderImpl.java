@@ -430,9 +430,9 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	 */
 	private BigDecimal calculateCollecionRate(BigDecimal amountReceivable, BigDecimal amountReceived) {
 		BigDecimal collectionRate = BigDecimal.ZERO;
-    	//如果应收含税金额为0，那么收缴率是100
+    	//如果应收含税金额为0，那么收缴率是0
     	if(amountReceivable == null || amountReceivable.compareTo(BigDecimal.ZERO) == 0) {
-    		collectionRate = new BigDecimal("100");
+    		collectionRate = BigDecimal.ZERO;
     	}else {
     		if(amountReceived != null) {
         		collectionRate = amountReceived.divide(amountReceivable, 2, BigDecimal.ROUND_HALF_UP);
@@ -494,7 +494,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
         	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
         }
-        query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
+        query.addGroupBy(Tables.EH_COMMUNITIES.ID);
         if(pageOffSet != null && pageSize != null) {
         	query.addLimit(pageOffSet,pageSize+1);
         }
