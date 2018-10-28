@@ -20,7 +20,7 @@ public class ParkingRechargeConfig {
     private Byte tempFeeDiscountFlag;
     private String tempFeeDiscount;
     private String contact;
-    private String noticeContact;
+
 
     public String getContact() {
         return contact;
@@ -94,12 +94,5 @@ public class ParkingRechargeConfig {
         this.expiredRechargeType = expiredRechargeType;
     }
 
-	public String getNoticeContact() {
-		return noticeContact;
-	}
-
-	public void setNoticeContact(String noticeContact) {
-		this.noticeContact = noticeContact;
-	}
     
 }
