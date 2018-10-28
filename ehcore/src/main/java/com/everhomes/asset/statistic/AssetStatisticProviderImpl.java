@@ -10,6 +10,7 @@ import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,8 @@ import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticBuildingDao
 import com.everhomes.server.schema.tables.daos.EhPaymentBillStatisticCommunityDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticBuilding;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillStatisticCommunity;
+import com.everhomes.server.schema.tables.records.EhPaymentBillStatisticCommunityRecord;
+import com.everhomes.server.schema.tables.records.EhStatEventParamLogsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 /**
@@ -366,17 +369,17 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	 */
 	private ListBillStatisticByCommunityDTO convertEhPaymentBillStatisticCommunity(Record f, com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity r) {
 		ListBillStatisticByCommunityDTO dto = new ListBillStatisticByCommunityDTO();
-		BigDecimal amountReceivable = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE));
-    	BigDecimal amountReceived = f.getValue(DSL.sum(r.AMOUNT_RECEIVED));
-    	BigDecimal amountOwed = f.getValue(DSL.sum(r.AMOUNT_OWED));
-    	BigDecimal amountReceivableWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE_WITHOUT_TAX));
-    	BigDecimal amountReceivedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVED_WITHOUT_TAX));
-    	BigDecimal amountOwedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_OWED_WITHOUT_TAX));
-    	BigDecimal taxAmount = f.getValue(DSL.sum(r.TAX_AMOUNT));
-    	BigDecimal amountExemption = f.getValue(DSL.sum(r.AMOUNT_EXEMPTION));
-    	BigDecimal amountSupplement = f.getValue(DSL.sum(r.AMOUNT_SUPPLEMENT));
-    	BigDecimal dueDayCount = f.getValue(DSL.sum(r.DUE_DAY_COUNT));
-    	BigDecimal noticeTimes = f.getValue(DSL.sum(r.NOTICE_TIMES));
+		BigDecimal amountReceivable = f.getValue("AMOUNT_RECEIVABLE") != null ? f.getValue("AMOUNT_RECEIVABLE", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceived = f.getValue("AMOUNT_RECEIVED") != null ? f.getValue("AMOUNT_RECEIVED", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountOwed = f.getValue("AMOUNT_OWED") != null ? f.getValue("AMOUNT_OWED", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceivableWithoutTax = f.getValue("AMOUNT_RECEIVABLE_WITHOUT_TAX") != null ? f.getValue("AMOUNT_RECEIVABLE_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceivedWithoutTax = f.getValue("AMOUNT_RECEIVED_WITHOUT_TAX") != null ? f.getValue("AMOUNT_RECEIVED_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountOwedWithoutTax = f.getValue("AMOUNT_OWED_WITHOUT_TAX") != null ? f.getValue("AMOUNT_OWED_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal taxAmount = f.getValue("TAX_AMOUNT") != null ? f.getValue("TAX_AMOUNT", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountExemption = f.getValue("AMOUNT_EXEMPTION") != null ? f.getValue("AMOUNT_EXEMPTION", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountSupplement = f.getValue("AMOUNT_SUPPLEMENT") != null ? f.getValue("AMOUNT_SUPPLEMENT", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal dueDayCount = f.getValue("DUE_DAY_COUNT") != null ? f.getValue("DUE_DAY_COUNT", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal noticeTimes = f.getValue("NOTICE_TIMES") != null ? f.getValue("NOTICE_TIMES", BigDecimal.class) : BigDecimal.ZERO;
     	
     	dto.setAmountReceivable(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
     	dto.setAmountReceived(amountReceived != null ? amountReceived : BigDecimal.ZERO);
@@ -474,27 +477,46 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		List<ListBillStatisticByCommunityDTO> list = new ArrayList<ListBillStatisticByCommunityDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity statistic = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("statistic");
-		SelectQuery<Record> query = context.selectQuery();
-        //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(Tables.EH_COMMUNITIES.ID.as("communityId"), Tables.EH_COMMUNITIES.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT),DSL.sum(statistic.AMOUNT_EXEMPTION),DSL.sum(statistic.AMOUNT_SUPPLEMENT),
-        		DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addFrom(Tables.EH_COMMUNITIES); //为了兼容没有统计结果的查询
-		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_COMMUNITIES.ID.eq(statistic.OWNER_ID));
-        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ownerIdList));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId).or(statistic.NAMESPACE_ID.isNull()));
-        query.addConditions(statistic.OWNER_ID.in(ownerIdList).or(statistic.OWNER_ID.isNull()));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
+        //创建子查询
+        SelectQuery<Record> subQuery = context.selectQuery();
+        subQuery.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+        		DSL.sum(statistic.AMOUNT_OWED).as("AMOUNT_OWED"),
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+        		DSL.sum(statistic.TAX_AMOUNT).as("TAX_AMOUNT"),
+        		DSL.sum(statistic.AMOUNT_EXEMPTION).as("AMOUNT_EXEMPTION"),
+        		DSL.sum(statistic.AMOUNT_SUPPLEMENT).as("AMOUNT_SUPPLEMENT"),
+        		DSL.sum(statistic.DUE_DAY_COUNT).as("DUE_DAY_COUNT"), 
+        		DSL.sum(statistic.NOTICE_TIMES).as("NOTICE_TIMES"));
+        subQuery.addFrom(statistic);
+        subQuery.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
+        subQuery.addConditions(statistic.OWNER_ID.in(ownerIdList));
+        subQuery.addConditions(statistic.OWNER_TYPE.eq(ownerType));
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
+        	subQuery.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
+        	subQuery.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
         }
-        query.addGroupBy(Tables.EH_COMMUNITIES.ID);
+        subQuery.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE);
+        Table<Record> subQueryTable = subQuery.asTable();
+        
+        SelectQuery<Record> query = context.selectQuery();
+        //结果集表的sum不会影响数据库的性能，因为数据量非常小
+        query.addSelect(Tables.EH_COMMUNITIES.ID.as("communityId"), Tables.EH_COMMUNITIES.NAMESPACE_ID, 
+        		subQueryTable.field(statistic.OWNER_ID), subQueryTable.field(statistic.OWNER_TYPE),
+        		subQueryTable.field("AMOUNT_RECEIVABLE"), subQueryTable.field("AMOUNT_RECEIVED"), 
+        		subQueryTable.field("AMOUNT_OWED"), subQueryTable.field("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		subQueryTable.field("AMOUNT_RECEIVED_WITHOUT_TAX"), subQueryTable.field("AMOUNT_OWED_WITHOUT_TAX"),
+        		subQueryTable.field("TAX_AMOUNT"), subQueryTable.field("AMOUNT_EXEMPTION"), 
+        		subQueryTable.field("AMOUNT_SUPPLEMENT"), subQueryTable.field("DUE_DAY_COUNT"), subQueryTable.field("NOTICE_TIMES"));
+        query.addFrom(Tables.EH_COMMUNITIES); //为了兼容没有统计结果的查询
+		query.addJoin(subQuery, JoinType.LEFT_OUTER_JOIN, Tables.EH_COMMUNITIES.ID.eq(subQueryTable.field(statistic.OWNER_ID)));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ownerIdList));
         if(pageOffSet != null && pageSize != null) {
         	query.addLimit(pageOffSet,pageSize+1);
         }
