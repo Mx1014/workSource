@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.PrivilegeType;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
 import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
@@ -128,5 +129,7 @@ public interface YellowPageService {
 			String ownerType, Long ownerId, Long type);
 
 	ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd);
+
+	String buildAllianceUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
 
 }

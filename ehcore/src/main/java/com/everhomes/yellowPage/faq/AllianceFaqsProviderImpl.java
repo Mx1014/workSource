@@ -108,6 +108,22 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
 		}
 	}
+	
+	@Override
+	public void plusFAQSolveCounts(Long itemId, Byte solveTimesType) {
+		int updateCnt = updateSingle(itemId, query -> {
+			
+			if (null != solveTimesType && AllianceFaqSolveTimesType.UN_SOLVE_TIMES.getCode().equals(solveTimesType)) {
+				query.addValue(TABLE.UN_SOLVE_TIMES, TABLE.UN_SOLVE_TIMES.add(1));
+			} else {
+				query.addValue(TABLE.SOLVE_TIMES, TABLE.SOLVE_TIMES.add(1));
+			}
+		});
+
+		if (updateCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
 
 	@Override
 	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
@@ -126,7 +142,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 				q.addConditions(TABLE.TOP_FLAG.eq(topFlag));
 			}
 			
-			if (StringUtils.isBlank(keyword)) {
+			if (!StringUtils.isBlank(keyword)) {
 				q.addConditions(TABLE.TITLE.like(DSL.concat("%", keyword, "%")));
 			}
 			
@@ -140,7 +156,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	
 	private void buildOrderBy(SelectQuery<? extends Record> q, Byte orderType, Byte sortType) {
 		
-		if (AllianceFaqOrderType.SOLVE_TIMES.getCode().equals(orderType)) {
+		if (AllianceFaqSolveTimesType.SOLVE_TIMES.getCode().equals(orderType)) {
 			if (null != sortType && sortType > 0) {
 				q.addOrderBy(TABLE.SOLVE_TIMES.asc());
 			} else {

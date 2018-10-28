@@ -26,4 +26,6 @@ public interface AllianceFaqsProvider {
 
 	void updateTopFAQOrder(Long faqId, Long newTopOrder);
 
+	void plusFAQSolveCounts(Long itemId, Byte solveTimesType);
+
 }

@@ -6,29 +6,47 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.elasticsearch.common.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowLane;
+import com.everhomes.flow.FlowLaneProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceOperateService;
+import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.ListUiFAQsCommand;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecordProvider;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.yellowPage.ServiceAlliances;
+import com.everhomes.yellowPage.YellowPageProvider;
+import com.everhomes.yellowPage.YellowPageService;
+import com.everhomes.yellowPage.YellowPageServiceImpl;
 import com.everhomes.yellowPage.YellowPageUtils;
+import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 
 @Component
 public class AllianceFAQServiceImpl implements AllianceFAQService{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AllianceFAQServiceImpl.class);
 	
 	@Autowired
 	private AllianceFAQProvider allianceFAQProvider;
@@ -40,6 +58,16 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	private DbProvider dbProvider;
 	@Autowired
 	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
+	@Autowired
+	private FlowLaneProvider flowLaneProvider;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
+	@Autowired
+	private AllianceStandardService allianceStandardService;
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
+	@Autowired
+	private YellowPageService yellowPageService;
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
@@ -110,6 +138,13 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public void createFAQ(CreateFAQCommand cmd) {
 		AllianceFAQ faq = ConvertHelper.convert(cmd, AllianceFAQ.class);
+		
+		AllianceFAQType faqType = allianceFAQProvider.getFAQType(cmd.getTypeId());
+		if (null == faqType) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
+		}
+		
+		faq.setTypeName(faqType.getName());
 		allianceFAQProvider.createFAQ(faq);
 	}
 
@@ -249,30 +284,48 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd) {
 		
+		
 		List<AllianceOperateService> list = allianceFAQProvider.listOperateServices(cmd);
-//		List<OperateServiceDTO> dtos = 
+
+		List<OperateServiceDTO> dtos = list.stream().map(r -> {
+			OperateServiceDTO dto = new OperateServiceDTO();
+			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(r.getServiceId(), null, null);
+			if (null != sa) {
+				dto.setServiceName(sa.getName());
+			}
+			
+			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), r.getServiceId());
+			if (null != match) {
+				dto.setServiceName(match.getCategoryName());
+			}
+//			
+			return dto;
+		}).collect(Collectors.toList());
+		
 		ListOperateServicesResponse resp = new ListOperateServicesResponse();
-//		resp.setDtos();
+		resp.setDtos(dtos);
 		return resp;
 	}
 
 	@Override
 	public void updateOperateServices(UpdateOperateServicesCommand cmd) {
-		
+
 		dbProvider.execute(r -> {
 
 			// 删除所有
 			allianceFAQProvider.deleteOperateServices(cmd);
-
 			if (CollectionUtils.isEmpty(cmd.getServiceIds())) {
 				return null;
 			}
 
 			// 添加所有
-		for (Long serviceId : cmd.getServiceIds()) {
-			AllianceOperateService op = new AllianceOperateService();
-			allianceFAQProvider.createOperateService(op);
-		}
+			long order = 0;
+			for (Long serviceId : cmd.getServiceIds()) {
+				AllianceOperateService op = ConvertHelper.convert(cmd, AllianceOperateService.class);
+				op.setServiceId(serviceId);
+				op.setDefaultOrder(order++);
+				allianceFAQProvider.createOperateService(op);
+			}
 
 			return null;
 		});
@@ -301,81 +354,105 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public GetLatestServiceStateResponse getLatestServiceState(GetLatestServiceStateCommand cmd) {
-		
-		String prefix = "alliance37.";
-		String serviceIdStr = configurationProvider.getValue(prefix+"serviceId", null);
-		Long serviceId = serviceIdStr == null ? null : Long.parseLong(serviceIdStr);
-		String serviceName = configurationProvider.getValue(prefix+"serviceName", null);
-		String currentStatus = configurationProvider.getValue(prefix+"currentStatus", null);
-		
-		List<String> midChannel = new ArrayList<>();
-		for (int i = 1; i < 100; i++) {
-			String channel = configurationProvider.getValue(prefix+"channel"+i, null);
-			if (StringUtils.isBlank(channel)) {
-				break;
+		GetLatestServiceStateResponse resp = new GetLatestServiceStateResponse();
+		ServiceAllianceApplicationRecord record = saapplicationRecordProvider.listLatestRecord(cmd,
+				UserContext.currentUserId(), buildWorkingStatusList());
+		if (null != record) {
+			
+			//获取最新服务状态
+			resp.setServiceId(record.getServiceAllianceId());
+			resp.setServiceName(record.getServiceOrganization());
+			ServiceAllianceWorkFlowStatus currentStatus = ServiceAllianceWorkFlowStatus.fromType(record.getWorkflowStatus());
+			resp.setCurrentStatus(currentStatus == null ? null : currentStatus.getDescription());
+			
+			// 获取泳道
+			try {
+				
+				FlowCase flowCase = flowCaseProvider.getFlowCaseById(record.getFlowCaseId());
+				List<FlowLane> flowLanes = flowLaneProvider.listFlowLane(flowCase.getFlowMainId(),
+						flowCase.getFlowVersion());
+				List<String> channels = flowLanes.stream().map(FlowLane::getDisplayName).collect(Collectors.toList());
+				resp.setFlowCaseId(record.getFlowCaseId());
+				byte index = (byte)channels.indexOf(flowCase.getCurrentLane());
+				resp.setChannelPos(index < 0 ? 0 : index);
+				resp.setChannels(channels);
+				
+			} catch (Exception e) {
+				LOGGER.error("can't find flow case info record:"+StringHelper.toJsonString(record)+" e:"+e.getMessage());
 			}
-			midChannel.add(channel);
+
 		}
 		
 		
-		GetLatestServiceStateResponse resp = new GetLatestServiceStateResponse();
-		resp.setServiceId(serviceId);
-		resp.setServiceName(serviceName);
-		resp.setCurrentStatus(currentStatus);
-		List<String> channels = new ArrayList<>();
-		channels.add("开始");
-		channels.addAll(midChannel);
-		channels.add("结束");
+		//获取公单addr 和常见问题addr
+		ServiceAllianceCategories mainCa = allianceStandardService.queryHomePageCategoryByScene(cmd.getType(),
+				cmd.getOwnerId());
+		if (null != mainCa) {
+
+			ServiceAllianceInstanceConfig config = new ServiceAllianceInstanceConfig();
+			config.setDisplayType(AllianceDisplayType.HOUSE_KEEPER.getCode());
+			config.setEnableComment(mainCa.getEnableComment() == null ? (byte) 0 : mainCa.getEnableComment());
+			config.setType(mainCa.getType());
+			
+			String serviceListUrl = yellowPageService.buildAllianceUrl(UserContext.getCurrentNamespaceId(), config,
+					AllianceDisplayType.HOUSE_KEEPER.getShowType());
+			String topFaqUrl = yellowPageService.buildAllianceUrl(UserContext.getCurrentNamespaceId(), config,
+					AllianceDisplayType.FAQ.getShowType());
+			
+			resp.setServiceListUrl(serviceListUrl);
+			resp.setTopFAQUrl(topFaqUrl);
+
+		}
 		
-		List<String> squareInfos = new ArrayList<>();
-		squareInfos.add(configurationProvider.getValue(prefix+"squareInfos"+1, "http://www.baidu.com"));
-		squareInfos.add(configurationProvider.getValue(prefix+"squareInfos"+2, "http://www.baidu.com"));
-		squareInfos.add(configurationProvider.getValue(prefix+"squareInfos"+3, "505389"));
-		squareInfos.add(configurationProvider.getValue(prefix+"squareInfos"+4, "0755-331234"));
-		resp.setChannels(channels);
-		resp.setServiceListUrl(configurationProvider.getValue(prefix+"squareInfos"+1, "http://www.baidu.com"));
-		resp.setTopFAQUrl(configurationProvider.getValue(prefix+"squareInfos"+2, "http://www.baidu.com"));
-		resp.setServiceCustomerId(Long.parseLong(configurationProvider.getValue(prefix+"squareInfos"+3, "505389")));
-		resp.setPhoneNumber(configurationProvider.getValue(prefix+"squareInfos"+4, "0755-331234"));
+		// 获取客服
+		AllianceCommonCommand cmd2 = ConvertHelper.convert(cmd, AllianceCommonCommand.class);
+		AllianceFAQServiceCustomer onlineService = allianceFAQProvider.getFAQOnlineService(cmd2);
+		if (null != onlineService) {
+			resp.setServiceCustomerId(onlineService.getUserId());
+			resp.setPhoneNumber(onlineService.getHotlineNumber());
+		}
+		
 		return resp;
 	}
-
+	
 	@Override
 	public GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
-		AllianceFAQServiceCustomer onlineService = allianceFAQProvider.getFAQOnlineService(cmd);
 		GetFAQOnlineServiceResponse resp = new GetFAQOnlineServiceResponse();
-		resp.setId(onlineService.getId());
-		resp.setUserId(onlineService.getUserId());
-		resp.setUserName(onlineService.getUserName());
-		resp.setHotlineNumber(onlineService.getHotline());
+
+		AllianceFAQServiceCustomer onlineService = allianceFAQProvider.getFAQOnlineService(cmd);
+		if (null != onlineService) {
+			resp = ConvertHelper.convert(onlineService, GetFAQOnlineServiceResponse.class);
+		}
+
 		return resp;
 	}
 
 	@Override
 	public void updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
 		AllianceFAQServiceCustomer onlineService = ConvertHelper.convert(cmd, AllianceFAQServiceCustomer.class);
-		onlineService.setHotline(cmd.getHotlineNumber());
 		onlineService.setNamespaceId(null == cmd.getNamespaceId() ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
 		allianceFAQProvider.updateFAQOnlineService(onlineService);
 	}
 
 	@Override
 	public GetPendingServiceCountsResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
-		return null;
+		Integer count = saapplicationRecordProvider.listRecordCounts(cmd, UserContext.currentUserId(),
+				buildWorkingStatusList());
+		GetPendingServiceCountsResponse resp = new GetPendingServiceCountsResponse();
+		resp.setCount(count);
+		return resp;
 	}
-
 
 	@Override
 	public ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
 		ListingLocator locator = new ListingLocator();
 		List<Byte> workFlowStatusList = null;
 		if (null != cmd.getStatus() && ServiceAllianceWorkFlowStatus.PROCESSING.getCode() == cmd.getStatus()) {
-			workFlowStatusList = Arrays.asList(ServiceAllianceWorkFlowStatus.PROCESSING.getCode(),
-					ServiceAllianceWorkFlowStatus.SUSPEND.getCode());
+			workFlowStatusList = buildWorkingStatusList();
 		}
 		
 		List<ServiceAllianceApplicationRecord> records = saapplicationRecordProvider
-				.listServiceAllianceApplicationRecord(cmd, cmd.getPageSize(), locator, workFlowStatusList);
+				.listServiceAllianceApplicationRecord(cmd, cmd.getPageSize(), locator,  UserContext.currentUserId(), workFlowStatusList);
 		List<ServiceRecordDTO> dtos = records.stream().map(r -> {
 			ServiceRecordDTO dto = new ServiceRecordDTO();
 			dto.setFlowCaseId(r.getFlowCaseId());
@@ -392,5 +469,21 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		resp.setDtos(dtos);
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
+	}
+	
+	private List<Byte> buildWorkingStatusList() {
+		return Arrays.asList(
+				ServiceAllianceWorkFlowStatus.PROCESSING.getCode(),
+				ServiceAllianceWorkFlowStatus.SUSPEND.getCode());
+	}
+	
+	
+	private List<FlowLane> getLanesByFlowCase(Long flowCaseId) {
+		List<FlowLane> lanes = new ArrayList<>();
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+		if (null != flowCase) {
+			lanes = flowLaneProvider.listFlowLane(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		}
+		return lanes;
 	}
 }

@@ -97,6 +97,7 @@ import com.everhomes.rest.user.FieldTemplateDTO;
 import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.AddServiceAllianceProviderCommand;
 import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.AllianceTagDTO;
 import com.everhomes.rest.yellowPage.AllianceTagGroupDTO;
 import com.everhomes.rest.yellowPage.ApplyExtraAllianceEventCommand;
@@ -4129,6 +4130,26 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType) || null == ownerId || ownerId < 1) {
 			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
+	}
+	
+	@Override
+	public String buildAllianceUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType) {
+
+		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
+		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
+		StringBuilder url = new StringBuilder();
+		url.append("${home.url}/service-alliance-web/build/index.html");
+		url.append("?displayType=" + config.getDisplayType());
+		url.append("&parentId=" + config.getType());
+		url.append("&enableComment=" + config.getEnableComment());
+		url.append("&ns=" + namespaceId);
+		if (null == pageRealDisplayType) {
+			url.append("#/home/"+ config.getDisplayType());
+		} else {
+			url.append("#/home/"+ pageRealDisplayType);
+		}
+		url.append("#sign_suffix");
+		return url.toString();
 	}
 
 }

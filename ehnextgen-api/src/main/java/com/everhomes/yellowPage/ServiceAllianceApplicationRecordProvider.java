@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
 
 public interface ServiceAllianceApplicationRecordProvider {
 
@@ -22,6 +23,10 @@ public interface ServiceAllianceApplicationRecordProvider {
 	ServiceAllianceApplicationRecord findServiceAllianceApplicationRecordByFlowCaseId(Long flowCaseId);
 
 	List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecord(AllianceCommonCommand cmd,
-			Integer pageSize, ListingLocator locator, List<Byte> workFlowStatusList);
+			Integer pageSize, ListingLocator locator, Long userId, List<Byte> workFlowStatusList);
+
+	Integer listRecordCounts(AllianceCommonCommand cmd, Long userId, List<Byte> workFlowStatusList);
+
+	ServiceAllianceApplicationRecord listLatestRecord(GetLatestServiceStateCommand cmd, Long userId, List<Byte> workFlowStatusList);
 
 }

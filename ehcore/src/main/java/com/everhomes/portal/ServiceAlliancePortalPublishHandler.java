@@ -19,6 +19,7 @@ import com.everhomes.rest.portal.DetailFlag;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.portal.ServiceAllianceJump;
 import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
@@ -33,6 +34,7 @@ import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAllianceSkipRule;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
+import com.everhomes.yellowPage.YellowPageService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +80,10 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     
 	@Autowired
 	AllianceStandardService allianceStandardService;
-    
+	
+	@Autowired
+	private YellowPageService yellowPageService;
+
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
@@ -114,16 +119,21 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
      */
     @Override
 	public String getItemActionData(Integer namespaceId, String instanceConfig) {
-    	
+
 		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
 				.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
-		
+
 		if ("native".equals(config.getAppType())) {
 			return buildNativeActionData(namespaceId, config);
 		}
-		
+
 		JSONObject json = new JSONObject();
-		json.put("url", buildRenderUrl(namespaceId, config));
+		String pageRealDisplayType = config.getDisplayType();
+		if (AllianceDisplayType.HOUSE_KEEPER.getCode().equals(config.getDisplayType())) {
+			pageRealDisplayType = AllianceDisplayType.HOUSE_KEEPER.getShowType();
+		}
+
+		json.put("url", yellowPageService.buildAllianceUrl(namespaceId, config, pageRealDisplayType));
 		return json.toJSONString();
 	}
     
@@ -138,21 +148,6 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		return StringHelper.toJsonString(serviceAllianceActionData);
 	}
 
-	private String buildRenderUrl(Integer namespaceId, ServiceAllianceInstanceConfig config) {
-
-		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
-		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
-		StringBuilder url = new StringBuilder();
-		url.append("${home.url}/service-alliance-web/build/index.html");
-		url.append("?displayType=" + config.getDisplayType());
-		url.append("&parentId=" + config.getType());
-		url.append("&enableComment=" + config.getEnableComment());
-		url.append("&ns=" + namespaceId);
-		url.append("#/home/"+ config.getDisplayType());
-		url.append("#sign_suffix");
-
-		return url.toString();
-	}
 
 	private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name) {
 		User user = UserContext.current().getUser();

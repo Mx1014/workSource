@@ -16,7 +16,7 @@ import com.everhomes.rest.yellowPage.AllianceAdminCommand;
  * <li>FAQType: 问题类型</li>
  * <li>topFlag: 空-都显示 0-非热门 1-热门</li>
  * <li>keyword: 关键字</li>
- * <li>orderType: 空-按默认排序 0-以解决次数 1-以未解决次数</li>
+ * <li>orderType: 空-按默认排序 0-以未解决次数 1-以解决次数 {@link com.everhomes.yellowPage.faq.AllianceFaqSolveTimesType}</li>
  * <li>sortType: >0-升序  其他-降序  </li>
  * </ul>
  **/

@@ -1190,10 +1190,10 @@ public class YellowPageController  extends ControllerBase {
         return response;
 	}
     /**
-	 * <b>URL: /yellowPage/getServiceCounts</b>
+	 * <b>URL: /yellowPage/getPendingServiceCounts</b>
 	 * <p> 获取处理中的服务记录个数 </p>
 	 */
-	@RequestMapping("getServiceCounts")
+	@RequestMapping("getPendingServiceCounts")
     @RestReturn(value = GetPendingServiceCountsResponse.class)
 	public RestResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
 		GetPendingServiceCountsResponse resp = allianceFAQService.getPendingServiceCounts(cmd);
@@ -1226,7 +1226,6 @@ public class YellowPageController  extends ControllerBase {
 	 * 更新解决/未解决次数
 	 * </p>
 	 */
-	@RequireAuthentication(false)
 	@RequestMapping("updateFAQSolveTimes")
 	@RestReturn(value = String.class)
 	public RestResponse updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
@@ -1243,7 +1242,6 @@ public class YellowPageController  extends ControllerBase {
 	 * 获取用户服务记录
 	 * </p>
 	 */
-	@RequireAuthentication(false)
 	@RequestMapping("listUiServiceRecords")
 	@RestReturn(value = ListUiServiceRecordsResponse.class)
 	public RestResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {

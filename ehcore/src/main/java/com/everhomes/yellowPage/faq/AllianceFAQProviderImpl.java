@@ -138,7 +138,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public void updateFAQSolveTimes(Long faqId, Byte solveStaus) {
-		
+		allianceFaqsProvider.plusFAQSolveCounts(faqId, solveStaus);
 	}
 
 }

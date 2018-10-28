@@ -10,18 +10,19 @@ import com.everhomes.util.StringHelper;
  * @date 2018年10月23日
  */
 public class GetPendingServiceCountsResponse {
-	private Long count;
+	private Integer count;
 	
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getCount() {
+	public Integer getCount() {
 		return count;
 	}
 
-	public void setCount(Long count) {
+	public void setCount(Integer count) {
 		this.count = count;
 	}
+
 	
 }
