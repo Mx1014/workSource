@@ -1305,16 +1305,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         //根据节假日
         List<RentalCloseDate> closeDates = rentalv2Provider.queryRentalCloseDateByOwner(rentalSite.getResourceType(),
                 EhRentalv2Resources.class.getSimpleName(), rentalSite.getId());
-        Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
-        LocalDateTime startTime = new java.util.Date(showTimeStart).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime endTime = new java.util.Date(showTimeEnd).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
-        endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
-        if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-            return new ArrayList<>();
-        if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
-            return new ArrayList<>();
-
+        if (closeDates != null && closeDates.size() > 0) {
+			Set<Long> closeDateSet = closeDates.stream().map(p -> p.getCloseDate().getTime()).collect(Collectors.toSet());
+			LocalDateTime startTime = new java.util.Date(showTimeStart).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime endTime = new java.util.Date(showTimeEnd).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			startTime = LocalDateTime.of(startTime.toLocalDate(), LocalTime.MIN);
+			endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.MIN);
+			if (closeDateSet.contains(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+				return new ArrayList<>();
+			if (closeDateSet.contains(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+				return new ArrayList<>();
+		}
         SegmentTree segmentTree = new SegmentTree();
 
         //查看格子被关闭
