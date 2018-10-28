@@ -63,11 +63,20 @@ public class AllianceFaqServiceCustomerProviderImpl implements AllianceFaqServic
 
 	@Override
 	public void updateServiceCustomer(AllianceFAQServiceCustomer updateItem) {
-		// 使用dao方法
-		writeDao().update(updateItem);
+		int updateCnt = updateSingle(null, q -> {
+			q.addValue(TABLE.USER_ID, updateItem.getUserId());
+			q.addValue(TABLE.USER_NAME, updateItem.getUserName());
+			q.addValue(TABLE.HOTLINE_NUMBER, updateItem.getHotlineNumber());
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(updateItem.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : updateItem.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(updateItem.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(updateItem.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(updateItem.getType()));
+		});
 
-		// 广播给从数据库
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, CLASS, null);
+		if (updateCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
 	}
 
 	@Override
@@ -105,17 +114,16 @@ public class AllianceFaqServiceCustomerProviderImpl implements AllianceFaqServic
 	
 	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
 
-		if (CollectionUtils.isEmpty(updateIds)) {
-			return 0;
-		}
-
 		UpdateQuery<EhAllianceFaqServiceCustomersRecord> query = updateQuery();
 
 		if (callback != null) {
 			callback.buildCondition(query);
 		}
 
-		query.addConditions(TABLE.ID.in(updateIds));
+		if (!CollectionUtils.isEmpty(updateIds)) {
+			query.addConditions(TABLE.ID.in(updateIds));
+		}
+		
 		return query.execute();
 	}
 	
@@ -175,7 +183,9 @@ public class AllianceFaqServiceCustomerProviderImpl implements AllianceFaqServic
     }
 
 	private int updateSingle(Long id, UpdateQueryBuilderCallback callback) {
-		return updateTool(Arrays.asList(id), callback);
+		List<Long> ids = id == null ? null : Arrays.asList(id);
+		
+		return updateTool(ids, callback);
 	}
 
 	private int updateMulti(List<Long> updateIds, UpdateQueryBuilderCallback callback) {

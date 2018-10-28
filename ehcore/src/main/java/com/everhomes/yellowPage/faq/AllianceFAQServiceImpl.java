@@ -291,12 +291,13 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			OperateServiceDTO dto = new OperateServiceDTO();
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(r.getServiceId(), null, null);
 			if (null != sa) {
+				dto.setServiceId(sa.getId());
 				dto.setServiceName(sa.getName());
 			}
 			
 			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), r.getServiceId());
 			if (null != match) {
-				dto.setServiceName(match.getCategoryName());
+				dto.setServiceTypeName(match.getCategoryName());
 			}
 //			
 			return dto;
@@ -319,11 +320,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			}
 
 			// 添加所有
-			long order = 0;
 			for (Long serviceId : cmd.getServiceIds()) {
 				AllianceOperateService op = ConvertHelper.convert(cmd, AllianceOperateService.class);
 				op.setServiceId(serviceId);
-				op.setDefaultOrder(order++);
 				allianceFAQProvider.createOperateService(op);
 			}
 
@@ -345,8 +344,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		}
 		
 		dbProvider.execute(r->{
-			allianceFAQProvider.updateTopFAQOrder(upItem.getId(), lowItem.getDefaultOrder());
-			allianceFAQProvider.updateTopFAQOrder(lowItem.getId(), upItem.getDefaultOrder());
+			allianceFAQProvider.updateOperateServiceOrder(upItem.getId(), lowItem.getDefaultOrder());
+			allianceFAQProvider.updateOperateServiceOrder(lowItem.getId(), upItem.getDefaultOrder());
 			return null;
 		});
 	
@@ -399,6 +398,12 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			String topFaqUrl = yellowPageService.buildAllianceUrl(UserContext.getCurrentNamespaceId(), config,
 					AllianceDisplayType.FAQ.getShowType());
 			
+			String homeUrl = configurationProvider.getValue("home.url", null);
+			if (null != homeUrl) {
+				serviceListUrl = replaceHomeUrl(serviceListUrl, homeUrl);
+				topFaqUrl = replaceHomeUrl(topFaqUrl, homeUrl);
+			}
+			
 			resp.setServiceListUrl(serviceListUrl);
 			resp.setTopFAQUrl(topFaqUrl);
 
@@ -415,6 +420,14 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		return resp;
 	}
 	
+	private String replaceHomeUrl(String origin, String homeUrl) {
+		String replaceStr = "${home.url}";
+		int index1 = origin.indexOf(replaceStr);
+
+		return origin.substring(0, index1) + homeUrl + origin.substring(index1 + replaceStr.length());
+
+	}
+	
 	@Override
 	public GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
 		GetFAQOnlineServiceResponse resp = new GetFAQOnlineServiceResponse();
@@ -429,9 +442,16 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
-		AllianceFAQServiceCustomer onlineService = ConvertHelper.convert(cmd, AllianceFAQServiceCustomer.class);
-		onlineService.setNamespaceId(null == cmd.getNamespaceId() ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
-		allianceFAQProvider.updateFAQOnlineService(onlineService);
+		AllianceFAQServiceCustomer newOne = ConvertHelper.convert(cmd, AllianceFAQServiceCustomer.class);
+		newOne.setNamespaceId(null == cmd.getNamespaceId() ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+		
+		AllianceFAQServiceCustomer oldOne = allianceFAQProvider.getFAQOnlineService(cmd);
+		if (null == oldOne) {
+			allianceFAQProvider.createFAQOnlineService(newOne);
+			return ;
+		}
+		
+		allianceFAQProvider.updateFAQOnlineService(newOne);
 	}
 
 	@Override

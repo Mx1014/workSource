@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  **/
 public class UpdateFAQOnlineServiceCommand extends AllianceAdminCommand{
 	private String id;
-	private String userId;
+	private Long userId;
 	private String userName;
 	private String hotlineNumber;
 	
@@ -28,12 +28,6 @@ public class UpdateFAQOnlineServiceCommand extends AllianceAdminCommand{
 		return StringHelper.toJsonString(this);
 	}
 	
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
 	public String getUserName() {
 		return userName;
 	}
@@ -53,5 +47,13 @@ public class UpdateFAQOnlineServiceCommand extends AllianceAdminCommand{
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }
