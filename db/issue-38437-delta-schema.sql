@@ -54,7 +54,7 @@ CREATE TABLE `eh_alliance_operate_services` (
 	`owner_type` VARCHAR(20) NOT NULL,
 	`owner_id` BIGINT(20) NOT NULL,
 	`type` BIGINT(20) NOT NULL,
-	`service_id` VARCHAR(50) NOT NULL COMMENT '服务id',
+	`service_id`  BIGINT(20) NOT NULL COMMENT '服务id',
 	`default_order` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '排序，数字小的在上面',
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 	`create_uid` BIGINT(20) NOT NULL COMMENT '创建人',
