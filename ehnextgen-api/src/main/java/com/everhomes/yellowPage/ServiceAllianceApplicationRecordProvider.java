@@ -3,6 +3,9 @@ package com.everhomes.yellowPage;
 
 import java.util.List;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+
 public interface ServiceAllianceApplicationRecordProvider {
 
 	void createServiceAllianceApplicationRecord(ServiceAllianceApplicationRecord serviceAllianceApplicationRecord);
@@ -17,5 +20,8 @@ public interface ServiceAllianceApplicationRecordProvider {
 			Long pageAnchor, Integer pageSize);
 
 	ServiceAllianceApplicationRecord findServiceAllianceApplicationRecordByFlowCaseId(Long flowCaseId);
+
+	List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecord(AllianceCommonCommand cmd,
+			Integer pageSize, ListingLocator locator, List<Byte> workFlowStatusList);
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +14,16 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceApplicationRecordsDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApplicationRecords;
+import com.everhomes.server.schema.tables.records.EhAllianceOperateServicesRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceApplicationRecordsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -60,6 +66,7 @@ public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAlli
 				.orderBy(Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS.ID.asc()).limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceAllianceApplicationRecord.class));
 	}
+	
 	
 	@Override
 	public List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecordByEnterpriseId(Long enterpriseId,Long pageAnchor, Integer pageSize) {
@@ -107,5 +114,61 @@ public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAlli
 		}
 
 		return records.get(0);
+	}
+	
+	private com.everhomes.server.schema.tables.EhServiceAllianceApplicationRecords TABLE = Tables.EH_SERVICE_ALLIANCE_APPLICATION_RECORDS;
+	
+	private Class<ServiceAllianceApplicationRecord> CLASS = ServiceAllianceApplicationRecord.class;
+	
+	private List<ServiceAllianceApplicationRecord> listTool(Integer pageSize, ListingLocator locator,
+			ListingQueryBuilderCallback callback) {
+		
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+        int realPageSize = null == pageSize ? 0 : pageSize;
+        
+        SelectQuery<EhServiceAllianceApplicationRecordsRecord> query = context.selectQuery(TABLE);
+        if(callback != null)
+        	callback.buildCondition(locator, query);
+
+		if (null != locator && locator.getAnchor() != null) {
+			query.addConditions(TABLE.ID.ge(locator.getAnchor()));
+		}
+        
+		if (realPageSize > 0) {
+			query.addLimit(realPageSize + 1);
+		}
+		
+		query.addOrderBy(TABLE.CREATE_TIME.desc());
+		query.addOrderBy(TABLE.ID.asc());
+        
+        List<ServiceAllianceApplicationRecord> list = query.fetchInto(CLASS);
+        
+        // 设置锚点
+        if (null != locator && null != list) {
+    		if (realPageSize > 0 && list.size() > realPageSize) {
+    			locator.setAnchor(list.get(list.size() - 1).getId());
+    			list.remove(list.size() - 1);
+    		} else {
+    			locator.setAnchor(null);
+    		}
+        }
+
+        return list;
+    }
+	
+	
+	@Override
+	public List<ServiceAllianceApplicationRecord> listServiceAllianceApplicationRecord(AllianceCommonCommand cmd, Integer pageSize, ListingLocator locator, List<Byte> workFlowStatusList) {
+		return listTool(pageSize, locator, (l, q) -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+			if (!CollectionUtils.isEmpty(workFlowStatusList)) {
+				q.addConditions(TABLE.WORKFLOW_STATUS.in(workFlowStatusList));
+			}
+			return null;
+		});
 	}
 }

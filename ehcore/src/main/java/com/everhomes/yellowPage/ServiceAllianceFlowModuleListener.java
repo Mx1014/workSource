@@ -250,7 +250,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			request.setCreatorOrganization(companyName);
 		}
 			
-		record.setServiceOrganization(sa.getName());
+		record.setServiceOrganization(sa.getName()); //这里储存服务名称，如有修改，需同步修改listUiServiceRecords
 		record.setNamespaceId(flowCase.getNamespaceId());
 		record.setServiceAllianceId(request.getServiceAllianceId());
 		saapplicationRecordProvider.createServiceAllianceApplicationRecord(record);

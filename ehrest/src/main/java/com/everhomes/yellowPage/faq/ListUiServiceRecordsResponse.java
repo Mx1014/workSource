@@ -1,64 +1,36 @@
 package com.everhomes.yellowPage.faq;
 
+import java.util.List;
+
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>flowCaseId : flowCaseId</li>
- * <li>serviceId : 服务id</li>
- * <li>serviceName : 服务名称</li>
- * <li>applyTime : 申请时间 format:1999-01-01 09:09</li>
- * <li>status : 2-处理中 6-暂缓 4-完成 其他详见{@link com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus}</li>
- * <li>statusName : 应用的originId</li>
+ *  <li> nextPageAnchor: 下一页锚点</li>
+ *  <li> dtos: 样式列表 {@link com.everhomes.yellowPage.faq.ServiceRecordDTO}</li>
  * </ul>
- * @author huangmingbo 
- * @date 2018年10月25日
  */
 public class ListUiServiceRecordsResponse {
-	private Long flowCaseId;
-	private Long serviceId;
-	private String serviceName;
-	private String applyTime;
-	private Byte status;
-	private String statusName;
-	
-	public Long getFlowCaseId() {
-		return flowCaseId;
-	}
-	public void setFlowCaseId(Long flowCaseId) {
-		this.flowCaseId = flowCaseId;
-	}
-	public Long getServiceId() {
-		return serviceId;
-	}
-	public void setServiceId(Long serviceId) {
-		this.serviceId = serviceId;
-	}
-	public String getServiceName() {
-		return serviceName;
-	}
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
-	public String getApplyTime() {
-		return applyTime;
-	}
-	public void setApplyTime(String applyTime) {
-		this.applyTime = applyTime;
-	}
+	private Long nextPageAnchor;
+	private List<ServiceRecordDTO> dtos;
+
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	public Byte getStatus() {
-		return status;
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
-	public void setStatus(Byte status) {
-		this.status = status;
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
-	public String getStatusName() {
-		return statusName;
+
+	public List<ServiceRecordDTO> getDtos() {
+		return dtos;
 	}
-	public void setStatusName(String statusName) {
-		this.statusName = statusName;
+
+	public void setDtos(List<ServiceRecordDTO> dtos) {
+		this.dtos = dtos;
 	}
 }

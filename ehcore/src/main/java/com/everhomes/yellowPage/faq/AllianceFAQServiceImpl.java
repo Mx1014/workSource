@@ -1,6 +1,7 @@
 package com.everhomes.yellowPage.faq;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,10 +16,15 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.yellowPage.AllianceOperateService;
 import com.everhomes.yellowPage.ListUiFAQsCommand;
+import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
+import com.everhomes.yellowPage.ServiceAllianceApplicationRecordProvider;
 import com.everhomes.yellowPage.YellowPageUtils;
 
 @Component
@@ -32,6 +38,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	
 	@Autowired
 	private DbProvider dbProvider;
+	@Autowired
+	private ServiceAllianceApplicationRecordProvider saapplicationRecordProvider;
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
@@ -268,9 +276,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 			return null;
 		});
-
-		
-		
 	}
 
 	@Override
@@ -337,26 +342,55 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public GetFAQOnlineServiceResponse getFAQOnlineService(GetFAQOnlineServiceCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		AllianceFAQServiceCustomer onlineService = allianceFAQProvider.getFAQOnlineService(cmd);
+		GetFAQOnlineServiceResponse resp = new GetFAQOnlineServiceResponse();
+		resp.setId(onlineService.getId());
+		resp.setUserId(onlineService.getUserId());
+		resp.setUserName(onlineService.getUserName());
+		resp.setHotlineNumber(onlineService.getHotline());
+		return resp;
 	}
 
 	@Override
 	public void updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		AllianceFAQServiceCustomer onlineService = ConvertHelper.convert(cmd, AllianceFAQServiceCustomer.class);
+		onlineService.setHotline(cmd.getHotlineNumber());
+		onlineService.setNamespaceId(null == cmd.getNamespaceId() ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
+		allianceFAQProvider.updateFAQOnlineService(onlineService);
 	}
 
 	@Override
 	public GetPendingServiceCountsResponse getPendingServiceCounts(GetPendingServiceCountsCommand cmd) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	@Override
 	public ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListingLocator locator = new ListingLocator();
+		List<Byte> workFlowStatusList = null;
+		if (null != cmd.getStatus() && ServiceAllianceWorkFlowStatus.PROCESSING.getCode() == cmd.getStatus()) {
+			workFlowStatusList = Arrays.asList(ServiceAllianceWorkFlowStatus.PROCESSING.getCode(),
+					ServiceAllianceWorkFlowStatus.SUSPEND.getCode());
+		}
+		
+		List<ServiceAllianceApplicationRecord> records = saapplicationRecordProvider
+				.listServiceAllianceApplicationRecord(cmd, cmd.getPageSize(), locator, workFlowStatusList);
+		List<ServiceRecordDTO> dtos = records.stream().map(r -> {
+			ServiceRecordDTO dto = new ServiceRecordDTO();
+			dto.setFlowCaseId(r.getFlowCaseId());
+			dto.setServiceId(r.getServiceAllianceId());
+			dto.setServiceName(r.getServiceOrganization());
+			dto.setApplyTime(DateUtil.dateToStr(r.getCreateTime(), "yyyy-MM-dd HH:mm"));
+			dto.setStatus(r.getWorkflowStatus());
+			ServiceAllianceWorkFlowStatus wStatus = ServiceAllianceWorkFlowStatus.fromType(dto.getStatus());
+			dto.setStatusName(wStatus.getDescription());
+			return dto;
+		}).collect(Collectors.toList());
+
+		ListUiServiceRecordsResponse resp = new ListUiServiceRecordsResponse();
+		resp.setDtos(dtos);
+		resp.setNextPageAnchor(locator.getAnchor());
+		return resp;
 	}
 }
