@@ -396,15 +396,15 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 	
 	private ListBillStatisticByBuildingDTO convertEhPaymentBillItemsStatisticBuilding(Record f, com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding r) {
 		ListBillStatisticByBuildingDTO dto = new ListBillStatisticByBuildingDTO();
-		BigDecimal amountReceivable = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE));
-    	BigDecimal amountReceived = f.getValue(DSL.sum(r.AMOUNT_RECEIVED));
-    	BigDecimal amountOwed = f.getValue(DSL.sum(r.AMOUNT_OWED));
-    	BigDecimal amountReceivableWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVABLE_WITHOUT_TAX));
-    	BigDecimal amountReceivedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_RECEIVED_WITHOUT_TAX));
-    	BigDecimal amountOwedWithoutTax = f.getValue(DSL.sum(r.AMOUNT_OWED_WITHOUT_TAX));
-    	BigDecimal taxAmount = f.getValue(DSL.sum(r.TAX_AMOUNT));
-    	BigDecimal dueDayCount = f.getValue(DSL.sum(r.DUE_DAY_COUNT));
-    	BigDecimal noticeTimes = f.getValue(DSL.sum(r.NOTICE_TIMES));
+		BigDecimal amountReceivable = f.getValue("AMOUNT_RECEIVABLE") != null ? f.getValue("AMOUNT_RECEIVABLE", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceived = f.getValue("AMOUNT_RECEIVED") != null ? f.getValue("AMOUNT_RECEIVED", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountOwed = f.getValue("AMOUNT_OWED") != null ? f.getValue("AMOUNT_OWED", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceivableWithoutTax = f.getValue("AMOUNT_RECEIVABLE_WITHOUT_TAX") != null ? f.getValue("AMOUNT_RECEIVABLE_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountReceivedWithoutTax = f.getValue("AMOUNT_RECEIVED_WITHOUT_TAX") != null ? f.getValue("AMOUNT_RECEIVED_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal amountOwedWithoutTax = f.getValue("AMOUNT_OWED_WITHOUT_TAX") != null ? f.getValue("AMOUNT_OWED_WITHOUT_TAX", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal taxAmount = f.getValue("TAX_AMOUNT") != null ? f.getValue("TAX_AMOUNT", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal dueDayCount = f.getValue("DUE_DAY_COUNT") != null ? f.getValue("DUE_DAY_COUNT", BigDecimal.class) : BigDecimal.ZERO;
+    	BigDecimal noticeTimes = f.getValue("NOTICE_TIMES") != null ? f.getValue("NOTICE_TIMES", BigDecimal.class) : BigDecimal.ZERO;
     	
     	dto.setAmountReceivable(amountReceivable != null ? amountReceivable : BigDecimal.ZERO);
     	dto.setAmountReceived(amountReceived != null ? amountReceived : BigDecimal.ZERO);
@@ -536,7 +536,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 				namespaceId, ownerId, buildingNameList, dateStrEnd);
 		for(ListBillStatisticByBuildingDTO dto : list) {
 			BuildingBriefStaticsDTO buildingBriefStaticsDTO = map.get(dto.getBuildingName());
-			dto.setBuildingName(buildingBriefStaticsDTO.getBuildingName() != null ? buildingBriefStaticsDTO.getBuildingName() : "--");
+			dto.setBuildingName(dto.getBuildingName() != null ? dto.getBuildingName() : "--");
 			dto.setAddressCount(buildingBriefStaticsDTO.getTotalApartmentCount() != null ? buildingBriefStaticsDTO.getTotalApartmentCount() : 0);
 			dto.setAreaSize(buildingBriefStaticsDTO.getAreaSize() != null ? buildingBriefStaticsDTO.getAreaSize() : BigDecimal.ZERO);
 		}
@@ -558,29 +558,46 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		List<ListBillStatisticByBuildingDTO> list = new ArrayList<ListBillStatisticByBuildingDTO>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding statistic = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("statistic");
+		//创建子查询
+        SelectQuery<Record> subQuery = context.selectQuery();
+        subQuery.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, statistic.BUILDING_NAME,
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+        		DSL.sum(statistic.AMOUNT_OWED).as("AMOUNT_OWED"),
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+        		DSL.sum(statistic.TAX_AMOUNT).as("TAX_AMOUNT"),
+        		DSL.sum(statistic.DUE_DAY_COUNT).as("DUE_DAY_COUNT"), 
+        		DSL.sum(statistic.NOTICE_TIMES).as("NOTICE_TIMES"));
+        subQuery.addFrom(statistic);
+        subQuery.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
+        subQuery.addConditions(statistic.OWNER_ID.in(ownerId));
+        subQuery.addConditions(statistic.OWNER_TYPE.eq(ownerType));
+        subQuery.addConditions(statistic.BUILDING_NAME.in(buildingNameList));
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
+        	subQuery.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
+        	subQuery.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
+        }
+        subQuery.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, statistic.BUILDING_NAME);
+        Table<Record> subQueryTable = subQuery.asTable();
+		
 		SelectQuery<Record> query = context.selectQuery();
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
         query.addSelect(Tables.EH_BUILDINGS.NAME.as("buildingName"), Tables.EH_BUILDINGS.COMMUNITY_ID.as("communityId"), 
-        		Tables.EH_BUILDINGS.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT), DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
+        		subQueryTable.field(statistic.NAMESPACE_ID), subQueryTable.field(statistic.OWNER_ID), subQueryTable.field(statistic.OWNER_TYPE),
+        		subQueryTable.field("AMOUNT_RECEIVABLE"), subQueryTable.field("AMOUNT_RECEIVED"), 
+        		subQueryTable.field("AMOUNT_OWED"), subQueryTable.field("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		subQueryTable.field("AMOUNT_RECEIVED_WITHOUT_TAX"), subQueryTable.field("AMOUNT_OWED_WITHOUT_TAX"),
+        		subQueryTable.field("TAX_AMOUNT"), subQueryTable.field("DUE_DAY_COUNT"), subQueryTable.field("NOTICE_TIMES"));
         query.addFrom(Tables.EH_BUILDINGS); //为了兼容没有统计结果的查询
-		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_BUILDINGS.NAME.eq(statistic.BUILDING_NAME));
+        query.addJoin(subQuery, JoinType.LEFT_OUTER_JOIN, Tables.EH_BUILDINGS.NAME.eq(subQueryTable.field(statistic.BUILDING_NAME)));
         query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(ownerId));
         query.addConditions(Tables.EH_BUILDINGS.NAME.in(buildingNameList));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId).or(statistic.NAMESPACE_ID.isNull()));
-        query.addConditions(statistic.OWNER_ID.eq(ownerId).or(statistic.OWNER_ID.isNull()));
-        query.addConditions(statistic.BUILDING_NAME.in(buildingNameList).or(statistic.BUILDING_NAME.isNull()));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
-        }
-        if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
-        }
-        query.addGroupBy(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, statistic.BUILDING_NAME);
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
         if(pageOffSet != null && pageSize != null) {
         	query.addLimit(pageOffSet,pageSize+1);
         }
@@ -681,24 +698,26 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
 		com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding statistic = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("statistic");
 		SelectQuery<Record> query = context.selectQuery();
         //结果集表的sum不会影响数据库的性能，因为数据量非常小
-        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE,
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE), DSL.sum(statistic.AMOUNT_RECEIVED), DSL.sum(statistic.AMOUNT_OWED),
-        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX), DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX),
-        		DSL.sum(statistic.TAX_AMOUNT), DSL.sum(statistic.DUE_DAY_COUNT), DSL.sum(statistic.NOTICE_TIMES));
-        query.addFrom(Tables.EH_BUILDINGS); //为了兼容没有统计结果的查询
-		query.addJoin(statistic, JoinType.LEFT_OUTER_JOIN, Tables.EH_BUILDINGS.NAME.eq(statistic.BUILDING_NAME));
-        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(ownerId));
-        query.addConditions(Tables.EH_BUILDINGS.NAME.in(buildingNameList));
-        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId).or(statistic.NAMESPACE_ID.isNull()));
-        query.addConditions(statistic.OWNER_ID.eq(ownerId).or(statistic.OWNER_ID.isNull()));
-        query.addConditions(statistic.BUILDING_NAME.in(buildingNameList).or(statistic.BUILDING_NAME.isNull()));
-        query.addConditions(statistic.OWNER_TYPE.eq(ownerType).or(statistic.OWNER_TYPE.isNull()));
+        query.addSelect(statistic.NAMESPACE_ID, statistic.OWNER_ID, statistic.OWNER_TYPE, statistic.BUILDING_NAME,
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+        		DSL.sum(statistic.AMOUNT_OWED).as("AMOUNT_OWED"),
+        		DSL.sum(statistic.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+        		DSL.sum(statistic.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+        		DSL.sum(statistic.TAX_AMOUNT).as("TAX_AMOUNT"),
+        		DSL.sum(statistic.DUE_DAY_COUNT).as("DUE_DAY_COUNT"), 
+        		DSL.sum(statistic.NOTICE_TIMES).as("NOTICE_TIMES"));
+        query.addFrom(statistic);
+        query.addConditions(statistic.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(statistic.OWNER_ID.in(ownerId));
+        query.addConditions(statistic.OWNER_TYPE.eq(ownerType));
+        query.addConditions(statistic.BUILDING_NAME.in(buildingNameList));
         if(!org.springframework.util.StringUtils.isEmpty(dateStrBegin)) {
-        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin).or(statistic.DATE_STR.isNull()));
+        	query.addConditions(statistic.DATE_STR.greaterOrEqual(dateStrBegin));
         }
         if(!org.springframework.util.StringUtils.isEmpty(dateStrEnd)) {
-        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd).or(statistic.DATE_STR.isNull()));
+        	query.addConditions(statistic.DATE_STR.lessOrEqual(dateStrEnd));
         }
         query.fetch().map(f -> {
         	ListBillStatisticByBuildingDTO convertDTO = convertEhPaymentBillItemsStatisticBuilding(f, statistic);
