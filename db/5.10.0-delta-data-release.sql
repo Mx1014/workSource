@@ -400,6 +400,9 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 DELETE FROM `eh_service_modules` WHERE parent_id = 41400 AND id = 41430;
 DELETE FROM `eh_acl_privileges` WHERE id = 4140041430;
 DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
+
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
