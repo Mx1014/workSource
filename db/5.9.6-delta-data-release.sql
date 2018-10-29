@@ -825,7 +825,7 @@ update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reade
 
 -- AUTHOR: 刘一麟
 -- REMARK: 访客二维码短信模板
-UPDATE eh_locale_templates set `text` = '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）' where `code` = 8 and `scope` LIKE '%sms.default%' and 'description' like '%门禁%';
+UPDATE eh_locale_templates set `text` = '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）' where `code` = 8 and `scope` LIKE '%sms.default%' and `description` like '%门禁%';
 
 -- AUTHOR: 缪洲
 -- REMARK: 停车缴费收款账号迁移
