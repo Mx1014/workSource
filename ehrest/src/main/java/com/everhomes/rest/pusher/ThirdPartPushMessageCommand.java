@@ -4,11 +4,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>identifierToken:手机号</li>
+ * <li>identifierTokenList:目标用户的手机号列表，英文字符';'分割</li>
  * <li>routeName:路线名称</li>
  * <li>nextStation:下一站名称</li>
- * <li>msgSendType:消息类型：1，只发应用内消息；2，只推送；3，同时推送兼发应用内消息</li>
- * <li>msgType:消息类型：1，只发应用内消息；2，只推送；3，同时推送兼发应用内消息</li>
  * <li>appkey: (必填)appkey</li>
  * <li>appsecret: 应用密钥AppSecret</li>
  * <li>messageType: 1：登车提醒；2：下车提醒；</li>
@@ -19,20 +17,19 @@ import com.everhomes.util.StringHelper;
  */
 
 public class ThirdPartPushMessageCommand {
-	private String identifierToken;
-	private String routeName;
-	private String nextStation;
-	private Integer msgSendType;
-	private Integer msgType;
+	private String identifierTokenList;
 	private String appkey;
 	private String appsecret;
+	private String routeName;
+	private String nextStation;
+	private Integer msgType;
 	
-	public String getIdentifierToken() {
-		return identifierToken;
+	public String getIdentifierTokenList() {
+		return identifierTokenList;
 	}
 
-	public void setIdentifierToken(String identifierToken) {
-		this.identifierToken = identifierToken;
+	public void setIdentifierTokenList(String identifierTokenList) {
+		this.identifierTokenList = identifierTokenList;
 	}
 
 	public String getRouteName() {
@@ -49,14 +46,6 @@ public class ThirdPartPushMessageCommand {
 
 	public void setNextStation(String nextStation) {
 		this.nextStation = nextStation;
-	}
-
-	public Integer getMsgSendType() {
-		return msgSendType;
-	}
-
-	public void setMsgSendType(Integer msgSendType) {
-		this.msgSendType = msgSendType;
 	}
 
 	public Integer getMsgType() {

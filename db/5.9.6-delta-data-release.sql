@@ -89,7 +89,7 @@ DECLARE  pName varchar(64);
 DECLARE pNamespaceId INT;
 DECLARE pType BIGINT(20);
 
-DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories;  -- 首先这里对游标进行定义
+DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories where parent_id = 0;  -- 首先这里对游标进行定义
  DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1; -- 这个是个条件处理,针对NOT FOUND的条件,当没有记录时赋值为1
  
  OPEN  cur_record; -- 接着使用OPEN打开游标
@@ -306,6 +306,7 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '509', 'zh_CN', '找不到订单或订单状态错误', '找不到订单或订单状态错误', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '510', 'zh_CN', '下单失败', '下单失败', '0');
 
+update eh_rentalv2_pay_accounts set merchant_id = account_id;
 
 
 -- AUTHOR: 黄明波 20181008
@@ -573,6 +574,15 @@ UPDATE eh_service_module_apps SET instance_config = '{"isGuild":1}' WHERE module
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
 
+-- AUTHOR: 黄明波
+-- REMARK: 更新打印机名称
+update eh_siyin_print_printers set printer_name = 'FX-ApeosPort-VI C3370' where reader_name = 'TC101154727022';
+update eh_siyin_print_printers set printer_name = 'FX-AP-VI C3370-BJ' where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set printer_name = 'FX_AP_VIC3370' where reader_name = 'TC101154727497';
+update eh_siyin_print_printers set printer_name = 'Zuolin' where reader_name = 'TC101157736913';
+update eh_siyin_print_printers set printer_name = 'APV3373' where reader_name = 'TC100887870538';
+
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 
@@ -656,6 +666,89 @@ VALUES ('ruian.order.url','/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f
 INSERT INTO eh_configurations (name, value, description)
 VALUES ('ruian.coupon.url','https://inno.xintiandi.com/promotion/app-coupon?systemId=16#/','瑞安新天地卡券链接');
 
+
+-- AUTHOR:黄良铭  20181025
+-- REMARK: 瑞安活动对接配置项
+-- 默认
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.publickey', 'd2NP2Z','publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ( 'mall.ruian.privatekey', 'a6cfff2c4aa370f8','privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid', '5b5046c988ce7e5ad49c9b10','appid','999929','');
+
+-- 上海新天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.publickey.1', 'd2NP2Z','上海新天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.1', 'a6cfff2c4aa370f8','上海新天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.1', '5b5046c988ce7e5ad49c9b10','上海新天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.1', '10764','上海新天地mallid','999929','');
+
+
+-- 重庆天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ( 'mall.ruian.publickey.2', 'o7Oep_','重庆天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.2', '7d57f43738f546e2','重庆天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.2', '5b505c8688ce7e238c3c3a2a','重庆天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.2', '10782','重庆天地mallid','999929','');
+
+-- 岭南天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.publickey.3', 'bOT1fy','岭南天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.3', 'ef94c7e11445aebd','岭南天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.3', '5b505b8e3ae74e465c93447b','岭南天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.3', '10778','岭南天地mallid','999929','');
+
+
+-- 虹桥天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ( 'mall.ruian.publickey.4', '6pqMSA','虹桥天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.4', '761604f49636c418','虹桥天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.4', '5b505ac188ce7e238c3c3a28','虹桥天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.4', '10743','虹桥天地mallid','999929','');
+
+-- 创智天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.publickey.5', 'XWLzKN','创智天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.5', 'cfeb935979f50825','创智天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.5', '5b5048333ae74e58743209f7','创智天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.5', '10776','创智天地mallid','999929','');
+
+-- 瑞虹天地
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.publickey.6', 'ydVQ7f','瑞虹天地publickey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.privatekey.6', '24f36ef07865a906','瑞虹天地privatekey','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.appid.6', '5b5047103ae74e58743209f3','瑞虹天地appid','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'ruian.mall.id.6', '10775','瑞虹天地mallid','999929','');
+
+
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'activity.butt.url.getcategorylist', 'https://openapi10.mallcoo.cn/Event/Activity/V1/GetCategoryList/','获取活动分类','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'activity.butt.url.getactivitylist', 'https://openapi10.mallcoo.cn/Event/Activity/V1/GetList/','获取活动列表','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ( 'activity.butt.url.getactivity', 'https://openapi10.mallcoo.cn/Event/Activity/V1/GetDetail/','获取活动详情','999929','');
+INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
+VALUES ( 'mall.ruian.url.activity', 'https://m.mallcoo.cn/a/custom/10764/xtd/activitylist','瑞安活动列表面URL','999929','');
+
 -- AUTHOR: 唐岑
 -- REMARK: 修改楼宇资产管理web menu的module id
 UPDATE eh_web_menus SET module_id=38000 WHERE id=16010100;
@@ -724,6 +817,16 @@ SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0);
 INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
 VALUES (@id := @id + 1, 999929, NULL, 0, 'PAY', NULL, NULL, NULL, NULL, NULL, NULL);	
 
+-- AUTHOR: 黄明波
+-- REMARK: 填写瑞安打印机名称
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F02' where reader_name = 'TC101152723470';
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_3F01' where reader_name = 'TC101152723540';
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reader_name = 'TC101152723478';
+
+
+-- AUTHOR: 缪洲
+-- REMARK: 停车缴费收款账号迁移
+update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 
