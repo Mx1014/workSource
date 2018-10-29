@@ -485,7 +485,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		// 查看当前项目下配置状态
 		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
 		if (isEnableSelfConfig(state)) {
-			return yellowPageProvider.listCategories(locator, pageSize, ownerType, organizationId, namespaceId, null,
+			return yellowPageProvider.listCategories(locator, pageSize, ownerType, ownerId, namespaceId, null,
 					type, null, isQueryChild);
 		}
 
