@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 
@@ -134,6 +136,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}else {
 						//支付成功之后 cancelOtherOrderFlag设置成true，取消其他竞争状态的订单
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
+							order.setPaidMoney(order.getPayTotalMoney());
+							if (order.getPaidMoney().compareTo(new BigDecimal(0)) >0 )
+								order.setVendorType(VendorType.OFFLINE.getCode());
 							rentalv2Service.changeRentalOrderStatus(order, status, true);
 						}
 					}
