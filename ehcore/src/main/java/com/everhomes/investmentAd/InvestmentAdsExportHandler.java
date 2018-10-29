@@ -126,10 +126,10 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
         titleName.add("招商状态");
         titleSize.add(20);
         propertyNames.add("availableArea");
-        titleName.add("面积");
+        titleName.add("面积(㎡)");
         titleSize.add(20);
         propertyNames.add("assetPrice");
-        titleName.add("租金（元/平*月）");
+        titleName.add("租金（元/㎡*月）");
         titleSize.add(20);
         propertyNames.add("apartmentFloor");
         titleName.add("楼层");
@@ -141,7 +141,7 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
         titleName.add("地址");
         titleSize.add(20);
         propertyNames.add("contactPhone");
-        titleName.add("联系电话");
+        titleName.add("咨询电话");
         titleSize.add(20);
         propertyNames.add("description");
         titleName.add("描述");
