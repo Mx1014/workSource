@@ -644,7 +644,8 @@ INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` )
 
 INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041024, 0, '企业门禁 移动端管理', '企业门禁 移动端管理权限', NULL );
 -- AUTHER：李清岩 20181019
--- 模块权限关联 SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+-- 模块权限关联
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
 
 INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41010', '0', 4101041010, '全部权限', '0', NOW());
 
