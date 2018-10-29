@@ -5249,17 +5249,17 @@ public class AssetServiceImpl implements AssetService {
 
 	/**
 	 * djm 
-	 * 缴费欠费，对接门禁
+	 * 缴费欠费，对接门禁，先查询开启门禁，然后再去关门禁，部分缴费门禁还是需要关闭
 	 */
 	@Override
 	public void meterAutoReading(Boolean createPlansFlag) {
 		// 关闭门禁
 		LOGGER.debug("starting auto closeAssetDoorAccess...");
-		closeAssetDoorAccess();
+		openAssetDoorAccess();
 		LOGGER.debug("ending auto closeAssetDoorAccess...");
 		// 开启门禁
 		LOGGER.debug("starting auto openAssetDoorAccess...");
-		openAssetDoorAccess();
+		closeAssetDoorAccess();
 		LOGGER.debug("ending auto openAssetDoorAccess...");
 	}
 	
@@ -5534,6 +5534,11 @@ public class AssetServiceImpl implements AssetService {
 		AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(cmd, AssetDooraccessLog.class);
 		assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
 		AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
+		if (existDooraccessLog == null) {
+			assetDooraccessLog.setMsg("暂无该企业或者个人门禁信息");
+			return assetDooraccessLog;
+		}
+		
 		if (existDooraccessLog.getDooraccessStatus() == 0) {
 			existDooraccessLog.setMsg("该企业或公司门禁处于全部关闭");
 		} else {
