@@ -176,9 +176,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
                     arg1.setStartTime("0");
                 }
                 //将2018/09/15这种字符串转为＂20180915＂这种来比较
-                arg0.setStartTime(arg0.getStartTime().replace("/",""));
-                arg1.setStartTime(arg1.getStartTime().replace("/",""));
-                return arg0.getStartTime().compareTo(arg1.getStartTime());
+                return arg1.getStartTime().replace("/","").compareTo(arg0.getStartTime().replace("/",""));
             }
         });
         for(ActivityModel model : activitys){
