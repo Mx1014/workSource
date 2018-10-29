@@ -2288,10 +2288,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 			if (!flag) {
-				if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
-					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-					throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
-				}
 				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {
