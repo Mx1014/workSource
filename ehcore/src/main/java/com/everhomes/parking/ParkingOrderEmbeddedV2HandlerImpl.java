@@ -287,10 +287,14 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	@Override
 	public void payCallBack(MerchantPaymentNotificationCommand cmd) {
 		//检查签名
-		if(!PayUtil.verifyCallbackSignature(cmd)){
+		if(LOGGER.isDebugEnabled()) {
 			String tmpSecretKey = (PaySettings.getSecretKey() == null) ? null : PaySettings.getSecretKey().substring(0, 5);
-			LOGGER.info("Failed to verify pay-callback signature, appKey={}, secretKey={}, signature={}", 
+			LOGGER.debug("Failed to verify pay-callback signature, appKey={}, secretKey={}, signature={}", 
 					PaySettings.getAppKey(), tmpSecretKey, cmd.getSignature());
+		}
+		if(!PayUtil.verifyCallbackSignature(cmd)){
+			LOGGER.error("Failed to verify pay-callback signature, appKey={}, signature={}", 
+					PaySettings.getAppKey(), cmd.getSignature());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"sign verify faild");
 		}
