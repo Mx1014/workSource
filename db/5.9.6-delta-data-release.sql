@@ -823,6 +823,10 @@ update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F02' where reade
 update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_3F01' where reader_name = 'TC101152723540';
 update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reader_name = 'TC101152723478';
 
+
+-- AUTHOR: 缪洲
+-- REMARK: 停车缴费收款账号迁移
+update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 
