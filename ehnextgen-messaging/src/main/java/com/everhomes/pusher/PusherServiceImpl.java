@@ -944,6 +944,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 					messageDto.setBody("班车信息类型有误，请稍后重试！");
 					response.setCode(3);
 					response.setMsg("FAIL");
+					response.setExtra("");
 					return response;
 				}
 				
@@ -974,6 +975,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 		// 4.6 成功则返回标志位1
 		response.setCode(1);
 		response.setMsg("SUCCESS");
+		response.setExtra("");
 		return response;
 	}
 	
