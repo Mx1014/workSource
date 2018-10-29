@@ -20,6 +20,9 @@
 -- 第一步请执行在es上执行db/search/energy_task.sh
 -- 第二步执行同步接口/energy/syncEnergyTaskIndex
 
+-- AUTHOR:梁家声 20181030
+-- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
