@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jooq.tools.StringUtils;
 import org.json.simple.parser.ParseException;
@@ -82,6 +83,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
@@ -906,60 +908,72 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 	 */
 	@Override
 	public ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd) {
-//		LOGGER.debug("cmd: "+cmd.getAppkey()+" "+cmd.getIdentifierToken()+" "+cmd.getMsgSendType()+" "+ cmd.getMsgType());
-		
-		// 1.1 验证接受者在左邻系统是否存在,由 appkey/appsecret确定namespace
-		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
-		
-		// 1.2(tocken/namespace确定一个用户)
-		UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(cmd.getIdentifierToken(),appNamespaceMapping.getNamespaceId());
-//		LOGGER.debug("appNamespaceMapping : "+appNamespaceMapping.toString());
+		LOGGER.debug("cmd: "+cmd.getAppkey()+" tokenList: "+cmd.getIdentifierTokenList());
+		// 1.用户token列表/发送失败手机号列表/这里设置默认发送方式为3（同时推送和应用消息）
+		String[] tokenArray = cmd.getIdentifierTokenList().split(",");
+		List<String> unReachTokenList = new ArrayList<String>(tokenArray.length);		 
+		Integer MSG_DEFAULT_SEND_TYPE= 3; 	
 		
 		// 2.响应内容
 		ThirdPartResponseMessageDTO response = new ThirdPartResponseMessageDTO();
+		
+		for(String token : tokenArray){
+			
+			// 3.1 验证接受者在左邻系统是否存在,由 appkey/appsecret确定namespace
+			AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppkey());
+			
+			// 3.2(tocken/namespace确定一个用户)
+			UserIdentifier user = userProvider.findClaimedIdentifierByTokenAndNamespaceId(token,appNamespaceMapping.getNamespaceId());
+			LOGGER.debug("appNamespaceMapping : "+ appNamespaceMapping == null?"appNamespaceMapping is null":appNamespaceMapping.toString());
+			
+			if (user != null) {
+				// 4.1 消息构造
+				MessageDTO messageDto = new MessageDTO();
+				messageDto.setAppId(AppConstants.APPID_MESSAGING);
+				messageDto.setSenderUid(User.SYSTEM_UID);
+				messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), user.getOwnerUid().toString()));
+				messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+				messageDto.setCreateTime(System.currentTimeMillis());
+				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+				if(cmd.getMsgType() == 1){//上车信息
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好乘车准备！"));				
+				}else if(cmd.getMsgType() == 2){//下车信息
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好下车准备！"));				
+				}else{
+					// 4.2 班车信息类型有误则返回标志位3
+					messageDto.setBody("班车信息类型有误，请稍后重试！");
+					response.setCode(3);
+					response.setMsg("FAIL");
+					return response;
+				}
+				
+				// 4.3 根据 msgType 推送方式推送给用户
+				messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, MSG_DEFAULT_SEND_TYPE);
+//				LOGGER.debug("调用第三方信息推送接口：=====【发送成功】=====message： "+messageDto.toString());
 
-		if (user != null) {
-			// 3.1 消息构造
-			MessageDTO messageDto = new MessageDTO();
-			messageDto.setAppId(AppConstants.APPID_MESSAGING);
-			messageDto.setSenderUid(User.SYSTEM_UID);
-			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), user.getOwnerUid().toString()));
-			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-			messageDto.setCreateTime(System.currentTimeMillis());
-			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-			if(cmd.getMsgType() == 1){
-				messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好乘车准备！"));				
-			}else if(cmd.getMsgType() == 2){
-				messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好下车准备！"));				
 			}else{
-				messageDto.setBody("班车信息类型有误，请稍后重试！");
-				response.setCode(3);
-				response.setMsg("FAIL");
-				return response;
+				// 4.4 用户不存在，则加入失败列表
+				unReachTokenList.add(token);
+//				LOGGER.debug("调用第三方信息推送接口：=====【用户不存在】=====token： "+token);
+				continue;
 			}
-			
-			if(cmd.getMsgSendType() > 3 || cmd.getMsgSendType() < 1){
-				response.setCode(4);
-				response.setMsg("FAIL");
-				return response;
-			}
-			
-			
-			// 3.2 根据 msgType 推送方式推送给用户
-			messagingService.routeMessage(null, User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING,
-					ChannelType.USER.getCode(), String.valueOf(user.getOwnerUid()), messageDto, cmd.getMsgSendType());
-			LOGGER.debug("调用第三方信息推送接口： "+messageDto.toString());
-			
-			// 3.3 成功则返回标志位1
-			response.setCode(1);
-			response.setMsg("SUCCESS");
-			return response;
-			
 		}
-
-		// 4 发送失败返回标志位2
-		response.setCode(2);
-		response.setMsg("FAIL");
+		
+		if(unReachTokenList.size() > 0){
+			// 4.5 有发送失败号码则返回标志位2和失败号码列表
+			response.setCode(2);
+			response.setMsg("FAIL");
+			StringBuffer sbuffer = new StringBuffer();
+			for(String i : unReachTokenList){
+				sbuffer.append(i).append(",");
+			}
+			response.setExtra(sbuffer.toString());
+			return response;
+		}
+		
+		// 4.6 成功则返回标志位1
+		response.setCode(1);
+		response.setMsg("SUCCESS");
 		return response;
 	}
 	
