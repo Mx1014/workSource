@@ -89,7 +89,7 @@ DECLARE  pName varchar(64);
 DECLARE pNamespaceId INT;
 DECLARE pType BIGINT(20);
 
-DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories;  -- 首先这里对游标进行定义
+DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories where parent_id = 0;  -- 首先这里对游标进行定义
  DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1; -- 这个是个条件处理,针对NOT FOUND的条件,当没有记录时赋值为1
  
  OPEN  cur_record; -- 接着使用OPEN打开游标
@@ -306,6 +306,7 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '509', 'zh_CN', '找不到订单或订单状态错误', '找不到订单或订单状态错误', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '510', 'zh_CN', '下单失败', '下单失败', '0');
 
+update eh_rentalv2_pay_accounts set merchant_id = account_id;
 
 
 -- AUTHOR: 黄明波 20181008
@@ -826,6 +827,9 @@ update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reade
 -- REMARK: 访客二维码短信模板
 UPDATE eh_locale_templates set `description` = '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）' where `code` = 8 and `scope` LIKE '%sms.default%';
 
+-- AUTHOR: 缪洲
+-- REMARK: 停车缴费收款账号迁移
+update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
