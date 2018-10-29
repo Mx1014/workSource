@@ -316,7 +316,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		yellowPageProvider.createCategory(newMainCag);
 
 		// 图片保存
-		List<ServiceAllianceAttachment> attches = yellowPageProvider.listAttachments(oldMainCag.getId(),
+		List<ServiceAllianceAttachment> attches = yellowPageProvider.listAttachments(YellowPageService.HOME_PAGE_ATTACH_OWNER_TYPE, oldMainCag.getId(),
 				ServiceAllianceAttachmentType.COVER_ATTACHMENT.getCode());
 		for (ServiceAllianceAttachment attch : attches) {
 			attch.setOwnerId(newMainCag.getId());

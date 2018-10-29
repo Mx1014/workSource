@@ -15,6 +15,8 @@ import com.everhomes.rest.yellowPage.stat.ListClickStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListInterestStatResponse;
 import com.everhomes.rest.yellowPage.stat.ListServiceTypeNamesCommand;
 import com.everhomes.rest.yellowPage.stat.ListStatCommonCommand;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 
 import java.util.List;
 
@@ -23,6 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 public interface YellowPageService {
 
 	public static final String SERVICE_ALLIANCE_HANDLER_NAME = "service_alliance";
+	
+	public final String SERVICE_ATTACH_OWNER_TYPE = EhServiceAlliances.class.getSimpleName();
+	public final String HOME_PAGE_ATTACH_OWNER_TYPE = EhServiceAllianceCategories.class.getSimpleName();
 
 	public final long SERVICE_ALLIANCE_MODULE_ID = 40500L;
 

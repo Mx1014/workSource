@@ -63,10 +63,10 @@ public interface YellowPageProvider {
 	void createServiceAlliances(ServiceAlliances sa);
 	void updateServiceAlliances(ServiceAlliances sa);
 	void createServiceAllianceAttachments(ServiceAllianceAttachment attachment);
-	void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId);
+	void deleteServiceAllianceAttachmentsByOwnerId(String ownerType, Long ownerId);
 	
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
-	void populateServiceAlliancesAttachment(ServiceAlliances sa);
+	void populateServiceAlliancesAttachment(ServiceAlliances sa, String ownerType);
 	
 	List<ServiceAllianceCategories> listCategories(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Integer namespaceId, Long parentId, Long type, List<Byte> displayDestination, boolean queryAllChilds);
 
@@ -101,9 +101,9 @@ public interface YellowPageProvider {
 
 	List<JumpModuleDTO> jumpModules(Integer namespaceId, String bizString);
 	
-	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
+	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, String ownerType, Long ownerId);
 
-	List<ServiceAllianceAttachment> listAttachments(Long ownerId, Byte attachmentType);
+	List<ServiceAllianceAttachment> listAttachments(String ownerType, Long ownerId, Byte attachmentType);
 
 	Long createGolfRequest(ServiceAllianceGolfRequest request);
 
@@ -170,4 +170,8 @@ public interface YellowPageProvider {
 
 
 	List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
+
+
+
+
 }
