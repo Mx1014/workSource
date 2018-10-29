@@ -412,8 +412,7 @@ public class ExcelUtils {
         Sheet sheet = workbook.getSheet(this.sheetName);
         sheet.shiftRows(0,sheet.getLastRowNum(),1,true,false);
         // 合并首行单元格
-//        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
-        sheet.addMergedRegion(new CellRangeAddress(0,0,0,13));
+        sheet.addMergedRegion(new CellRangeAddress(0,0,0,12));
         // 表头
         Row titleRemarkRow = sheet.createRow(0);
         titleRemarkRow.setHeight(titleRemarkCellHeight);
