@@ -249,7 +249,7 @@ public class RemindServiceImpl implements RemindService  {
                 	if(CollectionUtils.isEmpty(reminds))
                 		return null;
                 	for(ShareMemberDTO shareToMember : cmd.getShareToMembers()){
-                		if(checkCategoryShareExists(categoryShares, shareToMember)){
+                		if(!checkCategoryShareExists(categoryShares, shareToMember)){
                 			for(Remind remind : reminds){
 	                			Remind trackRemind = convertRemindShareToMSGRemind(remind, shareToMember);
 	                            sendTrackMessageOnBackGround(remind.getPlanDescription(), Arrays.asList(trackRemind), RemindModifyType.CREATE_SUBSCRIBE);
