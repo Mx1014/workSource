@@ -416,6 +416,17 @@ DELETE FROM eh_namespaces WHERE id=2;
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-standard
+-- DESCRIPTION: 此SECTION只在左邻标准版执行的脚本
+
+-- AUTHOR: xq.tian
+-- REMARK: 标准版数据库的标识
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+  VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
+
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
