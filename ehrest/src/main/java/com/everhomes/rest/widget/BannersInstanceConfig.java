@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *      <li>categoryId: 应用入口ID</li>
- *      <li>moduleAppId: 应用ID</li>
+ *      <li>appId: 应用ID</li>
  *      <Li>moreRouter: 查看更多路由  --非全屏轮播</Li>
  *      <li>backgroundType: 背景类型，0：无，1：纯色，2：渐变  --非全屏轮播</li>
  *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播 格式：#FFFFFF</li>
@@ -30,7 +30,7 @@ public class BannersInstanceConfig implements Serializable  {
 
 	private Long categoryId;
 
-	private Long moduleAppId;
+	private Long appId;
 
 	private String moreRouter;
 
@@ -74,12 +74,12 @@ public class BannersInstanceConfig implements Serializable  {
         this.heightRatio = heightRatio;
     }
 
-    public Long getModuleAppId() {
-        return moduleAppId;
+    public Long getAppId() {
+        return appId;
     }
 
-    public void setModuleAppId(Long moduleAppId) {
-        this.moduleAppId = moduleAppId;
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public String getMoreRouter() {
