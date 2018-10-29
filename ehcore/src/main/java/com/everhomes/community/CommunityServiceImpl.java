@@ -5224,7 +5224,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 
-		for(int i = 12; i > 5; i--){
+		for(int i = 12; i > 3; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){
