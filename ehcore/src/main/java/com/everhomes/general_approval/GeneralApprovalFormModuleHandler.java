@@ -2,8 +2,11 @@ package com.everhomes.general_approval;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralFormModuleHandler;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.yellowPage.YellowPageService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +15,18 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
+    
+    @Autowired
+    GeneralFormService generalFormService;
 
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
+    	
+    	if (YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME.equals(cmd.getSourceType())) {
+    		return generalFormService.postGeneralForm(cmd);
+    	}
+    	
+    	
         GeneralApprovalFormHandler handler = getApprovalPostItemHandler(cmd.getSourceId());
         PostApprovalFormCommand command = new PostApprovalFormCommand();
         command.setApprovalId(cmd.getSourceId());
@@ -37,6 +49,10 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+    	if (YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME.equals(cmd.getSourceType())) {
+    		return generalFormService.getTemplateBySourceId(cmd);
+    	}
+    	
         GeneralApprovalFormHandler handler = getApprovalPostItemHandler(cmd.getSourceId());
         return handler.getTemplateBySourceId(cmd);
     }
