@@ -865,7 +865,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		//获取首页封面图
 		ServiceAlliances sa = new ServiceAlliances();
 		sa.setId(homePageCa.getId());
-		this.yellowPageProvider.populateServiceAlliancesAttachment(sa);
+		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, HOME_PAGE_ATTACH_OWNER_TYPE);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
 		dto.setDisplayMode(homePageCa.getDisplayMode());
@@ -884,7 +884,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		// 获取首页封面图
 		ServiceAlliances sa = new ServiceAlliances();
 		sa.setId(homePageCa.getId());
-		this.yellowPageProvider.populateServiceAlliancesAttachment(sa);
+		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, HOME_PAGE_ATTACH_OWNER_TYPE);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
 		dto.setDisplayMode(homePageCa.getDisplayMode());
@@ -1277,11 +1277,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 			
 			//添加首页样式的图片
 			if (needDeleteOldPic) {
-				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(homePageCa.getId()); // 删除旧的图片
+				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(HOME_PAGE_ATTACH_OWNER_TYPE, homePageCa.getId()); // 删除旧的图片
 			}
 
 			// 创建多张封面图片 v3.4需求
-			createServiceAllianceAttachments(cmd.getCoverAttachments(), homePageCa.getId(),
+			createServiceAllianceAttachments(cmd.getCoverAttachments(), HOME_PAGE_ATTACH_OWNER_TYPE, homePageCa.getId(),
 					ServiceAllianceAttachmentType.COVER_ATTACHMENT.getCode());
 			
 			return null;
@@ -1368,13 +1368,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 				// 更新时间
 				updateServiceAllianceDate(serviceAlliance);
 				this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
-				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
+				this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(SERVICE_ATTACH_OWNER_TYPE, serviceAlliance.getId());
 			}
 
 			// 创建封面图和文件
-			createServiceAllianceAttachments(cmd.getAttachments(), serviceAlliance.getId(),
+			createServiceAllianceAttachments(cmd.getAttachments(), SERVICE_ATTACH_OWNER_TYPE, serviceAlliance.getId(),
 					ServiceAllianceAttachmentType.BANNER.getCode());
-			createServiceAllianceAttachments(cmd.getFileAttachments(), serviceAlliance.getId(),
+			createServiceAllianceAttachments(cmd.getFileAttachments(), SERVICE_ATTACH_OWNER_TYPE, serviceAlliance.getId(),
 					ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 
 			// 更新筛选项
@@ -1546,7 +1546,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 
 	private void populateServiceAlliance(ServiceAlliances sa) {
-		this.yellowPageProvider.populateServiceAlliancesAttachment(sa);
+		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, SERVICE_ATTACH_OWNER_TYPE);
 
 		populateServiceAllianceUrl(sa);
 		populateServiceAllianceDate(sa);
@@ -1613,7 +1613,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		sa.setTagGroups(tagGroups);
 	}
 
-	private void createServiceAllianceAttachments(List<ServiceAllianceAttachmentDTO> attachments, Long ownerId,
+	private void createServiceAllianceAttachments(List<ServiceAllianceAttachmentDTO> attachments, String ownerType, Long ownerId,
 			Byte attachmentType) {
 		if (null == attachments)
 			return;
@@ -1624,6 +1624,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				continue;
 			ServiceAllianceAttachment attachment = ConvertHelper.convert(dto, ServiceAllianceAttachment.class);
 			attachment.setOwnerId(ownerId);
+			attachment.setOwnerType(ownerType);
 			// attachment.setContentType(PostContentType.IMAGE.getCode());
 			attachment.setAttachmentType(attachmentType);
 			attachment.setDefaultOrder(index++);
@@ -2376,7 +2377,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		ListAttachmentsResponse response = new ListAttachmentsResponse();
 		List<ServiceAllianceAttachment> attachments = yellowPageProvider.listAttachments(locator, cmd.getPageSize() + 1,
-				cmd.getOwnerId());
+				SERVICE_ATTACH_OWNER_TYPE, cmd.getOwnerId());
 		if (attachments != null && attachments.size() > 0) {
 			if (attachments.size() > cmd.getPageSize()) {
 				attachments.remove(attachments.size() - 1);
