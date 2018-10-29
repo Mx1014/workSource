@@ -573,6 +573,15 @@ UPDATE eh_service_module_apps SET instance_config = '{"isGuild":1}' WHERE module
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
 
+-- AUTHOR: 黄明波
+-- REMARK: 更新打印机名称
+update eh_siyin_print_printers set printer_name = 'FX-ApeosPort-VI C3370' where reader_name = 'TC101154727022';
+update eh_siyin_print_printers set printer_name = 'FX-AP-VI C3370-BJ' where reader_name = 'TC101154727294';
+update eh_siyin_print_printers set printer_name = 'FX_AP_VIC3370' where reader_name = 'TC101154727497';
+update eh_siyin_print_printers set printer_name = 'Zuolin' where reader_name = 'TC101157736913';
+update eh_siyin_print_printers set printer_name = 'APV3373' where reader_name = 'TC100887870538';
+
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 
@@ -723,6 +732,12 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 SET @id = ifnull((SELECT MAX(id) FROM `eh_payment_app_views`),0); 
 INSERT INTO `eh_payment_app_views`(`id`, `namespace_id`, `community_id`, `has_view`, `view_item`, `remark1_type`, `remark1_identifier`, `remark2_type`, `remark2_identifier`, `remark3_type`, `remark3_identifier`) 
 VALUES (@id := @id + 1, 999929, NULL, 0, 'PAY', NULL, NULL, NULL, NULL, NULL, NULL);	
+
+-- AUTHOR: 黄明波
+-- REMARK: 填写瑞安打印机名称
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F02' where reader_name = 'TC101152723470';
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_3F01' where reader_name = 'TC101152723540';
+update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reader_name = 'TC101152723478';
 
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
