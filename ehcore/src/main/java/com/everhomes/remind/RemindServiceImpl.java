@@ -251,6 +251,9 @@ public class RemindServiceImpl implements RemindService  {
                 	for(ShareMemberDTO shareToMember : cmd.getShareToMembers()){
                 		if(!checkCategoryShareExists(categoryShares, shareToMember)){
                 			for(Remind remind : reminds){
+                				if(remind.getStatus().equals(RemindStatus.DONE.getCode())){
+                					continue;
+                				}
 	                			Remind trackRemind = convertRemindShareToMSGRemind(remind, shareToMember);
 	                            sendTrackMessageOnBackGround(remind.getPlanDescription(), Arrays.asList(trackRemind), RemindModifyType.CREATE_SUBSCRIBE);
                 			}
