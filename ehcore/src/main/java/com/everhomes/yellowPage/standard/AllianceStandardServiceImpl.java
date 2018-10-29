@@ -27,6 +27,8 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormVal;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -56,6 +58,9 @@ import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhFlowCases;
 import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
+import com.everhomes.server.schema.tables.records.EhFlowsRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
+import com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceAlliancesRecord;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
@@ -122,6 +127,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private GeneralApprovalValProvider generalApprovalValProvider;
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
+	@Autowired
+	private LaunchPadProvider launchPadItemProvider;
 
 	
 	@Override
@@ -680,5 +687,36 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					.and(APPV.MODULE_ID.eq(40500L).or(APPV.MODULE_TYPE.eq("service_alliance")))
 				).fetchInto(GeneralApprovalVal.class);
 	}
+	
+	private List<LaunchPadItem> queryLaunchPadItems() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhLaunchPadItemsRecord> query = context.selectQuery(Tables.EH_LAUNCH_PAD_ITEMS);
+		query.addConditions(Tables.EH_LAUNCH_PAD_ITEMS.ACTION_DATA.like(DSL.concat( "%", "/service-alliance-web/build/index.html#/home/", "%")));
+		return query.fetchInto(LaunchPadItem.class);
+	}
+	
+	@Override
+	public String transferPadItems() {
+		int update = 0;
+		List<LaunchPadItem>  items  = queryLaunchPadItems();
+		for (LaunchPadItem item : items) {
+			String oldActionData = item.getActionData();
+			String newActionData = "";
+			int index1 = oldActionData.indexOf("#");
+			int index2 = oldActionData.indexOf("?");
+			int index3 = oldActionData.indexOf("#sign_suffix");
+			String homeStr = oldActionData.substring(index1, index2);
+			newActionData = oldActionData.substring(0, index1) 
+					+ oldActionData.substring(index2, index3) 
+					+ homeStr
+					+ oldActionData.substring(index3);
+			item.setActionData(newActionData);
+			launchPadItemProvider.updateLaunchPadItem(item);
+			update++;
+		}
+		
+		return "u:"+update;
+	}
+	
 	
 }
