@@ -42,6 +42,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100016', 'zh_CN', '账号长度不对或格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100017', 'zh_CN', '账号一经设定，无法修改');
 
+-- AUTHOR: 黄良铭
+-- REMARK: 修改积分系统状态
+UPDATE  eh_point_systems SET STATUS='2'WHERE id = 1;
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
@@ -105,6 +108,12 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+
+-- AUTHOR: 黄良铭
+-- REMARK: 新增ＩＤ为1的积分系统
+INSERT INTO `eh_point_systems` (`id`, `namespace_id`, `display_name`, `point_name`, `point_exchange_flag`, `exchange_point`, `exchange_cash`, `user_agreement`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES('1','0','固定数据','固定数据　','0','0','2','','2','2018-10-27 10:48:04.621','2',NULL,NULL);
+
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 
 
