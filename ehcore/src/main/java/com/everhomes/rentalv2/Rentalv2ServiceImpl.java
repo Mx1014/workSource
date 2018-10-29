@@ -2583,10 +2583,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					this.validateRentalBill(rules, rs, rule,order.getRentalType());
 
 					//本订单状态置为成功,
-//			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 					order.setStatus(status);
-					if (order.getStatus() == SiteBillStatus.SUCCESS.getCode())
-						order.setPaidMoney(order.getPayTotalMoney());
 					rentalv2Provider.updateRentalBill(order);
 					return null;
 				});
