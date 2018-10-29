@@ -213,6 +213,9 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
  
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡

@@ -128,7 +128,7 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
   `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
   `app_id` BIGINT NOT NULL COMMENT '授权应用id',
-  `app_name` VARCHAR(32) COMMENT '授权应用名称',
+  `app_name` VARCHAR(32) NOT NULL  COMMENT '授权应用名称',
   `source_id` BIGINT NOT NULL COMMENT '授权用户id',
   `source_name` VARCHAR(32) COMMENT '授权用户名称',
   `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
@@ -213,6 +213,4 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
--- AUTHOR: 唐岑
--- REMARK： 删除eh_organization_address_mappings表中的外键
-ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+

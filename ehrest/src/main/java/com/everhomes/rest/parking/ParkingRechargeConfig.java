@@ -93,6 +93,5 @@ public class ParkingRechargeConfig {
     public void setExpiredRechargeType(Byte expiredRechargeType) {
         this.expiredRechargeType = expiredRechargeType;
     }
-
     
 }
