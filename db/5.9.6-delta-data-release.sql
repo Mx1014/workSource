@@ -62,6 +62,10 @@ update eh_service_alliances
 set  integral_tag1 = 3
 where module_url not like 'zl://approva%' and  module_url not like 'zl://form%' and  module_url is not null and integral_tag1 = 2;
 
+-- 迁移5.1 迁移首页图片
+update eh_service_alliance_attachments st, eh_service_alliances sa set st.owner_type = 'EhServiceAllianceCategories', st.owner_id = sa.`type`
+where sa.parent_id = 0 and sa.owner_id > 0 and sa.`type` <> 0 and st.owner_type = 'EhServiceAlliances' and st.owner_id = sa.id;
+
 -- 迁移6.工作流
 update eh_flows fl, eh_general_approvals ap 
 set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE'
