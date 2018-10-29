@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -262,25 +263,36 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd) {
 
-		List<ServiceModuleApp> apps = listReleaseServiceModuleApps(cmd.getNamespaceId());
-
-		if(apps == null){
-			return null;
-		}
-
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
-		for (ServiceModuleApp app: apps){
-			if(app.getActionType() == null){
-				continue;
-			}
-			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-			PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+        List<ServiceModuleApp> apps = new ArrayList<>();
+		if(cmd.getNamespaceId() == 2) {
+            List<OrganizationCommunityDTO> communityDTOS = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+            if (!CollectionUtils.isEmpty(communityDTOS)) {
+                Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
+                Long orgId = communityDTOS.get(0).getOrganizationId();
+//                Byte appType = ServiceModuleAppType.COMMUNITY.getCode();
+                Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+                PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+                apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), orgId, locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
+            }
+        }else {
+            apps = listReleaseServiceModuleApps(cmd.getNamespaceId());
+        }
+        if(apps == null){
+            return null;
+        }
+        for (ServiceModuleApp app: apps){
+            if(app.getActionType() == null){
+                continue;
+            }
+            ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+            PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 
-			if(null != handler){
-				dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig()));
-			}
-			dtos.add(dto);
-		}
+            if(null != handler){
+                dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig()));
+            }
+            dtos.add(dto);
+        }
 
 		ListServiceModuleAppsForBannerResponse  response = new ListServiceModuleAppsForBannerResponse();
 		response.setApps(dtos);
