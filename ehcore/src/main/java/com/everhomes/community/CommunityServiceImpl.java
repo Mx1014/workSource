@@ -2386,7 +2386,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2396,7 +2396,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					break;
-				}
+                }else if (OrganizationMemberStatus.WAITING_FOR_APPROVAL == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                    dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                    break;
+                }
 			}
 		}
 
