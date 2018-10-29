@@ -12,6 +12,16 @@ import java.util.List;
  *     <li>heightRatio: 宽高比（高）</li>
  *     <li>shadowFlag: shadowFlag</li>
  *     <li>paddingFlag: paddingFlag</li>
+ *      <li>categoryId: 应用入口ID</li>
+ *      <li>appId: 应用ID</li>
+ *      <Li>moreRouter: 查看更多路由</Li>
+ *      <li>backgroundType: 背景类型，0：无，1：纯色，2：渐变</li>
+ *      <li>color: 当背景类型为纯色时的颜色</li>
+ *      <li>topColor: 当背景类型为渐变时的顶部颜色</li>
+ *      <li>bottomColor: 当背景类型为渐变时的底部颜色</li>
+ *      <li>autoCarousel: 是否自动轮播，0为否，1为是。请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
+ *      <li>padding: 图片padding</li>
+ *      <li>scale: 图片比例，1. 5:3  2. 16:9</li>
  * </ul>
  */
 public class Banners {
@@ -21,6 +31,106 @@ public class Banners {
     private Long heightRatio;
     private Byte shadowFlag;
     private Integer paddingFlag;
+
+    private Long categoryId;
+
+    private Long appId;
+
+    private String moreRouter;
+
+    private Byte backgroundType;
+
+    private String color;
+
+    private String topColor;
+
+    private String bottomColor;
+
+    private Byte autoCarousel;
+
+    private Long padding;
+
+    private Byte scale;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public String getMoreRouter() {
+        return moreRouter;
+    }
+
+    public void setMoreRouter(String moreRouter) {
+        this.moreRouter = moreRouter;
+    }
+
+    public Byte getBackgroundType() {
+        return backgroundType;
+    }
+
+    public void setBackgroundType(Byte backgroundType) {
+        this.backgroundType = backgroundType;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getTopColor() {
+        return topColor;
+    }
+
+    public void setTopColor(String topColor) {
+        this.topColor = topColor;
+    }
+
+    public String getBottomColor() {
+        return bottomColor;
+    }
+
+    public void setBottomColor(String bottomColor) {
+        this.bottomColor = bottomColor;
+    }
+
+    public Byte getAutoCarousel() {
+        return autoCarousel;
+    }
+
+    public void setAutoCarousel(Byte autoCarousel) {
+        this.autoCarousel = autoCarousel;
+    }
+
+    public Long getPadding() {
+        return padding;
+    }
+
+    public void setPadding(Long padding) {
+        this.padding = padding;
+    }
+
+    public Byte getScale() {
+        return scale;
+    }
+
+    public void setScale(Byte scale) {
+        this.scale = scale;
+    }
 
     public String getItemGroup() {
         return itemGroup;
