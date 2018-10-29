@@ -822,6 +822,11 @@ update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F02' where reade
 update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_3F01' where reader_name = 'TC101152723540';
 update eh_siyin_print_printers set printer_name = 'Sys_NJ_INNO_2F01' where reader_name = 'TC101152723478';
 
+-- AUTHOR: 刘一麟
+-- REMARK: 访客二维码短信模板
+UPDATE eh_locale_templates set `description` = '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}/aclink/v?id=${id}（24小时有效）' where `code` = 8 and `scope` LIKE '%sms.default%';
+
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 

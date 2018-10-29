@@ -217,3 +217,9 @@ ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint
 -- AUTHOR: 唐岑
 -- REMARK： 删除eh_organization_address_mappings表中的外键
 ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+
+-- AUTHOR: 刘一麟
+-- REMARK： 门禁临时授权有效期添加默认值
+ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
