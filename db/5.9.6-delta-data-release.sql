@@ -89,7 +89,7 @@ DECLARE  pName varchar(64);
 DECLARE pNamespaceId INT;
 DECLARE pType BIGINT(20);
 
-DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories;  -- 首先这里对游标进行定义
+DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories where parent_id = 0;  -- 首先这里对游标进行定义
  DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1; -- 这个是个条件处理,针对NOT FOUND的条件,当没有记录时赋值为1
  
  OPEN  cur_record; -- 接着使用OPEN打开游标
