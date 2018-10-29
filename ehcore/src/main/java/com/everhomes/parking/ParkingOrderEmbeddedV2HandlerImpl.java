@@ -75,8 +75,11 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
 			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 			if (order == null) { //做一下兼容
-				Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
-				order = checkOrder(orderId);
+				 order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
+				if (order == null ){
+					Long orderId = Long.parseLong(transferOrderNo(cmd.getBizOrderNum()));//获取下单时候的支付id
+					order = checkOrder(orderId);
+				}
 			}
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
@@ -99,10 +102,12 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
-				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				if (cmd.getPaymentType() != null){
+					order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				}
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				order.setBizOrderNo(cmd.getBizOrderNum());
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else 
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
@@ -154,8 +159,10 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
 				order.setBizOrderNo(cmd.getBizOrderNum());
-				order.setPaidType(transferPaidType(cmd.getPaymentType()));
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null){
+					order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				}
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
@@ -167,9 +174,11 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
 				order.setPaidTime(payTimeStamp);
 				order.setPayOrderNo(cmd.getOrderId()+"");//保存支付系统的订单号
-				order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				if (cmd.getPaymentType() != null){
+					order.setPaidType(transferPaidType(cmd.getPaymentType()));
+				}
 				order.setBizOrderNo(cmd.getBizOrderNum());
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());

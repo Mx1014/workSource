@@ -506,7 +506,8 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 			if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
 				return false;
 			}
-			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			//CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
 			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
 				return false;
 			}

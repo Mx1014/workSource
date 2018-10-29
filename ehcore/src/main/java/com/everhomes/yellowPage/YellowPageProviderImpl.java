@@ -520,10 +520,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId) {
+	public void deleteServiceAllianceAttachmentsByOwnerId(String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 
         SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.eq(ownerId));
         
         
@@ -551,9 +552,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void populateServiceAlliancesAttachment(ServiceAlliances sa) {
+	public void populateServiceAlliancesAttachment(ServiceAlliances sa, String ownerType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.in(sa.getId()));
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.DEFAULT_ORDER.asc()); //获取图片按defaultOrder  服务联盟v3.4需求
         query.fetch().map((EhServiceAllianceAttachmentsRecord record) -> {
@@ -1147,7 +1149,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceAttachment> listAttachments(
-			CrossShardListingLocator locator, int count, Long ownerId) {
+			CrossShardListingLocator locator, int count, String ownerType, Long ownerId) {
 		List<ServiceAllianceAttachment> attachments = new ArrayList<ServiceAllianceAttachment>();
 
         if (locator.getShardIterator() == null) {
@@ -1361,11 +1363,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<ServiceAllianceAttachment> listAttachments(Long ownerId, Byte attachmentType) {
+	public List<ServiceAllianceAttachment> listAttachments(String ownerType, Long ownerId, Byte attachmentType) {
 		com.everhomes.server.schema.tables.EhServiceAllianceAttachments ATTACH = Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 SelectQuery<EhServiceAllianceAttachmentsRecord> query  = context.selectQuery(ATTACH);
-
+		 
+		 if (!StringUtils.isEmpty(ownerType)) {
+			 query.addConditions(ATTACH.OWNER_TYPE.eq(ownerType));
+		 }
+		 
 		 if (null != ownerId) {
 			 query.addConditions(ATTACH.OWNER_ID.eq(ownerId));
 		 }
