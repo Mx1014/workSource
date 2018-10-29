@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,8 +85,21 @@ public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
 
             for(ActivityRuianDetail dto :res.getEntities()){
                 OPPushCard card = new OPPushCard();
-                card.setRouterPath(dto.getPageUrl());
-                card.setRouterQuery("");
+                card.setRouterPath("/detail");
+
+                try {
+                    card.setRouterQuery("url=" + URLEncoder.encode(dto.getPageUrl(), "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    LOGGER.warn("url encode, url=", dto.getPageUrl());
+                }
+
+                card.setClientHandlerType(ClientHandlerType.OUTSIDE_URL.getCode());
+
+                String host = "default";
+                String router = "zl://" + host + card.getRouterPath() + "?moduleId=90100&clientHandlerType=1&appId="+ context.getAppId()+"&" + card.getRouterQuery();
+                card.setRouter(router);
+
+
                 card.setClientHandlerType(ClientHandlerType.OUTSIDE_URL.getCode());
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPhoto());

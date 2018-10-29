@@ -57,7 +57,8 @@ public class OPPushUrlHandler implements OPPushHandler {
         for (OPPushUrlDetailHandler handler: oPPushUrlDetailHandlers){
             if(handler.checkUrl(instanceConfig)){
 
-                return handler.refreshInstanceConfig(instanceConfig);
+                return handler.refreshInstanceConfig(instanceConfig)
+                        ;
             }
         }
         return null;
