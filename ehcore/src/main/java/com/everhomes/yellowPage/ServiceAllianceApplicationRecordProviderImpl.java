@@ -23,6 +23,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.rest.yellowPage.faq.GetLatestServiceStateCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhServiceAllianceApplicationRecordsDao;
@@ -32,7 +33,6 @@ import com.everhomes.server.schema.tables.records.EhServiceAllianceApplicationRe
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
 
 @Component
 public class ServiceAllianceApplicationRecordProviderImpl implements ServiceAllianceApplicationRecordProvider {

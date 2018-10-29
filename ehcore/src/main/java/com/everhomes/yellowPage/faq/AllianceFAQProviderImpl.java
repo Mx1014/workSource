@@ -141,4 +141,9 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 		allianceFaqsProvider.plusFAQSolveCounts(faqId, solveStaus);
 	}
 
+	@Override
+	public void updateFAQOrder(Long id, Long defaultOrder) {
+		allianceFaqsProvider.updateFAQOrder(id, defaultOrder);
+	}
+
 }

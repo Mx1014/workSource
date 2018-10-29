@@ -25,6 +25,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
+import com.everhomes.rest.yellowPage.faq.AllianceFaqSolveTimesType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAllianceFaqsDao;

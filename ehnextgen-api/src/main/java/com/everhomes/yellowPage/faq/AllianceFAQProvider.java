@@ -62,6 +62,8 @@ public interface AllianceFAQProvider {
 
 	void updateFAQSolveTimes(Long faqId, Byte solveStaus);
 
+	void updateFAQOrder(Long id, Long defaultOrder);
+
 
 
 

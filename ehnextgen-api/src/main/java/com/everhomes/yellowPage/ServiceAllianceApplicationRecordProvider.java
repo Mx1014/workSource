@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
-import com.everhomes.yellowPage.faq.GetLatestServiceStateCommand;
+import com.everhomes.rest.yellowPage.faq.GetLatestServiceStateCommand;
 
 public interface ServiceAllianceApplicationRecordProvider {
 

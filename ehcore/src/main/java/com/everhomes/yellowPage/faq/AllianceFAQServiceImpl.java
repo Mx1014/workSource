@@ -26,13 +26,47 @@ import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.rest.yellowPage.faq.CreateFAQCommand;
+import com.everhomes.rest.yellowPage.faq.CreateFAQTypeCommand;
+import com.everhomes.rest.yellowPage.faq.DeleteFAQCommand;
+import com.everhomes.rest.yellowPage.faq.DeleteFAQTypeCommand;
+import com.everhomes.rest.yellowPage.faq.FAQDTO;
+import com.everhomes.rest.yellowPage.faq.GetFAQOnlineServiceCommand;
+import com.everhomes.rest.yellowPage.faq.GetFAQOnlineServiceResponse;
+import com.everhomes.rest.yellowPage.faq.GetLatestServiceStateCommand;
+import com.everhomes.rest.yellowPage.faq.GetLatestServiceStateResponse;
+import com.everhomes.rest.yellowPage.faq.GetPendingServiceCountsCommand;
+import com.everhomes.rest.yellowPage.faq.GetPendingServiceCountsResponse;
+import com.everhomes.rest.yellowPage.faq.ListFAQTypesCommand;
+import com.everhomes.rest.yellowPage.faq.ListFAQTypesResponse;
+import com.everhomes.rest.yellowPage.faq.ListFAQsCommand;
+import com.everhomes.rest.yellowPage.faq.ListFAQsResponse;
+import com.everhomes.rest.yellowPage.faq.ListOperateServicesCommand;
+import com.everhomes.rest.yellowPage.faq.ListOperateServicesResponse;
+import com.everhomes.rest.yellowPage.faq.ListTopFAQsCommand;
+import com.everhomes.rest.yellowPage.faq.ListTopFAQsResponse;
+import com.everhomes.rest.yellowPage.faq.ListUiFAQsCommand;
+import com.everhomes.rest.yellowPage.faq.ListUiFAQsResponse;
+import com.everhomes.rest.yellowPage.faq.ListUiServiceRecordsCommand;
+import com.everhomes.rest.yellowPage.faq.ListUiServiceRecordsResponse;
+import com.everhomes.rest.yellowPage.faq.OperateServiceDTO;
+import com.everhomes.rest.yellowPage.faq.ServiceRecordDTO;
+import com.everhomes.rest.yellowPage.faq.UpdateFAQCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateFAQOnlineServiceCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateFAQSolveTimesCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeOrdersCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateOperateServiceOrdersCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateOperateServicesCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateTopFAQFlagCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateTopFAQOrdersCommand;
+import com.everhomes.rest.yellowPage.faq.updateFAQOrderCommand;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceOperateService;
 import com.everhomes.yellowPage.AllianceStandardService;
-import com.everhomes.yellowPage.ListUiFAQsCommand;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecordProvider;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
@@ -505,5 +539,25 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			lanes = flowLaneProvider.listFlowLane(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		}
 		return lanes;
+	}
+
+	@Override
+	public void updateFAQOrder(updateFAQOrderCommand cmd) {
+		AllianceFAQ upFaq = allianceFAQProvider.getFAQ(cmd.getUpFAQId());
+		AllianceFAQ lowFaq = allianceFAQProvider.getFAQ(cmd.getLowFAQId());
+		if (null == upFaq ||null == lowFaq) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
+		}		
+		
+		if (upFaq.getDefaultOrder() < lowFaq.getDefaultOrder()) {
+			return;
+		}
+		
+		dbProvider.execute(r->{
+			allianceFAQProvider.updateFAQOrder(upFaq.getId(), lowFaq.getDefaultOrder());
+			allianceFAQProvider.updateFAQOrder(lowFaq.getId(), upFaq.getDefaultOrder());
+			return null;
+		});
+		
 	}
 }
