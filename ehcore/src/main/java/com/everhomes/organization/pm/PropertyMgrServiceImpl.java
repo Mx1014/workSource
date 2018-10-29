@@ -2628,13 +2628,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         if (cmd.getStatus() != null) {
             Long organizationId = findOrganizationByCommunity(community);
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
             if (communityAddressMapping != null) {
                 communityAddressMapping.setLivingStatus(cmd.getStatus());
                 organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
             } else {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -2748,8 +2751,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         Community community = checkCommunity(address.getCommunityId());
         Long organizationId = findOrganizationByCommunity(community);
-        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-
+        //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理，
+        //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的
+        //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         response = ConvertHelper.convert(address, GetApartmentDetailResponse.class);
         if (communityAddressMapping != null) {
             response.setStatus(communityAddressMapping.getLivingStatus());
@@ -3045,16 +3050,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 		//删除门牌
-		//// TODO: 2018/5/11
-		addressProvider.deleteAddressById(cmd.getId());
+		//// TODO: 2018/5/11 
+        //删除门牌应该以置状态的方式，而不能直接去删除数据库里的记录，不然会对房源招商，租户管理，个人客户管理等模块的业务产生影响，by 唐岑
+		//addressProvider.deleteAddressById(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
-            if (communityAddressMapping == null) {
+        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
+        	if (communityAddressMapping == null) {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
