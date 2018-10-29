@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;

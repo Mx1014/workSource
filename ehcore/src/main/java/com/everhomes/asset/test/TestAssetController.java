@@ -13,12 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.schedule.AssetSchedule;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.util.StringHelper;
 
@@ -32,6 +37,9 @@ public class TestAssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetSchedule assetSchedule;
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 	
 	/**
 	 * <p>手动修改系统时间，从而触发滞纳金产生（仅用于测试）</p>
