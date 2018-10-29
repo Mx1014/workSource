@@ -17,6 +17,7 @@ import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -1551,6 +1552,132 @@ public class AssetController extends ControllerBase {
 	    response.setErrorDescription("OK");
 	    response.setErrorCode(ErrorCodes.SUCCESS);
 	    return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunity")
+	@RestReturn(value = ListBillStatisticByCommunityResponse.class)
+	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityResponse res = assetStatisticService.listBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("listBillStatisticByBuilding")
+	@RestReturn(value = ListBillStatisticByBuildingResponse.class)
+	public RestResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse res = assetStatisticService.listBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-合计</p>
+	 * <b>URL: /asset/listBillStatisticByCommunityTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotal")
+	@RestReturn(value = ListBillStatisticByCommunityDTO.class)
+	public RestResponse listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-合计</p>
+	 * <b>URL: /asset/listBillStatisticByBuildingTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByBuildingTotal")
+	@RestReturn(value = ListBillStatisticByBuildingDTO.class)
+	public RestResponse listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticService.listBillStatisticByBuildingTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByAddress</b>
+	 */
+	@RequestMapping("listBillStatisticByAddress")
+	@RestReturn(value = ListBillStatisticByAddressResponse.class)
+	public RestResponse listBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		ListBillStatisticByAddressResponse res = assetStatisticService.listBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-合计</p>
+	 * <b>URL: /asset/listBillStatisticByAddressTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByAddressTotal")
+	@RestReturn(value = ListBillStatisticByAddressDTO.class)
+	public RestResponse listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd) {
+		ListBillStatisticByAddressDTO dto = assetStatisticService.listBillStatisticByAddressTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("exportBillStatisticByCommunity")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		assetStatisticService.exportBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("exportBillStatisticByBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		assetStatisticService.exportBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByAddress</b>
+	 */
+	@RequestMapping("exportBillStatisticByAddress")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		assetStatisticService.exportBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 }

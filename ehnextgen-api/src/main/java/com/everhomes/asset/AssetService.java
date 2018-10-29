@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+<<<<<<< HEAD
 import com.everhomes.rest.asset.AdjustBillGroupOrderCommand;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
@@ -101,6 +102,10 @@ import com.everhomes.rest.asset.listBillRelatedTransacCommand;
 import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
 import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.CMSyncObject;
+=======
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+>>>>>>> asset7.0
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
@@ -335,4 +340,5 @@ public interface AssetService {
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
 
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	
 }

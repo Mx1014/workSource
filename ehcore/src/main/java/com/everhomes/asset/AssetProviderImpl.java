@@ -5848,6 +5848,45 @@ public class AssetProviderImpl implements AssetProvider {
 			LOGGER.info("insert eh_asset_module_app_mappings success!");
 		}
 	}
+	
+	public List<CommunityStatisticParam> getPaymentBillsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
 
+	public List<CommunityStatisticParam> getStatisticCommunityDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticCommunity t = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getPaymentBillItemsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getStatisticBuildingDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticBuilding t = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
 
 }

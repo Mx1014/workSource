@@ -275,5 +275,49 @@ public class TestAssetController extends ControllerBase {
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
 		return restResponse;
 	}
+	
+	/**
+	 * <b>URL: /test/listBillStatisticByCommunityTotalForProperty</b>
+	 * <p>提供给资产获取“缴费信息汇总表-项目-合计”列表接口</p>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotalForProperty")
+	public RestResponse listBillStatisticByCommunityTotalForProperty(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotalForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerIdList() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
+	 * <b>URL: /test/listBillStatisticByBuildingForProperty</b>
+	 * <p>提供给资产获取“缴费信息汇总表-楼宇”列表接口</p>
+	 */
+	@RequestMapping("listBillStatisticByBuildingForProperty")
+	public RestResponse listBillStatisticByBuildingForProperty(ListBillStatisticByBuildingCmd cmd) {
+		List<ListBillStatisticByBuildingDTO> list = assetStatisticService.listBillStatisticByBuildingForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerId() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(), 
+				cmd.getBuildingNameList());
+		RestResponse restResponse = new RestResponse(list);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+
+	/**
+	 * <b>URL: /test/listBillStatisticByBuildingTotalForProperty</b>
+	 * <p>提供给资产获取“缴费信息汇总表-楼宇-合计”列表接口</p>
+	 */
+	@RequestMapping("listBillStatisticByBuildingTotalForProperty")
+	public RestResponse listBillStatisticByBuildingTotalForProperty(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticService.listBillStatisticByBuildingTotalForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerId() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd(), 
+				cmd.getBuildingNameList());
+		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
 
 }

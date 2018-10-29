@@ -140,4 +140,8 @@ public interface ContractProvider {
 
 	List<ContractCategory> listContractAppCategory(Integer namespaceId);
 
+	Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
+
+	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
+
 }

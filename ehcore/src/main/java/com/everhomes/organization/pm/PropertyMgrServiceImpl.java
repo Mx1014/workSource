@@ -2491,6 +2491,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            //TODO 这个BuildingId应该由前端传过来
             address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
