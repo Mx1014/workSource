@@ -5305,7 +5305,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setGroups(groups);
         for(DoorAuth auth : auths){
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-            if(null != access && access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+//      分别返回旺龙门禁组，梯控组
+            boolean doorType = true;
+            if( cmd.getDoorType() != null){
+                doorType = access.getDoorType().equals(cmd.getDoorType());
+            }
+            else{
+                doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+            }
+            if(null != access && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
                 groups.add(group);
                 group.setId(access.getId());
@@ -6848,6 +6856,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         if(cmd.getStatus() != null){
             form.setStatus(cmd.getStatus());
+        }
+        if(cmd.getType() != null){
+            form.setItemType(cmd.getType());
         }
 	    form.setOperateTime(time);
 	    form.setOperatorUid(user.getId());
