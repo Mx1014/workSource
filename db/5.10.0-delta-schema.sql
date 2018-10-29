@@ -482,3 +482,20 @@ CREATE TABLE `eh_property_statistic_building` (
   `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 
+
+
+-- AUTHOR: 李清岩 20181029
+-- REMARK:issue-38336 门禁3.0.2 门禁管理授权
+CREATE TABLE `eh_aclink_management` (
+`id` bigint(20) NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`door_id` bigint(20) NOT NULL COMMENT '门禁Id',
+`owner_id` bigint(20) NOT NULL COMMENT '门禁归属对象Id',
+`owner_type` tinyint(4) NOT NULL COMMENT '门禁归属对象类型 0园区 1公司',
+`manager_id` bigint(20) NOT NULL COMMENT '授权对象Id',
+`manager_type` tinyint(4) NOT NULL COMMENT '授权对象类型 0园区 1公司',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁管理授权';
