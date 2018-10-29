@@ -1,5 +1,4 @@
 
-
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
@@ -482,3 +481,20 @@ CREATE TABLE `eh_property_statistic_building` (
   `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 
+
+
+-- AUTHOR: 李清岩 20181029
+-- REMARK:issue-38336 门禁3.0.2 门禁管理授权
+CREATE TABLE `eh_aclink_management` (
+`id` bigint NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`door_id` bigint NOT NULL COMMENT '门禁Id',
+`owner_id` bigint NOT NULL COMMENT '门禁归属对象Id',
+`owner_type` tinyint NOT NULL COMMENT '门禁归属对象类型 0园区 1公司',
+`manager_id` bigint NOT NULL COMMENT '授权对象Id',
+`manager_type` tinyint NOT NULL COMMENT '授权对象类型 0园区 1公司',
+`creator_uid` bigint NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`status` tinyint NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁管理授权';

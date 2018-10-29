@@ -13,7 +13,7 @@ import java.util.List;
  * <li>namespaceId: 域空间ID</li>
  * <li>path: 路径</li>
  * <li>name: 字段名</li>
- * <li>type: 字段类型：1文本 2单选</li>
+ * <li>type: 字段类型：0 选项 1文本 2单选</li>
  * <li>status: 状态：0失效 1必填 2非必填</li>
  * <li>itemName: 子项名称</li>
  * </ul>

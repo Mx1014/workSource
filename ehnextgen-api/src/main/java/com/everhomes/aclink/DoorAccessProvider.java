@@ -72,4 +72,12 @@ public interface DoorAccessProvider {
     Long createAclinkFormValues(AclinkFormValues value);
 
     List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id);
+    //门禁v3.0.2 添加企业管理授权
+    Long createDoorManagement (AclinkManagement obj);
+
+    List<AclinkManagementDTO> searchAclinkManagement (Long doorId);
+
+    AclinkManagement findAclinkManagementById (Long id);
+
+    Long updateAclinkManagement(AclinkManagement manager);
 }
