@@ -11,6 +11,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.organization.VendorType;
@@ -287,6 +288,9 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	public void payCallBack(MerchantPaymentNotificationCommand cmd) {
 		//检查签名
 		if(!PayUtil.verifyCallbackSignature(cmd)){
+			String tmpSecretKey = (PaySettings.getSecretKey() == null) ? null : PaySettings.getSecretKey().substring(0, 5);
+			LOGGER.info("Failed to verify pay-callback signature, appKey={}, secretKey={}, signature={}", 
+					PaySettings.getAppKey(), tmpSecretKey, cmd.getSignature());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"sign verify faild");
 		}
