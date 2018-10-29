@@ -143,11 +143,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
 		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
 		StringBuilder url = new StringBuilder();
-		url.append("${home.url}/service-alliance-web/build/index.html#/home/" + config.getDisplayType());
+		url.append("${home.url}/service-alliance-web/build/index.html");
 		url.append("?displayType=" + config.getDisplayType());
 		url.append("&parentId=" + config.getType());
 		url.append("&enableComment=" + config.getEnableComment());
 		url.append("&ns=" + namespaceId);
+		url.append("#/home/"+ config.getDisplayType());
 		url.append("#sign_suffix");
 
 		return url.toString();

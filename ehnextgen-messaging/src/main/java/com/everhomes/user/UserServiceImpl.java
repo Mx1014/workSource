@@ -1760,6 +1760,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     LOGGER.info("User service check success, loginToken={}", loginToken);
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
+                }else {
+                    //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+                    //如果core server和统一用户都没有用户，说明真的没有该用户
+                    // add by yanlong.liang 20180928
+                    user = ConvertHelper.convert(this.sdkUserService.getUser(userInfo.getId()), User.class);
+                    if (user != null) {
+                        this.userProvider.createUserFromUnite(user);
+                        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userInfo.getId()), UserIdentifier.class);
+                        if (userIdentifier != null) {
+                            UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                            if (existsIdentifier != null) {
+                                this.userProvider.updateIdentifier(userIdentifier);
+                            }else {
+                                this.userProvider.createIdentifierFromUnite(userIdentifier);
+                            }
+                        }
+                        return true;
+                    }
                 }
             } else {
                 LOGGER.info("User service check failure, loginToken={}", loginToken);

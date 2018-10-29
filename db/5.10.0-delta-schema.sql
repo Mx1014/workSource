@@ -30,6 +30,11 @@ ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等
 -- REMARK: 访客办公地点表  20181001
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 微信分享配置中增加主题色字段
+ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
+ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
 -- end
 
 -- AUTHOR: 黄明波
@@ -213,6 +218,9 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
  
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡

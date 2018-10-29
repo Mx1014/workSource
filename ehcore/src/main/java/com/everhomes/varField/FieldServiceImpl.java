@@ -1363,13 +1363,15 @@ public class FieldServiceImpl implements FieldService {
         // get params ownerId and ownerType
         PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
         Long ownerId = null;
-        if(dtoDes != null){
-            ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
+        Object ownerIdObj = dtoDes.getReadMethod().invoke(dto);
+        if(ownerIdObj != null){
+            ownerId = (Long)ownerIdObj;
         }
         PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
-        String  ownerType = "";
-        if(dtoDesOwnerType != null){
-            ownerType = dtoDesOwnerType.getReadMethod().invoke(dto).toString();
+        String ownerType = "";
+        Object ownerTypeObj = dtoDesOwnerType.getReadMethod().invoke(dto);
+        if(ownerTypeObj != null){
+            ownerType = ownerTypeObj.toString();
         }
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd;

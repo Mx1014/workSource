@@ -293,6 +293,7 @@ import com.everhomes.version.VersionUpgradeRule;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -5752,7 +5753,8 @@ public class CommunityServiceImpl implements CommunityService {
         if (buildings != null && buildings.size() > 0) {
 			String fileName = String.format("楼栋信息导出_%s", community.getName());
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
-
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
@@ -5774,16 +5776,18 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			).collect(Collectors.toList());
 			//设置excel提示
-//			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
-//                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-//                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
-//                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-//                    "4、带有星号（*）的红色字段为必填项。\n" +
-//                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
-//                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "areaSize", "rentArea", "freeArea", "chargeArea", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription"};
-			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.setNeedTitleRemark(true).setTitleRemark("导出注意事项：\n" +
+                    "1、该导出结果可直接应用于系统的楼宇导入操作，但进行楼宇导入操作时，建筑面积、在租面积、可招租面积、收费面积这四个字段的值将不会记录到系统当中。\n" +
+                    "2、带有星号（*）的字段为导入时的必填项。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500)
+			.setNeedSequenceColumn(false)
+			.setIsCellStylePureString(true)
+			.setTitleRemarkColorIndex(HSSFColor.YELLOW.index);
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription", "areaSize", "rentArea", "freeArea", "chargeArea"};
+			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)"};
+			int[] titleSizes = {20, 20, 20, 20, 40, 25, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
