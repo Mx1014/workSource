@@ -71,6 +71,7 @@ ENGINE=InnoDB
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
 
 
 
@@ -213,4 +214,6 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
-
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;

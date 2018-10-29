@@ -2938,6 +2938,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
 			response.setCards(opPushCards);
 
+			String newConfig = opPushHandler.refreshInstanceConfig(serviceModuleApp.getInstanceConfig());
+
+			serviceModuleApp.setInstanceConfig(newConfig);
+
 			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
 			String itemActionData = serviceModuleApp.getInstanceConfig();
 			if(portalPublishHandler != null){

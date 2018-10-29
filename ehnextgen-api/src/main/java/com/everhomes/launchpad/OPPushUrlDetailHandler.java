@@ -6,14 +6,16 @@ import com.everhomes.rest.launchpadbase.OPPushCard;
 
 import java.util.List;
 
-public interface OPPushHandler {
-    String OPPUSH_ITEMGROUP_TYPE = "OPPushItemGroupType-";
+public interface OPPushUrlDetailHandler {
 
-    default String refreshInstanceConfig( String instanceConfig){
+    /**
+     * 链接模块的应用配置，instanceConfig可参考："{"url":"http://www.baidu.com"}"
+     * @param instanceConfig
+     * @return
+     */
+    boolean checkUrl(Object instanceConfig);
+    default String refreshInstanceConfig( String instanceConfig ){
         return instanceConfig;
     };
-
     List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context);
-
-    //String getInstanceConfig(Object instanceConfig);
 }

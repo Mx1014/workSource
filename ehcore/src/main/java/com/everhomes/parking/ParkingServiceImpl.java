@@ -907,7 +907,16 @@ public class ParkingServiceImpl implements ParkingService {
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+		String paySource = ParkingPaySourceType.APP.getCode();
+		if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
+			paySource = ParkingPaySourceType.QRCODE.getCode();
+//			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
+		} else if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			paySource = ParkingPaySourceType.PUBLICACCOUNT.getCode();
+		}
+		order.setPaySource(paySource);
         parkingProvider.updateParkingRechargeOrder(order);
+
         
         CreateParkingGeneralOrderResponse resp2 = new CreateParkingGeneralOrderResponse();
 		resp2.setOrderId(generalOrderResp.getMerchantOrderId());

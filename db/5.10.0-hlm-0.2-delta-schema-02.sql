@@ -821,10 +821,6 @@ CREATE TABLE `eh_flow_scripts` (
 ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
 
 
--- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
-
-
-
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
@@ -1039,6 +1035,6 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
--- AUTHOR: 唐岑
--- REMARK： 删除eh_organization_address_mappings表中的外键
-ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+
+
+-- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
