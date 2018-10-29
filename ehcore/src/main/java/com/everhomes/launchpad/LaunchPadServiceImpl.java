@@ -76,6 +76,7 @@ import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
@@ -2900,7 +2901,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 
 		GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
-		bannerCmd.setCategoryId(cmd.getCategoryId());
+		BannersInstanceConfig config = (BannersInstanceConfig) StringHelper.fromJsonString(cmd.getInstanceConfig(), BannersInstanceConfig.class);
+		if (config != null) {
+            bannerCmd.setCategoryId(config.getCategoryId());
+        }
 		//bannerCmd.setSceneToken(sceneToken);
 		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(bannerCmd);
 

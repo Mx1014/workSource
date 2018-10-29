@@ -10,12 +10,13 @@ import com.everhomes.util.StringHelper;
  *      <li>appId: 应用ID</li>
  *      <Li>moreRouter: 查看更多路由  --非全屏轮播</Li>
  *      <li>backgroundType: 背景类型，0：无，1：纯色，2：渐变  --非全屏轮播</li>
- *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播</li>
- *      <li>topColor: 当背景类型为渐变时的顶部颜色  --非全屏轮播</li>
- *      <li>bottomColor: 当背景类型为渐变时的底部颜色  --非全屏轮播</li>
- *      <li>autoCarousel: 是否自动轮播，0为否，1为是。请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}  --非全屏轮播</li>
- *      <li>padding: 图片padding  --全屏轮播</li>
- *      <li>scale: 图片比例，1. 5:3  2. 16:9   --全屏轮播</li>
+ *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播 格式：#FFFFFF</li>
+ *      <li>topColor: 当背景类型为渐变时的顶部颜色  --非全屏轮播 格式：#FFFFFF</li>
+ *      <li>bottomColor: 当背景类型为渐变时的底部颜色  --非全屏轮播 格式：#FFFFFF</li>
+ *      <li>autoScroll: 是否自动轮播，0为否，1为是。请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}  --非全屏轮播</li>
+ *      <li>paddingFlag: 图片padding，是否有padding  --全屏轮播</li>
+ *      <li>widthRatio: 宽比例数值  --全屏轮播</li>
+ *      <li>heightRatio: 高比例数值  --全屏轮播</li>
  * </ul>
  */
 public class BannersInstanceConfig implements Serializable  {
@@ -41,11 +42,38 @@ public class BannersInstanceConfig implements Serializable  {
 
 	private String bottomColor;
 
-	private Byte autoCarousel;
+	private Byte autoScroll;
 
-	private Long padding;
+    private Integer paddingFlag;
 
-	private Byte scale;
+    private Long widthRatio;
+
+    private Long heightRatio;
+
+    public Integer getPaddingFlag() {
+        return paddingFlag;
+    }
+
+    public void setPaddingFlag(Integer paddingFlag) {
+        this.paddingFlag = paddingFlag;
+    }
+
+    public Long getWidthRatio() {
+        return widthRatio;
+    }
+
+    public void setWidthRatio(Long widthRatio) {
+        this.widthRatio = widthRatio;
+    }
+
+    public Long getHeightRatio() {
+        return heightRatio;
+    }
+
+    public void setHeightRatio(Long heightRatio) {
+        this.heightRatio = heightRatio;
+    }
+
 
     public Long getAppId() {
         return appId;
@@ -95,29 +123,14 @@ public class BannersInstanceConfig implements Serializable  {
         this.bottomColor = bottomColor;
     }
 
-    public Byte getAutoCarousel() {
-        return autoCarousel;
+    public Byte getAutoScroll() {
+        return autoScroll;
     }
 
-    public void setAutoCarousel(Byte autoCarousel) {
-        this.autoCarousel = autoCarousel;
+    public void setAutoScroll(Byte autoScroll) {
+        this.autoScroll = autoScroll;
     }
 
-    public Long getPadding() {
-        return padding;
-    }
-
-    public void setPadding(Long padding) {
-        this.padding = padding;
-    }
-
-    public Byte getScale() {
-        return scale;
-    }
-
-    public void setScale(Byte scale) {
-        this.scale = scale;
-    }
 
     public Long getCategoryId() {
         return categoryId;
