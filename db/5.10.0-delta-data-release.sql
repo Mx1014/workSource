@@ -403,6 +403,11 @@ DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
 
 UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
 
+-- AUTHOR:严军 201801030
+-- REMARK: issue-null 设置路由相关参数
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
+UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
