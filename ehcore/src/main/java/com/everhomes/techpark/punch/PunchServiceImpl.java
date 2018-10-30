@@ -10727,7 +10727,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(pdl.getDetailId());
         if(null != pdl.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(pdl.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(pdl.getUserId());
         if(null != pdl.getUserId() && pdl.getUserId() > 0L){
@@ -10904,7 +10906,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(statistic.getDetailId());
         if(null != statistic.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(statistic.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){
