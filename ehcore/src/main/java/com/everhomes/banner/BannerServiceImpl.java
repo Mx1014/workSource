@@ -16,6 +16,8 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -47,6 +49,9 @@ import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -109,6 +114,9 @@ public class BannerServiceImpl implements BannerService {
 
     @Autowired
     private PortalItemGroupProvider portalItemGroupProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -627,17 +635,21 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd) {
         BannerInstanconfigDTO dto = new BannerInstanconfigDTO();
-        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(cmd.getAppId());
-        if (!CollectionUtils.isEmpty(list)) {
-            PortalItemGroup portalItemGroup = list.get(0);
-            if (portalItemGroup.getStyle().equals("Shape")) {
-                dto.setWidthRatio(22L);
-                dto.setHeightRatio(10L);
-            }else {
-                BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
-                if (config != null) {
-                    dto.setWidthRatio(config.getWidthRatio());
-                    dto.setHeightRatio(config.getHeightRatio());
+
+        ServiceModuleApp serviceModuleApp = this.serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
+        if (serviceModuleApp != null) {
+            List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(serviceModuleApp.getId());
+            if (!CollectionUtils.isEmpty(list)) {
+                PortalItemGroup portalItemGroup = list.get(0);
+                if (portalItemGroup.getStyle().equals("Shape")) {
+                    dto.setWidthRatio(22L);
+                    dto.setHeightRatio(10L);
+                }else {
+                    BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
+                    if (config != null) {
+                        dto.setWidthRatio(config.getWidthRatio());
+                        dto.setHeightRatio(config.getHeightRatio());
+                    }
                 }
             }
         }

@@ -7,19 +7,19 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>appId: 应用ID</li>
+ *     <li>originId: 应用originId</li>
  * </ul>
  */
 public class GetBannerInstanconfigCommand {
 
-    private Long appId;
+    private Long originId;
 
-    public Long getAppId() {
-        return appId;
+    public Long getOriginId() {
+        return originId;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 
     @Override
