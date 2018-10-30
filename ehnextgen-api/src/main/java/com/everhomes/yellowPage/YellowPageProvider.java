@@ -7,6 +7,7 @@ import java.util.Map;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.yellowPage.JumpModuleDTO;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.IdNameDTO;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.util.SortOrder;
@@ -28,10 +29,10 @@ public interface YellowPageProvider {
 	
 	
 	List<ServiceAlliances> queryServiceAllianceAdmin(CrossShardListingLocator locator, int pageSize,
-												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag);
+												String ownerType, Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords,  Byte displayFlag, ConfigCommand cmd);
 
 	List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords);
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, ConfigCommand cmd);
 
 	void createYellowPage(YellowPage yellowPage);
 
