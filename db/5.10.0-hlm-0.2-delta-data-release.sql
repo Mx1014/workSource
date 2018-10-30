@@ -181,7 +181,7 @@ VALUES ( 'activity.butt.url.getcategorylist', 'https://openapi10.mallcoo.cn/Even
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
 VALUES ( 'activity.butt.url.getactivitylist', 'https://openapi10.mallcoo.cn/Event/Activity/V1/GetList/','获取活动列表','999929','');
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name`)
-VALUES ( 'activity.butt.url.getactivity', ' https://openapi10.mallcoo.cn/Event/Activity/V1/GetDetail/','获取活动详情','999929','');
+VALUES ( 'activity.butt.url.getactivity', 'https://openapi10.mallcoo.cn/Event/Activity/V1/GetDetail/','获取活动详情','999929','');
 INSERT INTO `eh_configurations` ( `name`, `value`, `description`, `namespace_id`, `display_name` )
 VALUES ( 'mall.ruian.url.activity', 'https://m.mallcoo.cn/a/custom/10764/xtd/activitylist','瑞安活动列表面URL','999929','');
 -- end

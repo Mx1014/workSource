@@ -1,6 +1,7 @@
 package com.everhomes.activity.ruian;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ruian.*;
 import com.everhomes.rest.launchpadbase.AppContext;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -134,7 +137,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
     }
 
     @Override
-    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene(Integer size) {
+    public ListRuianActivityBySceneReponse listActivityRuiAnEntitiesByScene(Integer size,Integer fillterSize) {
         //先查询出所有分类
         //List<ActivityCategoryModel> cateGorys = this.getCategoryList(null , null);
         //获取活动列表
@@ -147,7 +150,7 @@ public class ActivityButtServiceImpl implements ActivityButtService {
         ListRuianActivityBySceneReponse res = new ListRuianActivityBySceneReponse();
         res.setEntities(new ArrayList<>());
         if(CollectionUtils.isNotEmpty(activitys)){
-            List<ActivityRuianDetail> entitys = transfer2LocalEntity(activitys,communityId);
+            List<ActivityRuianDetail> entitys = transfer2LocalEntity(activitys,communityId,fillterSize);
             res.setEntities(entitys);
         }
         return res;
@@ -158,12 +161,29 @@ public class ActivityButtServiceImpl implements ActivityButtService {
      * @param activitys
      * @return
      */
-    private List<ActivityRuianDetail> transfer2LocalEntity(List<ActivityModel> activitys ,Long communityId){
+    private List<ActivityRuianDetail> transfer2LocalEntity(List<ActivityModel> activitys ,Long communityId,Integer fillterSize){
         List<ActivityRuianDetail> entities = new ArrayList<ActivityRuianDetail>();
         if(CollectionUtils.isEmpty(activitys)){
             return entities;
         }
+        //将结果按StartTime开始时间 由近及远排序
+        Collections.sort(activitys,new Comparator<ActivityModel>(){
+            public int compare(ActivityModel arg0, ActivityModel arg1) {
+                if(StringUtils.isBlank(arg0.getStartTime())){
+                    arg0.setStartTime("0");
+                }
+                if (StringUtils.isBlank(arg1.getStartTime())){
+                    arg1.setStartTime("0");
+                }
+                //将2018/09/15这种字符串转为＂20180915＂这种来比较
+                return arg1.getStartTime().replace("/","").compareTo(arg0.getStartTime().replace("/",""));
+            }
+        });
         for(ActivityModel model : activitys){
+            //达到设置值即退出
+            if(entities.size() == fillterSize ){
+               break ;
+            }
             ActivityRuianDetail dto = new ActivityRuianDetail();
 
             ActivityDetailModel detail = this.getActivityDetail(null,communityId,model.getActivityID());

@@ -1418,12 +1418,9 @@ public class PunchServiceImpl implements PunchService {
         // 计算加班时间
         calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
 
-        if (pr != null && PunchRuleType.GUDING == PunchRuleType.fromCode(pr.getRuleType())) {
-            return pdl;
-        }
         // ptr.getId()==0  包含休息和未安排班次
         if (ptr != null && ptr.getId() == 0) {
-            if (NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
+            if (pr != null && PunchRuleType.PAIBAN == PunchRuleType.fromCode(pr.getRuleType()) && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                 pdl.setStatusList(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode() + "");
                 punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             } else {
