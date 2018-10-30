@@ -552,6 +552,11 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 -- AUTHOR: st.zheng
 -- REMARK: 资源预订3.7.1
+ALTER TABLE `eh_rentalv2_resources`
+MODIFY COLUMN `aclink_id`  text  NULL AFTER `default_order`;
+ALTER TABLE `eh_rentalv2_orders`
+MODIFY COLUMN `door_auth_id`  text  NULL AFTER `auth_end_time`;
+update eh_rentalv2_orders set pay_channel = 'normal' where pay_channel is null;
 
 
 -- AUTHOR: 缪洲 20180930
