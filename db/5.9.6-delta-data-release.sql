@@ -176,6 +176,8 @@ DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  -- 删除该存储过程
 -- AUTHOR:黄明波
 -- REMARK:云打印账号迁移
 update eh_siyin_print_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
+update eh_service_modules set client_handler_type = 2 where id = 40500;
+update eh_service_modules set client_handler_type = 0 where id = 10800;
 
 
 
