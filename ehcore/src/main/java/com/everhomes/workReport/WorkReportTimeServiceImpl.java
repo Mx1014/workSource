@@ -5,9 +5,13 @@ import com.everhomes.rest.workReport.WorkReportType;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 
 @Component
 public class WorkReportTimeServiceImpl implements WorkReportTimeService{
@@ -17,45 +21,25 @@ public class WorkReportTimeServiceImpl implements WorkReportTimeService{
      */
     @Override
     public LocalDateTime getSettingTime(Byte rType, Long rTime, Byte sType, String sMask, String sTime) {
-        LocalDateTime reportTime = toLocalDateTime(rTime);
-        String pattern = "yyyy-MM-dd HH:mm:ss";
-        int year, month, day;
-        String temp = null;
+        LocalDate reportDate = toLocalDateTime(rTime).toLocalDate();
+        LocalTime sLocalTime = LocalTime.parse(sTime + ":" + "00");
         switch (WorkReportType.fromCode(rType)) {
             case DAY:
                 if (sType == 1)
-                    reportTime = reportTime.plusDays(1L);
-                year = reportTime.getYear();
-                month = reportTime.getMonth().getValue();
-                day = reportTime.getDayOfMonth();
-                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
+                    reportDate = reportDate.plusDays(1L);
                 break;
             case WEEK:
                 if (sType == 1)
-                    reportTime = reportTime.plusWeeks(1L);
-                year = reportTime.getYear();
-                month = reportTime.getMonth().getValue();
-                day = reportTime.getDayOfMonth() + Integer.valueOf(sMask) - 1;
-                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
+                    reportDate = reportDate.plusWeeks(1L);
+                reportDate = reportDate.with(DayOfWeek.of(Integer.valueOf(sMask)));
                 break;
             case MONTH:
                 if (sType == 1)
-                    reportTime = reportTime.plusMonths(1L);
-                year = reportTime.getYear();
-                month = reportTime.getMonth().getValue();
-                day = Integer.valueOf(sMask);
-                temp = year + "-" + toDoubleDigit(month) + "-" + toDoubleDigit(day) + " " + sTime + ":" + "00";
+                    reportDate = reportDate.plusMonths(1L);
+                reportDate = reportDate.withDayOfMonth(Math.min(reportDate.lengthOfMonth(), Integer.valueOf(sMask)));
                 break;
         }
-        TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(temp);
-        return LocalDateTime.from(accessor);
-    }
-
-    private static String toDoubleDigit(int num) {
-        String tem = String.valueOf(num);
-        if (tem.length() < 2)
-            return "0" + tem;
-        return tem;
+        return LocalDateTime.of(reportDate, sLocalTime);
     }
 
     /**
