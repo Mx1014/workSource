@@ -363,7 +363,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			
 			BigDecimal rentRate;
 			BigDecimal freeRate;
-			if (result.getAreaSize() == null && result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
+			if (result.getAreaSize() == null || result.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
 				rentRate = BigDecimal.ZERO;
 				freeRate = BigDecimal.ZERO;
 			}else {
