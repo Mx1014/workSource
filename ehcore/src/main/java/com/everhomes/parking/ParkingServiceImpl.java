@@ -339,7 +339,10 @@ public class ParkingServiceImpl implements ParkingService {
 						RuleSourceType.RESOURCE.getCode(), dto.getId());
 				dto.setVipParkingUrl(homeUrl + detailUrl);
 			}
-
+			dto.setData(Arrays.asList(r.getDefaultData().split(",")));
+			String[] plate = r.getDefaultPlate().split(",");
+			dto.setProvince(plate[0]);
+			dto.setCity(plate[1]);
 			dto.setFlowId(null);
 			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 			if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
@@ -1062,9 +1065,11 @@ public class ParkingServiceImpl implements ParkingService {
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		//公众号支付
 		String paySource = ParkingPaySourceType.APP.getCode();
-		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+		if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
 			paySource = ParkingPaySourceType.QRCODE.getCode();
 //			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
+		} else if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			paySource = ParkingPaySourceType.PUBLICACCOUNT.getCode();
 		}
 
 //		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
@@ -1113,6 +1118,17 @@ public class ParkingServiceImpl implements ParkingService {
 			Map<String, String> flattenMap = new HashMap<>();
 			flattenMap.put("acct",user.getNamespaceUserToken());
 			//flattenMap.put("acct","11");
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
+//			flattenMap.put("vspCusid",vspCusid);
+			flattenMap.put("payType","no_credit");
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+			createOrderCommand.setOrderType(3);
+			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay","NS"+UserContext.getCurrentNamespaceId()));
+		} else if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()){
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("acct",user.getNamespaceUserToken());
 //			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
 //			flattenMap.put("vspCusid",vspCusid);
 			flattenMap.put("payType","no_credit");
