@@ -245,7 +245,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             return result[0];
         } catch (Exception ex) {
             // fetchAny() maybe return null
-            LOGGER.info("This Customer don't have NewestRequirement");
+            LOGGER.debug("This Customer don't have NewestRequirement");
 
             return null;
         }

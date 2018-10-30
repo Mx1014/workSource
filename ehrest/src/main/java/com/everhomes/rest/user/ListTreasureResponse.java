@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  *     <li>activityDefaultListStyle: 活动列表默认样式</li>
  *     <li>shakeOpenDoorUser: 当前用户是否开启摇一摇</li>
  *     <li>shakeOpenDoorNamespace: 当前域空间是否开启</li>
+ *     <li>shakeOpenDoorHardwareId: 当前用户摇一摇开门对应的门禁蓝牙mac地址</li>
  * </ul>
  */
 public class ListTreasureResponse {
@@ -47,6 +48,7 @@ public class ListTreasureResponse {
     private Byte activityDefaultListStyle;
     private Byte shakeOpenDoorUser;
     private Byte shakeOpenDoorNamespace;
+    private String shakeOpenDoorHardwareId;
 
     public Byte getActivityDefaultListStyle() {
         return activityDefaultListStyle;
@@ -201,7 +203,15 @@ public class ListTreasureResponse {
         this.pointsUrlStatus = pointsUrlStatus;
     }
 
-    @Override
+	public String getShakeOpenDoorHardwareId() {
+		return shakeOpenDoorHardwareId;
+	}
+
+	public void setShakeOpenDoorHardwareId(String shakeOpenDoorHardwareId) {
+		this.shakeOpenDoorHardwareId = shakeOpenDoorHardwareId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

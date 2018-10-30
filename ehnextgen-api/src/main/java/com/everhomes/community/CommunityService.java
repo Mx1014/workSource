@@ -33,6 +33,8 @@ public interface CommunityService {
 
     CommunityDTO getCommunityById(GetCommunityByIdCommand cmd);
 
+	CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd);
+
     CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
 
 	ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd);
@@ -199,5 +201,7 @@ public interface CommunityService {
 	void caculateAllCommunityArea();
 
 	void caculateAllBuildingArea();
+
+	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
 
 }

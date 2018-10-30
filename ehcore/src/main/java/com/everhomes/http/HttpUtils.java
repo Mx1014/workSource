@@ -1,28 +1,16 @@
 // @formatter:off
 package com.everhomes.http;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-//import org.apache.http.annotation.Contract;
-//import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -32,6 +20,15 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+//import org.apache.http.annotation.Contract;
+//import org.apache.http.annotation.ThreadingBehavior;
 
 /**
  * http请求
@@ -176,7 +173,7 @@ public class HttpUtils {
 			}
 			HttpPost httppost = new HttpPost(url);
 			StringEntity params = new StringEntity(json, encoding);
-			httppost.addHeader("content-type", "application/json");
+			httppost.addHeader("Content-Type", "application/json");
 			httppost.setEntity(params);
 			setHeaderInfo(httppost);
 			ResponseHandler<String> responseHandler = new BasicResponseHandler();

@@ -20,7 +20,9 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.tool.BlutoAccessor;
 import com.everhomes.user.*;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -86,7 +88,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
+    @Autowired
+    private SdkUserService sdkUserService;
+
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
 
     public WebRequestInterceptor() {
     }
@@ -185,9 +191,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
 //                    }
                     if (this.isInnerSignLogon(request)) {
+                        LOGGER.debug("this is inner sign logon before");
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                        LOGGER.debug("this is inner sign logon, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -204,6 +212,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
+                        LOGGER.debug("check request signature success, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -220,6 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     setupUserContext(token);
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    LOGGER.debug("token check success, setup user context: {}, uid={}", token, String.valueOf(UserContext.current().getUser().getId()));
                 }
 
             } else {
@@ -449,7 +459,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
 
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
-        App app = this.appProvider.findAppByKey(appKey);
+        App app = getAppByKey(appKey);
         if (app == null) {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
@@ -467,6 +477,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         String signature = getParamValue(paramMap, "signature");
 
         return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
+    }
+
+    private App getAppByKey(String appKey) {
+        // 给 SDK 调用提供的便捷方式
+        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+            App app = new App();
+            app.setAppKey(appKey);
+            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setName("SDK");
+            app.setId(0L);
+            return app;
+        }
+        return this.appProvider.findAppByKey(appKey);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {

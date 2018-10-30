@@ -389,14 +389,21 @@ public interface PrivilegeConstants {
     long VISITORSYS_DEV_MANAGEMENT = 4180041840L;//设备管理权限
     long VISITORSYS_MODILE_MAMAGEMENT = 4180041850L;//移动端管理权限
 
+    // ------- 企业访客权限 --------
+    long VISITORSYS_BOOKING_MANAGEMENT_ENT = 5210052110L;//预约管理权限
+    long VISITORSYS_VISITOR_MANAGEMENT_ENT = 5210052120L;//访客管理权限
+    long VISITORSYS_DEV_MANAGEMENT_ENT = 5210052130L;//设备管理权限
+    long VISITORSYS_MODILE_MAMAGEMENT_ENT = 5210052140L;//移动端管理权限
+
     // -----------用户认证-------------
     long AUTHENTIFICATION_LIST_VIEW = 42007; //查看用户认证列表
-    long AUTHENTIFICATION_AUDITING = 42008;; // 审核权限
+    long AUTHENTIFICATION_AUDITING = 42008; // 审核权限
     // ----------用户认证 END----------------
 
     // 停车缴费权限常量
     long PARKING_APPLY_MANAGERMENT = 4080040810L;//
     long PARKING_ORDER_MANAGERMENT = 4080040820L;
+
 
 
     // ----------招商客户权限---------
@@ -422,4 +429,31 @@ public interface PrivilegeConstants {
     long INVESTMENT_APPLY_TRANSFORM_TO_CUSTOMER = 150107L;//转为意向客户权限
     long INVESTMENT_APPLY_DELETE = 150108L;//删除申请记录权限
     
+
+    //公共门禁权限常量
+//    long PUBLIC_ACLINK_ALL = 4101041010L;
+//    long PUBLIC_ACLINK_AUTH = 4101041011L;
+//    long PUBLIC_ACLINK_LOGS = 4101041012L;
+//    long PUBLIC_ACLINK_STAT = 4101041013L;
+//    long PUBLIC_ACLINK_MOBILE = 4101041014L;
+    //企业门禁权限常量
+//    long COMPANY_ACLINK_ALL = 4102041020L;
+//    long COMPANY_ACLINK_AUTH = 4102041021L;
+//    long COMPANY_ACLINK_LOGS = 4102041022L;
+//    long COMPANY_ACLINK_STAT = 4102041023L;
+//    long COMPANY_ACLINK_MOBILE = 4102041024L;
+
+    //公共门禁beta权限常量
+    long PUBLIC_ACLINK_ALL = 4111041110L;
+    long PUBLIC_ACLINK_AUTH = 4111041111L;
+    long PUBLIC_ACLINK_LOGS = 4111041112L;
+    long PUBLIC_ACLINK_STAT = 4111041113L;
+    long PUBLIC_ACLINK_MOBILE = 4111041114L;
+    //企业门禁权限常量
+    long COMPANY_ACLINK_ALL = 4112041120L;
+    long COMPANY_ACLINK_AUTH = 4112041121L;
+    long COMPANY_ACLINK_LOGS = 4112041122L;
+    long COMPANY_ACLINK_STAT = 4112041123L;
+    long COMPANY_ACLINK_MOBILE = 4112041124L;
+
 }

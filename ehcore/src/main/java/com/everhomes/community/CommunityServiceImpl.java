@@ -49,6 +49,7 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
@@ -180,6 +181,7 @@ import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ExportAllCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ExportBatchCommunityUsersCommand;
+import com.everhomes.rest.community.admin.GetOrgIdByCommunityIdCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
 import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
@@ -193,6 +195,7 @@ import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.community.admin.OperateType;
+import com.everhomes.rest.community.admin.OrgDTO;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.QryCommunityUserAllByUserIdCommand;
@@ -246,6 +249,7 @@ import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -285,9 +289,11 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -308,6 +314,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -442,6 +449,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
 	private TaskService taskService;
+    
+    @Autowired
+    private NamespacesService namespacesService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -489,7 +499,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunity(UpdateCommunityAdminCommand cmd) {
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
@@ -520,13 +530,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Region city = regionProvider.findRegionById(cmd.getCityId());
 		if(city == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid cityId parameter,city is not found.");
 		}
 
 		Region area = regionProvider.findRegionById(cmd.getAreaId());
 		if(area == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid areaId parameter,area is not found.");
 		}
 		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
@@ -837,6 +847,20 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 
 		return communityDTO;
+	}
+
+	@Override
+	public CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd) {
+		if(cmd.getId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter");
+		}
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if (community == null) {
+            return null;
+        }
+        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+        return communityDTO;
 	}
 
 
@@ -1885,7 +1909,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId(), cmd.getAppId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -2362,7 +2386,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2372,7 +2396,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					break;
-				}
+                }else if (OrganizationMemberStatus.WAITING_FOR_APPROVAL == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                    dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                    break;
+                }
 			}
 		}
 
@@ -3485,7 +3512,7 @@ public class CommunityServiceImpl implements CommunityService {
 		//如果左邻域下也没有就抛出异常
 		LOGGER.error(
 				"Invalid region, operatorId=" + userId + ", path=" + path);
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 				"Invalid region");
 	}
 
@@ -3578,8 +3605,8 @@ public class CommunityServiceImpl implements CommunityService {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
 			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_PARSE_FILE, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -3606,7 +3633,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return list;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXCEL_DATA_FORMAT,
 				"excel data format is not correct");
 	}
 
@@ -4001,7 +4028,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId(), cmd.getAppId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -4115,18 +4142,18 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
-	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
-        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId, Long appId){
+		return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, appId,null,communityId);
 	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
 		if(null == cmd.getUserId() )
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid userid parameter");
 		User user = userProvider.findUserById(cmd.getUserId());
 
 		if(null == user)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_USER_NOT_EXIST,
 					"Invalid userid parameter: no this user");
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 
@@ -4626,13 +4653,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateBuildingOrder(UpdateBuildingOrderCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		if (null == cmd.getExchangeId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid exchangeId parameter in the command");
 		}
 		Building building = communityProvider.findBuildingById(cmd.getId());
@@ -4640,14 +4667,14 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if (null == building) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 		if (null == exchangeBuilding) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 
@@ -4780,7 +4807,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
         CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
-        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId(), cmd.getAppId());
         if (isAuditing) {
             response.setIsAuditing(CheckAuditingType.YES.getCode());
         }else {
@@ -5179,12 +5206,24 @@ public class CommunityServiceImpl implements CommunityService {
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 
-					List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
-					if(workPlaces != null && workPlaces.size() > 0){
-						for (OrganizationWorkPlaces workPlace: workPlaces){
-							orgCommunityIdSet.add(workPlace.getCommunityId());
+
+					//定制版要直接使用OrganizationCommunityRequest表的数据
+					if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+						List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
+						if(workPlaces != null && workPlaces.size() > 0){
+							for (OrganizationWorkPlaces workPlace: workPlaces){
+								orgCommunityIdSet.add(workPlace.getCommunityId());
+							}
 						}
+					}else {
+
+						OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(member.getOrganizationId());
+						if(organizationCommunityRequest != null){
+							orgCommunityIdSet.add(organizationCommunityRequest.getCommunityId());
+						}
+
 					}
+
 				}
 			}
 		}
@@ -5201,7 +5240,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 
-		for(int i = 12; i > 5; i--){
+		for(int i = 12; i > 3; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){
@@ -5729,7 +5768,8 @@ public class CommunityServiceImpl implements CommunityService {
         if (buildings != null && buildings.size() > 0) {
 			String fileName = String.format("楼栋信息导出_%s", community.getName());
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
-
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
@@ -5751,16 +5791,18 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			).collect(Collectors.toList());
 			//设置excel提示
-//			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
-//                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-//                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
-//                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-//                    "4、带有星号（*）的红色字段为必填项。\n" +
-//                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
-//                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "areaSize", "rentArea", "freeArea", "chargeArea", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription"};
-			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.setNeedTitleRemark(true).setTitleRemark("导出注意事项：\n" +
+                    "1、该导出结果可直接应用于系统的楼宇导入操作，但进行楼宇导入操作时，建筑面积、在租面积、可招租面积、收费面积这四个字段的值将不会记录到系统当中。\n" +
+                    "2、带有星号（*）的字段为导入时的必填项。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500)
+			.setNeedSequenceColumn(false)
+			.setIsCellStylePureString(true)
+			.setTitleRemarkColorIndex(HSSFColor.YELLOW.index);
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription", "areaSize", "rentArea", "freeArea", "chargeArea"};
+			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)"};
+			int[] titleSizes = {20, 20, 20, 20, 40, 25, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
@@ -6221,7 +6263,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		final List<Long> projectIds = new ArrayList<>();
 
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			//标准版
 			List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getOrgId(), cmd.getAppId());
 
@@ -6266,6 +6308,15 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setDtos(dtos);
 
 		return response;
+	}
+
+	@Override
+	public OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+		OrgDTO dto = new OrgDTO();
+		dto.setId(currentOrganizationId);
+		return dto;
 	}
 
 }

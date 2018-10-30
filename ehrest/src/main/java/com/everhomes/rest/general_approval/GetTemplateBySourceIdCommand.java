@@ -7,16 +7,16 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>sourceType: 源类型</li>
  * <li>sourceId: 源Id</li>
+ * <li>valuesOfFlowCaseId: 工作流ID，有值时获取对应表单的值(复制审批单功能)</li>
  * </ul>
  */
 public class GetTemplateBySourceIdCommand {
     private Integer namespaceId;
     private Long ownerId;
-
     private String ownerType;
-
     private String sourceType;
     private Long sourceId;
+    private Long valuesOfFlowCaseId;
 
     public String getSourceType() {
         return sourceType;
@@ -56,6 +56,14 @@ public class GetTemplateBySourceIdCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getValuesOfFlowCaseId() {
+        return valuesOfFlowCaseId;
+    }
+
+    public void setValuesOfFlowCaseId(Long valuesOfFlowCaseId) {
+        this.valuesOfFlowCaseId = valuesOfFlowCaseId;
     }
 
     @Override

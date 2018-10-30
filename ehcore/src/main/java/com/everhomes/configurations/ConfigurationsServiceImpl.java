@@ -55,7 +55,7 @@ public class ConfigurationsServiceImpl implements  ConfigurationsService{
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		//Provider 层传进行查询并返回对象
 		List<Configurations> boList = configurationsProvider.listConfigurations(namespaceId, 
-														cmd.getName(), cmd.getValue(), pageSize, locator);
+														cmd.getName(), cmd.getValue(), pageSize, locator,true);
 		 //对象转换
 		ConfigurationsAdminDTO returnDto = new ConfigurationsAdminDTO ();
 

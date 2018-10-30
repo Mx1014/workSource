@@ -10,14 +10,14 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class GetDoorAccessByIdCommand {
-    Long id;
+    Long doorId;
     
-    public Long getId() {
-		return id;
+	public Long getDoorId() {
+		return doorId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setDoorId(Long doorId) {
+		this.doorId = doorId;
 	}
 
 	@Override

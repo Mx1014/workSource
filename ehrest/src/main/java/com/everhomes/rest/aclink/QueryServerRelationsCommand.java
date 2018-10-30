@@ -71,7 +71,7 @@ public class QueryServerRelationsCommand {
 	}
 
 	public Integer getPageSize() {
-		return pageSize;
+		return pageSize == null? 0 : pageSize;
 	}
 
 	public void setPageSize(Integer pageSize) {

@@ -12,6 +12,26 @@ public class ListSystemFieldItemCommand {
 
     private Long fieldId;
 
+    private Long ownerId;
+
+    private String ownerType;
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
     public Long getFieldId() {
         return fieldId;
     }

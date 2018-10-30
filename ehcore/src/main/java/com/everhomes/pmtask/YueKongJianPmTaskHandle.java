@@ -182,7 +182,7 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 		Category category = categoryProvider.findCategoryById(id);
 		if(null == category) {
 			LOGGER.error("Category not found, categoryId={}", id);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
 					"Category not found.");
 		}
 		return category;

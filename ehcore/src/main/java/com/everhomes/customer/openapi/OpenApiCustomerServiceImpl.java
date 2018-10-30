@@ -110,7 +110,7 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
     public EnterpriseCustomerDTO createEnterpriseCustomer(OpenApiUpdateCustomerCommand cmd) {
         EnterpriseCustomer customer = ConvertHelper.convert(cmd, EnterpriseCustomer.class);
         customer.setName(cmd.getCompanyName());
-        checkEnterpriseCustomerUnique(cmd.getNamespaceId(), cmd.getCompanyName());
+        checkEnterpriseCustomerUnique(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCompanyName());
         checkEnterpriseCustomerAddress(cmd.getAddresses());
         customer.setNamespaceId((null != cmd.getNamespaceId() ? cmd.getNamespaceId() : UserContext.getCurrentNamespaceId()));
         if (cmd.getCorpEntryDate() != null) {
@@ -163,9 +163,9 @@ public class OpenApiCustomerServiceImpl implements OpenApiCustomerService {
         }
     }
 
-    private void checkEnterpriseCustomerUnique( Integer namespaceId,  String companyName) {
+    private void checkEnterpriseCustomerUnique( Integer namespaceId,  Long commuityId, String companyName) {
         if (StringUtils.isNotBlank(companyName)) {
-            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, companyName);
+            List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, commuityId, companyName);
             if (customers != null && customers.size() > 0) {
                 LOGGER.error("customerName {} in namespace {} already exist!", companyName, namespaceId);
                 throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_NAME_IS_EXIST,

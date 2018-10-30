@@ -457,6 +457,15 @@ public class BannerServiceImpl implements BannerService {
         AppContext appContext = UserContext.current().getAppContext();
         //Long communityId = parseCommunityIdFromSceneToken(sceneToken);
 
+        //旧版本的公司场景没有communityId跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(appContext.getOrganizationId());
+            if(communityRequest != null){
+                appContext.setCommunityId(communityRequest.getCommunityId());
+            }
+        }
+
+
         if (appContext != null && appContext.getCommunityId() != null) {
             List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId());
             return bannerList.stream().map(r -> {
@@ -500,11 +509,14 @@ public class BannerServiceImpl implements BannerService {
                         dto.setModuleId(routerInfo.getModuleId());
                         dto.setRouterPath(routerInfo.getPath());
                         dto.setRouterQuery(routerInfo.getQuery());
+
+                        String host = "default";
+                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId=10400&clientHandlerType=0&" + dto.getRouterQuery();
+                        dto.setRouter(router);
                     }
 
                     Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
                     dto.setClientHandlerType(clientHandlerType);
-
 
                 } catch (Exception e) {
                     throw RuntimeErrorException.errorWith(e,

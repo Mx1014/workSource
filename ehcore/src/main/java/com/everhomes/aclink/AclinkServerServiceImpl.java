@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -25,9 +26,9 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.aclink.AclinkCameraDTO;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkEnterStatus;
 import com.everhomes.rest.aclink.AclinkIPadDTO;
 import com.everhomes.rest.aclink.AclinkListLocalServersCommand;
-import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkServerDTO;
 import com.everhomes.rest.aclink.AclinkServerRelDTO;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
@@ -39,14 +40,14 @@ import com.everhomes.rest.aclink.DeleteLocalServerCommand;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.DoorMessageType;
 import com.everhomes.rest.aclink.ListAclinkServersResponse;
+import com.everhomes.rest.aclink.ListLocalCamerasCommand;
+import com.everhomes.rest.aclink.ListLocalIpadCommand;
 import com.everhomes.rest.aclink.PairLocalServerResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessByServerCommand;
 import com.everhomes.rest.aclink.QueryServerRelationsCommand;
 import com.everhomes.rest.aclink.QueryServerRelationsResponse;
 import com.everhomes.rest.aclink.SyncLocalServerResponse;
+import com.everhomes.rest.aclink.UpdateCameraIpadBatchCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgCommand;
 import com.everhomes.rest.aclink.ListLocalServerByOrgResponse;
 import com.everhomes.rest.aclink.LocalDoorAccessDTO;
@@ -104,7 +105,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	private BorderProvider borderProvider;
 
 	@Override
-	public CreateMarchUUIDResponse generateUUID(CreateMarchUUIDCommand cmd) {
+	public String generateUUID(CreateMarchUUIDCommand cmd) {
 		char[] charArr = new char[6];
 		int i = 0;
 		while (i < 6) {
@@ -124,14 +125,14 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 				return this.generateUUID(cmd);
 			}
 		} else if (cmd.getUuidType() == (byte) 1) {
-			if (aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), null, null, null, null, null, null, resStr, 0).size() > 0){
+			ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
+			qryIpadCmd.setUuid(resStr);
+			if (aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), qryIpadCmd).size() > 0){
 				LOGGER.error("uuid is already existed, trying agian ... ");
 				return this.generateUUID(cmd);
 			}
 		}
-		CreateMarchUUIDResponse resp = new CreateMarchUUIDResponse();
-		resp.setUuid(resStr);
-		return resp;
+		return resStr;
 	}
 
 	// 查找某园区下的本地服务器
@@ -140,12 +141,15 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		ListAclinkServersResponse resp = new ListAclinkServersResponse();
-		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		if(cmd.getPageSize() == null){
-			count = 0;
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		List<AclinkServer> servers= aclinkServerProvider.queryLocalServers(locator, cmd);
+		if (servers != null && servers.size() > 0){
+			List<AclinkServerDTO> dtos = servers.stream().map((r)-> {
+                return ConvertHelper.convert(r, AclinkServerDTO.class);
+            }).collect(Collectors.toList());
+            
+            resp.setAclinkServers(dtos);
 		}
-		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(cmd.getOwnerType());
-		resp.setAclinkServers(this.listLocalServers(locator, cmd.getOwnerId(), typ, cmd.getUuid(), count));
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
 	}
@@ -210,11 +214,15 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	@Override
 	public void deleteLocalServer(DeleteLocalServerCommand cmd) {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, cmd.getId(), null, null, null, null, 0);
+		ListLocalCamerasCommand qryCmd = new ListLocalCamerasCommand();
+		qryCmd.setServerId(cmd.getId());
+		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, qryCmd);
 		if(cameras != null && cameras.size() > 0){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_RELATION_EXISTS, "服务器有关联设备，不可删除");
 		}
-		List<AclinkIpad> ipads = aclinkIpadProvider.listLocalIpads(locator, cmd.getId(), null, null, null, null, null, null, 0);
+		ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
+		qryIpadCmd.setServerId(cmd.getId());
+		List<AclinkIpad> ipads = aclinkIpadProvider.listLocalIpads(locator, qryIpadCmd);
 		if(ipads != null && ipads.size()>0){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_RELATION_EXISTS, "服务器有关联设备，不可删除");
 		}
@@ -278,8 +286,9 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 			}
 		}
 		
-		List<AclinkIpad> listIpads = aclinkIpadProvider.listLocalIpads(locator, cmd.getServerId(), null, cmd.getDoorAccessId(), null, null, null, null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
-		List<AclinkCamera> listCameras = aclinkCameraProvider.listLocalCameras(locator, cmd.getServerId(), null, cmd.getDoorAccessId(), null, null, cmd.getPageSize() == null? 0 : cmd.getPageSize());
+		List<AclinkIpad> listIpads = aclinkIpadProvider.listLocalIpads(locator, ConvertHelper.convert(cmd, ListLocalIpadCommand.class));
+		ListLocalCamerasCommand qryCameraCmd = ConvertHelper.convert(cmd, ListLocalCamerasCommand.class);
+		List<AclinkCamera> listCameras = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), qryCameraCmd);
 		for(AclinkIpad ipad : listIpads){
 			AclinkServerRelDTO ipadRelDTO = new AclinkServerRelDTO();
 			ipadRelDTO.setId(ipad.getId());
@@ -327,8 +336,12 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 	@Override
 	public SyncLocalServerResponse syncLocalServer(Long id) {
 		List<DoorAccess> listDoors = doorAccessProvider.listDoorAccessByServerId(id, 0);
-		List<AclinkIpad> listIpads = aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(0), id, null, null, null, null, null, null, 0);
-		List<AclinkCamera> listCameras = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(0), id, null, null, null, null, 0);
+		ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
+		qryIpadCmd.setServerId(id);
+		List<AclinkIpad> listIpads = aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(0), qryIpadCmd);
+		ListLocalCamerasCommand qryCmd = new ListLocalCamerasCommand();
+		qryCmd.setServerId(id);
+		List<AclinkCamera> listCameras = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), qryCmd);
 		SyncLocalServerResponse rsp = new SyncLocalServerResponse();
 		List<DoorAccessDTO> doorDTOs = new ArrayList<DoorAccessDTO>();
 		List<AclinkIPadDTO> iPadDTOs = new ArrayList<AclinkIPadDTO>();
@@ -398,8 +411,12 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 //			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_LATEST_DATA, "已同步至最新数据");
 //		}
 		
-		List<AclinkIpad> listIpad = aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), server.getId(), null, null, null, null, null, null, 0);
-		List<AclinkCamera> listCamera = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), server.getId(), null, null, null, null, 0);
+		ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
+		qryIpadCmd.setServerId(server.getId());
+		List<AclinkIpad> listIpad = aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), qryIpadCmd);
+		ListLocalCamerasCommand qryCmd = new ListLocalCamerasCommand();
+		qryCmd.setServerId(server.getId());
+		List<AclinkCamera> listCamera = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), qryCmd);
 		List<DoorAccess> listDoorAccess = doorAccessProvider.listDoorAccessByServerId(server.getId(), 0);
 		
 		List<DoorAccessDTO> doorAccessDtos = new ArrayList<DoorAccessDTO>();
@@ -544,5 +561,100 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 			rsp.setListServer(listDto);
 		}
 		return rsp;
+	}
+	
+	@Override
+	public void updateCameraIpadBatch(UpdateCameraIpadBatchCommand cmd) {
+		DoorAccess da = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+		if(da == null){
+			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+		}
+		//TODO 非空判断,原门禁没有关联服务器,现在也没
+		if(da.getLocalServerId() != cmd.getServerId()){
+			if(cmd.getServerId() != null || cmd.getServerId() != 0L){
+				AclinkServer server = aclinkServerProvider.findServerById(cmd.getServerId());
+				if(server == null){
+					throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_SERVER_NOT_FOUND, "server is not found");
+				}
+			}
+			da.setLocalServerId(cmd.getServerId());
+			doorAccessProvider.updateDoorAccess(da);
+		}
+		
+		
+		ListLocalCamerasCommand qryCameraCmd = new ListLocalCamerasCommand();
+		qryCameraCmd.setDoorAccessId(cmd.getDoorId());
+		List<AclinkCamera> qryCameras = aclinkCameraProvider.listLocalCameras(new CrossShardListingLocator(), qryCameraCmd);
+		
+		List<Long> reqOutCameraIds = cmd.getExternalCameraIds() == null ? new ArrayList<Long>() : cmd.getExternalCameraIds();
+		List<Long> reqInCameraIds = cmd.getInternalCameraIds() == null ? new ArrayList<Long>() : cmd.getInternalCameraIds();
+
+		List<Long> reqCameraIds = new ArrayList<Long>();
+		reqCameraIds.addAll(reqOutCameraIds);
+		reqCameraIds.addAll(reqInCameraIds);
+		
+		List<AclinkCamera> updateCameras = new ArrayList<AclinkCamera>();
+		
+		for(AclinkCamera qryCamera : qryCameras){
+			if(reqCameraIds.indexOf(qryCamera.getId()) < 0){
+				qryCamera.setDoorAccessId(0L);
+				qryCamera.setServerId(0L);
+				updateCameras.add(qryCamera);
+			}
+		}
+		
+		if(reqCameraIds.size() != 0){
+			List<AclinkCamera> reqCameras = aclinkCameraProvider.listLocalCamerasByIds(reqCameraIds);
+			for(AclinkCamera reqCamera : reqCameras){
+				if(reqOutCameraIds.indexOf(reqCamera.getId()) >= 0){
+					reqCamera.setEnterStatus(AclinkEnterStatus.OUT.getCode());
+				}else if(reqInCameraIds.indexOf(reqCamera.getId()) >=0 ){
+					reqCamera.setEnterStatus(AclinkEnterStatus.IN.getCode());
+				}
+				reqCamera.setDoorAccessId(cmd.getDoorId());
+				reqCamera.setServerId(cmd.getServerId());
+				updateCameras.add(reqCamera);
+			}
+		}
+		
+		aclinkCameraProvider.updateCameraBatch(updateCameras);
+		
+		ListLocalIpadCommand qryIpadCmd = new ListLocalIpadCommand();
+		qryIpadCmd.setDoorAccessId(cmd.getDoorId());
+		List<AclinkIpad> qryIpads = aclinkIpadProvider.listLocalIpads(new CrossShardListingLocator(), qryIpadCmd);
+		
+		List<Long> reqOutIpadIds = cmd.getExternalIpadIds() == null ? new ArrayList<Long>() : cmd.getExternalIpadIds();
+		List<Long> reqInIpadIds = cmd.getInternalIpadIds() == null ? new ArrayList<Long>() : cmd.getInternalIpadIds();
+
+		List<Long> reqIpadIds = new ArrayList<Long>();
+		reqIpadIds.addAll(reqOutIpadIds);
+		reqIpadIds.addAll(reqInIpadIds);
+		
+		List<AclinkIpad> updateIpads = new ArrayList<AclinkIpad>();
+		
+		for(AclinkIpad qryIpad : qryIpads){
+			if(reqIpadIds.indexOf(qryIpad.getId()) < 0){
+				qryIpad.setDoorAccessId(0L);
+				qryIpad.setServerId(0L);
+				updateIpads.add(qryIpad);
+			}
+		}
+		
+		if(reqIpadIds.size() != 0){
+			List<AclinkIpad> reqIpads = aclinkIpadProvider.listLocalIpadByIds(reqIpadIds);
+			for(AclinkIpad reqIpad : reqIpads){
+				if(reqOutIpadIds.indexOf(reqIpad.getId()) >= 0){
+					reqIpad.setEnterStatus(AclinkEnterStatus.OUT.getCode());
+				}else if(reqInIpadIds.indexOf(reqIpad.getId()) >=0 ){
+					reqIpad.setEnterStatus(AclinkEnterStatus.IN.getCode());
+				}
+				reqIpad.setDoorAccessId(cmd.getDoorId());
+				reqIpad.setServerId(cmd.getServerId());
+				updateIpads.add(reqIpad);
+			}
+		}
+		
+		aclinkIpadProvider.updateIpadBatch(updateIpads);
+		
 	}
 }

@@ -11,6 +11,13 @@ public class TestPunchDayRefreshCommand {
     public void setRunDate(Long runDate) {
         this.runDate = runDate;
     }
+    public Long getOrgId() {
+		return orgId;
+	}
 
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
+	}
+	private Long orgId;
     Long runDate;
 }

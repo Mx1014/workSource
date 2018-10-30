@@ -18,4 +18,6 @@ public interface NamespacesService {
 	List<NamespaceInfoDTO> listNamespaceByModuleId(ListNamespaceByModuleIdCommand cmd);
 
 	Boolean isWechatNamespace(Integer namespaceId);
+
+    Boolean isStdNamespace(Integer namespaceId);
 }

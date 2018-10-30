@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>doorAccessId：关联门禁id</li>
  * <li>enterStatus：进出标识0出1进</li>
  * <li>keyCode:摄像头密钥</li>
+ * <li>account:摄像头账号</li>
  * </ul>
  */
 public class UpdateLocalCamerasCommand {
