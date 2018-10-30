@@ -4121,7 +4121,14 @@ public class CommunityServiceImpl implements CommunityService {
                 }
                 dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
                 if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
-				    if (noAuthOrganizationIds.contains(dto.getOrganizationId())) {
+					List<OrganizationMember> manage = this.organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(dto.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode());
+					List<Long> manageUserIds = new ArrayList<>();
+					if (!CollectionUtils.isEmpty(manage)) {
+						for (OrganizationMember member : manage) {
+							manageUserIds.add(member.getTargetId());
+						}
+					}
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId()) && !manageUserIds.contains(UserContext.currentUserId())) {
 				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
                     }
                 }
