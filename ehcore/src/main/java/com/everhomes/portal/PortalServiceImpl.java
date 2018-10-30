@@ -2700,6 +2700,9 @@ public class PortalServiceImpl implements PortalService {
 						"&versionCode=" + versionCode.toString()+
 						"&displayName=" + layout.getLabel();
 				associationActionData.setUrl(url);
+				associationActionData.setLayoutName(layout.getName());
+				associationActionData.setItemLocation(layout.getLocation());
+				associationActionData.setContainerType(ContainerType.TAB.getCode());
 				item.setActionData(associationActionData.toString());
 			}else {
 				item.setActionType(ActionType.NAVIGATION.getCode());
@@ -2707,6 +2710,7 @@ public class PortalServiceImpl implements PortalService {
 				navigationActionData.setItemLocation(layout.getLocation());
 				navigationActionData.setLayoutName(layout.getName());
 				navigationActionData.setTitle(layout.getLabel());
+				navigationActionData.setContainerType(ContainerType.NAVIGATOR.getCode());
 				item.setActionData(StringHelper.toJsonString(navigationActionData));
 			}
 
