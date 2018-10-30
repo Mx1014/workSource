@@ -20,6 +20,8 @@ import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalItemGroup;
+import com.everhomes.portal.PortalItemGroupProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.banner.*;
 import com.everhomes.rest.banner.BannerOrder;
@@ -41,6 +43,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
@@ -55,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -102,6 +106,9 @@ public class BannerServiceImpl implements BannerService {
 
     @Autowired
     private LaunchPadService launchPadService;
+
+    @Autowired
+    private PortalItemGroupProvider portalItemGroupProvider;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -615,6 +622,26 @@ public class BannerServiceImpl implements BannerService {
             bannerProvider.updateBanner(banner);
         }
         return toBannerDTO(banner);
+    }
+
+    @Override
+    public BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd) {
+        BannerInstanconfigDTO dto = new BannerInstanconfigDTO();
+        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(cmd.getAppId());
+        if (!CollectionUtils.isEmpty(list)) {
+            PortalItemGroup portalItemGroup = list.get(0);
+            if (portalItemGroup.getStyle().equals("Shape")) {
+                dto.setWidthRatio(22L);
+                dto.setHeightRatio(10L);
+            }else {
+                BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
+                if (config != null) {
+                    dto.setWidthRatio(config.getWidthRatio());
+                    dto.setHeightRatio(config.getHeightRatio());
+                }
+            }
+        }
+        return dto;
     }
 
     private void setupOrderToBanner(Banner banner, Byte status) {

@@ -121,4 +121,18 @@ public class BannerAdminController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+
+    /**
+     * <b>URL: /admin/banner/getBannerInstanconfig</b>
+     * <p>获取banner配置</p>
+     */
+    @RequestMapping("getBannerInstanconfig")
+    @RestReturn(value = BannerInstanconfigDTO.class)
+    public RestResponse getBannerInstanconfig(@Valid GetBannerInstanconfigCommand cmd) {
+        BannerInstanconfigDTO dto = bannerService.getBannerInstanconfig(cmd);
+        RestResponse resp = new RestResponse(dto);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 }

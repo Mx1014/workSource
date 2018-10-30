@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *      <li>paddingFlag: 图片padding，是否有padding  0为否，1为是。请参考{@link com.everhomes.rest.common.TrueOrFalseFlag} --全屏轮播</li>
  *      <li>widthRatio: 宽比例数值  --全屏轮播</li>
  *      <li>heightRatio: 高比例数值  --全屏轮播</li>
+ *      <li>showTitleFlag: 是否显示标题 0为否，1为是</li>
  * </ul>
  */
 public class BannersInstanceConfig implements Serializable  {
@@ -49,6 +50,16 @@ public class BannersInstanceConfig implements Serializable  {
     private Long widthRatio;
 
     private Long heightRatio;
+
+    private Byte showTitleFlag;
+
+    public Byte getShowTitleFlag() {
+        return showTitleFlag;
+    }
+
+    public void setShowTitleFlag(Byte showTitleFlag) {
+        this.showTitleFlag = showTitleFlag;
+    }
 
     public Integer getPaddingFlag() {
         return paddingFlag;
