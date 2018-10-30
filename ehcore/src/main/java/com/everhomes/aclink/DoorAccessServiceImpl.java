@@ -2713,7 +2713,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 //The door is delete, set it to invalid
                 auth.setStatus(DoorAuthStatus.INVALID.getCode());
                 doorAuthProvider.updateDoorAuth(auth);
-                return null;
+                continue;
             }
             
             //没有二维码读头的门禁不返回二维码,by liuyilin 20180529

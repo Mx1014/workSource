@@ -868,6 +868,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, HOME_PAGE_ATTACH_OWNER_TYPE);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
+		dto.setName(homePageCa.getName());
 		dto.setDisplayMode(homePageCa.getDisplayMode());
 		dto.setSkipType(homePageCa.getSkipType());
 		return dto;
