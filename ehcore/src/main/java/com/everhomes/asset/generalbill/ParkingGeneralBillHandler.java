@@ -42,7 +42,7 @@ public class ParkingGeneralBillHandler implements GeneralBillHandler{
 					for(ParkingInstanceConfigDTO parkingInstanceConfigDTO : parkingInstanceConfigDTOList) {
 	    				AssetModuleAppMapping mapping = new AssetModuleAppMapping();
 	    				mapping.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-	    				mapping.setSourceType(AssetSourceTypeEnum.PRINT_MODULE.getSourceType());
+	    				mapping.setSourceType(AssetSourceTypeEnum.PARKING_MODULE.getSourceType());
 	    				mapping.setNamespaceId(app.getNamespaceId());
 	    				mapping.setOwnerType(parkingInstanceConfigDTO.getOwnerType());
 	    				mapping.setOwnerId(parkingInstanceConfigDTO.getOwnerId());

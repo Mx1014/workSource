@@ -77,15 +77,18 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 
 	@Override
 	public List<Configurations> listConfigurations(Integer namespaceId, String name,
-			String value, Integer pageSize, CrossShardListingLocator locator) {
+			String value, Integer pageSize, CrossShardListingLocator locator,Boolean likeSearch) {
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Condition condition = null ;
 		//默认域空间ID是不能为空的，若可为空该逻辑得改		
 		condition = Tables.EH_CONFIGURATIONS.NAMESPACE_ID.eq(namespaceId);
 		//不为空才拼接条件
-		if( !StringUtils.isBlank(name)){
+		if( !StringUtils.isBlank(name)&& likeSearch){
 			condition  = condition.and(Tables.EH_CONFIGURATIONS.NAME.like("%" + name + "%"));
+		}
+		if( !StringUtils.isBlank(name)&& !likeSearch){
+			condition  = condition.and(Tables.EH_CONFIGURATIONS.NAME.eq(name));
 		}
 		//不为空才拼接条件
 		if(!StringUtils.isBlank(value)){
@@ -295,7 +298,7 @@ public class ConfigurationsAdminProviderImpl implements ConfigurationsProvider{
 	 */
 	private void checkMultiple(Integer id , Integer nemespaceId , String name ){
 		//靠nemespaceId与name查询配置表看是否有存在数据
-		List<Configurations> resultList = listConfigurations(nemespaceId, name, null, null, null);
+		List<Configurations> resultList = listConfigurations(nemespaceId, name, null, null, null,false);
 		//ID 为空，说明是新增数据，否则为修改数据
 		if(id == null ){			
 			if(resultList !=null && resultList.size() >0){

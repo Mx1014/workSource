@@ -552,6 +552,11 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 
 -- AUTHOR: st.zheng
 -- REMARK: 资源预订3.7.1
+ALTER TABLE `eh_rentalv2_resources`
+MODIFY COLUMN `aclink_id`  text  NULL AFTER `default_order`;
+ALTER TABLE `eh_rentalv2_orders`
+MODIFY COLUMN `door_auth_id`  text  NULL AFTER `auth_end_time`;
+update eh_rentalv2_orders set pay_channel = 'normal' where pay_channel is null;
 
 
 -- AUTHOR: 缪洲 20180930
@@ -578,6 +583,8 @@ INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`
 DELETE FROM `eh_service_modules` WHERE parent_id = 41400 AND id = 41430;
 DELETE FROM `eh_acl_privileges` WHERE id = 4140041430;
 DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
+
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
 
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 行业协会路由修改
@@ -815,6 +822,8 @@ SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
 
 
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
@@ -825,6 +834,17 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- AUTHOR: xq.tian
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
+
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-standard
+-- DESCRIPTION: 此SECTION只在左邻标准版执行的脚本
+
+-- AUTHOR: xq.tian
+-- REMARK: 标准版数据库的标识
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+  VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
