@@ -467,7 +467,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			return null;
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId ;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
@@ -489,7 +489,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					type, null, isQueryChild);
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
