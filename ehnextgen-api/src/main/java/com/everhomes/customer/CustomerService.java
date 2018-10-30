@@ -8,6 +8,7 @@ import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -283,5 +284,7 @@ public interface CustomerService {
     EnterpriseCustomerDTO createEnterpriseCustomerOutAuth(CreateEnterpriseCustomerCommand cmd);
 
     ListSignupInfoByOrganizationIdResponse listCustomerApartmentActivity(ListCustomerApartmentActivityCommand cmd);
+
+    void updateSuperAdmin(createSuperAdminCommand cmd);
 
 }

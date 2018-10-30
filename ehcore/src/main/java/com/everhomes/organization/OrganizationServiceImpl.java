@@ -8639,11 +8639,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                         for(String str : importEnterpriseDataDTO.getBuildingNameAndApartmentName().split(",")){
                             //创建OrganizationApartDTO类的对象
                             OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
-                            if(str.split("-")[0] != null){
+                            if(str.contains("-")){
+                                if(str.split("-")[0] != null){
+                                    organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
+                                }
+                                if(str.split("-")[1] != null){
+                                    organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
+                                }
+                            }else{
                                 organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
-                            }
-                            if(str.split("-")[1] != null){
-                                organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
                             }
                             siteDtos.add(organizationSiteApartmentDTO);
                         }
@@ -13540,7 +13544,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (isCreate && find_detail == null) {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
             detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
-            detail.setContactName(member.getRegionCode());
+            detail.setRegionCode(member.getRegionCode());
             detail.setContactName(member.getContactName());
             detail.setGender(member.getGender());
             detail.setContactToken(member.getContactToken());

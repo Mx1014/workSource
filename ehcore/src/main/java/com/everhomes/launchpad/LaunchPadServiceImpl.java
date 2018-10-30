@@ -2938,6 +2938,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
 			response.setCards(opPushCards);
 
+			String newConfig = opPushHandler.refreshInstanceConfig(serviceModuleApp.getInstanceConfig());
+
+			serviceModuleApp.setInstanceConfig(newConfig);
+
 			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
 			String itemActionData = serviceModuleApp.getInstanceConfig();
 			if(portalPublishHandler != null){
@@ -3254,9 +3258,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 				String path = "/index";
 				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
+					host = "app-management";
 					path = "/more";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+					host = "app-management";
 					path = "/all";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}
 
 				//填充路由信息

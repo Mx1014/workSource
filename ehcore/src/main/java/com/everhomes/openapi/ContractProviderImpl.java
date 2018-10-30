@@ -23,6 +23,7 @@ import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.EhContractEvents;
 import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
@@ -1617,5 +1619,48 @@ public class ContractProviderImpl implements ContractProvider {
 	        .fetchInto(ContractCategory.class);
 		return list;
 	}
+	
+	@Override
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,
+			List<String> buildindNames, List<String> apartmentNames) {
+		Map<String, BigDecimal> resultMap = new HashMap<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractBuildingMappings a = Tables.EH_CONTRACT_BUILDING_MAPPINGS;
+		
+		context.select(a.CONTRACT_ID,a.BUILDING_NAME,a.APARTMENT_NAME,a.AREA_SIZE)
+		       .from(a)
+		       .where(a.CONTRACT_ID.in(contractIds))
+		       .and(a.BUILDING_NAME.in(buildindNames))
+		       .and(a.APARTMENT_NAME.in(apartmentNames))
+		       .and(a.STATUS.eq((byte)2))
+		       .fetch()
+		       .stream()
+		       .forEach(r->{
+		    	   Long contractId = r.getValue(a.CONTRACT_ID);
+		    	   String buildingName = r.getValue(a.BUILDING_NAME);
+		    	   String apartmentName = r.getValue(a.APARTMENT_NAME);
+		    	   Double areaSize = r.getValue(a.AREA_SIZE);
+		    	   
+		    	   String key = contractId + "-" + buildingName + "-" + apartmentName;
+		    	   resultMap.put(key, areaSize!=null ? new BigDecimal(areaSize): BigDecimal.ZERO);
+		       });
+		return resultMap;
+	}
+	
+	@Override
+	public BigDecimal getTotalChargeArea(List<Long> contractIds,List<String> buildindNames, List<String> apartmentNames) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractBuildingMappings a = Tables.EH_CONTRACT_BUILDING_MAPPINGS;
+		
+		return context.select(DSL.sum(a.AREA_SIZE))
+				       .from(a)
+				       .where(a.CONTRACT_ID.in(contractIds))
+				       .and(a.BUILDING_NAME.in(buildindNames))
+				       .and(a.APARTMENT_NAME.in(apartmentNames))
+				       .and(a.STATUS.eq((byte)2))
+				       .fetchAnyInto(BigDecimal.class);
+	}
+
 
 }

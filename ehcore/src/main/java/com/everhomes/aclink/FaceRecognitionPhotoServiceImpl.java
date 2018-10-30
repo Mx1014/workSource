@@ -195,7 +195,10 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 	public void notifySyncVistorsCommand(NotifySyncVistorsCommand cmd) {
 		DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
 		if(door == null || door.getLocalServerId() == null || door.getLocalServerId() == 0){
-			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "FR-door not found");
+			//太多场景会用到,找不到就打个日志算了,不抛异常  by liuyilin 20180824
+//			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "FR-door not found");
+			LOGGER.info("FR-door not found");
+			return ;
 		}
 		AclinkServer server = aclinkServerProvider.findServerById(door.getLocalServerId());
 		//消息拼装
@@ -236,7 +239,8 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 				DoorAuthDTO authDto = ConvertHelper.convert(auth, DoorAuthDTO.class);
 				AesUserKey aesUserKey = doorAccessService.getAesUserKey(user, auth);
 		        if(aesUserKey == null) {
-		        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
+		        	//throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
+		        	continue;
 		        }
 		        
 		        byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
@@ -256,8 +260,10 @@ public class FaceRecognitionPhotoServiceImpl implements FaceRecognitionPhotoServ
 					rsp.setPhone(auth.getPhone());
 				}
 			}
-		}else{
-			//没有权限就不同步
+		}
+
+		if(listauthDtos.size() == 0){
+			//没有有效权限
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "用户无权限");
 		}
 		List<Long> userIds = new ArrayList<Long>();

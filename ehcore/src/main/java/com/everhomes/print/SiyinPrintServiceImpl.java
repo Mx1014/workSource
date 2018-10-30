@@ -40,6 +40,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -651,7 +652,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
@@ -701,7 +702,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(merchantId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
@@ -2084,6 +2085,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}else{
 			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
 			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setMerchantId(cmd.getPayeeId());
 			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
 		}
 	}
@@ -2100,7 +2102,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(account.getMerchantId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 
@@ -2244,8 +2246,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 		//检查签名
 		if (!PayUtil.verifyCallbackSignature(cmd)) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sign verify faild");
+			LOGGER.error("sign error:"+(null == cmd ? "cmd is null" : StringHelper.toJsonString(cmd)));
+			
+			boolean signS = configurationProvider.getBooleanValue("print.notify.signswitch", true);
+			if (signS) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sign verify faild");
+			}
 		}
 
 		// * RAW(0)：
@@ -2281,10 +2288,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 			if (!flag) {
-				if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
-					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-					throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
-				}
 				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {

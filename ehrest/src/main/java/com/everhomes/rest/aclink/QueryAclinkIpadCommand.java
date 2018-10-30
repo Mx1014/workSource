@@ -31,8 +31,28 @@ public class QueryAclinkIpadCommand {
 	private Byte enterStatus;
 	private Byte linkStatus;
 	private Byte status;
+	private String name;
+	private String uuid;
 	private Long pageAnchor;
 	private Integer pageSize;
+
+
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;

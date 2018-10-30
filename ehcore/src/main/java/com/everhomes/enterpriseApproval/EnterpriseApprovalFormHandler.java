@@ -7,7 +7,6 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowCaseAdditionalFieldDTO;
@@ -97,12 +96,9 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
     private FlowService flowService;
 
     @Autowired
-    private FlowCaseProvider flowCaseProvider;
-
-    @Autowired
     private DbProvider dbProvider;
-
     static final String ENTERPRISE_APPROVAL_NO = "enterprise_approval_no";
+
 
     @Override
     public PostGeneralFormDTO postApprovalForm(PostApprovalFormCommand cmd) {
@@ -135,9 +131,12 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
             //  4.compatible with the previous data(兼容旧数据)
             Long formOriginId = flow.getFormOriginId();
-            if (0 == formOriginId)
+            Long formVersion = flow.getFormVersion();
+            if (0 == formOriginId) {
                 formOriginId = ga.getFormOriginId();
-            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
+                formVersion = ga.getFormVersion();
+            }
+            GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
             if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
                 // change the status
                 form.setStatus(GeneralFormStatus.RUNNING.getCode());
@@ -255,12 +254,14 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
             throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
                     EnterpriseApprovalErrorCode.ERROR_DISABLE_APPROVAL_FLOW, "flow not found");
         Long formOriginId = flow.getFormOriginId();
+        Long formVersion = flow.getFormVersion();
         //  compatible with the previous data
         if (0 == formOriginId) {
             GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd.getSourceId());
             formOriginId = ga.getFormOriginId();
+            formVersion = ga.getFormVersion();
         }
-        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(formOriginId);
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
         if (form == null)
             throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
                     EnterpriseApprovalErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
@@ -285,6 +286,15 @@ public class EnterpriseApprovalFormHandler implements GeneralApprovalFormHandler
 
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
+
+        // 复制审批单的操作 填充表单值(仅复制工作流启动的申请表单)
+        if (cmd.getValuesOfFlowCaseId() != null && cmd.getValuesOfFlowCaseId() > 0) {
+            FlowCase flowCase = flowService.getFlowCaseById(cmd.getValuesOfFlowCaseId());
+            if (flowCase != null) {
+                List<GeneralApprovalVal> values = generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCase.getRootFlowCaseId());
+                generalApprovalService.fullGeneralApprovalFormValues(fieldDTOs, form, values);
+            }
+        }
         return dto;
     }
 

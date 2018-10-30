@@ -13,10 +13,11 @@ import com.everhomes.util.StringHelper;
  *  <li>dtos:  参考{@link com.everhomes.rest.appurl.AppUrlDeviceDTO}</li>
  *  <li>logoUrl: logo路径</li>
  *  <li>description: 相关描述</li>
+ *  <li></li>
  * </ul>
  *
  */
-public class appInfoByNamespaceIdDTO {
+public class AppInfoByNamespaceIdDTO {
 	
 	@NotNull
 	private Integer namespaceId;
@@ -24,7 +25,15 @@ public class appInfoByNamespaceIdDTO {
 	private String logoUrl;
 	private String description;
 	private List<AppUrlDeviceDTO> dtos ;
-	
+	private String themeColor;
+
+	public String getThemeColor() {
+		return themeColor;
+	}
+
+	public void setThemeColor(String themeColor) {
+		this.themeColor = themeColor;
+	}
 
 	public List<AppUrlDeviceDTO> getDtos() {
 		return dtos;

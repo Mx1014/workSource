@@ -10,7 +10,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.*;
 import com.everhomes.gogs.*;
-import com.everhomes.gogs.GogsNotExistException;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.TrueOrFalseFlag;
@@ -28,7 +27,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -38,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.apache.commons.lang.StringUtils;
 
 import java.nio.charset.Charset;
 import java.sql.Timestamp;

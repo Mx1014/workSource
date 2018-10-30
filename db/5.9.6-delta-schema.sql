@@ -1,4 +1,4 @@
-
+﻿
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
@@ -43,7 +43,7 @@ CREATE TABLE `eh_alliance_config_state` (
 	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
 	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
 	PRIMARY KEY (`id`),
-	INDEX `u_eh_prefix` (`type`, `project_id`)
+	UNIQUE INDEX `u_eh_prefix` (`type`, `project_id`)
 )
 COMMENT='储存应用不同项目下的配置情况。'
 COLLATE='utf8mb4_general_ci'
@@ -128,7 +128,7 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
   `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
   `app_id` BIGINT NOT NULL COMMENT '授权应用id',
-  `app_name` VARCHAR(32) NOT NULL  COMMENT '授权应用名称',
+  `app_name` VARCHAR(32) COMMENT '授权应用名称',
   `source_id` BIGINT NOT NULL COMMENT '授权用户id',
   `source_name` VARCHAR(32) COMMENT '授权用户名称',
   `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
@@ -213,4 +213,6 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
-
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;

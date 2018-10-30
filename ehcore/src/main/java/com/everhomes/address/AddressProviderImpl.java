@@ -22,8 +22,10 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -44,6 +46,9 @@ import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record6;
+import org.jooq.RecordMapper;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.jooq.exception.DataAccessException;
@@ -1252,4 +1257,65 @@ public class AddressProviderImpl implements AddressProvider {
 				       .fetchAnyInto(Community.class);
 	}
 	
+
+	//SELECT COUNT(*) FROM eh_addresses WHERE namespace_id!=0 AND `status`=2;
+	@Override
+	public int getTotalApartmentCount() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				       .from(Tables.EH_ADDRESSES)
+				       .where(Tables.EH_ADDRESSES.NAMESPACE_ID.ne(0))
+				       .and(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+				       .and(Tables.EH_ADDRESSES.IS_FUTURE_APARTMENT.eq((byte)0))
+				       .fetchAnyInto(Integer.class);
+	}
+
+//SELECT
+//	a.id,
+//	a.community_id,
+//	a.community_name,
+//	a.building_id,
+//	a.building_name,
+//	a.status,
+//	b.living_status
+//FROM
+//	eh_addresses a
+//LEFT JOIN eh_organization_address_mappings b ON a.id = b.address_id
+//WHERE
+//	a.namespace_id != 0
+//AND
+//	a.`status`=2
+//ORDER BY
+//	a.community_id,a.building_id
+//LIMIT 5000;
+	@Override
+	public List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize) {
+		List<ApartmentReportFormDTO> result = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhAddresses a = Tables.EH_ADDRESSES;
+		EhOrganizationAddressMappings b = Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS;
+		
+		context.select(a.ID,a.COMMUNITY_ID,a.COMMUNITY_NAME,a.BUILDING_ID,a.BUILDING_NAME,b.LIVING_STATUS)
+			   .from(a)
+			   .leftOuterJoin(b)
+			   .on(a.ID.eq(b.ADDRESS_ID))
+			   .where(a.NAMESPACE_ID.ne(0))
+			   .and(a.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+			   .and(a.IS_FUTURE_APARTMENT.eq((byte)0))
+			   .orderBy(a.COMMUNITY_ID,a.BUILDING_ID)
+			   .limit(startIndex, pageSize)
+			   .fetch()
+			   .forEach(r->{
+				   ApartmentReportFormDTO dto = new ApartmentReportFormDTO();
+				   dto.setId(r.getValue(a.ID));
+				   dto.setCommunityId(r.getValue(a.COMMUNITY_ID));
+				   dto.setCommunityName(r.getValue(a.COMMUNITY_NAME));
+				   dto.setBuildingId(r.getValue(a.BUILDING_ID));
+				   dto.setBuildingName(r.getValue(a.BUILDING_NAME));
+				   dto.setLivingStatus(r.getValue(b.LIVING_STATUS));
+				   result.add(dto);
+			   });
+		return result;
+	}
 }

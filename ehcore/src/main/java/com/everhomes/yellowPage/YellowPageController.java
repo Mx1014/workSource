@@ -939,4 +939,45 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferApprovalToForm</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferApprovalToForm")
+	@RestReturn(value = String.class)
+	public RestResponse transferApprovalToForm(ListServiceTypeNamesCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferApprovalToForm();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferPadItems</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferPadItems")
+	@RestReturn(value = String.class)
+	public RestResponse transferPadItems(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferPadItems();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
 }

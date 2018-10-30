@@ -2,6 +2,7 @@
 package com.everhomes.aclink;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -20,9 +21,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.ListLocalIpadCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAclinkIpads;
+import com.everhomes.server.schema.tables.pojos.EhAclinkIpads;
 import com.everhomes.server.schema.tables.daos.EhAclinkIpadsDao;
 import com.everhomes.server.schema.tables.records.EhAclinkIpadsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -70,36 +72,48 @@ public class AclinkIpadProviderImpl implements AclinkIpadProvider{
 	}
 
 	@Override
-	public List<AclinkIpad> listLocalIpads(CrossShardListingLocator locator, Long serverId, List<Long> serverIds, Long doorAccessId, Byte enterStatus, Byte linkStatus, Byte activeStatus, String uuid, Integer count) {
-		return queryLocalIpads(locator,count,new ListingQueryBuilderCallback(){
+	public List<AclinkIpad> listLocalIpads(CrossShardListingLocator locator, ListLocalIpadCommand cmd) {
+		return queryLocalIpads(locator,cmd.getPageSize(),new ListingQueryBuilderCallback(){
 
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
-				if(serverId != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.SERVER_ID.eq(serverId));
-				}else if(serverIds != null && serverIds.size() > 0){
-					query.addConditions(Tables.EH_ACLINK_IPADS.SERVER_ID.in(serverIds));
+				if(cmd.getServerId() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.SERVER_ID.eq(cmd.getServerId()));
+				}else if(cmd.getServerIds() != null && cmd.getServerIds().size() > 0){
+					query.addConditions(Tables.EH_ACLINK_IPADS.SERVER_ID.in(cmd.getServerIds()));
 				}
 				
-				if(doorAccessId != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.DOOR_ACCESS_ID.eq(doorAccessId));
+				if(cmd.getDoorAccessId() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.DOOR_ACCESS_ID.eq(cmd.getDoorAccessId()));
 				}
 				
-				if(enterStatus != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.ENTER_STATUS.eq(enterStatus));
+				if(cmd.getEnterStatus() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.ENTER_STATUS.eq(cmd.getEnterStatus()));
 				}
 				
-				if(linkStatus != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.LINK_STATUS.eq(linkStatus));
+				if(cmd.getLinkStatus() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.LINK_STATUS.eq(cmd.getLinkStatus()));
 				}
 				
-				if(activeStatus != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.STATUS.eq(activeStatus));
+				if(cmd.getActiveStatus() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.STATUS.eq(cmd.getActiveStatus()));
 				}
 				
-				if(uuid != null){
-					query.addConditions(Tables.EH_ACLINK_IPADS.UUID.eq(uuid));
+				if(cmd.getUuid() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.UUID.like("%" + cmd.getUuid() + "%"));
+				}
+				
+				if(cmd.getName() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.NAME.like("%" + cmd.getName() + "%"));
+				}
+				
+				if(cmd.getOwnerId() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.OWNER_ID.eq(cmd.getOwnerId()));
+				}
+				
+				if(cmd.getOwnerType() != null){
+					query.addConditions(Tables.EH_ACLINK_IPADS.OWNER_TYPE.eq(cmd.getOwnerType()));
 				}
 					
                 return query;
@@ -139,6 +153,34 @@ public class AclinkIpadProviderImpl implements AclinkIpadProvider{
 		EhAclinkIpadsDao dao = new EhAclinkIpadsDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAclinkIpads.class, id);
+		
+	}
+
+	@Override
+	public List<AclinkIpad> listLocalIpadByIds(List<Long> ids) {
+		return queryLocalIpads(new CrossShardListingLocator(),0,new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				if(ids != null && ids.size() > 0){
+					query.addConditions(Tables.EH_ACLINK_IPADS.ID.in(ids));
+				}
+                return query;
+			}
+		});
+	}
+
+	@Override
+	public void updateIpadBatch(List<AclinkIpad> updateIpads) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAclinkIpadsDao dao = new EhAclinkIpadsDao(context.configuration());
+		List<EhAclinkIpads> list = new ArrayList<>();
+		for(AclinkIpad ca : updateIpads){
+			list.add(ConvertHelper.convert(ca, EhAclinkIpads.class));
+		}
+		dao.update(list);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAclinkIpads.class, null);
 		
 	}
 }

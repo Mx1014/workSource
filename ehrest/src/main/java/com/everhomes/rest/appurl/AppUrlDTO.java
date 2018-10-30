@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  *  <li>description: 应用描述</li>
  *  <li>logoUrl: logo image url</li>
  *  <li>downloadUrl: 应用商店链接</li>
+ *  <li>themeColor: 主题色</li>
+ *  <li>linkUrl: 跳转链接URL</li>
  * </ul>
  *
  */
@@ -20,8 +22,28 @@ public class AppUrlDTO {
 	private String logoUrl;
 	
 	private String downloadUrl;
-	
-	public String getName() {
+
+	private String themeColor;
+
+	private String linkUrl;
+
+    public String getLinkUrl() {
+        return linkUrl;
+    }
+
+    public void setLinkUrl(String linkUrl) {
+        this.linkUrl = linkUrl;
+    }
+
+    public String getThemeColor() {
+        return themeColor;
+    }
+
+    public void setThemeColor(String themeColor) {
+        this.themeColor = themeColor;
+    }
+
+    public String getName() {
 		return name;
 	}
 

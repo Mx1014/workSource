@@ -82,7 +82,7 @@ public class OPPushForumHandler implements OPPushHandler{
         }
         listTopicCommand.setVisibilityScope(VisibilityScope.COMMUNITY.getCode());
         listTopicCommand.setCommunityId(context.getCommunityId());
-        listTopicCommand.setPageSize(config.getEntityCount());
+        listTopicCommand.setPageSize(config.getNewsSize());
         List<Long> excludeCategories = new ArrayList<>();
         excludeCategories.add(1010L);
         listTopicCommand.setExcludeCategories(excludeCategories);
@@ -104,7 +104,7 @@ public class OPPushForumHandler implements OPPushHandler{
                 card.setRouterQuery(routerInfo.getQuery());
                 card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 
-                String host = "forum";
+                String host = "post";
                 String router = "zl://" + host + card.getRouterPath() + "?" + card.getRouterQuery();
                 card.setRouter(router);
 

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul> 查询转发的消息
  * <li>pageAnchor:下一页锚点(CREATE_TIME)</li>
@@ -23,4 +25,8 @@ public class ListAesUserKeyByUserCommand {
 		this.pageSize = pageSize;
 	}
     
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
