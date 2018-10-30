@@ -15,6 +15,13 @@
 -- REMARK：备份eh_payment_variables表
 -- select * from eh_payment_variables;
 
+-- AUTHOR:杨崇鑫 20181027
+-- REMARK:解决缺陷 #39571: 
+-- 第一步请执行在es上执行db/search/energy_task.sh
+-- 第二步执行同步接口/energy/syncEnergyTaskIndex
+
+-- AUTHOR:梁家声 20181030
+-- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -23,6 +30,24 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
+
+-- AUTHOR:唐岑2018年10月23日14:29:41
+-- REMARK:添加资产报表定时配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('schedule.property.task.time', '0 30 2 * * ?', '资产报表定时任务', '0', NULL, '1');
+
+-- AUTHOR: 杨崇鑫 20181023
+-- REMARK: 新增“资产报表中心”模块和菜单
+set @module_id=230000; -- 模块Id（运维分配的）
+set @data_type='property-statistic';-- 前端发给你的页面跳转链接
+-- 新增模块 eh_service_modules
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`) 
+VALUES (230000, '资产报表中心', 130000, '/200/130000/230000', 1, 3, 2, 10, UTC_TIMESTAMP(), NULL, NULL, UTC_TIMESTAMP(), 0, 0, '0', 0, 'unlimit_control', 1, 0, NULL, NULL, 1, 1, 'module');
+-- 新增模块菜单 eh_web_menus
+-- 左邻后台:zuolin、园区：park
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+	VALUES (79850000, '资产报表中心', 17000000, NULL, @data_type, 1, 2, '/27000000/17000000/79850000', 'zuolin', 10, 230000, 3, 'system', 'module', NULL, 1);
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+	VALUES (79860000, '资产报表中心', 49000000, NULL, @data_type, 1, 2, '/40000040/49000000/79860000', 'park', 10, 230000, 3, 'system', 'module', 2, 1);
 
 
 -- AUTHOR:黄明波
@@ -622,7 +647,8 @@ INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` )
 
 INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041024, 0, '企业门禁 移动端管理', '企业门禁 移动端管理权限', NULL );
 -- AUTHER：李清岩 20181019
--- 模块权限关联 SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+-- 模块权限关联
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
 
 INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41010', '0', 4101041010, '全部权限', '0', NOW());
 

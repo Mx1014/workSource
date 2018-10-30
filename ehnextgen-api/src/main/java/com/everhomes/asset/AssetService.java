@@ -93,13 +93,10 @@ import com.everhomes.rest.asset.SelectedNoticeCommand;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.TestLateFineCommand;
 import com.everhomes.rest.asset.UploadCertificateCommand;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -335,4 +332,5 @@ public interface AssetService {
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
 
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	
 }

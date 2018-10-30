@@ -3,30 +3,45 @@ package com.everhomes.rest.aclink;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
- * <li>companyId：管理公司Id</li>
- * <li>companyName：管理公司名字</li>
+ * <li>doorId: 门禁id</li>
+ * <li>managerId：管理公司Id</li>
+ * <li>managerType：管理公司类型</li>
  * </ul>
  */
 public class AddDoorManagementCommand {
-    private Long companyId;
-    private String companyName;
-
-    public Long getCompanyId() {
-        return companyId;
+    @NotNull
+    private Long doorId;
+    @NotNull
+    private Long managerId;
+//    private String managerName;
+    private Byte managerType;
+    public Long getDoorId() {
+        return doorId;
     }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
+    public void setDoorId(Long doorId) {
+        this.doorId = doorId;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    @NotNull
+    public Long getManagerId() {
+        return managerId;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setManagerId(@NotNull Long managerId) {
+        this.managerId = managerId;
+    }
+
+    public void setManagerType(Byte managerType) {
+        this.managerType = managerType;
+    }
+
+    public Byte getManagerType() {
+        return managerType;
     }
 
     @Override

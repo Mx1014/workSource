@@ -201,10 +201,6 @@ public interface DoorAccessService {
 
     void changeDoorName(ChangeDoorNameCommand cmd);
 
-    void addDoorManagement(AddDoorManagementCommand cmd);
-
-    void deleteDoorManagement (AddDoorManagementCommand cmd);
-
     ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
 
     FirmwareNewDTO addFirmware (AddFirmwareCommand cmd);
@@ -262,5 +258,10 @@ public interface DoorAccessService {
 	void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
 	OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+    //门禁v3.0.2 添加管理授权企业 add by liqingyan
+	void addDoorManagement(AddDoorManagementCommand cmd);
 
+    ListDoorManagementResponse listDoorManagement(ListDoorManagementCommand cmd);
+
+    void deleteDoorManagement (DeleteDoorManagementCommand cmd);
 }

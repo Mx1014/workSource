@@ -104,7 +104,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -209,6 +209,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private com.everhomes.gorder.sdk.order.GeneralOrderService payServiceV2;
 	@Autowired
 	private ServiceModuleAppService serviceModuleAppService;
+	@Value("${server.contextPath:}")
+    private String contextPath;
 	@Override
 	public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -905,7 +907,16 @@ public class ParkingServiceImpl implements ParkingService {
         
 		CreateMerchantOrderResponse generalOrderResp = getParkingGeneralOrderHandler().createOrder(baseInfo);
         order.setGeneralOrderId(generalOrderResp.getMerchantOrderId()+"");
+		String paySource = ParkingPaySourceType.APP.getCode();
+		if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
+			paySource = ParkingPaySourceType.QRCODE.getCode();
+//			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
+		} else if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			paySource = ParkingPaySourceType.PUBLICACCOUNT.getCode();
+		}
+		order.setPaySource(paySource);
         parkingProvider.updateParkingRechargeOrder(order);
+
         
         CreateParkingGeneralOrderResponse resp2 = new CreateParkingGeneralOrderResponse();
 		resp2.setOrderId(generalOrderResp.getMerchantOrderId());
@@ -1081,8 +1092,9 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setExtendInfo(extendInfo);
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
-		String homeurl = configProvider.getValue("home.url", "");
-		String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+        String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		//String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
+		String callbackurl = homeurl + contextPath + configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2");
 		createOrderCommand.setBackUrl(callbackurl);
 		//公众号支付
 		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {

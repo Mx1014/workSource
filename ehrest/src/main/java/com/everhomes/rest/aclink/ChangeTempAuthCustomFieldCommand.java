@@ -18,7 +18,7 @@ public class ChangeTempAuthCustomFieldCommand {
 //    private Integer namespaceId;
 //    private String path;
     private String name;
-//    private Byte type;
+    private Byte type;
     private Byte status;
 
     public Long getId() {
@@ -77,13 +77,13 @@ public class ChangeTempAuthCustomFieldCommand {
 //        this.value = value;
 //    }
 
-//    public Byte getType() {
-//        return type;
-//    }
-//
-//    public void setType(Byte type) {
-//        this.type = type;
-//    }
+    public Byte getType() {
+        return type;
+    }
+
+    public void setType(Byte type) {
+        this.type = type;
+    }
 
     public Byte getStatus() {
         return status;

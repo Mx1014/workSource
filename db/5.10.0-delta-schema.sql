@@ -1,5 +1,4 @@
 
-
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
@@ -30,6 +29,11 @@ ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等
 -- REMARK: 访客办公地点表  20181001
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 微信分享配置中增加主题色字段
+ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
+ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
 -- end
 
 -- AUTHOR: 黄明波
@@ -213,6 +217,9 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
  
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
@@ -369,3 +376,125 @@ ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '�
 
 ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
 
+-- AUTHOR: 杨崇鑫   20181017
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 增加项目-时间段（月份）统计结果集表
+CREATE TABLE `eh_payment_bill_statistic_community` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),  
+  `date_str` VARCHAR(10),  
+  `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
+  `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
+  `tax_amount` DECIMAL(10,2) COMMENT '税额',
+  `amount_received` DECIMAL(10,2) COMMENT '已收（含税）',
+  `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
+  `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
+  `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
+  `amount_exemption` DECIMAL(10,2) COMMENT 'amount reduced',
+  `amount_supplement` DECIMAL(10,2) COMMENT 'amount increased',  
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
+  `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='项目-时间段（月份）统计结果集表';
+
+-- AUTHOR: 杨崇鑫   20181022
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 增加楼宇-时间段（月份）统计结果集表
+CREATE TABLE `eh_payment_bill_statistic_building` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64), 
+  `building_id` BIGINT(20),
+  `building_name` VARCHAR(256),
+  `date_str` VARCHAR(10), 
+  `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
+  `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
+  `tax_amount` DECIMAL(10,2) COMMENT '税额',
+  `amount_received` DECIMAL(10,2) COMMENT '已收（含税）',
+  `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
+  `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
+  `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
+  `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇-时间段（月份）统计结果集表';
+
+-- AUTHOR: 唐岑   20181021
+-- REMARK: 资产管理V3.4（资产统计报表） 
+-- REMARK: 项目信息报表结果集（项目-月份） 
+CREATE TABLE `eh_property_statistic_community` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11),
+  `community_id` bigint(20),
+  `community_name` varchar(64),
+  `date_str` varchar(10) COMMENT '统计月份（格式为xxxx-xx）',
+  `building_count` int(11) DEFAULT '0' COMMENT '园区下的楼宇总数',
+  `total_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的房源总数',
+  `free_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的待租房源数',
+  `rent_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已出租房源数',
+  `occupied_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已占用房源数',
+  `living_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的自用房源数',
+  `saled_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已售房源数',
+  `area_size` decimal(10,2) DEFAULT '0.00' COMMENT '园区的建筑面积',
+  `rent_area` decimal(10,2) DEFAULT '0.00' COMMENT '园区的在租面积',
+  `free_area` decimal(10,2) DEFAULT '0.00' COMMENT '园区的可招租面积',
+  `rent_rate` decimal(10,2) COMMENT '出租率=在租面积/总的建筑面积*100%',
+  `free_rate` decimal(10,2) COMMENT '空置率=可招租面积/总的建筑面积*100% ',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0-inactive, 1-confirming, 2-active',
+  `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目信息报表结果集（项目-月份）';
+
+-- AUTHOR: 唐岑   20181021
+-- REMARK: 资产管理V3.4（资产统计报表） 
+-- REMARK: 楼宇信息报表结果集（楼宇-月份） 
+CREATE TABLE `eh_property_statistic_building` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11),
+  `community_id` bigint(20),
+  `building_id` bigint(20),
+  `building_name` varchar(64),
+  `date_str` varchar(10) COMMENT '统计月份（格式为xxxx-xx）',
+  `total_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的房源总数',
+  `free_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的待租房源数',
+  `rent_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已出租房源数',
+  `occupied_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已占用房源数',
+  `living_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的自用房源数',
+  `saled_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已售房源数',
+  `area_size` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的建筑面积',
+  `rent_area` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的在租面积',
+  `free_area` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的可招租面积',
+  `rent_rate` decimal(10,2) COMMENT '出租率=在租面积/总的建筑面积*100%',
+  `free_rate` decimal(10,2) COMMENT '空置率=可招租面积/总的建筑面积*100% ',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0-inactive, 1-confirming, 2-active',
+  `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 
+
+
+-- AUTHOR: 李清岩 20181029
+-- REMARK:issue-38336 门禁3.0.2 门禁管理授权
+CREATE TABLE `eh_aclink_management` (
+`id` bigint NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`door_id` bigint NOT NULL COMMENT '门禁Id',
+`owner_id` bigint NOT NULL COMMENT '门禁归属对象Id',
+`owner_type` tinyint NOT NULL COMMENT '门禁归属对象类型 0园区 1公司',
+`manager_id` bigint NOT NULL COMMENT '授权对象Id',
+`manager_type` tinyint NOT NULL COMMENT '授权对象类型 0园区 1公司',
+`creator_uid` bigint NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`status` tinyint NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁管理授权';

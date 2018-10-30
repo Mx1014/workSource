@@ -1,0 +1,37 @@
+package com.everhomes.rest.activity.ruian;
+
+import java.util.List;
+
+/**
+ * 对接瑞安方的类，别人的的字段名都是大写开头的，为方便转按只能按别人的写了，不是我的锅．
+ */
+public class ActivityCategoryList {
+
+    private Integer Code ;//返回状态
+    private List<ActivityCategoryModel>  Data;//返回数据
+    private String Message ;//返回状态描述
+
+    public Integer getCode() {
+        return Code;
+    }
+
+    public void setCode(Integer code) {
+        Code = code;
+    }
+
+    public List<ActivityCategoryModel> getData() {
+        return Data;
+    }
+
+    public void setData(List<ActivityCategoryModel> data) {
+        Data = data;
+    }
+
+    public String getMessage() {
+        return Message;
+    }
+
+    public void setMessage(String message) {
+        Message = message;
+    }
+}

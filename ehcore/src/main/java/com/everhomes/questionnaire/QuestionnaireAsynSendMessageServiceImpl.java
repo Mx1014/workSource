@@ -423,7 +423,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
 //				认证中的用户
 				List<UserOrganizations> users1 = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),Arrays.asList((Long) cmd.getCommunityId()),
-						Arrays.asList((new Integer(1))),null,999999999);
+						Arrays.asList((new Integer(1))),new CrossShardListingLocator(),999999999);
 				users.addAll(users1.stream().map(r -> {
 					User bean = new User();
 					bean.setId(r.getUserId());

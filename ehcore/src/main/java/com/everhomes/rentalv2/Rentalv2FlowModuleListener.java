@@ -440,6 +440,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
                 order.getId());
         if (files != null && files.size() > 0){
             e = new FlowCaseEntity();
+            e.setEntityType(FlowCaseEntityType.FILE.getCode());
             FlowCaseFileValue value = new FlowCaseFileValue();
             List<FlowCaseFileDTO> fileDTOS = new ArrayList<>();
             for (RentalResourceFile file : files){

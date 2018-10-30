@@ -2,6 +2,7 @@
 package com.everhomes.contract;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 

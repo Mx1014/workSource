@@ -932,7 +932,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
         if (organizationDetail == null) {
             organizationDetail = new OrganizationDetail();
-            organizationDetail.setOrganizationId(organization.getId());
+            organizationDetail.setOrganizationId(organization.getId());AddressProvider
             organizationDetail.setDescription(organization.getDescription());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());

@@ -12,6 +12,7 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -164,5 +165,8 @@ public interface AddressProvider {
      * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
      * @return
      */
-    Community findCommunityByThirdPartyId(String thirdPartyType);
+    Community findCommunityByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+	int getTotalApartmentCount();
+
+	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
 }
