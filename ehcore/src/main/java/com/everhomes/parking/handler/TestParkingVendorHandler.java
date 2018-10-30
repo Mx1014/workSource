@@ -156,6 +156,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 		
 		        }else {
 		            request = getParkingCardRequestByOrder(order);
+		            LOGGER.info("request id : " + request.getId());
 		            order.setCardRequestId(request.getId()); //补上id
 		        }
 		        updateFlowStatus(request);
