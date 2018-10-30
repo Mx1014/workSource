@@ -499,28 +499,28 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/aclink/updateAccessGroupRel</b>
+     * <b>URL: /admin/aclink/updateDoorGroup</b>
      * <p>更新门禁组</p>
      * @return 门禁列表
      */
-    @RequestMapping("updateAccessGroupRel")
-    @RestReturn(value=String.class)
+    @RequestMapping("updateDoorGroup")
+    @RestReturn(value=AclinkGroup.class)
     public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.updateDoorGroup(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
     
     /**
-     * <b>URL: /admin/aclink/createAccessGroupRel</b>
-     * <p>新增门禁组-门禁关系</p>
+     * <b>URL: /admin/aclink/createDoorGroup</b>
+     * <p>新增门禁组</p>
      * @return 门禁列表
      */
-    @RequestMapping("createAccessGroupRel")
-    @RestReturn(value=String.class)
+    @RequestMapping("createDoorGroup")
+    @RestReturn(value=AclinkGroup.class)
     public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.createDoorGroup(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

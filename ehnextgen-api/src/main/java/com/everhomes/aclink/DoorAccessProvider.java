@@ -80,4 +80,10 @@ public interface DoorAccessProvider {
     AclinkManagement findAclinkManagementById (Long id);
 
     Long updateAclinkManagement(AclinkManagement manager);
+    //门禁v3.0.2 门禁分组 add by liqingyan
+    AclinkGroup createDoorGroup(AclinkGroup group);
+
+    AclinkGroup findAclinkGroupById(Long id);
+
+    AclinkGroup updateDoorGroup(AclinkGroup group);
 }

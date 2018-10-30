@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>groupId:门禁组id 必填</li>
  * <li>groupName:门禁组名称</li>
- * <li>doorIds:下属门禁id</li>
  * <li>status:删除时传0</li>
  * </ul>
  */
@@ -19,7 +18,7 @@ public class UpdateDoorAccessGroupCommand {
     @NotNull
 	private Long groupId;
 	private String groupName;
-	private List<Long> doorIds;
+//	private List<Long> doorIds;
 	private Byte status;
 	
 	public Long getGroupId() {
@@ -34,12 +33,12 @@ public class UpdateDoorAccessGroupCommand {
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
 	}
-	public List<Long> getDoorIds() {
-		return doorIds;
-	}
-	public void setDoorIds(List<Long> doorIds) {
-		this.doorIds = doorIds;
-	}
+//	public List<Long> getDoorIds() {
+//		return doorIds;
+//	}
+//	public void setDoorIds(List<Long> doorIds) {
+//		this.doorIds = doorIds;
+//	}
 	public Byte getStatus() {
 		return status;
 	}

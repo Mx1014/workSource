@@ -12,9 +12,7 @@ import java.util.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhAclinkFormTitlesDao;
-import com.everhomes.server.schema.tables.daos.EhAclinkFormValuesDao;
-import com.everhomes.server.schema.tables.daos.EhAclinkManagementDao;
+import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,6 @@ import com.everhomes.rest.aclink.DoorAccessType;
 import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;
 import com.everhomes.server.schema.tables.records.EhDoorAccessRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
@@ -742,15 +739,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         dao.insert(obj);
         return id;
     }
+
     @Override
     public List<AclinkManagementDTO> searchAclinkManagement (Long doorId){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_MANAGEMENT);
+        query.addJoin(Tables.EH_ORGANIZATIONS,JoinType.LEFT_OUTER_JOIN,Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ACLINK_MANAGEMENT.MANAGER_ID));
         query.addConditions(Tables.EH_ACLINK_MANAGEMENT.DOOR_ID.eq(doorId));
         query.addConditions(Tables.EH_ACLINK_MANAGEMENT.STATUS.ne((byte)0));
         List<AclinkManagementDTO> dtos = query.fetch().map((r) -> {
             AclinkManagementDTO dto = ConvertHelper.convert(r ,AclinkManagementDTO.class );
+            dto.setId(r.getValue(Tables.EH_ACLINK_MANAGEMENT.ID));
+            dto.setNamespaceId(r.getValue(Tables.EH_ACLINK_MANAGEMENT.NAMESPACE_ID));
+            dto.setDoorId(r.getValue(Tables.EH_ACLINK_MANAGEMENT.DOOR_ID));
+            dto.setOwnerId(r.getValue(Tables.EH_ACLINK_MANAGEMENT.OWNER_ID));
+            dto.setOwnerType(r.getValue(Tables.EH_ACLINK_MANAGEMENT.OWNER_TYPE));
+            dto.setManagerId(r.getValue(Tables.EH_ACLINK_MANAGEMENT.MANAGER_ID));
+            dto.setManagerType(r.getValue(Tables.EH_ACLINK_MANAGEMENT.MANAGER_TYPE));
+            dto.setManagerName(r.getValue(Tables.EH_ORGANIZATIONS.NAME));
+            dto.setCreatorUid(r.getValue(Tables.EH_ACLINK_MANAGEMENT.CREATOR_UID));
+            dto.setCreateTime(r.getValue(Tables.EH_ACLINK_MANAGEMENT.CREATE_TIME));
+            dto.setStatus(r.getValue(Tables.EH_ACLINK_MANAGEMENT.STATUS));
             return dto;
         });
         return dtos;
@@ -782,4 +792,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         return dtos;
     }
 
+    @Override
+    public AclinkGroup createDoorGroup(AclinkGroup group){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkGroup.class));
+        group.setId(id);
+        EhAclinkGroupDao dao = new EhAclinkGroupDao(context.configuration());
+        dao.insert(group);
+        return group;
+    }
+
+    @Override
+    public AclinkGroup findAclinkGroupById(Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkGroupDao dao = new EhAclinkGroupDao();
+        return ConvertHelper.convert(dao.findById(id), AclinkGroup.class);
+    }
+
+    @Override
+    public AclinkGroup updateDoorGroup(AclinkGroup group){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkGroupDao dao = new EhAclinkGroupDao(context.configuration());
+        dao.update(group);
+        return group;
+    }
 }

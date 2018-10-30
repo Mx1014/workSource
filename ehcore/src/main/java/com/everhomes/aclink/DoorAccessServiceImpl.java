@@ -517,7 +517,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     dto.setGroupName(group.getDisplayNameNotEmpty());
                 }
             }
-            
+
             if(dto.getDisplayName() == null) {
                 dto.setDisplayName(dto.getName());
             }
@@ -6966,6 +6966,35 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		
 	}
 
+	@Override
+    public AclinkGroup createDoorGroup(CreateDoorAccessGroupCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    AclinkGroup group = new AclinkGroup();
+	    group.setName(cmd.getGroupName());
+	    group.setNamespaceId(namespaceId);
+	    group.setStatus((byte)1);
+	    group.setOwnerId(cmd.getOwnerId());
+	    group.setOwnerType(cmd.getOwnerType());
+	    group.setCreatorUid(user.getId());
+	    group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        return doorAccessProvider.createDoorGroup(group);
+    }
+
+    @Override
+    public AclinkGroup updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
+	    AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getGroupId());
+	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
+	        group.setName(cmd.getGroupName());
+        }
+        if(cmd.getStatus() != null){
+            group.setStatus(cmd.getStatus());
+        }
+        User user = UserContext.current().getUser();
+        group.setOperatorUid(user.getId());
+        group.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    return doorAccessProvider.updateDoorGroup(group);
+    }
 }
 
 
