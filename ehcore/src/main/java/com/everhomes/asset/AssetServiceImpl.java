@@ -46,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.calculate.AssetCalculateUtil;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.standard.AssetStandardProvider;
@@ -265,6 +266,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private AssetStandardProvider assetStandardProvider;
+    
+    @Autowired
+    private AssetCalculateUtil assetCalculateUtil;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -1285,7 +1289,14 @@ public class AssetServiceImpl implements AssetService {
                 aWithoutLimit.setTime(a.getTime());
                 if(!cycle.isContract()){
                     aWithoutLimit.set(Calendar.DAY_OF_MONTH, aWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                    //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	monthOffset = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.setTime(d.getTime());
                  }else{
