@@ -612,9 +612,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         
-        condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        if (null != ownerId) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        }
+        
+        if (!StringUtils.isBlank(ownerType)) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        }
 
-    	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
 
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
