@@ -16,6 +16,8 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -49,6 +51,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -102,6 +105,9 @@ public class BannerServiceImpl implements BannerService {
 
     @Autowired
     private LaunchPadService launchPadService;
+
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -511,7 +517,13 @@ public class BannerServiceImpl implements BannerService {
                         dto.setRouterQuery(routerInfo.getQuery());
 
                         String host = "default";
-                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId=10400&clientHandlerType=0&" + dto.getRouterQuery();
+                        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(routerInfo.getModuleId());
+                        if (serviceModule != null) {
+                            if (!StringUtils.isBlank(serviceModule.getHost())) {
+                                host = serviceModule.getHost();
+                            }
+                        }
+                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId="+routerInfo.getModuleId()+"&clientHandlerType=0&" + dto.getRouterQuery();
                         dto.setRouter(router);
                     }
 
