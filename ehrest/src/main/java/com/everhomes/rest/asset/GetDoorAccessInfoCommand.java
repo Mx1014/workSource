@@ -18,29 +18,13 @@ import com.everhomes.util.StringHelper;
 
 public class GetDoorAccessInfoCommand {
     private Integer namespaceId;
-    private Long projectId;
-    private String projectType;
+    //private Long projectId;
+    //private String projectType;
     private Long ownerId;
-    private String ownerType;
-    private Long orgId;
-    private Long categoryId;
+    //private String ownerType;
+    //private Long orgId;
+    //private Long categoryId;
     
-	public Long getProjectId() {
-		return projectId;
-	}
-
-	public void setProjectId(Long projectId) {
-		this.projectId = projectId;
-	}
-
-	public String getProjectType() {
-		return projectType;
-	}
-
-	public void setProjectType(String projectType) {
-		this.projectType = projectType;
-	}
-
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -55,30 +39,6 @@ public class GetDoorAccessInfoCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOrgId() {
-		return orgId;
-	}
-
-	public void setOrgId(Long orgId) {
-		this.orgId = orgId;
-	}
-
-	public Long getCategoryId() {
-		return categoryId;
-	}
-
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
 	}
 
 	@Override
