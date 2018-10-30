@@ -857,6 +857,11 @@ ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64
 ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
 -- end
 
+-- AUTHOR: 梁燕龙
+-- REMARK: 微信分享配置中增加主题色字段
+ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
+ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
+
 -- AUTHOR: 黄明波
 -- REMARK: 服务联盟通用配置修复
 CREATE TABLE `eh_alliance_config_state` (
