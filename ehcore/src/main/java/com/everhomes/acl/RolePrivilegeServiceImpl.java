@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.customer.createSuperAdminCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -4541,4 +4543,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
 		return identifier.getIdentifierToken();
 	}
+
+
+	/*@Override
+	public void updateSuperAdmin(createSuperAdminCommand cmd){
+		checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+		UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
+		organizationService.updateSuperAdmin(cmd2);
+	}*/
 }

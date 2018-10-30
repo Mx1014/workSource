@@ -10,6 +10,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.customer.createSuperAdminCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -774,6 +775,22 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /acl/createSuperAdmin</b>
+     * <p>创建企业管理员</p>
+     */
+    @RequestMapping("createSuperAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse createSuperAdmin(createSuperAdminCommand cmd) {
+        //rolePrivilegeService.updateSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 
 }

@@ -1243,12 +1243,11 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public Community findCommunityByThirdPartyId(String thirdPartyType, String thirdPartyToken) {
+	public Community findCommunityByThirdPartyId(String thirdPartyType) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return  context.select()
 				       .from(Tables.EH_COMMUNITIES)
 				       .where(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TYPE.eq(thirdPartyType))
-				       .and(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN.eq(thirdPartyToken))
 				       .fetchAnyInto(Community.class);
 	}
 	

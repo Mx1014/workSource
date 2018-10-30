@@ -2,7 +2,6 @@ package com.everhomes.contract;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.asset.AssetService;
 import com.everhomes.aclink.DoorAccessService;
@@ -36,8 +35,6 @@ import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.community.NamespaceCommunityType;
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.EbeiCustomer;
-import com.everhomes.rest.customer.EbeiJsonEntity;
 import com.everhomes.rest.customer.NamespaceCustomerType;
 import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerType;
@@ -47,21 +44,14 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
-import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.util.*;
-import com.everhomes.util.xml.XMLToJSON;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.xmlbeans.XmlObject;
-import org.elasticsearch.index.mapper.MapperBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,7 +221,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
 
         try{
-            syncAllEnterprises(NAMESPACE_ID,  cmSyncObjects);
+            syncAllEnterprises(cmSyncObjects);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause customer " );
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer");
@@ -755,23 +745,42 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     }
 
 
-    private List<CMSyncObject> syncAllEnterprises(Integer namespaceId, List<CMSyncObject> syncObjects) {
+    private List<CMSyncObject> syncAllEnterprises(List<CMSyncObject> syncObjects) {
         //必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
         //allFlag为part时，仅更新单个特定的项目数据即可
-        List<EnterpriseCustomer> myEnterpriseCustomerList = customerProvider.listEnterpriseCustomerByNamespaceType(namespaceId, NamespaceCustomerType.CM.getCode());
+        List<EnterpriseCustomer> myEnterpriseCustomerList = customerProvider.listEnterpriseCustomerByNamespaceType(CMThirdPartContractHandler.NAMESPACE_ID, NamespaceCustomerType.CM.getCode());
 
         //List<EbeiCustomer> mergeEnterpriseList = mergeBackupList(backupList, EbeiCustomer.class);
 
         LOGGER.debug("syncDataToDb namespaceId: {}, myEnterpriseCustomerList size: {}, theirEnterpriseList size: {}",
-                namespaceId, myEnterpriseCustomerList.size(), syncObjects.size());
+                CMThirdPartContractHandler.NAMESPACE_ID, myEnterpriseCustomerList.size(), syncObjects.size());
 
+        List<CMCustomer> cmCustomers = new ArrayList<>();
 
 
         syncObjects.forEach(object -> {
             object.getData().forEach(data -> {
-                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm", data.getContractHeader().getPropertyID());
+                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm");
                 if(community1 != null) {
                     data.setCommunityId(community1.getId());
+                }
+                //进行去重判断
+                Boolean pushFlag = true;
+                for(CMCustomer customer : cmCustomers){
+                    if(customer.getAccountId().equals(data.getContractHeader().getAccountID())){
+                        pushFlag = false;
+                    }
+                }
+
+                if(pushFlag){
+                    CMCustomer customer = new CMCustomer();
+                    customer.setAccountId(data.getContractHeader().getAccountID());
+                    customer.setAccountName(data.getContractHeader().getAccountName());
+                    customer.setConnector(data.getContractHeader().getConnector());
+                    customer.setMail(data.getContractHeader().getMail());
+                    customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
+                    customer.setCommunityId(community1.getId());
+                    cmCustomers.add(customer);
                 }
             });
         });
@@ -779,41 +788,50 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
 
 
-        return syncAllEnterprises(namespaceId, myEnterpriseCustomerList, syncObjects);
+
+        return syncAllEnterprises(CMThirdPartContractHandler.NAMESPACE_ID, myEnterpriseCustomerList, syncObjects, cmCustomers);
 
     }
 
     //ebei同步数据规则：两次之间所有的改动会同步过来，所以以一碑同步过来数据作为参照：
     // state为0的数据删除，state为1的数据：我们有，更新；我们没有则新增
-    private List<CMSyncObject> syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<CMSyncObject> theirSyncList) {
+    private List<CMSyncObject> syncAllEnterprises(Integer namespaceId, List<EnterpriseCustomer> myEnterpriseCustomerList, List<CMSyncObject> theirSyncList, List<CMCustomer> cmCustomers) {
         if (theirSyncList != null) {
             Long customerId = 0L;
+
+            for(CMCustomer customer : cmCustomers){
+                Boolean notDeal = true;
+                if (myEnterpriseCustomerList != null) {
+                    for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
+                        if (NamespaceCustomerType.CM.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
+                                && enterpriseCustomer.getNamespaceCustomerToken().equals(customer.getAccountId())) {
+                            notDeal = false;
+                            customerId = updateEnterpriseCustomer(enterpriseCustomer, customer);
+                        }
+                    }
+                }
+                if (notDeal) {
+                    // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+                    List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, customer.getAccountName());
+                    if (customers == null || customers.size() == 0) {
+                        customerId = insertEnterpriseCustomer(customer);
+                    } else {
+                        customerId = updateEnterpriseCustomer(customers.get(0), customer);
+                    }
+                }
+                customer.setCustomerId(customerId);
+            }
+
             for(CMSyncObject syncObject : theirSyncList) {
 
                 for (CMDataObject dataObject : syncObject.getData()) {
                     CMContractHeader cmContractHeader = dataObject.getContractHeader();
 
-                    Boolean notdeal = true;
-                    if (myEnterpriseCustomerList != null) {
-                        for (EnterpriseCustomer enterpriseCustomer : myEnterpriseCustomerList) {
-                            if (NamespaceCustomerType.CM.getCode().equals(enterpriseCustomer.getNamespaceCustomerType())
-                                    && enterpriseCustomer.getNamespaceCustomerToken().equals(cmContractHeader.getAccountID())) {
-                                notdeal = false;
-                                customerId = updateEnterpriseCustomer(enterpriseCustomer, dataObject.getCommunityId(), cmContractHeader);
-                            }
+                    for(CMCustomer customer : cmCustomers){
+                        if(dataObject.getCommunityId().equals(customer.getCommunityId()) && cmContractHeader.getAccountID().equals(customer.getAccountId())){
+                            dataObject.setCustomerId(customer.getCustomerId());
                         }
                     }
-                    if (notdeal) {
-                        // 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-                        List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(namespaceId, cmContractHeader.getAccountName());
-                        if (customers == null || customers.size() == 0) {
-                            customerId = insertEnterpriseCustomer(NAMESPACE_ID, dataObject.getCommunityId(), cmContractHeader);
-                        } else {
-                            customerId = updateEnterpriseCustomer(customers.get(0), dataObject.getCommunityId(), cmContractHeader);
-                        }
-                    }
-                    dataObject.setCustomerId(customerId);
-
                 }
             }
 
@@ -821,19 +839,20 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         return theirSyncList;
     }
 
-    private Long insertEnterpriseCustomer(Integer namespaceId, Long communityId, CMContractHeader contractHeader) {
+    private Long insertEnterpriseCustomer(CMCustomer cmCustomer) {
         LOGGER.debug("syncDataToDb insertEnterpriseCustomer namespaceId: {}, zjEnterprise: {}",
-                namespaceId, StringHelper.toJsonString(contractHeader));
+                CMThirdPartContractHandler.NAMESPACE_ID, StringHelper.toJsonString(cmCustomer));
 //        this.dbProvider.execute((TransactionStatus status) -> {
         EnterpriseCustomer customer = new EnterpriseCustomer();
-        customer.setCommunityId(communityId);
-        customer.setNamespaceId(namespaceId);
+        customer.setCommunityId(cmCustomer.getCommunityId());
+        customer.setNamespaceId(CMThirdPartContractHandler.NAMESPACE_ID);
         customer.setNamespaceCustomerType(NamespaceCustomerType.CM.getCode());
-        customer.setNamespaceCustomerToken(contractHeader.getAccountID());
-        customer.setName(contractHeader.getAccountName());
-        customer.setNickName(contractHeader.getAccountName());
-        customer.setContactName(contractHeader.getConnector());
-        customer.setContactPhone(contractHeader.getConnectorPhone());
+        customer.setNamespaceCustomerToken(cmCustomer.getAccountId());
+        customer.setName(cmCustomer.getAccountName());
+        customer.setNickName(cmCustomer.getAccountName());
+        customer.setContactName(cmCustomer.getConnector());
+        customer.setContactPhone(cmCustomer.getConnectorPhone());
+        customer.setCorpEmail(cmCustomer.getMail());
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setCreatorUid(1L);
 //            customer.setTrackingUid(-1L);
@@ -851,9 +870,9 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customerSearcher.feedDoc(customer);
 
         insertOrUpdateOrganizationDetail(organization, customer);
-        insertOrUpdateOrganizationCommunityRequest(communityId, organization);
+        insertOrUpdateOrganizationCommunityRequest(cmCustomer.getCommunityId(), organization);
         //项目要求不要把联系人同步为管理员 20180125
-        insertOrUpdateOrganizationMembers(namespaceId, organization, customer.getContactName(), customer.getContactPhone());
+        insertOrUpdateOrganizationMembers(CMThirdPartContractHandler.NAMESPACE_ID, organization, customer.getContactName(), customer.getContactPhone());
         organizationSearcher.feedDoc(organization);
 //            return null;
 //        });
@@ -862,18 +881,18 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
     }
 
 
-    private Long updateEnterpriseCustomer(EnterpriseCustomer customer, Long communityId, CMContractHeader contractHeader) {
+    private Long updateEnterpriseCustomer(EnterpriseCustomer customer, CMCustomer cmCustomer) {
         LOGGER.debug("syncDataToDb updateEnterpriseCustomer customer: {}, ebeiCustomer: {}",
-                StringHelper.toJsonString(customer), StringHelper.toJsonString(contractHeader));
+                StringHelper.toJsonString(customer), StringHelper.toJsonString(cmCustomer));
 //        this.dbProvider.execute((TransactionStatus status) -> {
-        customer.setCommunityId(communityId);
+        customer.setCommunityId(cmCustomer.getCommunityId());
         customer.setNamespaceCustomerType(NamespaceCustomerType.CM.getCode());
-        customer.setNamespaceCustomerToken(contractHeader.getAccountID());
-        customer.setName(contractHeader.getAccountName());
-        customer.setNickName(contractHeader.getAccountName());
-        customer.setContactName(contractHeader.getConnector());
-        customer.setContactPhone(contractHeader.getConnectorPhone());
-        customer.setCorpEmail(contractHeader.getMail());
+        customer.setNamespaceCustomerToken(cmCustomer.getAccountId());
+        customer.setName(cmCustomer.getAccountName());
+        customer.setNickName(cmCustomer.getAccountName());
+        customer.setContactName(cmCustomer.getConnector());
+        customer.setContactPhone(cmCustomer.getConnectorPhone());
+        customer.setCorpEmail(cmCustomer.getMail());
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setOperatorUid(1L);
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
@@ -901,7 +920,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         }
 
         insertOrUpdateOrganizationDetail(organization, customer);
-        insertOrUpdateOrganizationCommunityRequest(communityId, organization);
+        insertOrUpdateOrganizationCommunityRequest(cmCustomer.getCommunityId(), organization);
         insertOrUpdateOrganizationMembers(customer.getNamespaceId(), organization, customer.getContactName(), customer.getContactPhone());
         organizationSearcher.feedDoc(organization);
 //            return null;
