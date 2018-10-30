@@ -140,7 +140,7 @@ DECLARE  pCategoryName VARCHAR(64);
 
 -- 首先这里对游标进行定义
 DECLARE  cur_record CURSOR FOR  
-SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  sa.owner_type, sa.owner_id, ca.`type` 
+SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  ca.owner_type, ca.owner_id, ca.`type` 
 from eh_service_alliances sa, eh_service_alliance_categories ca 
 where sa.category_id = ca.id and sa.category_id is not null and sa.parent_id <> 0; 
 
