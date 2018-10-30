@@ -328,7 +328,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		yellowPageProvider.createCategory(newMainCag);
 
 		// 图片保存
-		List<ServiceAllianceAttachment> attches = yellowPageProvider.listAttachments(oldMainCag.getId(),
+		List<ServiceAllianceAttachment> attches = yellowPageProvider.listAttachments(YellowPageService.HOME_PAGE_ATTACH_OWNER_TYPE, oldMainCag.getId(),
 				ServiceAllianceAttachmentType.COVER_ATTACHMENT.getCode());
 		for (ServiceAllianceAttachment attch : attches) {
 			attch.setOwnerId(newMainCag.getId());
@@ -485,7 +485,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		// 查看当前项目下配置状态
 		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
 		if (isEnableSelfConfig(state)) {
-			return yellowPageProvider.listCategories(locator, pageSize, ownerType, organizationId, namespaceId, null,
+			return yellowPageProvider.listCategories(locator, pageSize, ownerType, ownerId, namespaceId, null,
 					type, null, isQueryChild);
 		}
 

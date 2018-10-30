@@ -11,6 +11,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.paySDK.PaySettings;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.rest.general.order.GorderPayType;
 import com.everhomes.rest.organization.VendorType;
@@ -63,16 +64,21 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	}
 
 	private void paySuccess(MerchantPaymentNotificationCommand cmd) {
-		this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
+		String lockId = null;
+		if (cmd.getMerchantOrderId() != null){
+			lockId = String.valueOf(cmd.getMerchantOrderId());
+		}else{
+			this.checkOrderNoIsNull(cmd.getBizOrderNum());//检查停车业务订单号
+			lockId = cmd.getBizOrderNum();
+		}
 		this.checkPayAmountIsNull(cmd.getAmount());//
-
 
 
 		BigDecimal payAmount = new BigDecimal(cmd.getAmount()).divide(new BigDecimal(100));
 		BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + cmd.getBizOrderNum()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + lockId).enter(()-> {
 			ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByGeneralOrderId(cmd.getMerchantOrderId());
 			if (order == null) { //做一下兼容
 				 order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getBizOrderNum());
@@ -107,7 +113,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				}
 				order.setOrderNo(parkingService.createOrderNo(lot));
 				order.setBizOrderNo(cmd.getBizOrderNum());
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else 
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
@@ -162,7 +168,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 				if (cmd.getPaymentType() != null){
 					order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				}
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
@@ -178,7 +184,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 					order.setPaidType(transferPaidType(cmd.getPaymentType()));
 				}
 				order.setBizOrderNo(cmd.getBizOrderNum());
-				if (cmd.getPaymentType() == 29)
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == 29)
 					order.setPayMode(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
 				else
 					order.setPayMode(GorderPayType.PERSON_PAY.getCode());
@@ -232,7 +238,7 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 					"orderNo is null or empty.");
 		}
 	}
-	
+
 	private ParkingRechargeOrder checkOrder(Long orderId) {
     	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(orderId);
 		
@@ -281,7 +287,14 @@ public class ParkingOrderEmbeddedV2HandlerImpl implements ParkingOrderEmbeddedV2
 	@Override
 	public void payCallBack(MerchantPaymentNotificationCommand cmd) {
 		//检查签名
+		if(LOGGER.isDebugEnabled()) {
+			String tmpSecretKey = (PaySettings.getSecretKey() == null) ? null : PaySettings.getSecretKey().substring(0, 5);
+			LOGGER.debug("Failed to verify pay-callback signature, appKey={}, secretKey={}, signature={}", 
+					PaySettings.getAppKey(), tmpSecretKey, cmd.getSignature());
+		}
 		if(!PayUtil.verifyCallbackSignature(cmd)){
+			LOGGER.error("Failed to verify pay-callback signature, appKey={}, signature={}", 
+					PaySettings.getAppKey(), cmd.getSignature());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"sign verify faild");
 		}

@@ -221,6 +221,16 @@ ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint
 -- REMARK： 删除eh_organization_address_mappings表中的外键
 ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
  
+ 
+-- AUTHOR: 刘一麟
+-- REMARK： 门禁临时授权有效期添加默认值
+ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
+
+-- 以上都是5.9.6上线的内容 2018-10-30 注释 by 吴寒
+
+
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
 ALTER TABLE `eh_punch_logs` ADD COLUMN `create_type` TINYINT NOT NULL DEFAULT 0 COMMENT '创建类型 : 0-正常打卡创建 1-自动打卡创建 2-人脸识别打卡创建 4-其他第三方接口创建(通过第三方接口打卡没有带创建类型)' ;

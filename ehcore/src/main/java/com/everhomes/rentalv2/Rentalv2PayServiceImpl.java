@@ -468,7 +468,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public void refundOrder(RentalOrder order,Long amount) {
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-
+        if (record == null)
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
         String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
