@@ -87,6 +87,9 @@ public class ParkingLotDTO {
     private String summary;
     private Byte noticeFlag;
     private String noticeContact;
+    private String province;
+    private String city;
+
     
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
@@ -338,6 +341,22 @@ public class ParkingLotDTO {
 
 	public void setNoticeContact(String noticeContact) {
 		this.noticeContact = noticeContact;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	@Override

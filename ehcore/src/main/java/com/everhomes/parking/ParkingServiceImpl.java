@@ -3782,7 +3782,10 @@ public class ParkingServiceImpl implements ParkingService {
 					RuleSourceType.RESOURCE.getCode(), dto.getId());
 			dto.setVipParkingUrl(homeUrl + detailUrl);
 		}
-
+		dto.setData(Arrays.asList(r.getDefaultData().split(",")));
+		String[] plate = r.getDefaultPlate().split(",");
+		dto.setProvince(plate[0]);
+		dto.setCity(plate[1]);
 		dto.setFlowId(null);
 		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 		if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
