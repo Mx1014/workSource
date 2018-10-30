@@ -5207,22 +5207,21 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public void setDoorAccessParam(SetDoorAccessParamCommand cmd) {
 		AssetDooraccessParam assetDooraccessParam = ConvertHelper.convert(cmd, AssetDooraccessParam.class);
+		
+		if (null == cmd.getCategoryId() || null == cmd.getOrgId() || null == cmd.getOwnerId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
 		assetDooraccessParam.setOwnerType(EntityType.COMMUNITY.getCode());
+		AssetDooraccessParam existParam = assetProvider.findDoorAccessParamByParams(cmd);
 		// 更新
-		if (cmd.getId() != null) {
-			assetDooraccessParam = assetProvider.findDoorAccessParamById(cmd.getId());
-			assetDooraccessParam.setFreezeDays(cmd.getFreezeDays());
-			assetDooraccessParam.setUnfreezeDays(cmd.getUnfreezeDays());
-			/*
-			 * if (cmd.getOwnerId() != null) {
-			 * assetDooraccessParam.setOrgId(null); }
-			 */
-			assetProvider.updateDoorAccessParam(assetDooraccessParam);
+		if (existParam !=null) {
+			//assetDooraccessParam = assetProvider.findDoorAccessParamById(cmd.getId());
+			existParam.setFreezeDays(cmd.getFreezeDays());
+			existParam.setUnfreezeDays(cmd.getUnfreezeDays());
+			assetProvider.updateDoorAccessParam(existParam);
 		} else {
-			/*
-			 * if (cmd.getOwnerId() != null) {
-			 * assetDooraccessParam.setOrgId(null); }
-			 */
 			assetProvider.createDoorAccessParam(assetDooraccessParam);
 		}
 	}
@@ -5306,7 +5305,7 @@ public class AssetServiceImpl implements AssetService {
 						getDoorAccessParamCommand.setOwnerType(bill.getOwnerType());
 						DoorAccessParamDTO DoorAccessParam = null;
 						// 线下缴费不用去查配置
-						if (paymentType != 0) {
+						//if (paymentType != 0) {
 							ListDoorAccessParamResponse listDoorAccessParamResponse = getDoorAccessParam(
 									getDoorAccessParamCommand);
 							List<DoorAccessParamDTO> listDoorAccessParam = listDoorAccessParamResponse
@@ -5316,7 +5315,7 @@ public class AssetServiceImpl implements AssetService {
 							} else {
 								continue;
 							}
-						}
+						//}
 
 						// 查询logs获取那些公司门禁已经关闭
 						// 禁门禁之前记录下
@@ -5441,15 +5440,16 @@ public class AssetServiceImpl implements AssetService {
 					for (PaymentBills bill : bills) {
 						String dueDayDeadline = bill.getDueDayDeadline();
 						Long ownerId = bill.getOwnerId();
-						Long targetId = null;
+						Long targetId = bill.getTargetId();
 						String targetType = bill.getTargetType();
 						Byte DooraccessTargetType = 0;
 						// 企业
 						if ("eh_organization".equals(targetType)) {
-							targetId = bill.getTargetId();
+							//targetId = bill.getTargetId();
 							DooraccessTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
 						} else if ("eh_user".equals(targetType)) {
 							// assetDooraccessLog.setOwnerId(targetId);
+							//targetId = bill.getTargetId();
 							DooraccessTargetType = DoorLicenseType.USER.getCode();
 						}
 

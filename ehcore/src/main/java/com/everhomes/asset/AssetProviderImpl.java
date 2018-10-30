@@ -107,6 +107,7 @@ import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.asset.ReSortCmd;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
@@ -5882,6 +5883,31 @@ public class AssetProviderImpl implements AssetProvider {
 		EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
 		
 		return ConvertHelper.convert(dao.findById(id), AssetDooraccessParam.class);
+	}
+    
+    @SuppressWarnings("unchecked")
+    @Override
+	public AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
+		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+
+		Condition cond = t1.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
+		cond = cond.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
+		cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
+		
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
+
+		if (assetDooraccessParams.size()>0 && assetDooraccessParams != null) {
+			return assetDooraccessParams.get(0);
+		}
+		
+		return null;
 	}
 
 	@Override

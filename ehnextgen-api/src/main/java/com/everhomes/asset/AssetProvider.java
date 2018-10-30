@@ -43,6 +43,7 @@ import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
@@ -468,4 +469,5 @@ public interface AssetProvider {
 	void updateCMBillItem(PaymentBillItems items);
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
+	AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd);
 }
