@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>osType: 操作系统类型 参考{@link com.everhomes.rest.user.OSType}</li>
  *  <li>downloadUrl: 应用商店链接</li>
  *  <li>id: 主键</li>
+ *  <li>packageName: 包名</li>
  * </ul>
  *
  */
@@ -15,9 +16,16 @@ public class AppUrlDeviceDTO {
 	private Long id ;
 	private Byte osType;
 	private String downloadUrl;
-	
+	private String packageName;
 
-	
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
 	public Long getId() {
 		return id;
 	}

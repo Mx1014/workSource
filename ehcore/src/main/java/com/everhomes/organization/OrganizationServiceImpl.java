@@ -9,6 +9,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
@@ -206,6 +207,7 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -6857,17 +6859,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/部门岗位
+        //:todo 部门/部门岗位 +2018年10月22日增加公司搜索
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(),  Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.ENTERPRISE.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 部门岗位
         ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
         cmd_3.setName(cmd.getKeywords());
         cmd_3.setNamespaceId(namespaceId);
-        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 岗位
         ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();
@@ -8408,7 +8410,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, identifierToken);
+        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
         this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
@@ -8636,11 +8639,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                         for(String str : importEnterpriseDataDTO.getBuildingNameAndApartmentName().split(",")){
                             //创建OrganizationApartDTO类的对象
                             OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
-                            if(str.split("-")[0] != null){
+                            if(str.contains("-")){
+                                if(str.split("-")[0] != null){
+                                    organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
+                                }
+                                if(str.split("-")[1] != null){
+                                    organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
+                                }
+                            }else{
                                 organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
-                            }
-                            if(str.split("-")[1] != null){
-                                organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
                             }
                             siteDtos.add(organizationSiteApartmentDTO);
                         }
@@ -13169,8 +13176,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (size != pageSize) {
                 response.setNextPageAnchor(null);
             } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
                 list.remove(list.size() - 1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
             }
             
             response.setRequests(list.stream().map(r -> {
@@ -13537,6 +13544,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (isCreate && find_detail == null) {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
             detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
+            detail.setRegionCode(member.getRegionCode());
             detail.setContactName(member.getContactName());
             detail.setGender(member.getGender());
             detail.setContactToken(member.getContactToken());
@@ -13632,6 +13640,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
             //organizationMemberDetails表中的organizationId指的是总公司的organizationId
             organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
+            organizationMemberDetail.setCheckInTime(ArchivesUtil.currentDate());
             //根据OrganizationMemberDetails来获取detailId的方法
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /* 如果档案表中有记录 */

@@ -9,6 +9,7 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.module.RouterInfoService;
 import com.everhomes.news.NewsService;
+import com.everhomes.portal.NewsPortalPublishHandler;
 import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -37,9 +38,13 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,6 +55,7 @@ import java.util.List;
  */
 @Component(OPPushHandler.OPPUSH_ITEMGROUP_TYPE + 10800)
 public class OPPushNewsHandler implements OPPushHandler{
+    private static final Logger LOGGER = LoggerFactory.getLogger(OPPushNewsHandler.class);
 	
 	@Autowired
 	ServiceModuleAppService serviceModuleAppService;
@@ -68,7 +74,7 @@ public class OPPushNewsHandler implements OPPushHandler{
         UserContext.current().setAppContext(context);
         ListNewsBySceneCommand cmd = new ListNewsBySceneCommand();
         cmd.setCategoryId(categoryId);
-        cmd.setPageSize(config.getEntityCount());
+        cmd.setPageSize(config.getNewsSize());
         ListNewsBySceneResponse resp = newsService.listNewsByScene(cmd);
         
         
@@ -80,12 +86,23 @@ public class OPPushNewsHandler implements OPPushHandler{
                OPPushCard card = new OPPushCard();
                card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
                card.setRouterPath("/detail");
-               card.setRouterQuery("url:"+dto.getNewsUrl());
+				try {
+					card.setRouterQuery("url=" + URLEncoder.encode(dto.getNewsUrl(), "utf-8"));
+				} catch (UnsupportedEncodingException e) {
+					LOGGER.info("url can't encode:"+dto.getNewsUrl());
+				}
+
+
+               String host = "news-feed";
+               String router = "zl://" + host + card.getRouterPath() + "?moduleId=10800&clientHandlerType=2&" + card.getRouterQuery();
+               card.setRouter(router);
+
                List<Object> properties = new ArrayList<>();
-               properties.add(dto.getCoverUri());
-               properties.add(dto.getNewsUrl());
-               properties.add(dto.getTitle());
+               properties.add(dto.getCoverUri() == null ? "" : dto.getCoverUri());
+               properties.add(dto.getTitle() == null ? "" : dto.getTitle());
+               properties.add(dto.getTopFlag() == null ? "0" : ""+dto.getTopFlag() );
                properties.add(DateUtil.dateToStr(dto.getPublishTime(), "yyyy-MM-dd HH:mm"));
+               properties.add(dto.getLikeCount() == null ? "0" : ""+dto.getLikeCount());
                card.setProperties(properties);
                listCards.add(card);
            }

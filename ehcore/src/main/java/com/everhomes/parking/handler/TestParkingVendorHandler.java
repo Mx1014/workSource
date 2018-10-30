@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,7 +66,9 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setCardNumber("");
 			parkingCardDTO.setPlateOwnerPhone("12345679812");
 			parkingCardDTO.setIsValid(true);
-
+			parkingCardDTO.setCardTypeId("普通月卡");
+			if (plateNumber.equals("粤B12345"))
+				parkingCardDTO.setCardStatus(ParkingCardStatus.SUPPORT_EXPIRED_RECHARGE.getCode());
 			resultList.add(parkingCardDTO);
 		}
 
@@ -145,6 +148,19 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		boolean notifyresult = configProvider.getBooleanValue("parking.test.notifyresult", true);
+		ParkingCardRequest request;
+		if (order.getOrderType().equals(ParkingOrderType.RECHARGE.getCode())) {
+			if (order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode())) {
+				if (null != order.getCardRequestId()) {
+		            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+		
+		        }else {
+		            request = getParkingCardRequestByOrder(order);
+		            order.setCardRequestId(request.getId()); //补上id
+		        }
+		        updateFlowStatus(request);
+		    }
+        }
 		return notifyresult;
 
 	}
@@ -168,6 +184,61 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		return dto;
 	}
+
+	@Override
+    public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+        List<ParkingCardDTO> parkingCardLists = listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
+        if(parkingCardLists==null || parkingCardLists.size()==0){
+            return null;
+        }
+        ParkingCardDTO cardInfo = parkingCardLists.get(0);
+        if (cardInfo == null) {
+            return null;
+        }
+        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, null, null);
+        if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+            return null;
+        }
+
+        ParkingRechargeRateDTO targetRateDTO = null;
+        String cardTypeId = cardInfo.getCardTypeId();
+        for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+            if (rateDTO.getCardTypeId().equals(cardTypeId) && rateDTO.getMonthCount().intValue()==parkingLot.getExpiredRechargeMonthCount()) {
+                targetRateDTO = rateDTO;
+                break;
+            }
+        }
+
+        if (null == targetRateDTO) {
+            parkingRechargeRates.sort((r1,r2)->r1.getMonthCount().compareTo(r2.getMonthCount()));
+            for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+                if (rateDTO.getCardTypeId().equals(cardTypeId)) {
+                    targetRateDTO = rateDTO;
+                    break;
+                }
+            }
+        }
+        if (null == targetRateDTO) {
+            return null;
+        }
+
+        ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(targetRateDTO,ParkingExpiredRechargeInfoDTO.class);
+        dto.setCardTypeName(targetRateDTO.getCardType());
+        if (cardInfo != null  && cardInfo.getEndTime() != null) {
+            long newStartTime = cardInfo.getEndTime();
+            long now = System.currentTimeMillis();
+            if(now>newStartTime){
+                newStartTime = now;
+            }
+            dto.setStartPeriod(newStartTime);
+            Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThirtyDays(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+            dto.setEndPeriod(rechargeEndTimestamp.getTime());
+            dto.setMonthCount(new BigDecimal(2));
+            dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.default.rateName","个月"));
+            dto.setPrice(new BigDecimal(0.01));
+        }
+        return dto;
+    }
 
 	@Override
 	public String applyTempCard(ParkingClearanceLog log) {

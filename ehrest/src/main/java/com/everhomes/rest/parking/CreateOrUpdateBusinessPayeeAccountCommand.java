@@ -99,7 +99,8 @@ public class CreateOrUpdateBusinessPayeeAccountCommand {
         this.payeeUserType = payeeUserType;
     }
 
-    @Override
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

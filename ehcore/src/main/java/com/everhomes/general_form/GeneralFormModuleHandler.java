@@ -1,7 +1,17 @@
 package com.everhomes.general_form;
 
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 
 import java.util.List;
 

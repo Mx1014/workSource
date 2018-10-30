@@ -11,6 +11,8 @@ import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.mysql.jdbc.StringUtils;
+
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -121,7 +123,7 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
         List<EnergyMeterTask> tasks = energyMeterTaskProvider.listEnergyMeterTasks(pageAnchor, pageSize);
         while (tasks != null && tasks.size() > 0) {
             bulkUpdate(tasks);
-            pageAnchor += (tasks.size() + 1);
+            pageAnchor = tasks.get(tasks.size() - 1).getId() + 1;
             tasks = energyMeterTaskProvider.listEnergyMeterTasks(pageAnchor, pageSize);
         }
         this.optimize(1);
@@ -133,16 +135,23 @@ public class EnergyMeterTaskSearcherImpl extends AbstractElasticSearch implement
     public SearchTasksByEnergyPlanResponse searchTasksByEnergyPlan(SearchTasksByEnergyPlanCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
-        } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
-                    .field("meterName", 1.5f);
-
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("meterName");
+        if (!StringUtils.isNullOrEmpty(cmd.getKeywords())) {
+        	//任务工单：表计名称 支持模糊搜索  by ycx 缺陷 #39571
+            String pattern = "*" + cmd.getKeywords() + "*";
+            qb = QueryBuilders.boolQuery()
+    					.must(QueryBuilders.wildcardQuery("meterName", pattern));
         }
+        
+//        if(cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+//            qb = QueryBuilders.matchAllQuery();
+//        } else {
+//            qb = QueryBuilders.multiMatchQuery(cmd.getKeywords())
+//                    .field("meterName", 1.5f);
+//
+//            builder.setHighlighterFragmentSize(60);
+//            builder.setHighlighterNumOfFragments(8);
+//            builder.addHighlightedField("meterName");
+//        }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));

@@ -160,8 +160,9 @@ public enum CoordinationLocks {
     PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
-    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
-
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user"),
+	
+	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community");//issue-38508 根据项目+月份统计缴费报表
 
     private String code;
 

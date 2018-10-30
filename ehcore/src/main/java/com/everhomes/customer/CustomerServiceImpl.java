@@ -61,6 +61,7 @@ import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.acl.admin.ListOrganizationContectDTOResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CustomerAptitudeFlag;
@@ -70,156 +71,9 @@ import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.customer.AllotEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CreateCustomerAccountCommand;
-import com.everhomes.rest.customer.CreateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.CreateCustomerCertificateCommand;
-import com.everhomes.rest.customer.CreateCustomerCommercialCommand;
-import com.everhomes.rest.customer.CreateCustomerDepartureInfoCommand;
-import com.everhomes.rest.customer.CreateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.CreateCustomerEntryInfoCommand;
-import com.everhomes.rest.customer.CreateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.CreateCustomerPatentCommand;
-import com.everhomes.rest.customer.CreateCustomerTalentCommand;
-import com.everhomes.rest.customer.CreateCustomerTaxCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingCommand;
-import com.everhomes.rest.customer.CreateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.CreateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.CreateEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.CustomerAccountDTO;
-import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerApplyProjectStatus;
-import com.everhomes.rest.customer.CustomerAttachmentDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerConfigurationCommand;
-import com.everhomes.rest.customer.CustomerConfigurationDTO;
-import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerEventDTO;
-import com.everhomes.rest.customer.CustomerEventType;
-import com.everhomes.rest.customer.CustomerExpandItemDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIndustryStatisticsResponse;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsDTO;
-import com.everhomes.rest.customer.CustomerIntellectualPropertyStatisticsResponse;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerPotentialResponse;
-import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
-import com.everhomes.rest.customer.CustomerProjectStatisticsResponse;
-import com.everhomes.rest.customer.CustomerSourceStatisticsDTO;
-import com.everhomes.rest.customer.CustomerSourceStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsDTO;
-import com.everhomes.rest.customer.CustomerTalentStatisticsResponse;
-import com.everhomes.rest.customer.CustomerTaxDTO;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrackingTemplateCode;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.DeleteCustomerAccountCommand;
-import com.everhomes.rest.customer.DeleteCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.DeleteCustomerCertificateCommand;
-import com.everhomes.rest.customer.DeleteCustomerCommercialCommand;
-import com.everhomes.rest.customer.DeleteCustomerDepartureInfoCommand;
-import com.everhomes.rest.customer.DeleteCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.DeleteCustomerEntryInfoCommand;
-import com.everhomes.rest.customer.DeleteCustomerInvestmentCommand;
-import com.everhomes.rest.customer.DeleteCustomerPatentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTalentCommand;
-import com.everhomes.rest.customer.DeleteCustomerTaxCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.DeleteCustomerTrademarkCommand;
-import com.everhomes.rest.customer.DeleteEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerStatisticsDTO;
-import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GetCustomerAccountCommand;
-import com.everhomes.rest.customer.GetCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.GetCustomerCertificateCommand;
-import com.everhomes.rest.customer.GetCustomerCommercialCommand;
-import com.everhomes.rest.customer.GetCustomerDepartureInfoCommand;
-import com.everhomes.rest.customer.GetCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.GetCustomerEntryInfoCommand;
-import com.everhomes.rest.customer.GetCustomerInvestmentCommand;
-import com.everhomes.rest.customer.GetCustomerPatentCommand;
-import com.everhomes.rest.customer.GetCustomerTalentCommand;
-import com.everhomes.rest.customer.GetCustomerTaxCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingCommand;
-import com.everhomes.rest.customer.GetCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.GetCustomerTrademarkCommand;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GiveUpEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataDTO;
-import com.everhomes.rest.customer.ListCommunitySyncResultCommand;
-import com.everhomes.rest.customer.ListCommunitySyncResultResponse;
-import com.everhomes.rest.customer.ListCustomerAccountsCommand;
-import com.everhomes.rest.customer.ListCustomerAnnualDetailsCommand;
-import com.everhomes.rest.customer.ListCustomerAnnualDetailsResponse;
-import com.everhomes.rest.customer.ListCustomerAnnualStatisticsCommand;
-import com.everhomes.rest.customer.ListCustomerAnnualStatisticsResponse;
-import com.everhomes.rest.customer.ListCustomerApartmentActivityCommand;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEventsCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
-import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTaxesCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansByDateCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.ListEnterpriseCustomerStatisticsCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommand;
-import com.everhomes.rest.customer.ListNearbyEnterpriseCustomersCommandResponse;
-import com.everhomes.rest.customer.MonthStatistics;
-import com.everhomes.rest.customer.NamespaceCustomerType;
-import com.everhomes.rest.customer.PotentialCustomerDTO;
-import com.everhomes.rest.customer.PotentialCustomerType;
-import com.everhomes.rest.customer.QuarterStatistics;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
-import com.everhomes.rest.customer.SyncCustomerDataCommand;
-import com.everhomes.rest.customer.SyncCustomersCommand;
-import com.everhomes.rest.customer.SyncDataTaskType;
-import com.everhomes.rest.customer.SyncResultViewedCommand;
-import com.everhomes.rest.customer.TrackingNotifyTemplateCode;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
-import com.everhomes.rest.customer.UpdateCustomerAccountCommand;
-import com.everhomes.rest.customer.UpdateCustomerApplyProjectCommand;
-import com.everhomes.rest.customer.UpdateCustomerCertificateCommand;
-import com.everhomes.rest.customer.UpdateCustomerCommercialCommand;
-import com.everhomes.rest.customer.UpdateCustomerDepartureInfoCommand;
-import com.everhomes.rest.customer.UpdateCustomerEconomicIndicatorCommand;
-import com.everhomes.rest.customer.UpdateCustomerEntryInfoCommand;
-import com.everhomes.rest.customer.UpdateCustomerInvestmentCommand;
-import com.everhomes.rest.customer.UpdateCustomerPatentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTalentCommand;
-import com.everhomes.rest.customer.UpdateCustomerTaxCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrackingPlanCommand;
-import com.everhomes.rest.customer.UpdateCustomerTrademarkCommand;
-import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.YearQuarter;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.energy.ListCommnutyRelatedMembersCommand;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.equipment.AdminFlag;
 import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
 import com.everhomes.rest.equipment.findScopeFieldItemCommand;
@@ -238,21 +92,7 @@ import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.openapi.shenzhou.DataType;
-import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
-import com.everhomes.rest.organization.FilterOrganizationContactScopeType;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
-import com.everhomes.rest.organization.ImportFileTaskType;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -2810,6 +2650,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateOrganizationAddress(Long orgId, Long buildingId, Long addressId) {
         Long userId = UserContext.currentUserId();
         OrganizationAddress address = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(orgId, addressId);
+        Address trueAddress = addressProvider.findAddressById(addressId);
         if (address != null) {
             return;
         }
@@ -2827,6 +2668,28 @@ public class CustomerServiceImpl implements CustomerService {
         address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
         this.organizationProvider.createOrganizationAddress(address);
+
+        UpdateWorkPlaceCommand cmd = new UpdateWorkPlaceCommand();
+        cmd.setOrganizationId(orgId);
+        CreateOfficeSiteCommand cmd2 = new CreateOfficeSiteCommand();
+        cmd2.setCommunityId(trueAddress.getCommunityId());
+        cmd2.setSiteName(trueAddress.getAddress());
+        cmd2.setWholeAddressName(trueAddress.getAddress());
+        OrganizationSiteApartmentDTO siteDto = new OrganizationSiteApartmentDTO();
+        siteDto.setBuildingId(buildingId);
+        siteDto.setApartmentId(addressId);
+        List<OrganizationSiteApartmentDTO> siteDtos = new ArrayList<>();
+        siteDtos.add(siteDto);
+        cmd2.setSiteDtos(siteDtos);
+        List<CreateOfficeSiteCommand> cmd2s = new ArrayList<>();
+        cmd2s.add(cmd2);
+        cmd.setOfficeSites(cmd2s);
+
+        try{
+            organizationService.insertWorkPlacesAndBuildings(cmd);
+        }catch (Exception e){
+            LOGGER.error(e.getMessage());
+        }
     }
 
     // 企业管理楼栋与客户tab页的入驻信息双向同步 产品功能22898
@@ -2992,6 +2855,7 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
+
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfos(ListCustomerEntryInfosCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
@@ -3014,6 +2878,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerEntryInfoDTO> listCustomerEntryInfosWithoutAuth(ListCustomerEntryInfosCommand cmd) {
         List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(cmd.getCustomerId());
+        //issue-39640 新签合同，签约“前海金融管理学院”资产重复出现多条
+        entryInfos = removeDuplicatedEntryInfo(entryInfos);
         if (entryInfos != null && entryInfos.size() > 0) {
             return entryInfos.stream().map(this::convertCustomerEntryInfoDTO).collect(Collectors.toList());
         }
@@ -5077,6 +4943,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public ListSignupInfoByOrganizationIdResponse listCustomerApartmentActivity(ListCustomerApartmentActivityCommand cmd){
         return activityService.listSignupInfoByOrganizationId(cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageAnchor(), cmd.getPageSize());
+    }
+
+    @Override
+    public void updateSuperAdmin(createSuperAdminCommand cmd){
+        checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
+        UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
+        organizationService.updateSuperAdmin(cmd2);
     }
 
 }

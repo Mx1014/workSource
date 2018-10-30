@@ -7,10 +7,16 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.asset.UpdateAnAppMappingCommand;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.rest.servicehotline.*;
+import com.everhomes.rest.servicemoduleapp.*;
+import com.everhomes.techpark.servicehotline.HotlineService;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -121,6 +127,23 @@ public class ServiceModuleAppController extends ControllerBase {
 	}
 
 	/**
+	 * 查询支持企业支付的应用，原来的接口参数太多已经快废了，新建一个专用接口。
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("listServiceModuleAppsForEnterprisePay")
+	@RestReturn(value= ListServiceModuleAppsForEnterprisePayResponse.class)
+	public RestResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd) {
+		ListServiceModuleAppsForEnterprisePayResponse res = serviceModuleAppService.listServiceModuleAppsForEnterprisePay(cmd);
+
+		RestResponse response =  new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
 	 * <p>园区是否跟随默认方案</p>
 	 * <b>URL: /servicemoduleapp/changeCommunityConfigFlag</b>
 	 */
@@ -145,11 +168,13 @@ public class ServiceModuleAppController extends ControllerBase {
 	@RestReturn(value=ListAppCommunityConfigsResponse.class)
 	public RestResponse listAppCommunityConfigs(ListAppCommunityConfigsCommand cmd) {
 		ListAppCommunityConfigsResponse res = serviceModuleAppService.listAppCommunityConfigs(cmd);
+
 		RestResponse response =  new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 
 	/**
 	 * <p>更新园区自定义app配置信息</p>
@@ -182,6 +207,4 @@ public class ServiceModuleAppController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-
 }

@@ -509,11 +509,14 @@ public class BannerServiceImpl implements BannerService {
                         dto.setModuleId(routerInfo.getModuleId());
                         dto.setRouterPath(routerInfo.getPath());
                         dto.setRouterQuery(routerInfo.getQuery());
+
+                        String host = "default";
+                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId=10400&clientHandlerType=0&" + dto.getRouterQuery();
+                        dto.setRouter(router);
                     }
 
                     Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
                     dto.setClientHandlerType(clientHandlerType);
-
 
                 } catch (Exception e) {
                     throw RuntimeErrorException.errorWith(e,

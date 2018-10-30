@@ -11,6 +11,7 @@ import com.everhomes.rest.category.GetCategoryCommand;
 import com.everhomes.rest.category.GetCategoryRestResponse;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.contentserver.ParseSharedUriRestResponse;
 import com.everhomes.rest.contentserver.ParseURICommand;
 import com.everhomes.rest.contentserver.UploadFileByUrlRestResponse;
 import com.everhomes.rest.contentserver.UploadFileCommand;
@@ -20,10 +21,13 @@ import com.everhomes.rest.region.GetRegionCommand;
 import com.everhomes.rest.region.GetRegionRestResponse;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.user.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SdkCommonService extends NsDispatcher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdkCommonService.class);
 
     public void setDefaultCommunity(Long userId, Integer namecpaceId) {
         SetUserDefaultCommunityCommand cmd = new SetUserDefaultCommunityCommand();
@@ -132,8 +136,9 @@ public class SdkCommonService extends NsDispatcher {
         ParseURICommand cmd = new ParseURICommand();
         cmd.setUri(uri);
         return dispatcher(namespaceId, sdkClient -> {
-            RestResponse response = sdkClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, RestResponse.class);
-            return (String) response.getResponseObject();
+            ParseSharedUriRestResponse response = sdkClient.restCall("post", "/evh/contentServer/parseSharedUri", cmd, ParseSharedUriRestResponse.class);
+            LOGGER.info("parseUri to URL, url = {}", response.getResponse().getUrl());
+            return (String) response.getResponse().getUrl();
         });
     }
 

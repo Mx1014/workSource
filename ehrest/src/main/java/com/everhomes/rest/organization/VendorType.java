@@ -6,6 +6,7 @@ package com.everhomes.rest.organization;
  *	<li>微信 : 10002</li>
  *	<li>个人钱包 : 10003</li>
  *	<li>企业钱包 : 10004</li>
+ *  <li>线下支付 : 10005</li>
  *</ul>
  *
  */

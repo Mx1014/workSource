@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  *     <li>clientHandlerType: 客户端处理方式 参考{@link ClientHandlerType}</li>
  *     <li>routerPath: 路由路径，例如: ""</li>
  *     <li>routerQuery: 路由参数，例如: ""</li>
- *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}
+ *     <li>router: router</li>
+ *     <li>accessControlType: accessControlType</li>
  * </ul>
  */
 public class AppDTO {
@@ -55,6 +56,9 @@ public class AppDTO {
     private String routerPath;
 
     private String routerQuery;
+
+    //路由2.0
+    private String router;
 
 
     //权限控制
@@ -171,6 +175,15 @@ public class AppDTO {
 
     public void setAccessControlType(Byte accessControlType) {
         this.accessControlType = accessControlType;
+    }
+
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     @Override

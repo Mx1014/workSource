@@ -178,11 +178,14 @@ public interface SmsTemplateCode {
 
     int DECORATION_MOTIFY_REFUND = 82;//修改退费信息后，短信提醒租户和装修公司负责人 尊敬的“申请人姓名”/“装修公司负责人姓名”，关于“租户公司名称”的装修押金退费信息有更新，请前往APP查看详情。
 
-    int RENTAL_CANCEL_ORDER_REFUND = 83;//尊敬的用户，您预约的${useDetail}已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
+    //云打印
+    int PRINT_UNPAID_MESSAGE = 83; //未支付的短信
 
-    int RENTAL_CANCEL_ORDER_NO_REFUND = 84;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
+    int RENTAL_CANCEL_ORDER_REFUND = 84;//尊敬的用户，您预约的${useDetail}已退款成功，订单编号：$订单编号$，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。
 
-    int RENTAL_CANCEL_ORDER = 85;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
+    int RENTAL_CANCEL_ORDER_NO_REFUND = 85;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。
+
+    int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
 
 
 }

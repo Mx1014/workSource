@@ -245,12 +245,11 @@ public class IncubatorServiceImpl implements IncubatorService {
 		coordinationProvider.getNamedLock(CoordinationLocks.PORTAL_PUBLISH.getCode() + user.getId()).enter(()->{
 
 
+			//因为不知名原因，经常会出现重复的数据。可能的原因是页面点击两次、前端重复、nginx重复等。此处检查一样的话直接返回。
 			IncubatorApply sameApply = incubatorProvider.findSameApply(incubatorApply);
-
 			if(sameApply != null){
 				LOGGER.error("repeat apply, see you apply history.");
-				throw RuntimeErrorException.errorWith(IncubatorServiceErrorCode.SCOPE, IncubatorServiceErrorCode.ERROR_REPEAT_APPLY,
-						"repeat apply, see you apply history.");
+				return null;
 			}
 
 			dbProvider.execute((status)->{
