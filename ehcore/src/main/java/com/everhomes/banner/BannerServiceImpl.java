@@ -509,8 +509,11 @@ public class BannerServiceImpl implements BannerService {
                 }
 
                 try {
-                    RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
 
+                    Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
+                    dto.setClientHandlerType(clientHandlerType);
+
+                    RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
                     if(routerInfo != null){
                         dto.setModuleId(routerInfo.getModuleId());
                         dto.setRouterPath(routerInfo.getPath());
@@ -523,12 +526,9 @@ public class BannerServiceImpl implements BannerService {
                                 host = serviceModule.getHost();
                             }
                         }
-                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId="+routerInfo.getModuleId()+"&clientHandlerType=0&" + dto.getRouterQuery();
+                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId="+routerInfo.getModuleId()+"&clientHandlerType="+ clientHandlerType +"&" + dto.getRouterQuery();
                         dto.setRouter(router);
                     }
-
-                    Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
-                    dto.setClientHandlerType(clientHandlerType);
 
                 } catch (Exception e) {
                     throw RuntimeErrorException.errorWith(e,
