@@ -16,7 +16,7 @@
 -- select * from eh_payment_variables;
 
 -- AUTHOR:杨崇鑫 20181027
--- REMARK:解决缺陷 #39571: 
+-- REMARK:解决缺陷 #39571:
 -- 第一步请执行在es上执行db/search/energy_task.sh
 -- 第二步执行同步接口/energy/syncEnergyTaskIndex
 
@@ -40,13 +40,13 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 set @module_id=230000; -- 模块Id（运维分配的）
 set @data_type='property-statistic';-- 前端发给你的页面跳转链接
 -- 新增模块 eh_service_modules
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`) 
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`)
 VALUES (230000, '资产报表中心', 130000, '/200/130000/230000', 1, 3, 2, 10, UTC_TIMESTAMP(), NULL, NULL, UTC_TIMESTAMP(), 0, 0, '0', 0, 'unlimit_control', 1, 0, NULL, NULL, 1, 1, 'module');
 -- 新增模块菜单 eh_web_menus
 -- 左邻后台:zuolin、园区：park
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
 	VALUES (79850000, '资产报表中心', 17000000, NULL, @data_type, 1, 2, '/27000000/17000000/79850000', 'zuolin', 10, 230000, 3, 'system', 'module', NULL, 1);
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
 	VALUES (79860000, '资产报表中心', 49000000, NULL, @data_type, 1, 2, '/40000040/49000000/79860000', 'park', 10, 230000, 3, 'system', 'module', 2, 1);
 
 
@@ -54,30 +54,30 @@ INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `
 -- REMARK:服务联盟数据迁移，待续
 -- 迁移 start
 -- 迁移1.调整ca表的ownerType和ownerId
-update eh_service_alliance_categories ca, eh_service_alliances sa 
-set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
+update eh_service_alliance_categories ca, eh_service_alliances sa
+set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id
 ,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
 where ca.parent_id = 0 and sa.`type` = ca.id;
 
 
 -- 迁移2.调整ca表子类的ownerType ownerId, type
-update eh_service_alliance_categories  cag1,  eh_service_alliance_categories  cag2 
-set cag1.owner_type = cag2.owner_type, cag1.owner_id = cag2.owner_id, cag1.`type` = cag2.`type` 
+update eh_service_alliance_categories  cag1,  eh_service_alliance_categories  cag2
+set cag1.owner_type = cag2.owner_type, cag1.owner_id = cag2.owner_id, cag1.`type` = cag2.`type`
 where cag1.parent_id = cag2.id;
 
 
 -- 迁移3.更新ca表skip_rule
-update eh_service_alliance_categories ca, eh_service_alliance_skip_rule sr 
+update eh_service_alliance_categories ca, eh_service_alliance_skip_rule sr
 set ca.skip_type = 1, ca.delete_uid = -100 where ca.id = sr.service_alliance_category_id and sr.id is not null and ca.namespace_id = sr.namespace_id;
 
 
 -- 迁移4.tag表填充ownerType ownerId
-update eh_alliance_tag tag, eh_service_alliances sa 
-set tag.owner_type = sa.owner_type, tag.owner_id = sa.owner_id 
+update eh_alliance_tag tag, eh_service_alliances sa
+set tag.owner_type = sa.owner_type, tag.owner_id = sa.owner_id
 where tag.type = sa.type and sa.parent_id = 0 and tag.type <> 0 ;
 
--- 迁移5.jumpType应用跳转时，设置为3 
-update eh_service_alliances 
+-- 迁移5.jumpType应用跳转时，设置为3
+update eh_service_alliances
 set  integral_tag1 = 3
 where module_url not like 'zl://approva%' and  module_url not like 'zl://form%' and  module_url is not null and integral_tag1 = 2;
 
@@ -101,18 +101,18 @@ DECLARE pType BIGINT(20);
 
 DECLARE  cur_record CURSOR FOR   SELECT  name,  namespace_id, `type` from eh_service_alliance_categories;  -- 首先这里对游标进行定义
  DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1; -- 这个是个条件处理,针对NOT FOUND的条件,当没有记录时赋值为1
- 
+
  OPEN  cur_record; -- 接着使用OPEN打开游标
  FETCH  cur_record INTO pName, pNamespaceId, pType; -- 把第一行数据写入变量中,游标也随之指向了记录的第一行
- 
- 
+
+
  SET @max_id = (select max(id) from eh_service_alliance_categories);
- 
+
  WHILE no_more_record != 1 DO
  INSERT  INTO eh_service_alliance_categories(id, name, namespace_id, parent_id, owner_type, owner_id,creator_uid,`status`, `type`)
  VALUES  (@max_id:=@max_id+1, pName, pNamespaceId, 0, 'organaization', -1, 3, 2, pType );
  FETCH  cur_record INTO pName, pNamespaceId, pType;
- 
+
  END WHILE;
  CLOSE  cur_record;  -- 用完后记得用CLOSE把资源释放掉
 
@@ -149,25 +149,25 @@ DECLARE  pType BIGINT(20);
 DECLARE  pCategoryName VARCHAR(64);
 
 -- 首先这里对游标进行定义
-DECLARE  cur_record CURSOR FOR  
-SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  sa.owner_type, sa.owner_id, ca.`type` 
-from eh_service_alliances sa, eh_service_alliance_categories ca 
-where sa.category_id = ca.id and sa.category_id is not null and sa.parent_id <> 0; 
+DECLARE  cur_record CURSOR FOR
+SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  sa.owner_type, sa.owner_id, ca.`type`
+from eh_service_alliances sa, eh_service_alliance_categories ca
+where sa.category_id = ca.id and sa.category_id is not null and sa.parent_id <> 0;
 
 -- 这个是个条件处理,针对NOT FOUND的条件,当没有记录时赋值为1
-DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1; 
- 
+DECLARE  CONTINUE HANDLER FOR NOT FOUND  SET  no_more_record = 1;
+
  OPEN  cur_record; -- 接着使用OPEN打开游标
  FETCH  cur_record INTO pServiceId, pCategoryId, pCategoryName,  pNamespaceId, pOwnerType, pOwnerId, pType; -- 把第一行数据写入变量中,游标也随之指向了记录的第一行
- 
+
  SET @max_id = (select ifnull(max(id),0) from eh_alliance_service_category_match);
- 
+
  WHILE no_more_record != 1 DO
- 
+
  INSERT  INTO eh_alliance_service_category_match(id, namespace_id, owner_type, owner_id, `type`, service_id, category_id, category_name,create_time, create_uid)
  VALUES  (@max_id:=@max_id+1, pNamespaceId, pOwnerType, pOwnerId, pType, pServiceId, pCategoryId, pCategoryName, now(), 3 );
  FETCH  cur_record INTO pServiceId, pCategoryId, pCategoryName,  pNamespaceId, pOwnerType, pOwnerId, pType;
- 
+
  END WHILE;
  CLOSE  cur_record;  -- 用完后记得用CLOSE把资源释放掉
 
@@ -585,11 +585,16 @@ DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
 
 UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
 
+-- AUTHOR:严军 201801030
+-- REMARK: issue-null 设置路由相关参数
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
+UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 行业协会路由修改
 UPDATE eh_service_modules SET instance_config = '{"isGuild":1}' WHERE id = 10760;
 UPDATE eh_service_module_apps SET instance_config = '{"isGuild":1}' WHERE module_id = 10760;
- 
+
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('punch.create','1','zh_CN','打卡发送消息','${createType}: ${punchTime}','0');

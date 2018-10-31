@@ -4696,10 +4696,10 @@ public class AssetServiceImpl implements AssetService {
 						CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
-						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
-						if(community != null) {
-							communityId = community.getId();
-						}
+//						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
+//						if(community != null) {
+//							communityId = community.getId();
+//						}
 						//2、获取左邻客户ID
 						Long targetId = null;
 						targetId = cmDataObject.getCustomerId();
@@ -4710,6 +4710,7 @@ public class AssetServiceImpl implements AssetService {
 							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
 							if(address != null) {
 								addressId = address.getId();
+								communityId = address.getCommunityId();
 							}
 						}
 

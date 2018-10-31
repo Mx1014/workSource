@@ -140,7 +140,7 @@ DECLARE  pCategoryName VARCHAR(64);
 
 -- 首先这里对游标进行定义
 DECLARE  cur_record CURSOR FOR  
-SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  sa.owner_type, sa.owner_id, ca.`type` 
+SELECT  sa.id, sa.category_id, ca.name, ca.namespace_id,  ca.owner_type, ca.owner_id, ca.`type` 
 from eh_service_alliances sa, eh_service_alliance_categories ca 
 where sa.category_id = ca.id and sa.category_id is not null and sa.parent_id <> 0; 
 
@@ -176,6 +176,8 @@ DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  -- 删除该存储过程
 -- AUTHOR:黄明波
 -- REMARK:云打印账号迁移
 update eh_siyin_print_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
+update eh_service_modules set client_handler_type = 2 where id = 40500;
+update eh_service_modules set client_handler_type = 0 where id = 10800;
 
 
 
