@@ -2436,6 +2436,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(localVisitorAuth.getValidEndMs()!=null) {
                 visitor.setDoorGuardEndTime(new Timestamp(localVisitorAuth.getValidEndMs()));
             }
+        }else{
+//          门禁授权返回空
+            LOGGER.info("DoorAccess Auth,cmd = {}",doorCmd.toString());
         }
     }
 
