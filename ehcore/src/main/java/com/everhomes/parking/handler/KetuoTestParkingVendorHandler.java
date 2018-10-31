@@ -36,7 +36,7 @@ import com.everhomes.util.RuntimeErrorException;
  * 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO_TEST")
-public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
+public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoTestParkingVendorHandler.class);
 
 	static final String RECHARGE = "/api/wec/PayCarCardFee";
@@ -53,10 +53,14 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 	static final String RULE_TYPE = "1";
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
-	String URL = configProvider.getValue("parking.ketuotest.url", "http://220.160.111.118:8099/");
-	String appId = configProvider.getValue("parking.ketuotest.appId", "1");
-	String appSecret = configProvider.getValue("parking.ketuotest.appId", "b20887292a374637b4a9d6e9f940b1e6");
-	String parkId = configProvider.getValue("parking.ketuotest.parkId", "1");
+	private static final String URL= "http://220.160.111.118:8099/";
+	private static final String appId= "1";
+	private static final String appSecret= "b20887292a374637b4a9d6e9f940b1e6";
+	private static final String parkId= "1";
+	//String URL = configProvider.getValue("parking.ketuotest.url", "http://220.160.111.118:8099/");
+//	String appId = configProvider.getValue("parking.ketuotest.appId", "1");
+//	String appSecret = configProvider.getValue("parking.ketuotest.appId", "b20887292a374637b4a9d6e9f940b1e6");
+//	String parkId = configProvider.getValue("parking.ketuotest.parkId", "1");
 	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
@@ -275,7 +279,7 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		}
 
 
-		String urlPath = URL+GET_CARD;
+		String urlPath = URL+RECHARGE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = order.getOrderToken() + order.getOriginalPrice() + iv + appSecret;
@@ -360,6 +364,7 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
         String urlPath = URL+GET_TEMP_FEE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
+        plateNumber=plateNumber.substring(2);
         String p = parkId + plateNumber + iv + appSecret;
         String key = MD5Utils.getMD5(p);
         param.put("appId", appId);
@@ -393,8 +398,12 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		dto.setPayTime(strToLong(tempFee.getPayTime()));
 		dto.setParkingTime(tempFee.getElapsedTime());
 		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-
+		boolean flag = configProvider.getBooleanValue("parking.ketuotest.amount", true);
+		if (flag){
+			dto.setPrice(new BigDecimal(configProvider.getValue("parking.test.prices","1")));
+		} else{
+			dto.setPrice(new BigDecimal(tempFee.getPayable()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		}
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
 	}
@@ -609,4 +618,17 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		return params;
 	}
 
+	@Override
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
 }
