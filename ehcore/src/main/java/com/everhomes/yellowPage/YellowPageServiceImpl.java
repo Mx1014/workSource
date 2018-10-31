@@ -170,6 +170,7 @@ import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.ClickCountDTO;
 import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
 import com.everhomes.rest.yellowPage.stat.ClickStatDetailDTO;
@@ -764,18 +765,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ServiceAllianceDTO getServiceAllianceEnterpriseDetail(GetServiceAllianceEnterpriseDetailCommand cmd) {
-		// YellowPage yellowPage = verifyYellowPage(cmd.getId(),
-		// cmd.getOwnerType(), cmd.getOwnerId());
-		//
-		// populateYellowPage(yellowPage);
-
+		
 		ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
-		populateServiceAlliance(sa);
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParentId());
+		populateServiceAlliance(sa, configCmd);
 
 		ServiceAllianceDTO dto = null;
 
-		// ServiceAlliance serviceAlliance = ConvertHelper.convert(yellowPage
-		// ,ServiceAlliance.class);
 		dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
 		if (dto.getJumpType() != null) {
 
@@ -930,8 +927,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 		List<Long> childTagIds = buildSearchChildTagIds(cmd.getParentId(), cmd.getTagItems()); //根据输入的筛选item，转成实际的tagId
 		final ServiceAllianceSourceRequestType sourceRequestType = ServiceAllianceSourceRequestType
 				.fromCode(cmd.getSourceRequestType());
+		
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParentId());
 		// 如果为CLIENT，或者空值，认为是客户端
 		if (ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null) {
+
+
 
 			// 根据community和type获取所有项目id
 			List<Long> authProjectIds = getProjectIdsByScene(cmd.getOwnerId(), cmd.getParentId());
@@ -940,10 +942,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 
 			sas = this.yellowPageProvider.queryServiceAllianceByScene(locator, pageSize + 1, cmd.getOwnerType(),
-					cmd.getOwnerId(), authProjectIds, cmd.getParentId(), cmd.getCategoryId(),  childTagIds, cmd.getKeywords());
+					cmd.getOwnerId(), authProjectIds, cmd.getParentId(), cmd.getCategoryId(),  childTagIds, cmd.getKeywords(), configCmd);
 		} else {
 			sas = this.yellowPageProvider.queryServiceAllianceAdmin(locator, pageSize + 1, cmd.getOwnerType(),
-					cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), childTagIds, cmd.getKeywords(), cmd.getDisplayFlag());
+					cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), childTagIds, cmd.getKeywords(), cmd.getDisplayFlag(), configCmd);
 		}
 
 		if (null == sas || sas.size() == 0)
@@ -959,7 +961,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		sas = reSortServiceAllianceList(sas);
 
 		for (ServiceAlliances sa : sas) {
-			populateServiceAlliance(sa);
+			populateServiceAlliance(sa, configCmd);
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
 			if (dto.getJumpType() != null) {
 
@@ -1399,10 +1401,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(serviceAlliance.getOwnerType(), serviceAlliance.getOwnerId(),
-				serviceAlliance.getParentId(), serviceAlliance.getId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(category.getOwnerType(), category.getOwnerId(),
+				category.getType(), serviceAlliance.getId());
 		if (null == match) {
-			createServiceCategoryMatch(serviceAlliance, categoryId, category.getName());
+			createServiceCategoryMatch(serviceAlliance.getId(), category);
 			return;
 		}
 		
@@ -1412,15 +1414,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 	
 	
-	private ServiceCategoryMatch createServiceCategoryMatch(ServiceAlliances serviceAlliance, Long categoryId, String categoryName) {
+	private ServiceCategoryMatch createServiceCategoryMatch(Long serviceAllianceId, ServiceAllianceCategories category) {
 		ServiceCategoryMatch tmp = new ServiceCategoryMatch();
 		tmp.setNamespaceId(UserContext.getCurrentNamespaceId());
-		tmp.setOwnerType(serviceAlliance.getOwnerType());
-		tmp.setOwnerId(serviceAlliance.getOwnerId());
-		tmp.setServiceId(serviceAlliance.getId());
-		tmp.setCategoryId(categoryId);
-		tmp.setCategoryName(categoryName);
-		tmp.setType(serviceAlliance.getParentId());
+		tmp.setOwnerType(category.getOwnerType());
+		tmp.setOwnerId(category.getOwnerId());
+		tmp.setServiceId(serviceAllianceId);
+		tmp.setCategoryId(category.getId());
+		tmp.setCategoryName(category.getName());
+		tmp.setType(category.getType());
 		serviceCategoryMatchProvider.createMatch(tmp);
 		return tmp;
 	}
@@ -1546,21 +1548,21 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 
-	private void populateServiceAlliance(ServiceAlliances sa) {
+	private void populateServiceAlliance(ServiceAlliances sa, ConfigCommand configCmd) {
 		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, SERVICE_ATTACH_OWNER_TYPE);
 
 		populateServiceAllianceUrl(sa);
 		populateServiceAllianceDate(sa);
 		populateServiceAllianceTagVals(sa);
-		populateServiceAllianceCategory(sa);
+		populateServiceAllianceCategory(sa, configCmd);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
 		populateServiceAllianceAttachements(sa, sa.getAttachments());
 		populateServiceAllianceAttachements(sa, sa.getFileAttachments());
 
 	}
 
-	private void populateServiceAllianceCategory(ServiceAlliances sa) {
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(sa.getOwnerType(), sa.getOwnerId(), sa.getParentId(), sa.getId());
+	private void populateServiceAllianceCategory(ServiceAlliances sa,  ConfigCommand configCmd) {
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(configCmd.getOwnerType(), configCmd.getOwnerId(), sa.getParentId(), sa.getId());
 		if (null != match) {
 			sa.setCategoryId(match.getCategoryId());
 			sa.setServiceType(match.getCategoryName());
@@ -4128,5 +4130,6 @@ public class YellowPageServiceImpl implements YellowPageService {
 			throwError(YellowPageServiceErrorCode.ERROR_COMMUNITY_NOT_CHOSEN, "community not chosen");
 		}
 	}
+	
 
 }
