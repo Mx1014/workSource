@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
@@ -35,7 +36,7 @@ import com.everhomes.util.RuntimeErrorException;
  * 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO_TEST")
-public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
+public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoTestParkingVendorHandler.class);
 
 	static final String RECHARGE = "/api/wec/PayCarCardFee";
@@ -606,18 +607,6 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 		}
 
 		return params;
-	}
-
-	@Override
-	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
