@@ -2026,6 +2026,9 @@ public class PortalServiceImpl implements PortalService {
 				group.setInstanceConfig(config);
 			}else if(Widget.fromCode(group.getWidget()) == Widget.BANNERS){
 				BannersInstanceConfig config = new BannersInstanceConfig();
+				if (!StringUtils.isEmpty(itemGroup.getInstanceConfig())) {
+				    config = (BannersInstanceConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), BannersInstanceConfig.class);
+                }
 				if(StringUtils.isEmpty(group.getStyle())){
 					group.setStyle(BannerStyle.DEFAULT.getCode());
 				}
