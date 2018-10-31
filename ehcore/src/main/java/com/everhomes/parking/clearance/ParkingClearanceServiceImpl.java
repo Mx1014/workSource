@@ -194,7 +194,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(Long orgId, Long parkingLotId) {
-        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) &&
+        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
                 !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
@@ -517,19 +517,20 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         } else if (actionType == ActionType.PARKING_CLEARANCE_TASK){
 
         }
-
+        CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         List<ParkingLot> parkingLots = new ArrayList<>();
         if (cmd.getParkingLotId() != null) {
             ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
             if (parkingLot != null) {
 //                parkingLots.add(parkingLot);
             	checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
+                status = CheckAuthorityStatus.SUCCESS;
+                message = null;
             }
         } else {
             parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
         }
 
-        CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
