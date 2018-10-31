@@ -88,5 +88,4 @@ ENGINE=InnoDB
 ALTER TABLE `eh_service_alliances` ADD COLUMN `update_time` DATETIME NULL DEFAULT NULL COMMENT '更新时间' ;
 ALTER TABLE `eh_service_alliances`	ADD COLUMN `update_uid` BIGINT NULL COMMENT '更新用户id' ;
 ALTER TABLE `eh_service_alliance_application_records` ADD COLUMN `update_time` DATETIME NULL DEFAULT NULL COMMENT '更新时间' ;
-ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
 -- end
