@@ -94,7 +94,7 @@ public class NashornEngineServiceImpl implements NashornEngineService {
             return null;
         });
         // 线程内的线程池
-        rawExecutorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("flow-nashorn-engine-raw-"));
+        rawExecutorService = Executors.newFixedThreadPool(N, new CustomizableThreadFactory("flow-nashorn-engine-raw-"));
         start();
     }
 
