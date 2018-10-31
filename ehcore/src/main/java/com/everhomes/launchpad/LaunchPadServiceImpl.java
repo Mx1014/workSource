@@ -3238,6 +3238,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				app = new ServiceModuleApp();
 				app.setModuleId(-10000L);
 				app.setOriginId(0L);
+			}else if(ActionType.fromCode(item.getActionType()) == ActionType.ROUTER || ActionType.fromCode(item.getActionType()) == ActionType.NAVIGATION){
+				//路由 actionType=60、二级门户actionType=2
+				app = new ServiceModuleApp();
+				app.setModuleId(250000L);
+				app.setOriginId(0L);
 			}
 
 
@@ -3264,6 +3269,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
 					host = "app-management";
 					path = "/all";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+				}else if(ActionType.fromCode(item.getActionType()) == ActionType.NAVIGATION || ActionType.fromCode(item.getActionType()) == ActionType.ROUTER){
+					host = "container";
+					path = "/index";
 					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}
 
