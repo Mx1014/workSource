@@ -964,25 +964,26 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             String contactName = memberDetail != null ? memberDetail.getContactName() : UserContext.current().getUser().getNickName();
             String logContent = generalApprovalValChangeLogUtils.changeLog(befores, afters, contactName);
 
-            trackChangeLog(flowCase, cmd.getFlowNodeId(), contactName, logContent);
+            trackChangeLog(flowCase.getRootFlowCaseId(), contactName, logContent);
             return null;
         });
     }
 
-    private void trackChangeLog(FlowCase flowCase, Long flowNodeId, String flowUserName, String logContent) {
+    private void trackChangeLog(Long rootFlowCaseId, String flowUserName, String logContent) {
+        FlowCase rootFlowCase = flowService.getFlowCaseById(rootFlowCaseId);
         FlowPostSubjectCommand flowPostSubjectCommand = new FlowPostSubjectCommand();
-        flowPostSubjectCommand.setFlowEntityId(flowNodeId);
+        flowPostSubjectCommand.setFlowEntityId(rootFlowCase.getCurrentNodeId());
         flowPostSubjectCommand.setFlowEntityType(FlowEntityType.FLOW_NODE.getCode());
         flowPostSubjectCommand.setContent(logContent);
         FlowSubjectDTO subject = flowService.postSubject(flowPostSubjectCommand);
         FlowEventLog log = new FlowEventLog();
         log.setId(flowEventLogProvider.getNextId());
-        log.setFlowMainId(flowCase.getFlowMainId());
-        log.setFlowVersion(flowCase.getFlowVersion());
-        log.setNamespaceId(flowCase.getNamespaceId());
-        log.setFlowNodeId(flowNodeId);
-        log.setFlowCaseId(flowCase.getId());
-        log.setStepCount(flowCase.getStepCount());
+        log.setFlowMainId(rootFlowCase.getFlowMainId());
+        log.setFlowVersion(rootFlowCase.getFlowVersion());
+        log.setNamespaceId(rootFlowCase.getNamespaceId());
+        log.setFlowNodeId(rootFlowCase.getCurrentNodeId());
+        log.setFlowCaseId(rootFlowCase.getId());
+        log.setStepCount(rootFlowCase.getStepCount());
         log.setSubjectId(subject.getId());
         log.setParentId(0L);
         log.setFlowUserId(UserContext.currentUserId());
@@ -996,9 +997,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
         logList.add(log);
 
         FlowAutoStepDTO flowAutoStepDTO = new FlowAutoStepDTO();
-        flowAutoStepDTO.setFlowCaseId(flowCase.getId());
-        flowAutoStepDTO.setFlowNodeId(flowNodeId);
-        flowAutoStepDTO.setStepCount(flowCase.getStepCount());
+        flowAutoStepDTO.setFlowCaseId(rootFlowCase.getId());
+        flowAutoStepDTO.setFlowNodeId(rootFlowCase.getCurrentNodeId());
+        flowAutoStepDTO.setStepCount(rootFlowCase.getStepCount());
         flowAutoStepDTO.setAutoStepType(FlowStepType.NO_STEP.getCode());
         flowAutoStepDTO.setEventType(FlowEventType.BUTTON_FIRED.getCode());
         flowAutoStepDTO.setEventLogs(logList);

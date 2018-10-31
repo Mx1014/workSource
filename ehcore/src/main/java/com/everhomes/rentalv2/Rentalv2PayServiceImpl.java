@@ -745,13 +745,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (cmd.getPaymentStatus() != null) {
             Rentalv2OrderRecord record;
             BigDecimal couponAmount = new BigDecimal(0);
-            if (cmd.getMerchantOrderId() != null) {
-                record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
-                record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
-                rentalv2AccountProvider.updateOrderRecord(record);
-                couponAmount = changePayAmount(cmd.getCouponAmount());
-            } else
+
+            record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            if (record == null)
                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
+            rentalv2AccountProvider.updateOrderRecord(record);
+            couponAmount = changePayAmount(cmd.getCouponAmount());
+
             RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
             order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
             order.setAccountName(record.getAccountName()); //记录收款方账号
