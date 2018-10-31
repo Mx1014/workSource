@@ -354,9 +354,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
-
-        this.validate(cmd);
-        this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
         if(!userPrivilegeMgr.checkSuperAdmin(currUserId(), cmd.getOrganizationId())){
         	LOGGER.info("no auth privilege");
         } else {
@@ -367,6 +364,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         } else {
         	LOGGER.info("have auth APPLICANT");
         }
+        this.validate(cmd);
+        this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
+
         ParkingClearanceLog log = new ParkingClearanceLog();
         log.setNamespaceId(cmd.getNamespaceId());
         log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
