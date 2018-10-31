@@ -12,7 +12,7 @@ public class XssCleaner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XssCleaner.class);
 
-    private static final String ANTISAMY_SLASHDOT_XML = "antisamy-anythinggoes.xml";
+    private static final String ANTISAMY_SLASHDOT_XML = "antisamy-rule.xml";
     private static Policy policy = null;
 
     static {

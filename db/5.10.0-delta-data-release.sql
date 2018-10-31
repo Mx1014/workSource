@@ -16,7 +16,7 @@
 -- select * from eh_payment_variables;
 
 -- AUTHOR:杨崇鑫 20181027
--- REMARK:解决缺陷 #39571: 
+-- REMARK:解决缺陷 #39571:
 -- 第一步请执行在es上执行db/search/energy_task.sh
 -- 第二步执行同步接口/energy/syncEnergyTaskIndex
 
@@ -40,50 +40,23 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 set @module_id=230000; -- 模块Id（运维分配的）
 set @data_type='property-statistic';-- 前端发给你的页面跳转链接
 -- 新增模块 eh_service_modules
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`) 
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`)
 VALUES (230000, '资产报表中心', 130000, '/200/130000/230000', 1, 3, 2, 10, UTC_TIMESTAMP(), NULL, NULL, UTC_TIMESTAMP(), 0, 0, '0', 0, 'unlimit_control', 1, 0, NULL, NULL, 1, 1, 'module');
 -- 新增模块菜单 eh_web_menus
 -- 左邻后台:zuolin、园区：park
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
 	VALUES (79850000, '资产报表中心', 17000000, NULL, @data_type, 1, 2, '/27000000/17000000/79850000', 'zuolin', 10, 230000, 3, 'system', 'module', NULL, 1);
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) 
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
 	VALUES (79860000, '资产报表中心', 49000000, NULL, @data_type, 1, 2, '/40000040/49000000/79860000', 'park', 10, 230000, 3, 'system', 'module', 2, 1);
 
 
--- AUTHOR:黄明波
--- REMARK:服务联盟数据迁移，待续
--- 迁移 start
--- 迁移1.调整ca表的ownerType和ownerId
-update eh_service_alliance_categories ca, eh_service_alliances sa 
-set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
-,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
-where ca.parent_id = 0 and sa.`type` = ca.id;
 
 
--- 迁移2.调整ca表子类的ownerType ownerId, type
-update eh_service_alliance_categories  cag1,  eh_service_alliance_categories  cag2 
-set cag1.owner_type = cag2.owner_type, cag1.owner_id = cag2.owner_id, cag1.`type` = cag2.`type` 
-where cag1.parent_id = cag2.id;
 
 
--- 迁移3.更新ca表skip_rule
-update eh_service_alliance_categories ca, eh_service_alliance_skip_rule sr 
-set ca.skip_type = 1, ca.delete_uid = -100 where ca.id = sr.service_alliance_category_id and sr.id is not null and ca.namespace_id = sr.namespace_id;
 
 
--- 迁移4.tag表填充ownerType ownerId
-update eh_alliance_tag tag, eh_service_alliances sa 
-set tag.owner_type = sa.owner_type, tag.owner_id = sa.owner_id 
-where tag.type = sa.type and sa.parent_id = 0 and tag.type <> 0 ;
 
--- 迁移5.jumpType应用跳转时，设置为3 
-update eh_service_alliances 
-set  integral_tag1 = 3
-where module_url not like 'zl://approva%' and  module_url not like 'zl://form%' and  module_url is not null and integral_tag1 = 2;
-
-
--- 迁移6.添加基础数据
-DELIMITER $$  -- 开始符
 
 CREATE PROCEDURE alliance_transfer_add_base_ca(
 
@@ -244,6 +217,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100016', 'zh_CN', '账号长度不对或格式错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100017', 'zh_CN', '账号一经设定，无法修改');
 
+-- AUTHOR: 黄良铭
+-- REMARK: 修改积分系统状态
+UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 
 -- AUTHOR: 严军
 -- REMARK: 客户端处理方式
@@ -473,6 +449,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
 UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
 
+
 -- AUTHOR:黄鹏宇 2018年10月22日
 -- REMARK:将计划任务中的拜访时间改为计划时间
 update eh_var_fields set display_name = '计划时间' where display_name='拜访时间' and group_id = 20;
@@ -484,111 +461,21 @@ update eh_var_field_scopes set field_display_name = '计划时间' where field_d
 update eh_service_modules set client_handler_type = 2 where id = 25000;
 update eh_service_modules set client_handler_type = 2 where id = 150020;
 
--- 资产管理系统
-UPDATE eh_web_menus set parent_id = 15000000, sort_num = 25 WHERE id = 20000000;
-UPDATE eh_web_menus set parent_id = 15000000, sort_num = 5 WHERE id = 21000000;
-UPDATE eh_web_menus set parent_id = 15000000, sort_num = 90 WHERE id = 22000000;
-UPDATE eh_web_menus SET path = replace(path, '/11000000/', '/15000000/') WHERE parent_id in (20000000, 21000000, 22000000) OR id in (20000000, 21000000, 22000000);
-UPDATE eh_web_menus SET `status` = 0 WHERE id = 11000000;
-UPDATE eh_web_menus SET `status` = 0 WHERE id = 23020000;
-UPDATE eh_web_menus set parent_id = 25000000, sort_num = 30 WHERE id = 16050000;
-UPDATE eh_web_menus SET path = replace(path, '/26000000/', '/25000000/') WHERE parent_id = 16050000 OR id = 16050000;
-UPDATE eh_web_menus SET `status` = 0 WHERE id = 26000000;
-UPDATE eh_web_menus SET `name` = '资管物业业务' WHERE id = 25000000;
-UPDATE eh_web_menus set `name` = '园区运营业务' WHERE id = 16000000;
-UPDATE eh_web_menus set `name` = '企业办公业务' WHERE id = 23000000;
-UPDATE eh_web_menus set `name` = '统计分析业务' WHERE id = 27000000;
 
 
 
--- AUTHOR: 严军 2018-10-21
--- REMARK: issue-null 增加模块路由
-update eh_service_modules set host = 'bulletin'  where id = 	10300;
-update eh_service_modules set host = 'activity'  where id = 	10600;
-update eh_service_modules set host = 'post'  where id = 	10100;
-update eh_service_modules set host = 'group'  where id = 	10750;
-update eh_service_modules set host = 'group'  where id = 	10760;
-update eh_service_modules set host = 'approval'  where id = 	52000;
-update eh_service_modules set host = 'work-report'  where id = 	54000;
-update eh_service_modules set host = 'file-management'  where id = 	55000;
-update eh_service_modules set host = 'remind'  where id = 	59100;
-update eh_service_modules set host = 'meeting-reservation'  where id = 	53000;
-update eh_service_modules set host = 'video-conference'  where id = 	50700;
-update eh_service_modules set host = 'enterprise-bulletin'  where id = 	57000;
-update eh_service_modules set host = 'enterprise-contact'  where id = 	50100;
-update eh_service_modules set host = 'attendance'  where id = 	50600;
-update eh_service_modules set host = 'salary'  where id = 	51400;
-update eh_service_modules set host = 'station'  where id = 	40200;
-update eh_service_modules set host = 'news-feed'  where id = 	10800;
-update eh_service_modules set host = 'questionnaire'  where id = 	41700;
-update eh_service_modules set host = 'hot-line'  where id = 	40300;
-update eh_service_modules set host = 'property-repair'  where id = 	20100;
-update eh_service_modules set host = 'resource-reservation'  where id = 	40400;
-update eh_service_modules set host = 'visitor'  where id = 	41800;
-update eh_service_modules set host = 'parking'  where id = 	40800;
-update eh_service_modules set host = 'vehicle-release'  where id = 	20900;
-update eh_service_modules set host = 'cloud-print'  where id = 	41400;
-update eh_service_modules set host = 'item-release'  where id = 	49200;
-update eh_service_modules set host = 'decoration'  where id = 	22000;
-update eh_service_modules set host = 'service-alliance'  where id = 	40500;
-update eh_service_modules set host = 'wifi'  where id = 	41100;
-update eh_service_modules set host = 'park-enterprises'  where id = 	33000;
-update eh_service_modules set host = 'park-settle'  where id = 	40100;
-update eh_service_modules set host = 'property-payment'  where id = 	20400;
-update eh_service_modules set host = 'property-inspection'  where id = 	20800;
-update eh_service_modules set host = 'quality'  where id = 	20600;
-update eh_service_modules set host = 'energy-management'  where id = 	49100;
-update eh_service_modules set host = 'customer-management'  where id = 	21100;
-
-update eh_service_modules set host = 'access-control'  where id = 	41000;
-update eh_service_modules set client_handler_type = 2  where id = 	40700;
-update eh_service_modules set client_handler_type = 2  where id = 	10800;
-
--- AUTHOR: st.zheng
--- REMARK: 增加商户管理模块及菜单
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`) VALUES ('210000', '商户管理', '170000', '/200/170000/210000', '1', '3', '2', '110', '2018-03-19 17:52:57', NULL, NULL, '2018-03-19 17:53:11', '0', '0', '0', '0', 'community_control', '1', '1', 'module');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79820000', '商户管理', '16400000', NULL, 'business-management', '1', '2', '/16000000/16400000/79820000', 'zuolin', '120', '210000', '3', 'system', 'module', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('79830000', '商户管理', '56000000', NULL, 'business-management', '1', '2', '/40000040/56000000/79830000', 'park', '120', '210000', '3', 'system', 'module', '2');
-
--- AUTHOR: st.zheng
--- REMARK: 资源预订3.7.1
-ALTER TABLE `eh_rentalv2_resources`
-MODIFY COLUMN `aclink_id`  text  NULL AFTER `default_order`;
-ALTER TABLE `eh_rentalv2_orders`
-MODIFY COLUMN `door_auth_id`  text  NULL AFTER `auth_end_time`;
-update eh_rentalv2_orders set pay_channel = 'normal' where pay_channel is null;
 
 
--- AUTHOR: 缪洲 20180930
--- REMARK: issue-34780 增加企业支付授权页面
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES (79800000, '企业支付授权', 16300000, NULL, 'payment-privileges', 1, 2, '/16000000/16300000/79800000', 'zuolin', 8, 200000, 3, 'system', 'module', NULL, 1);
-INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES (79810000, '企业支付授权', 55000000, NULL, 'payment-privileges', 1, 2, '/40000040/55000000/79810000', 'park', 2, 200000, 3, 'system', 'module', NULL, 1);
-INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`) VALUES (200000, '企业支付授权', 140000, '/200/140000', 1, 3, 2, 10, '2018-09-26 16:51:46', '{}', 13, '2018-09-26 16:51:46', 0, 0, '0', NULL, 'community_control', 1, 1, 'module', NULL, 0, NULL, NULL);
 
--- AUTHOR: liangqishi
--- REMARK: 把原来统一订单的配置项前缀gorder改为prmt 20181006
-UPDATE `eh_configurations` SET `value`=REPLACE(`value`, 'gorder', 'prmt') WHERE `name`='gorder.server.connect_url';
-UPDATE `eh_configurations` SET `name`='prmt.server.connect_url' WHERE `name`='gorder.server.connect_url';
-UPDATE `eh_configurations` SET `name`='prmt.server.app_key' WHERE `name`='gorder.server.app_key';
-UPDATE `eh_configurations` SET `name`='prmt.server.app_secret' WHERE `name`='gorder.server.app_secret';
-UPDATE `eh_configurations` SET `name`='prmt.default.personal_bind_phone' WHERE `name`='gorder.default.personal_bind_phone';
-UPDATE `eh_configurations` SET `name`='prmt.system_id' WHERE `name`='gorder.system_id';
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
 
--- AUTHOR: 缪洲 20180930
--- REMARK: issue-34780 增加未支付推送与短信模板
-INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (3421, 'sms.default', 83, 'zh_CN', '未支付短信', '您有一笔云打印的订单未支付，请到云打印-打印记录中进行支付。', 0);
+-- AUTHOR:严军 201801030
+-- REMARK: issue-null 设置路由相关参数
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
+UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
 
--- AUTHOR: 缪洲 201801011
--- REMARK: issue-34780 删除打印设置规则
-DELETE FROM `eh_service_modules` WHERE parent_id = 41400 AND id = 41430;
-DELETE FROM `eh_acl_privileges` WHERE id = 4140041430;
-DELETE FROM `eh_service_module_privileges` WHERE privilege_id = 4140041430;
 
--- AUTHOR: 梁燕龙 20181026
--- REMARK: 行业协会路由修改
-UPDATE eh_service_modules SET instance_config = '{"isGuild":1}' WHERE id = 10760;
-UPDATE eh_service_module_apps SET instance_config = '{"isGuild":1}' WHERE module_id = 10760;
- 
+
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('punch.create','1','zh_CN','打卡发送消息','${createType}: ${punchTime}','0');
@@ -820,6 +707,8 @@ SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
 
 
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
@@ -830,6 +719,17 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- AUTHOR: xq.tian
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
+
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-standard
+-- DESCRIPTION: 此SECTION只在左邻标准版执行的脚本
+
+-- AUTHOR: xq.tian
+-- REMARK: 标准版数据库的标识
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+  VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
@@ -885,6 +785,12 @@ DELETE FROM eh_namespaces WHERE id=2;
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+
+-- AUTHOR: 黄良铭
+-- REMARK: 新增ＩＤ为1的积分系统
+INSERT INTO `eh_point_systems` (`id`, `namespace_id`, `display_name`, `point_name`, `point_exchange_flag`, `exchange_point`, `exchange_cash`, `user_agreement`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES('1','0','固定数据','固定数据　','1','1','2','','2','2018-10-27 10:48:04.621','2',NULL,NULL);
+
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 
 
@@ -894,8 +800,6 @@ DELETE FROM eh_namespaces WHERE id=2;
 
 -- AUTHOR: xq.tian
 -- REMARK: 越空间独立部署的 root 用户的密码修改为: eh#1802
-UPDATE eh_users SET password_hash='4eaded9b566765a1e70e2e0dc45204c14c4b9df41507a6b72c7cc7fe91d85341', salt='3023538e14053565b98fdfb2050c7709'
-WHERE account_name='root' AND namespace_id=0;
 
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 
@@ -905,14 +809,7 @@ WHERE account_name='root' AND namespace_id=0;
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
 -- AUTHOR:梁燕龙  20181022
 -- REMARK: 瑞安个人中心跳转URL
-INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
-VALUES ('ruian.point.url','https://m.mallcoo.cn/a/user/10764/Point/List','瑞安积分跳转URL',999929, '瑞安积分跳转URL');
-INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
-VALUES ('ruian.vip.url','https://m.mallcoo.cn/a/custom/10764/xtd/Rights','瑞安会员跳转URL',999929, '瑞安会员跳转URL');
-INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
-VALUES ('ruian.order.url','/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix','瑞安订单跳转URL',999929, '瑞安订单跳转URL');
-INSERT INTO eh_configurations (name, value, description)
-VALUES ('ruian.coupon.url','https://inno.xintiandi.com/promotion/app-coupon?systemId=16#/','瑞安新天地卡券链接');
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 

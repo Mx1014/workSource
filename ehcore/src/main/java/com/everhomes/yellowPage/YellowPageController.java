@@ -2,6 +2,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.servicehotline.GetChatGroupListCommand;
@@ -272,6 +273,7 @@ public class YellowPageController  extends ControllerBase {
    	 */
     @RequestMapping("updateServiceAllianceEnterprise")
     @RestReturn(value=String.class)
+    @XssExclude
     public RestResponse updateServiceAllianceEnterprise(@Valid UpdateServiceAllianceEnterpriseCommand cmd) {
     	 this.yellowPageService.updateServiceAllianceEnterprise(cmd);
     	 RestResponse response = new RestResponse();

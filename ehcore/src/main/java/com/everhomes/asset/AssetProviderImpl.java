@@ -591,6 +591,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<ListBillsDTO> listBills(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommand cmd) {
+    	LOGGER.info("AssetProviderImpl listBills currentNamespaceId={}, cmd={}", currentNamespaceId, cmd.toString());
         //卸货
         String contractNum = cmd.getContractNum();
         Long ownerId = cmd.getOwnerId();

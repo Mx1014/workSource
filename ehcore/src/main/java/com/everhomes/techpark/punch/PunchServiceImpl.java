@@ -1418,12 +1418,9 @@ public class PunchServiceImpl implements PunchService {
         // 计算加班时间
         calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
 
-        if (pr != null && PunchRuleType.GUDING == PunchRuleType.fromCode(pr.getRuleType())) {
-            return pdl;
-        }
         // ptr.getId()==0  包含休息和未安排班次
         if (ptr != null && ptr.getId() == 0) {
-            if (NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
+            if (pr != null && PunchRuleType.PAIBAN == PunchRuleType.fromCode(pr.getRuleType()) && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                 pdl.setStatusList(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode() + "");
                 punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             } else {
@@ -10730,7 +10727,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(pdl.getDetailId());
         if(null != pdl.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(pdl.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(pdl.getUserId());
         if(null != pdl.getUserId() && pdl.getUserId() > 0L){
@@ -10907,7 +10906,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(statistic.getDetailId());
         if(null != statistic.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(statistic.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){
