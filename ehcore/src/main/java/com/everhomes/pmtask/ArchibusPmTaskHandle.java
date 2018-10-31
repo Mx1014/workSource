@@ -162,7 +162,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         String order_date = req.getParameter("order_date");
         String order_time = req.getParameter("order_time");
 
-        if("4".equals(service_id)){
+        if("4".equals(record_type)){
             if(StringUtils.isBlank(order_date)){
                 SimpleDateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd ");
                 order_date = dateFormat.format(new Date());
