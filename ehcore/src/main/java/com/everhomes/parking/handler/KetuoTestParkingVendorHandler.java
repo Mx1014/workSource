@@ -27,6 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -39,7 +40,7 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 
 	static final String RECHARGE = "/api/wec/PayCarCardFee";
 	private static final String GET_CARD = "/api/wec/GetCarCardInfo";
-	private static final String GET_TYPES = "/api/pay/GetCarTypeList";
+	private static final String GET_FREE_SPACE_NUM = "/api/wec/GetFreeSpaceNum";
 	private static final String GET_CARD_RULE = "/api/wec/GetCarCardRule2";
 	private static final String GET_TEMP_FEE = "/api/wec/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/wec/PayParkingFee2";
@@ -51,7 +52,11 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 	static final String RULE_TYPE = "1";
 	//月租车 : 2
 	static final String CAR_TYPE = "2";
-    
+	String URL = configProvider.getValue("parking.ketuotest.url", "http://220.160.111.118:8099/");
+	String appId = configProvider.getValue("parking.ketuotest.appId", "1");
+	String appSecret = configProvider.getValue("parking.ketuotest.appId", "b20887292a374637b4a9d6e9f940b1e6");
+	String parkId = configProvider.getValue("parking.ketuotest.parkId", "1");
+	
 	@Override
     public List<ParkingCardDTO> listParkingCardsByPlate(ParkingLot parkingLot, String plateNumber) {
         
@@ -152,13 +157,12 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		param.put("carType", ruleId);
     	String parkId = "1";
 
-        String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+GET_CARD_RULE;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+        String urlPath = URL+GET_CARD_RULE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = parkId + ruleId + iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
     	param.put("parkId", parkId);
 		param.put("ruleId", ruleId);
@@ -180,15 +184,13 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		
 		//科托月卡车没有 归属地区分
     	plateNumber = plateNumber.substring(1, plateNumber.length());
-    	String parkId = "1";
 
-        String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+GET_CARD;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+        String urlPath = URL+GET_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = parkId + plateNumber + iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
     	param.put("parkId", parkId);
 		param.put("plateNo", plateNumber);
@@ -209,8 +211,7 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
     boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+PAY_TEMP_FEE;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+		String urlPath = URL+PAY_TEMP_FEE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         Integer amount = (order.getOriginalPrice().multiply(new BigDecimal(100))).intValue();
@@ -220,7 +221,7 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
         String freeTime = "0";
         String p = order.getOrderToken() + amount + payType + payMethod + freeMoney + freeTime + iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
         param.put("orderNo", order.getOrderToken());
         param.put("amount", amount);
@@ -273,13 +274,12 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		}
 
 
-		String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+GET_CARD;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+		String urlPath = URL+GET_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = order.getOrderToken() + order.getOriginalPrice() + iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
     	param.put("orderNo", order.getOrderToken());
 		param.put("amount", order.getOriginalPrice());
@@ -356,15 +356,12 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 	private KetuoTempFee getTempFee(String plateNumber) {
 		KetuoTempFee tempFee = null;
 		JSONObject param = new JSONObject();
-		String parkId = "1";
-
-        String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+GET_TEMP_FEE;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+        String urlPath = URL+GET_TEMP_FEE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = parkId + plateNumber + iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
     	param.put("parkId", parkId);
 		param.put("plateNo", plateNumber);
@@ -519,14 +516,12 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		String startTime = Utils.dateToStr(tempStart, Utils.DateStyle.DATE_TIME);
 		Timestamp tempEnd = Utils.getTimestampByAddDistanceMonthV2(tempTime, order.getMonthCount().intValue());
 		String endTime = Utils.dateToStr(tempEnd, Utils.DateStyle.DATE_TIME);
-		String parkId = "1";
-        String urlPath = configProvider.getValue("parking.yuekongjian.url", "")+ ADD_MONTH_CARD;
-        String appSecret = configProvider.getValue("parking.yuekongjian.key", "");
+        String urlPath = URL+ ADD_MONTH_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
         String p = parkId + order.getPlateNumber() +"2" +startTime+ endTime +  iv + appSecret;
         String key = MD5Utils.getMD5(p);
-        param.put("appId", "1");
+        param.put("appId", appId);
         param.put("key", key);
     	param.put("parkId", parkId);
 		param.put("plateNo", order.getPlateNumber());
@@ -554,6 +549,64 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 		return false;
 	}
 
+    @Override
+    public ParkingFreeSpaceNumDTO getFreeSpaceNum(GetFreeSpaceNumCommand cmd) {
+		ParkingFreeSpaceNumDTO dto = ConvertHelper.convert(cmd, ParkingFreeSpaceNumDTO.class);
+
+		KexingFreeSpaceNum kexingFreeSpaceNum = getFreeSpaceNum();
+
+		if (null != kexingFreeSpaceNum) {
+			dto.setFreeSpaceNum(kexingFreeSpaceNum.getFreeSpaceNum());
+
+			return dto;
+		}
+		return null;
+    }
+    
+	private KexingFreeSpaceNum getFreeSpaceNum() {
+
+
+		LinkedHashMap<String, Object> param = new LinkedHashMap<>();
+		param.put("parkId", parkId);
+
+		JSONObject params = createRequestParam(param);
+		String json = Utils.post(URL + GET_FREE_SPACE_NUM, params);
+
+		KetuoJsonEntity<KexingFreeSpaceNum> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KexingFreeSpaceNum>>(){});
+
+		if(entity.isSuccess()){
+			List<KexingFreeSpaceNum> list = entity.getData();
+			if(null != list && !list.isEmpty()) {
+				return list.get(0);
+			}
+		}
+		return null;
+	}
+	
+	private JSONObject createRequestParam(LinkedHashMap<String, Object> param) {
+
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+		StringBuilder sb = new StringBuilder();
+		Set<Map.Entry<String, Object>> entries = param.entrySet();
+		for (Map.Entry entry: entries) {
+			sb.append(entry.getValue());
+		}
+
+		String str = sb.append(sdf.format(new Date())).append(appSecret).toString();
+		String key = MD5Utils.getMD5(str);
+
+		JSONObject params = new JSONObject();
+		params.put("appId", appId);
+		params.put("key", key );
+
+		for (Map.Entry entry: entries) {
+			params.put((String)entry.getKey(), entry.getValue());
+		}
+
+		return params;
+	}
 	abstract protected KetuoRequestConfig getKetuoRequestConfig();
 
 }
