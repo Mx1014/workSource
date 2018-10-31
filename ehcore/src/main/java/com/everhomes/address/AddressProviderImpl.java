@@ -1253,7 +1253,7 @@ public class AddressProviderImpl implements AddressProvider {
 				       .and(Tables.EH_COMMUNITIES.NAMESPACE_COMMUNITY_TOKEN.eq(thirdPartyToken))
 				       .fetchAnyInto(Community.class);
 	}
-	
+
     //SELECT COUNT(*) FROM eh_addresses WHERE namespace_id!=0 AND `status`=2;
     @Override
     public int getTotalApartmentCount() {
@@ -1266,7 +1266,7 @@ public class AddressProviderImpl implements AddressProvider {
                 .fetchAnyInto(Integer.class);
     }
 
-    //SELECT
+//SELECT
 //	a.id,
 //	a.community_id,
 //	a.community_name,
