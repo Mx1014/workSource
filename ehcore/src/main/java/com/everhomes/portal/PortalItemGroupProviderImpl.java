@@ -142,10 +142,9 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 	}
 
 	@Override
-	public List<PortalItemGroup> listBannerItemGroupByAppId(Long appId) {
-		String instanconfig = "%\"appId\":\""+appId+"\"%";
+	public List<PortalItemGroup> listBannerItemGroupByAppId(String instanceConfig) {
 		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
-				.where(Tables.EH_PORTAL_ITEM_GROUPS.INSTANCE_CONFIG.like(instanconfig))
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.INSTANCE_CONFIG.like(instanceConfig))
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.WIDGET.eq(Widget.BANNERS.getCode()))
                 .and(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.desc())

@@ -10,7 +10,7 @@ import java.util.List;
  *     <li>itemGroup: itemGroup</li>
  *      <li>categoryId: 应用入口ID</li>
  *      <li>appId: 应用ID</li>
- *      <Li>moreRouter: 查看更多路由  --非全屏轮播</Li>
+ *      <li>moreAppId: 查看更多应用originId  --非全屏轮播</li>
  *      <li>backgroundType: 背景类型，0：无，1：纯色，2：渐变  --非全屏轮播</li>
  *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播 格式：#FFFFFF</li>
  *      <li>topColor: 当背景类型为渐变时的顶部颜色  --非全屏轮播 格式：#FFFFFF</li>
@@ -34,7 +34,7 @@ public class Banners {
 
     private Long appId;
 
-    private String moreRouter;
+    private Long moreAppId;
 
     private Byte backgroundType;
 
@@ -80,12 +80,12 @@ public class Banners {
         this.appId = appId;
     }
 
-    public String getMoreRouter() {
-        return moreRouter;
+    public Long getMoreAppId() {
+        return moreAppId;
     }
 
-    public void setMoreRouter(String moreRouter) {
-        this.moreRouter = moreRouter;
+    public void setMoreAppId(Long moreAppId) {
+        this.moreAppId = moreAppId;
     }
 
     public Byte getBackgroundType() {

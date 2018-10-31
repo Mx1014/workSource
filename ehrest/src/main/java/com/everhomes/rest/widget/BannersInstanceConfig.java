@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *      <li>categoryId: 应用入口ID</li>
- *      <li>appId: 应用ID</li>
- *      <Li>moreRouter: 查看更多路由  --非全屏轮播</Li>
+ *      <li>appId: 应用originID</li>
+ *      <li>moreAppId: 查看更多应用originId</li>
  *      <li>backgroundType: 背景类型，0：无，1：纯色，2：渐变  --非全屏轮播</li>
  *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播 格式：#FFFFFF</li>
  *      <li>topColor: 当背景类型为渐变时的顶部颜色  --非全屏轮播 格式：#FFFFFF</li>
@@ -33,7 +33,7 @@ public class BannersInstanceConfig implements Serializable  {
 
 	private Long appId;
 
-	private String moreRouter;
+	private Long moreAppId;
 
 	private Byte backgroundType;
 
@@ -52,6 +52,14 @@ public class BannersInstanceConfig implements Serializable  {
     private Long heightRatio;
 
     private Byte showDots;
+
+    public Long getMoreAppId() {
+        return moreAppId;
+    }
+
+    public void setMoreAppId(Long moreAppId) {
+        this.moreAppId = moreAppId;
+    }
 
     public Byte getShowDots() {
         return showDots;
@@ -91,14 +99,6 @@ public class BannersInstanceConfig implements Serializable  {
 
     public void setAppId(Long appId) {
         this.appId = appId;
-    }
-
-    public String getMoreRouter() {
-        return moreRouter;
-    }
-
-    public void setMoreRouter(String moreRouter) {
-        this.moreRouter = moreRouter;
     }
 
     public Byte getBackgroundType() {

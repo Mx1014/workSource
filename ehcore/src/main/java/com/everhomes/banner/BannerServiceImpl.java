@@ -635,8 +635,8 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd) {
         BannerInstanconfigDTO dto = new BannerInstanconfigDTO();
-
-        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(cmd.getOriginId());
+        String instanceConfig = "%\"appId\":\""+cmd.getOriginId()+"\"%";
+        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(instanceConfig);
         if (!CollectionUtils.isEmpty(list)) {
             PortalItemGroup portalItemGroup = list.get(0);
             if (portalItemGroup.getStyle().equals("Shape")) {

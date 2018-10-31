@@ -83,7 +83,7 @@ public class ItemGroupInstanceConfig {
 
 	private Long appId;
 
-	private String moreRouter;
+	private Long moreAppId;
 
 	private Byte backgroundType;
 
@@ -126,12 +126,12 @@ public class ItemGroupInstanceConfig {
 		this.appId = appId;
 	}
 
-	public String getMoreRouter() {
-		return moreRouter;
+	public Long getMoreAppId() {
+		return moreAppId;
 	}
 
-	public void setMoreRouter(String moreRouter) {
-		this.moreRouter = moreRouter;
+	public void setMoreAppId(Long moreAppId) {
+		this.moreAppId = moreAppId;
 	}
 
 	public Byte getBackgroundType() {

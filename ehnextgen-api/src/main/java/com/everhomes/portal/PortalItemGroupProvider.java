@@ -23,5 +23,5 @@ public interface PortalItemGroupProvider {
 
     List<PortalItemGroup> listPortalItemGroupByWidgetAndStyle(Integer namespaceId, Long versionId, String widget, String style);
 
-    List<PortalItemGroup> listBannerItemGroupByAppId(Long appId);
+    List<PortalItemGroup> listBannerItemGroupByAppId(String instanceConfig);
 }
