@@ -205,6 +205,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     private boolean checkApplyUser(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
         ParkingClearanceOperator applicant = clearanceOperatorProvider
                 .findByParkingLotIdAndUid(parkingLotId, currUserId(), operatorType.getCode());
+        
+        LOGGER.info("userID : " + currUserId() + " parkingLot : " + parkingLotId);
         if (applicant == null) {
             return false;
         }
