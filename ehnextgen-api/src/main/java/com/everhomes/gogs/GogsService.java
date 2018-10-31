@@ -17,7 +17,7 @@ public interface GogsService {
 
     GogsRepo getAnyRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId);
 
-    byte[] getFile(GogsRepo repo, String path, String lastCommit) throws GogsFileNotExistException;
+    byte[] getFile(GogsRepo repo, String path, String lastCommit) throws GogsNotExistException;
 
     GogsCommit commitFile(GogsRepo repo, String path, GogsRawFileParam param) throws GogsConflictException;
 

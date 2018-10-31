@@ -104,7 +104,7 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                 } finally {
                     LOGGER.debug("SyncDataTask task: {}", StringHelper.toJsonString(task));
                     syncDataTaskProvider.updateSyncDataTask(task);
-                    if(StringUtils.isNotBlank(task.getLockKey())) {
+                    if (StringUtils.isNotBlank(task.getLockKey())) {
                         releaseSyncLock(task.getLockKey());
                     }
                 }
@@ -259,30 +259,30 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
 
 
     @Override
-    public void createSyncErrorMsg(Integer namespaceId, Long taskId){
+    public void createSyncErrorMsg(Integer namespaceId, Long taskId) {
         List<Contract> contractList = contractProvider.listContractByNamespaceId(namespaceId);
-        for(Contract contract: contractList){
+        for (Contract contract : contractList) {
             ContractBuildingMapping mapping = addressProvider.findContractBuildingMappingByContractId(contract.getId());
-            if(contract.getCustomerId() == null || StringUtils.isBlank(contract.getCustomerName())){
+            if (contract.getCustomerId() == null || StringUtils.isBlank(contract.getCustomerName())) {
                 syncDataTaskProvider.createSyncErrorMsg(
                         namespaceId, "contract", contract.getId(), "contract-customer", "该合同无关联的客户，请确认合同和客户信息", taskId);
-            }else if(mapping.getAddressId() == null || StringUtils.isBlank(mapping.getBuildingName()) || StringUtils.isBlank(mapping.getApartmentName())){
+            } else if (mapping.getAddressId() == null || StringUtils.isBlank(mapping.getBuildingName()) || StringUtils.isBlank(mapping.getApartmentName())) {
                 syncDataTaskProvider.createSyncErrorMsg(
                         namespaceId, "contract", contract.getId(), "contract-address", "该合同无关联的门牌，请确认合同和资产信息", taskId);
             }
         }
 
         List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceId(namespaceId);
-        for(EnterpriseCustomer customer: customers){
+        for (EnterpriseCustomer customer : customers) {
             List<CustomerEntryInfo> infos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
-            if(infos != null && infos.size() > 0){
-                for(int i = 0 ; i < infos.size(); i++){
-                    if(infos.get(i).getAddressId() == null || infos.get(i).getAddressId() == 0 || infos.get(i).getBuildingId() == null || infos.get(i).getBuildingId() == 0){
-                        if(i == infos.size()-1){
+            if (infos != null && infos.size() > 0) {
+                for (int i = 0; i < infos.size(); i++) {
+                    if (infos.get(i).getAddressId() == null || infos.get(i).getAddressId() == 0 || infos.get(i).getBuildingId() == null || infos.get(i).getBuildingId() == 0) {
+                        if (i == infos.size() - 1) {
                             syncDataTaskProvider.createSyncErrorMsg(
                                     namespaceId, "customer", customer.getId(), "customer-address", "该客户无关联的门牌，请确认客户和资产信息", taskId);
                         }
-                    }else{
+                    } else {
                         break;
                     }
                 }
@@ -292,12 +292,12 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     }
 
     @Override
-    public List<ContractDTO> listContractErrorMsg(SearchContractCommand cmd){
+    public List<ContractDTO> listContractErrorMsg(SearchContractCommand cmd) {
         List<ContractDTO> contracts = new ArrayList<>();
         List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), "contract", null, 999999);
-        for(SyncDataError syncDataError : syncDataErrors){
+        for (SyncDataError syncDataError : syncDataErrors) {
             Contract contract = contractProvider.findContractById(syncDataError.getOwnerId());
-            ContractDTO contractDTO = ConvertHelper.convert(contract,ContractDTO.class);
+            ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
             contractDTO.setSyncErrorMsg(syncDataError.getErrorMessage());
             contracts.add(contractDTO);
         }
@@ -305,28 +305,28 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
     }
 
     @Override
-    public ListSyncDataErrorMsgResponse listSyncErrorMsg(ListSyncErrorMsgCommand cmd){
+    public ListSyncDataErrorMsgResponse listSyncErrorMsg(ListSyncErrorMsgCommand cmd) {
         ListSyncDataErrorMsgResponse response = new ListSyncDataErrorMsgResponse();
 
         Long anchor = 9999999l;
-        if(cmd.getNextPageAnchor() != null) {
+        if (cmd.getNextPageAnchor() != null) {
             anchor = cmd.getNextPageAnchor();
         }
-        if(cmd.getSyncType().equals("customer")){
+        if (cmd.getSyncType().equals("customer")) {
             cmd.setTaskId(cmd.getTaskId() + 1);
         }
         List<SyncDataError> syncDataErrors = syncDataTaskProvider.listSyncErrorMsgByTaskId(cmd.getTaskId(), cmd.getSyncType(), anchor, cmd.getPageSize() + 1);
-        List<SyncDataErrorDTO> results = syncDataErrors.stream().map( r -> {
+        List<SyncDataErrorDTO> results = syncDataErrors.stream().map(r -> {
             return ConvertHelper.convert(r, SyncDataErrorDTO.class);
         }).collect(Collectors.toList());
-        if(syncDataErrors.size() > cmd.getPageSize()) {
+        if (syncDataErrors.size() > cmd.getPageSize()) {
             syncDataErrors.remove(syncDataErrors.size() - 1);
-            SyncDataError last = syncDataErrors.get(syncDataErrors.size()-1);
+            SyncDataError last = syncDataErrors.get(syncDataErrors.size() - 1);
             response.setNextPageAnchor(last.getId());
         }
 
-        if(cmd.getSyncType().equals("contract")){
-            for(SyncDataErrorDTO error : results) {
+        if (cmd.getSyncType().equals("contract")) {
+            for (SyncDataErrorDTO error : results) {
                 String handler = configurationProvider.getValue(cmd.getNamespaceId(), "contractService", "");
                 ContractService contractService = PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
                 FindContractCommand cmdc = new FindContractCommand();
@@ -337,8 +337,8 @@ public class SyncDataTaskServiceImpl implements SyncDataTaskService {
                 ContractDetailDTO contractDTO = contractService.findContract(cmdc);
                 error.setContract(contractDTO);
             }
-        }else if(cmd.getSyncType().equals("customer")){
-            for(SyncDataErrorDTO error : results) {
+        } else if (cmd.getSyncType().equals("customer")) {
+            for (SyncDataErrorDTO error : results) {
                 EnterpriseCustomerDTO customer = ConvertHelper.convert(enterpriseCustomerProvider.findById(error.getOwnerId()), EnterpriseCustomerDTO.class);
                 error.setCustomerDTO(customer);
             }

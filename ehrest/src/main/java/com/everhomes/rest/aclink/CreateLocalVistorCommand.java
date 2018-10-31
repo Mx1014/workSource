@@ -3,7 +3,10 @@ package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul> 添加访客授权。
@@ -43,6 +46,18 @@ public class CreateLocalVistorCommand {
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
 	private String headImgUri;
+
+	@ItemType(CreateCustomFieldCommand.class)
+	private List<CreateCustomFieldCommand> list;
+
+	public List<CreateCustomFieldCommand> getList() {
+		return list;
+	}
+
+	public void setList(List<CreateCustomFieldCommand> list) {
+		this.list = list;
+	}
+
 	public String getPhone() {
 		return phone;
 	}

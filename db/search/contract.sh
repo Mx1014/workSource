@@ -30,6 +30,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 			"contractEndDate":{"type":"date"},
 			"updateTime":{"type":"date"},
 			"categoryId":{"type":"long"},
+			"depositStatus":{"type":"byte"},
 			"rent":{"type":"double"}
 		}
 	}

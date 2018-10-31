@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.module.ServiceModuleAppType;
 import com.everhomes.rest.module.ServiceModuleSceneType;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -264,6 +265,7 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 
 		return  apps;
 	}
+
 
 	@Override
 	public List<ServiceModuleApp> listServiceModuleAppsByAppTypeAndKeyword(Long versionId, Byte appType, String keyword) {
@@ -544,5 +546,23 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 		return apps;
 	}
 
+
+
+	@Override
+	public List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePayFlag) {
+		Condition cond = Tables.EH_SERVICE_MODULE_APPS.VERSION_ID.eq(versionId);
+
+		if(enableEnterprisePayFlag != null && enableEnterprisePayFlag == 1){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ENABLE_ENTERPRISE_PAY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+		}else {
+			cond = cond.and(Tables.EH_SERVICE_MODULE_APPS.ENABLE_ENTERPRISE_PAY_FLAG.ne(TrueOrFalseFlag.TRUE.getCode()));
+		}
+
+		return getReadOnlyContext().select().from(Tables.EH_SERVICE_MODULE_APPS)
+				.where(cond)
+				.and(Tables.EH_SERVICE_MODULE_APPS.STATUS.eq(ServiceModuleAppStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
+	}
 
 }

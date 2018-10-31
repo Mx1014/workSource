@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>clientHandlerType: clientHandlerType</li>
  *     <li>routerPath: routerPath</li>
  *     <li>routerQuery: routerQuery</li>
+ *     <li>router: router</li>
  * </ul>
  */
 public class CardExtension {
@@ -27,6 +28,8 @@ public class CardExtension {
     private String routerPath;
 
     private String routerQuery;
+
+    private String router;
 
     public String getItemGroup() {
         return itemGroup;
@@ -74,6 +77,14 @@ public class CardExtension {
 
     public void setRouterQuery(String routerQuery) {
         this.routerQuery = routerQuery;
+    }
+
+    public String getRouter() {
+        return router;
+    }
+
+    public void setRouter(String router) {
+        this.router = router;
     }
 
     @Override

@@ -64,6 +64,10 @@ public class EnterpriseBulletinsHandler implements BulletinsHandler {
             card.setRouterPath("/detail");
             card.setRouterQuery(queryStr);
 
+            String host = "enterprise-bulletin";
+            String router = "zl://" + host + card.getRouterPath() + "?moduleId=57000&clientHandlerType=0&appId="+ context.getAppId()+"&" + card.getRouterQuery();
+            card.setRouter(router);
+
             cards.add(card);
         }
 

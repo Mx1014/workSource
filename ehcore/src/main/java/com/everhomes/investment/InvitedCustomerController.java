@@ -5,7 +5,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
+import com.everhomes.rest.customer.ListCustomerApartmentActivityCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
@@ -210,6 +212,21 @@ public class InvitedCustomerController extends ControllerBase {
     public RestResponse changeCustomerAptitude(@Valid SearchEnterpriseCustomerCommand cmd) {
         invitedCustomerService.changeCustomerAptitude(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/signCustomerDataToThird</b>
+     * <p>传送瑞安客户</p>
+     */
+    @RequestMapping("signCustomerDataToThird")
+    @RestReturn(value = String.class)
+    public RestResponse signCustomerDataToThird(@Valid SignCustomerDataToThirdCommand cmd) {
+        String url = invitedCustomerService.signCustomerDataToThird(cmd);
+        RestResponse response = new RestResponse(url);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

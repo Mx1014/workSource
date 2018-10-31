@@ -26,9 +26,9 @@ if not exist %prop_template_file% (
 REM Check if the pom.properties file exists, if not then copy from template
 set property_file=%project_dir%\pom.properties
 echo property_file=%property_file%
-REM if not exist %property_file% (
+if not exist %property_file% (
 	COPY "%prop_template_file%" "%property_file%" /Y
-REM )
+)
 
 echo Try to get the ehapp.version...
 for /f "tokens=1,2 delims==" %%a in (%property_file%) do (

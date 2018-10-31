@@ -2,6 +2,9 @@
 package com.everhomes.rest.asset;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.everhomes.rest.promotion.order.GoodDTO;
 
 /**
  *<ul>
@@ -11,16 +14,20 @@ import java.math.BigDecimal;
  * <li>sourceType:各个业务系统定义的唯一标识</li>
  * <li>sourceId:各个业务系统定义的唯一标识</li>
  * <li>sourceName:账单来源（如：停车缴费）</li>
- * <li>consumeUserId:企业下面的某个人的ID</li>
- * <li>thirdBillId:各个业务系统定义的唯一账单标识</li>
+ * <li>consumeUserId:记账人ID</li>
+ * <li>consumeUserName:记账人名称</li>
+ * <li>merchantOrderId:统一订单定义的唯一标识</li>
  * <li>targetType:客户类别,参考{@link com.everhomes.rest.asset.AssetTargetType}</li>
  * <li>targetId:客户id</li>
  * <li>targetName:客户名称</li>
- * <li>amountReceivable:应收金额（含税）</li>
+ * <li>amountReceivable:应收金额（含税）（原始总金额，不计算优惠的金额）</li>
+ * <li>exemptionAmount:优惠/减免金额</li>
+ * <li>exemptionRemark:优惠/减免的备注说明</li>
  * <li>isSettled:是否是已出账单,1:新增已出账单;0:新增未出账单（如何不传该参数，接口会自动根据账单组的设置去判断是已出或未出）</li>
  * <li>invoiceNum:发票单号</li>
  * <li>dateStrBegin:计费开始（不传默认当前时间）</li>
  * <li>dateStrEnd:计费结束（不传，默认按照当前时间+账单组的设置去计算得出）</li>
+ * <li>goodDTOList:商品信息列表,参考{@link com.everhomes.rest.promotion.order.GoodDTO}</li>
  *</ul>
  */
 public class CreateGeneralBillCommand {
@@ -31,15 +38,19 @@ public class CreateGeneralBillCommand {
     private Long sourceId;
     private String sourceName;
     private Long consumeUserId;
-    private String thirdBillId;
+    private String consumeUserName;
+    private String merchantOrderId;
     private String targetType;
     private Long targetId;
     private String targetName;
     private BigDecimal amountReceivable;
+    private BigDecimal exemptionAmount;
+    private String exemptionRemark;
     private String invoiceNum;
     private Byte isSettled;
     private String dateStrBegin;
     private String dateStrEnd;
+    private List<GoodDTO> goodDTOList;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -131,11 +142,35 @@ public class CreateGeneralBillCommand {
 	public void setDateStrEnd(String dateStrEnd) {
 		this.dateStrEnd = dateStrEnd;
 	}
-	public String getThirdBillId() {
-		return thirdBillId;
+	public BigDecimal getExemptionAmount() {
+		return exemptionAmount;
 	}
-	public void setThirdBillId(String thirdBillId) {
-		this.thirdBillId = thirdBillId;
+	public void setExemptionAmount(BigDecimal exemptionAmount) {
+		this.exemptionAmount = exemptionAmount;
+	}
+	public String getExemptionRemark() {
+		return exemptionRemark;
+	}
+	public void setExemptionRemark(String exemptionRemark) {
+		this.exemptionRemark = exemptionRemark;
+	}
+	public List<GoodDTO> getGoodDTOList() {
+		return goodDTOList;
+	}
+	public void setGoodDTOList(List<GoodDTO> goodDTOList) {
+		this.goodDTOList = goodDTOList;
+	}
+	public String getMerchantOrderId() {
+		return merchantOrderId;
+	}
+	public void setMerchantOrderId(String merchantOrderId) {
+		this.merchantOrderId = merchantOrderId;
+	}
+	public String getConsumeUserName() {
+		return consumeUserName;
+	}
+	public void setConsumeUserName(String consumeUserName) {
+		this.consumeUserName = consumeUserName;
 	}
     
 }

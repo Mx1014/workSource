@@ -13,6 +13,7 @@ import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
@@ -271,7 +272,10 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
     @Override
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType,
                              String dstChannelToken, MessageDTO message, int deliveryOption) {
-        if(namespacesService.isWechatNamespace(UserContext.getCurrentNamespaceId())){
+
+        Integer wxNamespaceFlag = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "wx.namespace.flag", 0);
+
+        if(wxNamespaceFlag != null && wxNamespaceFlag.intValue() == 1){
             routeMessageForWechat(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
         }else {
             routeMessageForApp(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
@@ -301,16 +305,19 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
             }
         }
 
-        String url = null;
+        String url = configProvider.getValue(UserContext.getCurrentNamespaceId(),"wx.default.template.url", "");
         String title = null;
         if(message.getMeta() != null ){
             Map meta = message.getMeta();
 
             if("message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
-                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
-                if(routerMetaObject != null){
-                    url = routerToUrl(routerMetaObject.getUrl());
-                }
+
+                url = url + "?routerMetaObject=" + meta.get(MessageMetaConstant.META_OBJECT);
+
+//                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
+//                if(routerMetaObject != null){
+//                    url = routerToUrl(routerMetaObject.getUrl());
+//                }
             }
 
             title = (String)meta.get(MessageMetaConstant.MESSAGE_SUBJECT);

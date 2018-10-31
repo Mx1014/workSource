@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ListPunchMembersResponse {
     private Integer nextPageOffset;
-    private Long total;
+    private Integer total;
     private List<PunchMemberDTO> punchMemberDTOS;
 
     public Integer getNextPageOffset() {
@@ -24,11 +24,11 @@ public class ListPunchMembersResponse {
         this.nextPageOffset = nextPageOffset;
     }
 
-    public Long getTotal() {
+    public Integer getTotal() {
         return total;
     }
 
-    public void setTotal(Long total) {
+    public void setTotal(Integer total) {
         this.total = total;
     }
 

@@ -160,8 +160,14 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(),null,null); 
 		if (null == yellowPage) {
 			LOGGER.error("formItemsInfo:"+formItemsInfo);
-			throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
 			return;
+		}
+		
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		if (null != match) {
+			flowCase.setTitle(match.getCategoryName());
 		}
 		
 		StringBuffer contentBuffer = new StringBuffer();
@@ -475,7 +481,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(flowCase.getReferId(), null, null);
 		if (null == yellowPage) {
 			LOGGER.error("flowCaseInfo:"+flowCase.toString());
-			throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
 		}
 		
 		entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));

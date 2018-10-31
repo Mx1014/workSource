@@ -5,6 +5,7 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.print.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SiyinPrintService {
@@ -72,11 +74,17 @@ public interface SiyinPrintService {
 
 	void mfpLogNotificationV2(MfpLogNotificationV2Command cmd, HttpServletResponse response);
 
-    void notifySiyinprintOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+    void notifySiyinprintOrderPaymentV2(MerchantPaymentNotificationCommand cmd);
 
     void initPayeeAccount(MultipartFile[] files);
 
 	String getSiyinServerUrl();
 
     void mfpLogNotification(MfpLogNotificationCommand cmd);
+
+	void updatePrintOrder(SiyinPrintOrder order, String payOrderNo);
+
+	PayPrintGeneralOrderResponse payPrintGeneralOrder(PayPrintGeneralOrderCommand cmd);
+
+	GetPrintOrdersResponse getPrintOrder(GetPrintOrdersCommand cmd);
 }

@@ -43,4 +43,6 @@ public interface AllianceStandardService {
 	String transferApprovalToForm();
 
 	String transferPadItems();
+
+	ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type);
 }

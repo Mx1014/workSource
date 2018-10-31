@@ -125,6 +125,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		}
 
 		punchProvider.createPunchExceptionRequest(request);
+		refreshPunchDayLog(flowCase, ga, request);
 		String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(ApprovalServiceConstants.VACATION_BALANCE_DEC_FOR_ASK_FOR_LEAVE), UserContext.current().getUser().getLocale(), "");
 		updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) -1, description);
 	}
@@ -148,7 +149,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			request.setStatus(ApprovalStatus.REJECTION.getCode());
 			punchProvider.updatePunchExceptionRequest(request);
 		}
-
+		refreshPunchDayLog(flowCase, ga, request);
 		String description = localeStringService.getLocalizedString(ApprovalServiceConstants.SCOPE, String.valueOf(code), UserContext.current().getUser().getLocale(), "");
 		// 返还假期余额
 		updateVacationBalance(flowCase.getApplyUserId(), ga, request, (byte) 1, description);
@@ -162,7 +163,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			return;
 		}
 		// 如果流程删除之前是审批通过状态，则删除以后，需要重新校准考勤状态，否则不需要
-		boolean showRefreshPunchDayLog = ApprovalStatus.AGREEMENT == ApprovalStatus.fromCode(request.getStatus());
+		boolean showRefreshPunchDayLog = ApprovalStatus.REJECTION != ApprovalStatus.fromCode(request.getStatus());
 		boolean showUpdateVacationBalance = ApprovalStatus.REJECTION != ApprovalStatus.fromCode(request.getStatus());
 		punchProvider.deletePunchExceptionRequest(request);
 		// 审批单被驳回后已经退回余额，所以删除以后不需要再退
@@ -200,15 +201,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		try {
 			// 如果审批类型是-加班请假等,重刷影响日期的pdl
 			if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
-				PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
-				if (pr != null) {
-					Calendar punCalendar = Calendar.getInstance();
-					punCalendar.setTime(request.getBeginTime());
-					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-					punCalendar.setTime(request.getEndTime());
-					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
-				}
+				refreshPunchDayLog(flowCase, ga, request);
 			}
 			punchNotificationService.setPunchNotificationInvalidBackground(request, ga.getNamespaceId(), new Date());
 		} catch (Exception e) {
@@ -219,6 +212,29 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		addVacationBalanceHistoryCount(flowCase.getApplyUserId(), ga, request, (byte) 1);
 
 		return request;
+	}
+
+	private void refreshPunchDayLog(FlowCase flowCase, GeneralApproval ga, PunchExceptionRequest request) {
+		try {
+			if (punchService.getTimeIntervalApprovalAttribute().contains(ga.getApprovalAttribute())) {
+				PunchRule pr = punchService.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), ga.getOrganizationId(), flowCase.getApplyUserId());
+				if (pr != null) {
+					Calendar punCalendar = Calendar.getInstance();
+					punCalendar.setTime(request.getBeginTime());
+					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punCalendar.setTime(request.getEndTime());
+					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
+					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+				}
+			} else if (GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH) {
+				Calendar punCalendar = Calendar.getInstance();
+				punCalendar.setTime(request.getPunchDate());
+				OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(request.getUserId(), request.getEnterpriseId());
+				punchService.refreshPunchDayLog(memberDetail, punCalendar);
+			}
+		} catch (Exception e) {
+			LOGGER.error("flow case create refreshPunchDayLog error ", e);
+		}
 	}
 
 	private void addVacationBalanceHistoryCount(Long userId, GeneralApproval ga, PunchExceptionRequest request, byte operation) {

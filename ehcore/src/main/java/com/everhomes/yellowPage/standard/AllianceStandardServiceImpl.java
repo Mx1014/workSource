@@ -10,6 +10,9 @@ import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.jooq.impl.UpdatableRecordImpl;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -53,6 +56,7 @@ import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
@@ -455,7 +459,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			return null;
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId ;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
@@ -473,11 +477,11 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		// 查看当前项目下配置状态
 		AllianceConfigState state = allianceConfigStateProvider.findConfigState(type, ownerId);
 		if (isEnableSelfConfig(state)) {
-			return yellowPageProvider.listCategories(locator, pageSize, ownerType, organizationId, namespaceId, null,
+			return yellowPageProvider.listCategories(locator, pageSize, ownerType, ownerId, namespaceId, null,
 					type, null, isQueryChild);
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
@@ -511,23 +515,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		serviceCategoryMatchProvider.updateMatchCategoryName(type, categoryId, categoryName);
 	}
 	
-	private void reNewCommonReqParam(AllianceCommonCommand cmd, boolean isByScene) {
-		
-		String ownerType = cmd.getOwnerType();
-		Long ownerId = cmd.getOwnerId();
-		if (isByScene && ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
-			AllianceConfigState state = allianceConfigStateProvider.findConfigState(cmd.getType(),ownerId);
-			if (isDisableSelfConfig(state)) {
-				ownerType = ServiceAllianceBelongType.ORGANAIZATION.getCode();
-				ownerId = getOrgIdByTypeAndProjectId(cmd.getType(), ownerId);
-			}
-		}
-		
-		cmd.setOwnerType(ownerType);
-		cmd.setOwnerId(ownerId);
-	}
-	
-	
 	@Override
 	public String transferApprovalToForm() {
 		
@@ -536,7 +523,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		dbProvider.execute(r->{
 			totalUpdate.append(" service:").append(saveFormFlowId()); //更新serviceAlliance的moduleUrl
 			totalUpdate.append(" approval:").append(transferToFormVal()); //保存approvalVal
-			totalUpdate.append(" flowcase").append(transferFlowCases());//更新flowcase
+			totalUpdate.append(" flowcase").append(transferFlowCases()); //更新flowcase
 			return null;
 		});
 		
@@ -721,5 +708,22 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		return "u:"+update;
 	}
 	
+	@Override
+	public ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type) {
+		
+		ConfigCommand cmd = new ConfigCommand();
+		cmd.setOwnerType(ownerType);
+		cmd.setOwnerId(ownerId);
+		
+		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			AllianceConfigState state = allianceConfigStateProvider.findConfigState(type,ownerId);
+			if (isDisableSelfConfig(state)) {
+				cmd.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+				cmd.setOwnerId(getOrgIdByTypeAndProjectId(type, ownerId));
+			}
+		}
+		
+		return cmd;
+	}
 	
 }

@@ -25,11 +25,11 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.express.*;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.OrderErrorCode;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.print.PayPrintOrderCommandV2;
@@ -47,6 +47,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -1608,7 +1609,7 @@ public class ExpressServiceImpl implements ExpressService {
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getOwnerId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         LOGGER.info("preOrderCommand:"+StringHelper.toJsonString(preOrderCommand));
         return preOrderCommand;
@@ -1626,7 +1627,7 @@ public class ExpressServiceImpl implements ExpressService {
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();

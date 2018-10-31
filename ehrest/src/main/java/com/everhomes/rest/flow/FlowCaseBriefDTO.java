@@ -12,6 +12,7 @@ import java.util.List;
  *     <li>id: id</li>
  *     <li>applyUserId: 申请人id</li>
  *     <li>applyUserName: 申请人名称</li>
+ *     <li>contactAvatar:用户头像</li>
  *     <li>flowMainId: flow main id</li>
  *     <li>ownerType: ownerType</li>
  *     <li>ownerId: ownerId</li>
@@ -51,6 +52,7 @@ public class FlowCaseBriefDTO {
     private Long id;
     private Long applyUserId;
     private String applyUserName;
+    private String contactAvatar;
     private Long flowMainId;
     private String ownerType;
     private Long ownerId;
@@ -115,6 +117,14 @@ public class FlowCaseBriefDTO {
 
     public void setApplyUserName(String applyUserName) {
         this.applyUserName = applyUserName;
+    }
+
+    public String getContactAvatar() {
+        return contactAvatar;
+    }
+
+    public void setContactAvatar(String contactAvatar) {
+        this.contactAvatar = contactAvatar;
     }
 
     public Long getFlowMainId() {

@@ -22,28 +22,32 @@ import java.util.List;
  * <li>formAttribute: 表单属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
  * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
  * <li>deleteFlag: 是否可修改 0-不可删除 1-可以删除</li>
+ * <li>flowNodeId: 工作流节点ID</li>
+ * <li>flowCaseId: 工作流ID</li>
  * </ul>
  * @author janson
  *
  */
 public class GeneralFormDTO {
-    private Long     id;
-    private Long     ownerId;
-    private String     ownerType;
-    private Long     moduleId;
-    private String     moduleType;
-    private Long     organizationId;
-    private Long     formOriginId;
-    private Long     formVersion;
-    private Timestamp     updateTime;
-    private Integer     namespaceId;
-    private String     formName;
-    private Byte     status;
-    private String     templateType;
-    private String     templateText;
-    private Timestamp     createTime;
+	private Long id;
+	private Long ownerId;
+	private String ownerType;
+	private Long moduleId;
+	private String moduleType;
+	private Long organizationId;
+	private Long formOriginId;
+	private Long formVersion;
+	private Timestamp updateTime;
+	private Integer namespaceId;
+	private String formName;
+	private Byte status;
+	private String templateType;
+	private String templateText;
+	private Timestamp createTime;
+	private Long flowNodeId;
+	private Long flowCaseId;
 
-    //added by R
+	//added by R
 	private String formAttribute;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
@@ -209,6 +213,22 @@ public class GeneralFormDTO {
 
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
+	}
+
+	public Long getFlowNodeId() {
+		return flowNodeId;
+	}
+
+	public void setFlowNodeId(Long flowNodeId) {
+		this.flowNodeId = flowNodeId;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
 	}
 
 	@Override

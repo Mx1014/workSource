@@ -90,7 +90,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 	private DbProvider dbProvider;
 	
 	@Autowired
-	FlowProvider flowProvider;
+	private FlowProvider flowProvider;
 
 	@Override
 	public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {

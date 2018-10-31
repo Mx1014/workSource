@@ -5720,8 +5720,73 @@ public class ForumServiceImpl implements ForumService {
         List<Long> organizationIds = new ArrayList<>();
 
         organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-        
+        if (communityId == null) {
+            parseData(communityIds, organizationIds, cmd.getSceneToken());
+        }
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
+    }
+
+    //兼容旧版本app
+    private void parseData(List<Long> communityIds, List<Long> organizationIds, String sceneTokenStr) {
+        Long userId = UserContext.currentUserId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, sceneTokenStr);
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        Long communityId = null;
+        switch(sceneType) {
+            case DEFAULT:
+            case PARK_TOURIST:
+                communityId = sceneToken.getEntityId();
+                communityIds.add(communityId);
+                organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+                break;
+            case FAMILY:
+                FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+                if(family != null) {
+                    communityId = family.getCommunityId();
+                    communityIds.add(communityId);
+                    organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+                } else {
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                    }
+                }
+                break;
+            case ENTERPRISE:
+            case ENTERPRISE_NOAUTH:
+                // 对于普通公司，也需要取到其对应的管理公司，以便拿到管理公司所发的公告
+                OrganizationDTO org = organizationService.getOrganizationById(sceneToken.getEntityId());
+                if(org != null) {
+                    communityId = org.getCommunityId();
+                    if(communityId == null) {
+                        LOGGER.error("No community found for organization, organizationId={}, sceneToken={}",
+                            sceneToken.getEntityId(), sceneToken);
+                    } else {
+                        communityIds.add(communityId);
+                        organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+                    }
+                } else {
+                    LOGGER.error("Organization not found, organizationId={}, sceneToken={}", sceneToken.getEntityId(), sceneToken);
+                }
+                break;
+            case PM_ADMIN:
+                Long organizationId = sceneToken.getEntityId();
+                org = organizationService.getOrganizationById(organizationId);
+                if(org != null) {
+                    organizationIds.add(organizationId);
+                    communityId = org.getCommunityId();
+                    if(communityId == null) {
+                        LOGGER.error("No community found for organization, organizationId={}, sceneToken={}",
+                            sceneToken.getEntityId(), sceneToken);
+                    }else {
+                        communityIds.add(communityId);
+                        organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+                    }
+                }
+                break;
+            default:
+                LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+                break;
+	    }
     }
 
     @Override
@@ -5825,9 +5890,6 @@ public class ForumServiceImpl implements ForumService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
 
-        //标准版没有场景
-        //SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        //SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         
       //检查游客是否能继续访问此场景 by xiongying 20161009
         //userService.checkUserScene(sceneType);
@@ -5854,16 +5916,30 @@ public class ForumServiceImpl implements ForumService {
 
         AppContext appContext = UserContext.current().getAppContext();
         List<TopicFilterDTO> filterList = null;
+        //标准版融合兼容旧APP
+        SceneType sceneType = null;
+        SceneTokenDTO sceneToken = null;
+        if (appContext.getCommunityId() == null) {
+            sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+            sceneType= SceneType.fromCode(sceneToken.getScene());
+        }
+
         PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
         if(filterType == null) {
             LOGGER.error("Unsupported post filter type, cmd={}, appContext={}", cmd, appContext);
             return filterList;
         }
-        
-        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + "park_tourist";
+        //兼容旧版本
+        String handlerEnd = "park_tourist";
+        if (sceneType != null) {
+            handlerEnd = sceneToken.getScene();
+        }else {
+            sceneToken = null;
+        }
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + handlerEnd;
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
-            filterList = handler.getTopicQueryFilters(user, null);
+            filterList = handler.getTopicQueryFilters(user, sceneToken);
         } else {
             LOGGER.error("No handler found for post quering filter, cmd={}, appContext={}, handlerName={}", cmd, appContext, handlerName);
         }
