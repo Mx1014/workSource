@@ -636,20 +636,17 @@ public class BannerServiceImpl implements BannerService {
     public BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd) {
         BannerInstanconfigDTO dto = new BannerInstanconfigDTO();
 
-        ServiceModuleApp serviceModuleApp = this.serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getOriginId());
-        if (serviceModuleApp != null) {
-            List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(serviceModuleApp.getId());
-            if (!CollectionUtils.isEmpty(list)) {
-                PortalItemGroup portalItemGroup = list.get(0);
-                if (portalItemGroup.getStyle().equals("Shape")) {
-                    dto.setWidthRatio(22L);
-                    dto.setHeightRatio(10L);
-                }else {
-                    BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
-                    if (config != null) {
-                        dto.setWidthRatio(config.getWidthRatio());
-                        dto.setHeightRatio(config.getHeightRatio());
-                    }
+        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(cmd.getOriginId());
+        if (!CollectionUtils.isEmpty(list)) {
+            PortalItemGroup portalItemGroup = list.get(0);
+            if (portalItemGroup.getStyle().equals("Shape")) {
+                dto.setWidthRatio(22L);
+                dto.setHeightRatio(10L);
+            }else {
+                BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
+                if (config != null) {
+                    dto.setWidthRatio(config.getWidthRatio());
+                    dto.setHeightRatio(config.getHeightRatio());
                 }
             }
         }
