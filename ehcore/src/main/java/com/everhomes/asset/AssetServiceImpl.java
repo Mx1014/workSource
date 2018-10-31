@@ -5203,24 +5203,27 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
-	//djm 公司欠费关闭相应的门禁权限
+	// djm 公司欠费关闭相应的门禁权限（缴费对接门禁）
 	@Override
 	public void setDoorAccessParam(SetDoorAccessParamCommand cmd) {
 		AssetDooraccessParam assetDooraccessParam = ConvertHelper.convert(cmd, AssetDooraccessParam.class);
-		
 		if (null == cmd.getCategoryId() || null == cmd.getOrgId() || null == cmd.getOwnerId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		assetDooraccessParam.setOwnerType(EntityType.COMMUNITY.getCode());
 		AssetDooraccessParam existParam = assetProvider.findDoorAccessParamByParams(cmd);
 		// 更新
-		if (existParam !=null) {
-			//assetDooraccessParam = assetProvider.findDoorAccessParamById(cmd.getId());
-			existParam.setFreezeDays(cmd.getFreezeDays());
-			existParam.setUnfreezeDays(cmd.getUnfreezeDays());
-			assetProvider.updateDoorAccessParam(existParam);
+		if (existParam != null) {
+			// 冻结门禁参数为空删除参数记录
+			if (cmd.getFreezeDays() == null) {
+				existParam.setStatus((byte) 0);
+				assetProvider.updateDoorAccessParam(existParam);
+			} else {
+				existParam.setFreezeDays(cmd.getFreezeDays());
+				existParam.setUnfreezeDays(cmd.getUnfreezeDays());
+				assetProvider.updateDoorAccessParam(existParam);
+			}
 		} else {
 			assetProvider.createDoorAccessParam(assetDooraccessParam);
 		}
@@ -5228,13 +5231,7 @@ public class AssetServiceImpl implements AssetService {
 
 	@Override
 	public ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd) {
-
 		List<AssetDooraccessParam> list = assetProvider.listDooraccessParams(cmd);
-		/*
-		 * if (list.size() < 1 && cmd.getOrgId() != null) {
-		 * cmd.setOwnerId(null); list = assetProvider.listDooraccessParams(cmd);
-		 * }
-		 */
 		ListDoorAccessParamResponse response = new ListDoorAccessParamResponse();
 		if (list.size() > 0) {
 			List<DoorAccessParamDTO> resultList = list.stream().map((c) -> {
@@ -5246,9 +5243,21 @@ public class AssetServiceImpl implements AssetService {
 		return response;
 	}
 
+	@Override
+	public List<AssetDooraccessParam> getDoorAccessParamList() {
+		List<AssetDooraccessParam> list = assetProvider.listDooraccessParamsList();
+		return list;
+	}
+
+	public void deletAassetDooraccessLog() {
+		AssetDooraccessLog existDooraccessLog = new AssetDooraccessLog();
+		// 更新门禁为开启
+		existDooraccessLog.setStatus((byte) 0);
+		assetProvider.deleteAllDoorAccessLog(existDooraccessLog);
+	}
+
 	/**
-	 * djm 
-	 * 缴费欠费，对接门禁，先查询开启门禁，然后再去关门禁，部分缴费门禁还是需要关闭
+	 * djm 缴费欠费，对接门禁，先查询开启门禁，然后再去关门禁，部分缴费门禁还是需要关闭
 	 */
 	@Override
 	public void meterAutoReading(Boolean createPlansFlag) {
@@ -5256,12 +5265,14 @@ public class AssetServiceImpl implements AssetService {
 		LOGGER.debug("starting auto closeAssetDoorAccess...");
 		openAssetDoorAccess();
 		LOGGER.debug("ending auto closeAssetDoorAccess...");
+		// 删除记录信息，设置能立即生效
+		// deletAassetDooraccessLog();
 		// 开启门禁
 		LOGGER.debug("starting auto openAssetDoorAccess...");
 		closeAssetDoorAccess();
 		LOGGER.debug("ending auto openAssetDoorAccess...");
 	}
-	
+
 	private void openAssetDoorAccess() {
 		// 双机判断
 		if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -5272,151 +5283,134 @@ public class AssetServiceImpl implements AssetService {
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 			Date today = new Date();
 			coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
-				// 根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
-				Long nextPageAnchor = 0l;
-				while (nextPageAnchor != null) {
-					// 0，表示未缴，1 已缴
-					Byte status = AssetBillStatusType.PAID.getCode();
-					SettledBillRes res = assetProvider.getAssetDoorAccessBills(pageSize, pageAnchor, status);
-					List<PaymentBills> bills = res.getBills();
+				// 先去读配置，再去循环账单
+				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList();
+				// 循环配置项
+				for (AssetDooraccessParam doorAccessParam : listDoorAccessParam) {
+					// 循环符合调件的账单，打开门禁
+					Long nextPageAnchor = 0l;
+					while (nextPageAnchor != null) {
+						// 0，表示未缴，1 已缴 开启门禁
+						Byte status = AssetBillStatusType.PAID.getCode();
+						SettledBillRes res = assetProvider.getAssetDoorAccessBills(pageSize, pageAnchor, status, doorAccessParam);
+						List<PaymentBills> bills = res.getBills();
+						// 0，表示未缴，1 已缴 未缴开门禁，天数小于设置天数，并且门禁已关闭过
+						status = AssetBillStatusType.UNPAID.getCode();
+						SettledBillRes resUNPAID = assetProvider.getAssetDoorAccessBillsUNPAID(pageSize, pageAnchor, status, doorAccessParam);
+						List<PaymentBills> billsUNPAID = resUNPAID.getBills();
 
-					// 更新账单
-					for (PaymentBills bill : bills) {
-						Long ownerId = bill.getOwnerId();
-						Long targetId = null;
-						String targetType = bill.getTargetType();
-						Integer paymentType = bill.getPaymentType();
-						Byte DooraccessTargetType = 0;
-						// 企业
-						if ("eh_organization".equals(targetType)) {
-							targetId = bill.getTargetId();
-							DooraccessTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
-						} else if ("eh_user".equals(targetType)) {
-							// assetDooraccessLog.setOwnerId(targetId);
-							targetId = bill.getTargetId();
-							DooraccessTargetType = DoorLicenseType.USER.getCode();
-						}
-
-						GetDoorAccessParamCommand getDoorAccessParamCommand = new GetDoorAccessParamCommand();
-						// 先去查询设置的参数
-						getDoorAccessParamCommand.setNamespaceId(bill.getNamespaceId());
-						getDoorAccessParamCommand.setCategoryId(bill.getCategoryId());
-						getDoorAccessParamCommand.setOwnerId(ownerId);
-						getDoorAccessParamCommand.setOwnerType(bill.getOwnerType());
-						DoorAccessParamDTO DoorAccessParam = null;
-						// 线下缴费不用去查配置
-						//if (paymentType != 0) {
-							ListDoorAccessParamResponse listDoorAccessParamResponse = getDoorAccessParam(
-									getDoorAccessParamCommand);
-							List<DoorAccessParamDTO> listDoorAccessParam = listDoorAccessParamResponse
-									.getDoorAccessParamDTOs();
-							if (listDoorAccessParam != null) {
-								DoorAccessParam = listDoorAccessParam.get(0);
-							} else {
-								continue;
+						bills.addAll(billsUNPAID);
+						// 查询账单都是满足配置条件的项
+						for (PaymentBills bill : bills) {
+							Long ownerId = bill.getOwnerId();
+							Long targetId = null;
+							String targetType = bill.getTargetType();
+							Integer paymentType = bill.getPaymentType();
+							Byte DooraccessTargetType = 0;
+							// 企业
+							if ("eh_organization".equals(targetType)) {
+								targetId = bill.getTargetId();
+								DooraccessTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
+							} else if ("eh_user".equals(targetType)) {
+								targetId = bill.getTargetId();
+								DooraccessTargetType = DoorLicenseType.USER.getCode();
 							}
-						//}
-
-						// 查询logs获取那些公司门禁已经关闭
-						// 禁门禁之前记录下
-						AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(getDoorAccessParamCommand, AssetDooraccessLog.class);
-						assetDooraccessLog.setProjectId(ownerId);
-						assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
-						assetDooraccessLog.setOwnerId(targetId);
-						assetDooraccessLog.setOwnerType(targetType);
-						if (DoorAccessParam != null) {
-							assetDooraccessLog.setOrgId(DoorAccessParam.getOrgId());
-						}
-						assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 已禁用
-						// 查询该企业是否已经禁用了门禁，为空是还没有禁用门禁，不为空，已存在，已禁用，跳过
-						// 过滤，发起过的关闭的公司
-						AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
-						if (existDooraccessLog != null) {
-							continue;
-						}
-
-						try {
-							// 非线下支付，需要获取支付时间
-							if (paymentType != 0) {
-								PaymentBillOrder paymentBillOrder = assetProvider.getPaymentBillOrderByBillId(bill.getId().toString());
-								if (paymentBillOrder != null && paymentBillOrder.getPaymentTime() != null) {
-									DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-									Date deadline = yyyyMMdd.parse(sdf.format(paymentBillOrder.getPaymentTime()));
-
-									Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
-
-									// 缴费完成时间大于设置的缴费多长时间开启门禁
-									if (dueDayCount.compareTo(DoorAccessParam.getUnfreezeDays()) >= 0) {
-										// 欠费时间大于等于设置的时间，禁用门禁
-										// 项目id,状态，管理公司id ,公司id, 类型 调用门禁接口
-										// 0表示关门禁
-
+							try {
+								Long dueDayCount = -1L;// 2000-01-01
+								// 非线下支付，需要获取支付时间
+								if (paymentType != null && paymentType != 0) {
+									PaymentBillOrder paymentBillOrder = assetProvider.getPaymentBillOrderByBillId(bill.getId().toString());
+									if (paymentBillOrder != null && paymentBillOrder.getPaymentTime() != null) {
+										DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+										Date deadline = yyyyMMdd.parse(sdf.format(paymentBillOrder.getPaymentTime()));
+										dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
+									} else {
+										LOGGER.info("PaymentBillOrder is error 获取支付时间失败, paymentBillOrder {}", paymentBillOrder);
+										continue;
+									}
+								} else {
+									if (bill.getStatus() == AssetBillStatusType.UNPAID.getCode()) {
 										UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
-
 										updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
-										updateFormalAuthByCommunityCommand.setOperateOrgId(DoorAccessParam.getOrgId());
+										updateFormalAuthByCommunityCommand.setOperateOrgId(doorAccessParam.getOrgId());
 										updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
 										updateFormalAuthByCommunityCommand.setTargetId(targetId);
 										updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
 
-										
-										UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
-										rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+										UpdateFormalAuthByCommunityResponse rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
 
-										assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());
-										existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
-
+										// 更新门禁记录表
+										AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(doorAccessParam, AssetDooraccessLog.class);
+										assetDooraccessLog.setProjectId(ownerId);
+										assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+										assetDooraccessLog.setOwnerId(targetId);
+										assetDooraccessLog.setOwnerType(targetType);
+										assetDooraccessLog.setOrgId(doorAccessParam.getOrgId());
+										AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 										// 更新门禁为开启
 										if (existDooraccessLog == null) {
-											assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
+											assetDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
 											assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 											assetProvider.createDoorAccessLog(assetDooraccessLog);
 										} else {
-											existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
+											existDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
 											existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
 											assetProvider.updateDoorAccessLog(existDooraccessLog);
 										}
+										continue;
+									}
+									// 线下缴费，取账单的最后更新时间，
+									DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+									Date deadline = yyyyMMdd.parse(sdf.format(bill.getUpdateTime()));
+									dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
+								}
+
+								// 缴费完成时间大于设置的缴费多长时间开启门禁
+								if (dueDayCount.compareTo(doorAccessParam.getUnfreezeDays()) >= 0) {
+									// 项目id,状态，管理公司id ,公司id, 类型 调用门禁接口
+									// 0表示取消门禁授权，1授予门禁权限
+
+									UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
+									updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
+									updateFormalAuthByCommunityCommand.setOperateOrgId(doorAccessParam.getOrgId());
+									updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
+									updateFormalAuthByCommunityCommand.setTargetId(targetId);
+									updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
+
+									UpdateFormalAuthByCommunityResponse rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+
+									// 更新门禁记录表
+									AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(doorAccessParam, AssetDooraccessLog.class);
+									assetDooraccessLog.setProjectId(ownerId);
+									assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+									assetDooraccessLog.setOwnerId(targetId);
+									assetDooraccessLog.setOwnerType(targetType);
+									assetDooraccessLog.setOrgId(doorAccessParam.getOrgId());
+									AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
+
+									// 更新门禁为开启
+									if (existDooraccessLog == null) {
+										assetDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
+										assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
+										assetProvider.createDoorAccessLog(assetDooraccessLog);
+									} else {
+										existDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
+										existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
+										assetProvider.updateDoorAccessLog(existDooraccessLog);
 									}
 								}
-							} else {
-								// 直接开启门禁
-								UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
-
-								updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
-								if (DoorAccessParam != null) {
-									updateFormalAuthByCommunityCommand.setOperateOrgId(DoorAccessParam.getOrgId());
-								}
-								updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
-								updateFormalAuthByCommunityCommand.setTargetId(targetId);
-								updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
-								
-								UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
-								rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
-
-								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());
-								existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
-
-								// 更新门禁为开启
-								if (existDooraccessLog == null) {
-									assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
-									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
-									assetProvider.createDoorAccessLog(assetDooraccessLog);
-								} else {
-									existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
-									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
-									assetProvider.updateDoorAccessLog(existDooraccessLog);
-								}
+							} catch (ParseException e) {
+								LOGGER.info("openAssetDoorAccess is error 门禁开启失败!");
+								continue;
 							}
-						} catch (Exception e) {
-							continue;
 						}
+						nextPageAnchor = res.getNextPageAnchor();
 					}
-					nextPageAnchor = res.getNextPageAnchor();
 				}
 			});
 		}
 	}
-	
+
 	private void closeAssetDoorAccess() {
 		// 双机判断
 		if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
@@ -5427,103 +5421,76 @@ public class AssetServiceImpl implements AssetService {
 			SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 			Date today = new Date();
 			coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
-				// 根据账单组的最晚还款日（eh_payment_bills ： due_day_deadline）以及当前时间计算欠费天数
-				Long nextPageAnchor = 0l;
-				while (nextPageAnchor != null) {
-					// 0，表示未缴，1 已缴
-					Byte status = AssetBillStatusType.UNPAID.getCode();
-					
-					SettledBillRes res = assetProvider.getAssetDoorAccessBills(pageSize, pageAnchor,status);
-					List<PaymentBills> bills = res.getBills();
-
-					// 更新账单
-					for (PaymentBills bill : bills) {
-						String dueDayDeadline = bill.getDueDayDeadline();
-						Long ownerId = bill.getOwnerId();
-						Long targetId = bill.getTargetId();
-						String targetType = bill.getTargetType();
-						Byte DooraccessTargetType = 0;
-						// 企业
-						if ("eh_organization".equals(targetType)) {
-							//targetId = bill.getTargetId();
-							DooraccessTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
-						} else if ("eh_user".equals(targetType)) {
-							// assetDooraccessLog.setOwnerId(targetId);
-							//targetId = bill.getTargetId();
-							DooraccessTargetType = DoorLicenseType.USER.getCode();
-						}
-
-						// 先去查询设置的参数
-						GetDoorAccessParamCommand getDoorAccessParamCommand = new GetDoorAccessParamCommand();
-						getDoorAccessParamCommand.setNamespaceId(bill.getNamespaceId());
-						getDoorAccessParamCommand.setCategoryId(bill.getCategoryId());
-						getDoorAccessParamCommand.setOwnerId(ownerId);
-						getDoorAccessParamCommand.setOwnerType(bill.getOwnerType());
-						ListDoorAccessParamResponse listDoorAccessParamResponse = getDoorAccessParam(getDoorAccessParamCommand);
-						List<DoorAccessParamDTO> listDoorAccessParam = listDoorAccessParamResponse.getDoorAccessParamDTOs();
-						DoorAccessParamDTO DoorAccessParam = null;
-						if (listDoorAccessParam != null) {
-							DoorAccessParam = listDoorAccessParam.get(0);
-						} else {
-							continue;
-						}
-
-						// 查询logs获取那些公司门禁已经关闭
-						// 禁门禁之前记录下
-						AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(getDoorAccessParamCommand, AssetDooraccessLog.class);
-						assetDooraccessLog.setProjectId(ownerId);
-						assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
-						assetDooraccessLog.setOwnerId(targetId);
-						assetDooraccessLog.setOwnerType(targetType);
-						assetDooraccessLog.setOrgId(DoorAccessParam.getOrgId());
-						assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 已禁用
-						// 查询该企业是否已经禁用了门禁，为空是还没有禁用门禁，不为空，已存在，已禁用，跳过
-						// 过滤，发起过的关闭的公司
-						AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
-						if (existDooraccessLog != null) {
-							continue;
-						}
-
-						try {
-							Date deadline = yyyyMMdd.parse(dueDayDeadline);
-							Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
-
-							if (dueDayCount.compareTo(DoorAccessParam.getFreezeDays()) >= 0) {
-								// 欠费时间大于等于设置的时间，禁用门禁
-								// 项目id,状态，管理公司id ,公司id, 类型 调用门禁接口 0表示关门禁
-
-								UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
-
-								updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
-								updateFormalAuthByCommunityCommand.setOperateOrgId(DoorAccessParam.getOrgId());
-								updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.INVALID.getCode());
-								updateFormalAuthByCommunityCommand.setTargetId(targetId);
-								updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
-
-								UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
-								rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
-
-								//原来的门禁开启状态，欠费后更新门禁状态，不存在则新增
-								assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());
-								existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
-								
-								//更新门禁为开启
-								
-								if (existDooraccessLog == null) {
-									assetDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
-									assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
-									assetProvider.createDoorAccessLog(assetDooraccessLog);
-								}else {
-									existDooraccessLog.setResultMsg(rsp.getErrorCode()+":"+rsp.getMsg());
-									existDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 禁用门禁
-									assetProvider.updateDoorAccessLog(existDooraccessLog);
-								}
+				// 先去读配置，再去循环账单
+				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList();
+				// 循环配置项
+				for (AssetDooraccessParam doorAccessParam : listDoorAccessParam) {
+					// 循环符合调件的账单，打开门禁
+					Long nextPageAnchor = 0l;
+					while (nextPageAnchor != null) {
+						// 0，表示未缴，1 已缴
+						Byte status = AssetBillStatusType.UNPAID.getCode();
+						SettledBillRes res = assetProvider.getAssetDoorAccessBills(pageSize, pageAnchor, status, doorAccessParam);
+						List<PaymentBills> bills = res.getBills();
+						// 查询账单都是满足配置条件的项
+						for (PaymentBills bill : bills) {
+							String dueDayDeadline = bill.getDueDayDeadline();
+							Long ownerId = bill.getOwnerId();
+							Long targetId = bill.getTargetId();
+							String targetType = bill.getTargetType();
+							Byte DooraccessTargetType = 0;
+							// 企业
+							if ("eh_organization".equals(targetType)) {
+								DooraccessTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
+							} else if ("eh_user".equals(targetType)) {
+								DooraccessTargetType = DoorLicenseType.USER.getCode();
 							}
-						} catch (Exception e) {
-							continue;
+
+							try {
+								// 线下缴费，取账单的最后更新时间，
+								Date deadline = yyyyMMdd.parse(dueDayDeadline);
+								Long dueDayCount = (today.getTime() - deadline.getTime()) / ((1000 * 3600 * 24));
+								// 缴费完成时间大于设置的缴费多长时间开启门禁
+								if (dueDayCount.compareTo(doorAccessParam.getFreezeDays()) >= 0) {
+									// 项目id,状态，管理公司id ,公司id, 类型 调用门禁接口
+									// 0表示取消门禁授权，1授予门禁权限
+
+									UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
+									updateFormalAuthByCommunityCommand.setCommunityId(ownerId);
+									updateFormalAuthByCommunityCommand.setOperateOrgId(doorAccessParam.getOrgId());
+									updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.INVALID.getCode());
+									updateFormalAuthByCommunityCommand.setTargetId(targetId);
+									updateFormalAuthByCommunityCommand.setTargetType(DooraccessTargetType);
+
+									UpdateFormalAuthByCommunityResponse rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+
+									// 更新门禁记录表
+									AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(doorAccessParam, AssetDooraccessLog.class);
+									assetDooraccessLog.setProjectId(ownerId);
+									assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+									assetDooraccessLog.setOwnerId(targetId);
+									assetDooraccessLog.setOwnerType(targetType);
+									assetDooraccessLog.setOrgId(doorAccessParam.getOrgId());
+									AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
+
+									// 更新门禁为开启
+									if (existDooraccessLog == null) {
+										assetDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
+										assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 关闭门禁
+										assetProvider.createDoorAccessLog(assetDooraccessLog);
+									} else {
+										existDooraccessLog.setResultMsg(rsp.getErrorCode() + ":" + rsp.getMsg());
+										existDooraccessLog.setDooraccessStatus(DoorAuthStatus.INVALID.getCode());// 关闭门禁
+										assetProvider.updateDoorAccessLog(existDooraccessLog);
+									}
+								}
+							} catch (ParseException e) {
+								LOGGER.info("openAssetDoorAccess is error 门禁开启失败!");
+								continue;
+							}
 						}
+						nextPageAnchor = res.getNextPageAnchor();
 					}
-					nextPageAnchor = res.getNextPageAnchor();
 				}
 			});
 		}
@@ -5535,14 +5502,13 @@ public class AssetServiceImpl implements AssetService {
 		assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
 		AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);
 		if (existDooraccessLog == null) {
-			assetDooraccessLog.setMsg("暂无该企业或者个人门禁信息");
+			assetDooraccessLog.setMsg("暂无门禁信息");
 			return assetDooraccessLog;
 		}
-		
 		if (existDooraccessLog.getDooraccessStatus() == 0) {
-			existDooraccessLog.setMsg("该企业或公司门禁处于全部关闭");
+			existDooraccessLog.setMsg("门禁处于全部关闭");
 		} else {
-			existDooraccessLog.setMsg("该企业或公司门禁处于开启状态");
+			existDooraccessLog.setMsg("门禁处于开启状态");
 		}
 		return existDooraccessLog;
 	}

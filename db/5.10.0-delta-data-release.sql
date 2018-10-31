@@ -788,6 +788,11 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
 
+-- AUTHOR: 丁建民 20181031
+-- REMARK: 缴费对接门禁。企业或者个人欠费将禁用该企业或个人门禁 定时器执行时间
+SET @id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,5 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 

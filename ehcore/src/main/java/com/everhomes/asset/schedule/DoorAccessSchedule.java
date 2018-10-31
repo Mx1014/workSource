@@ -46,7 +46,8 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 	
 	//定时任务时间  每天早上3点，5点刷自动读表
 	//static final String cronExpression = "0/10 * *  * * ?";
-	static final String cronExpression = "0 0 3,5 * * ?";
+	//static final String cronExpression = "0 0 3,5 * * ?";
+	//final String cronExpression = configurationProvider.getValue("asset.dooraccess.cronexpression", "");
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -56,6 +57,7 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 	}
 
 	public void init() {
+		String cronExpression = configurationProvider.getValue("asset.dooraccess.cronexpression", "");
 		String autoReading = "EnergyAutoReading " + System.currentTimeMillis();
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
 		LOGGER.info("================================================energyTaskServer: " + taskServer + ", equipmentIp: " + equipmentIp);

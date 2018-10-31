@@ -345,4 +345,5 @@ public interface AssetService {
 	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
 	void meterAutoReading(Boolean createPlanFlag);
 	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
+	List<AssetDooraccessParam> getDoorAccessParamList();
 }

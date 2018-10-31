@@ -37,6 +37,7 @@ import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListDoorAccessParamResponse;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
@@ -448,7 +449,7 @@ public interface AssetProvider {
 	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
 	AssetDooraccessParam findDoorAccessParamById(Long id);
 	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
-	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status);
+	
 	Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
@@ -470,4 +471,8 @@ public interface AssetProvider {
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
 	AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd);
+	List<AssetDooraccessParam> listDooraccessParamsList();
+	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
 }
