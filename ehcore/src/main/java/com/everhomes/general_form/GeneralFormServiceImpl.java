@@ -376,7 +376,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd) {
         //处理一下入参
-        cmd = processCreateApprovalForm(cmd);
+        List<GeneralFormFieldDTO> dtos = processGeneralFormField(cmd.getFormFields());
+        cmd.setFormFields(dtos);
 
         GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
         form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
@@ -394,7 +395,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
         return this.dbProvider.execute((TransactionStatus status) -> {
             //处理一下入参
-            List<GeneralFormFieldDTO> dtos = processUpdateApprovalForm(cmd.getFormFields());
+            List<GeneralFormFieldDTO> dtos = processGeneralFormField(cmd.getFormFields());
             cmd.setFormFields(dtos);
 
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
@@ -1003,26 +1004,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return new String(file, Charset.forName("UTF-8"));
     }
 
-    //对CreateApprovalFormCommand中的fieldType　为＂MULTI_SELECT＂的GeneralFormFieldDTO进行处理
-    private CreateApprovalFormCommand  processCreateApprovalForm(CreateApprovalFormCommand form){
-        if(form==null||CollectionUtils.isEmpty(form.getFormFields())){
-            return form ;
-        }
-        List<GeneralFormFieldDTO> dtos = form.getFormFields();
-        for(GeneralFormFieldDTO dto : dtos){
-            String type = dto.getFieldType();
-            if(GeneralFormFieldType.MULTI_SELECT.getCode().equals(type)){
-                String selectValue = dto.getFieldExtra();
-                selectValue = multiSelectTransferPingyin(selectValue);
-                dto.setFieldExtra(selectValue);
-            }
-        }
-        form.setFormFields(dtos);
-        return form ;
-    }
-
-    //对CreateApprovalFormCommand中的fieldType　为＂MULTI_SELECT＂的GeneralFormFieldDTO进行处理
-    private List<GeneralFormFieldDTO>  processUpdateApprovalForm(List<GeneralFormFieldDTO> dtos){
+    //对fieldType　为＂MULTI_SELECT＂的GeneralFormFieldDTO进行处理
+    private List<GeneralFormFieldDTO>  processGeneralFormField(List<GeneralFormFieldDTO> dtos){
         if(CollectionUtils.isEmpty(dtos)){
             return dtos ;
         }
