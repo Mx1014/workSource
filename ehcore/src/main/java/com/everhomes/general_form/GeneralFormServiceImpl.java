@@ -19,51 +19,10 @@ import com.everhomes.gogs.GogsRepoType;
 import com.everhomes.gogs.GogsService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.activity.ruian.ActivityCategoryList;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.general_approval.AddGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
-import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
-import com.everhomes.rest.general_approval.DisableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.DoFormMirrorCommand;
-import com.everhomes.rest.general_approval.EnableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
-import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormConstants;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormIdCommand;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateDTO;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GeneralFormTemplateType;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.GeneralFormValRequestStatus;
-import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
-import com.everhomes.rest.general_approval.SearchFormValDTO;
-import com.everhomes.rest.general_approval.SearchFormValsCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.VerifyApprovalFormNameCommand;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
@@ -71,11 +30,7 @@ import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.ValidatorUtil;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -1040,6 +995,41 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private String gogsGet(GogsRepo repo, String path, String lastCommit) {
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         return new String(file, Charset.forName("UTF-8"));
+    }
+
+
+    /**
+     * 初始化出拼音
+     * @param selectValue
+     * @return
+     */
+    private String multiSelectTransferPingyin(String selectValue){
+        if(StringUtils.isBlank(selectValue)){
+            LOGGER.info("multiSelectTransferPingyin : selectValue is blank !");
+            return selectValue ;
+        }
+
+        GeneralFormMultiSelectDTO dto = (GeneralFormMultiSelectDTO)StringHelper.fromJsonString(selectValue,GeneralFormMultiSelectDTO.class);
+        if(CollectionUtils.isEmpty(dto.getSelectValue())){
+            LOGGER.info("multiSelectTransferPingyin : selectValue is empty !");
+            return selectValue ;
+        }
+        List<String> pinyins = new ArrayList<String>();
+        for(String str : dto.getSelectValue()){
+            String pinyin = "";
+            try{ //转换拼音出错不应该影响该功能的进行
+                 pinyin = PinYinHelper.getPinYin(str);
+            }catch(Exception e ){
+                LOGGER.info("multiSelectTransferPingyin  : str:{} can not transfer pinyin !",str);
+            }
+
+            pinyins.add(pinyin);
+        }
+
+        dto.setPingYin(pinyins);
+        selectValue = StringHelper.toJsonString(dto);
+
+        return selectValue ;
     }
 }
 
