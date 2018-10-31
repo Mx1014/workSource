@@ -852,4 +852,7 @@ CREATE TABLE `eh_user_authentication_organizations`(
 
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '用户认证审核权限配置表';
+-- AUTHOR: 荣楠
+-- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
