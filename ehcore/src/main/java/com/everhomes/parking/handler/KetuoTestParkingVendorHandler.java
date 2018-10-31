@@ -35,7 +35,7 @@ import com.everhomes.util.RuntimeErrorException;
  * 停车对接
  */
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO_TEST")
-public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
+public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KetuoTestParkingVendorHandler.class);
 
 	static final String RECHARGE = "/api/wec/PayCarCardFee";
@@ -607,6 +607,17 @@ public abstract class KetuoTestParkingVendorHandler extends DefaultParkingVendor
 
 		return params;
 	}
-	abstract protected KetuoRequestConfig getKetuoRequestConfig();
+
+	@Override
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
