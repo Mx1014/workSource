@@ -12,6 +12,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.module.GetServiceModuleCommand;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -251,14 +252,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public List<ServiceAlliances> queryServiceAllianceAdmin(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag) {
-		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, null, parentId, categoryId, childTagIds, keywords, displayFlag, false);
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, ConfigCommand cmd) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, null, parentId, categoryId, childTagIds, keywords, displayFlag, false, cmd);
 	}
 	
 	
 	private List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, boolean isByScene) {
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, boolean isByScene, ConfigCommand configCmd) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
@@ -289,8 +290,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				
 				if (null != categoryId) {
 					tmpFrom = tmpFrom.leftOuterJoin(MATCH).on(
-							MATCH.OWNER_TYPE.eq(ownerType)
-							.and(MATCH.OWNER_ID.eq(ownerId))
+							MATCH.OWNER_TYPE.eq(configCmd.getOwnerType())
+							.and(MATCH.OWNER_ID.eq(configCmd.getOwnerId()))
 							.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
 							.and(MATCH.CATEGORY_ID.eq(categoryId))
 							);
@@ -299,8 +300,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			
 			if (null != categoryId) {
 				tmpFrom = ALLIANCES.leftOuterJoin(MATCH).on(
-						MATCH.OWNER_TYPE.eq(ownerType)
-						.and(MATCH.OWNER_ID.eq(ownerId))
+						MATCH.OWNER_TYPE.eq(configCmd.getOwnerType())
+						.and(MATCH.OWNER_ID.eq(configCmd.getOwnerId()))
 						.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
 						.and(MATCH.CATEGORY_ID.eq(categoryId))
 						);
@@ -398,8 +399,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	*/
 	@Override
 	public List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords) {
-		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, authProjectIds, parentId, categoryId, childTagIds, keywords, DisplayFlagType.SHOW.getCode(), true);
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, ConfigCommand cmd) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, authProjectIds, parentId, categoryId, childTagIds, keywords, DisplayFlagType.SHOW.getCode(), true, cmd);
 	}
 
 	@Override
@@ -611,9 +612,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         
-        condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        if (null != ownerId) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        }
+        
+        if (!StringUtils.isBlank(ownerType)) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        }
 
-    	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
 
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
