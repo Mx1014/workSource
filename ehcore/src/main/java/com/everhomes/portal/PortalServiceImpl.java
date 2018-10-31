@@ -2418,13 +2418,13 @@ public class PortalServiceImpl implements PortalService {
 		item.setMinVersion(1L);
 		item.setItemGroup(itemGroup.getName());
 		item.setItemLocation(location);
-		if(StringUtils.isEmpty(instanceConfig.getTitle())){
+		if(StringUtils.isEmpty(itemGroup.getTitle())){
 			//查询的时候itemName为空会报错
 			item.setItemLabel("default");
 			item.setItemName("default");
 		}else {
-			item.setItemLabel(instanceConfig.getTitle());
-			item.setItemName(instanceConfig.getTitle());
+			item.setItemLabel(itemGroup.getTitle());
+			item.setItemName(itemGroup.getTitle());
 		}
 
 		item.setDeleteFlag(DeleteFlagType.YES.getCode());
