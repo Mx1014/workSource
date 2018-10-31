@@ -760,7 +760,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         syncObjects.forEach(object -> {
             object.getData().forEach(data -> {
-                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm");
+                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm", data.getContractHeader().getPropertyID());
                 if(community1 != null) {
                     data.setCommunityId(community1.getId());
                 }
@@ -932,7 +932,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
         if (organizationDetail == null) {
             organizationDetail = new OrganizationDetail();
-            organizationDetail.setOrganizationId(organization.getId());AddressProvider
+            organizationDetail.setOrganizationId(organization.getId());
             organizationDetail.setDescription(organization.getDescription());
             organizationDetail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             organizationDetail.setDisplayName(organization.getName());
