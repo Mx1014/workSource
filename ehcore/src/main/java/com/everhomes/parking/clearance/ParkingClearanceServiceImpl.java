@@ -194,7 +194,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(Long orgId, Long parkingLotId) {
-        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) &&
+        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
                 !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
