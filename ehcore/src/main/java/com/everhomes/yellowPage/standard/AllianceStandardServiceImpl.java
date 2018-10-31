@@ -54,6 +54,7 @@ import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.standard.SelfDefinedState;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhFlowCases;
@@ -467,7 +468,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			return null;
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId ;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
@@ -489,7 +490,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					type, null, isQueryChild);
 		}
 
-		organizationId = null == organizationId ? null : getOrgIdByTypeAndProjectId(type, ownerId);
+		organizationId = null == organizationId ? getOrgIdByTypeAndProjectId(type, ownerId) : organizationId;
 		return yellowPageProvider.listCategories(locator, pageSize, ServiceAllianceBelongType.ORGANAIZATION.getCode(),
 				organizationId, namespaceId, null, type, null, isQueryChild);
 	}
@@ -718,5 +719,22 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		return "u:"+update;
 	}
 	
+	@Override
+	public ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type) {
+		
+		ConfigCommand cmd = new ConfigCommand();
+		cmd.setOwnerType(ownerType);
+		cmd.setOwnerId(ownerId);
+		
+		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+			AllianceConfigState state = allianceConfigStateProvider.findConfigState(type,ownerId);
+			if (isDisableSelfConfig(state)) {
+				cmd.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+				cmd.setOwnerId(getOrgIdByTypeAndProjectId(type, ownerId));
+			}
+		}
+		
+		return cmd;
+	}
 	
 }
