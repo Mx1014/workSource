@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.pmtask.archibus.*;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,20 +110,21 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         try {
             FmWorkDataService service = getService();
 
-            String json = service.areaInfo();
-            ArchibusListEntity<ArchibusArea> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusArea>>(){});
-            if(!result.isSuccess()){
-                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
-            }
+//            String json = service.areaInfo();
+//            ArchibusListEntity<ArchibusArea> result = JSONObject.parseObject(json,new TypeReference<ArchibusListEntity<ArchibusArea>>(){});
+//            if(!result.isSuccess()){
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+//            }
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            String areaId = configProvider.getValue("pmtask.archibus.areaid-" + namespaceId,"ALL");
+//            for(ArchibusArea area : result.getData()){
+//                if(area.getArea_name().contains("国贸")){
+//                    areaId = area.getPk_area();
+//                }
+//            }
 
-            String areaId = "";
-            for(ArchibusArea area : result.getData()){
-                if(area.getArea_name().contains("国贸")){
-                    areaId = area.getPk_area();
-                }
-            }
-
-            String json1 = service.getProjectInfo(req.getParameter("areaId"));
+//            String json1 = service.getProjectInfo(req.getParameter("areaId"));
+            String json1 = service.getProjectInfo(areaId);
             ArchibusListEntity<ArchibusProject> result1 = JSONObject.parseObject(json1,new TypeReference<ArchibusListEntity<ArchibusProject>>(){});
 
             if(result1.isSuccess()){
@@ -156,8 +161,17 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         String location =req.getParameter("location");
         String order_date = req.getParameter("order_date");
         String order_time = req.getParameter("order_time");
-        try {
 
+        if("4".equals(service_id)){
+            if(StringUtils.isBlank(order_date)){
+                SimpleDateFormat dateFormat = new SimpleDateFormat(" yyyy-MM-dd ");
+                order_date = dateFormat.format(new Date());
+            }
+            if(StringUtils.isBlank(order_time)){
+                order_time = "FAST";
+            }
+        }
+        try {
             json = service.submitEvent(pk_crop, request_source, user_id, project_id,
                             service_id, record_type, remarks, contack,
                             telephone, location, order_date, order_time);
@@ -176,7 +190,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     @Override
     public Object listThirdTasks(HttpServletRequest req) {
         FmWorkDataService service = getService();
-        String json = "";
+        String json;
         try {
             PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
             json = service.eventList(user.getArchibusUid(), req.getParameter("project_id"), req.getParameter("order_type"),
@@ -196,7 +210,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     @Override
     public Object getThirdTaskDetail(HttpServletRequest req) {
         FmWorkDataService service = getService();
-        String json = "";
+        String json;
         try {
             json = service.eventDetails(req.getParameter("order_id"));
             LOGGER.debug(json);
