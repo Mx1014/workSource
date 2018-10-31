@@ -87,7 +87,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setEndTime(expireTime);
 			parkingCardDTO.setCardTypeId(String.valueOf(card.getRuleId()));
 			parkingCardDTO.setCardNumber(card.getCardId().toString());
-
+			parkingCardDTO.setCardType("月租车");
 			resultList.add(parkingCardDTO);
 		}
         
@@ -686,7 +686,6 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
             if(now>newStartTime){
                 newStartTime = now;
             }
-            dto.setCardTypeName("月租车");
             dto.setStartPeriod(newStartTime);
             Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThirtyDays(newStartTime, parkingLot.getExpiredRechargeMonthCount());
             dto.setEndPeriod(rechargeEndTimestamp.getTime());

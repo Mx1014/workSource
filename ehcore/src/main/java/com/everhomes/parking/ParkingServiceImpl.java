@@ -339,10 +339,10 @@ public class ParkingServiceImpl implements ParkingService {
 						RuleSourceType.RESOURCE.getCode(), dto.getId());
 				dto.setVipParkingUrl(homeUrl + detailUrl);
 			}
-			if (r.getDefaultData() != null){
+			if (r.getDefaultData() != null && r.getDefaultData().length() >0){
 				dto.setData(Arrays.asList(r.getDefaultData().split(",")));
 			}
-			if (r.getDefaultPlate() != null){
+			if (r.getDefaultPlate() != null && r.getDefaultData().length() >0){
 				String[] plate = r.getDefaultPlate().split(",");
 				dto.setProvince(plate[0]);
 				dto.setCity(plate[1]);
