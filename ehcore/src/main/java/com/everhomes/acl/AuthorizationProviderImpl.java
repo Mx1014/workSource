@@ -333,7 +333,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 			}
 		}
 		cond = cond.and(targetCond);
-		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds)).or(t2.field("control_id").eq(0)));
+		Condition t2_condition = (t2.field("target_type").in(types).and(t2.field("target_id").in(configIds))
+				.or(t1.field("control_id").eq(0)));//#40596 t1.field("control_id").eq(0) 这个条件满足表示，全部项目都有权限
 		cond = cond.and(
 				t1.field("control_id").isNull() //这一行必须加，因为权限细化的 control_id 为空值
 				.or(t2_condition));

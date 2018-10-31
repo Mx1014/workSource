@@ -293,8 +293,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			Date date = punchService.parseDateTimeByTimeSelectType(organizationId, applyUserId, startTimeStr.replace("下半天", "").trim(), ApprovalCategoryTimeSelectType.FIRST_HALF_END);
 			return new Timestamp(date.getTime());
 		}
-		// 前端5.10.0缺陷引起日期中的空格变成换行符，临时处理，避免测试阻塞
-		return Timestamp.valueOf(startTimeStr.replace("\n", " ") + ":00");
+		return Timestamp.valueOf(startTimeStr + ":00");
 	}
 
 	private Timestamp parseEndTime(Long organizationId, Long applyUserId, String endTimeStr) {
@@ -306,8 +305,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 			Date date = punchService.parseDateTimeByTimeSelectType(organizationId, applyUserId, endTimeStr.replace("下半天", "").trim(), ApprovalCategoryTimeSelectType.SECOND_HALF_END);
 			return new Timestamp(date.getTime());
 		}
-		// 前端5.10.0缺陷引起日期中的空格变成换行符，临时处理，避免测试阻塞
-		return Timestamp.valueOf(endTimeStr.replace("\n", " ") + ":00");
+		return Timestamp.valueOf(endTimeStr + ":00");
 	}
 
 }

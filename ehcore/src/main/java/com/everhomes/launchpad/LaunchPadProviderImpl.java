@@ -752,6 +752,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		query.addConditions(getPreviewPortalVersionCondition(Tables.EH_ITEM_SERVICE_CATEGRIES.getName()));
 
 		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER.asc());
+		query.addGroupBy(Tables.EH_ITEM_SERVICE_CATEGRIES.NAME);
 
 		List<ItemServiceCategry> res = query.fetch().map(r -> ConvertHelper.convert(r, ItemServiceCategry.class));
 		return res;

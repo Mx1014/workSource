@@ -5305,7 +5305,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setGroups(groups);
         for(DoorAuth auth : auths){
             DoorAccess access = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-            if(null != access && access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode())){
+//      分别返回旺龙门禁组，梯控组
+            boolean doorType = true;
+            if( cmd.getDoorType() != null){
+                doorType = access.getDoorType().equals(cmd.getDoorType());
+            }
+            else{
+                doorType = access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_GROUP.getCode()) || access.getDoorType().equals(DoorAccessType.ACLINK_WANGLONG_DOOR_GROUP.getCode());
+            }
+            if(null != access && doorType){
                 DoorAccessGroupDTO group = new DoorAccessGroupDTO();
                 groups.add(group);
                 group.setId(access.getId());
@@ -5340,7 +5348,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                         group.setFloors(floors.stream().distinct().map(r -> {
                             FloorDTO dto = new FloorDTO();
                             dto.setFloor(r.getApartmentFloor());
-                            dto.setFloorName(r.getAddress());
+                            //楼层名改为BuildingName
+                            dto.setFloorName(r.getBuildingName());
                             return dto;
                         }).collect(Collectors.toList()));
                     }
@@ -5773,12 +5782,37 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void addDoorManagement(AddDoorManagementCommand cmd){
-
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        AclinkManagement manager = new AclinkManagement();
+        manager.setDoorId(door.getId());
+        manager.setNamespaceId(namespaceId);
+        manager.setOwnerId(door.getOwnerId());
+        manager.setOwnerType(door.getOwnerType());
+        manager.setManagerId(cmd.getManagerId());
+        manager.setCreatorUid(user.getId());
+        if(cmd.getManagerType() != null){
+            manager.setManagerType(cmd.getManagerType());
+        }
+        doorAccessProvider.createDoorManagement(manager);
     }
+
     @Override
-    public void deleteDoorManagement (AddDoorManagementCommand cmd){
-
+    public ListDoorManagementResponse listDoorManagement(ListDoorManagementCommand cmd){
+        ListDoorManagementResponse resp = new ListDoorManagementResponse();
+	    List<AclinkManagementDTO> doors = doorAccessProvider.searchAclinkManagement(cmd.getDoorId());
+	    resp.setDoors(doors);
+	    return resp;
     }
+
+    @Override
+    public void deleteDoorManagement (DeleteDoorManagementCommand cmd){
+        AclinkManagement manager = doorAccessProvider.findAclinkManagementById(cmd.getId());
+        manager.setStatus((byte)0);
+        doorAccessProvider.updateAclinkManagement(manager);
+    }
+
     @Override
     public ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd){
         ChangeUpdateFirmwareResponse resp = new ChangeUpdateFirmwareResponse();
@@ -6848,6 +6882,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         if(cmd.getStatus() != null){
             form.setStatus(cmd.getStatus());
+        }
+        if(cmd.getType() != null){
+            form.setItemType(cmd.getType());
         }
 	    form.setOperateTime(time);
 	    form.setOperatorUid(user.getId());

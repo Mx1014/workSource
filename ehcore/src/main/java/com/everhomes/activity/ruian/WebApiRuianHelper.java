@@ -120,11 +120,11 @@ public class WebApiRuianHelper {
 		}
 		LOGGER.info("publickey:{};privatekey:{};appid:{}",publickey,privatekey,appid);
 
-		String pkey =configProvider.getValue(namespaceId,publickey, "") ;
+		String pkey =configProvider.getValue(namespaceId,publickey, publicKey) ;
 		publicKey =  pkey==null?publicKey : pkey;
-		String prkey = configProvider.getValue(namespaceId,privatekey, "");
+		String prkey = configProvider.getValue(namespaceId,privatekey, privateKey);
 		privateKey = prkey==null?privateKey : prkey;
-		String appId = configProvider.getValue(namespaceId,appid, "");
+		String appId = configProvider.getValue(namespaceId,appid, AppID);
 		AppID =	appId==null?AppID:appId ;
 
 		String timeStamp = dateStr;
@@ -214,11 +214,11 @@ public class WebApiRuianHelper {
 			appid = appid + "."+ communityId ;
 		}
 		LOGGER.info("publickey:{};privatekey:{};appid:{}",publickey,privatekey,appid);
-		String pkey =configProvider.getValue(namespaceId,publickey, "") ;
+		String pkey =configProvider.getValue(namespaceId,publickey, publicKey) ;
 		publicKey =  pkey==null?publicKey : pkey;
-		String prkey = configProvider.getValue(namespaceId,privatekey, "");
+		String prkey = configProvider.getValue(namespaceId,privatekey, privateKey);
 		privateKey = prkey==null?privateKey : prkey;
-		String appId = configProvider.getValue(namespaceId,appid, "");
+		String appId = configProvider.getValue(namespaceId,appid, AppID);
 		AppID =	appId==null?AppID:appId ;
 
 		String encryptString = "{publicKey:" + publicKey + ",timeStamp:" + timeStamp + ",data:" + jsonParameter + ",privateKey:" + privateKey + "}";

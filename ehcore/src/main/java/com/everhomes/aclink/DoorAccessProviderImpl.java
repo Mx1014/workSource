@@ -14,6 +14,7 @@ import com.everhomes.rest.aclink.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinkFormTitlesDao;
 import com.everhomes.server.schema.tables.daos.EhAclinkFormValuesDao;
+import com.everhomes.server.schema.tables.daos.EhAclinkManagementDao;
 import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -526,6 +527,14 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         EhDoorAccessDao dao = new EhDoorAccessDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), DoorAccess.class);
     }
+
+    @Override
+    public AclinkManagement findAclinkManagementById (Long id){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkManagementDao dao = new EhAclinkManagementDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id),AclinkManagement.class);
+    }
+
     @Override
     public List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -553,6 +562,15 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         dao.update(form);
         return null;
     }
+
+    @Override
+    public Long updateAclinkManagement(AclinkManagement manager){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhAclinkManagementDao dao = new EhAclinkManagementDao(context.configuration());
+        dao.update(manager);
+        return null;
+    }
+
     @Override
     public Long updateDoorAccessNew (DoorAccess obj){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -712,6 +730,30 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         EhAclinkFormTitlesDao dao = new EhAclinkFormTitlesDao(context.configuration());
         dao.insert(form);
         return id;
+    }
+
+    @Override
+    public Long createDoorManagement (AclinkManagement obj){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkManagement.class));
+        obj.setId(id);
+        obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhAclinkManagementDao dao = new EhAclinkManagementDao(context.configuration());
+        dao.insert(obj);
+        return id;
+    }
+    @Override
+    public List<AclinkManagementDTO> searchAclinkManagement (Long doorId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_MANAGEMENT);
+        query.addConditions(Tables.EH_ACLINK_MANAGEMENT.DOOR_ID.eq(doorId));
+        query.addConditions(Tables.EH_ACLINK_MANAGEMENT.STATUS.ne((byte)0));
+        List<AclinkManagementDTO> dtos = query.fetch().map((r) -> {
+            AclinkManagementDTO dto = ConvertHelper.convert(r ,AclinkManagementDTO.class );
+            return dto;
+        });
+        return dtos;
     }
 
     @Override

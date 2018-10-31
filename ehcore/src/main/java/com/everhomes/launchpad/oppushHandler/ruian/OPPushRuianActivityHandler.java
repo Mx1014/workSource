@@ -78,7 +78,8 @@ public class OPPushRuianActivityHandler implements OPPushUrlDetailHandler {
 
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
         Integer size  = config.getNewsSize()==null?3:config.getNewsSize();
-        ListRuianActivityBySceneReponse res = activityButtService.listActivityRuiAnEntitiesByScene(size);
+        //默认获取20条数据，然后在里面筛选
+        ListRuianActivityBySceneReponse res = activityButtService.listActivityRuiAnEntitiesByScene(20,size);
 
         List<OPPushCard> listCards = new ArrayList<>();
         if(res != null && res.getEntities() != null){

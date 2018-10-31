@@ -46,14 +46,13 @@ public class PrintRecordDTO {
 	@ItemType(String.class)
 	private List<String> creatorCompanys;
 	private Byte payMode;
-	private String payType;
-	
-	public String getPayType() {
-		return payType;
+	private String paidType;
+
+	public String getPaidType() {
+		return paidType;
 	}
-	
-	public void setPayType(String payType) {
-		this.payType = payType;
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
 	}
 	
 	public List<String> getCreatorCompanys() {
