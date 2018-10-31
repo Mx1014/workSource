@@ -157,10 +157,8 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
 	            order.setCardRequestId(request.getId()); //补上id
 	        }
 		        updateFlowStatus(request);
-		    
         }
 		return notifyresult;
-
 	}
 
 	ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {

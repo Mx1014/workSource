@@ -65,9 +65,12 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
 					config.setFlowMode(Integer.valueOf(parkingLotFuncConfig.getMonthCardFlow()));
 				}
                 parkingLot.setConfigJson(StringHelper.toJsonString(config));
-                parkingLot.setDefaultData(parkingLotFuncConfig.getDefaultData());
-                parkingLot.setDefaultPlate(parkingLotFuncConfig.getDefaultPlate());
-
+                if (parkingLotFuncConfig.getDefaultData() != null){
+                	parkingLot.setDefaultData(parkingLotFuncConfig.getDefaultData());
+                }
+                if (parkingLotFuncConfig.getDefaultPlate() != null){
+                	parkingLot.setDefaultPlate(parkingLotFuncConfig.getDefaultPlate());
+                }
                 parkingProvider.updateParkingLot(parkingLot);
 
             }

@@ -19,6 +19,7 @@ import com.everhomes.parking.*;
 import com.everhomes.parking.ketuo.*;
 import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.util.digester.Rules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 /**
  * 停车对接
@@ -83,7 +85,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 			parkingCardDTO.setPlateOwnerPhone("");
 
 			parkingCardDTO.setEndTime(expireTime);
-			parkingCardDTO.setCardTypeId(card.getCarType());
+			parkingCardDTO.setCardTypeId(String.valueOf(card.getRuleId()));
 			parkingCardDTO.setCardNumber(card.getCardId().toString());
 
 			resultList.add(parkingCardDTO);
@@ -95,19 +97,26 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
     @Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(ParkingLot parkingLot,
     		String plateNumber, String cardNo) {
-    	List<KetuoCardRate> list = new ArrayList<>();
-
+    	//List<KetuoCardRate> list = new ArrayList<>();
+    	List<KetuoTestCardRule> rules = new ArrayList<>();
     	if(StringUtils.isBlank(plateNumber)) {
     		return null;
     	}else{
     		KetuoTestCard cardInfo = getCard(plateNumber);
     		if(null != cardInfo) {
 				Integer ruleId = cardInfo.getRuleId();
-				List<KetuoTestCardRule> rules =  getCardRule(ruleId);
+				rules =  getCardRule(ruleId);
     		}
     	}
-
-		return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
+    	KetuoTestCardRule rule = rules.get(0);
+		KetuoCardRate ketuoCardRate = new KetuoCardRate();
+		ketuoCardRate.setRuleId(String.valueOf(rule.getRuleId()));
+		ketuoCardRate.setRuleAmount(rule.getRuleAmount());
+		ketuoCardRate.setCarType(rule.getRuleType());
+		ketuoCardRate.setTypeName(rule.getRuleName());
+		ParkingRechargeRateDTO rateDTO = convertParkingRechargeRateDTO(parkingLot, ketuoCardRate);
+		return Arrays.asList(rateDTO);
+		//return list.stream().map(r -> convertParkingRechargeRateDTO(parkingLot, r)).collect(Collectors.toList());
     }
 
 
@@ -127,8 +136,8 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 		dto.setCardTypeId(rate.getCarType());
 		dto.setCardType(rate.getTypeName());
 		dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-		dto.setPrice(new BigDecimal(rate.getRuleMoney()).divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-		dto.setVendorName(ParkingLotVendor.KETUO2.getCode());
+		dto.setPrice(new BigDecimal(rate.getRuleAmount()).divide(new BigDecimal(100), CARD_RATE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		dto.setVendorName(ParkingLotVendor.KETUO_TEST.getCode());
 		return dto;
 	}
 
@@ -188,7 +197,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		
 		//科托月卡车没有 归属地区分
-    	plateNumber = plateNumber.substring(1, plateNumber.length());
+    	plateNumber = plateNumber.substring(2);
 
         String urlPath = URL+GET_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
@@ -529,13 +538,14 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
         String urlPath = URL+ ADD_MONTH_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
-        String p = parkId + order.getPlateNumber() +"2" +startTime+ endTime +  iv + appSecret;
+        String plateNumber = order.getPlateNumber().substring(2);
+        String p = parkId + plateNumber +CAR_TYPE +startTime+ endTime +  iv + appSecret;
         String key = MD5Utils.getMD5(p);
         param.put("appId", appId);
         param.put("key", key);
     	param.put("parkId", parkId);
 		param.put("plateNo", order.getPlateNumber());
-		param.put("carType", "2");
+		param.put("carType", CAR_TYPE);
 		param.put("ValidFrom", startTime);
 		param.put("ValidTo", endTime);
         String json = param.toJSONString();
@@ -630,5 +640,61 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 		
 	}
 
+	@Override
+	public ParkingExpiredRechargeInfoDTO getExpiredRechargeInfo(ParkingLot parkingLot, GetExpiredRechargeInfoCommand cmd) {
+
+        List<ParkingCardDTO> parkingCardLists = listParkingCardsByPlate(parkingLot, cmd.getPlateNumber());
+        if(parkingCardLists==null || parkingCardLists.size()==0){
+            return null;
+        }
+        ParkingCardDTO cardInfo = parkingCardLists.get(0);
+        if (cardInfo == null) {
+            return null;
+        }
+        List<ParkingRechargeRateDTO> parkingRechargeRates = getParkingRechargeRates(parkingLot, cmd.getPlateNumber(), null);
+        if(parkingRechargeRates==null || parkingRechargeRates.size()==0){
+            return null;
+        }
+
+        ParkingRechargeRateDTO targetRateDTO = null;
+        String cardTypeId = cardInfo.getCardTypeId();
+        for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+            if (rateDTO.getRateToken().equals(cardTypeId) && rateDTO.getMonthCount().intValue()==parkingLot.getExpiredRechargeMonthCount()) {
+                targetRateDTO = rateDTO;
+                break;
+            }
+        }
+
+        if (null == targetRateDTO) {
+            parkingRechargeRates.sort((r1,r2)->r1.getMonthCount().compareTo(r2.getMonthCount()));
+            for (ParkingRechargeRateDTO rateDTO : parkingRechargeRates) {
+                if (rateDTO.getCardTypeId().equals(cardTypeId)) {
+                    targetRateDTO = rateDTO;
+                    break;
+                }
+            }
+        }
+        if (null == targetRateDTO) {
+            return null;
+        }
+
+        ParkingExpiredRechargeInfoDTO dto = ConvertHelper.convert(targetRateDTO,ParkingExpiredRechargeInfoDTO.class);
+        dto.setCardTypeName(targetRateDTO.getCardType());
+        if (cardInfo != null  && cardInfo.getEndTime() != null) {
+            long newStartTime = cardInfo.getEndTime();
+            long now = System.currentTimeMillis();
+            if(now>newStartTime){
+                newStartTime = now;
+            }
+            dto.setCardTypeName("月租车");
+            dto.setStartPeriod(newStartTime);
+            Timestamp rechargeEndTimestamp = Utils.getTimestampByAddThirtyDays(newStartTime, parkingLot.getExpiredRechargeMonthCount());
+            dto.setEndPeriod(rechargeEndTimestamp.getTime());
+            dto.setMonthCount(new BigDecimal(2));
+            dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.default.rateName","个月"));
+    		dto.setPrice(new BigDecimal(configProvider.getValue("parking.test.prices.month","0.01")));
+        }
+        return dto;
+	}
 	
 }
