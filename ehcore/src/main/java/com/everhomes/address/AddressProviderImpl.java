@@ -1257,8 +1257,6 @@ public class AddressProviderImpl implements AddressProvider {
 				       .fetchAnyInto(Community.class);
 	}
 	
-
-	//SELECT COUNT(*) FROM eh_addresses WHERE namespace_id!=0 AND `status`=2;
 	@Override
 	public int getTotalApartmentCount() {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1270,24 +1268,6 @@ public class AddressProviderImpl implements AddressProvider {
 				       .fetchAnyInto(Integer.class);
 	}
 
-//SELECT
-//	a.id,
-//	a.community_id,
-//	a.community_name,
-//	a.building_id,
-//	a.building_name,
-//	a.status,
-//	b.living_status
-//FROM
-//	eh_addresses a
-//LEFT JOIN eh_organization_address_mappings b ON a.id = b.address_id
-//WHERE
-//	a.namespace_id != 0
-//AND
-//	a.`status`=2
-//ORDER BY
-//	a.community_id,a.building_id
-//LIMIT 5000;
 	@Override
 	public List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize) {
 		List<ApartmentReportFormDTO> result = new ArrayList<>();
