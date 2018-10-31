@@ -2427,8 +2427,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
-//            e.printStackTrace();
-            LOGGER.error("error invoke dooraccess,stacktrace = {}",e.getMessage());
+            LOGGER.error("error invoke dooraccess,stacktrace = {}",e);
         }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
