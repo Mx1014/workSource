@@ -358,10 +358,14 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         this.validate(cmd);
         this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
         if(!userPrivilegeMgr.checkSuperAdmin(currUserId(), cmd.getOrganizationId())){
-        	LOGGER.info("check auth privilege");
+        	LOGGER.info("no auth privilege");
+        } else {
+        	LOGGER.info("have auth privilege");
         }
         if(!checkApplyUser(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT)){
-        	LOGGER.info("check auth APPLICANT");
+        	LOGGER.info("no auth APPLICANT");
+        } else {
+        	LOGGER.info("have auth APPLICANT");
         }
         ParkingClearanceLog log = new ParkingClearanceLog();
         log.setNamespaceId(cmd.getNamespaceId());
