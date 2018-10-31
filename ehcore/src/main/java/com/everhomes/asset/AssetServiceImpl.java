@@ -1638,7 +1638,14 @@ public class AssetServiceImpl implements AssetService {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
                 if(!cycle.isContract()){
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	monthOffset = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }else{
                     // #32243  check if the next day is beyond the maximum day of the next month
