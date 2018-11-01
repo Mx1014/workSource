@@ -12,4 +12,6 @@ public interface AllianceFaqServiceCustomerProvider {
 
 	AllianceFAQServiceCustomer getServiceCustomer(AllianceCommonCommand cmd);
 
+	void deleteFAQOnlineService(AllianceCommonCommand cmd);
+
 }

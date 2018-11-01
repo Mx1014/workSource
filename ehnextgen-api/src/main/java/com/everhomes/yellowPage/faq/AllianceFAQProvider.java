@@ -64,7 +64,12 @@ public interface AllianceFAQProvider {
 
 	void updateFAQOrder(Long id, Long defaultOrder);
 
+	List<AllianceFAQ> listAllFAQs(AllianceCommonCommand cmd);
 
+	void deleteFAQTypes(AllianceCommonCommand cmd);
 
+	void deleteFAQs(AllianceCommonCommand cmd);
+
+	void deleteFAQOnlineService(AllianceCommonCommand cmd);
 
 }

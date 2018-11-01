@@ -4,9 +4,10 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
-import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
+import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 
 public interface AllianceStandardService {
 

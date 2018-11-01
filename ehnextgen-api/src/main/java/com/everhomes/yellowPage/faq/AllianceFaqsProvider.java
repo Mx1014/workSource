@@ -28,4 +28,6 @@ public interface AllianceFaqsProvider {
 
 	void plusFAQSolveCounts(Long itemId, Byte solveTimesType);
 
+	void deleteFAQs(AllianceCommonCommand cmd);
+
 }

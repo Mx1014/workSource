@@ -242,7 +242,7 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		}).collect(Collectors.toList());
 		ListTopFAQsResponse resp = new ListTopFAQsResponse();
 		resp.setDtos(dtos);
-		return null;
+		return resp;
 	}
 
 	@Override

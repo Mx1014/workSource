@@ -164,7 +164,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategoryMatch(yellowPage.getOwnerType(),
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(yellowPage.getOwnerType(),
 				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
 		if (null != match) {
 			flowCase.setTitle(match.getCategoryName());

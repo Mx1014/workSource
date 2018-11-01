@@ -146,4 +146,27 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 		allianceFaqsProvider.updateFAQOrder(id, defaultOrder);
 	}
 
+	@Override
+	public List<AllianceFAQ> listAllFAQs(AllianceCommonCommand cmd) {
+		return listFAQs(cmd, null, null, null, null, null, null, null, null);
+	}
+
+	@Override
+	public void deleteFAQTypes(AllianceCommonCommand cmd) {
+		allianceFaqTypeProvider.deleteFAQTypes(cmd);
+		
+	}
+
+	@Override
+	public void deleteFAQs(AllianceCommonCommand cmd) {
+		allianceFaqsProvider.deleteFAQs(cmd);
+		
+	}
+
+	@Override
+	public void deleteFAQOnlineService(AllianceCommonCommand cmd) {
+		allianceFaqServiceCustomerProvider.deleteFAQOnlineService(cmd);
+		
+	}
+
 }

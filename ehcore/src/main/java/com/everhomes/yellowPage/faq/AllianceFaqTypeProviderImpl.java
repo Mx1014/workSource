@@ -213,5 +213,11 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 	private UpdateQuery<EhAllianceFaqTypesRecord> updateQuery() {
 		return readWriteContext().updateQuery(TABLE);
 	}
+
+	@Override
+	public void deleteFAQTypes(AllianceCommonCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

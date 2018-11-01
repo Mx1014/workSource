@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
@@ -30,8 +31,10 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAllianceFaqsDao;
 import com.everhomes.server.schema.tables.records.EhAllianceFaqsRecord;
+import com.everhomes.server.schema.tables.records.EhAllianceOperateServicesRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
+import com.everhomes.yellowPage.DeleteQueryBuilderCallback;
 import com.everhomes.yellowPage.UpdateQueryBuilderCallback;
 
 @Component
@@ -305,6 +308,37 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 		if (updateCnt > 0) {
 			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
 		}
+	}
+
+	@Override
+	public void deleteFAQs(AllianceCommonCommand cmd) {
+
+		int deleteCnt = deleteTool(q -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+		});
+
+		if (deleteCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
+	
+	private int deleteTool(DeleteQueryBuilderCallback callback) {
+
+		DeleteQuery<EhAllianceFaqsRecord> query = deleteQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		return query.execute();
+	}
+	
+	private DeleteQuery<EhAllianceFaqsRecord> deleteQuery() {
+		return readWriteContext().deleteQuery(TABLE);
 	}
 	
 }

@@ -211,5 +211,21 @@ public class AllianceFaqServiceCustomerProviderImpl implements AllianceFaqServic
 	private DeleteQuery<EhAllianceFaqServiceCustomersRecord> deleteQuery() {
 		return readWriteContext().deleteQuery(TABLE);
 	}
+
+	@Override
+	public void deleteFAQOnlineService(AllianceCommonCommand cmd) {
+
+		int deleteCnt = deleteTool(q -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+		});
+
+		if (deleteCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
 	
 }
