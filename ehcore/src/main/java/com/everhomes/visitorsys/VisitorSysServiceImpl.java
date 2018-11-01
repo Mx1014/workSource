@@ -2427,8 +2427,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("error invoke dooraccess");
+            LOGGER.error("error invoke dooraccess,stacktrace = {}",e);
         }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
@@ -2436,6 +2435,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(localVisitorAuth.getValidEndMs()!=null) {
                 visitor.setDoorGuardEndTime(new Timestamp(localVisitorAuth.getValidEndMs()));
             }
+        }else{
+//          门禁授权返回空
+            LOGGER.info("DoorAccess Auth,cmd = {}",doorCmd.toString());
         }
     }
 
