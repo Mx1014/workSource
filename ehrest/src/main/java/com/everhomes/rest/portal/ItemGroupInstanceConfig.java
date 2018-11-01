@@ -100,9 +100,20 @@ public class ItemGroupInstanceConfig {
 	private Long widthRatio;
 
 	private Long heightRatio;
+
+	private Byte showDots;
 	//banner字段end
 
-	public String getItemGroup() {
+
+    public Byte getShowDots() {
+        return showDots;
+    }
+
+    public void setShowDots(Byte showDots) {
+        this.showDots = showDots;
+    }
+
+    public String getItemGroup() {
 		return itemGroup;
 	}
 
