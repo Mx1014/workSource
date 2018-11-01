@@ -55,7 +55,7 @@ endpoint.mappings: true
 management.security.enabled: false
 management.security.role: SUPERUSER
 management.context-path: /manage
-management.port: 8080
+management.port: 8082
 
 spring.jmx.enabled: true
 endpoints.jmx.domain: ehcore
@@ -97,7 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@10.1.10.27:13334/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -162,7 +162,7 @@ nashorn.class.includes:
 
 # kafka
 spring.kafka:
-  enabled: false # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
+  enabled: true # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
   bootstrap-servers: localhost:9092
   properties:
     request.timeout.ms: 20000
