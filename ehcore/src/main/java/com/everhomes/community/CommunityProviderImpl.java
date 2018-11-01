@@ -2010,7 +2010,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
-        query.addLimit(pageSize);
+        query.addLimit(pageSize+1);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBuildingsByKeywords, sql=" + query.getSQL());

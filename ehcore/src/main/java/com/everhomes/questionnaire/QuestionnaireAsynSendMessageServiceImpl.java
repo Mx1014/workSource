@@ -138,7 +138,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		int intervalTime = configurationProvider.getIntValue(ConfigConstants.QUESTIONNAIRE_REMIND_TIME_INTERVAL,24);
 		Timestamp remindTime = new Timestamp(System.currentTimeMillis()+intervalTime*3600*1000);
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
-		Set<String> userLevelRanges = null;
+		List<QuestionnaireScope> userLevelRanges = null;
 		LOGGER.info("approach cutoffTime quesionnaire ",StringHelper.toJsonString(questionnaires.stream().map(r->{
 			return r.getId()+"->"+r.getQuestionnaireName();
 		}).collect(Collectors.toList())));
@@ -159,8 +159,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 	}
 
-	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire,List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
-		Set<String> userLevelRanges = new HashSet<String>();
+	private List<QuestionnaireScope> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire,List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
+		List<QuestionnaireScope> userLevelRanges = new ArrayList<>();
 		for (QuestionnaireRange originalRange : originalRanges) {
 			boolean answered = false;
 			for (QuestionnaireAnswer answer : answers) {
@@ -173,19 +173,23 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if (!answered){
 				List<String> adminlists = getOrganizationAdministrators(originalRange.getRange());
 				originalRange.setAdminlists(adminlists);
-				userLevelRanges.addAll(adminlists);
+				userLevelRanges.addAll(adminlists.stream().map(r->{
+					QuestionnaireScope scope = new QuestionnaireScope();
+					scope.setUserId(r);
+					return scope;
+				}).collect(Collectors.toList()));
 			}
 		}
 		questionnaire.setRanges(originalRanges);
 		return userLevelRanges;
 	}
-	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire, List<QuestionnaireAnswer> answers) {
-		List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<String>>(){});
-		Set<String> userLevelRanges = new HashSet<String>();
+	private List<QuestionnaireScope> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire, List<QuestionnaireAnswer> answers) {
+		List<QuestionnaireScope> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<QuestionnaireScope>>(){});
+		List<QuestionnaireScope> userLevelRanges = new ArrayList<>();
 		ranges.forEach(range->{
 			boolean answered = false;
 			for (QuestionnaireAnswer answer : answers) {
-				if(answer.getTargetId().longValue() == Long.valueOf(range)){
+				if(answer.getTargetId().longValue() == Long.valueOf(range.getUserId())){
 					answered = true;
 					break;
 				}
