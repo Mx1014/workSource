@@ -331,6 +331,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(getLevelQryCondition(qryCmd));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(DoorAuthStatus.VALID.getCode()));
 
                 if(qryCmd.getDriver() != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(qryCmd.getDriver()));
