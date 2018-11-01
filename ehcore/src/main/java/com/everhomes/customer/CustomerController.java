@@ -217,7 +217,7 @@ public class CustomerController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /customer/syncEnterpriseCustomerIndex</b>
+     * <b>URL:  </b>
      * <p>同步企业客户</p>
      */
     @RequestMapping("syncEnterpriseCustomerIndex")

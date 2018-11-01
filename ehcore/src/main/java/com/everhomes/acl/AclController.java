@@ -784,7 +784,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("createSuperAdmin")
     @RestReturn(value = String.class)
     public RestResponse createSuperAdmin(createSuperAdminCommand cmd) {
-        //rolePrivilegeService.updateSuperAdmin(cmd);
+        rolePrivilegeService.updateSuperAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
