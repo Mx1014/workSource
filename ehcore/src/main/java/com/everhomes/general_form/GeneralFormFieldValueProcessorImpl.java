@@ -20,6 +20,8 @@ import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.user.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,7 @@ import java.util.Map;
 
 @Component
 public class GeneralFormFieldValueProcessorImpl implements GeneralFormFieldValueProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneralFormFieldValueProcessorImpl.class);
     @Autowired
     private ContentServerService contentServerService;
 
@@ -63,8 +66,12 @@ public class GeneralFormFieldValueProcessorImpl implements GeneralFormFieldValue
         imageValue.setUris(imageObj.getUris());
         List<String> urls = new ArrayList<>();
         for (String uriString : imageObj.getUris()) {
-            String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-            urls.add(url);
+            try {
+                String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                urls.add(url);
+            } catch (Exception ex) {
+                LOGGER.error("parserUri error", ex);
+            }
         }
         imageValue.setUrls(urls);
         formVal.setFieldValue(imageValue.toString());
@@ -78,14 +85,18 @@ public class GeneralFormFieldValueProcessorImpl implements GeneralFormFieldValue
             return null;
         List<GeneralFormFileValueDTO> files = new ArrayList<>();
         for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
-            GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
-            String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-            ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-            fileDTO.setUri(dto2.getUri());
-            fileDTO.setUrl(url);
-            fileDTO.setFileName(dto2.getFileName());
-            fileDTO.setFileSize(resource.getResourceSize());
-            files.add(fileDTO);
+            try {
+                GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
+                String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+                fileDTO.setUri(dto2.getUri());
+                fileDTO.setUrl(url);
+                fileDTO.setFileName(dto2.getFileName());
+                fileDTO.setFileSize(resource.getResourceSize());
+                files.add(fileDTO);
+            } catch (Exception ex) {
+                LOGGER.error("parserUri error", ex);
+            }
         }
         GeneralFormFileValue fileValue = new GeneralFormFileValue();
         fileValue.setFiles(files);
