@@ -91,6 +91,7 @@ public class ParkingLotDTO {
     private List<String> data;
     private String province;
     private String city;
+    private Byte invoiceTypeFlag;
 
     
     public Byte getIdentityCardFlag() {
@@ -367,6 +368,14 @@ public class ParkingLotDTO {
 
 	public void setData(List<String> data) {
 		this.data = data;
+	}
+
+	public Byte getInvoiceTypeFlag() {
+		return invoiceTypeFlag;
+	}
+
+	public void setInvoiceTypeFlag(Byte invoiceTypeFlag) {
+		this.invoiceTypeFlag = invoiceTypeFlag;
 	}
 
 	@Override
