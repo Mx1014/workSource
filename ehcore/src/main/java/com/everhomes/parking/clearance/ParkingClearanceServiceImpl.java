@@ -194,8 +194,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(Long orgId, Long parkingLotId) {
-        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
-                !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
+//        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
+//                !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
+        if (!checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
@@ -355,16 +356,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        }
-        if(!userPrivilegeMgr.checkSuperAdmin(currUserId(), cmd.getOrganizationId())){
-        	LOGGER.info("no auth privilege");
-        } else {
-        	LOGGER.info("have auth privilege");
-        }
-        if(!checkApplyUser(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT)){
-        	LOGGER.info("no auth APPLICANT");
-        } else {
-        	LOGGER.info("have auth APPLICANT");
         }
         this.validate(cmd);
         this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
