@@ -978,7 +978,12 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 			}
 			return format;
 		}else if (dateStr.matches("\\d{4}-\\d{2}")) {
-			format = dateStr;
+			String todayMonthStr = getTodayMonthStr();
+			if (dateStr.compareTo(todayMonthStr) > 0) {
+				format = todayMonthStr;
+			}else {
+				format = dateStr;
+			}
 			return format;
 		}else {
 			//抛出异常
