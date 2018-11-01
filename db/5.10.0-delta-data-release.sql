@@ -84,6 +84,7 @@ UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  18000
 -- REMARK: issue-null 设置路由相关参数
 UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
 UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+UPDATE eh_service_modules SET `host` = 'community-map' WHERE id = 40070;
 
 
 
