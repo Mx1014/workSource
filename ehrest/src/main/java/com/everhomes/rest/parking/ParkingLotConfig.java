@@ -29,6 +29,7 @@ public class ParkingLotConfig {
     private Byte monthCardFlag = 0;
     private Integer flowMode;
     private Byte noticeFlag = 0;
+    private Byte invoiceType = 0;
 
     public Integer getFlowMode() {
         return flowMode;
@@ -141,6 +142,15 @@ public class ParkingLotConfig {
 
 	public void setNoticeFlag(Byte noticeFlag) {
 		this.noticeFlag = noticeFlag;
+	}
+	
+
+	public Byte getInvoiceType() {
+		return invoiceType;
+	}
+
+	public void setInvoiceType(Byte invoiceType) {
+		this.invoiceType = invoiceType;
 	}
 
 	@Override
