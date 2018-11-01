@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
@@ -54,6 +56,9 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 	
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
 	public void createBuildingStatistics(BuildingStatistics buildingStatistics) {
@@ -288,7 +293,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		EhPropertyStatisticBuilding b = Tables.EH_PROPERTY_STATISTIC_BUILDING;
 		
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(a.ID,a.NAME,
+		query.addSelect(a.ID,a.NAME,a.COMMUNITY_ID,
 				b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
 				b.OCCUPIED_APARTMENT_COUNT,b.LIVING_APARTMENT_COUNT,b.SALED_APARTMENT_COUNT,
 				b.AREA_SIZE,b.RENT_AREA,b.FREE_AREA,b.RENT_RATE,b.FREE_RATE);
@@ -305,6 +310,11 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.fetch().forEach(r->{
 			BuildingReportFormDTO dto = new BuildingReportFormDTO();
 			
+			dto.setCommunityId(r.getValue(a.COMMUNITY_ID));
+			Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if (community!=null) {
+				dto.setCommunityName(community.getName());
+			}
 			dto.setBuildingId(r.getValue(a.ID));
 			dto.setBuildingName(r.getValue(a.NAME));
 			dto.setTotalApartmentCount(r.getValue(b.TOTAL_APARTMENT_COUNT));
