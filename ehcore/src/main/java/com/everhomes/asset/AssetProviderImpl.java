@@ -5897,7 +5897,7 @@ public class AssetProviderImpl implements AssetProvider {
 		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
 		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
 		Condition cond = t1.NAMESPACE_ID.eq(cmd.getNamespaceId());
-		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		//cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
 		cond = cond.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
 		cond = cond.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
 		cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
@@ -5961,11 +5961,11 @@ public class AssetProviderImpl implements AssetProvider {
 	// 获取eh_asset_dooraccess_params 整表数据
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<AssetDooraccessParam> listDooraccessParamsList() {
+	public List<AssetDooraccessParam> listDooraccessParamsList(byte status) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
 		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
 		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
-		Condition cond = t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode());
+		Condition cond = t1.STATUS.eq(status);
 		query.orderBy(t1.CREATE_TIME.desc());
 		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
 				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
@@ -6145,6 +6145,19 @@ public class AssetProviderImpl implements AssetProvider {
 			return assetDooraccessParams.get(0);
 		}
 		return null;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class));
+		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode());
+		//query.orderBy(t1.CREATE_TIME.desc());
+		List<AssetDooraccessLog> assetDooraccessLogs = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessLog.class));
+		return assetDooraccessLogs;
 	}
 
 }

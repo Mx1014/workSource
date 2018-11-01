@@ -471,8 +471,9 @@ public interface AssetProvider {
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
 	AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd);
-	List<AssetDooraccessParam> listDooraccessParamsList();
+	List<AssetDooraccessParam> listDooraccessParamsList(byte status);
 	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
 	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus);
 }

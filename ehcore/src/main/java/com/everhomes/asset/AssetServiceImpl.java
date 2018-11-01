@@ -108,6 +108,7 @@ import com.everhomes.rest.contract.CMContractUnit;
 import com.everhomes.rest.contract.CMDataObject;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.contract.NamespaceContractType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
@@ -5225,7 +5226,14 @@ public class AssetServiceImpl implements AssetService {
 				assetProvider.updateDoorAccessParam(existParam);
 			}
 		} else {
-			assetProvider.createDoorAccessParam(assetDooraccessParam);
+			if (existParam.getStatus() == ContractTemplateStatus.INACTIVE.getCode()) {
+				existParam.setStatus(ContractTemplateStatus.ACTIVE.getCode());
+				existParam.setFreezeDays(cmd.getFreezeDays());
+				existParam.setUnfreezeDays(cmd.getUnfreezeDays());
+				assetProvider.updateDoorAccessParam(existParam);
+			} else {
+				assetProvider.createDoorAccessParam(assetDooraccessParam);
+			}
 		}
 	}
 
@@ -5244,8 +5252,8 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public List<AssetDooraccessParam> getDoorAccessParamList() {
-		List<AssetDooraccessParam> list = assetProvider.listDooraccessParamsList();
+	public List<AssetDooraccessParam> getDoorAccessParamList(byte status) {
+		List<AssetDooraccessParam> list = assetProvider.listDooraccessParamsList(status);
 		return list;
 	}
 
@@ -5284,7 +5292,8 @@ public class AssetServiceImpl implements AssetService {
 			Date today = new Date();
 			coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
 				// 先去读配置，再去循环账单
-				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList();
+				Byte satus = ContractTemplateStatus.ACTIVE.getCode();//配置的状态
+				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList(satus);
 				// 循环配置项
 				for (AssetDooraccessParam doorAccessParam : listDoorAccessParam) {
 					// 循环符合调件的账单，打开门禁
@@ -5407,6 +5416,44 @@ public class AssetServiceImpl implements AssetService {
 						nextPageAnchor = res.getNextPageAnchor();
 					}
 				}
+				
+				//处理取消配置的情况，开启门禁
+				Byte InStatus = ContractTemplateStatus.INACTIVE.getCode();//配置的状态
+				List<AssetDooraccessParam> listDoorAccessParamInStatus = getDoorAccessParamList(InStatus);
+				//循环删除配置的
+				for (AssetDooraccessParam doorAccessParamInStatus : listDoorAccessParamInStatus) {
+					//查询配置下面已经关闭的门禁的公司个人,这些需要全部开启门禁
+					List<AssetDooraccessLog> openDooraccessLogList = assetProvider.getDooraccessLogInStatus(doorAccessParamInStatus);
+					for (AssetDooraccessLog openDooraccessLog : openDooraccessLogList) {
+						UpdateFormalAuthByCommunityCommand updateFormalAuthByCommunityCommand = new UpdateFormalAuthByCommunityCommand();
+						updateFormalAuthByCommunityCommand.setCommunityId(doorAccessParamInStatus.getOwnerId());
+						updateFormalAuthByCommunityCommand.setOperateOrgId(doorAccessParamInStatus.getOrgId());
+						updateFormalAuthByCommunityCommand.setStatus(DoorAuthStatus.VALID.getCode());
+						updateFormalAuthByCommunityCommand.setTargetId(openDooraccessLog.getOwnerId());
+						Byte InStatusTargetType = null;
+						if ("eh_organization".equals(openDooraccessLog.getOwnerType())) {
+							InStatusTargetType = DoorLicenseType.ORG_COMMUNITY.getCode();
+						} else if ("eh_user".equals(openDooraccessLog.getOwnerType())) {
+							InStatusTargetType = DoorLicenseType.USER.getCode();
+						}
+						updateFormalAuthByCommunityCommand.setTargetType(InStatusTargetType);
+
+						UpdateFormalAuthByCommunityResponse rsp = doorAccessService.updateFormalAuthByCommunity(updateFormalAuthByCommunityCommand);
+
+						// 更新门禁记录表
+						AssetDooraccessLog assetDooraccessLog = ConvertHelper.convert(openDooraccessLog, AssetDooraccessLog.class);
+						/*assetDooraccessLog.setProjectId(doorAccessParamInStatus.getOwnerId());
+						assetDooraccessLog.setProjectType(EntityType.COMMUNITY.getCode());
+						assetDooraccessLog.setOwnerId(openDooraccessLog.getOwnerId());
+						assetDooraccessLog.setOwnerType(openDooraccessLog.getOwnerType());
+						assetDooraccessLog.setOrgId(doorAccessParamInStatus.getOrgId());
+						AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);*/
+						assetDooraccessLog.setResultMsg(rsp.getErrorCode() + "配置取消开启门禁:" + rsp.getMsg());
+						assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
+						assetProvider.createDoorAccessLog(assetDooraccessLog);
+					}
+				}
+				
 			});
 		}
 	}
@@ -5422,7 +5469,8 @@ public class AssetServiceImpl implements AssetService {
 			Date today = new Date();
 			coordinationProvider.getNamedLock(CoordinationLocks.BILL_DUEDAYCOUNT_UPDATE.getCode()).tryEnter(() -> {
 				// 先去读配置，再去循环账单
-				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList();
+				Byte satus = ContractTemplateStatus.ACTIVE.getCode();//配置的状态
+				List<AssetDooraccessParam> listDoorAccessParam = getDoorAccessParamList(satus);
 				// 循环配置项
 				for (AssetDooraccessParam doorAccessParam : listDoorAccessParam) {
 					// 循环符合调件的账单，打开门禁
