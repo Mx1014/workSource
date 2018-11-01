@@ -792,7 +792,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             meetingProvider.deleteMeetingReservation(meetingReservation);
             throw errorWithMeetingTimeExpired();
         }
-        boolean isSubjectUpdate = !cmd.getSubject().equals(meetingReservation.getSubject());
+        boolean isSubjectUpdate = !(cmd.getSubject().equals(meetingReservation.getSubject()) && stringEqual(cmd.getContent(),meetingReservation.getContent()));
         final MeetingReservation updateMeetingReservation = meetingReservation;
         checkWhenUpdateMeetingReservation(updateMeetingReservation);
 
@@ -865,7 +865,11 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
+    private boolean stringEqual(String content, String content2) { 
+		return content == null ? (content2 == null ? true : false) : content.equals(content2);
+	}
+
+	private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
 			List<MeetingAttachment> newAttachements, List<MeetingAttachment> existsAttachements) {
     	if(CollectionUtils.isEmpty(oldAttachements))
 			return Collections.emptyList();
