@@ -2493,6 +2493,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (ifCreateNewOrder){
             order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
             rentalv2Provider.updateRentalBill(order);//更新新的订单号
+			preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
         }return preOrderCommand;
 	}
 
