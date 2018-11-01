@@ -5221,19 +5221,19 @@ public class AssetServiceImpl implements AssetService {
 				existParam.setStatus((byte) 0);
 				assetProvider.updateDoorAccessParam(existParam);
 			} else {
-				existParam.setFreezeDays(cmd.getFreezeDays());
-				existParam.setUnfreezeDays(cmd.getUnfreezeDays());
-				assetProvider.updateDoorAccessParam(existParam);
+				if (existParam.getStatus() == ContractTemplateStatus.INACTIVE.getCode()) {
+					existParam.setStatus(ContractTemplateStatus.ACTIVE.getCode());
+					existParam.setFreezeDays(cmd.getFreezeDays());
+					existParam.setUnfreezeDays(cmd.getUnfreezeDays());
+					assetProvider.updateDoorAccessParam(existParam);
+				} else {
+					existParam.setFreezeDays(cmd.getFreezeDays());
+					existParam.setUnfreezeDays(cmd.getUnfreezeDays());
+					assetProvider.updateDoorAccessParam(existParam);
+				}
 			}
 		} else {
-			if (existParam.getStatus() == ContractTemplateStatus.INACTIVE.getCode()) {
-				existParam.setStatus(ContractTemplateStatus.ACTIVE.getCode());
-				existParam.setFreezeDays(cmd.getFreezeDays());
-				existParam.setUnfreezeDays(cmd.getUnfreezeDays());
-				assetProvider.updateDoorAccessParam(existParam);
-			} else {
-				assetProvider.createDoorAccessParam(assetDooraccessParam);
-			}
+			assetProvider.createDoorAccessParam(assetDooraccessParam);
 		}
 	}
 
@@ -5450,7 +5450,7 @@ public class AssetServiceImpl implements AssetService {
 						AssetDooraccessLog existDooraccessLog = assetProvider.getDooraccessLog(assetDooraccessLog);*/
 						assetDooraccessLog.setResultMsg(rsp.getErrorCode() + "配置取消开启门禁:" + rsp.getMsg());
 						assetDooraccessLog.setDooraccessStatus(DoorAuthStatus.VALID.getCode());// 开启门禁
-						assetProvider.createDoorAccessLog(assetDooraccessLog);
+						assetProvider.updateDoorAccessLog(assetDooraccessLog);
 					}
 				}
 				

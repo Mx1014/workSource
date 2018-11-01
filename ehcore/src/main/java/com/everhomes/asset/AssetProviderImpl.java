@@ -6154,6 +6154,7 @@ public class AssetProviderImpl implements AssetProvider {
 		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
 		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
 		Condition cond = t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode());
+		cond = cond.and(t1.PROJECT_ID.eq(doorAccessParamInStatus.getOwnerId()));
 		//query.orderBy(t1.CREATE_TIME.desc());
 		List<AssetDooraccessLog> assetDooraccessLogs = query.where(cond).fetch()
 				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessLog.class));
