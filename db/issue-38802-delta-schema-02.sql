@@ -286,6 +286,33 @@ PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁管理授权';
 
 -- ------------------------------------------------- 以下为zuolin-base-2.1(5.8.2)新增的schema脚本   start ---------------------------------
+ CREATE TABLE `eh_service_module_app_authorizations` (
+  `id` BIGINT(20) NOT NULL,
+  `namespace_id` INT(11) DEFAULT NULL,
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
+  `organization_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
+  `project_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'community_id',
+  `app_id` BIGINT(20)  NOT NULL DEFAULT '0' COMMENT 'app_id',
+  `control_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'control type',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 公司安装应用表
+CREATE TABLE `eh_organization_apps` (
+  `id` bigint(20) NOT NULL,
+  `app_origin_id` bigint(20) DEFAULT NULL,
+  `org_id` bigint(20) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `operator_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 功能模块入口列表
 CREATE TABLE `eh_service_module_entries` (
@@ -1002,33 +1029,7 @@ ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' C
 -- -----------------------------------------------------  以下为 5.6.1 新增的脚本 ----------------------------------------
 
  -- 应用公司项目授权表 by lei.lv
- CREATE TABLE `eh_service_module_app_authorizations` (
-  `id` BIGINT(20) NOT NULL,
-  `namespace_id` INT(11) DEFAULT NULL,
-  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
-  `organization_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
-  `project_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'community_id',
-  `app_id` BIGINT(20)  NOT NULL DEFAULT '0' COMMENT 'app_id',
-  `control_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'control type',
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
--- 公司安装应用表
-CREATE TABLE `eh_organization_apps` (
-  `id` bigint(20) NOT NULL,
-  `app_origin_id` bigint(20) DEFAULT NULL,
-  `org_id` bigint(20) DEFAULT NULL,
-  `visibility_flag` tinyint(4) DEFAULT NULL,
-  `display_name` varchar(255) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT NULL,
-  `creator_uid` bigint(20) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) DEFAULT NULL,
-  `operator_time` datetime DEFAULT NULL,
-
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
 ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
