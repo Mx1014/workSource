@@ -327,6 +327,14 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- REMARK: 修改积分系统状态
 UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 
+-- AUTHOR: 马世亨 20181031
+-- REMARK: 访客1.3合并访客与访客管理后清除app
+-- REMARK: 访客1.3园区访客地址修改
+delete from eh_service_module_apps where module_id in (42100,52200);
+update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
+
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
