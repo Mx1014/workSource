@@ -291,6 +291,6 @@ ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMEN
 
 
 -- AUTHOR: 黄鹏宇 20181101
--- REMARK:
+-- REMARK: 修改请示单的创建时间为datetime类型
 ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;
 ALTER TABLE eh_general_form_val_requests MODIFY operator_time DATETIME;
