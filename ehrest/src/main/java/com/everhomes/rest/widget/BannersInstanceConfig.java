@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     修改时，同步修改banners  itemgourpinstanceConfig类
  *      <li>categoryId: 应用入口ID</li>
  *      <li>appId: 应用originID</li>
  *      <li>moreAppId: 查看更多应用originId</li>

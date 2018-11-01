@@ -19,7 +19,7 @@ import java.util.List;
  *      <li>paddingFlag: 图片padding，是否有padding  --全屏轮播</li>
  *      <li>widthRatio: 宽比例数值  --全屏轮播</li>
  *      <li>heightRatio: 高比例数值  --全屏轮播</li>
- *      <li>showTitleFlag: 是否显示标题 1为否，0为是</li>
+ *      <li>showDots: 是否显示指示点 1为否，0为是</li>
  * </ul>
  */
 public class Banners {
@@ -46,14 +46,14 @@ public class Banners {
 
     private Byte autoScroll;
 
-    private Byte showTitleFlag;
+    private Byte showDots;
 
-    public Byte getShowTitleFlag() {
-        return showTitleFlag;
+    public Byte getShowDots() {
+        return showDots;
     }
 
-    public void setShowTitleFlag(Byte showTitleFlag) {
-        this.showTitleFlag = showTitleFlag;
+    public void setShowDots(Byte showDots) {
+        this.showDots = showDots;
     }
 
     public Byte getAutoScroll() {
