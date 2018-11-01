@@ -38,7 +38,7 @@
 update eh_service_alliance_categories ca, eh_service_alliances sa 
 set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
 ,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
-where ca.parent_id = 0 and sa.`type` = ca.id;
+where ca.parent_id = 0 and sa.`type` = ca.id and a.owner_type = 'organaization';
 
 
 -- 迁移2.调整ca表子类的ownerType ownerId, type
