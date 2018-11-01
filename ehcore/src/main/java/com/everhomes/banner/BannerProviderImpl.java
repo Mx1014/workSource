@@ -491,13 +491,14 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public Map<Long, Integer> countEnabledBannersByScope(Integer namespaceId) {
+    public Map<Long, Integer> countEnabledBannersByScope(Integer namespaceId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
         return context.select(t.SCOPE_ID, DSL.count(t.ID))
                 .from(t)
                 .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.CATEGORY_ID.eq(categoryId))
                 .and(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()))
                 .and(t.STATUS.eq(BannerStatus.ACTIVE.getCode()))
                 .groupBy(t.SCOPE_ID)

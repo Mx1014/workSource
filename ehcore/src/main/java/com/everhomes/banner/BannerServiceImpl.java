@@ -572,7 +572,10 @@ public class BannerServiceImpl implements BannerService {
     public CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd) {
 	    ValidatorUtil.validate(cmd);
 
-        Map<Long, Integer> communityIdTOEnabledCountMap = bannerProvider.countEnabledBannersByScope(cmd.getNamespaceId());
+	    if (cmd.getCategoryId() == null) {
+	        cmd.setCategoryId(0L);
+        }
+        Map<Long, Integer> communityIdTOEnabledCountMap = bannerProvider.countEnabledBannersByScope(cmd.getNamespaceId(), cmd.getCategoryId());
 
         List<EnabledBannersDTO> list = new ArrayList<>();
         communityIdTOEnabledCountMap.forEach((k, v) -> list.add(new EnabledBannersDTO(k, v)));
