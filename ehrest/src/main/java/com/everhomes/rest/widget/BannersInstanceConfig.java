@@ -14,11 +14,11 @@ import com.everhomes.util.StringHelper;
  *      <li>color: 当背景类型为纯色时的颜色  --非全屏轮播 格式：#FFFFFF</li>
  *      <li>topColor: 当背景类型为渐变时的顶部颜色  --非全屏轮播 格式：#FFFFFF</li>
  *      <li>bottomColor: 当背景类型为渐变时的底部颜色  --非全屏轮播 格式：#FFFFFF</li>
- *      <li>autoScroll: 是否自动轮播，1为否，0为是  --非全屏轮播</li>
+ *      <li>autoScroll: 是否自动轮播，0为否，1为是  --非全屏轮播</li>
  *      <li>paddingFlag: 图片padding，是否有padding  0为否，1为是。请参考{@link com.everhomes.rest.common.TrueOrFalseFlag} --全屏轮播</li>
  *      <li>widthRatio: 宽比例数值  --全屏轮播</li>
  *      <li>heightRatio: 高比例数值  --全屏轮播</li>
- *      <li>showDots: 是否显示指示点 1为否，0为是</li>
+ *      <li>showDots: 是否显示指示点 0为否，1为是</li>
  * </ul>
  */
 public class BannersInstanceConfig implements Serializable  {

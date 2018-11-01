@@ -25,6 +25,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.common.OwnerType;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.launchpad.LaunchPadCategoryDTO;
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
 import com.everhomes.rest.module.AppCategoryDTO;
@@ -265,24 +266,28 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
         List<ServiceModuleApp> apps = new ArrayList<>();
+		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
 		if(cmd.getNamespaceId() == 2) {
             List<OrganizationCommunityDTO> communityDTOS = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
             if (!CollectionUtils.isEmpty(communityDTOS)) {
-                Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
                 Long orgId = communityDTOS.get(0).getOrganizationId();
 //                Byte appType = ServiceModuleAppType.COMMUNITY.getCode();
-                Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
-                PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+
                 apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), orgId, locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
             }
         }else {
-            apps = listReleaseServiceModuleApps(cmd.getNamespaceId());
+            apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
         }
         if(apps == null){
             return null;
         }
         for (ServiceModuleApp app: apps){
             if(app.getActionType() == null){
+                continue;
+            }
+            if (cmd.getShowBannerAppFlag() != null && cmd.getShowBannerAppFlag().equals(TrueOrFalseFlag.FALSE.getCode()) && app.getModuleId().equals(ServiceModuleConstants.BANNER_MODULE)) {
                 continue;
             }
             ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
