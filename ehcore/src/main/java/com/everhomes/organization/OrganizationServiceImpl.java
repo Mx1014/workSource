@@ -13820,6 +13820,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         //创建 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
         organizationProvider.createOrganizationMember(member);
+        System.out.println("插入新的【OrganizationMember】数据： "+member.toString());
     }
     
     private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
