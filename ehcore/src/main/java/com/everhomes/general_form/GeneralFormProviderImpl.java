@@ -389,6 +389,9 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		GeneralFormValRequest generalFormValRequests = new GeneralFormValRequest();
+		generalFormValRequests.setCreatorUid(UserContext.currentUserId());
+		Long l2 = DateHelper.currentGMTTime().getTime();
+		generalFormValRequests.setCreatedTime(new Timestamp(l2));
 		//EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
