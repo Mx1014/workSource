@@ -245,14 +245,20 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
 			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
 				if (InvestmentAdAssetType.BUILDING.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 					Building building = communityProvider.findBuildingById(investmentAdAsset.getAssetId());
-					relatedAssetsSB.append(building.getName() + ",");
+					if (building != null) {
+						relatedAssetsSB.append(building.getName() + ",");
+					}
 				}else if (InvestmentAdAssetType.APARTMENT.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 					Address address = addressProvider.findAddressById(investmentAdAsset.getAssetId());
-					relatedAssetsSB.append(address.getAddress() + ",");
+					if (address != null) {
+						relatedAssetsSB.append(address.getAddress() + ",");
+					}
 				}
 			}
 			String relatedAssetsStr = relatedAssetsSB.toString();
-			detail.put("relatedAssets", relatedAssetsStr.substring(0,relatedAssetsStr.length()-1));
+			if (relatedAssetsStr.length() > 0) {
+				detail.put("relatedAssets", relatedAssetsStr.substring(0,relatedAssetsStr.length()-1));
+			}
 		}
 		return detail;
 	}
