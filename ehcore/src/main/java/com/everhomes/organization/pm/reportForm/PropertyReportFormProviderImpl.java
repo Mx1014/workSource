@@ -203,8 +203,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addJoin(b, JoinType.LEFT_OUTER_JOIN, a.ID.eq(b.COMMUNITY_ID));
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(a.ID.in(communityIds));
-		query.addConditions(b.DATE_STR.eq(dateStr));
-		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.addConditions(b.DATE_STR.eq(dateStr).or(b.DATE_STR.isNull()));
+		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()).or(b.STATUS.isNull()));
 		if (pageOffSet != null && pageSize != null) {
 			query.addLimit(pageOffSet, pageSize + 1);
 		}
@@ -302,8 +302,8 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(a.COMMUNITY_ID.eq(communityId));
 		query.addConditions(a.ID.in(buildingIds));
-		query.addConditions(b.DATE_STR.eq(dateStr));
-		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
+		query.addConditions(b.DATE_STR.eq(dateStr).or(b.DATE_STR.isNull()));
+		query.addConditions(b.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()).or(b.STATUS.isNull()));
 		if (pageOffSet != null && pageSize != null) {
 			query.addLimit(pageOffSet, pageSize + 1);
 		}
