@@ -463,97 +463,27 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 		return dto;
 	}
 
-//	@Override
-//	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-//
-//		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
-//
-//		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-//
-//		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
-//				cmd.getParkingLotId(), flowCase.getFlowMainId());
-//
-//		Integer requestMonthCount = REQUEST_MONTH_COUNT;
-//		Byte requestRechargeType = REQUEST_RECHARGE_TYPE;
-//		
-//		if(null != parkingFlow) {
-//			requestMonthCount = parkingFlow.getRequestMonthCount();
-//			requestRechargeType = parkingFlow.getRequestRechargeType();
-//		}
-//		
-//		OpenCardInfoDTO dto = new OpenCardInfoDTO();
-//		String cardTypeId = parkingCardRequest.getCardTypeId();
-//		Integer ruleId;
-//		if (StringUtils.isBlank(cardTypeId)) {
-//			List<ParkingCardRequestType> types = parkingProvider.listParkingCardTypes(parkingCardRequest.getOwnerType(),
-//					parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId());
-//			ruleId = Integer.valueOf(types.get(0).getCardTypeId());
-//		} else {
-//			ruleId = Integer.valueOf(parkingCardRequest.getCardTypeId());
-//		}
-//
-//		//月租车
-//		List<KetuoTestCardRule> rules = getCardRule(ruleId);
-//		if(null != rules && !rules.isEmpty()) {
-//			
-//			KetuoTestCardRule rate = null;
-//			for(KetuoTestCardRule r: rules) {
-//				if(Integer.valueOf(r.getRuleAmount()) == 1) {
-//					rate = r;
-//					break;
-//				}
-//			}
-//
-//			if (null == rate) {
-//				//TODO:
-//				return null;
-//			}
-//
-//
-//			dto.setOwnerId(cmd.getOwnerId());
-//			dto.setOwnerType(cmd.getOwnerType());
-//			dto.setParkingLotId(cmd.getParkingLotId());
-//			dto.setRateToken(rate.getRuleId().toString());
-//			Map<String, Object> map = new HashMap<String, Object>();
-//		    map.put("count", rate.getRuleAmount());
-//			String scope = ParkingNotificationTemplateCode.SCOPE;
-//			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-//			String locale = "zh_CN";
-//			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-//			dto.setRateName(rateName);
-//			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
-//			dto.setPrice(new BigDecimal(rate.getRuleFee()).divide(new BigDecimal(100), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP));
-//
-//			dto.setPlateNumber(cmd.getPlateNumber());
-//			long now = configProvider.getLongValue("parking.opencard.now",System.currentTimeMillis());
-//			dto.setOpenDate(now);
-//			dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount,true));
-//			if(requestRechargeType == ParkingCardExpiredRechargeType.ALL.getCode()) {
-//				dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
-//			}else {
-//				Calendar calendar = Calendar.getInstance();
-//				calendar.setTimeInMillis(now);
-//				int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-//				int today = calendar.get(Calendar.DAY_OF_MONTH);
-//
-//				BigDecimal firstMonthPrice = dto.getPrice().multiply(new BigDecimal(maxDay-today+1))
-//						.divide(new BigDecimal(DAY_COUNT), OPEN_CARD_RETAIN_DECIMAL, RoundingMode.HALF_UP);
-//				if(firstMonthPrice.compareTo(dto.getPrice())>0){
-//					firstMonthPrice = dto.getPrice();
-//				}
-//				BigDecimal price = dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
-//						.add(firstMonthPrice);
-//				dto.setPayMoney(price);
-//			}
-//			if(configProvider.getBooleanValue("parking.ketuo.debug",false)){
-//				LOGGER.debug("parking.ketuo.debug is true, pay 0.01 RMB");
-//				dto.setPayMoney(new BigDecimal(0.01));
-//			}
-//			dto.setOrderType(ParkingOrderType.OPEN_CARD.getCode());
-//		}
-//
-//		return dto;
-//	}
+	@Override
+    ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest request) {
+		
+    	List<KetuoTestCardRule> rules = new ArrayList<>();
+		rules =  getCardRule(Integer.valueOf(CAR_TYPE));
+		KetuoTestCardRule rule = rules.get(0);
+		ParkingRechargeRateDTO dto = ConvertHelper.convert(request, ParkingRechargeRateDTO.class);
+
+		dto.setCardTypeId(String.valueOf(rule.getRuleId()));
+		dto.setCardType(rule.getRuleName());
+		dto.setRateToken(rule.getRuleAmount());
+		boolean flag = configProvider.getBooleanValue("parking.ketuotest.amount", true);
+		if (flag){
+			dto.setPrice(new BigDecimal(configProvider.getValue("parking.test.prices.month","1")));
+		} else{
+			dto.setPrice(new BigDecimal(rule.getRuleFee()).divide(new BigDecimal(100), TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP));
+		}
+		dto.setVendorName(ParkingLotVendor.KETUO_TEST.getCode());
+
+		return dto;
+    }
 	
 	private boolean addMonthCard(ParkingRechargeOrder order){
 
@@ -584,8 +514,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
         String urlPath = URL+ ADD_MONTH_CARD;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
-        String plateNumber = order.getPlateNumber().substring(2);
-        String p = parkId + plateNumber +CAR_TYPE +startTime+ endTime +  iv + appSecret;
+        String p = parkId + order.getPlateNumber() +CAR_TYPE +startTime+ endTime +  iv + appSecret;
         String key = MD5Utils.getMD5(p);
         param.put("appId", appId);
         param.put("key", key);
@@ -676,8 +605,24 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+    	ListCardTypeResponse ret = new ListCardTypeResponse();
+
+		String json = configProvider.getValue("parking.default.card.type", "");
+		List<ParkingCardType> list = new ArrayList<>();
+		if(json.startsWith("{")) {
+			ParkingCardType cardType = JSONObject.parseObject(json, ParkingCardType.class);
+			list.add(cardType);
+			ret.setCardTypes(list);
+		}else if(json.startsWith("[")){
+			JSONArray array = JSONObject.parseArray(json);
+			for (Object o : array) {
+				ParkingCardType cardType = JSONObject.parseObject(o.toString(),ParkingCardType.class);
+				list.add(cardType);
+			}
+		}
+		ret.setCardTypes(list);
+
+    	return ret;
 	}
 
 	@Override
