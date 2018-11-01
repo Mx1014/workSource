@@ -269,12 +269,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
 		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
-		if(cmd.getNamespaceId() == 2) {
+		if(cmd.getNamespaceId() == 2 && cmd.getCommunityId() != null) {
             List<OrganizationCommunityDTO> communityDTOS = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
             if (!CollectionUtils.isEmpty(communityDTOS)) {
                 Long orgId = communityDTOS.get(0).getOrganizationId();
-//                Byte appType = ServiceModuleAppType.COMMUNITY.getCode();
-
                 apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), orgId, locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
             }
         }else {
