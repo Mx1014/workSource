@@ -15,6 +15,13 @@
 -- REMARK：备份eh_payment_variables表
 -- select * from eh_payment_variables;
 
+-- AUTHOR:杨崇鑫 20181027
+-- REMARK:解决缺陷 #39571:
+-- 第一步请执行在es上执行db/search/energy_task.sh
+-- 第二步执行同步接口/energy/syncEnergyTaskIndex
+
+-- AUTHOR:梁家声 20181030
+-- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
@@ -24,287 +31,307 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
--- AUTHOR:杨崇鑫 20181018
--- REMARK:解决缺陷 #39352: 【全量标准版】【物业缴费】新增收费标准前端提示成功，但实际未新增成功，无相关数据，后台提示“应用开小差”
-delete from eh_payment_variables;
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (1, NULL, NULL, '单价', 0, '2017-11-02 12:51:43', NULL, '2017-11-02 12:51:43', 'dj');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (2, NULL, 1, '面积', 0, '2017-11-02 12:51:43', NULL, '2017-11-02 12:51:43', 'mj');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (3, NULL, 6, '固定金额', 0, '2017-11-02 12:51:43', NULL, '2017-11-02 12:51:43', 'gdje');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (4, NULL, 5, '用量', 0, '2017-11-02 12:51:43', NULL, '2017-11-02 12:51:43', 'yl');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (5, NULL, 6, '欠费', 0, '2017-10-16 09:31:00', NULL, '2017-10-16 09:31:00', 'qf');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (7, NULL, NULL, '比例系数', 0, '2018-05-04 21:34:48', NULL, '2018-05-04 21:34:48', 'blxs');
-INSERT INTO `eh_payment_variables`(`id`, `charging_standard_id`, `charging_items_id`, `name`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `identifier`) VALUES (8, NULL, NULL, '折扣', 0, '2018-05-23 02:09:38', NULL, '2018-05-23 02:09:38', 'zk');
+-- AUTHOR:唐岑2018年10月23日14:29:41
+-- REMARK:添加资产报表定时配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('schedule.property.task.time', '0 30 2 * * ?', '资产报表定时任务', '0', NULL, '1');
 
-
--- AUTHOR:杨崇鑫 20181015
--- REMARK:补充缴费模块“应用开小差”的错误码
-SET @locale_string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10012', 'zh_CN', '第三方授权异常');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10013', 'zh_CN', '收费项标准公式不存在');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-	VALUES ((@locale_string_id := @locale_string_id + 1), 'assetv2', '10014', 'zh_CN', '收费项标准类型错误');
-	
--- 更新 layout
-SET @versionCode = '201810110200';
-
-SET @bizAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 92100 AND `namespace_id` = 2);
-SET @activityAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10600 AND `namespace_id` = 2);
-SET @forumAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10100 AND `namespace_id` = 2);
-SET @newsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10800 AND `namespace_id` = 2);
-SET @communityBulletinsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 10300 AND `namespace_id` = 2);
-SET @enterpriseBulletinsAppId = (SELECT IFNULL(MIN(origin_id),0) from eh_service_module_apps WHERE module_id = 57000 AND `namespace_id` = 2);
-
-UPDATE eh_launch_pad_layouts set version_code = @versionCode, layout_json  = CONCAT('{"versionCode":"',@versionCode,'","layoutName":\"ServiceMarketLayout\",\"displayName\":\"工作台\",\"groups\":[{\"defaultOrder\":3,\"groupName\":\"公告\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"rowCount\":1.0,\"style\":2.0,\"shadow\":1.0,\"moduleId\":57000.0,\"appId\":', @enterpriseBulletinsAppId ,'},\"separatorFlag\":0,\"separatorHeight\":0,\"widget\":\"Bulletins\"},{\"columnCount\":1,\"defaultOrder\":2,\"groupName\":\"园区运营\","title":"园区运营","titleFlag":1,\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"paddingTop\":16.0,\"paddingLeft\":16.0,\"paddingBottom\":16.0,\"paddingRight\":16.0,\"lineSpacing\":0.0,\"columnSpacing\":0.0,\"backgroundColor\":\"#ffffff\",\"appType\":1.0},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Default\",\"widget\":\"Card\"},{\"columnCount\":1,\"defaultOrder\":4,\"groupName\":\"企业办公\","title":"企业办公","titleFlag":1,\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"paddingTop\":16.0,\"paddingLeft\":16.0,\"paddingBottom\":16.0,\"paddingRight\":16.0,\"lineSpacing\":0.0,\"columnSpacing\":0.0,\"backgroundColor\":\"#ffffff\",\"appType\":0.0},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Default\",\"widget\":\"Card\"}]}') WHERE type = 4 AND namespace_id = 2;
-UPDATE eh_launch_pad_layouts set version_code = @versionCode, layout_json  = CONCAT('{"versionCode":"',@versionCode,'","layoutName":\"ServiceMarketLayout\",\"displayName\":\"服务广场\",\"groups\":[{\"defaultOrder\":1,\"groupName\":\"banner图片1\",\"style\":\"Shape\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31056\",\"widthRatio\":16.0,\"heightRatio\":9.0,\"shadowFlag\":1.0,\"paddingFlag\":1.0},\"separatorFlag\":0,\"separatorHeight\":0,\"widget\":\"Banners\"},{\"groupId\":0,\"groupName\":\"容器\","title":"容器","titleFlag":0,"titleStyle":101,"titleSize":2,"titleMoreFlag":0,\"columnCount\":4,\"defaultOrder\":2,\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31058\",\"paddingTop\":0.0,\"paddingLeft\":16.0,\"paddingBottom\":0.0,\"paddingRight\":16.0,\"lineSpacing\":0.0,\"columnSpacing\":0.0,\"cssStyleFlag\":1.0,\"backgroundColor\":\"#ffffff\",\"allAppFlag\":1.0},\"separatorFlag\":0,\"separatorHeight\":0,\"style\":\"Default\",\"widget\":\"Navigator\"},{\"defaultOrder\":3,\"groupName\":\"公告\",\"instanceConfig\":{\"itemGroup\":\"EhPortalItemGroups31057\",\"rowCount\":1.0,\"style\":2.0,\"shadow\":1.0,\"moduleId\":10300.0,\"appId\":', @communityBulletinsAppId ,'},\"separatorFlag\":0,\"separatorHeight\":0,\"widget\":\"Bulletins\"},{\"groupName\":\"电商入口\",\"widget\":\"NavigatorTemp\"},{\"defaultOrder\":4,\"groupName\":\"商品精选\","title":"商品精选","titleFlag":1,"titleStyle":101,"titleSize":2,"titleMoreFlag":1,\"instanceConfig\":{\"itemGroup\":\"OPPushBiz\",\"moduleId\":92100.0,\"appId\":', @bizAppId, ',\"entityCount\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"HorizontalScrollSquareView\",\"widget\":\"OPPush\"},{\"defaultOrder\":5,\"groupName\":\"活动\","title":"活动","titleFlag":1,"titleStyle":101,"titleSize":2,"titleMoreFlag":1,\"instanceConfig\":{\"itemGroup\":\"OPPushActivity\",\"entityCount\":5.0,\"subjectHeight\":0.0,\"descriptionHeight\":0.0,\"newsSize\":5.0,\"moduleId\":10600.0,\"appId\":', @activityAppId, ',\"actionType\":61.0,\"appConfig\":{\"categoryId\":1.0,\"publishPrivilege\":1.0,\"livePrivilege\":0.0,\"listStyle\":2.0,\"scope\":3.0,\"style\":4.0}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"HorizontalScrollWideView\",\"widget\":\"OPPush\"},{\"defaultOrder\":7,\"groupName\":\"论坛\","title":"论坛","titleFlag":1,"titleStyle":101,"titleSize":2,"titleMoreFlag":1,\"instanceConfig\":{\"moduleId\":10100.0,\"appId\":', @forumAppId, ',\"actionType\":62.0,\"newsSize\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"TextImageWithTagListView\",\"widget\":\"OPPush\"},{\"defaultOrder\":8,\"groupName\":\"园区快讯\","title":"园区快讯","titleFlag":1,"titleStyle":101,"titleSize":2,"titleMoreFlag":1,\"instanceConfig\":{\"moduleId\":10800,\"appId\":', @newsAppId, ',\"actionType\":48,\"newsSize\":5.0,\"appConfig\":{}},\"separatorFlag\":1,\"separatorHeight\":0,\"style\":\"NewsListView\",\"widget\":\"OPPush\"}]}') WHERE type = 5 AND namespace_id = 2 ;
+-- AUTHOR: 杨崇鑫 20181023
+-- REMARK: 新增“资产报表中心”模块和菜单
+set @module_id=230000; -- 模块Id（运维分配的）
+set @data_type='property-statistic';-- 前端发给你的页面跳转链接
+-- 新增模块 eh_service_modules
+INSERT INTO `eh_service_modules`(`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `access_control_type`, `menu_auth_flag`, `category`)
+VALUES (230000, '资产报表中心', 130000, '/200/130000/230000', 1, 3, 2, 10, UTC_TIMESTAMP(), NULL, NULL, UTC_TIMESTAMP(), 0, 0, '0', 0, 'unlimit_control', 1, 0, NULL, NULL, 1, 1, 'module');
+-- 新增模块菜单 eh_web_menus
+-- 左邻后台:zuolin、园区：park
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
+	VALUES (79850000, '资产报表中心', 17000000, NULL, @data_type, 1, 2, '/27000000/17000000/79850000', 'zuolin', 10, 230000, 3, 'system', 'module', NULL, 1);
+INSERT INTO `eh_web_menus`(`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`)
+	VALUES (79860000, '资产报表中心', 49000000, NULL, @data_type, 1, 2, '/40000040/49000000/79860000', 'park', 10, 230000, 3, 'system', 'module', 2, 1);
 
 
 
 
--- 企业访客 设置oa模块
-UPDATE eh_service_modules set app_type = 0 WHERE id in (52100, 52200);
--- 更新应用信息
-UPDATE eh_service_module_apps a set app_type = 0 WHERE module_id in (52100, 52200);
-
--- 默认的微信消息模板Id
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('wx.default.template.id', 'JnTt-ce69Wlie-o8nv4Jhl3CKA0pXaageIsr4aJiWCk', '默认的微信消息模板Id', '0', NULL, '1');
-
-
--- AUTHOR: 荣楠
--- REMARK: 组织架构4.6
-SET @locale_id = (SELECT MAX(id) FROM `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100015', 'zh_CN', '账号重复');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100016', 'zh_CN', '账号长度不对或格式错误');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@locale_id := @locale_id + 1, 'archives', '100017', 'zh_CN', '账号一经设定，无法修改');
-
-
--- AUTHOR: 严军
--- REMARK: 客户端处理方式
-update eh_service_modules set client_handler_type = 2 WHERE id in (41700, 20100,40730,41200);
-
-
--- AUTHOR: 严军
--- REMARK: 云打印设置为园区应用
-UPDATE eh_service_modules set app_type = 1 WHERE id = 41400;
-UPDATE eh_service_module_apps a set app_type = 1 WHERE module_id = 41400;
-
-UPDATE eh_service_modules set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE id = 41400;
-UPDATE eh_service_module_apps set instance_config = '{"url":"${home.url}/cloud-print/build/index.html#/home#sign_suffix"}' WHERE module_id = 41400;
-
--- AUTHOR: 严军
--- REMARK: 工位预定客户端处理方式设置为内部链接
-update eh_service_modules set client_handler_type = 2 WHERE id in (40200);
-
-
--- AUTHOR: 严军
--- REMARK: 开放“应用入口”菜单
-DELETE FROM eh_web_menus WHERE id = 15010000;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15010000', '基础数据', '15000000', NULL, NULL, '1', '2', '/15000000/15010000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL);
-DELETE FROM eh_web_menus WHERE id = 15025000;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`) VALUES ('15025000', '应用入口', '15010000', NULL, 'servicemodule-entry', '1', '2', '/15000000/15010000/15025000', 'zuolin', '30', NULL, '3', 'system', 'module', NULL);
-
--- AUTHOR: 严军
--- REMARK: 设置默认的应用分类
-UPDATE eh_service_modules set app_type = 1 WHERE app_type is NULL;
-UPDATE eh_service_module_apps a set a.app_type = IFNULL((SELECT b.app_type from eh_service_modules b where b.id = a.module_id), 1);
-
-update eh_service_modules set client_handler_type = 2 WHERE id = 43000;
-
--- AUTHOR: xq.tian
--- REMARK: 用户名或密码错误提示 add by xq.tian  2018/10/11
-SET @eh_locale_strings_id = (SELECT MAX(id) from `eh_locale_strings`);
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
-	VALUES (@eh_locale_strings_id:=@eh_locale_strings_id+1, 'user', '100020', 'zh_CN', '用户名或密码错误');
-
--- AUTHOR: 缪洲 20181008
--- REMARK: issue-38650 增加error消息模板
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10034', 'zh_CN', '接口参数缺失');
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10035', 'zh_CN', '接口参数异常');
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10036', 'zh_CN', '订单状态异常');
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10037', 'zh_CN', '文件导出失败');
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10038', 'zh_CN', '工作流未开启');
-INSERT INTO `eh_locale_strings`(`scope`, `code`, `locale`, `text`) VALUES ('parking', '10039', 'zh_CN', '对象不存在');
-
--- AUTHOR: 马世亨 20181008
--- REMARK: issue-38650 增加error消息模板
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10020','zh_CN','同步搜索引擎失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10021','zh_CN','查询失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10022','zh_CN','文件导出失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10023','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10024','zh_CN','第三方返回失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask','10025','zh_CN','接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1414','zh_CN','同步搜索引擎失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1415','zh_CN','接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1416','zh_CN','接口参数缺失');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1417','zh_CN','二维码下载失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1418','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('visitorsys','1419','zh_CN','文件导出失败');
-
--- by st.zheng
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'relocation', '506', 'zh_CN', '非法参数', '非法参数', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '506', 'zh_CN', '非法参数', '非法参数', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '507', 'zh_CN', '参数缺失', '参数缺失', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '508', 'zh_CN', '资源或资源规则缺失', '资源或资源规则缺失', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '509', 'zh_CN', '找不到订单或订单状态错误', '找不到订单或订单状态错误', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental', '510', 'zh_CN', '下单失败', '下单失败', '0');
 
 
 
--- AUTHOR: 黄明波 20181008
--- REMARK: issue-38650 增加error消息模板
--- yellowPage
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10012', 'zh_CN', '评论不存在或已被删除');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10013', 'zh_CN', '文件导出失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10014', 'zh_CN', '跳转链接格式错误');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10015', 'zh_CN', '接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('yellowPage', '10016', 'zh_CN', '获取电商模块失败');
 
 
--- express
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10003', 'zh_CN', 'URL加密失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10004', 'zh_CN', '请求失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10005', 'zh_CN', '接口参数缺失');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10006', 'zh_CN', '接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10007', 'zh_CN', '订单不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10008', 'zh_CN', '获取公司失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10009', 'zh_CN', '用户鉴权失败，请重新登录');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10010', 'zh_CN', '订单异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10011', 'zh_CN', '第三方返回失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('express', '10012', 'zh_CN', '支付鉴权失败');
-
--- news
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10017', 'zh_CN', '评论不存在或已被删除');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10018', 'zh_CN', '接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10019', 'zh_CN', '无效的快讯类型id');
-
--- print
-
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10000', 'zh_CN', '订单不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10001', 'zh_CN', '订单异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10002', 'zh_CN', '邮箱地址格式错误');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10003', 'zh_CN', '接口参数缺失');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10004', 'zh_CN', '接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10005', 'zh_CN', '获取打印任务失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10006', 'zh_CN', '订单不存在或已支付');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10007', 'zh_CN', '打印机解锁失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10008', 'zh_CN', '第三方返回失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10009', 'zh_CN', '扫码失败，请重试');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10010', 'zh_CN', '有未支付订单，请支付后重试');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10011', 'zh_CN', '订单已支付');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10012', 'zh_CN', '锁定订单失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('news', '10013', 'zh_CN', '文件导出失败');
 
 
--- 马世亨 2018-10-10
--- 访客管理1.3 合并访客应用
-update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-management/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
-update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=enterprise#/home#sign_suffix"}' where id = 52100;
-delete from eh_service_modules where id in (42100,52200);
--- end
-
--- 马世亨 2018-10-10
--- 访客管理1.3 企业访客权限
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`)
-VALUES ('52110', '预约管理', '52100', '/100/50000/52100/52110', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', NULL);
-
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`)
-VALUES ('52120', '访客管理', '52100', '/100/50000/52100/52120', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', NULL);
-
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`)
-VALUES ('52130', '设备管理', '52100', '/100/50000/52100/52130', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', NULL);
-
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`)
-VALUES ('52140', '移动端管理', '52100', '/100/50000/52100/52140', '1', '4', '2', '0', now(), NULL, NULL, now(), '0', '1', '1', NULL, '', '1', '1', NULL);
 
 
-set @privilege_id = (select max(id) from eh_service_module_privileges);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES (@privilege_id:=@privilege_id+1, '52100', '0', '5210052100', '全部权限', '0', now());
-
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (5210052110, '0', '企业访客 预约管理权限', '企业访客 预约管理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES (@privilege_id:=@privilege_id+1, '52110', '0', 5210052110, '预约管理权限', '0', now());
-
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (5210052120, '0', '企业访客 访客管理权限', '企业访客 访客管理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES (@privilege_id:=@privilege_id+1, '52120', '0', 5210052120, '访客管理权限', '0', now());
-
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (5210052130, '0', '企业访客 设备管理权限', '企业访客 设备管理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES (@privilege_id:=@privilege_id+1, '52130', '0', 5210052130, '设备管理权限', '0', now());
-
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (5210052140, '0', '企业访客 移动端管理权限', '企业访客 移动端管理权限', NULL);
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES (@privilege_id:=@privilege_id+1, '52140', '0', 5210052140, '移动端管理权限', '0', now());
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:将计划任务中的拜访时间改为计划时间
+update eh_var_fields set display_name = '计划时间' where display_name='拜访时间' and group_id = 20;
+update eh_var_field_scopes set field_display_name = '计划时间' where field_display_name='拜访时间' and group_id = 20;
 
 
--- AUTHOR: 唐岑2018年10月17日20:32:09
--- REMARK: issue-38650 增加error消息模板
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','101','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','102','zh_CN','接口参数异常');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','103','zh_CN','接口参数缺失');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','104','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','105','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','106','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','107','zh_CN','消息内容为空');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','108','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','109','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','110','zh_CN','上传文件为空');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','111','zh_CN','解析文件失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','112','zh_CN','账单数据重复');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','113','zh_CN','服务器内部错误');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','114','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','115','zh_CN','该用户未欠费，不能向其发送催缴短信');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','116','zh_CN','支付方式不支持');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','117','zh_CN','订单不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','118','zh_CN','账单无效');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','119','zh_CN','用户权限不足');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','120','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','121','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','122','zh_CN','excel数据格式不正确');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','123','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','124','zh_CN','创建预约计划失败');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','125','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','126','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','127','zh_CN','对象不存在');
-INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('property','128','zh_CN','导出文件失败');
-
--- end
-
--- xq.tian 2018-10-19
--- 驳回按钮的默认跟踪
-UPDATE eh_locale_strings SET text='任务已被 ${text_tracker_curr_operator_name} 驳回' WHERE scope='flow' AND code='20005';
+-- AUTHOR:黄鹏宇 2018年10月22日
+-- REMARK:更改module表中的client_handler_type类型为外部链接
+update eh_service_modules set client_handler_type = 2 where id = 25000;
+update eh_service_modules set client_handler_type = 2 where id = 150020;
 
 
--- AUTHOR: 严军 2018-10-21
--- REMARK: issue-38924 修改菜单
--- 一级菜单
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('25000000', '资产管理系统', '0', NULL, NULL, '1', '2', '/25000000', 'zuolin', '23', NULL, '1', 'system', 'classify', NULL, '1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('26000000', '物业服务系统', '0', NULL, NULL, '1', '2', '/26000000', 'zuolin', '26', NULL, '1', 'system', 'classify', NULL, '1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('27000000', '统计分析', '0', NULL, NULL, '1', '2', '/27000000', 'zuolin', '60', NULL, '1', 'system', 'classify', NULL, '1');
-UPDATE eh_web_menus set `name` = '园区运营系统' WHERE id = 16000000;
-UPDATE eh_web_menus set `name` = '企业办公系统' WHERE id = 23000000;
--- 资产管理系统
-UPDATE eh_web_menus set parent_id = 25000000, sort_num = 10 WHERE id = 16010000;
-UPDATE eh_web_menus set parent_id = 25000000, sort_num = 20 WHERE id = 16210000;
-UPDATE eh_web_menus SET path = replace(path, '/16000000/', '/25000000/') WHERE parent_id in (16010000, 16210000) OR id in (16010000, 16210000);
--- 物业服务系统
-UPDATE eh_web_menus set parent_id = 26000000, sort_num = 10, `name` = '物业服务' WHERE id = 16050000;
-UPDATE eh_web_menus SET path = replace(path, '/16000000/', '/26000000/') WHERE parent_id = 16050000 or id = 16050000;
-UPDATE eh_web_menus SET `status` = 0 WHERE id = 16050400;
--- 园区运营系统
-UPDATE eh_web_menus SET `status` = 2, parent_id = 16400000, path = '/16000000/16400000/16020500' WHERE id = 16020500;
-UPDATE eh_web_menus SET `name` = '收款账户管理' WHERE id = 16070000;
--- 统计分析
-UPDATE eh_web_menus set parent_id = 27000000, sort_num = 10, `name` = '统计分析' WHERE id = 17000000;
-UPDATE eh_web_menus SET path = replace(path, '/16000000/', '/27000000/') WHERE parent_id = 17000000 or id = 17000000;
--- 企业办公系统
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('23020000', '协同办公', '23000000', NULL, NULL, '1', '2', '/23000000/23020000', 'zuolin', '10', NULL, '2', 'system', 'classify', NULL, '1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('23030000', '人力资源', '23000000', NULL, NULL, '1', '0', '/23000000/23030000', 'zuolin', '20', NULL, '2', 'system', 'classify', NULL, '1');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type`, `scene_type`) VALUES ('23040000', '支付管理', '23000000', NULL, NULL, '1', '2', '/23000000/23040000', 'zuolin', '50', NULL, '2', 'system', 'classify', NULL, '1');
-UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/78000001' WHERE id = 78000001;
-UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/79100000' WHERE id = 79100000;
+
+
+
+
+
+UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  180000);
+
+-- AUTHOR:严军 201801030
+-- REMARK: issue-null 设置路由相关参数
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
+UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+
+
+
+-- AUTHOR: 吴寒
+-- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES('punch.create','1','zh_CN','打卡发送消息','${createType}: ${punchTime}','0');
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('punch.create.type','1','zh_CN','自动打卡');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('punch.create.type','2','zh_CN','人脸识别打卡');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('punch.create.type','3','zh_CN','门禁打卡');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('punch.create.type','4','zh_CN','其他第三方打卡');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('oa.unit','1','zh_CN','天');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('oa.unit','2','zh_CN','次');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('remind.msg','1','zh_CN','日程提醒');
+
+INSERT INTO eh_locale_strings(scope,CODE,locale,TEXT) VALUE( 'PunchStatusStatisticsItemName', 11, 'zh_CN', '外出');
+
+-- AUTHOR: 吴寒
+-- REMARK: 日程提醒给共享人发消息
+SET @tem_id = (SELECT MAX(id) FROM eh_locale_templates);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@tem_id := @tem_id + 1),'remind.msg','6','zh_CN','创建给被共享人发消息','${trackContractName}共享了日程“${planDescription}” ','0');
+
+-- AUTHOR: 马世亨
+-- REMARK: 邀请者查看邀请详情路由修改
+UPDATE `eh_configurations` SET `value`='%s/visitor-appointment/build/index.html?detailId=%s&ns=%s#/appointment-detail#sign_suffix' WHERE `name`='visitorsys.inviter.route';
+
+-- AUTHER：李清岩 20181019
+-- REMARK: 新增公共门禁权限子模块
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41011, '门禁授权', '40000', '/200/40000/41010/41011', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41012, '门禁日志', '40000', '/200/40000/41010/41012', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41013, '数据统计', '40000', '/200/40000/41010/41013', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41014, '移动端管理', '40000', '/200/40000/41010/41014', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+-- AUTHER：李清岩 20181019
+-- REMARK: 新增企业门禁权限子模块
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41021, '门禁授权', '310000', '/100/310000/41020/4102', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41022, '门禁日志', '310000', '/100/310000/41020/41022', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41023, '数据统计', '310000', '/100/310000/41020/41023', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41024, '移动端管理', '310000', '/100/310000/41020/41024', '1', '4', '2', 0, NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+-- AUTHER：李清岩 20181019
+-- 新增门禁权限项
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4101041010, 0, '公共门禁 全部权限', '公共门禁 全部权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4101041011, 0, '公共门禁 门禁授权', '公共门禁 门禁授权权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4101041012, 0, '公共门禁 门禁日志', '公共门禁 门禁日志权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4101041013, 0, '公共门禁 数据统计', '公共门禁 数据统计权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4101041014, 0, '公共门禁 移动端管理', '公共门禁 移动端管理权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041020, 0, '企业门禁 全部权限', '企业门禁 全部权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041021, 0, '企业门禁 门禁授权', '企业门禁 门禁授权权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041022, 0, '企业门禁 门禁日志', '企业门禁 门禁日志权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041023, 0, '企业门禁 数据统计', '企业门禁 数据统计权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4102041024, 0, '企业门禁 移动端管理', '企业门禁 移动端管理权限', NULL );
+-- AUTHER：李清岩 20181019
+-- 模块权限关联
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41010', '0', 4101041010, '全部权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41011', '0', 4101041011, '门禁授权权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41012', '0', 4101041012, '门禁日志权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41013', '0', 4101041013, '数据统计权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41014', '0', 4101041014, '移动端管理权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41020', '0', 4102041020, '全部权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41021', '0', 4102041021, '门禁授权权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41022', '0', 4102041022, '门禁日志权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41023', '0', 4102041023, '数据统计权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41024', '0', 4102041024, '移动端管理权限', '0', NOW());
+-- AUTHER：李清岩 20181019
+-- 新增两个门禁模块：公共门禁beta，企业门禁beta
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 16030610, '公共门禁beta', 16030000, NULL, 'public-access', 1, 2, '/16000000/16030000/16030610', 'zuolin', 40, 41110, 3, 'system', 'module', NULL );
+
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 16030620, '公共门禁beta', 45000000, NULL, 'public-access', 1, 2, '/40000040/45000000/16030620', 'park', 30, 41110, 3, 'system', 'module', NULL );
+
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 48140010, '企业门禁beta', 16040000, NULL, 'company-access', 1, 2, '/23000000/16040000/48140010', 'zuolin', 60, 41120, 3, 'system', 'module', NULL );
+
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 48140020, '企业门禁beta', 48000000, NULL, 'company-access', 1, 2, '/40000010/48000000/48140020', 'park', 80, 41120, 3, 'system', 'module', NULL );
+-- AUTHER：李清岩 20181019
+-- 新增公共门禁beta子模块
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( 41110, '公共门禁beta', '40000', '/200/40000/41110', '1', '3', '2', 10, NOW(), '{\"isSupportQR\":1,\"isSupportSmart\":0}', '78', NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'module' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41111', '门禁授权', '40000', '/200/40000/41110/41111', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41112', '门禁日志', '40000', '/200/40000/41110/41112', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41113', '数据统计', '40000', '/200/40000/41110/41113', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41114', '移动端管理', '40000', '/200/40000/41110/41114', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+-- AUTHER：李清岩 20181019
+-- 新增企业门禁beta子模块
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41120', '企业门禁beta', '310000', '/100/310000/41120', '1', '3', '2', '100', NOW(), '{\"isSupportQR\":1,\"isSupportSmart\":0}', '79', NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'module' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41121', '门禁授权', '310000', '/100/310000/41120/41121', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41122', '门禁日志', '310000', '/100/310000/41120/41122', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41123', '数据统计', '310000', '/100/310000/41120/41123', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+
+INSERT INTO `eh_service_modules` ( `id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category` ) VALUES ( '41124', '移动端管理', '310000', '/100/310000/41120/41124', '1', '4', '2', '0', NOW(), NULL, NULL, NOW(), '0', '0', '0', '0', 'community_control', '2', '1', 'subModule' );
+-- AUTHER：李清岩 20181019
+-- 新增公共门禁beta权限
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4111041110, 0, '公共门禁beta 全部权限', '公共门禁beta 全部权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4111041111, 0, '公共门禁beta 门禁授权', '公共门禁beta 门禁授权权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4111041112, 0, '公共门禁beta 门禁日志', '公共门禁beta 门禁日志权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4111041113, 0, '公共门禁beta 数据统计', '公共门禁beta 数据统计权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4111041114, 0, '公共门禁beta 移动端管理', '公共门禁beta 移动端管理权限', NULL );
+-- AUTHER：李清岩 20181019
+-- 新增企业门禁beta权限
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4112041120, 0, '企业门禁beta 全部权限', '企业门禁beta 全部权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4112041121, 0, '企业门禁beta 门禁授权', '企业门禁beta 门禁授权权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4112041122, 0, '企业门禁beta 门禁日志', '企业门禁beta 门禁日志权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4112041123, 0, '企业门禁beta 数据统计', '企业门禁beta 数据统计权限', NULL );
+
+INSERT INTO `eh_acl_privileges` ( `id`, `app_id`, `name`, `description`, `tag` ) VALUES ( 4112041124, 0, '企业门禁beta 移动端管理', '企业门禁beta 移动端管理权限', NULL );
+-- AUTHER：李清岩 20181019
+-- 模块权限关联
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41110', '0', 4111041110, '全部权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41111', '0', 4111041111, '门禁授权权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41112', '0', 4111041112, '门禁日志权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41113', '0', 4111041113, '数据统计权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41114', '0', 4111041114, '移动端管理权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41120', '0', 4112041120, '全部权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41121', '0', 4112041121, '门禁授权权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41122', '0', 4112041122, '门禁日志权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41123', '0', 4112041123, '数据统计权限', '0', NOW());
+
+SET @mp_id = ( SELECT MAX(id) FROM eh_service_module_privileges );
+
+INSERT INTO `eh_service_module_privileges` ( `id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time` ) VALUES ( @mp_id :=@mp_id + 1, '41124', '0', 4112041124, '移动端管理权限', '0', NOW());
+-- AUTHER：李清岩 20181019
+-- 新增左邻后台门禁管理模块
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 79300000, '智能硬件', 15000000, NULL, NULL, 1, 2, '/15000000/79300000', 'zuolin', 60, NULL, 2, 'system', 'classify', NULL );
+
+INSERT INTO `eh_web_menus` ( `id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`, `level`, `condition_type`, `category`, `config_type` ) VALUES ( 79410000, '门禁管理', 79300000, NULL, 'access-management', 1, 2, '/15000000/79300000/79410000', 'zuolin', 1, 70400, 3, 'system', 'module', NULL );
+-- AUTHER：李清岩 20181019
+-- 更新门禁设备所属城市id
+UPDATE eh_door_access dc LEFT JOIN eh_communities c ON c.id = dc.owner_id SET dc.city_id = c.city_id WHERE dc.owner_type = 0;
+
+UPDATE eh_door_access dc LEFT JOIN ( SELECT DISTINCT r.member_id organization_id, c.city_id city_id FROM eh_organization_community_requests r LEFT JOIN eh_communities c ON c.id = r.community_id ) t ON t.organization_id = dc.owner_id SET dc.city_id = t.city_id WHERE dc.owner_type = 1;
+-- AUTHER：李清岩 20181019
+-- 更新门禁设备所属域空间id
+UPDATE eh_door_access dc LEFT JOIN eh_communities c ON c.id = dc.owner_id SET dc.namespace_id = c.namespace_id WHERE dc.owner_type = 0;
+
+UPDATE eh_door_access dc LEFT JOIN eh_organizations t ON dc.owner_id = t.id SET dc.namespace_id = t.namespace_id WHERE dc.owner_type = 1;
+
+-- AUTHOR: 张智伟 20180912
+-- REMARK: issue-37602 审批单支持编辑
+SET @flow_predefined_params_id = IFNULL((SELECT MAX(id) FROM `eh_flow_predefined_params`), 1);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1),0, 0, '', 52000, 'any-module', 'flow_button', '终止并重新提交', '终止并重新提交', '{"nodeType":"APPROVAL_CANCEL_AND_RESUMBIT"}', 2);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1),0, 0, '', 52000, 'any-module', 'flow_button', '复制审批单', '复制审批单', '{"nodeType":"APPROVAL_COPY_FORM_VALUES"}', 2);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1),0, 0, '', 52000, 'any-module', 'flow_button', '显示撤销规则', '显示撤销规则', '{"nodeType":"APPROVAL_SHOW_CANCEL_INFO"}', 2);
+INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `entity_type`, `display_name`, `name`, `text`, `status`)
+  VALUES ((@flow_predefined_params_id := @flow_predefined_params_id + 1),0, 0, '', 52000, 'any-module', 'flow_button', '编辑当前节点表单', '编辑当前节点表单', '{"nodeType":"APPROVAL_EDIT_CURRENT_FORM"}', 2);
+
+-- AUTHOR: 张智伟 20180912
+-- REMARK: issue-37602 审批单支持编辑
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
+
+-- AUTHOR: 张智伟 20181031
+-- REMARK: issue-40880 离职申请执行下一步，提示“No rights to remove the admin.”无法执行成功。
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '200002', 'zh_CN', '无法删除管理员，请先解除其管理权限再重试');
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 修改积分系统状态
+UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
+
+-- AUTHOR: 马世亨 20181031
+-- REMARK: 访客1.3合并访客与访客管理后清除app
+-- REMARK: 访客1.3园区访客地址修改
+delete from eh_service_module_apps where module_id in (42100,52200);
+update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
 
 
 
@@ -318,6 +345,17 @@ UPDATE eh_web_menus SET parent_id = 23040000, path = '/23000000/23040000/7910000
 -- AUTHOR: xq.tian
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
+
+-- --------------------- SECTION END zuolin-base ---------------------------------------------
+
+-- --------------------- SECTION BEGIN -------------------------------------------------------
+-- ENV: zuolin-standard
+-- DESCRIPTION: 此SECTION只在左邻标准版执行的脚本
+
+-- AUTHOR: xq.tian
+-- REMARK: 标准版数据库的标识
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
+  VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
@@ -373,6 +411,11 @@ DELETE FROM eh_namespaces WHERE id=2;
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
+-- AUTHOR: 黄良铭
+-- REMARK: 新增ＩＤ为1的积分系统
+INSERT INTO `eh_point_systems` (`id`, `namespace_id`, `display_name`, `point_name`, `point_exchange_flag`, `exchange_point`, `exchange_cash`, `user_agreement`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES('1','0','固定数据','固定数据　','1','1','2','','2','2018-10-27 10:48:04.621','2',NULL,NULL);
+
 -- --------------------- SECTION END nanshanquzhengfu ----------------------------------------
 
 
@@ -382,8 +425,6 @@ DELETE FROM eh_namespaces WHERE id=2;
 
 -- AUTHOR: xq.tian
 -- REMARK: 越空间独立部署的 root 用户的密码修改为: eh#1802
-UPDATE eh_users SET password_hash='4eaded9b566765a1e70e2e0dc45204c14c4b9df41507a6b72c7cc7fe91d85341', salt='3023538e14053565b98fdfb2050c7709'
-WHERE account_name='root' AND namespace_id=0;
 
 -- --------------------- SECTION END guanzhouyuekongjian -------------------------------------
 
@@ -391,6 +432,9 @@ WHERE account_name='root' AND namespace_id=0;
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ruianxintiandi
 -- DESCRIPTION: 此SECTION只在上海瑞安新天地-999929执行的脚本
+-- AUTHOR:梁燕龙  20181022
+-- REMARK: 瑞安个人中心跳转URL
+
 -- --------------------- SECTION END ruianxintiandi ------------------------------------------
 
 

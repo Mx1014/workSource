@@ -88,6 +88,10 @@ public class CommunityBulletinsHandler implements BulletinsHandler {
             card.setRouterPath("/detail");
             card.setRouterQuery(queryStr);
 
+            String host = "bulletin";
+            String router = "zl://" + host + card.getRouterPath() + "?moduleId=10300&clientHandlerType=0&appId="+ context.getAppId()+"&" + card.getRouterQuery();
+            card.setRouter(router);
+
             cards.add(card);
         }
 

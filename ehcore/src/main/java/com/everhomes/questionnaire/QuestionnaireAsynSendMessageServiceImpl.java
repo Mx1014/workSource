@@ -116,7 +116,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		UserContext.current().setUser(new User());
 		UserContext.current().getUser().setId(questionnaire.getCreatorUid());
 		//计算推送消息的用户范围
-		Set<String> userLevelRanges = calculateQuesionnaireRange(questionnaire);
+		List<QuestionnaireScope> userLevelRanges = calculateQuesionnaireRange(questionnaire);
 		//保存文件的范围和用户数量
 		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaire.getTargetType());
 		//目标数量，面向用户则计算用户数量，面向企业则计算企业数量。
@@ -138,7 +138,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		int intervalTime = configurationProvider.getIntValue(ConfigConstants.QUESTIONNAIRE_REMIND_TIME_INTERVAL,24);
 		Timestamp remindTime = new Timestamp(System.currentTimeMillis()+intervalTime*3600*1000);
 		List<Questionnaire> questionnaires = questionnaireProvider.listApproachCutoffTimeQuestionnaire(remindTime);
-		Set<String> userLevelRanges = null;
+		List<QuestionnaireScope> userLevelRanges = null;
 		LOGGER.info("approach cutoffTime quesionnaire ",StringHelper.toJsonString(questionnaires.stream().map(r->{
 			return r.getId()+"->"+r.getQuestionnaireName();
 		}).collect(Collectors.toList())));
@@ -159,8 +159,8 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 
 	}
 
-	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire,List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
-		Set<String> userLevelRanges = new HashSet<String>();
+	private List<QuestionnaireScope> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire,List<QuestionnaireRange> originalRanges, List<QuestionnaireAnswer> answers) {
+		List<QuestionnaireScope> userLevelRanges = new ArrayList<>();
 		for (QuestionnaireRange originalRange : originalRanges) {
 			boolean answered = false;
 			for (QuestionnaireAnswer answer : answers) {
@@ -173,19 +173,23 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if (!answered){
 				List<String> adminlists = getOrganizationAdministrators(originalRange.getRange());
 				originalRange.setAdminlists(adminlists);
-				userLevelRanges.addAll(adminlists);
+				userLevelRanges.addAll(adminlists.stream().map(r->{
+					QuestionnaireScope scope = new QuestionnaireScope();
+					scope.setUserId(r);
+					return scope;
+				}).collect(Collectors.toList()));
 			}
 		}
 		questionnaire.setRanges(originalRanges);
 		return userLevelRanges;
 	}
-	private Set<String> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire, List<QuestionnaireAnswer> answers) {
-		List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<String>>(){});
-		Set<String> userLevelRanges = new HashSet<String>();
+	private List<QuestionnaireScope> calculateUnAnsweredQuesionnaireRange(Questionnaire questionnaire, List<QuestionnaireAnswer> answers) {
+		List<QuestionnaireScope> ranges = JSONObject.parseObject(questionnaire.getUserScope(),new TypeReference<List<QuestionnaireScope>>(){});
+		List<QuestionnaireScope> userLevelRanges = new ArrayList<>();
 		ranges.forEach(range->{
 			boolean answered = false;
 			for (QuestionnaireAnswer answer : answers) {
-				if(answer.getTargetId().longValue() == Long.valueOf(range)){
+				if(answer.getTargetId().longValue() == Long.valueOf(range.getUserId())){
 					answered = true;
 					break;
 				}
@@ -202,38 +206,32 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		List<String> sendedranges = new ArrayList<>();
 		try {
 			LOGGER.info("send message to:" + questionnaire.getUserScope());
-			List<String> ranges = JSONObject.parseObject(questionnaire.getUserScope(), new TypeReference<List<String>>() {
-			});
+			List<QuestionnaireScope> ranges = JSONObject.parseObject(questionnaire.getUserScope(), new TypeReference<List<QuestionnaireScope>>() {});
 
 			//部分不用循环创建的对象
 			Namespace namespace = namespaceProvider.findNamespaceById(questionnaire.getNamespaceId());
 			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请%s参与《");
 			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
 			String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question/%s#sign_suffix");
-			String url = String.format(homeurl+contextUrl, questionnaire.getId());
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question?questionId=%s&orgId=%s#sign_suffix");
 
 //			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
-			// 组装路由
-			OfficialActionData actionData = new OfficialActionData();
-			actionData.setUrl(url);
 
-			String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
-			RouterMetaObject metaObject = new RouterMetaObject();
-			metaObject.setUrl(uri);
 
 			Map<String, String> meta = new HashMap<String, String>();
 			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN, "zh_CN", "问卷调查邀请函"));
 			meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-			meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
 
 			String body = new StringBuffer().append(namespace.getName()).append(string1).append(questionnaire.getQuestionnaireName()).append(string2).append(questionnaire.getDescription()).toString();
 			Map<String,Set<String>> userMapingOrganizationList = new HashMap<>();
 			if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION){
 				userMapingOrganizationList = generateUserMapingOrganizationList(questionnaire);
 			}
-			for (String range : ranges) {
+
+
+			for (QuestionnaireScope range : ranges) {
 //				MessageDTO messageDto = new MessageDTO();
 //				messageDto.setAppId(AppConstants.APPID_MESSAGING);
 //				messageDto.setSenderUid(User.SYSTEM_UID);
@@ -261,12 +259,29 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 //						sendedranges.add(range);
 //					}
 //				}
+				String orgId = "";
+				if(StringUtils.isNotEmpty(range.getOrgId())){
+					orgId = range.getOrgId();
+				}
+
+				String url = String.format(homeurl+contextUrl, questionnaire.getId(), orgId);
+
+				// 组装路由
+				OfficialActionData actionData = new OfficialActionData();
+				actionData.setUrl(url);
+
+				String uri = RouterBuilder.build(Router.BROWSER_I, actionData);
+				RouterMetaObject metaObject = new RouterMetaObject();
+				metaObject.setUrl(uri);
+				meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+
+
 
 				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
-					sendMessageToUser(range,String.format(body,"您"),meta,sendedranges);
+					sendMessageToUser(range.getUserId(),String.format(body,"您"),meta,sendedranges);
 				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
 					for (String organizationName : userMapingOrganizationList.get(range)) {
-						sendMessageToUser(range,String.format(body,organizationName),meta,sendedranges);
+						sendMessageToUser(range.getUserId(),String.format(body,organizationName),meta,sendedranges);
 					}
 				}
 			}
@@ -284,10 +299,11 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setSenderUid(User.SYSTEM_UID);
-		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid));
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
 		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 		messageDto.setBody(content);
@@ -296,7 +312,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			messageDto.getMeta().putAll(meta);
 		}
 		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-				uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+				uid, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 		sendedranges.add(uid);
 	}
 
@@ -323,16 +339,18 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		return map;
 	}
 
-	private Set<String> calculateQuesionnaireRange(Questionnaire questionnaireDTO) {
+	private List<QuestionnaireScope> calculateQuesionnaireRange(Questionnaire questionnaireDTO) {
 		List<QuestionnaireRange> originalRanges = questionnaireRangeProvider.listQuestionnaireRangeByQuestionnaireId(questionnaireDTO.getId());
-		Set<String> userLevelRanges = new HashSet<String>();
+		List<QuestionnaireScope> userLevelRanges = new ArrayList<>();
 		QuestionnaireTargetType targetType = QuestionnaireTargetType.fromCode(questionnaireDTO.getTargetType());
 		for (QuestionnaireRange originalRange : originalRanges) {
 			QuestionnaireRangeType enumRangeType = QuestionnaireRangeType.fromCode(originalRange.getRangeType());
 			if(targetType == QuestionnaireTargetType.USER){
 				switch (enumRangeType){
 					case USER:
-						userLevelRanges.add(originalRange.getRange());
+						QuestionnaireScope scope = new QuestionnaireScope();
+						scope.setUserId(originalRange.getRange());
+						userLevelRanges.add(scope);
 						break;
 					case BUILDING:
 						ListEnterprisesCommand cmd = new ListEnterprisesCommand();
@@ -377,7 +395,11 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				if (QuestionnaireRangeType.ENTERPRISE == enumRangeType){
 					List<String> adminList  = getOrganizationAdministrators(originalRange.getRange());
 					originalRange.setAdminlists(adminList);
-					userLevelRanges.addAll(adminList);
+					userLevelRanges.addAll(adminList.stream().map(r->{
+						QuestionnaireScope scope = new QuestionnaireScope();
+						scope.setUserId(r);
+						return scope;
+					}).collect(Collectors.toList()));
 				}else{
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 							"status error, targetType = organization, unknown rangeType = "+originalRange.getRangeType());
@@ -405,7 +427,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 		}
 	}
 
-	private  List<String> getCommunityUsers(String range, Integer isAuthor) {
+	private  List<QuestionnaireScope> getCommunityUsers(String range, Integer isAuthor) {
 		try{
 			ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
 			cmd.setCommunityId(Long.valueOf(range));
@@ -414,28 +436,54 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			cmd.setIsAuth(isAuthor);
 			//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
 			List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-			List<String> userids = new ArrayList<>();
+			List<QuestionnaireScope> userids = new ArrayList<>();
 			if(isAuthor == 0 || isAuthor == 1) {
-				userids = userOrganizations.stream().map(r -> String.valueOf(r.getUserId())).collect(Collectors.toList());
+				userids = userOrganizations.stream().map(r ->{
+					if(r.getUserId() != null){
+						QuestionnaireScope scope = new QuestionnaireScope();
+						scope.setUserId(String.valueOf(r.getUserId()));
+						scope.setOrgId(String.valueOf(r.getOrganizationId()));
+						return scope;
+					}
+					return null;
+				}).collect(Collectors.toList());
 			}
 			if(isAuthor == 0 || isAuthor == 2){
 				//未认证用户 userprofile表中的用户-已认证或者认证中的用户
 				List<User> users = userActivityProvider.listUnAuthUsersByProfileCommunityId(cmd.getNamespaceId(), cmd.getCommunityId(), null, 1000000, CommunityType.COMMERCIAL.getCode(), null, null);
+//				认证中的用户
+				List<UserOrganizations> users1 = organizationProvider.findUserByCommunityIDAndAuthStatus(cmd.getNamespaceId(),Arrays.asList((Long) cmd.getCommunityId()),
+						Arrays.asList((new Integer(1))),new CrossShardListingLocator(),999999999);
+				users.addAll(users1.stream().map(r -> {
+					User bean = new User();
+					bean.setId(r.getUserId());
+					return bean;
+				}).collect(Collectors.toList()));
 				if(users == null){
 					users = new ArrayList<>();
 				}
 				for (User user : users) {
-					userids.add(user.getId()+"");
+					QuestionnaireScope scope = new QuestionnaireScope();
+					scope.setUserId(String.valueOf(user.getId()));
+					userids.add(scope);
+				}
+				for(UserOrganizations user : users1){
+					if(user.getId() != null){
+						QuestionnaireScope scope = new QuestionnaireScope();
+						scope.setUserId(String.valueOf(user.getId()));
+						scope.setOrgId(String.valueOf(user.getOrganizationId()));
+						userids.add(scope);
+					}
 				}
 			}
 			return userids;
 		}catch (Exception e) {
 			LOGGER.info("getCommunityUsers catch exception, range = {}, isAuthor={}", range,isAuthor, e);
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
-	private  List<String> getNamespaceUsers(String range, Integer isAuthor) {
+	private  List<QuestionnaireScope> getNamespaceUsers(String range, Integer isAuthor) {
 		try{
 			ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
 			cmd.setNamespaceId(Integer.valueOf(range));
@@ -443,14 +491,22 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			cmd.setIsAuth(isAuthor);
 			//这里只需要查询userID，其他的附加查询不需要，所以自己搞了个查询。
 			List<UserOrganizations> userOrganizations = listUserCommunities(cmd);
-			return userOrganizations.stream().map(r->String.valueOf(r.getUserId())).collect(Collectors.toList());
+			return userOrganizations.stream().map(r->{
+				if(r.getUserId() != null){
+					QuestionnaireScope scope = new QuestionnaireScope();
+					scope.setUserId(String.valueOf(r.getUserId()));
+					scope.setOrgId(String.valueOf(r.getOrganizationId()));
+					return scope;
+				}
+				return null;
+			}).collect(Collectors.toList());
 		}catch (Exception e) {
 			LOGGER.info("getNamespaceUsers catch exception, range = {}, isAuthor={}", range,isAuthor, e);
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
-	private List<String> getEnterpriseUsers(String range) {
+	private List<QuestionnaireScope> getEnterpriseUsers(String range) {
 		try{
 			ListOrganizationContactCommand cmd = new ListOrganizationContactCommand();
 			cmd.setOrganizationId( Long.valueOf(range));
@@ -459,10 +515,18 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			if(response == null || response.getMembers() == null){
 				return new ArrayList<>();
 			}
-			return response.getMembers().stream().map(r->String.valueOf(r.getTargetId())).collect(Collectors.toList());
+			return response.getMembers().stream().map(r->{
+				if(r.getTargetId() != null){
+					QuestionnaireScope scope = new QuestionnaireScope();
+					scope.setUserId(String.valueOf(r.getTargetId()));
+					scope.setOrgId(String.valueOf(r.getOrganizationId()));
+					return scope;
+				}
+				return null;
+			}).collect(Collectors.toList());
 		}catch (Exception e) {
 			LOGGER.info("getEnterpriseUsers catch exception, range = {}", range, e);
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 

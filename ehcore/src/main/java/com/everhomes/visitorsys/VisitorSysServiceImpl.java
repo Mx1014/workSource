@@ -185,9 +185,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT_ENT, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
         }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT_ENT, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
         }
         return listBookedVisitorsWithOutACL(cmd);
     }
@@ -466,7 +466,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
         }
         String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
-        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
+        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-appointment/build/index.html?ns=%s&ownerType=%s&detailId=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
 
         String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getId(),appId,visitor.getVisitStatus());
         List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
@@ -929,7 +929,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         } else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
         }
         if(cmd.getPairingCode()==null){
             throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
@@ -995,7 +995,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         } else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
         }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
@@ -1882,7 +1882,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT_ENT, cmd.getAppId(), null, cmd.getOwnerId());
+            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
         }
     }
     @Override
@@ -2427,8 +2427,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("error invoke dooraccess");
+            LOGGER.error("error invoke dooraccess,stacktrace = {}",e);
         }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
@@ -2436,6 +2435,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(localVisitorAuth.getValidEndMs()!=null) {
                 visitor.setDoorGuardEndTime(new Timestamp(localVisitorAuth.getValidEndMs()));
             }
+        }else{
+//          门禁授权返回空
+            LOGGER.info("DoorAccess Auth,cmd = {}",doorCmd.toString());
         }
     }
 

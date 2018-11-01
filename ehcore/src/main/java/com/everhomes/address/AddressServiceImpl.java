@@ -960,6 +960,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         query.addJoin(Tables.EH_ORGANIZATION_ADDRESSES, JoinType.LEFT_OUTER_JOIN,Tables.EH_ADDRESSES.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID));
         query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()));
+        query.addConditions(Tables.EH_ADDRESSES.APARTMENT_NAME.like("%"+cmd.getKeyword()+"%"));
         if(cmd.getBuildingName() != null){
             query.addConditions(Tables.EH_ADDRESSES.BUILDING_NAME.eq(cmd.getBuildingName()));
         }
@@ -2013,6 +2014,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         return results;
     }
 
+    @Deprecated
     @Override
     public void importParkAddressData(ImportAddressCommand cmd,
                                       MultipartFile[] files) {
@@ -2706,10 +2708,13 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
+            //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
             if (communityAddressMapping == null) {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -3257,7 +3262,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
 	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
 		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
-        communityAddressMapping.setOrganizationId(organizationId);
+        //communityAddressMapping.setOrganizationId(organizationId);
         communityAddressMapping.setCommunityId(communityId);
         communityAddressMapping.setAddressId(addressId);
         communityAddressMapping.setOrganizationAddress(address);

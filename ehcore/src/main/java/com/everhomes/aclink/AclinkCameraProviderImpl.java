@@ -2,6 +2,7 @@
 package com.everhomes.aclink;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -20,9 +21,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.aclink.ListLocalCamerasCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhAclinkCameras;
+import com.everhomes.server.schema.tables.pojos.EhAclinkCameras;
 import com.everhomes.server.schema.tables.daos.EhAclinkCamerasDao;
 import com.everhomes.server.schema.tables.records.EhAclinkCamerasRecord;
 import com.everhomes.util.ConvertHelper;
@@ -71,28 +73,32 @@ public class AclinkCameraProviderImpl implements AclinkCameraProvider{
 	}
 
 	@Override
-	public List<AclinkCamera> listLocalCameras(CrossShardListingLocator locator, Long serverId, List<Long> serverIds, Long doorAccessId, Byte enterStatus, Byte linkStatus, int count) {
-		return queryLocalCameras(locator,count,new ListingQueryBuilderCallback(){
+	public List<AclinkCamera> listLocalCameras(CrossShardListingLocator locator, ListLocalCamerasCommand cmd) {
+		return queryLocalCameras(locator,cmd.getPageSize(),new ListingQueryBuilderCallback(){
 
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
-				if(serverId != null){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.SERVER_ID.eq(serverId));
-				}else if(serverIds != null && serverIds.size() > 0){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.SERVER_ID.in(serverIds));
+				if(cmd.getServerId() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.SERVER_ID.eq(cmd.getServerId()));
+				}else if(cmd.getServerIds() != null && cmd.getServerIds().size() > 0){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.SERVER_ID.in(cmd.getServerIds()));
 				}
 				
-				if(doorAccessId != null){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.DOOR_ACCESS_ID.eq(doorAccessId));
+				if(cmd.getDoorAccessId() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.DOOR_ACCESS_ID.eq(cmd.getDoorAccessId()));
 				}
 				
-				if(enterStatus != null){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.ENTER_STATUS.eq(enterStatus));
+				if(cmd.getEnterStatus() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.ENTER_STATUS.eq(cmd.getEnterStatus()));
 				}
 				
-				if(linkStatus != null){
-					query.addConditions(Tables.EH_ACLINK_CAMERAS.LINK_STATUS.eq(linkStatus));
+				if(cmd.getName() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.NAME.like("%" + cmd.getName() + "%"));
+				}
+				
+				if(cmd.getLinkStatus() != null){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.LINK_STATUS.eq(cmd.getLinkStatus()));
 				}
 					
                 return query;
@@ -133,6 +139,34 @@ public class AclinkCameraProviderImpl implements AclinkCameraProvider{
 		EhAclinkCamerasDao dao = new EhAclinkCamerasDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAclinkCameras.class, id);
+		
+	}
+
+	@Override
+	public List<AclinkCamera> listLocalCamerasByIds(List<Long> ids) {
+		return queryLocalCameras(new CrossShardListingLocator(),0,new ListingQueryBuilderCallback(){
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				if(ids != null && ids.size() > 0){
+					query.addConditions(Tables.EH_ACLINK_CAMERAS.ID.in(ids));
+				}
+                return query;
+			}
+		});
+	}
+
+	@Override
+	public void updateCameraBatch(List<AclinkCamera> updateCameras) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAclinkCamerasDao dao = new EhAclinkCamerasDao(context.configuration());
+		List<EhAclinkCameras> list = new ArrayList<>();
+		for(AclinkCamera ca : updateCameras){
+			list.add(ConvertHelper.convert(ca, EhAclinkCameras.class));
+		}
+		dao.update(list);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAclinkCameras.class, null);
 		
 	}
 }

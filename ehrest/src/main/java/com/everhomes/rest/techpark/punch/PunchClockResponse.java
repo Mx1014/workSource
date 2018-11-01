@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
 * <ul>  
-* <li>code：</li>
+* <li>punchTime：打卡时间</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
 * </ul>
 */

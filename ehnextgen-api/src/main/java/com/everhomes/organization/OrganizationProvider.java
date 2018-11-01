@@ -506,7 +506,7 @@ public interface OrganizationProvider {
 
     List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
+    List listOrganizationByName(String name, List<String> groupTypes, Long parentId, Integer namespaceId, Long enterpriseId);
 
     void createImportFileTask(ImportFileTask importFileTask);
 
@@ -689,7 +689,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
+    List<Long> listOrganizationPersonnelDetailIdsByDepartmentIds(List<Long> departmentIds);
 
 	//List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -983,8 +983,10 @@ public interface OrganizationProvider {
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
 			List<Long> organizationIds);
 
-    OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
+    OrganizationMember findMemberByType(Long aLong, String groupPath, String code);
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
+
+	Integer countOrganizationMemberDetails(Long orgId, Long departmentId);
 }

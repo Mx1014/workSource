@@ -18,13 +18,14 @@ public enum ClockCode {
         return this.code;
     }
     
-    public static ClockCode fromCode(byte code) {
+    public static ClockCode fromCode(Byte code) {
+    	if(null == code)
+    		return null;
         for(ClockCode t : ClockCode.values()) {
-            if (t.code == code) {
+            if (t.code == code.byteValue()) {
                 return t;
             }
         }
-        
         return null;
     }
 }

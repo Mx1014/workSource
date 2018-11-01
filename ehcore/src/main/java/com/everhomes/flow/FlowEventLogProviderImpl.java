@@ -584,6 +584,25 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     /**
+     * 节点的处理人列表，不管是否已经处理，转交后以转交后的为准
+     */
+    @Override
+    public List<FlowEventLog> findNodeEnterLogs(Long nodeId, Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+				return query;
+			}
+    	});
+    }
+
+    /**
      * 查询flowCase的某个节点的最大stepCount
      */
     @Override

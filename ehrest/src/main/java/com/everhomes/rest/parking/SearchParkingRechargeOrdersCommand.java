@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>paySource: 缴费来源， 参考{@link com.everhomes.rest.parking.ParkingPaySourceType}</li>
  * <li>currentPMId: 当前管理公司ID</li>
  * <li>currentProjectId: 当前选中项目Id，如果是全部则不传</li>
+ * <li>payMode:支付类型，全部则为空，参考 {@link com.everhomes.rest.general.order.GorderPayType}</li>
  * <li>appId: 应用id</li>
  * </ul>
  */
@@ -46,7 +47,8 @@ public class SearchParkingRechargeOrdersCommand {
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
-
+	private Byte payMode;
+	
     public String getOwnerType() {
         return ownerType;
     }
@@ -199,7 +201,16 @@ public class SearchParkingRechargeOrdersCommand {
         this.cardNumber = cardNumber;
     }
 
-    @Override
+    
+    public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

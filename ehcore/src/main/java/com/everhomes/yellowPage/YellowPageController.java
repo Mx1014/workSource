@@ -2,6 +2,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.servicehotline.GetChatGroupListCommand;
@@ -175,9 +176,9 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listServiceAllianceCategoriesAdmin")
 	@RestReturn(value=ListServiceAllianceCategoriesAdminResponse.class)
 	public RestResponse listServiceAllianceCategoriesAdmin(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.listServiceAllianceCategoriesAdmin(cmd));
+		return new RestResponse(yellowPageService.listServiceAllianceCategoriesByAdmin(cmd));
 	}
-
+    
     /**
 	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
 	 * <p>获取服务联盟机构的展示类型</p>
@@ -208,7 +209,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
    	 * <b>URL: /yellowPage/getServiceAlliance</b>
-   	 * <p> 服务联盟首页 </p>
+   	 * <p> 客户端/前端获取服务联盟首页 </p>
    	 */
     @RequireAuthentication(false)
     @RequestMapping("getServiceAlliance")
@@ -272,6 +273,7 @@ public class YellowPageController  extends ControllerBase {
    	 */
     @RequestMapping("updateServiceAllianceEnterprise")
     @RestReturn(value=String.class)
+    @XssExclude
     public RestResponse updateServiceAllianceEnterprise(@Valid UpdateServiceAllianceEnterpriseCommand cmd) {
     	 this.yellowPageService.updateServiceAllianceEnterprise(cmd);
     	 RestResponse response = new RestResponse();
@@ -918,7 +920,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
 	 * <b>URL: /yellowPage/listServiceTypeNames</b>
-	 * <p> 获取所有服务名称 </p>
+	 * <p> 获取所有服务类型名称 </p>
 	 */
 	@RequestMapping("listServiceTypeNames")
     @RestReturn(value = IdNameDTO.class, collection = true)
@@ -939,4 +941,45 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferApprovalToForm</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferApprovalToForm")
+	@RestReturn(value = String.class)
+	public RestResponse transferApprovalToForm(ListServiceTypeNamesCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferApprovalToForm();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferPadItems</b>
+	 * <p>
+	 * 获取用户服务记录
+	 * </p>
+	 */
+	@RequestMapping("transferPadItems")
+	@RestReturn(value = String.class)
+	public RestResponse transferPadItems(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferPadItems();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
 }

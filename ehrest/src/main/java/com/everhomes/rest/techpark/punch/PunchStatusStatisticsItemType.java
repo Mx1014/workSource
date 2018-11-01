@@ -13,14 +13,18 @@ package com.everhomes.rest.techpark.punch;
  * <li>CHECKING((byte) 8): 核算中（等价于未到）</li>
  * <li>SHOULD_ARRIVE((byte) 9): 应到</li>
  * <li>ARRIVED((byte) 10): 已到</li>
+ * <li>GO_OUT((byte) 11): 外出打卡</li>
  * </ul>
  */
 public enum PunchStatusStatisticsItemType {
-    UN_ARRIVED((byte) 1), BELATE((byte) 2), LEAVE_EARLY((byte) 3), NORMAL((byte) 4), REST((byte) 5), ABSENT((byte) 6), FORGOT_PUNCH((byte) 7), CHECKING((byte) 8), SHOULD_ARRIVE((byte) 9), ARRIVED((byte) 10);
+    UN_ARRIVED((byte) 1, "次"), BELATE((byte) 2, "次"), LEAVE_EARLY((byte) 3, "次"), NORMAL((byte) 4, "次"), REST((byte) 5, "天"), ABSENT((byte) 6, "天"),
+    FORGOT_PUNCH((byte) 7, "次"), CHECKING((byte) 8, "次"), SHOULD_ARRIVE((byte) 9, "次"), ARRIVED((byte) 10, "次"), GO_OUT((byte) 11, "天");
     private byte code;
+    private String unit;
 
-    PunchStatusStatisticsItemType(byte code) {
+    PunchStatusStatisticsItemType(byte code, String unit) {
         this.code = code;
+        this.unit = unit;
     }
 
     public byte getCode() {
@@ -42,6 +46,8 @@ public enum PunchStatusStatisticsItemType {
     @Override
     public String toString() {
         switch (this) {
+            case GO_OUT:
+                return "外出";
             case UN_ARRIVED:
                 return "未到";
             case BELATE:
@@ -66,4 +72,9 @@ public enum PunchStatusStatisticsItemType {
                 return "";
         }
     }
+
+    public String getUnit() {
+        return this.unit;
+    }
+
 }

@@ -66,7 +66,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
                 cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
-                null, null);
+                null, null,cmd.getPayChannel());
         if(null == bills){
             bills = new ArrayList<>();
         }
@@ -144,6 +144,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         row.createCell(++i).setCellValue("使用详情");
         row.createCell(++i).setCellValue("预订人");
         row.createCell(++i).setCellValue("总价");
+        row.createCell(++i).setCellValue("支付类型");
         row.createCell(++i).setCellValue("支付方式");
         row.createCell(++i).setCellValue("订单状态");
     }
@@ -169,6 +170,12 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
             row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
         else
             row.createCell(++i).setCellValue("0");
+        //支付类型
+        PayChannel payChannel = PayChannel.fromCode(dto.getPayChannel());
+        if (null != payChannel)
+            row.createCell(++i).setCellValue(payChannel.getDescribe());
+        else
+            row.createCell(++i).setCellValue("");
         //支付方式
         if(null != dto.getVendorType())
             row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());

@@ -23,6 +23,7 @@ import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.module.ServiceModule;
@@ -44,12 +45,18 @@ import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
+import com.everhomes.rest.flow.GetFlowCaseCountResponse;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.promotion.coupon.couponjointorders.GetAllCouponsForUserCommand;
+import com.everhomes.rest.promotion.coupon.couponjointorders.GetAllCouponsForUserRestResponse;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
@@ -190,6 +197,9 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private GeneralOrderService generalOrderService;
 
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
@@ -850,6 +860,8 @@ public class UserActivityServiceImpl implements UserActivityService {
         		UserProfileContstant.RECEIVED_ORDER_COUNT);
         UserProfile shakeOpenDoorUser = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
           		UserProfileContstant.SHAKE_OPEN_DOOR);
+        UserProfile shakeOpenDoorHarwareId = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+          		UserProfileContstant.SHAKE_OPEN_DOOR_HARDWARE_ID);
         
         if (item != null)
             rsp.setSharedCount(NumberUtils.toInt(item.getItemValue(), 0));
@@ -903,6 +915,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte(shakeOpenDoorNamespace));
         }else{
         	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
+        }
+        if(shakeOpenDoorHarwareId != null){
+        	rsp.setShakeOpenDoorHardwareId(shakeOpenDoorHarwareId.getItemValue());
         }
         return rsp;
     }
@@ -998,6 +1013,77 @@ public class UserActivityServiceImpl implements UserActivityService {
             rsp.setPoint(0L);
         }
         return rsp;
+    }
+
+    @Override
+    public GetUserTreasureForRuiAnResponse getUserTreasureForRuiAn() {
+        GetUserTreasureForRuiAnResponse response = new GetUserTreasureForRuiAnResponse();
+        //积分
+        UserTreasureDTO point = new UserTreasureDTO();
+        try {
+            point = pointService.getPointTreasure();
+        }catch (Exception e) {
+            LOGGER.error("get point exception");
+            e.printStackTrace();
+        }
+        if (point.getCount() == null) {
+            point.setCount(0L);
+        }
+        response.setPoint(point.getCount());
+        String pointUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.RUIAN_POINT_URL, "https://m.mallcoo.cn/a/user/10764/Point/List");
+        response.setPointUrl(pointUrl);
+
+        //会员
+        User user = this.userProvider.findUserById(UserContext.currentUserId());
+        if (user != null) {
+            response.setVipLevelText(user.getVipLevelText());
+        }
+        String vipUrl = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.RUIAN_VIP_URL, "https://m.mallcoo.cn/a/custom/10764/xtd/Rights");
+        response.setVipUrl(vipUrl);
+
+        //任务
+        SearchFlowCaseCommand caseCommand = new SearchFlowCaseCommand();
+        caseCommand.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+        caseCommand.setFlowCaseStatus(FlowCaseStatus.PROCESS.getCode());
+        GetFlowCaseCountResponse task = this.flowService.getFlowCaseCount(caseCommand);
+        response.setTask(0);
+        if (task != null && task.getCount() != null) {
+            response.setTask(task.getCount());
+        }
+
+
+        //订单
+        BizMyUserCenterCountResponse biz = fetchBizMyUserCenterCount(user);
+        if (biz != null && biz.getResponse() != null) {
+
+            long orderCount = biz.getResponse().orderCount;
+            response.setOrder(orderCount);
+        }
+        if (response.getOrder() == null) {
+            response.setOrder(0L);
+        }
+        String orderHomeUrl = this.configurationProvider.getValue(0,"personal.order.home.url","https://biz.zuolin.com");
+        String url = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),ConfigConstants.RUIAN_ORDER_URL,
+                "/zl-ec/rest/service/front/logon?sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fmall%2findex.html#sign_suffix");
+        response.setOrderUrl(orderHomeUrl + url);
+
+        //卡包
+        response.setCoupon(0L);
+        GetAllCouponsForUserCommand couponsForUserCommand = new GetAllCouponsForUserCommand();
+        couponsForUserCommand.setNamespaceId(user.getNamespaceId());
+        couponsForUserCommand.setUserId(user.getId());
+        GetAllCouponsForUserRestResponse couponsForUserRestResponse = null;
+        try {
+            couponsForUserRestResponse = this.generalOrderService.getCouponsNumberForUser(couponsForUserCommand);
+        }catch (Exception e) {
+            LOGGER.error("get user coupon error",e);
+        }
+        if (couponsForUserRestResponse != null && couponsForUserRestResponse.getResponse() != null) {
+            response.setCoupon(couponsForUserRestResponse.getResponse().getCouponAmount());
+        }
+        String couponUrl = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),ConfigConstants.RUIAN_COUPON_URL,"");
+        response.setCouponUrl(couponUrl);
+        return response;
     }
 
     private BizMyUserCenterCountResponse fetchBizMyUserCenterCount(User user) {
@@ -1846,12 +1932,15 @@ public class UserActivityServiceImpl implements UserActivityService {
 	}
 	
 	@Override
-	public void updateShakeOpenDoor(Byte shakeOpenDoor) {
+	public void updateShakeOpenDoor(UpdateShakeOpenDoorCommand cmd) {
 		String namespaceOpen = getShakeOpenDoor();
 		User user = UserContext.current().getUser();
 		
 		if("1".equals(namespaceOpen)){
-			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, shakeOpenDoor.toString());
+			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, cmd.getShakeOpenDoor().toString());
+			if(cmd.getHardwareId() != null){
+				updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR_HARDWARE_ID, cmd.getHardwareId().toString());
+			}
 		}else{
 			LOGGER.error("namespace configuration is false, then user configuration is prohibited");
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,

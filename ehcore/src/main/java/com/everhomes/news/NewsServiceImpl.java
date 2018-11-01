@@ -661,9 +661,7 @@ public class NewsServiceImpl implements NewsService {
 		return listNews(cmd, true);
 	}
 
-	/**
-	 * <b>listNews:/</b>
-	 */
+	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene) {
 
 		// 先进行权限验证
@@ -814,9 +812,12 @@ public class NewsServiceImpl implements NewsService {
 		}
 		if (newsDTO.getCoverUri() == null) {
 			NewsCategory category = this.newsProvider.findNewsCategoryById(news.getCategoryId());
-			newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(),
-					UserContext.current().getUser().getId()));
+			if (null != category) {
+				newsDTO.setCoverUri(this.contentServerService.parserUri(category.getLogoUri(), EntityType.USER.getCode(),
+						UserContext.current().getUser().getId()));
+			}
 		}
+		
 		newsDTO.setNewsUrl(getNewsWebUrl(news.getNamespaceId(), newsDTO.getNewsToken()));
 
 		newsDTO.setCommentFlag(NewsNormalFlag.ENABLED.getCode());

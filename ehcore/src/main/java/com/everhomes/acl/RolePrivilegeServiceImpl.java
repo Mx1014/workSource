@@ -600,7 +600,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                 "organization not find");
         }
-      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(org.getAdminTargetId() != null && org.getAdminTargetId()!= 0
+			  && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
           return false;
         }
       
@@ -1640,7 +1641,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1668,7 +1669,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
