@@ -13799,6 +13799,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         //根据组织id来查询eh_organizations表信息
         Organization org = checkOrganization(organizationId);
         
+        //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），非null则更新，null则插入
+        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(organizationMember.getTargetId(),organizationMember.getGroupType(),organizationMember.getOrganizationId(),organizationMember.getContactToken());
         OrganizationMember member = new OrganizationMember();
         member.setOrganizationId(organizationId);
         member.setTargetType(OrganizationMemberTargetType.USER.getCode());
@@ -13821,9 +13823,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         member.setGroupId(organizationMember.getGroupId());
         member.setDetailId(organizationMember.getDetailId());
         
-        //创建 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
-        organizationProvider.createOrganizationMember(member);
-        System.out.println("插入新的【OrganizationMember】数据： "+member.toString());
+        if(selectMember == null){
+        	//创建 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
+        	organizationProvider.createOrganizationMember(member);
+        	LOGGER.debug("插入新的【OrganizationMember】数据： "+member.toString());
+        }else{
+        	//重复创建管理人 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
+        	organizationProvider.updateOrganizationMember(member);;
+        	LOGGER.debug("更新【OrganizationMember】数据： "+member.toString());
+        	
+        }
+        
+        
     }
     
     private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
