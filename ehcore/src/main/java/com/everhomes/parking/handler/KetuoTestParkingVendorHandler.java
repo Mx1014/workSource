@@ -48,6 +48,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 	private static final String GET_TEMP_FEE = "/api/wec/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/wec/PayParkingFee2";
 	private static final String ADD_MONTH_CARD = "/api/wec/AddCarCardNo";
+	private static final String GET_CAR_CARD_FEE = "api/wec/GetCarCardFee";
 
 	protected static final String ADD_NATURAL_MONTH = "ADD_NATURAL_MONTH";//按照自然月计算
 	protected static final String ADD_DISTANCE_MONTH = "ADD_DISTANCE_MONTH";//用户新有效期=目标月份自然月月底-「1」所得剩余天数。rp6.4
@@ -222,6 +223,44 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
         return card;
     }
 	
+	KetuoTestCarCardFee getCarCardFee(Integer cardId, KetuoTestCardRule rule, ParkingRechargeOrder order) {
+		KetuoTestCarCardFee card = null;
+		JSONObject param = new JSONObject();
+		
+
+        String urlPath = URL+GET_CAR_CARD_FEE;
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+        String iv = sdf2.format(new Date());
+        Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+        long tempTime = calendar.getTimeInMillis();
+		Timestamp tempStart = new Timestamp(tempTime);
+		String chargeFrom = Utils.dateToStr(tempStart, Utils.DateStyle.DATE_TIME);
+        String p = parkId + cardId + rule.getRuleId() + chargeFrom + rule.getRuleAmount() + iv + appSecret;
+        String key = MD5Utils.getMD5(p);
+        param.put("appId", appId);
+        param.put("key", key);
+    	param.put("parkId", parkId);
+		param.put("cardId", cardId);
+		param.put("ruleId", rule.getRuleId());
+		param.put("chargeFrom", chargeFrom);
+		param.put("chargeCount", rule.getRuleAmount());
+        String json = param.toJSONString();
+		String result = doJsonPost(json, urlPath);
+        
+		KetuoJsonEntity<KetuoTestCarCardFee> entity = JSONObject.parseObject(result, new TypeReference<KetuoJsonEntity<KetuoTestCarCardFee>>(){});
+		if(entity.isSuccess()){
+			List<KetuoTestCarCardFee> list = entity.getData();
+			if(null != list && !list.isEmpty()) {
+				card = list.get(0);
+			}
+		}
+        
+        return card;
+    }
+	
     boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
@@ -266,6 +305,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		JSONObject param = new JSONObject();
 		String plateNumber = order.getPlateNumber();
+    	List<KetuoTestCardRule> rules = new ArrayList<>();
 
 		KetuoTestCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
@@ -277,7 +317,12 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 				expireTime=now;
 			}
 		}
-
+		if(null != card) {
+			Integer ruleId = card.getRuleId();
+			rules =  getCardRule(ruleId);
+		}
+    	KetuoTestCardRule rule = rules.get(0);
+    	KetuoTestCarCardFee cardFee = getCarCardFee(card.getCardId(), rule, order);
 		Timestamp tempStart = Utils.addSecond(expireTime, 1);
 		Timestamp tempEnd = null;
 		if(ADD_DISTANCE_MONTH.equals(monthCardTimeArithmetic)) {
@@ -287,16 +332,17 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 		}
 
+		
 
 		String urlPath = URL+RECHARGE;
         SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
         String iv = sdf2.format(new Date());
-        String p = order.getOrderToken() + order.getOriginalPrice() + iv + appSecret;
+        String p = cardFee.getOrderNo() + cardFee.getPayable() + iv + appSecret;
         String key = MD5Utils.getMD5(p);
         param.put("appId", appId);
         param.put("key", key);
-    	param.put("orderNo", order.getOrderToken());
-		param.put("amount", order.getOriginalPrice());
+    	param.put("orderNo", cardFee.getOrderNo());
+		param.put("amount", cardFee.getPayable());
         String json = param.toJSONString();
 		String result = doJsonPost(json, urlPath);
 
@@ -636,7 +682,7 @@ public class KetuoTestParkingVendorHandler extends DefaultParkingVendorHandler {
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingLot parkingLot, ParkingRechargeOrder order) {
-		// TODO Auto-generated method stub
+		//updateParkingRechargeOrderRateInfo(parkingLot, order);
 		
 	}
 
