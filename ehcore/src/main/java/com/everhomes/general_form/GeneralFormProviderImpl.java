@@ -392,6 +392,9 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		generalFormValRequests.setCreatorUid(UserContext.currentUserId());
 		Long l2 = DateHelper.currentGMTTime().getTime();
 		generalFormValRequests.setCreatedTime(new Timestamp(l2));
+
+		generalFormValRequests.setOperatorUid(UserContext.currentUserId());
+		generalFormValRequests.setOperatorTime(new Timestamp(l2));
 		//EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
