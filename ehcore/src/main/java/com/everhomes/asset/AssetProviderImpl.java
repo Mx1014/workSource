@@ -27,11 +27,9 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
-import org.jooq.UpdatableRecord;
 import org.jooq.UpdateQuery;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -39,11 +37,9 @@ import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.object.UpdatableSqlQuery;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -55,14 +51,11 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.openapi.Contract;
-import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.order.PaymentAccount;
 import com.everhomes.order.PaymentServiceConfig;
 import com.everhomes.order.PaymentUser;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.archives.ArchivesOperationStatus;
 import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillStatusType;
@@ -120,13 +113,9 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
-import com.everhomes.rest.common.AssetModuleNotifyConstants;
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -137,8 +126,6 @@ import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
 import com.everhomes.server.schema.tables.EhContractChargingItems;
-import com.everhomes.server.schema.tables.EhContractTemplates;
-import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
 import com.everhomes.server.schema.tables.EhPaymentAccounts;
@@ -146,6 +133,8 @@ import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding;
+import com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingItems;
@@ -162,8 +151,6 @@ import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhAssetDooraccessLogsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhContractParamsDao;
-import com.everhomes.server.schema.tables.daos.EhContractTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillItemsDao;
@@ -178,10 +165,8 @@ import com.everhomes.server.schema.tables.daos.EhPaymentLateFineDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentNoticeConfigDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentSubtractionItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
-import com.everhomes.server.schema.tables.pojos.EhContractParams;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
-import com.everhomes.server.schema.tables.records.EhArchivesOperationalConfigurationsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetDooraccessLogsRecord;
@@ -619,6 +604,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<ListBillsDTO> listBills(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommand cmd) {
+    	LOGGER.info("AssetProviderImpl listBills currentNamespaceId={}, cmd={}", currentNamespaceId, cmd.toString());
         //卸货
         String contractNum = cmd.getContractNum();
         Long ownerId = cmd.getOwnerId();
@@ -2165,7 +2151,7 @@ public class AssetProviderImpl implements AssetProvider {
         return null;
     }
 
-    private String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
+    public String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
         List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
                 .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
@@ -5880,7 +5866,47 @@ public class AssetProviderImpl implements AssetProvider {
 			LOGGER.info("insert eh_asset_module_app_mappings success!");
 		}
 	}
+	
+	public List<CommunityStatisticParam> getPaymentBillsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
 
+	public List<CommunityStatisticParam> getStatisticCommunityDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticCommunity t = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getPaymentBillItemsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getStatisticBuildingDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticBuilding t = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+	
     //缴费对接门禁
 	@Override
 	public AssetDooraccessParam findDoorAccessParamById(Long id) {

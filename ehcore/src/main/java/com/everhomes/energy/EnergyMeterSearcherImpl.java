@@ -181,7 +181,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         List<EnergyMeter> meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);
         while (meters != null && meters.size() > 0) {
             bulkUpdate(meters);
-            pageAnchor += (meters.size() + 1);
+            pageAnchor = meters.get(meters.size() - 1).getId() + 1;
             meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);
         }
         this.optimize(1);
@@ -190,22 +190,31 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     }
 
     private SearchResponse query(SearchEnergyMeterCommand cmd) {        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
-        QueryBuilder qb;
-        if (cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
-            qb = QueryBuilders.matchAllQuery();
-        } else {
-//            qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*")
-////                    .field("meterNumber", 5.0f)
-//                    .field("name", 5.0f);
-            
+    	QueryBuilder qb = null;
+    	List<FilterBuilder> filterBuilders = new ArrayList<>();
+    	if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+        	//支持模糊搜索 --by djm 缺陷 #34940
+            String pattern = "*" + cmd.getMeterNumber() + "*";
             qb = QueryBuilders.boolQuery()
-					.should(QueryBuilders.wildcardQuery("meterNumber", "*" + cmd.getKeyword() + "*"));
-            
-            if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
-                qb = QueryBuilders.boolQuery().must(qb).must( QueryBuilders.queryString("*" + cmd.getMeterNumber() + "*"));
-            }
+    					.must(QueryBuilders.wildcardQuery("meterNumber", pattern));
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("meterNumber");
         }
-
+    	
+    	//表计名称 支持模糊搜索  by ycx 缺陷#39664
+    	if (!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
+    		String pattern = "*" + cmd.getKeyword() + "*";
+    		if(qb != null) {
+    			qb = QueryBuilders.boolQuery()
+    					.must(qb)
+    					.must(QueryBuilders.wildcardQuery("name", pattern));
+    		}else {
+    			qb = QueryBuilders.boolQuery()
+    					.must(QueryBuilders.wildcardQuery("name", pattern));
+    		}
+    	}
+        
         if (cmd.getAddressId() != null) {
             MultiMatchQueryBuilder addressId = QueryBuilders.multiMatchQuery(cmd.getAddressId(), "addressId");
             qb = QueryBuilders.boolQuery().must(qb).must(addressId);
@@ -214,25 +223,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             MultiMatchQueryBuilder buildingId = QueryBuilders.multiMatchQuery(cmd.getBuildingId(), "buildingId");
             qb = QueryBuilders.boolQuery().must(qb).must(buildingId);
         }
-
-        List<FilterBuilder> filterBuilders = new ArrayList<>();
-        //编号精确搜索 by xiongying20170525
-        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
-            /*TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
-            filterBuilders.add(meterNumberTermFilter);*/
-        	//支持模糊搜索 --by djm 缺陷 #34940
-            String pattern = "*" + cmd.getMeterNumber() + "*";
-            qb = QueryBuilders.boolQuery()
-            					.should(QueryBuilders.wildcardQuery("meterNumber", pattern));
-            builder.setHighlighterFragmentSize(60);
-            builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("meterNumber");
-        }
-//        //编号精确搜索 by xiongying20170525
-//        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
-//            TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
-//            filterBuilders.add(meterNumberTermFilter);
-//        }
+        
         if (cmd.getCommunityId() != null) {
             TermFilterBuilder communityIdTermFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
             filterBuilders.add(communityIdTermFilter);

@@ -431,7 +431,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
 
     /**
      * 
@@ -834,6 +834,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/aclink/listDoorManagement</b>
+     * <p>列出门禁管理授权企业(左邻后台)</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listDoorManagement")
+    @RestReturn(value=ListDoorManagementResponse.class)
+    public RestResponse listDoorManagement (@Valid ListDoorManagementCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listDoorManagement(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/deleteDoorManagement</b>
      * <p>删除门禁管理授权企业(左邻后台)</p>
@@ -841,7 +856,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("deleteDoorManagement")
     @RestReturn(value=String.class)
-    public RestResponse deleteDoorManagement (@Valid AddDoorManagementCommand cmd){
+    public RestResponse deleteDoorManagement (@Valid DeleteDoorManagementCommand cmd){
         doorAccessService.deleteDoorManagement(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

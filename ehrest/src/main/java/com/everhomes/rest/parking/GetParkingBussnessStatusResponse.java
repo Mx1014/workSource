@@ -27,6 +27,11 @@ public class GetParkingBussnessStatusResponse {
 
     private List<Byte> flowModeList;
 
+    private String defaultData;
+    
+    private String defaultPlate;
+
+    
     public List<ParkingFuncDTO> getDockingFuncLists() {
         return dockingFuncLists;
     }
@@ -67,7 +72,23 @@ public class GetParkingBussnessStatusResponse {
         this.flowModeList = flowModeList;
     }
 
-    @Override
+    public String getDefaultData() {
+		return defaultData;
+	}
+
+	public void setDefaultData(String defaultData) {
+		this.defaultData = defaultData;
+	}
+
+	public String getDefaultPlate() {
+		return defaultPlate;
+	}
+
+	public void setDefaultPlate(String defaultPlate) {
+		this.defaultPlate = defaultPlate;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

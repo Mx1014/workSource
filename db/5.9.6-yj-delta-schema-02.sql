@@ -826,6 +826,7 @@ ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
 
 
 
+
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
@@ -897,6 +898,7 @@ ENGINE=InnoDB
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
 
 
 
@@ -954,7 +956,7 @@ CREATE TABLE `eh_enterprise_payment_auths` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
   `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
   `app_id` BIGINT NOT NULL COMMENT '授权应用id',
-  `app_name` VARCHAR(32) NOT NULL  COMMENT '授权应用名称',
+  `app_name` VARCHAR(32) COMMENT '授权应用名称',
   `source_id` BIGINT NOT NULL COMMENT '授权用户id',
   `source_name` VARCHAR(32) COMMENT '授权用户名称',
   `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
@@ -1039,4 +1041,6 @@ ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(6
 ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
 
 
-
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;

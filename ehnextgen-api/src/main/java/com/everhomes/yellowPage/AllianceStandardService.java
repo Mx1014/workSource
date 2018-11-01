@@ -8,6 +8,7 @@ import com.everhomes.rest.yellowPage.GetFormListCommand;
 import com.everhomes.rest.yellowPage.GetFormListResponse;
 import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
 import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
@@ -47,4 +48,10 @@ public interface AllianceStandardService {
 	boolean isEnableSelfConfig(AllianceConfigState state);
 
 	Long getOrgIdByTypeAndProjectId(Long type, Long projectId);
+
+	String transferApprovalToForm();
+
+	String transferPadItems();
+
+	ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type);
 }

@@ -468,7 +468,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public void refundOrder(RentalOrder order,Long amount) {
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-
+        if (record == null)
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
         String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
@@ -723,71 +726,82 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         Map<String, String> params = new HashMap();
         StringHelper.toStringMap(null, cmd, params);
         params.remove("signature");
+        LOGGER.info("the cmd is {}  the pre signature is {} the after signature is {}",cmd,cmd.getSignature(),SignatureHelper.computeSignature(params,PaySettings.getSecretKey()));
         return SignatureHelper.verifySignature(params, PaySettings.getSecretKey(), cmd.getSignature());
     }
 
     @Override
     public void payNotify(MerchantPaymentNotificationCommand cmd) {
-        if (!verifyCallbackSignature(cmd))
-            throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
+        if (!verifyCallbackSignature(cmd)) {
+            if (configurationProvider.getBooleanValue("check.signature.flag",true))
+                 throw RuntimeErrorException.errorWith(PayServiceErrorCode.SCOPE, PayServiceErrorCode.ERROR_CREATE_FAIL,
                     "signature wrong");
+        }
         if(cmd.getPaymentStatus() == null) {
             LOGGER.info(" ----------------- - - - PAY FAIL command is "+cmd.toString());
         }
 
         //success
-        if(cmd.getPaymentStatus() != null) {
-            Rentalv2OrderRecord record ;
+        if (cmd.getPaymentStatus() != null) {
+            Rentalv2OrderRecord record;
             BigDecimal couponAmount = new BigDecimal(0);
-            if (cmd.getMerchantOrderId() != null) {
-                record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
-                record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
-                rentalv2AccountProvider.updateOrderRecord(record);
-                couponAmount = changePayAmount(cmd.getCouponAmount());
-            }
-            else
+
+            record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            if (record == null)
                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
-                RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
-                order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
-                order.setAccountName(record.getAccountName()); //记录收款方账号
-                switch (cmd.getPaymentType()){
+            record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
+            rentalv2AccountProvider.updateOrderRecord(record);
+            couponAmount = changePayAmount(cmd.getCouponAmount());
+
+            RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
+            order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
+            order.setAccountName(record.getAccountName()); //记录收款方账号
+            if (cmd.getPaymentType() != null)
+                switch (cmd.getPaymentType()) {
                     case 1:
                     case 7:
                     case 9:
-                    case 21: order.setVendorType(VendorType.WEI_XIN.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
-                    case 29: order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());break;
-                    default: order.setVendorType(VendorType.ZHI_FU_BAO.getCode());order.setPayChannel(PayChannel.NORMAL_PAY.getCode());break;
+                    case 21:
+                        order.setVendorType(VendorType.WEI_XIN.getCode());
+                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
+                        break;
+                    case 29:
+                        order.setPayChannel(PayChannel.ENTERPRISE_PAY_CHARGE.getCode());
+                        break;
+                    default:
+                        order.setVendorType(VendorType.ZHI_FU_BAO.getCode());
+                        order.setPayChannel(PayChannel.NORMAL_PAY.getCode());
+                        break;
                 }
 
-                order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            order.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            order.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 
-                if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
-                        order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
-                    //判断支付金额与订单金额是否相同
-                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney().add(couponAmount)) == 0) {
-                        onOrderRecordSuccess(order);
-                        onOrderSuccess(order);
-                    } else {
-                        LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
-                    }
-                } else if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-                    LOGGER.error("待付款订单:id [" + order.getId() + "] 状态已经是成功预约");
-                } else if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode()) || (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))) {//vip停车的欠费和续费
-                    if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
-                        if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())) {
-                            order.setStatus(SiteBillStatus.COMPLETE.getCode());
-                        }
-                        else
-                            rentalService.renewOrderSuccess(order,order.getRentalCount());
-                        rentalProvider.updateRentalBill(order);
-                        onOrderRecordSuccess(order);
-                    }else{
-                        LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
-                    }
-                } else
-                    LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
+            if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode()) ||
+                    order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
+                //判断支付金额与订单金额是否相同
+                if (order.getPayTotalMoney().compareTo(order.getPaidMoney().add(couponAmount)) == 0) {
+                    onOrderRecordSuccess(order);
+                    onOrderSuccess(order);
+                } else {
+                    LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+                }
+            } else if (order.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
+                LOGGER.error("待付款订单:id [" + order.getId() + "] 状态已经是成功预约");
+            } else if (order.getStatus().equals(SiteBillStatus.IN_USING.getCode()) || (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode()))) {//vip停车的欠费和续费
+                if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
+                    if (order.getStatus().equals(SiteBillStatus.OWING_FEE.getCode())) {
+                        order.setStatus(SiteBillStatus.COMPLETE.getCode());
+                    } else
+                        rentalService.renewOrderSuccess(order, order.getRentalCount());
+                    rentalProvider.updateRentalBill(order);
+                    onOrderRecordSuccess(order);
+                } else {
+                    LOGGER.error("待付款订单:id [" + order.getId() + "]付款金额有问题： 应该付款金额：" + order.getPayTotalMoney() + "实际付款金额：" + order.getPaidMoney());
+                }
+            } else
+                LOGGER.error("待付款订单:id [" + order.getId() + "]状态有问题： 订单状态是：" + order.getStatus());
 
         }
     }

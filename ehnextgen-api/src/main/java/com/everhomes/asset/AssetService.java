@@ -97,13 +97,10 @@ import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.TestLateFineCommand;
 import com.everhomes.rest.asset.UploadCertificateCommand;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -340,7 +337,7 @@ public interface AssetService {
 
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
 	
-	//djm 公司欠费关闭相应的门禁权限
+	//缴费对接门禁
 	void setDoorAccessParam(SetDoorAccessParamCommand cmd);
 	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
 	void meterAutoReading(Boolean createPlanFlag);

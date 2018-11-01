@@ -1087,10 +1087,10 @@ public class GroupServiceImpl implements GroupService {
 			if (g1.getCreatorUid().longValue() != operatorId && g2.getCreatorUid().longValue() == operatorId) {
 				return 1;
 			}
-			if (g1 != null && g2 != null && RoleConstants.ResourceAdmin == g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin != g2.getMemberRole()) {
+			if (Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && !Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return -1;
 			}
-			if (g1 != null && g2 != null && RoleConstants.ResourceAdmin != g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin == g2.getMemberRole()) {
+			if (!Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return 1;
 			}
 			if (g1.getJoinTime().getTime() > g2.getJoinTime().getTime()) {

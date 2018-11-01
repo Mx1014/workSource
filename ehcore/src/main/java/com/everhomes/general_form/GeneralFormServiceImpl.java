@@ -4,80 +4,27 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.general_approval.GeneralApprovalFieldProcessor;
-import com.everhomes.general_approval.GeneralApprovalProvider;
-import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralApprovalValProvider;
-import com.everhomes.gogs.GogsCommit;
-import com.everhomes.gogs.GogsConflictException;
-import com.everhomes.gogs.GogsFileNotExistException;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.entity.EntityType;
+import com.everhomes.general_approval.*;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.general_approval.AddGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
-import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
-import com.everhomes.rest.general_approval.DisableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.DoFormMirrorCommand;
-import com.everhomes.rest.general_approval.EnableProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
-import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormConstants;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormIdCommand;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateDTO;
-import com.everhomes.rest.general_approval.GeneralFormPrintTemplateErrorCode;
-import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
-import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
-import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GeneralFormTemplateType;
-import com.everhomes.rest.general_approval.GeneralFormValDTO;
-import com.everhomes.rest.general_approval.GeneralFormValRequestStatus;
-import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
-import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
-import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
-import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
-import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormsCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostGeneralFormDTO;
-import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
-import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
-import com.everhomes.rest.general_approval.SearchFormValDTO;
-import com.everhomes.rest.general_approval.SearchFormValsCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralFormPrintTemplateCommand;
-import com.everhomes.rest.general_approval.VerifyApprovalFormNameCommand;
-import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
-import com.everhomes.util.StringHelper;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
@@ -90,15 +37,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -117,7 +59,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private GeneralFormValProvider generalFormValProvider;
 
     @Autowired
-    private GeneralFormFieldValueProcessor generalFormFieldValueProcessor;
+    private ContentServerService contentServerService;
 
     @Autowired
     private GeneralApprovalFieldProcessor generalApprovalFieldProcessor;
@@ -160,11 +102,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         return handler.getTemplateBySourceId(cmd);
     }
 
+
+
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormValCommand cmd) {
         GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
         return handler.postGeneralFormVal(cmd);
     }
+
+
 
     private GeneralFormModuleHandler getOrderHandler(String type) {
         String handler = GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + type;
@@ -262,26 +208,26 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                             case NUMBER_TEXT:
                             case DATE:
                             case DROP_BOX:
-                                results.add(generalFormFieldValueProcessor.processDropBoxField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                results.add(processDropBoxField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case MULTI_LINE_TEXT:
-                                results.add(generalFormFieldValueProcessor.processMultiLineTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                results.add(processMultiLineTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case IMAGE:
-                                formVal = generalFormFieldValueProcessor.processImageField(formVal, val.getFieldValue());
+                                formVal = processImageField(formVal, val.getFieldValue());
                                 if (formVal != null)
                                     results.add(formVal);
                                 break;
                             case FILE:
-                                formVal = generalFormFieldValueProcessor.processFileField(formVal, val.getFieldValue());
+                                formVal = processFileField(formVal, val.getFieldValue());
                                 if (formVal != null)
                                     results.add(formVal);
                                 break;
                             case INTEGER_TEXT:
-                                results.add(generalFormFieldValueProcessor.processIntegerTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                results.add(processIntegerTextField(formVal, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                             case SUBFORM:
-                                results.add(generalFormFieldValueProcessor.processSubFormField(formVal, dto.getFieldExtra(), val.getFieldValue(), cmd.getOriginFieldFlag()));
+                                results.add(processSubFormField(formVal, dto, val.getFieldValue(), cmd.getOriginFieldFlag()));
                                 break;
                         }
                     }
@@ -294,6 +240,125 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         }
         return results;
     }
+
+    /**********     form field process start      **********/
+
+    private PostApprovalFormItem processDropBoxField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processMultiLineTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processImageField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormImageValue imageObj = JSON.parseObject(jsonVal, PostApprovalFormImageValue.class);
+        if (null == imageObj || imageObj.getUris() == null)
+            return null;
+        GeneralFormImageValue imageValue = new GeneralFormImageValue();
+        imageValue.setUris(imageObj.getUris());
+        List<String> urls = new ArrayList<>();
+        for (String uriString : imageObj.getUris()) {
+            String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            urls.add(url);
+        }
+        imageValue.setUrls(urls);
+        formVal.setFieldValue(imageValue.toString());
+        return formVal;
+    }
+
+    private PostApprovalFormItem processFileField(PostApprovalFormItem formVal, String jsonVal) {
+        PostApprovalFormFileValue fileObj = JSON.parseObject(jsonVal, PostApprovalFormFileValue.class);
+        if (null == fileObj || fileObj.getFiles() == null)
+            return null;
+        List<GeneralFormFileValueDTO> files = new ArrayList<>();
+        for (PostApprovalFormFileDTO dto2 : fileObj.getFiles()) {
+            GeneralFormFileValueDTO fileDTO = new GeneralFormFileValueDTO();
+            String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+            ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+            fileDTO.setUri(dto2.getUri());
+            fileDTO.setUrl(url);
+            fileDTO.setFileName(dto2.getFileName());
+            fileDTO.setFileSize(resource.getResourceSize());
+            files.add(fileDTO);
+        }
+        GeneralFormFileValue fileValue = new GeneralFormFileValue();
+        fileValue.setFiles(files);
+        formVal.setFieldValue(fileValue.toString());
+        return formVal;
+    }
+
+    private PostApprovalFormItem processIntegerTextField(PostApprovalFormItem formVal, String jsonVal, Byte originFieldFlag) {
+        if (NormalFlag.NEED.getCode() == originFieldFlag) {
+            formVal.setFieldValue(jsonVal);
+        } else {
+            formVal.setFieldValue(JSON.parseObject(jsonVal, PostApprovalFormTextValue.class).getText());
+        }
+        return formVal;
+    }
+
+    private PostApprovalFormItem processSubFormField(PostApprovalFormItem formVal, GeneralFormFieldDTO dto, String jsonVal, Byte originFieldFlag) {
+        //  取出子表单字段值
+        PostApprovalFormSubformValue postSubFormValue = JSON.parseObject(jsonVal, PostApprovalFormSubformValue.class);
+        List<GeneralFormSubFormValueDTO> subForms = new ArrayList<>();
+        //  解析子表单的值
+        for (PostApprovalFormSubformItemValue itemValue : postSubFormValue.getForms()) {
+            subForms.add(processSubFormItemField(dto.getFieldExtra(), itemValue, originFieldFlag));
+        }
+        GeneralFormSubFormValue subFormValue = new GeneralFormSubFormValue();
+        subFormValue.setSubForms(subForms);
+        formVal.setFieldValue(subFormValue.toString());
+        return formVal;
+    }
+
+    private GeneralFormSubFormValueDTO processSubFormItemField(String extraJson, PostApprovalFormSubformItemValue value, Byte originFieldFlag) {
+        //  1.取出子表单字段初始内容
+        //  2.将子表单中的值解析
+        //  3.将得到的Value放入原有的Extra类中，并组装放入fieldValue中
+        GeneralFormSubFormValueDTO result = JSON.parseObject(extraJson, GeneralFormSubFormValueDTO.class);
+        Map<String, String> fieldMap = new HashMap<>();
+
+        for (PostApprovalFormItem formVal : value.getValues()) {
+            switch (GeneralFormFieldType.fromCode(formVal.getFieldType())) {
+                case SINGLE_LINE_TEXT:
+                case NUMBER_TEXT:
+                case DATE:
+                case DROP_BOX:
+                    processDropBoxField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case MULTI_LINE_TEXT:
+                    processMultiLineTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case IMAGE:
+                    processImageField(formVal, formVal.getFieldValue());
+                    break;
+                case FILE:
+                    processFileField(formVal, formVal.getFieldValue());
+                    break;
+                case INTEGER_TEXT:
+                    processIntegerTextField(formVal, formVal.getFieldValue(), originFieldFlag);
+                    break;
+                case SUBFORM:
+                    break;
+            }
+            fieldMap.put(formVal.getFieldName(), formVal.getFieldValue());
+        }
+        for (GeneralFormFieldDTO dto : result.getFormFields())
+            dto.setFieldValue(fieldMap.get(dto.getFieldName()));
+        return result;
+    }
+
+    /**********     form field process end      **********/
 
     @Override
     public List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd) {
@@ -319,11 +384,13 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     }
 
     @Override
-    public GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType, Long moduleId, String ownerType, Long ownerId, String fieldName) {
+    public GeneralFormFieldDTO getGeneralFormValueByOwner(Long formOriginId, Long formVersion, String moduleType,
+                                                          Long moduleId, String ownerType, Long ownerId, String fieldName) {
         GeneralFormFieldDTO dto = null;
         // 审批的值是在一张表
         if (moduleId == 52000L) {
-            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(ownerId, formOriginId, formVersion, fieldName);
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(
+                    formOriginId, 0L/*这张表的version好像都是0*/, ownerId, fieldName);
             if (approvalVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(approvalVal.getFieldType());
@@ -907,7 +974,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
                     "generalFormPrintTemplate is already exist");
-        } catch (GogsFileNotExistException e) {
+        } catch (GogsNotExistException e) {
             LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
@@ -963,7 +1030,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
                     "generalFormPrintTemplate is already exist");
-        } catch (GogsFileNotExistException e) {
+        } catch (GogsNotExistException e) {
             LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
