@@ -193,8 +193,9 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         String json;
         try {
             PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
-            json = service.eventList(user.getArchibusUid(), req.getParameter("project_id"), req.getParameter("order_type"),
-                    req.getParameter("record_type"), Integer.valueOf(req.getParameter("page_num")), perg_size);
+//            req.getParameter("order_type") Integer.valueOf(req.getParameter("page_num"))
+            json = service.eventList(user.getArchibusUid(), req.getParameter("project_id"), "",
+                    req.getParameter("record_type"), 0, perg_size);
             LOGGER.debug(json);
         } catch (RemoteException e) {
             LOGGER.error("eventList fail",e);
