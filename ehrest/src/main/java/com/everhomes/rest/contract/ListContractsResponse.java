@@ -16,12 +16,21 @@ import com.everhomes.util.StringHelper;
 public class ListContractsResponse {
 
 	private Long nextPageAnchor;
+	private Long totalNum;
 
 	@ItemType(ContractDTO.class)
 	private List<ContractDTO> contracts;
 
 	public ListContractsResponse() {
 
+	}
+
+	public Long getTotalNum() {
+		return totalNum;
+	}
+
+	public void setTotalNum(Long totalNum) {
+		this.totalNum = totalNum;
 	}
 
 	public ListContractsResponse(Long nextPageAnchor, List<ContractDTO> contracts) {

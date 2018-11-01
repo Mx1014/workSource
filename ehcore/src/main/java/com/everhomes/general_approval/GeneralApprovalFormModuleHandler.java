@@ -4,6 +4,16 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.yellowPage.YellowPageService;
 

@@ -66,7 +66,9 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -539,6 +541,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private AssetChargingItemService assetChargingItemService;
+   	
+   	@Autowired
+   	private AssetGroupProvider assetGroupProvider;
 
     private String queueName = "property-mgr-push";
 
@@ -2491,6 +2496,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            //TODO 这个BuildingId应该由前端传过来
             address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
@@ -7772,7 +7778,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
 		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(items != null && items.size() > 0) {
-			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			List<DefaultChargingItemDTO> list = items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			for(DefaultChargingItemDTO itemDto : list) {
+				if(itemDto.getBillGroupId() != null) {
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(itemDto.getBillGroupId());
+					if(group != null) {
+						itemDto.setBillGroupName(group.getName());
+					}
+				}
+			}
+			return list;
 		}
 		return null;
 	}

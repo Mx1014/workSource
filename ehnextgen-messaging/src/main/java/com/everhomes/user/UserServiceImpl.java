@@ -130,6 +130,8 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
+import com.everhomes.user.smartcard.SmartCardModuleManager;
+import com.everhomes.user.smartcard.SmartCardProcessorContext;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
@@ -396,12 +398,16 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Autowired
     private NamespacesService namespacesService;
 
+	@Autowired
+	private SmartCardModuleManager smartCardModuleManager;
+
 	private static long stepInSecond = 30;
 
    private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
 
     @Autowired
-    private NamespaceProvider namespaceProvider;private static final String DEVICE_KEY = "device_login";
+    private NamespaceProvider namespaceProvider;
+    private static final String DEVICE_KEY = "device_login";
 
 	@Autowired
     private ArchivesService archivesService;
@@ -7036,8 +7042,40 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             aclinkCard.setItems(items);
             smartCardhandlers.add(aclinkCard);
+
+//            aclinkCard = new SmartCardHandler();
+//            aclinkCard.setAppOriginId(41015L);
+//            aclinkCard.setModuleId(41016L);
+//            aclinkCard.setData("test-aclink-onlybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbtest-aclink-only555aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//            aclinkCard.setTitle("公共门禁555");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            smartCardhandlers.add(aclinkCard);
+
+            SmartCardProcessorContext ctx = new SmartCardProcessorContext();
+            ctx.setUserId(UserContext.currentUserId());
+            List<SmartCardHandler> hs = smartCardModuleManager.generateSmartCards(ctx);
+            if(hs != null) {
+            	smartCardhandlers.addAll(hs);
+            }
+
             smartCardInfo.setSmartCardHandlers(smartCardhandlers);
-            smartCardInfo.setStandaloneHandlers(smartCardhandlers);
+
+            List<SmartCardHandler> stand2 = new ArrayList<SmartCardHandler>();
+            smartCardInfo.setStandaloneHandlers(stand2);
+            stand2.add(aclinkCard);
+
+            hs = smartCardModuleManager.generateStandaloneCards(ctx);
+            if(hs != null) {
+            	stand2.addAll(hs);
+            }
+
+//            aclinkCard = new SmartCardHandler();
+//            aclinkCard.setAppOriginId(41015L);
+//            aclinkCard.setModuleId(41016L);
+//            aclinkCard.setData("test-aclink-onlybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbtest-aclink-only555aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//            aclinkCard.setTitle("公共门禁555");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            stand2.add(aclinkCard);
 
             List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
             item = new SmartCardHandlerItem();
@@ -7065,36 +7103,37 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return code;
     }
 
-    private Map<Integer, byte[]> getSmartCardSegments(String cardCode, List<Integer> segOrders) {
-    	byte[] code = Base64.getDecoder().decode(cardCode);
+    private List<SmartCardItem> getSmartCardSegments(String cardCode) {
+//    	byte[] code = Base64.getDecoder().decode(cardCode);
+    	byte[] code = org.apache.commons.codec.binary.Base64.decodeBase64(cardCode);
     	int i = 0, len, typ;
-    	byte[] b = new byte[2];
     	Map<Integer, byte[]> segments = new HashMap<Integer, byte[]>();
-    	while(i+3 < code.length) {
-			b[0] = code[i+1];
-			b[1] = code[i+2];
-			len = DataUtil.byteToShort(b);
-			if(i+3+len > code.length) {
+    	List<SmartCardItem> items = new ArrayList<SmartCardItem>();
+
+    	while(i+2 < code.length) {
+			len = (int)code[i+1];
+			if(i+2+len > code.length) {
 				break;
 			}
 			typ = (int)code[i];
-			if(segOrders != null) {
-				segOrders.add(typ);
-			}
-
-			i += 3;
+			i += 2;
 			byte[] seg = new byte[len];
-			System.arraycopy(code, i, seg, 0, i+len);
+			System.arraycopy(code, i, seg, 0, len);
 			segments.put(new Integer(typ), seg);
+			SmartCardItem item = new SmartCardItem();
+			item.setSmartCardCode(seg);
+			item.setSmartCardType((byte)typ);
+			items.add(item);
 			i += len;
     	}
 
-    	return segments;
+    	return items;
     }
 
     private boolean payCodeVerify(String payCode) throws InvalidKeyException, NoSuchAlgorithmException {
         TimeBasedOneTimePasswordGenerator totp;
         int validWindow = 1;
+        boolean ok = false;
 
         totp = getTotp();
         Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
@@ -7106,12 +7145,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
         if(cards != null) {
             int j;
+            CARD_IGNORES:
             for(j = 0; j < cards.size(); j++) {
                 SmartCardKey card = cards.get(j);
                 for(long i = -validWindow; i <= validWindow; i++) {
                     int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
                     if(code == totpCodeInt) {
-                        return true;
+                        ok = true;
+                        break CARD_IGNORES;
                     }
                 }
             }
@@ -7129,7 +7170,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         }
 
-        return false;
+        return ok;
     }
 
     @Override
@@ -7155,30 +7196,32 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
 
         try {
-            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 20) {
+            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 19) {
                 return resp;
             }
 
-            List<Integer> orders = new ArrayList<Integer>();
-            Map<Integer, byte[]> segs = getSmartCardSegments(cmd.getCardCode(), orders);
-            byte[] paySeg = segs.getOrDefault(new Integer(SmartCardType.SMART_CARD_PAY.getCode()), null);
-            if(paySeg == null) {
-            	return resp;
-            }
+            List<SmartCardItem> items = getSmartCardSegments(cmd.getCardCode());
+            for(int i = 0; i < items.size(); i++) {
+            	SmartCardItem item = items.get(i);
 
-            String payCode = new String(paySeg);
-            if(payCodeVerify(payCode)) {
-            	resp.getVerifyResults().add("OK");
-            } else {
-            	resp.getVerifyResults().add("ERROR");
-            }
+            	if(item.getSmartCardType().equals(SmartCardType.SMART_CARD_PAY.getCode())) {
+                    String payCode = new String(item.getSmartCardCode());
+                    if(payCodeVerify(payCode)) {
+                    	resp.getVerifyResults().add("PayOk");
+                    } else {
+                    	resp.getVerifyResults().add("PayError");
+                    }
+            	} else if (item.getSmartCardType().equals(SmartCardType.SMART_CARD_ACLINK.getCode())) {
+                    String aclinkCode = new String(item.getSmartCardCode());
+                    if(aclinkCode.contains("test-aclink-only")) {
+                    	resp.getVerifyResults().add("AclinkOk");
+                    } else {
+                    	resp.getVerifyResults().add("AclinkError");
+                    }
+            	} else {
+            		resp.getVerifyResults().add("UnKnownTypeError");
+            	}
 
-            byte[] aclinkSeg = segs.getOrDefault(SmartCardType.SMART_CARD_ACLINK.getCode(), null);
-            String aclinkCode = new String(aclinkSeg);
-            if(aclinkCode == "test-aclink-only") {
-            	resp.getVerifyResults().add("OK");
-            } else {
-            	resp.getVerifyResults().add("ERROR");
             }
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -7211,10 +7254,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             }
 
             String val = s2 + String.valueOf(topt);
-            byte[] cardCode = new byte[val.length() + 3];
+            byte[] valByte = val.getBytes();
+            byte[] cardCode = new byte[valByte.length + 2];
             cardCode[0] = SmartCardType.SMART_CARD_PAY.getCode();
-            cardCode[1] = 0x0;
-            cardCode[2] = 0x17;
+            cardCode[1] = 17;
+            System.arraycopy(valByte, 0, cardCode, 2, valByte.length);
+
             resp.setQrCode(org.apache.commons.codec.binary.Base64.encodeBase64String(cardCode));
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {

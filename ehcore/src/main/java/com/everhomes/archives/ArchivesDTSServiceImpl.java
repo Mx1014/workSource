@@ -390,7 +390,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         cellB.setCellValue(contact.getAccount());
         cellC.setCellValue(contact.getContactEnName());
         cellD.setCellValue(ArchivesUtil.resolveArchivesEnum(contact.getGender(), ArchivesParameter.GENDER));
-        cellE.setCellValue(("86".equals(contact.getRegionCode()) ? "" : "+" + contact.getRegionCode() + " ") + contact.getContactToken());
+        cellE.setCellValue(((contact.getRegionCode() != null && "86".equals(contact.getRegionCode())) ? "" : "+" + contact.getRegionCode() + " ") + contact.getContactToken());
         cellF.setCellValue(contact.getContactShortToken());
         cellG.setCellValue(contact.getWorkEmail());
         if (contact.getDepartments() != null)
@@ -920,8 +920,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             token[0] = token[0].substring(1, token[0].length());
             if (type.equals(ArchivesParameter.CONTACT_TOKEN))
                 return token[1];
-            else
-                return token[0];
+            else{
+            	if(Pattern.matches("^1\\d{10}$", token[0])){
+                    return token[0];
+            	}else{
+            		return null;
+            	}
+            }
         }
     }
 

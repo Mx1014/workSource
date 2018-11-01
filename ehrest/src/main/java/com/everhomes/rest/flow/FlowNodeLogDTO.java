@@ -23,6 +23,8 @@ public class FlowNodeLogDTO {
 
 	private Long nodeId;
     private Long laneId;
+    private Long flowCaseId;
+    private Long stepCount;
     private Integer nodeLevel;
 	private String nodeName;
 	private Byte allowComment;
@@ -153,6 +155,22 @@ public class FlowNodeLogDTO {
 	public void setIsRejectNode(Byte isRejectNode) {
         this.isRejectNode = isRejectNode;
     }
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
+	public Long getStepCount() {
+		return stepCount;
+	}
+
+	public void setStepCount(Long stepCount) {
+		this.stepCount = stepCount;
+	}
 
 	@Override
 	public String toString() {

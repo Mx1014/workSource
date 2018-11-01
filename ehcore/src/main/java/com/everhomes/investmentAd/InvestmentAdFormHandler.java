@@ -180,7 +180,7 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
                 flowService.deleteFlowCase(cmd2);
                 return generalFormService.deleteGeneralFormVal(cmd);
             }else{
-                return null;
+            	return generalFormService.deleteGeneralForm(cmd);
             }
         });
         return sourceId;

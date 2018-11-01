@@ -2,6 +2,7 @@ package com.everhomes.archives;
 
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationMemberDetails;
+
 import org.jooq.Condition;
 
 import java.sql.Date;
@@ -35,7 +36,7 @@ public interface ArchivesProvider {
 
     List<ArchivesDismissEmployees> listArchivesDismissEmployees(Integer offset, Integer count, Integer namespaceId, Condition condition);
 
-    List<Long> listDismissEmployeeDetailIdsByDepartmentId(Long departmentId);
+    List<Long> listDismissEmployeeDetailIdsByDepartmentIds(List<Long> departmentIds);
 
     void createOperationalConfiguration(ArchivesOperationalConfiguration config);
 
@@ -73,6 +74,7 @@ public interface ArchivesProvider {
     List<OrganizationMemberDetails> listDetailsWithoutDismissalStatus(List<Long> detailIds);
 
     OrganizationMember findOrganizationMemberWithStatusByDetailId(Long detailId);
+ 
 
     /* 同步数据接口 end */
 

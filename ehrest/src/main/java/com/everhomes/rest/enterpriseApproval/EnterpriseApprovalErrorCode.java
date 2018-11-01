@@ -25,4 +25,6 @@ public interface EnterpriseApprovalErrorCode {
 
     int ERROR_APPROVAL_DELETE_UN_ABLE = 30001;   // 组织人事的审批暂不支持删除
 
+    int ERROR_FLOW_CASE_FORM_REQUIRE_SUBMIT = 30002;   // 工作流节点对应的表单包含必填项
+
 }

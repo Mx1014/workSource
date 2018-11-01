@@ -532,21 +532,21 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         } else {
             parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
         }
-
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
 
-                    checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
 
-                    status = CheckAuthorityStatus.SUCCESS;
-                    message = null;
-                    break;// 只要有一个停车场的权限就放行
-                } catch (RuntimeErrorException ree) {
-                    // ignore
+                        checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
+
+                        status = CheckAuthorityStatus.SUCCESS;
+                        message = null;
+                        break;// 只要有一个停车场的权限就放行
+                    } catch (RuntimeErrorException ree) {
+                        // ignore
+                    }
                 }
             }
-        }
         return new CheckAuthorityResponse(status.getCode(), message);
     }
 

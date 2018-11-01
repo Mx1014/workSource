@@ -47,6 +47,8 @@ import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
@@ -457,4 +459,36 @@ public interface AssetProvider {
 	void updateCMBillItem(PaymentBillItems items);
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
+	
+	/**
+	 * 取出eh_payment_bills表中dateStr（年月）
+	 */
+	List<CommunityStatisticParam> getPaymentBillsDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_community表中dateStr（年月）
+	 */
+	List<CommunityStatisticParam> getStatisticCommunityDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_items表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getPaymentBillItemsDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_building表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getStatisticBuildingDateStr();
+	
+	/**
+	 * 获取费项的备注名称
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param chargingItemId
+	 * @param categoryId
+	 * @return
+	 */
+	String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId,
+			Long categoryId);
 }
