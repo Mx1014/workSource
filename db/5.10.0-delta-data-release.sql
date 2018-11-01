@@ -335,6 +335,15 @@ delete from eh_service_module_apps where module_id in (42100,52200);
 update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
 
 
+-- AUTHOR: 黄鹏宇 2018年11月1日
+--REMARK: 更改楼宇房源
+update eh_var_fields set display_name = '楼宇' where id = 10965;
+update eh_var_fields set display_name = '房源' where id = 10966;
+update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
+update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
+
+
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 

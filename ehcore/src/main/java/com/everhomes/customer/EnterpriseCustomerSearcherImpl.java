@@ -324,7 +324,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         } else {
             if(StringUtils.isNotBlank(cmd.getKeyword())) {
                 qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName",5.0f)
-                        .field("contactName", 5.0f)
+                            .field("contactName", 5.0f)
                         .field("customerContactName", 4.0f)
                         .field("contactAddress", 4.0f)
                         .field("contactPhone", 3.0f)
