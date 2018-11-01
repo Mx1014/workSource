@@ -13806,7 +13806,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         member.setContactName(StringUtils.isEmpty(organizationMember.getContactName()) ? user.getNickName() : organizationMember.getContactName());
         member.setContactType(IdentifierType.MOBILE.getCode());
         member.setContactToken(organizationMember.getContactToken());
-        member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
+        member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         member.setEmployeeNo(organizationMember.getEmployeeNo());
         member.setAvatar(user.getAvatar());
         member.setGroupPath(organizationMember.getGroupPath());
@@ -13817,6 +13817,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         member.setOperatorUid(user.getId());
         member.setCreatorUid(user.getId());
         member.setContactDescription(organizationMember.getContactDescription());
+        member.setMemberGroup(organizationMember.getMemberGroup());
+        member.setGroupId(organizationMember.getGroupId());
+        member.setDetailId(organizationMember.getDetailId());
         
         //创建 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
         organizationProvider.createOrganizationMember(member);
