@@ -5221,6 +5221,7 @@ public class AssetServiceImpl implements AssetService {
 			// 冻结门禁参数为空删除参数记录
 			if (cmd.getFreezeDays() == null) {
 				existParam.setStatus((byte) 0);
+				existParam.setUnfreezeDays(0L);
 				assetProvider.updateDoorAccessParam(existParam);
 			} else {
 				if (existParam.getStatus() == ContractTemplateStatus.INACTIVE.getCode()) {

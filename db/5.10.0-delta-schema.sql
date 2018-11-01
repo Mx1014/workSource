@@ -288,3 +288,43 @@ PRIMARY KEY (`id`)
 -- AUTHOR: 杨崇鑫 20181101
 -- REMARK: issue-40954 【标准版全量】【物业缴费】【集成】计价条款设置，新增计价条款后，列表中“账单组”不显示
 ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
+-- AUTHOR: djm
+-- REMARK: 缴费账单对接门禁
+CREATE TABLE `eh_asset_dooraccess_params` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT (11) DEFAULT NULL,
+	`owner_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
+	`owner_type` VARCHAR (64) NOT NULL,
+	`org_id` BIGINT (20) DEFAULT NULL,
+	`status` TINYINT (4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+	`freeze_days` BIGINT (5) NOT NULL DEFAULT '0' COMMENT '欠费多少天冻结',
+	`unfreeze_days` BIGINT (5) NOT NULL DEFAULT '0' COMMENT '缴费多少天解冻门禁',
+	`category_id` BIGINT COMMENT 'asset category id',
+	`creator_uid` BIGINT (20) DEFAULT NULL,
+	`create_time` datetime DEFAULT NULL,
+	`operator_uid` BIGINT (20) DEFAULT NULL,
+	`operator_time` datetime DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表';
+
+-- AUTHOR: djm
+-- REMARK: 对接门禁
+CREATE TABLE `eh_asset_dooraccess_logs` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT (11) DEFAULT NULL,
+	`project_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT '项目id',
+	`project_type` VARCHAR (64) NOT NULL,
+	`owner_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT '普通公司,企业的id,用户id',
+	`owner_type` VARCHAR (64) NOT NULL,
+	`org_id` BIGINT (20) DEFAULT NULL,
+	`status` TINYINT (4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+	`dooraccess_status` TINYINT (4) DEFAULT NULL COMMENT '该项目下门禁的状态 0:关闭门禁，1是开启门禁 ',
+	`result_msg` VARCHAR (256) DEFAULT NULL,
+	`category_id` BIGINT COMMENT 'asset category id',
+	`creator_uid` BIGINT (20) DEFAULT NULL,
+	`create_time` datetime DEFAULT NULL,
+	`operator_uid` BIGINT (20) DEFAULT NULL,
+	`operator_time` datetime DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表门禁记录表';
