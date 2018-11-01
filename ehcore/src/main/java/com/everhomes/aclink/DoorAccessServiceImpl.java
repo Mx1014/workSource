@@ -492,6 +492,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	dto.setLinkStatus(DoorAccessLinkStatus.FAILED.getCode());
                 }
             
+            //旧数据会有空值,新激活的门禁会设置默认值 by liuyilin 20181101
+			if (dto.getEnableAmount() == null && dto.getEnableDuration() == null) {
+				dto.setEnableDuration(DoorAuthStatus.VALID.getCode());
+				dto.setMaxDuration(dto.getMaxDuration() == null ? 60 : dto.getMaxDuration());
+			}
+            
             //User user = userProvider.findUserById(da.getCreatorUserId());
             UserInfo user = userService.getUserSnapshotInfoWithPhone(dto.getCreatorUserId());
             if(user != null) {
@@ -1553,6 +1559,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setGroupid(cmd.getGroupId());
                 doorAcc.setDisplayName(cmd.getDisplayName());
                 doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
+                //激活时设置默认值 by liuyilin 20181101
+                //TODO 门禁3.0实现默认配置后,拿默认配置
+                doorAcc.setEnableDuration(DoorAuthStatus.VALID.getCode());
+                doorAcc.setMaxDuration(60);
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
