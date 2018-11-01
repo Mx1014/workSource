@@ -886,7 +886,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(namespaceId==null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		checkOrgId(cmd.getOrgId());
+//		checkOrgId(cmd.getOrgId());
 		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,cmd.getOrgId(),cmd.getOwnerType(),cmd.getOwnerId(),pageAnchor,pageSize+1);
 
 		if (null == cities || cities.size()==0)
