@@ -84,6 +84,7 @@ UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  18000
 -- REMARK: issue-null 设置路由相关参数
 UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
 UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+UPDATE eh_service_modules SET `host` = 'community-map' WHERE id = 40070;
 
 
 
@@ -332,6 +333,15 @@ UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 -- REMARK: 访客1.3园区访客地址修改
 delete from eh_service_module_apps where module_id in (42100,52200);
 update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
+
+
+-- AUTHOR: 黄鹏宇 2018年11月1日
+--REMARK: 更改楼宇房源
+update eh_var_fields set display_name = '楼宇' where id = 10965;
+update eh_var_fields set display_name = '房源' where id = 10966;
+update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
+update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
+
 
 
 

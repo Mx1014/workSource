@@ -292,6 +292,7 @@ public class FieldServiceImpl implements FieldService {
     private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId, Long ownerId, String ownerType) {
         Field field = fieldProvider.findFieldById(fieldId);
         if (field!=null && field.getName().equals("sourceItemId")) {
+
             List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
             if (activityCategories != null && activityCategories.size() > 0) {
                 activityCategories.forEach((a) -> {
