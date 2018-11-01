@@ -116,6 +116,8 @@ import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.*;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpadbase.AppContext;
@@ -2055,6 +2057,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setOrganizationId(organization.getId());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
@@ -2095,6 +2099,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setHotline(enterprise.getContact());
             customer.setCorpEmail(enterprise.getEmailDomain());
             customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
 //            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);

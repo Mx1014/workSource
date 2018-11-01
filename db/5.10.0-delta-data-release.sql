@@ -348,6 +348,15 @@ where namespace_id=999938 and  action_type in (48, 55) and action_data not like 
 
 
 
+-- AUTHOR: 黄鹏宇 2018年11月1日
+--REMARK: 更改楼宇房源
+update eh_var_fields set display_name = '楼宇' where id = 10965;
+update eh_var_fields set display_name = '房源' where id = 10966;
+update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
+update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
+
+
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
