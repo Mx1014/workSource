@@ -1045,4 +1045,7 @@ ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_ad
 ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
 ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
 ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
-
+﻿-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌字段
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_data` TEXT NULL COMMENT '自定义上传资料';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_plate` VARCHAR(16) NULL COMMENT '默认车牌';
