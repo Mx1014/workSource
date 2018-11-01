@@ -342,7 +342,7 @@ public class ParkingServiceImpl implements ParkingService {
 			if (r.getDefaultData() != null && r.getDefaultData().length() >0){
 				dto.setData(Arrays.asList(r.getDefaultData().split(",")));
 			}
-			if (r.getDefaultPlate() != null && r.getDefaultData().length() >0){
+			if (r.getDefaultPlate() != null && r.getDefaultPlate().length() >0){
 				String[] plate = r.getDefaultPlate().split(",");
 				dto.setProvince(plate[0]);
 				dto.setCity(plate[1]);
