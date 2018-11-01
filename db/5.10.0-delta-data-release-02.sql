@@ -20,6 +20,8 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
+-- REMARK: /yellowPage/transferMainAllianceOwnerType 参数ownerId 填 1802， 将返回的字符串发给我确认
+-- REMARK: /yellowPage/transferAllianceModuleUrl 参数ownerId 填 1802， 将返回的字符串发给我确认
 -- REMARK: /yellowPage/transferApprovalToForm 参数ownerId 填 1802， 将返回的字符串发给我确认
 -- REMARK: /yellowPage/transferPadItems 参数ownerId 填 1802， 将返回的字符串发给我确认
 
