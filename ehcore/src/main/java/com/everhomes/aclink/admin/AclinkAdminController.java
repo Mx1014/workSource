@@ -462,6 +462,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/aclink/listDoorGroupNew</b>
+     * <p>创建门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorGroupNew")
+    @RestReturn(value=ListDoorGroupResponse.class)
+    public RestResponse listDoorGroupNew(@Valid ListDoorGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorGroupNew(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/aclink/getTempAuthSettings</b>

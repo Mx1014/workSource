@@ -86,4 +86,14 @@ public interface DoorAccessProvider {
     AclinkGroup findAclinkGroupById(Long id);
 
     AclinkGroup updateDoorGroup(AclinkGroup group);
+    //删除所有门禁组关系 add by liqingyan
+    void deleteAllDoorGroupRel(Long id);
+
+    List<DoorAccess> listNewDoorAccessByGroupId(Long groupId, int count);
+
+    void createDoorGroupRel(Long groupId, Long doorId);
+
+    List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
+                                                 ListDoorGroupCommand cmd);
+
 }

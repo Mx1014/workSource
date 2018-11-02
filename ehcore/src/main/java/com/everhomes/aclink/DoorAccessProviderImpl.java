@@ -11,6 +11,7 @@ import java.util.*;
 
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
@@ -380,7 +381,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectHavingStep<Record2<Integer,String>> groupBy = context.select(t.ID.count().as("num")
                 ,t.DEVICE_NAME.as("type"))
                 .from(t)
-                .groupBy(t.DOOR_TYPE);
+                .groupBy(t.DEVICE_ID);
         groupBy.fetch().map((r) -> {
             ActiveDoorByEquipmentDTO dto = new ActiveDoorByEquipmentDTO();
             dto.setActiveDoorNumber(r.value1());
@@ -719,6 +720,73 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 		return listDoorGroupRel;
 	}
 
+	@Override
+    public List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
+                                                 ListDoorGroupCommand cmd){
+        List<AclinkGroupDTO> groups= new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhAclinkGroup t = Tables.EH_ACLINK_GROUP;
+        com.everhomes.server.schema.tables.EhDoorAccess t1 = Tables.EH_DOOR_ACCESS;
+
+        Condition con = t.STATUS.eq((byte)1);
+        if(cmd.getOwnerId() != null && cmd.getOwnerType() != null){
+            con = con.and(t.OWNER_ID.eq(cmd.getOwnerId())).and(t.OWNER_TYPE.eq(cmd.getOwnerType()));
+        }
+        if(null != locator && null != locator.getAnchor()){
+            con = con.and(t.ID.ge(locator.getAnchor()));
+        }
+
+
+//        Condition con = Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode());
+//        if(cmd.getOwnerId() != null && cmd.getOwnerType() != null){
+//            con = con.and(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId())).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+//        }
+//        con = con.and(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode()));
+//
+        SelectOffsetStep groupBy = context.select(t1.ID.count(),
+                (t.ID),
+                (t.NAME),
+                (t.CREATE_TIME),
+                (t.STATUS))
+                .from(t)
+                .leftOuterJoin(t1).on(t1.GROUPID.eq(t.ID)).and(t1.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode())).and(t1.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
+                .where(con)
+                .groupBy(t.ID)
+                .limit(count + 1);
+        groups = groupBy.fetch().map((r) ->{
+            AclinkGroupDTO group = new AclinkGroupDTO();
+            group.setGroupId(r.getValue(t.ID));
+            group.setGroupName(r.getValue(t.NAME));
+            group.setCreateTime(r.getValue(t.CREATE_TIME));
+            group.setStatus(r.getValue(t.STATUS));
+            group.setCount(r.getValue(t1.ID.count()));
+            return group;
+        });
+        if(count > 0 && groups.size() > count) {
+            locator.setAnchor(groups.get(groups.size() - 1).getGroupId());
+            groups.remove(groups.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        if(null != groups && groups.size() > 0 ){
+            for(AclinkGroupDTO group:groups){
+                List<DoorAccessLiteDTO> doors = context.select().from(t1)
+                        .where(t1.GROUPID.eq(group.getGroupId()))
+                        .and(t1.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode()))
+                        .and(t1.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
+                        .fetch().map((r) ->{
+                            DoorAccessLiteDTO door = new DoorAccessLiteDTO();
+                            door.setId(r.getValue(t1.ID));
+                            door.setName(r.getValue(t1.NAME));
+                            door.setDisplayName(r.getValue(t1.DISPLAY_NAME));
+                            return door;
+                         });
+                group.setDoors(doors);
+            }
+        }
+        return groups;
+    }
+
     @Override
     public Long createAclinkFormTitles(AclinkFormTitles form){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
@@ -805,7 +873,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     @Override
     public AclinkGroup findAclinkGroupById(Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhAclinkGroupDao dao = new EhAclinkGroupDao();
+        EhAclinkGroupDao dao = new EhAclinkGroupDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), AclinkGroup.class);
     }
 
@@ -815,5 +883,50 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         EhAclinkGroupDao dao = new EhAclinkGroupDao(context.configuration());
         dao.update(group);
         return group;
+    }
+
+    @Override
+    public void deleteAllDoorGroupRel(Long id){
+        List<DoorAccess> doors = new ArrayList<DoorAccess>();
+        doors = this.listNewDoorAccessByGroupId(id, 0);
+        if(null == doors);
+        if(null != doors && !doors.isEmpty()){
+            for(DoorAccess door: doors){
+                door.setGroupid(0L);
+                this.updateDoorAccess(door);
+            }
+        }
+    }
+
+    @Override
+    public List<DoorAccess> listNewDoorAccessByGroupId(Long groupId, int count){
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<DoorAccess> doors = queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(groupId));
+                query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+                return query;
+            }
+
+        });
+
+        if(doors == null || doors.size() == 0) {
+            return null;
+        }
+
+        return doors;
+    }
+
+    @Override
+    public void createDoorGroupRel(Long groupId, Long doorId){
+        DoorAccess door = this.findDoorAccessById(doorId);
+        if(null != groupId){
+            door.setGroupid(groupId);
+        }
+        this.updateDoorAccess(door);
     }
 }

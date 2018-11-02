@@ -277,4 +277,6 @@ public interface DoorAccessService {
     AclinkGroup createDoorGroup(CreateDoorAccessGroupCommand cmd);
 
     AclinkGroup updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
+
+    ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
 }

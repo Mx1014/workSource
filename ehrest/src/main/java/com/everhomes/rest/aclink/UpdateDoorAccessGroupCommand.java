@@ -18,7 +18,7 @@ public class UpdateDoorAccessGroupCommand {
     @NotNull
 	private Long groupId;
 	private String groupName;
-//	private List<Long> doorIds;
+	private List<Long> doorIds;
 	private Byte status;
 	
 	public Long getGroupId() {
@@ -33,12 +33,12 @@ public class UpdateDoorAccessGroupCommand {
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
 	}
-//	public List<Long> getDoorIds() {
-//		return doorIds;
-//	}
-//	public void setDoorIds(List<Long> doorIds) {
-//		this.doorIds = doorIds;
-//	}
+	public List<Long> getDoorIds() {
+		return doorIds;
+	}
+	public void setDoorIds(List<Long> doorIds) {
+		this.doorIds = doorIds;
+	}
 	public Byte getStatus() {
 		return status;
 	}
