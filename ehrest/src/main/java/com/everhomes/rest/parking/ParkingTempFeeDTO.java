@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>orderToken: 订单token</li>
  * <li>originalPrice: 原价</li>
  * <li>remainingTime: 剩余免费时间</li>
+ * <li>temfeeDiscount：临时车优惠折扣</li>
  * </ul>
  */
 public class ParkingTempFeeDTO {
@@ -27,6 +28,8 @@ public class ParkingTempFeeDTO {
 	private String orderToken;
 	private BigDecimal originalPrice;
 	private Integer remainingTime;
+	private String tempFeeDiscount;
+	
 
 	public Integer getRemainingTime() {
 		return remainingTime;
@@ -98,6 +101,15 @@ public class ParkingTempFeeDTO {
 
 	public void setOrderToken(String orderToken) {
 		this.orderToken = orderToken;
+	}
+
+	
+	public String getTempFeeDiscount() {
+		return tempFeeDiscount;
+	}
+
+	public void setTempFeeDiscount(String tempFeeDiscount) {
+		this.tempFeeDiscount = tempFeeDiscount;
 	}
 
 	@Override
