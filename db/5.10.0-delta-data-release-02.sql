@@ -70,7 +70,7 @@ where sa.parent_id = 0 and sa.owner_id > 0 and sa.`type` <> 0 and st.owner_type 
 
 -- 迁移6.工作流
 update eh_flows fl, eh_general_approvals ap 
-set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE'
+set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE', fl.string_tag5 = ap.id
 where fl.owner_type = 'GENERAL_APPROVAL' and fl.module_id = 40500 and fl.owner_id = ap.id and fl.owner_type <> 'SERVICE_ALLIANCE' ;
 
 
