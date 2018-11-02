@@ -349,7 +349,7 @@ where namespace_id=999938 and  action_type in (48, 55) and action_data not like 
 
 
 -- AUTHOR: 黄鹏宇 2018年11月1日
---REMARK: 更改楼宇房源
+-- REMARK: 更改楼宇房源
 update eh_var_fields set display_name = '楼宇' where id = 10965;
 update eh_var_fields set display_name = '房源' where id = 10966;
 update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
@@ -364,6 +364,57 @@ UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id
 -- REMARK: 增加用户自定义上传资料与默认车牌的默认值
 UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
 UPDATE eh_parking_lots SET default_plate = '粤,B';
+
+-- AUTHOR: 黄鹏宇 2018年11月1日
+-- REMARK: 更改楼宇房源
+update eh_general_forms set template_text = replace(template_text,'楼栋门牌','楼宇房源') where module_id = 25000;
+update eh_general_form_templates set template_text = '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"remark": "系统自动获取客户管理中该项目下所有客户信息供用户选择；",
+	"disabled": 1,
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼宇房源",
+	"fieldDisplayName": "楼宇房源",
+	"fieldExtra": "{}",
+	"fieldName": "楼宇房源",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"remark": "系统自动获取资产管理中该项目下所有待租门牌供用户选择；",
+	"disabled": 1,
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"remark": "系统自动根据不同的触发不同的操作；",
+	"disabled": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]' where module_id = 25000;
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
