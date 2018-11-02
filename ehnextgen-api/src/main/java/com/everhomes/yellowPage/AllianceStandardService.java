@@ -50,4 +50,6 @@ public interface AllianceStandardService {
 	String transferAllianceModuleUrl();
 
 	String transferMainAllianceOwnerType();
+
+	String transferApprovalFlowCases();
 }
