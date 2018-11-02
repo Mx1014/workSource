@@ -328,6 +328,52 @@ CREATE TABLE eh_banner_categories
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 广告管理单应用修改为多应用
 ALTER TABLE eh_banners ADD COLUMN `category_id` BIGINT COMMENT '应用入口ID';
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸用户映射表 20181001
+DROP TABLE IF EXISTS `eh_pm_task_archibus_user_mapping`;
+CREATE TABLE `eh_pm_task_archibus_user_mapping` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `archibus_uid` VARCHAR(64) DEFAULT NULL COMMENT '国贸用户Id',
+  `user_id` bigint DEFAULT 0 COMMENT '用户Id',
+  `identifier_token` varchar(128) DEFAULT NULL COMMENT '用户手机号',
+  `create_time` datetime DEFAULT NOW(),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修国贸对接用户映射表';
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181001
+CREATE TABLE `eh_pm_task_categories`(
+  `id` BIGINT NOT NULL,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `create_time` DATETIME,
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used',
+  `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
+  `description` TEXT,
+  `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_category_path` (`path`),
+  KEY `i_eh_category_order` (`default_order`),
+  KEY `i_eh_category_delete_time` (`delete_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
+
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+ALTER TABLE `eh_pm_task_configs` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+-- 物业报修3.8 end
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 用户认证审核权限配置表

@@ -20,10 +20,12 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
--- REMARK: /yellowPage/transferMainAllianceOwnerType 参数ownerId 填 1802， 将返回的字符串发给我确认
--- REMARK: /yellowPage/transferAllianceModuleUrl 参数ownerId 填 1802， 将返回的字符串发给我确认
--- REMARK: /yellowPage/transferApprovalToForm 参数ownerId 填 1802， 将返回的字符串发给我确认
--- REMARK: /yellowPage/transferPadItems 参数ownerId 填 1802， 将返回的字符串发给我确认
+-- REMARK: 以下接口参数ownerId 填 1802，需将返回字符串发给我
+-- REMARK: /yellowPage/transferMainAllianceOwnerType
+-- REMARK: /yellowPage/transferAllianceModuleUrl 
+-- REMARK: /yellowPage/transferApprovalToForm 
+-- REMARK: /yellowPage/transferApprovalFlowCases
+-- REMARK: /yellowPage/transferPadItems 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
@@ -70,7 +72,7 @@ where sa.parent_id = 0 and sa.owner_id > 0 and sa.`type` <> 0 and st.owner_type 
 
 -- 迁移6.工作流
 update eh_flows fl, eh_general_approvals ap 
-set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE'
+set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE', fl.string_tag5 = ap.id
 where fl.owner_type = 'GENERAL_APPROVAL' and fl.module_id = 40500 and fl.owner_id = ap.id and fl.owner_type <> 'SERVICE_ALLIANCE' ;
 
 
