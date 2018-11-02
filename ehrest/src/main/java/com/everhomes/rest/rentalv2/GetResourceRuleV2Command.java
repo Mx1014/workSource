@@ -28,6 +28,8 @@ public class GetResourceRuleV2Command {
 
     private String sceneType;
 
+    private String sceneToken;
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -87,5 +89,13 @@ public class GetResourceRuleV2Command {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
     }
 }

@@ -26,6 +26,7 @@ public class  FindRentalSiteWeekStatusCommand {
 	private Byte priceType;
 	private String packageName;
 	private String sceneType;
+	private String sceneToken;
 
 	public String getResourceType() {
 		return resourceType;
@@ -86,5 +87,13 @@ public class  FindRentalSiteWeekStatusCommand {
 
 	public void setPriceType(Byte priceType) {
 		this.priceType = priceType;
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
 	}
 }
