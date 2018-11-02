@@ -7021,7 +7021,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
-    public AclinkGroup updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
+    public void updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
 	    AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getGroupId());
 	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
 	        group.setName(cmd.getGroupName());
@@ -7040,7 +7040,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }
             }
         }
-	    return doorAccessProvider.updateDoorGroup(group);
+	    doorAccessProvider.updateDoorGroup(group);
+
     }
 }
 
