@@ -414,6 +414,15 @@ update eh_general_form_templates set template_text = '[{
 	"filterFlag": 1
 }]' where module_id = 25000;
 
+-- AUTHOR: 缪洲
+-- REMARK: 科兴科学园发票类型字段
+UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCarFlag":0,"searchCarFlag":1,"currentInfoType":2,"contact":"18718523489","invoiceFlag":1,"businessLicenseFlag":0,"vipParkingFlag":0,"monthRechargeFlag":1,"identityCardFlag":1,"monthCardFlag":1,"noticeFlag":0,"flowMode":3,"invoiceTypeFlag":1}' WHERE id = 10006;
+
+
+-- AUTHOR: 吴寒
+-- REMARK: 会议室预定发邮件的内容修改
+UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
