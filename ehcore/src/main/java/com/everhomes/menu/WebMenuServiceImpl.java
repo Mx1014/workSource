@@ -219,9 +219,21 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
+
 			//全部appOriginIds
 			List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
-			appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
+
+			//管理公司的超管是有authCommunityIds的，普通公司没有，普通公司只拿OA应用
+			if(authCommunityIds != null && authCommunityIds.size() > 0 ){
+				appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
+			}else {
+				for(ServiceModuleApp app: allApps){
+					if(ServiceModuleAppType.fromCode(app.getAppType()) == ServiceModuleAppType.OA ){
+						appOriginIds.add(app.getOriginId());
+					}
+				}
+			}
+
 		}else {
 
 
