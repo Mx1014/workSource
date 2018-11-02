@@ -2057,6 +2057,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (!containPartnerCommunity(namespaceId, entityList)) {
                 List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
                 if (resources != null && resources.size() > 1) {
+                    if (resources.get(0) == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("namespaceResource is null, namespaceId = {}", namespaceId);
+                        }
+                        return communityId;
+                    }
                     communityId = resources.get(0).getResourceId();
                     updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
                     if (LOGGER.isInfoEnabled()) {

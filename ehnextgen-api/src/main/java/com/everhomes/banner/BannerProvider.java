@@ -64,13 +64,21 @@ public interface BannerProvider {
 
     List<Banner> listBannersByNamespace(Integer namespaceId);
 
-    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId);
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId);
 
     Integer getMaxOrderByCommunityId(Integer namespaceId, Long communityId);
 
     Integer getMinOrderByCommunityId(Integer namespaceId, Long scopeId);
 
-    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator);
+    List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId, int pageSize, ListingLocator locator);
 
-    Map<Long,Integer> countEnabledBannersByScope(Integer namespaceId);
+    Map<Long,Integer> countEnabledBannersByScope(Integer namespaceId, Long categoryId);
+
+    //广告应用入口
+    void createBannerCategory(BannerCategory bannerCategory);
+
+    BannerCategory findBannerCategoryById(Long id);
+
+    void updateBannerCategory(BannerCategory bannerCategory);
+    //广告应用入口END
 }

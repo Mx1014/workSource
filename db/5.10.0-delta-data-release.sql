@@ -375,6 +375,18 @@ UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCar
 -- REMARK: 会议室预定发邮件的内容修改
 UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
 
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+UPDATE eh_service_modules SET multiple_flag = 1 WHERE id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷app值
+UPDATE eh_service_module_apps SET instance_config = '{"categoryId":0}' WHERE module_id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷广告数据入口
+UPDATE eh_banners SET category_id = 0;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
