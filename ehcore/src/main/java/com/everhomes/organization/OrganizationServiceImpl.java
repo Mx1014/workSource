@@ -1256,12 +1256,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(organizationId);
         List<OrganizationContactDTO> justOneAdmin = new ArrayList<>();
-        List<OrganizationContactDTO> getadmin = rolePrivilegeService.listOrganizationAdministrators(command);
-        if(getadmin != null && getadmin.size() > 0){
-            justOneAdmin.add(getadmin.get(0));
-            return justOneAdmin;
+        List<OrganizationContactDTO> getAdmin = rolePrivilegeService.listOrganizationAdministrators(command);
+        //由于之前的企业可以设置多个管理员，故有可能返回多个管理员结果，此时只显示最新新增的一个
+        if(getAdmin == null || getAdmin.size() == 0){
+            return null;
         }else{
-            return getadmin;
+            justOneAdmin.add(getAdmin.get(0));
+            return justOneAdmin;
         }
     }
 
