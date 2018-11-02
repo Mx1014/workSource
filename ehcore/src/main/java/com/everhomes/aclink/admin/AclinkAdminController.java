@@ -518,8 +518,9 @@ public class AclinkAdminController extends ControllerBase {
      * @return 门禁列表
      */
     @RequestMapping("updateDoorGroup")
-    @RestReturn(value=AclinkGroup.class)
+    @RestReturn(value=String.class)
     public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        doorAccessService.updateDoorGroup(cmd);
         RestResponse response = new RestResponse(doorAccessService.updateDoorGroup(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
