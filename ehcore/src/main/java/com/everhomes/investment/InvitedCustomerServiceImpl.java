@@ -15,7 +15,10 @@ import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.*;
+import com.everhomes.portal.PortalService;
+import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
@@ -24,6 +27,9 @@ import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
+import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
@@ -108,6 +114,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
 
 
@@ -369,6 +381,24 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     }
 
+
+    private Boolean checkCustomerAdmin(Long ownerId, String ownerType, Integer namespaceId) {
+        ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+        listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+        listServiceModuleAppsCommand.setModuleId(QualityConstant.INVITED_CUSTOMER);
+        ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+        CheckModuleManageCommand checkModuleManageCommand = new CheckModuleManageCommand();
+        checkModuleManageCommand.setModuleId(QualityConstant.INVITED_CUSTOMER);
+        checkModuleManageCommand.setOrganizationId(ownerId);
+        checkModuleManageCommand.setOwnerType(ownerType);
+        checkModuleManageCommand.setUserId(UserContext.currentUserId());
+        if (null != apps && null != apps.getServiceModuleApps() && apps.getServiceModuleApps().size() > 0) {
+            checkModuleManageCommand.setAppId(apps.getServiceModuleApps().get(0).getOriginId());
+        }
+        return serviceModuleService.checkModuleManage(checkModuleManageCommand) != 0;
+    }
+
+
     @Override
     public SearchInvestmentResponse listInvestment(SearchEnterpriseCustomerCommand cmd) {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_VIEW, cmd.getOrgId(), cmd.getCommunityId());
@@ -381,7 +411,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
             response.setNextPageAnchor(searchResponse.getNextPageAnchor());
             return response;
         }else {
-            isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+            isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
             searchResponse = customerSearcher.queryEnterpriseCustomers(cmd, isAdmin);
         }
         SearchInvestmentResponse response = new SearchInvestmentResponse();
@@ -661,7 +691,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
         List<String> sheetNames = new ArrayList<>();
         sheetNames.add("客户信息");
         String excelTemplateName = "招商客户模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";
-        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         cmd.setIsAdmin(isAdmin);
         dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.INVITED_CUSTOMER, DynamicExcelStrings.invitedBaseIntro, sheetNames, cmd, true, false, excelTemplateName);
     }
@@ -782,7 +812,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Override
     public void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd){
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.INVITED_CUSTOMER_CHANGE_APTITUDE, cmd.getOrgId(), cmd.getCommunityId());
-        Boolean isAdmin = customerService.checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
+        Boolean isAdmin = checkCustomerAdmin(cmd.getOrgId(), cmd.getOwnerType(), cmd.getNamespaceId());
         SearchEnterpriseCustomerResponse res = null;
         if(cmd.getCustomerIds()!= null && cmd.getCustomerIds().size() > 0){
             res = customerSearcher.queryEnterpriseCustomersById(cmd);

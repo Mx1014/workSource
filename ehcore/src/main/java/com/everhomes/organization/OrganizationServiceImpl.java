@@ -1255,7 +1255,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 //		return response.getMembers();
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(organizationId);
-        return rolePrivilegeService.listOrganizationAdministrators(command);
+        List<OrganizationContactDTO> justOneAdmin = new ArrayList<>();
+        List<OrganizationContactDTO> getadmin = rolePrivilegeService.listOrganizationAdministrators(command);
+        if(getadmin != null && getadmin.size() > 0){
+            justOneAdmin.add(getadmin.get(0));
+            return justOneAdmin;
+        }else{
+            return getadmin;
+        }
     }
 
     private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
