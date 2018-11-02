@@ -221,6 +221,8 @@ public interface Rentalv2Service {
 
 	GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd);
 
+	String parseSceneToken(String sceneToken);
+
 	void test();
 
 }
