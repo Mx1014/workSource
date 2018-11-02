@@ -7,9 +7,15 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow_statistics.*;
+import com.everhomes.util.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * 工作流效率统计  Controller
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/flowstatistics")
 public class FlowStatisticsController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStatisticsController.class);
 
     @Autowired
     private  FlowStatisticsService flowStatisticsService ;
@@ -95,12 +102,16 @@ public class FlowStatisticsController extends ControllerBase {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+                LOGGER.info("statisticsHanldeLog begin");
+                Timestamp start = DateUtils.currentTimestamp();
                 if(cmd != null && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getIsAll())){
 
                     flowStatisticsTaskService.allStatistics();
                 }else{
                     flowStatisticsTaskService.appendStatistics();
                 }
+                Timestamp end = DateUtils.currentTimestamp();
+                LOGGER.info("statisticsHanldeLog end .cost:{}",end.getTime()-start.getTime());
             }
         });
         t.start();
