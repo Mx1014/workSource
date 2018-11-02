@@ -227,6 +227,10 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                     case DISMISS_APPLICATION:
                         processDismissApplicationField(entities, value.getFieldValue());
                         break;
+                    case MULTI_SELECT:
+                        //多选　
+                        generalApprovalFieldProcessor.processMultiSelectField(entities,e, val.getFieldStr3());
+                        break;
                 }
             }
 
@@ -609,6 +613,10 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                             break;
                         case DISMISS_APPLICATION:
                             processDismissApplicationField(entities, val.getFieldStr3());
+                            break;
+                        case MULTI_SELECT:
+                            //多选　
+                            generalApprovalFieldProcessor.processMultiSelectField(entities,e, val.getFieldStr3());
                             break;
                     }
                 }
