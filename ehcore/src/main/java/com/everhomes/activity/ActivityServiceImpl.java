@@ -746,7 +746,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
     	this.cancelExpireRosters(cmd.getActivityId());
 
     	// 把锁放在查询语句的外面，update by tt, 20170210
-        Tuple<ActivityDTO, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(() -> {
+        Tuple<ActivityDTO, Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(() -> {
             return (ActivityDTO) dbProvider.execute((status) -> {
 
                 LOGGER.warn("------signup start ");
