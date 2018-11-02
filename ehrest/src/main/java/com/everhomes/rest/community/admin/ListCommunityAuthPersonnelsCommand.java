@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
  *     <li>orgNameKeyword: 公司名称关键字</li>
  *     <li>currentOrgId: 当前用户的组织ID</li>
  *     <li>appId: appID</li>
+ *     <li>auditAuth: 审核权限,请参考{@link com.everhomes.rest.organization.AuditAuth}</li>
  * </ul>
  */
 public class ListCommunityAuthPersonnelsCommand {
@@ -35,6 +36,16 @@ public class ListCommunityAuthPersonnelsCommand {
 
     private Long currentOrgId;
     private Long appId;
+
+    private Byte auditAuth;
+
+    public Byte getAuditAuth() {
+        return auditAuth;
+    }
+
+    public void setAuditAuth(Byte auditAuth) {
+        this.auditAuth = auditAuth;
+    }
 
     public Long getAppId() {
         return appId;

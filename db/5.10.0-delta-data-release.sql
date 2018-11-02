@@ -400,6 +400,11 @@ UPDATE eh_service_module_apps SET instance_config = '{"categoryId":0}' WHERE mod
 -- 刷广告数据入口
 UPDATE eh_banners SET category_id = 0;
 
+-- AUTHOR: 梁燕龙
+-- REMARK: issue-36940 用户认证，邮箱认证提示文案
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
