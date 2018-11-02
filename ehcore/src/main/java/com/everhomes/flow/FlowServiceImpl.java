@@ -6884,7 +6884,11 @@ public class FlowServiceImpl implements FlowService {
         for (FlowEventLog eventLog : stepLogs) {
             //获取工作流经过的节点日志
             if (currNode == null || !currNode.getId().equals(eventLog.getFlowNodeId())) { // 相邻相同去重
-                currNode = flowGraph.getGraphNode(eventLog.getFlowNodeId()).getFlowNode();
+                FlowGraphNode graphNode = flowGraph.getGraphNode(eventLog.getFlowNodeId());
+                if(graphNode == null){
+                    continue ;
+                }
+                currNode = graphNode.getFlowNode();
                 final FlowNodeLogDTO nodeLogDTO = new FlowNodeLogDTO();
                 nodeLogDTO.setNodeId(currNode.getId());
                 nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
