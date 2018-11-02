@@ -33,7 +33,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     public static final String pk_crop = "GMFW";
 
-    public static final Integer perg_size = 1;
+    public static final Integer perg_size = 5;
 
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
