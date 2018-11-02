@@ -400,8 +400,10 @@ public class PortalServiceImpl implements PortalService {
 			return null;
 		}
 		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
+
+		ServiceModule serviceModule  = null;
 		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
-			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
+			serviceModule = checkServiceModule(moduleApp.getModuleId());
 			dto.setModuleName(serviceModule.getName());
 
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
@@ -412,6 +414,10 @@ public class PortalServiceImpl implements PortalService {
 
 		if(moduleApp.getIconUri() != null){
 			String url = contentServerService.parserUri(moduleApp.getIconUri(), ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
+			dto.setIconUrl(url);
+		}else if(serviceModule != null && serviceModule.getIconUri() != null){
+			//使用模块默认图标
+			String url = contentServerService.parserUri(serviceModule.getIconUri(), ServiceModule.class.getSimpleName(), serviceModule.getId());
 			dto.setIconUrl(url);
 		}
 
@@ -2087,15 +2093,19 @@ public class PortalServiceImpl implements PortalService {
 				config.setDescriptionHeight(0);
 				config.setSubjectHeight(0);
 				config.setEntityCount(0);
-				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY){
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.ACTIVITY
+						|| OPPushWidgetStyle.LIST_VIEW.equals(OPPushWidgetStyle.fromCode(itemGroup.getStyle()))
+						|| OPPushWidgetStyle.fromCode(itemGroup.getStyle()) == null){
 					//客户端居然是依赖名字判断的 * 1
 					itemGroup.setName("OPPushActivity");
 				}
-				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE){
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.SERVICE_ALLIANCE
+						|| OPPushWidgetStyle.LARGE_IMAGE_LIST_VIEW.equals(OPPushWidgetStyle.fromCode(itemGroup.getStyle()))){
 					//客户端居然是依赖名字判断的 * 2
 					itemGroup.setName("Gallery");
 				}
-				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ){
+				if(EntityType.fromCode(itemGroup.getContentType()) == EntityType.BIZ
+						|| OPPushWidgetStyle.HORIZONTAL_SCROLL_VIEW.equals(OPPushWidgetStyle.fromCode(itemGroup.getStyle()))){
 					//客户端居然是依赖名字判断的 * 3
 					itemGroup.setName("OPPushBiz");
 				}
@@ -2414,8 +2424,15 @@ public class PortalServiceImpl implements PortalService {
 		item.setMinVersion(1L);
 		item.setItemGroup(itemGroup.getName());
 		item.setItemLocation(location);
-		item.setItemLabel(instanceConfig.getTitle());
-		item.setItemName(instanceConfig.getTitle());
+		if(StringUtils.isEmpty(itemGroup.getTitle())){
+			//查询的时候itemName为空会报错
+			item.setItemLabel("default");
+			item.setItemName("default");
+		}else {
+			item.setItemLabel(itemGroup.getTitle());
+			item.setItemName(itemGroup.getTitle());
+		}
+
 		item.setDeleteFlag(DeleteFlagType.YES.getCode());
 		item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 		item.setScaleType(ScaleType.TAILOR.getCode());
@@ -2689,6 +2706,9 @@ public class PortalServiceImpl implements PortalService {
 						"&versionCode=" + versionCode.toString()+
 						"&displayName=" + layout.getLabel();
 				associationActionData.setUrl(url);
+				associationActionData.setLayoutName(layout.getName());
+				associationActionData.setItemLocation(layout.getLocation());
+				associationActionData.setContainerType(ContainerType.TAB.getCode());
 				item.setActionData(associationActionData.toString());
 			}else {
 				item.setActionType(ActionType.NAVIGATION.getCode());
@@ -2696,6 +2716,7 @@ public class PortalServiceImpl implements PortalService {
 				navigationActionData.setItemLocation(layout.getLocation());
 				navigationActionData.setLayoutName(layout.getName());
 				navigationActionData.setTitle(layout.getLabel());
+				navigationActionData.setContainerType(ContainerType.NAVIGATOR.getCode());
 				item.setActionData(StringHelper.toJsonString(navigationActionData));
 			}
 

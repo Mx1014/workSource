@@ -73,6 +73,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
+    OrganizationMember listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(Long memberUid,String groupType,Long organizationId,String contactToken);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 

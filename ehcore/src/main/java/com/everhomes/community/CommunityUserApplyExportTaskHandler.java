@@ -122,9 +122,9 @@ public class CommunityUserApplyExportTaskHandler implements FileDownloadTaskHand
                 exportCommunityUserDto.setGenderString(UserGender.fromCode(r.getGender()).getText());
                 exportCommunityUserDto.setAuthString(AuthFlag.fromCode(r.getIsAuth()) == AuthFlag.AUTHENTICATED ? "已认证" : "待认证");
                 exportCommunityUserDto.setUserSourceTypeString(UserSourceType.fromCode(r.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-                exportCommunityUserDto.setEnterpriseName(enterprises.toString());
+                exportCommunityUserDto.setEnterpriseName(StringUtils.isBlank(enterprises.toString())?"-":enterprises.toString().substring(0,enterprises.toString().length()-1));
                 exportCommunityUserDto.setPosition(StringUtils.isBlank(positionFlag.toString())?"-":positionFlag.toString().substring(0,positionFlag.toString().length()-1));
-                exportCommunityUserDto.setExecutiveString(executiveFlag.toString());
+                exportCommunityUserDto.setExecutiveString(StringUtils.isBlank(executiveFlag.toString())?"-":executiveFlag.toString().substring(0,executiveFlag.toString().length()-1));
                 exportCommunityUserDto.setEmail("-");
                 if (emailIdentifier != null) {
                     exportCommunityUserDto.setEmail(emailIdentifier.getIdentifierToken());

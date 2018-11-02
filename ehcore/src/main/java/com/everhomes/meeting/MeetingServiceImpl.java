@@ -84,6 +84,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -106,6 +107,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -785,7 +792,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
             meetingProvider.deleteMeetingReservation(meetingReservation);
             throw errorWithMeetingTimeExpired();
         }
-        boolean isSubjectUpdate = !cmd.getSubject().equals(meetingReservation.getSubject());
+        boolean isSubjectUpdate = !(cmd.getSubject().equals(meetingReservation.getSubject()) && stringEqual(cmd.getContent(),meetingReservation.getContent()));
         final MeetingReservation updateMeetingReservation = meetingReservation;
         checkWhenUpdateMeetingReservation(updateMeetingReservation);
 
@@ -858,7 +865,11 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         return meetingReservationDetailDTO;
     }
 
-    private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
+    private boolean stringEqual(String content, String content2) { 
+		return content == null ? (content2 == null ? true : false) : content.equals(content2);
+	}
+
+	private List<MeetingAttachment> findDeleteAttachments(List<MeetingAttachment> oldAttachements,
 			List<MeetingAttachment> newAttachements, List<MeetingAttachment> existsAttachements) {
     	if(CollectionUtils.isEmpty(oldAttachements))
 			return Collections.emptyList();
@@ -1437,21 +1448,96 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
         String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        UserLogin login = UserContext.current().getLogin();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
+            	if(UserContext.current().getLogin()==null){
+            		UserContext.current().setLogin(login);
+            	}
                 List<OrganizationMemberDetails> memberDetails = getOrganizationMembersByInvitationSourceIds(meetingInvitations);
                 Map<String, String> model = new HashMap<>();
                 model.put("meetingSponsorName", meetingReservation.getMeetingSponsorName());
                 String subject = localeTemplateService.getLocaleTemplateString(MeetingMessageLocaleConstants.SCOPE, MeetingMessageLocaleConstants.BE_INVITED_A_MEETING_MESSAGE_TITLE, locale, model, "");
                 String messageContent = buildMeetingReservationMessageContent(meetingReservation, locale);
                 String emailContent = buildMeetingReservationMailMessageContent(meetingReservation, memberNames, MeetingMessageLocaleConstants.MEETING_MAIL_MESSAGE_WITH_APP_NAME_BODY, locale);
-                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, routeUrl);
+                List<File> attachmentFiles = buildMeetingReservationAttachemntPaths(meetingReservation.getId());
+                List<String> stringAttementList = new ArrayList<String>();
+                attachmentFiles.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
+                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, routeUrl, CollectionUtils.isEmpty(stringAttementList)? null : stringAttementList);
+                attachmentFiles.stream().forEach(file->{file.delete();});
             }
         });
     }
 
-    private void sendNotifications(MeetingReservation meetingReservation, List<OrganizationMemberDetails> memberDetails, String account, String subject, String messageContent, String emailContent, String routeUrl) {
+    protected List<File> buildMeetingReservationAttachemntPaths(Long meetingReservationId) {
+    	List<MeetingAttachmentDTO> attachmentList = listMeetingAttachments(meetingReservationId,AttachmentOwnerType.EhMeetingReservations);
+		return buildAttachemntPaths(attachmentList);
+	}
+
+	private List<File> buildAttachemntPaths(List<MeetingAttachmentDTO> attachmentList) {
+		if(CollectionUtils.isEmpty(attachmentList))
+			return new ArrayList<>();
+		return attachmentList.stream().map(r->contentUrlToLocalFile(r)).filter(r -> r != null).collect(Collectors.toList());
+	}
+
+	private File contentUrlToLocalFile(MeetingAttachmentDTO r) {
+		// TODO Auto-generated method stub
+		List<File> list = new ArrayList<File>();
+	    StringBuffer tmpdirBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
+	    Long currentMillisecond = System.currentTimeMillis();
+	    tmpdirBuffer.append(File.separator);
+	    tmpdirBuffer.append(currentMillisecond);
+	    //附件目录
+	    String tmpdir= tmpdirBuffer.toString();
+	    File baseDir = new File(tmpdirBuffer.toString());
+	    if(!baseDir.exists()){
+	    	baseDir.mkdirs();
+	    }
+	    tmpdirBuffer.append(File.separator);
+	    tmpdirBuffer.append(r.getContentName());
+	    if(r.getContentType()!=null && !r.getContentName().endsWith(r.getContentType())){
+		    tmpdirBuffer.append(".");
+		    tmpdirBuffer.append(r.getContentType());
+	    }
+	    String tempName = tmpdirBuffer.toString();
+	    //附件
+	    File file = new File(tempName);
+	    if(naiveDownloadPicture(file, r.getContentUrl())){
+	    	return file;
+	    }
+		return null;
+	}
+	 public static boolean naiveDownloadPicture(File file,String urlstr) {
+        URL url = null;
+
+        try {
+            //生成图片链接的url类
+            url = new URL(urlstr);
+            //将url链接下的图片以字节流的形式存储到 DataInputStream类中
+            DataInputStream dataInputStream = new DataInputStream(url.openStream());
+            //为file生成对应的文件输出流
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            //定义字节数组大小
+            byte[] buffer = new byte[1024];
+            //从所包含的输入流中读取[buffer.length()]的字节，并将它们存储到缓冲区数组buffer 中。
+            //dataInputStream.read()会返回写入到buffer的实际长度,若已经读完 则返回-1                  
+            while (dataInputStream.read(buffer) > 0) { 
+                 fileOutputStream.write(buffer);//将buffer中的字节写入文件中区
+            }
+            dataInputStream.close();//关闭输入流
+            fileOutputStream.close();//关闭输出流
+
+            return true;
+        } catch (MalformedURLException e) {
+        	LOGGER.error("获取contentserver的资源到本地文件时出错: URL [{}] 有问题 ",urlstr,e);
+        } catch (IOException e) {
+        	LOGGER.error("获取contentserver的资源到本地文件时出错:  io 有问题 ",e);
+        }
+        return false;
+	}
+	 
+	private void sendNotifications(MeetingReservation meetingReservation, List<OrganizationMemberDetails> memberDetails, String account, String subject, String messageContent, String emailContent, String routeUrl, List<String> attachementPaths) {
         if (CollectionUtils.isEmpty(memberDetails)) {
             return;
         }
@@ -1465,7 +1551,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
                 sendMessage(memberDetail.getTargetId(), messageContent, routeUrl, subject);
             }
             if (MeetingGeneralFlag.ON == MeetingGeneralFlag.fromCode(meetingReservation.getEmailMessageFlag()) && StringUtils.hasText(memberDetail.getWorkEmail())) {
-                sendEmail(account, memberDetail.getWorkEmail(), subject, emailContent);
+                sendEmail(account, memberDetail.getWorkEmail(), subject, emailContent, attachementPaths);
             }
         }
     }
@@ -1478,14 +1564,22 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         String routeUrl = RouterBuilder.build(Router.MEETING_RESERVATION_DETAIL, new MeetingReservationDetailActionData(meetingReservation.getId(), meetingReservation.getOrganizationId()));
         String locale = UserContext.current().getUser().getLocale();
         String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        UserLogin login = UserContext.current().getLogin();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
+            	if(UserContext.current().getLogin()==null){
+            		UserContext.current().setLogin(login);
+            	}
                 List<OrganizationMemberDetails> memberDetails = getOrganizationMembersByInvitationSourceIds(meetingInvitations);
                 String subject = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.UPDATE_A_MEETING_MESSAGE_TITLE), locale, null);
                 String messageContent = buildMeetingReservationMessageContent(meetingReservation, locale);
                 String emailContent = buildMeetingReservationMailMessageContent(meetingReservation, memberNames, MeetingMessageLocaleConstants.MEETING_MAIL_MESSAGE_WITH_APP_NAME_BODY, locale);
-                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, routeUrl);
+                List<File> attachmentFiles = buildMeetingReservationAttachemntPaths(meetingReservation.getId());
+                List<String> stringAttementList = new ArrayList<String>();
+                attachmentFiles.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
+                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, routeUrl, CollectionUtils.isEmpty(stringAttementList)? null : stringAttementList);
+                attachmentFiles.stream().forEach(file->{file.delete();});
             }
         });
     }
@@ -1530,14 +1624,22 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
 
         String locale = UserContext.current().getUser().getLocale();
         String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        UserLogin login = UserContext.current().getLogin();
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
+            	if(UserContext.current().getLogin()==null){
+            		UserContext.current().setLogin(login);
+            	}
                 List<OrganizationMemberDetails> memberDetails = getOrganizationMembersByInvitationSourceIds(meetingInvitations);
                 String subject = localeStringService.getLocalizedString(MeetingMessageLocaleConstants.SCOPE, String.valueOf(MeetingMessageLocaleConstants.CANCEL_A_MEETING_MESSAGE_TITLE), locale, null);
                 String messageContent = buildMeetingReservationMessageContent(meetingReservation, locale);
                 String emailContent = buildMeetingReservationMailMessageContent(meetingReservation, memberNamesSummary, MeetingMessageLocaleConstants.MEETING_MAIL_MESSAGE_BODY, locale);
-                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent,null);
+                List<File> attachmentFiles = buildMeetingReservationAttachemntPaths(meetingReservation.getId());
+                List<String> stringAttementList = new ArrayList<String>();
+                attachmentFiles.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
+                sendNotifications(meetingReservation, memberDetails, account, subject, messageContent, emailContent, emailContent, CollectionUtils.isEmpty(stringAttementList)? null : stringAttementList);
+                attachmentFiles.stream().forEach(file->{file.delete();});
             }
         });
     }
@@ -1591,14 +1693,14 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         }
     }
 
-    private void sendEmail(String account, String email, String subject, String content) {
+    private void sendEmail(String account, String email, String subject, String content, List<String> attachementPaths) {
         if (!StringUtils.hasText(email)) {
             return;
         }
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
 
-        handler.sendMail(0, account, email, subject, content);
+        handler.sendMail(0, account, email, subject, content, attachementPaths);
     }
 
     private void sendMessage(Long receiveUserId, String content, String url, String messageSubject) {
@@ -1643,7 +1745,6 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
     }
 
     private String buildMeetingReservationMailMessageContent(MeetingReservation meetingReservation, String invitationNames, int code, String locale) {
-        Namespace namespace = namespaceProvider.findNamespaceById(meetingReservation.getNamespaceId());
         Map<String, String> model = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 EEEE HH:mm", Locale.SIMPLIFIED_CHINESE);
         model.put("meetingBeginTime", sdf.format(meetingReservation.getExpectBeginTime()));
@@ -1651,7 +1752,7 @@ public class MeetingServiceImpl implements MeetingService, ApplicationListener<C
         model.put("meetingSubject", meetingReservation.getSubject());
         model.put("meetingSponsorName", meetingReservation.getMeetingSponsorName());
         model.put("meetingUserList", invitationNames);
-        model.put("appName", namespace.getName());
+        model.put("content", meetingReservation.getContent() == null ? "" : meetingReservation.getContent());
         String content = localeTemplateService.getLocaleTemplateString(MeetingMessageLocaleConstants.SCOPE, code, locale, model, "");
         return content.replace("|", "\n");
     }

@@ -2386,7 +2386,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2396,7 +2396,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					break;
-				}
+                }else if (OrganizationMemberStatus.WAITING_FOR_APPROVAL == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                    dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                    break;
+                }
 			}
 		}
 
@@ -3479,6 +3482,11 @@ public class CommunityServiceImpl implements CommunityService {
 				organizationProvider.createOrganizationCommunity(organizationCommunity);
 			}
 
+
+			if(namespacesService.isStdNamespace(namespaceId) && cmd.getPmOrgId() != null){
+				//新增所有已安装应用的授权
+				serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(namespaceId, cmd.getPmOrgId(), community.getId());
+			}
 
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
@@ -5203,12 +5211,24 @@ public class CommunityServiceImpl implements CommunityService {
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 
-					List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
-					if(workPlaces != null && workPlaces.size() > 0){
-						for (OrganizationWorkPlaces workPlace: workPlaces){
-							orgCommunityIdSet.add(workPlace.getCommunityId());
+
+					//定制版要直接使用OrganizationCommunityRequest表的数据
+					if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+						List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
+						if(workPlaces != null && workPlaces.size() > 0){
+							for (OrganizationWorkPlaces workPlace: workPlaces){
+								orgCommunityIdSet.add(workPlace.getCommunityId());
+							}
 						}
+					}else {
+
+						OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(member.getOrganizationId());
+						if(organizationCommunityRequest != null){
+							orgCommunityIdSet.add(organizationCommunityRequest.getCommunityId());
+						}
+
 					}
+
 				}
 			}
 		}
@@ -5225,7 +5245,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 
-		for(int i = 12; i > 5; i--){
+		for(int i = 12; i > 3; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){

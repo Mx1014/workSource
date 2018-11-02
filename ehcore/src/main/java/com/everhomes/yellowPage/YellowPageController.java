@@ -2,6 +2,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.servicehotline.GetChatGroupListCommand;
@@ -272,6 +273,7 @@ public class YellowPageController  extends ControllerBase {
    	 */
     @RequestMapping("updateServiceAllianceEnterprise")
     @RestReturn(value=String.class)
+    @XssExclude
     public RestResponse updateServiceAllianceEnterprise(@Valid UpdateServiceAllianceEnterpriseCommand cmd) {
     	 this.yellowPageService.updateServiceAllianceEnterprise(cmd);
     	 RestResponse response = new RestResponse();
@@ -954,6 +956,46 @@ public class YellowPageController  extends ControllerBase {
 		}
 		
 		String ret = allianceStandardService.transferApprovalToForm();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferMainAllianceOwnerType</b>
+	 * <p>
+	 * 更新alliane的ownerType
+	 * </p>
+	 */
+	@RequestMapping("transferMainAllianceOwnerType")
+	@RestReturn(value = String.class)
+	public RestResponse transferMainAllianceOwnerType(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferMainAllianceOwnerType();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferAllianceModuleUrl</b>
+	 * <p>
+	 * 更新moduleUrl
+	 * </p>
+	 */
+	@RequestMapping("transferAllianceModuleUrl")
+	@RestReturn(value = String.class)
+	public RestResponse transferAllianceModuleUrl(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferAllianceModuleUrl();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription(ret);

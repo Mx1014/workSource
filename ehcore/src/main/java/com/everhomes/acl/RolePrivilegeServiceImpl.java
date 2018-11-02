@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.createSuperAdminCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.user.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -121,10 +126,6 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CopyUtils;
@@ -235,6 +236,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1641,7 +1645,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1669,7 +1673,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -4540,5 +4544,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long topId = this.getOrUpdateTopAdministratorByOrganizationId(cmd.getOrgId(), members);
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
 		return identifier.getIdentifierToken();
+	}
+
+
+	@Override
+	public void updateSuperAdmin(createSuperAdminCommand cmd){
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.ORG_ADMIN_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+        UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
+        organizationService.updateSuperAdmin(cmd2);
 	}
 }

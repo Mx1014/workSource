@@ -46,6 +46,8 @@ public class DefaultChargingItemDTO {
     private Byte billingCycle;
     @ItemType(DefaultChargingItemPropertyDTO.class)
     private List<DefaultChargingItemPropertyDTO> apartments;
+    private Long billGroupId;
+    private String billGroupName;
 
     public List<DefaultChargingItemPropertyDTO> getApartments() {
         return apartments;
@@ -198,4 +200,20 @@ public class DefaultChargingItemDTO {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
+	}
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }

@@ -285,6 +285,46 @@ public class TestAssetController extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /test/statisticBillByCommunity</b>
+	 * <p>启动"缴费信息汇总表-项目"统计结果集的定时任务</p>
+	 */
+	@RequestMapping("statisticBillByCommunity")
+	public RestResponse statisticBillByCommunity() {
+		assetSchedule.statisticBillByCommunity();
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
+	 * <b>URL: /test/statisticBillByBuilding</b>
+	 * <p>启动"缴费信息汇总表-楼宇"统计结果集的定时任务</p>
+	 */
+	@RequestMapping("statisticBillByBuilding")
+	public RestResponse statisticBillByBuilding() {
+		assetSchedule.statisticBillByBuilding();
+		RestResponse restResponse = new RestResponse();
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
+	 * <b>URL: /test/listBillStatisticByCommunityForProperty</b>
+	 * <p>提供给资产获取“缴费信息汇总表-项目”列表接口</p>
+	 */
+	@RequestMapping("listBillStatisticByCommunityForProperty")
+	public RestResponse listBillStatisticByCommunityForProperty(ListBillStatisticByCommunityCmd cmd) {
+		List<ListBillStatisticByCommunityDTO> list = assetStatisticService.listBillStatisticByCommunityForProperty(
+				cmd.getNamespaceId(), cmd.getOwnerIdList() , cmd.getOwnerType(), cmd.getDateStrBegin(), cmd.getDateStrEnd());
+		RestResponse restResponse = new RestResponse(list);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
+	}
+	
+	/**
 	 * <b>URL: /test/listBillStatisticByCommunityTotalForProperty</b>
 	 * <p>提供给资产获取“缴费信息汇总表-项目-合计”列表接口</p>
 	 */

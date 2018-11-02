@@ -306,6 +306,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ListBillsResponse listBills(ListBillsCommand cmd) {
+    	LOGGER.info("AssetServiceImpl listBills cmd={}", cmd.toString());
          // set category default is 0 representing the old data
         if(cmd.getCategoryId() == null){
             cmd.setCategoryId(0l);
@@ -599,7 +600,13 @@ public class AssetServiceImpl implements AssetService {
         }catch (Exception e){
             //todo
         }
-        return handler.listBillDetail(ncmd);
+        ListBillDetailResponse response = handler.listBillDetail(ncmd);
+        //issue-40791 【物业缴费】由合同新增的账单客户手机号不能自动获取并显示，修改账单也不能添加客户手机号
+        //个人直接获取手机号码，企业获取所有企业管理员的手机号码
+        List<String> phoneNumbers = getPhoneNumber(response.getTargetType(), response.getTargetId(), UserContext.getCurrentNamespaceId());
+        String customerTel = String.join(",", phoneNumbers);
+        response.setCustomerTel(customerTel);
+        return response;
     }
 
     @Override
@@ -4695,10 +4702,10 @@ public class AssetServiceImpl implements AssetService {
 						CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
-						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
-						if(community != null) {
-							communityId = community.getId();
-						}
+//						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());
+//						if(community != null) {
+//							communityId = community.getId();
+//						}
 						//2、获取左邻客户ID
 						Long targetId = null;
 						targetId = cmDataObject.getCustomerId();
@@ -4709,6 +4716,7 @@ public class AssetServiceImpl implements AssetService {
 							Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
 							if(address != null) {
 								addressId = address.getId();
+								communityId = address.getCommunityId();
 							}
 						}
 
@@ -5185,6 +5193,40 @@ public class AssetServiceImpl implements AssetService {
 		} else {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
+	}
+	
+	/**
+	 * 个人直接获取手机号码，企业获取所有企业管理员的手机号码
+	 */
+	private List<String> getPhoneNumber(String targetType, Long targetId, Integer namespaceId){
+		List<String> phoneNumbers = new ArrayList<String>(); 
+		try {
+			if (targetType.equals(AssetTargetType.USER.getCode())) {
+				UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), namespaceId);
+				if(userIdentifier != null) {
+					phoneNumbers.add(userIdentifier.getIdentifierToken());
+				}
+		    }else if(targetType.equals(AssetTargetType.ORGANIZATION.getCode())) {
+		    	ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+				cmd.setOrganizationId(targetId);
+				cmd.setActivationFlag((byte)1);
+				cmd.setOwnerType("EhOrganizations");
+				cmd.setOwnerId(null);
+				//List<OrganizationContactDTO> lists = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);//获取超级管理员
+	            //LOGGER.info("organization manager check for bill display, cmd = {}", cmd.toString());
+	            List<OrganizationContactDTO> organizationContactDTOS = rolePrivilegeService.listOrganizationAdministrators(cmd);//获取企业管理员
+	            LOGGER.info("organization manager check for bill display, orgContactsDTOs are = "+ organizationContactDTOS.toString());
+	            for(OrganizationContactDTO dto : organizationContactDTOS){
+	            	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(dto.getTargetId(), namespaceId);
+	            	if(userIdentifier != null) {
+	    				phoneNumbers.add(userIdentifier.getIdentifierToken());
+	    			}
+	            }
+		    }
+		} catch (Exception e) {
+			LOGGER.error("ZhuZongAssetVendor getPhoneNumber() {}", targetType, targetId, namespaceId, e);
+		}
+		return phoneNumbers;
 	}
 
 }

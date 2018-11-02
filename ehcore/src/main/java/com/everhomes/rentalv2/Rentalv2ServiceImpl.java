@@ -2493,6 +2493,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (ifCreateNewOrder){
             order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
             rentalv2Provider.updateRentalBill(order);//更新新的订单号
+			preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
         }return preOrderCommand;
 	}
 
@@ -2583,10 +2584,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					this.validateRentalBill(rules, rs, rule,order.getRentalType());
 
 					//本订单状态置为成功,
-//			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 					order.setStatus(status);
-					if (order.getStatus() == SiteBillStatus.SUCCESS.getCode())
-						order.setPaidMoney(order.getPayTotalMoney());
 					rentalv2Provider.updateRentalBill(order);
 					return null;
 				});
@@ -5333,7 +5331,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
-					dto.setOrgMemberOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOrgMemberOriginalPrice(dto.getOrgMemberOriginalPrice()==null?null:dto.getOrgMemberOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
