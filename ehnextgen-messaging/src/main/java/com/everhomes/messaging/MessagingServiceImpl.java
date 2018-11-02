@@ -43,6 +43,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
@@ -310,9 +312,13 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
         if(message.getMeta() != null ){
             Map meta = message.getMeta();
 
-            if("message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
+            if(url != null && "message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
 
-                url = url + "?routerMetaObject=" + meta.get(MessageMetaConstant.META_OBJECT);
+                try {
+                    url = url + "?routerMetaObject=" + URLEncoder.encode((String)meta.get(MessageMetaConstant.META_OBJECT), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
 //                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
 //                if(routerMetaObject != null){

@@ -262,14 +262,13 @@ public class HotlineServiceImpl extends AbstractChatRecordService implements Hot
 			
 		}
 
-		hotline.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		hotline.setCreatorUid(UserContext.current().getUser().getId());
 		hotline.setNamespaceId(namespaceId);
-		hotline.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		hotline.setStatus(HotlineStatus.ACTIVE.getCode());
 		
 		if (null != tmp) {//已删除的专属客服重新被添加时，进入此分支
 			hotline.setId(tmp.getId());
+			hotline.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			hotline.setCreatorUid(UserContext.current().getUser().getId());			
 			serviceHotlinesProvider.updateServiceHotline(hotline);
 			return;
 		}
@@ -331,24 +330,24 @@ public class HotlineServiceImpl extends AbstractChatRecordService implements Hot
 		}
 		
 		
-		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
-		
-		ServiceHotline hotline = ConvertHelper.convert(cmd, ServiceHotline.class);
-		
+		record.setContact(cmd.getContact());
+		record.setName(cmd.getName());
+		record.setUserId(cmd.getUserId());
+		record.setDescription(cmd.getDescription());
 		// 查询是否有重复的
-		List<ServiceHotline> tmp = getMultiHotlineIfExist(hotline);
+		List<ServiceHotline> tmp = getMultiHotlineIfExist(record);
 		
 		//排除自己
-		tmp = tmp.stream().filter(p -> !p.getId().equals(cmd.getId())).collect(Collectors.toList());
+		if (!CollectionUtils.isEmpty(tmp)) {
+			tmp = tmp.stream().filter(p -> !p.getId().equals(cmd.getId())).collect(Collectors.toList());
+		}
 		
 		// 仍有记录说明有重复的，需报错
 		if (null != tmp && tmp.size() > 0) {
 			throwErrorCode(HotlineErrorCode.ERROR_DUPLICATE_PHONE);
 		}
 
-		hotline.setNamespaceId(namespaceId);
-		hotline.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		this.serviceHotlinesProvider.updateServiceHotline(hotline);
+		this.serviceHotlinesProvider.updateServiceHotline(record);
 	}
 
 	@Override
