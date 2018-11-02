@@ -364,6 +364,11 @@ UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id
 -- REMARK: 增加用户自定义上传资料与默认车牌的默认值
 UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
 UPDATE eh_parking_lots SET default_plate = '粤,B';
+
+
+-- AUTHOR: 吴寒
+-- REMARK: 会议室预定发邮件的内容修改
+UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
