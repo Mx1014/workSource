@@ -19,10 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.ARCHIBUS)
 public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
@@ -34,6 +31,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     public static final String pk_crop = "GMFW";
 
     public static final Integer perg_size = 5;
+
+    public static final String file_type = "1";
 
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
@@ -265,20 +264,29 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     @Override
     public Object submitThirdAttachment(HttpServletRequest req) {
+        String orderId = req.getParameter("order_id");
+        String filePathStr = req.getParameter("file_path");
+        LOGGER.debug("imgages path" + filePathStr);
+        List<JSONObject> filePaths = JSONObject.parseObject(filePathStr,new TypeReference<ArrayList<JSONObject>>(){});
         FmWorkDataService service = getService();
         String json;
         try {
-            json = service.submitEventFile(pk_crop,req.getParameter("order_id"),req.getParameter("file_path"),req.getParameter("file_name"),req.getParameter("file_size"),req.getParameter("file_type"));
-            LOGGER.debug(json);
+            for(JSONObject filePath : filePaths){
+                String filename = UUID.randomUUID().toString();
+                json = service.submitEventFile(pk_crop,orderId,filePath.getString("contentUrl"),filename,"",file_type);
+                LOGGER.debug(json);
+                ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
+                if(!result.isSuccess()){
+                    LOGGER.error("submitEventEvaluation fail " + result.getMsg());
+//                  throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
+                }
+            }
         } catch (RemoteException e) {
             LOGGER.error("submitEventEvaluation fail",e);
-            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"submitEventFile fail,params={}",req.getParameterMap());
+//            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"submitEventFile fail,params={}",req.getParameterMap());
         }
-        ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
-        if(!result.isSuccess()){
-            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_REQUEST_ARCHIBUS_FAIL,"request fail response={}",json);
-        }
-        return result.getMsg();
+
+        return "OK";
     }
 
     private PmTaskArchibusUserMapping getUser(String phone){
