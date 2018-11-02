@@ -5,6 +5,8 @@ import com.everhomes.rest.flow.FlowNodeType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.List;
  */
 @Service
 public class FlowStatisticsTaskServiceImpl  implements  FlowStatisticsTaskService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStatisticsTaskServiceImpl.class);
 
     @Autowired
     private FlowStatisticsHandleLogProvider flowStatisticsHandleLogProvider ;
@@ -40,12 +44,13 @@ public class FlowStatisticsTaskServiceImpl  implements  FlowStatisticsTaskServic
      * 删除全部记录，重新统计
      */
     @Override
-    public void allStatistics(){
+    public void allStatistics(Integer namespaceId){
+        LOGGER.info("do allStatistics ,namespaceId:{}.",namespaceId);
 
         //原来的记录全部删除
-        flowStatisticsHandleLogProvider.deleteAll();
+        flowStatisticsHandleLogProvider.deleteAll(namespaceId);
         //获取所有记录
-        List<FlowEventLog> logs = flowStatisticsProvider.getAllFlowEventLogs();
+        List<FlowEventLog> logs = flowStatisticsProvider.getAllFlowEventLogs(namespaceId);
         //循环处理记录
         for(FlowEventLog log : logs){
 
@@ -118,10 +123,12 @@ public class FlowStatisticsTaskServiceImpl  implements  FlowStatisticsTaskServic
      * 在原记录的基础上追加统计
      */
     @Override
-    public void appendStatistics(){
+    public void appendStatistics(Integer namespaceId){
+
+        LOGGER.info("do appendStatistics ,namespaceId:{}.",namespaceId);
 
         //获取所有记录
-        List<FlowEventLog> logs = flowStatisticsProvider.getAllFlowEventLogs();
+        List<FlowEventLog> logs = flowStatisticsProvider.getAllFlowEventLogs(namespaceId);
         //循环处理记录
         for(FlowEventLog log : logs){
 

@@ -15,7 +15,7 @@ public interface FlowStatisticsProvider {
 
     List<FlowNode> getFlowNodes(Long flowMainId , Integer version);
 
-    List<FlowEventLog> getAllFlowEventLogs();
+    List<FlowEventLog> getAllFlowEventLogs(Integer namespaceId);
 
     List<FlowEventLog> queryFlowEventLog(ListingLocator locator, int count,
                                          ListingQueryBuilderCallback callback ,

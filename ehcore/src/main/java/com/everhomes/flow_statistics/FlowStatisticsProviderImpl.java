@@ -121,12 +121,15 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
      * @return
      */
     @Override
-    public List<FlowEventLog> getAllFlowEventLogs(){
+    public List<FlowEventLog> getAllFlowEventLogs(Integer namespaceId){
 
         com.everhomes.server.schema.tables.EhFlowEventLogs t = Tables.EH_FLOW_EVENT_LOGS;
         List<FlowEventLog> list =   this.queryFlowEventLog(new ListingLocator(), 0, (locator1, query) -> {
 
             query.addConditions(t.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+            if(namespaceId != null){
+                query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+            }
             return query;
 
         },(locator2, query)->{ //排序

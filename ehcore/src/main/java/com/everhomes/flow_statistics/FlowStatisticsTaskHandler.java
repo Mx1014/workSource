@@ -37,9 +37,9 @@ public class FlowStatisticsTaskHandler {
         String statisticsTaskKey = configProvider.getValue(STATISTICS_TASK_KEY, "");//查询是否有配置项
 
         if(TRUE_KEY.equals(statisticsTaskKey)){//使用合部重新统计的处理方式
-            flowStatisticsTaskService.allStatistics();
+            flowStatisticsTaskService.allStatistics(null);
         }else{ //默认是使用追加方式处理数据
-            flowStatisticsTaskService.appendStatistics();
+            flowStatisticsTaskService.appendStatistics(null);
         }
         LOG.info("flowStatisticsTaskHandler end . time:{}", System.currentTimeMillis());
     }

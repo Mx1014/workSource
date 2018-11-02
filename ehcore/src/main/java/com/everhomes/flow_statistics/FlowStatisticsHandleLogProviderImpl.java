@@ -312,9 +312,19 @@ public class FlowStatisticsHandleLogProviderImpl implements  FlowStatisticsHandl
                 .execute();
     }
     @Override
-    public void deleteAll(){
+    public void deleteAll(Integer namespaceId){
         com.everhomes.server.schema.tables.EhFlowStatisticsHandleLog t = Tables.EH_FLOW_STATISTICS_HANDLE_LOG;
-        rwContext().delete(t).execute();
+        if(namespaceId != null){
+            rwContext()
+                    .delete(t)
+                    .where(t.NAMESPACE_ID.eq(namespaceId))
+                    .execute();
+        }else{
+            rwContext()
+                    .delete(t)
+                    .execute();
+        }
+
     }
 
     /**

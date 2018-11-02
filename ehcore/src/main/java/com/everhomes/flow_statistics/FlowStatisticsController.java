@@ -106,9 +106,9 @@ public class FlowStatisticsController extends ControllerBase {
                 Timestamp start = DateUtils.currentTimestamp();
                 if(cmd != null && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getIsAll())){
 
-                    flowStatisticsTaskService.allStatistics();
+                    flowStatisticsTaskService.allStatistics(cmd.getNamespaceId());
                 }else{
-                    flowStatisticsTaskService.appendStatistics();
+                    flowStatisticsTaskService.appendStatistics(cmd.getNamespaceId());
                 }
                 Timestamp end = DateUtils.currentTimestamp();
                 LOGGER.info("statisticsHanldeLog end .cost:{}",end.getTime()-start.getTime());

@@ -2,7 +2,7 @@ package com.everhomes.flow_statistics;
 
 public interface FlowStatisticsTaskService {
 
-    void allStatistics() ;
+    void allStatistics(Integer namespaceId) ;
 
-    void appendStatistics() ;
+    void appendStatistics(Integer namespaceId) ;
 }

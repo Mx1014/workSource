@@ -19,7 +19,7 @@ public interface FlowStatisticsHandleLogProvider {
 
     void delete(FlowStatisticsHandleLog bo);
 
-    void deleteAll();
+    void deleteAll(Integer namespaceId);
 
     List<FlowStatisticsHandleLog> query(ListingLocator locator, int count,
                                         ListingQueryBuilderCallback callback ,
