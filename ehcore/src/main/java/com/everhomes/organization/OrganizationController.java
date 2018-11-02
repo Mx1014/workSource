@@ -1819,4 +1819,35 @@ public class OrganizationController extends ControllerBase {
         organizationService.processUserForMember(cmd.getNamespaceId(),cmd.getIdentifierToken(),cmd.getOwnerId());
         return new RestResponse();
     }
+
+
+    /**
+     * <b>URL: /org/createUserAuthenticationOrganization</b>
+     * <p>保存用户认证权限</p>
+     */
+    @RequestMapping("createUserAuthenticationOrganization")
+    @RestReturn(value = UserAuthenticationOrganizationDTO.class)
+    public RestResponse createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd){
+
+        UserAuthenticationOrganizationDTO res = organizationService.createUserAuthenticationOrganization(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/getUserAuthenticationOrganization</b>
+     * <p>获取用户认证权限</p>
+     */
+    @RequestMapping("getUserAuthenticationOrganization")
+    @RestReturn(value = UserAuthenticationOrganizationDTO.class)
+    public RestResponse getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd){
+
+        UserAuthenticationOrganizationDTO res = organizationService.getUserAuthenticationOrganization(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
