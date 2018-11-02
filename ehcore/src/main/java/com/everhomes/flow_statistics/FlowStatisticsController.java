@@ -91,12 +91,19 @@ public class FlowStatisticsController extends ControllerBase {
     @RequestMapping("statisticsHanldeLog")
     @RestReturn(value=String.class)
     public RestResponse statisticsHanldeLog( StatisticsHanldeLogCommand cmd ) {
+        //在新起的线程中做这种大比量处理动作
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(cmd != null && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getIsAll())){
 
-        if(cmd != null && TrueOrFalseFlag.TRUE.getCode().equals(cmd.getIsAll())){
-            flowStatisticsTaskService.allStatistics();
-        }else{
-            flowStatisticsTaskService.appendStatistics();
-        }
+                    flowStatisticsTaskService.allStatistics();
+                }else{
+                    flowStatisticsTaskService.appendStatistics();
+                }
+            }
+        });
+        t.start();
         RestResponse response = new RestResponse();
         setResponseSuccess(response);
         return response;
