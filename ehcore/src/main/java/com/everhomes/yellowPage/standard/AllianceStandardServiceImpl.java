@@ -572,15 +572,16 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	
 	@Override
 	public String transferApprovalToForm() {
-		
 		StringBuilder totalUpdate = new StringBuilder();
-		
-		dbProvider.execute(r->{
-			totalUpdate.append(" approval:").append(transferToFormVal()); //保存approvalVal
-			totalUpdate.append(" flowcase").append(transferFlowCases()); //更新flowcase
-			return null;
-		});
-		
+		totalUpdate.append(" approval:").append(transferToFormVal()); // 保存approvalVal
+		return totalUpdate.toString();
+	}
+	
+	
+	@Override
+	public String transferApprovalFlowCases() {
+		StringBuilder totalUpdate = new StringBuilder();
+		totalUpdate.append(" flowcase").append(transferFlowCases()); // 更新flowcase
 		return totalUpdate.toString();
 	}
 
