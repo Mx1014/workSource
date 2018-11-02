@@ -343,7 +343,9 @@ update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10
 update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
 
 
-
+-- AUTHOR: 缪洲 2018年11月1日
+--REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
