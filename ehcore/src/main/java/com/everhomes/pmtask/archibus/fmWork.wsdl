@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://inner.yjq.webservice.archibus.steward.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://localhost:8080/archibus/webServices/fmWork?wsdl" name="FmWorkDataServiceImplService" targetNamespace="http://inner.yjq.webservice.archibus.steward.com/">
+  <wsdl:import location="http://www.xboxad.com:8080/archibus/webServices/fmWork?wsdl=FmWorkDataService.wsdl" namespace="http://localhost:8080/archibus/webServices/fmWork?wsdl">
+    </wsdl:import>
+  <wsdl:binding name="FmWorkDataServiceImplServiceSoapBinding" type="ns1:FmWorkDataService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="eventClassHistoryAddressInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="eventClassHistoryAddressInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="eventClassHistoryAddressInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPersonDetails">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPersonDetails">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPersonDetailsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="cancelEvent">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="cancelEvent">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="cancelEventResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getProjectTimeQuantum">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getProjectTimeQuantum">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getProjectTimeQuantumResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitEventPaymentInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="submitEventPaymentInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitEventPaymentInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryNull">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="queryNull">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="queryNullResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="eventEvaluationDetails">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="eventEvaluationDetails">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="eventEvaluationDetailsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ownerAuthentication">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="ownerAuthentication">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ownerAuthenticationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="projectInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="projectInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="projectInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ownerResources">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="ownerResources">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ownerResourcesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="eventList">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="eventList">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="eventListResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getProjectLabels">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getProjectLabels">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getProjectLabelsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getResources">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getResources">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getResourcesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitEventFile">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="submitEventFile">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitEventFileResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getProjectInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getProjectInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getProjectInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitEventEvaluation">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="submitEventEvaluation">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitEventEvaluationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="substitute">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="substitute">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="substituteResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getTest">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getTest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getTestResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="eventProgress">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="eventProgress">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="eventProgressResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="areaInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="areaInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="areaInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="eventDetails">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="eventDetails">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="eventDetailsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitEventEvaluationFile">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="submitEventEvaluationFile">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitEventEvaluationFileResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="submitEvent">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="submitEvent">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitEventResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getEventServiceType">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getEventServiceType">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getEventServiceTypeResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="userInfo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="userInfo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="userInfoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FmWorkDataServiceImplService">
+    <wsdl:port binding="tns:FmWorkDataServiceImplServiceSoapBinding" name="FmWorkDataServiceImplPort">
+      <soap:address location="http://www.xboxad.com:8080/archibus/webServices/fmWork"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -697,6 +697,76 @@ public class PmTaskController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /pmtask/queryThirdCategories</b>
+     * <p>获取第三方服务类型</p>
+     */
+    @RequestMapping("queryThirdCategories")
+    @RestReturn(value = String.class)
+    public RestResponse queryThirdCategories(HttpServletRequest req){
+        Object addresses = pmTaskService.getThirdCategories(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/queryThirdProjects</b>
+     * <p>获取第三方项目</p>
+     */
+    @RequestMapping("queryThirdProjects")
+    @RestReturn(value = String.class)
+    public RestResponse queryThirdProjects(HttpServletRequest req){
+        Object addresses = pmTaskService.getThirdProjects(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/createThirdEvaluation</b>
+     * <p>提交第三方报修评价</p>
+     */
+    @RequestMapping("createThirdEvaluation")
+    @RestReturn(value = String.class)
+    public RestResponse createThirdEvaluation(HttpServletRequest req){
+        Object addresses = pmTaskService.createThirdEvaluation(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/getThirdEvaluation</b>
+     * <p>获取第三方报修评价</p>
+     */
+    @RequestMapping("getThirdEvaluation")
+    @RestReturn(value = String.class)
+    public RestResponse getThirdEvaluation(HttpServletRequest req){
+        Object addresses = pmTaskService.getThirdEvaluation(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
+     * <b>URL: /pmtask/submitThirdAttachment</b>
+     * <p>提交附件</p>
+     */
+    @RequestMapping("submitThirdAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse submitThirdAttachment(HttpServletRequest req){
+        Object addresses = pmTaskService.submitThirdAttachment(req);
+        RestResponse resp = new RestResponse(addresses);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
+    /**
      * <b>URL: /pmtask/syncCategories</b>
      * <p>给不同项目拷贝分类(用后删除)</p>
      */

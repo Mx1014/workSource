@@ -373,8 +373,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //	设置隐私保护值
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
-        dto.setVisibleFlag(member.getVisibleFlag());
-
+        if(member != null){
+        	dto.setVisibleFlag(member.getVisibleFlag());
+        }
         //  设置置顶
         dto.setStick("1");
 		return dto;

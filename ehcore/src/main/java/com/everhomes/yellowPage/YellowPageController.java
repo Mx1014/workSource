@@ -963,6 +963,46 @@ public class YellowPageController  extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /yellowPage/transferMainAllianceOwnerType</b>
+	 * <p>
+	 * 更新alliane的ownerType
+	 * </p>
+	 */
+	@RequestMapping("transferMainAllianceOwnerType")
+	@RestReturn(value = String.class)
+	public RestResponse transferMainAllianceOwnerType(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferMainAllianceOwnerType();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferAllianceModuleUrl</b>
+	 * <p>
+	 * 更新moduleUrl
+	 * </p>
+	 */
+	@RequestMapping("transferAllianceModuleUrl")
+	@RestReturn(value = String.class)
+	public RestResponse transferAllianceModuleUrl(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferAllianceModuleUrl();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /yellowPage/transferPadItems</b>
 	 * <p>
 	 * 获取用户服务记录
@@ -976,6 +1016,26 @@ public class YellowPageController  extends ControllerBase {
 		}
 		
 		String ret = allianceStandardService.transferPadItems();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /yellowPage/transferApprovalFlowCases</b>
+	 * <p>
+	 * 迁移工作流case
+	 * </p>
+	 */
+	@RequestMapping("transferApprovalFlowCases")
+	@RestReturn(value = String.class)
+	public RestResponse transferApprovalFlowCases(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferApprovalFlowCases();
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription(ret);

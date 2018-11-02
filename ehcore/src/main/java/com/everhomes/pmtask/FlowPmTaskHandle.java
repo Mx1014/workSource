@@ -57,7 +57,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 			Flow flow = null;
 
-            Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
+            Long parentTaskId = pmTaskProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
             if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
                 flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
                         FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
@@ -72,7 +72,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+			PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 
 			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 			listServiceModuleAppsCommand.setNamespaceId(namespaceId);

@@ -1,13 +1,18 @@
 package com.everhomes.rentalv2.order_handler;
 
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.ParkingSpace;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
@@ -40,6 +45,8 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     private OrganizationProvider organizationProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    protected GeneralOrderService orderService;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
@@ -59,7 +66,29 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
                 null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
         if (accounts != null && accounts.size()>0)
             return accounts.get(0).getAccountId();
+
+        //如果都没有 查看是否有商户号
+        Long merchantId = this.gerMerchantId(order);
+        if (merchantId == null)
+            return null;
+        //根据商户号查收款账户
+        GetPayAccountByMerchantIdCommand cmd = new GetPayAccountByMerchantIdCommand();
+        cmd.setId(merchantId);
+        GetPayAccountByMerchantIdRestResponse restResponse = orderService.getPayAccountByMerchantId(cmd);
+        if(checkOrderRestResponseIsSuccess(restResponse)) {
+            PayUserDTO dto = restResponse.getResponse();
+            if (dto != null)
+                return dto.getId();
+        }
+
         return null;
+    }
+
+    private boolean checkOrderRestResponseIsSuccess(RestResponseBase response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
     }
 
     @Override
