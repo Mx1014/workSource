@@ -1018,7 +1018,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	private String buildFormModuleUrl(Long serviceId) {
-		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+		//为了先兼容之前版本IOS不支持的表单的bug,仍然使用approval
+		return "zl://approval/create?approvalId="+-serviceId;
+//		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+		
 	}
 
 	private boolean checkFormModuleUrlValid(ServiceAllianceDTO dto) {
@@ -1028,8 +1031,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		if (null != dto.getFlowId()) {
-			FlowDTO flow = flowService.getFlowById(dto.getFlowId());
-			if (null == flow || FlowStatusType.RUNNING.getCode() != flow.getStatus()) {
+			Flow flow = flowProvider.getSnapshotFlowById(dto.getFlowId());
+			if (null == flow) {
 				return false;
 			}
 		}
