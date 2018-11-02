@@ -1028,8 +1028,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		if (null != dto.getFlowId()) {
-			FlowDTO flow = flowService.getFlowById(dto.getFlowId());
-			if (null == flow || FlowStatusType.RUNNING.getCode() != flow.getStatus()) {
+			Flow flow = flowProvider.getSnapshotFlowById(dto.getFlowId());
+			if (null == flow) {
 				return false;
 			}
 		}
