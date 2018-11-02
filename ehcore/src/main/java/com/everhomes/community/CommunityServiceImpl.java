@@ -3483,7 +3483,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 
-			if(namespacesService.isStdNamespace(namespaceId)){
+			if(namespacesService.isStdNamespace(namespaceId) && cmd.getPmOrgId() != null){
 				//新增所有已安装应用的授权
 				serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(namespaceId, cmd.getPmOrgId(), community.getId());
 			}
