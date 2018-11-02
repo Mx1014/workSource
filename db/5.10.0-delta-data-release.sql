@@ -347,6 +347,10 @@ update eh_var_field_scopes set field_display_name = '房源' where field_id = 10
 --REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
 UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
+-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌的默认值
+UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
+UPDATE eh_parking_lots SET default_plate = '粤,B';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 

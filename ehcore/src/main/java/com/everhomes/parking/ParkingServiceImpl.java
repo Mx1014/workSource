@@ -57,10 +57,13 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
 import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
 import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayerInfoByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
@@ -69,6 +72,7 @@ import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
+import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
@@ -1086,12 +1090,15 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"");
 		}
-
+		//根据merchantId获取payeeId
+		GetPayUserByMerchantIdCommand getPayUserByMerchantIdCommand = new GetPayUserByMerchantIdCommand();
+		getPayUserByMerchantIdCommand.setMerchantId(payeeAccounts.get(0).getPayeeId());
+		GetPayerInfoByMerchantIdRestResponse getPayerInfoByMerchantIdRestResponse = orderService.getPayerInfoByMerchantId(getPayUserByMerchantIdCommand);
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);//todoed
 
-		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
 		
 		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayeeUserId());
 		parkingRechargeOrder.setInvoiceStatus((byte)0);
