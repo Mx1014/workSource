@@ -4050,7 +4050,7 @@ public class PunchProviderImpl implements PunchProvider {
     public DailyPunchStatusStatisticsTodayRecordMapper dailyPunchStatusMemberCountsTodayByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime()))).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.eq(0)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
