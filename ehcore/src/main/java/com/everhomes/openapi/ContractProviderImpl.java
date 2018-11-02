@@ -23,6 +23,7 @@ import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ import com.everhomes.rest.varField.FieldDTO;
 import com.everhomes.rest.varField.ListFieldCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhContractBuildingMappings;
 import com.everhomes.server.schema.tables.EhContractEvents;
 import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.EhContracts;
@@ -774,13 +776,27 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 
 	@Override
+	public Timestamp findLastContractVersionByCommunity(Integer namespaceId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.orderBy(Tables.EH_CONTRACTS.VERSION.desc())
+				.limit(1)
+				.fetchOne();
+		if (record != null) {
+			return record.getValue(Tables.EH_CONTRACTS.UPDATE_TIME);
+		}
+		return null;
+	}
+
+
+	@Override
 	public List<Contract> listContractByNamespaceType(Integer namespaceId, String namespaceType, Long communityId, Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhContractsRecord> query = context.selectQuery(Tables.EH_CONTRACTS);
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceType));
-		query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
-		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		/*query.addConditions(Tables.EH_CONTRACTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));*/
 
 		List<Contract> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -789,6 +805,28 @@ public class ContractProviderImpl implements ContractProvider {
 		});
 
 		return result;
+	}
+	
+	@Override
+	public Contract findContractByNamespaceToken(Integer namespaceId, String namespaceContractType, Long namespaceContractToken, Long categoryId) {
+		SelectConditionStep<Record> query = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TYPE.eq(namespaceContractType));
+				
+		if (categoryId != null || "".equals(categoryId)) {
+			query.and(Tables.EH_CONTRACTS.CATEGORY_ID.eq(categoryId));
+		}
+		if (namespaceContractToken != null || "".equals(namespaceContractToken)) {
+			query.and(Tables.EH_CONTRACTS.NAMESPACE_CONTRACT_TOKEN.eq(namespaceContractToken.toString()));
+		}
+		
+		Record result = query.fetchAny();
+		if (result != null) {
+			return ConvertHelper.convert(result, Contract.class);
+		}
+		return null;
 	}
 
 	@Override
@@ -1581,5 +1619,48 @@ public class ContractProviderImpl implements ContractProvider {
 	        .fetchInto(ContractCategory.class);
 		return list;
 	}
+	
+	@Override
+	public Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds,
+			List<String> buildindNames, List<String> apartmentNames) {
+		Map<String, BigDecimal> resultMap = new HashMap<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractBuildingMappings a = Tables.EH_CONTRACT_BUILDING_MAPPINGS;
+		
+		context.select(a.CONTRACT_ID,a.BUILDING_NAME,a.APARTMENT_NAME,a.AREA_SIZE)
+		       .from(a)
+		       .where(a.CONTRACT_ID.in(contractIds))
+		       .and(a.BUILDING_NAME.in(buildindNames))
+		       .and(a.APARTMENT_NAME.in(apartmentNames))
+		       .and(a.STATUS.eq((byte)2))
+		       .fetch()
+		       .stream()
+		       .forEach(r->{
+		    	   Long contractId = r.getValue(a.CONTRACT_ID);
+		    	   String buildingName = r.getValue(a.BUILDING_NAME);
+		    	   String apartmentName = r.getValue(a.APARTMENT_NAME);
+		    	   Double areaSize = r.getValue(a.AREA_SIZE);
+		    	   
+		    	   String key = contractId + "-" + buildingName + "-" + apartmentName;
+		    	   resultMap.put(key, areaSize!=null ? new BigDecimal(areaSize): BigDecimal.ZERO);
+		       });
+		return resultMap;
+	}
+	
+	@Override
+	public BigDecimal getTotalChargeArea(List<Long> contractIds,List<String> buildindNames, List<String> apartmentNames) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhContractBuildingMappings a = Tables.EH_CONTRACT_BUILDING_MAPPINGS;
+		
+		return context.select(DSL.sum(a.AREA_SIZE))
+				       .from(a)
+				       .where(a.CONTRACT_ID.in(contractIds))
+				       .and(a.BUILDING_NAME.in(buildindNames))
+				       .and(a.APARTMENT_NAME.in(apartmentNames))
+				       .and(a.STATUS.eq((byte)2))
+				       .fetchAnyInto(BigDecimal.class);
+	}
+
 
 }

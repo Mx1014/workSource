@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -348,6 +349,38 @@ public class WXAuthController implements ApplicationListener<ContextRefreshedEve
         checkWxAuthIsBindPhoneRestResponse.setErrorDescription("OK");
         return checkWxAuthIsBindPhoneRestResponse;
     }
+
+    /**
+     * <b>URL: /wxauth/redirect</b>
+     * <p>统一用户重定向时，先重定向到这里，然后core server再重定向到目标url</p>
+     */
+    @RequestMapping("redirect")
+    @RestReturn(String.class)
+    public void redirect(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, String> params = getRequestParams(request);
+
+        String redirectUrl = params.get("callbackUrl");
+        params.remove("callbackUrl");
+        redirectUrl = URLDecoder.decode(redirectUrl, "UTF8");
+        LOGGER.info("redirect params = {}, keys = {}", params, params.keySet());
+        for (String key : params.keySet()) {
+            Cookie cookie = new Cookie(key, params.get(key));
+            cookie.setPath("/");
+            cookie.setMaxAge(7000);
+            response.addCookie(cookie);
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("redirect url to {}", redirectUrl);
+        }
+        redirectByWx(response,redirectUrl);
+    }
+
+
+
+
+
+
+
     private List<String> listAllBorderAccessPoints() {
         List<Border> borders = this.borderProvider.listAllBorders();
         return borders.stream().map((Border border) -> {

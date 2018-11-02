@@ -160,10 +160,6 @@ nashorn.class.includes:
 #pay.payHomeUrl: http://payv2-alpha.zuolin.com/pay
 #pay.localServerUrl: http://ycx-pay-test.zuolin.com/evh
 
-spring:
-  application:
-    name: ehcore
-
 # kafka
 spring.kafka:
   enabled: true # 如果是自己的环境不需要 Kafka, 则把这个值配置为 false
@@ -177,21 +173,23 @@ spring.kafka:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
   consumer:
-    group-id: ehcore-group
+    group-id: ${spring.application.name}-group
     auto-offset-reset: earliest
     enable-auto-commit: true
     auto-commit-interval: 100
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
+spring:
+  application:
+    name: ehcore
+
 server:
   port: 8080
-  address: ${INET_ADDRESS}
 
 eurekacli:
-  enabled: true
+  enabled: false
   service-url: ${EUREKA_SERVICE_URL}
-  instance-id: ${server.address}:${spring.application.name}:${server.port}
 
 # 配置 xssFilter 的开关
-xss.enabled: false
+xss.enabled: true

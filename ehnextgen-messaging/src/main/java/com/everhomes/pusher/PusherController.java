@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.cert.Cert;
-import com.everhomes.cert.CertProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.messaging.NotifyMessage;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.device.CreateCertCommand;
@@ -34,7 +31,8 @@ import com.everhomes.rest.device.RegistDeviceCommand;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
-import com.everhomes.rest.user.SendMessageTestCommand;
+import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartResponseMessageDTO;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
@@ -217,7 +215,21 @@ public class PusherController extends ControllerBase {
         RestResponse response = new RestResponse(msgs);
         return response;
     }
-    
+
+
+    /**
+     * <b>URL: /pusher/flushApnsClientCache</b>
+     * <p>在数据库修改推送证书的时候要清掉内在中的旧推送客户端对象</p>
+     */
+    @RequestMapping("flushApnsClientCache")
+    @RestReturn(value=String.class)
+    public RestResponse flushApnsClientCache() {
+        pusherService.flushHttp2ClientMaps();
+        RestResponse response = new RestResponse();
+        return response;
+    }
+
+
     private List<String> listAllBorderAccessPoints() {
         List<Border> borders = this.borderProvider.listAllBorders();
         return borders.stream().map((Border border) -> {
@@ -239,4 +251,20 @@ public class PusherController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /pusher/thirdPartPushMessage</b>
+     * <p>第三方应用推送信息给用户</p>
+     * @return
+     * */
+    @RequestMapping("thirdPartPushMessage")
+    @RestReturn(value=ThirdPartResponseMessageDTO.class)
+    public RestResponse thirdPartPushMessage(@Valid ThirdPartPushMessageCommand cmd){
+    	 ThirdPartResponseMessageDTO dto = pusherService.thirdPartPushMessage(cmd);
+    	 RestResponse response = new RestResponse(dto);
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
 }

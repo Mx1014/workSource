@@ -21,7 +21,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterpriseCustomer" -d '
                     }
                 }
             },
-			"contactName":{"type":"string", "index":"not_analyzed"},
+            "contactName":{"type":"string", "index":"not_analyzed"},
+            "trackerName":{"type":"string", "index":"not_analyzed"},
+            "customerContactName":{"type":"string", "index":"not_analyzed"},
+            "contactMobile":{"type":"string", "index":"not_analyzed"},
             "contactAddress":{"type":"string", "index":"not_analyzed"},
             "contactMobile":{"type":"string", "index":"not_analyzed"},
             "trackingName":{"type":"string", "index":"not_analyzed"},

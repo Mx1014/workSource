@@ -1629,7 +1629,7 @@ public class UserController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
-    
+
     /**
      * <b>URL: /user/smartCardVerify</b>
      * <p>校验用户的 TOTP 是否合法 </p>
@@ -1850,6 +1850,37 @@ public class UserController extends ControllerBase {
 		return resp;
 	}
 
+
+
+	/**
+	 * <b>URL: /user/findUsersByPhones</b>
+	 * <p>通过域空间和手机号查询用户信息</p>
+	 * @return
+	 */
+	@RequestMapping("findUsersByPhones")
+	@RestReturn(FindUsersByPhonesResponse.class)
+	public RestResponse findUsersByPhones(FindUsersByPhonesCommand cmd){
+
+		RestResponse resp = new RestResponse(userService.findUsersByPhones(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+
+	}
+
+	/**
+	 * <b>URL: /user/getPrintMerchantUrl</b>
+	 * <p>提供商户界面跳转URL</p>
+	 * @return
+	 */
+	@RequestMapping("getPrintMerchantUrl")
+	@RestReturn(GetPrintMerchantUrlResponse.class)
+	public RestResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd){
+		RestResponse resp = new RestResponse(userService.getPrintMerchantUrl(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
+	}
 	/**
 	 * <b>URL: /rpcapi/user/logonInfo</b>
 	 * <p>获取登录信息</p>

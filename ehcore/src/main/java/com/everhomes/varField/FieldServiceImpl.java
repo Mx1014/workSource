@@ -283,15 +283,16 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
-            addExpandItems(items,cmd.getFieldId());
+            addExpandItems(items,cmd.getFieldId(), cmd.getOwnerId(), cmd.getOwnerType());
             return items;
         }
         return null;
     }
 
-    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId, Long ownerId, String ownerType) {
         Field field = fieldProvider.findFieldById(fieldId);
         if (field!=null && field.getName().equals("sourceItemId")) {
+
             List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
             if (activityCategories != null && activityCategories.size() > 0) {
                 activityCategories.forEach((a) -> {
@@ -307,6 +308,8 @@ public class FieldServiceImpl implements FieldService {
             //add service alliance categories
             ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            cmd.setOwnerId(ownerId);
+            cmd.setOwnerType(ownerType);
             List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
             if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
                 serviceAllianceCategories.forEach((r) -> {
@@ -532,7 +535,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
-                addExpandItems(itemDTOs, systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId(), cmd.getOwnerId(), cmd.getOwnerType());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
@@ -558,14 +561,6 @@ public class FieldServiceImpl implements FieldService {
         List<FieldDTO> dtos = null;
         if(cmd.getNamespaceId() == null) {
             return null;
-//            List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
-//            if(fields != null && fields.size() > 0) {
-//                dtos = fields.stream().map(field -> {
-//                    FieldDTO dto = ConvertHelper.convert(field, FieldDTatusO.class);
-//                    dto.setFieldDisplayName(field.getDisplayName());
-//                    return dto;
-//                }).collect(Collectors.toList());
-//            }
         } else {
             dtos = listScopeFields(cmd);
         }
@@ -580,10 +575,6 @@ public class FieldServiceImpl implements FieldService {
         if (cmd.getCommunityId() != null) {
             // only namespace scope ,using organization id as search condition
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-            /*if (scopeFields != null && scopeFields.size() < 1) {
-            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), null);
-			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
                 globalFlag = false;
@@ -591,17 +582,9 @@ public class FieldServiceImpl implements FieldService {
         }
         if (namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-            /*if (scopeFields != null && scopeFields.size() < 1) {
-            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(),null, cmd.getModuleName(), cmd.getGroupPath(), null);
-			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
-            // don't read general configutations when choose all scope
-//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
-//                globalFlag = false;
-//            }
         }
         // add general scope fields version 3.5
         if (globalFlag) {
@@ -628,8 +611,6 @@ public class FieldServiceImpl implements FieldService {
 
             if (globalFlag) {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, cmd.getCategoryId(), cmd.getModuleName());
-//                if (scopeItems != null && scopeItems.size() < 1) {
-//                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,null, 0, null, null, cmd.getModuleName());
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId(), cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
@@ -643,18 +624,8 @@ public class FieldServiceImpl implements FieldService {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId(), cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
-                        //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), cmd.getCommunityId(), null);
-//    			}
                     }
                 }
-                //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-                /*if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), null);
-                }
-                if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), null, null);
-    			}*/
                 //查询表单初始化的数据
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
@@ -667,13 +638,10 @@ public class FieldServiceImpl implements FieldService {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                    //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
                     }
                 }
-//    			}
             }
             Map<Long, ScopeFieldItem> fieldItems = scopeItems;
             if (fields != null && fields.size() > 0) {
@@ -1395,9 +1363,17 @@ public class FieldServiceImpl implements FieldService {
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         // get params ownerId and ownerType
         PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
-        Long ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
+        Long ownerId = null;
+        Object ownerIdObj = dtoDes.getReadMethod().invoke(dto);
+        if(ownerIdObj != null){
+            ownerId = (Long)ownerIdObj;
+        }
         PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
-        String  ownerType = (String)dtoDes.getReadMethod().invoke(dto);
+        String ownerType = "";
+        Object ownerTypeObj = dtoDesOwnerType.getReadMethod().invoke(dto);
+        if(ownerTypeObj != null){
+            ownerType = ownerTypeObj.toString();
+        }
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd;
         if(fieldName.equals("customerContact") || fieldName.equals("channelContact")){

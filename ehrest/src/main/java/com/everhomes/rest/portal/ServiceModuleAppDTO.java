@@ -41,6 +41,7 @@ import java.util.List;
  *     <li>defaultAppFlag: 是否为默认安装应用，可以动态设置。0-no, 1-yes。参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>serviceModuleEntryDtos: 应用入口信息参考{@link ServiceModuleEntryDTO}</li>
  *     <li>accessControlType: 权限控制类型 参考{@link com.everhomes.rest.module.AccessControlType}</li>
+ *     <li>enableEnterprisePayFlag: 支持企业支付标记，0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ServiceModuleAppDTO {
@@ -80,6 +81,10 @@ public class ServiceModuleAppDTO {
     private List<ServiceModuleEntryDTO> serviceModuleEntryDtos;
 
     private Byte accessControlType;
+
+    private Byte enableEnterprisePayFlag;
+
+
     public Long getId() {
         return id;
     }
@@ -350,6 +355,14 @@ public class ServiceModuleAppDTO {
 
     public void setAccessControlType(Byte accessControlType) {
         this.accessControlType = accessControlType;
+    }
+
+    public Byte getEnableEnterprisePayFlag() {
+        return enableEnterprisePayFlag;
+    }
+
+    public void setEnableEnterprisePayFlag(Byte enableEnterprisePayFlag) {
+        this.enableEnterprisePayFlag = enableEnterprisePayFlag;
     }
 
 }

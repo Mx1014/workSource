@@ -182,6 +182,8 @@ public class CreateInvitedCustomerCommand {
 
     private Boolean isAdmin;
 
+    private Long transCommunityId;
+
     public Boolean getChangeCustomerFlag() {
         return changeCustomerFlag;
     }
@@ -1340,6 +1342,14 @@ public class CreateInvitedCustomerCommand {
 
     public void setEntryStatusItemId(Long entryStatusItemId) {
         this.entryStatusItemId = entryStatusItemId;
+    }
+
+    public Long getTransCommunityId() {
+        return transCommunityId;
+    }
+
+    public void setTransCommunityId(Long transCommunityId) {
+        this.transCommunityId = transCommunityId;
     }
 
     @Override

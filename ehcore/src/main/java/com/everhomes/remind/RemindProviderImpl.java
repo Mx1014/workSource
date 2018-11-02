@@ -594,7 +594,29 @@ public class RemindProviderImpl implements RemindProvider {
         query.addConditions(Tables.EH_REMIND_DEMO_CREATE_LOGS.USER_ID.eq(userId));
         return query.fetchCount() > 0;
     }
+    @Override
+    public List<Remind> findUndoRemindsByRemindTimeByPage(Timestamp remindStartTime,
+			Timestamp remindEndTime, int pageSize, int offset){
+		        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		        SelectQuery<EhRemindsRecord> query = context.selectQuery(Tables.EH_REMINDS);
+		        query.addConditions(Tables.EH_REMINDS.REMIND_TIME.greaterOrEqual(remindStartTime));
+		        query.addConditions(Tables.EH_REMINDS.REMIND_TIME.lessOrEqual(remindEndTime));
+		        query.addConditions(Tables.EH_REMINDS.STATUS.eq(RemindStatus.UNDO.getCode()));
+		        query.addConditions(Tables.EH_REMINDS.REMIND_CATEGORY_ID.gt(Long.valueOf(0)));
+		        query.addConditions(Tables.EH_REMINDS.ACT_REMIND_TIME.isNull());
 
+		        query.addLimit(offset, pageSize);
+
+		        Result<EhRemindsRecord> result = query.fetch();
+
+		        if (result == null || result.isEmpty()) {
+		            return Collections.emptyList();
+		        }
+
+		        return result.map((r) -> {
+		            return ConvertHelper.convert(r, Remind.class);
+		        });
+		    }
     @Override
     public List<Remind> findUndoRemindsByRemindTime(Timestamp remindStartTime, Timestamp remindEndTime, int count) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

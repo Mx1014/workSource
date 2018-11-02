@@ -92,6 +92,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
         LOGGER.info("Connection error, session=" + session.getId());
+        if(session.isOpen()){  
+            session.close();  
+        }
         removeSession(session);
     }
     

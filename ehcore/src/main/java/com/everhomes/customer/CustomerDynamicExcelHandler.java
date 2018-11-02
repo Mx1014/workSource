@@ -17,17 +17,16 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.*;
@@ -111,6 +110,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
     private PortalService portalService;
@@ -626,6 +628,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
                         if(flag) {
+                            tracking.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
                             customerProvider.createCustomerTracking(tracking);
                             EnterpriseCustomer customer = customerProvider.findById(customerId);
                             if(customer != null) {
@@ -894,7 +897,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setGeohash(geohash);
             }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
                         updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
@@ -960,6 +963,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         //企业客户新增成功,保存客户事件
         //customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
         //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
+
+
+        dynamicCustomers.forEach(r -> {
+            customerSearcher.feedDoc(r.getCustomer());
+        });
 
 
         long startUpdateSyncCustomerTime = System.currentTimeMillis();
@@ -1298,6 +1306,29 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
                 this.organizationProvider.createOrganizationAddress(organizationAddress);
+
+                UpdateWorkPlaceCommand cmd = new UpdateWorkPlaceCommand();
+                cmd.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                CreateOfficeSiteCommand cmd2 = new CreateOfficeSiteCommand();
+                cmd2.setCommunityId(address.getCommunityId());
+                cmd2.setSiteName(address.getAddress());
+                cmd2.setWholeAddressName(address.getAddress());
+                OrganizationSiteApartmentDTO siteDto = new OrganizationSiteApartmentDTO();
+                siteDto.setBuildingId(building.getId());
+                siteDto.setApartmentId(address.getId());
+                List<OrganizationSiteApartmentDTO> siteDtos = new ArrayList<>();
+                siteDtos.add(siteDto);
+                cmd2.setSiteDtos(siteDtos);
+                List<CreateOfficeSiteCommand> cmd2s = new ArrayList<>();
+                cmd2s.add(cmd2);
+                cmd.setOfficeSites(cmd2s);
+
+                try{
+                    organizationService.insertWorkPlacesAndBuildings(cmd);
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                }
+
                 Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
                 if (organization != null)
                     organizationSearcher.feedDoc(organization);

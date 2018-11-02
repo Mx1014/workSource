@@ -35,6 +35,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.discovery.zen.membership.MembershipAction;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,8 +112,20 @@ public class ArchivesServiceImpl implements ArchivesService {
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Override
-    public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) {
-
+    public ArchivesContactDTO addArchivesContact(AddArchivesContactCommand cmd) { 
+    	if(cmd.getUpdateDetailId()!=null || cmd.getDetailId() != null){
+    		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByDetailId(cmd.getDetailId(),
+    				Arrays.asList(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode(),OrganizationGroupType.DEPARTMENT.getCode(),OrganizationGroupType.GROUP.getCode()));
+    		if(CollectionUtils.isNotEmpty(members)){
+    			//当编辑后的部门和现在的部门不一样,取消置顶
+    			if(!members.get(0).getOrganizationId().equals(cmd.getDepartmentIds().get(0))){
+    				ArchivesStickyContacts result = archivesProvider.findArchivesStickyContactsByDetailIdAndOrganizationId(
+    	                    cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getDetailId());
+    	            if (result != null)
+    	                archivesProvider.deleteArchivesStickyContacts(result);
+    			}
+    		}
+    	}
         //  校验权限 by lei.lv  update by huanglm
         /*if (cmd.getDetailId() != null) {
             Long departmentId = organizationService.getDepartmentByDetailId(cmd.getDetailId());
@@ -153,6 +168,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
         if (employee == null)
             return null;
+        
         if(employee.getAccount() == null)
             employee.setAccount(cmd.getAccount());
         employee.setEnName(cmd.getContactEnName());
@@ -323,9 +339,15 @@ public class ArchivesServiceImpl implements ArchivesService {
     }
 
     private ArchivesContactDTO getArchivesStickyContactInfo(Long detailId) {
-        ArchivesContactDTO dto = new ArchivesContactDTO();
         OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(detailId);
 
+        ArchivesContactDTO dto = getArchivesStickContactInfo(detail);
+
+        return dto;
+    }
+
+	private ArchivesContactDTO getArchivesStickContactInfo(OrganizationMemberDetails detail) {
+		ArchivesContactDTO dto = new ArchivesContactDTO();
         if (detail == null)
             return null;
         dto.setDetailId(detail.getId());
@@ -338,7 +360,7 @@ public class ArchivesServiceImpl implements ArchivesService {
         dto.setRegionCode(detail.getRegionCode());
         dto.setContactShortToken(detail.getContactShortToken());
         dto.setContactEnName(detail.getEnName());
-
+        dto.setAccount(detail.getAccount());
         //  查询部门
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -355,13 +377,17 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //  设置置顶
         dto.setStick("1");
-
-        return dto;
+		return dto;
+	}
+	
+	@Override
+    public ArchivesContactDTO getArchivesContact(GetArchivesContactCommand cmd){
+    	OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(cmd.getUserId(), cmd.getOrganizationId());
+    	return getArchivesStickContactInfo(detail);
     }
-
     private List<ArchivesContactDTO> listArchivesContacts(ListArchivesContactsCommand cmd, ListArchivesContactsResponse response, List<Long> detailIds) {
         List<ArchivesContactDTO> contacts = new ArrayList<>();
-
+        
         ListOrganizationContactCommand orgCommand = new ListOrganizationContactCommand();
         orgCommand.setOrganizationId(cmd.getOrganizationId());
         orgCommand.setPageAnchor(cmd.getPageAnchor());
@@ -1575,14 +1601,18 @@ public class ArchivesServiceImpl implements ArchivesService {
             queryBuilderCallback.buildCondition(locator, query);
             if (departmentId != null) {
                 Organization department = organizationProvider.findOrganizationById(departmentId);
-                if (department.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-                    // get the hidden department of the company which has the same name
-                    Organization under_department = organizationProvider.findUnderOrganizationByParentOrgId(department.getId());
-                    if (under_department != null)
-                        department = under_department;
-                }
-                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentId(department.getId());
-                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentId(department.getId());
+
+    			List<String> groupTypes = new ArrayList<>();
+    			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+    			groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+    			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+                List<Organization> subDeparts = organizationProvider.listOrganizationByGroupTypesAndPath(department.getPath() + "%", groupTypes, null, null, Integer.MAX_VALUE - 1);
+                List<Long> subDptIds = new ArrayList<>();
+                subDeparts.forEach(r -> {
+                	subDptIds.add(r.getId());
+                });
+                List<Long> workGroups = organizationProvider.listOrganizationPersonnelDetailIdsByDepartmentIds(subDptIds);
+                List<Long> dismissGroups = archivesProvider.listDismissEmployeeDetailIdsByDepartmentIds(subDptIds);
                 Condition con1 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
                 Condition con2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(0L);
                 if (workGroups != null)

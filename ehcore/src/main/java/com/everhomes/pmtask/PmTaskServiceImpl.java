@@ -25,6 +25,7 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
@@ -89,9 +90,9 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.*;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
@@ -99,6 +100,7 @@ import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.*;
@@ -3016,7 +3018,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
-        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>7)
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>9)
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
 					"Illegal stateId");
 		PmTask task = list.get(0);
@@ -3039,6 +3041,8 @@ public class PmTaskServiceImpl implements PmTaskService {
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case HANGING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break; //待单中
+					case REVIEWED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break; //已回访
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
 				task.setStatus(flowCaseStatus);
@@ -3895,7 +3899,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		preOrderCommand.setOrderRemark3(String.valueOf(task.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
 		return preOrderCommand;
@@ -3939,7 +3943,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		// 找不到手机号则默认一个
 		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -4056,7 +4060,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 		String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
 		getPurchaseOrderCommand.setAccountCode(accountCode);
@@ -4402,7 +4406,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
 		cmd1.setPageSize(99999);
-		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
+		List<PmTaskDTO> list = this.searchTasksWithoutAuth(cmd1).getRequests();
 		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
 	}
 

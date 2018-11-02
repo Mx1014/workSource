@@ -43,6 +43,7 @@ import java.util.List;
  * <li>deleteFlag:删除状态：0：已删除；1：正常使用</li>
  * <li>canDelete:0：不可删除；1：可删除</li>
  * <li>canModify:0：不可编辑；1：可编辑</li>
+ * <li>isReadOnly:只读状态：0：非只读；1：只读</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -88,6 +89,8 @@ public class ListBillsDTO {
     //物业缴费V6.0 账单、费项增加是否可以删除、是否可以编辑状态字段
     private Byte canDelete;
     private Byte canModify;
+    //瑞安CM对接 账单、费项表增加是否是只读字段
+    private Byte isReadOnly;
     //催缴手机号码列表
     private List<String> noticeTelList;
 
@@ -378,4 +381,13 @@ public class ListBillsDTO {
 	public void setCanModify(Byte canModify) {
 		this.canModify = canModify;
 	}
+
+	public Byte getIsReadOnly() {
+		return isReadOnly;
+	}
+
+	public void setIsReadOnly(Byte isReadOnly) {
+		this.isReadOnly = isReadOnly;
+	}
+
 }

@@ -7,6 +7,7 @@ import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.module.*;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -101,6 +102,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private PortalVersionProvider portalVersionProvider;
+	
+	@Autowired
+	private NamespacesService namespacesService ;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -268,41 +272,54 @@ public class WebMenuServiceImpl implements WebMenuService {
 			appOriginIds = appIds;
 		}
 
-		//这里需要优化，需要缓存
-		List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
-		List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
-		Map<Long, ServiceModuleApp> communityAppMap = new HashMap<Long, ServiceModuleApp>();
-		for(ServiceModuleApp r: allApps) {
-			if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
-				communityAppMap.put(r.getOriginId(), r);
+		//TODO 1.对authAppIds遍历的时候调用listUserRelatedProjectByModuleId涉及权限有点慢，
+		//TODO 2.然后发现这段代码只对标准版有用（原因见下TODO 3），现在用标准版域空间框起来。
+
+		if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+			//这里需要优化，需要缓存
+			List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
+			List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
+			Map<Long, ServiceModuleApp> communityAppMap = new HashMap<Long, ServiceModuleApp>();
+			for(ServiceModuleApp r: allApps) {
+				if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+					communityAppMap.put(r.getOriginId(), r);
+				}
 			}
-		}
-		for(Long authAppId : authAppIds) {
-			ServiceModuleApp app = communityAppMap.get(authAppId);
-			if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
-				//如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
-				ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
-				relatedProjectCmd.setAppId(authAppId);
-				relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
-				relatedProjectCmd.setOrganizationId(organizationId);
-				List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
-				if(projects != null && projects.size() > 0) {
+			for(Long authAppId : authAppIds) {
+				ServiceModuleApp app = communityAppMap.get(authAppId);
+				if(app != null && app.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {
+
+					//TODO 4.这段代码有点坑，特别慢。感觉他想要查询的是这个公司在这个应用下有权限的项目。换成了TODO 5的代码。权限有问题的话找敢哥。
+//					//如果是园区 APP，并且项目数量大于 0 值，则返回此应用的菜单。
+//					ListUserRelatedProjectByModuleCommand relatedProjectCmd = new ListUserRelatedProjectByModuleCommand();
+//					relatedProjectCmd.setAppId(authAppId);
+//					relatedProjectCmd.setCommunityFetchType(CommunityFetchType.ONLY_COMMUNITY.getCode());
+//					relatedProjectCmd.setOrganizationId(organizationId);
+//					List<ProjectDTO> projects = serviceModuleService.listUserRelatedProjectByModuleId(relatedProjectCmd);
+//					if(projects != null && projects.size() > 0) {
+//						authAppIdsWithoutZeroProjects.add(authAppId);
+//					}
+
+					//TODO 5.直接用标准版授权的代码，因为外面已经被标准框起来了。
+					List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, authAppId);
+					if(authorizations != null && authorizations.size() > 0) {
+						authAppIdsWithoutZeroProjects.add(authAppId);
+					}
+
+				} else {
+
+					//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
+					OrganizationApp organizationApp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(authAppId, organizationId);
+					if(organizationApp == null || OrganizationStatus.fromCode(organizationApp.getStatus()) != OrganizationStatus.ACTIVE){
+						continue;
+					}
+
 					authAppIdsWithoutZeroProjects.add(authAppId);
 				}
-			} else {
-
-				//因为授权的应用authAppIds里包含了禁用的oa应用，此处要过滤掉
-				OrganizationApp organizationApp = organizationAppProvider.findOrganizationAppsByOriginIdAndOrgId(authAppId, organizationId);
-				if(organizationApp == null || OrganizationStatus.fromCode(organizationApp.getStatus()) != OrganizationStatus.ACTIVE){
-					continue;
-				}
-
-				authAppIdsWithoutZeroProjects.add(authAppId);
 			}
-		}
 
-		// 取下交集
-		if(UserContext.getCurrentNamespaceId() == 2){
+			//TODO 3.下面这句话原来是用标准版域空间框起来，因此推理上面整段代码都可以用标准版域空间框起来。
+			// 取下交集
 			appOriginIds.retainAll(authAppIdsWithoutZeroProjects);
 		}
 
@@ -333,7 +350,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		//1、查询已安装的应用
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 		List<ServiceModuleApp> apps;
-		if(namespaceId == 2){
+		if(namespacesService.isStdNamespace(namespaceId)){
 			apps = serviceModuleAppProvider.listServiceModuleAppsByOrganizationId(releaseVersion.getId(), null, null, organizationId, TrueOrFalseFlag.TRUE.getCode(), null, null, 10000);
 		}else {
 			apps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion.getId(), null);

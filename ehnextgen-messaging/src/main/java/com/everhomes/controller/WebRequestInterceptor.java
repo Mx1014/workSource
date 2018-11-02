@@ -191,9 +191,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
 //                    }
                     if (this.isInnerSignLogon(request)) {
+                        LOGGER.debug("this is inner sign logon before");
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                        LOGGER.debug("this is inner sign logon, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -210,6 +212,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
+                        LOGGER.debug("check request signature success, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -226,6 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     setupUserContext(token);
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    LOGGER.debug("token check success, setup user context: {}, uid={}", token, String.valueOf(UserContext.current().getUser().getId()));
                 }
 
             } else {
@@ -551,22 +555,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         context.setLogin(login);
 
         User user = this.userProvider.findUserById(login.getUserId());
-        if (user == null) {
-            //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
-            //如果core server和统一用户都没有用户，说明真的没有该用户
-            // add by yanlong.liang 20180928
-            user = ConvertHelper.convert(this.sdkUserService.getUser(login.getUserId()), User.class);
-            this.userProvider.createUserFromUnite(user);
-            UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(login.getUserId()), UserIdentifier.class);
-            if (userIdentifier != null) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifier(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }
         context.setUser(user);
 
         PortalVersionUser portalVersionUserByUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(login.getUserId());

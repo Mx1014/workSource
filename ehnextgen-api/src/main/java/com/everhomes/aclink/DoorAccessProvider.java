@@ -3,8 +3,14 @@ package com.everhomes.aclink;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessGroupRelDTO;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 
 public interface DoorAccessProvider {
 
@@ -31,5 +37,47 @@ public interface DoorAccessProvider {
     List<DoorAccess> listAllDoorAccessLingling(Long ownerId, Byte ownerType, int count);
 
 	List<DoorAccess> listDoorAccessByServerId(Long id, Integer count);
+	//add by liqingyan
+    List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespace(DoorStatisticEhCommand cmd);
+
+    List<ActiveDoorByNamespaceDTO> queryDoorAccessByNamespaceNew(DoorStatisticEhCommand cmd);
+
+    List<ActiveDoorByEquipmentDTO> queryDoorAccessByEquipment(DoorStatisticEhCommand cmd);
+
+    List<ActiveDoorByFirmwareDTO> queryDoorAccessByFirmware(DoorStatisticEhCommand cmd);
+
+    List<ActiveDoorByPlaceDTO> queryDoorAccessByPlace(DoorStatisticEhCommand cmd);
+
+    List<ActiveDoorByPlaceDTO> queryDoorAccessByPlaceNew (DoorStatisticEhCommand cmd);
+//add by liqingyan
+    List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
+
+    DoorAccess findDoorAccessById(Long id);
+
+    Long updateDoorAccessNew (DoorAccess obj);
 	
+	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd);
+
+	List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
+			ListDoorAccessGroupCommand cmd);
+	//门禁v3.0.2 创建自定义表单
+    Long createAclinkFormTitles(AclinkFormTitles form);
+
+    List<AclinkFormTitlesDTO> searchAclinkFormTitles (ListingLocator locator,Integer count,ListingQueryBuilderCallback queryBuilderCallback);
+
+    AclinkFormTitles findAclinkFormTitlesById (Long id);
+
+    Long updateAclinkFormTitles(AclinkFormTitles form);
+
+    Long createAclinkFormValues(AclinkFormValues value);
+
+    List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id);
+    //门禁v3.0.2 添加企业管理授权
+    Long createDoorManagement (AclinkManagement obj);
+
+    List<AclinkManagementDTO> searchAclinkManagement (Long doorId);
+
+    AclinkManagement findAclinkManagementById (Long id);
+
+    Long updateAclinkManagement(AclinkManagement manager);
 }

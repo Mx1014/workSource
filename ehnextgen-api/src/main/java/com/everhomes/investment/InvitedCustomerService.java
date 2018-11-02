@@ -44,5 +44,6 @@ public interface InvitedCustomerService {
 
     void changeCustomerAptitude(SearchEnterpriseCustomerCommand cmd);
 
+    String signCustomerDataToThird(SignCustomerDataToThirdCommand cmd);
 
 }

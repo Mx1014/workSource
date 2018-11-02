@@ -2469,4 +2469,22 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /pm/getOrgOwnerByContactToken</b>
+	 * <p>根据用户联系电话获取用户owner</p>
+	 * @param cmd
+	 * @return
+	 */
+	@RequestMapping("getOrgOwnerByContactToken")
+	@RestReturn(value = OrganizationOwnerDTO.class)
+	public RestResponse getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd) {
+		OrganizationOwnerDTO dto =  propertyMgrService.getOrgOwnerByContactToken(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

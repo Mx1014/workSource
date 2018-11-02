@@ -2938,6 +2938,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			List<OPPushCard> opPushCards = opPushHandler.listOPPushCard(cmd.getLayoutId(), cmd.getInstanceConfig(), cmd.getContext());
 			response.setCards(opPushCards);
 
+			String newConfig = opPushHandler.refreshInstanceConfig(serviceModuleApp.getInstanceConfig());
+
+			serviceModuleApp.setInstanceConfig(newConfig);
+
 			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
 			String itemActionData = serviceModuleApp.getInstanceConfig();
 			if(portalPublishHandler != null){
@@ -2948,9 +2952,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null, null, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), oppush.getAppId(), serviceModuleApp.getName(),itemActionData, null, null, null, serviceModule.getClientHandlerType());
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
+
+			String host = serviceModule.getHost();
+            if(org.springframework.util.StringUtils.isEmpty(host)){
+                host  = "default";
+            }
+
+            String router = "zl://" + host + response.getRouterPath() + "?" + response.getRouterQuery();
+            response.setRouter(router);
+
 		}
 
 		return response;
@@ -3049,10 +3062,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			itemActionData = refreshActionData(itemActionData);
 			response.setInstanceConfig(itemActionData);
 
-			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null, null, null);
+			RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(bulletins.getModuleId(), bulletins.getAppId(), title, itemActionData, null, null, null, serviceModule.getClientHandlerType());
 			response.setRouterPath(routerInfo.getPath());
 			response.setRouterQuery(routerInfo.getQuery());
-		}
+
+			String host = serviceModule.getHost();
+            if(org.springframework.util.StringUtils.isEmpty(host)){
+                host  = "default";
+            }
+
+            String router = "zl://" + host + response.getRouterPath() + "?" + response.getRouterQuery();
+            response.setRouter(router);
+        }
 
 
 		return response;
@@ -3217,29 +3238,56 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				app = new ServiceModuleApp();
 				app.setModuleId(-10000L);
 				app.setOriginId(0L);
+			}else if(ActionType.fromCode(item.getActionType()) == ActionType.ROUTER || ActionType.fromCode(item.getActionType()) == ActionType.NAVIGATION){
+				//路由 actionType=60、二级门户actionType=2
+				app = new ServiceModuleApp();
+				app.setModuleId(250000L);
+				app.setOriginId(0L);
 			}
 
 
 			if(app != null){
 				dto.setModuleId(app.getModuleId());
 				ServiceModule serviceModule = moduleMap.get(app.getModuleId());
+				Byte clientHandlerType = 0;
+				String host = "default";
 				if(serviceModule != null){
 					dto.setClientHandlerType(serviceModule.getClientHandlerType());
+
+					clientHandlerType = serviceModule.getClientHandlerType();
+					host = serviceModule.getHost();
+
 				}
 
 				String actionData = refreshActionData(item.getActionData());
 
 				String path = "/index";
 				if(ActionType.fromCode(item.getActionType()) == ActionType.MORE_BUTTON){
+					host = "app-management";
 					path = "/more";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}else if(ActionType.fromCode(item.getActionType()) == ActionType.ALL_BUTTON){
+					host = "app-management";
 					path = "/all";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+				}else if(ActionType.fromCode(item.getActionType()) == ActionType.NAVIGATION || ActionType.fromCode(item.getActionType()) == ActionType.ROUTER){
+					host = "container";
+					path = "/index";
+					dto.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
 				}
 
 				//填充路由信息
-				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null);
+				RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(app.getModuleId(), app.getOriginId(), item.getItemLabel(), actionData, path, null, null, clientHandlerType);
 				dto.setRouterPath(routerInfo.getPath());
 				dto.setRouterQuery(routerInfo.getQuery());
+
+				if(org.springframework.util.StringUtils.isEmpty(host)){
+					host  = "default";
+				}
+
+				String router = "zl://" + host + dto.getRouterPath() + "?" + dto.getRouterQuery();
+				dto.setRouter(router);
+
 			}
 
 			dto.setName(item.getItemLabel());

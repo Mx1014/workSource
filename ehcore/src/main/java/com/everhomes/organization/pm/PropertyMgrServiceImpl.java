@@ -33,6 +33,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Null;
 
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -65,7 +66,9 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -538,6 +541,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private AssetChargingItemService assetChargingItemService;
+   	
+   	@Autowired
+   	private AssetGroupProvider assetGroupProvider;
 
     private String queueName = "property-mgr-push";
 
@@ -853,7 +859,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Community community = communityProvider.findCommunityById(communityId);
         if (community == null) {
             LOGGER.error("Unable to find the community");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_COMMUNITY_NOT_EXIST,
                     "Unable to find the community.");
         }
         return community;
@@ -1070,7 +1076,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     private void checkCommunityIdIsEqual(long longValue, long longValue2) {
         if (longValue != longValue2) {
             LOGGER.error("communityId not equal.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                     "communityId not equal.");
         }
     }
@@ -1095,7 +1101,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     private void checkCommunityIdIsNull(Long communityId) {
         if (communityId == null) {
             LOGGER.error("communityId paramter is empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "communityId paramter is empty");
         }
 
@@ -1179,7 +1185,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     public void setApartmentStatus(SetPropAddressStatusCommand cmd) {
         if (cmd.getOrganizationId() == null || cmd.getAddressId() == null || cmd.getStatus() == null) {
             LOGGER.error("propterty organizationId or addressId or status paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "propterty organizationId or addressId or status paramter can not be null or empty");
         }
 
@@ -1194,7 +1200,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         CommunityAddressMapping mapping = this.propertyMgrProvider.findAddressMappingByAddressId(addressId);
         if (mapping == null) {
             LOGGER.error("address mapping is not find.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_MAPPING_NOT_EXIST,
                     "address mapping is not find.");
         }
         return mapping;
@@ -1208,7 +1214,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
         if (family == null) {
             LOGGER.error("family is not existed.communityId=" + cmd.getCommunityId() + ",addressId=" + cmd.getAddressId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_FAMILY_NOT_EXIST,
                     "Unable to find the family.");
         }
         this.checkCommunityIdIsEqual(family.getIntegralTag2().longValue(), cmd.getCommunityId().longValue());
@@ -1233,7 +1239,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Organization org = this.organizationProvider.findOrganizationByCommunityIdAndOrgType(communityId, orgType);
         if (org == null) {
             LOGGER.error("organization can not find by communityId and orgType.communityId=" + communityId + ",orgType=" + orgType);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_NOT_EXIST,
                     "organization can not find by communityId and orgType.");
         }
         return org;
@@ -1469,7 +1475,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     public void pushMessage(SendNoticeCommand cmd, User operator) {
         MessageBodyType bodyType = MessageBodyType.fromCode(cmd.getMessage());
         if (bodyType == MessageBodyType.TEXT && StringUtils.isEmpty(cmd.getMessage())) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_MESSAGE,
                     "Message body should not empty.");
         }
 
@@ -2428,7 +2434,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
         if (cmd.getCommunityId() == null) {
             LOGGER.error("propterty communityId paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                     "propterty communityId paramter can not be null or empty");
         }
         GetOrgDetailCommand c = new GetOrgDetailCommand();
@@ -2437,7 +2443,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         OrganizationDTO organizationDTO = this.organizationService.getOrganizationByComunityidAndOrgType(c);
         if (organizationDTO == null) {
             LOGGER.error("Property organization is not exists.communityId=" + cmd.getCommunityId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_NOT_EXIST,
                     "Property organization is not exists.");
         }
         long organizationId = organizationDTO.getId();
@@ -2466,7 +2472,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     @Override
     public void createApartment(CreateApartmentCommand cmd) {
         if (cmd.getCommunityId() == null || cmd.getStatus() == null || StringUtils.isEmpty(cmd.getBuildingName())) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameters");
         }
         if (StringUtils.isEmpty(cmd.getApartmentName())) {
             throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY, "apartment name cannot be empty");
@@ -2477,7 +2483,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), cmd.getBuildingName());
 
         if (null == building) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "not exists building name");
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BUILDING_NOT_EXIST, "not exists building name");
         }
 
         Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), building.getName() + "-" + cmd.getApartmentName());
@@ -2490,6 +2496,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            //TODO 这个BuildingId应该由前端传过来
             address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
@@ -2620,19 +2627,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
     public void updateApartment(UpdateApartmentCommand cmd) {
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameters");
         }
         Community community = checkCommunity(address.getCommunityId());
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         if (cmd.getStatus() != null) {
             Long organizationId = findOrganizationByCommunity(community);
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
             if (communityAddressMapping != null) {
                 communityAddressMapping.setLivingStatus(cmd.getStatus());
                 organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
             } else {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -2668,7 +2678,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		Double communityAreaSize = community.getAreaSize() == null ? 0.0 : community.getAreaSize();
 		community.setAreaSize(communityAreaSize - oldAddressAreaSize + areaSize);
 
-             address.setAreaSize(cmd.getAreaSize());
+        address.setAreaSize(cmd.getAreaSize());
         //公摊面积
 		Double sharedArea = cmd.getSharedArea() == null ? 0.0 : cmd.getSharedArea();
         Double buildingSharedArea = building.getSharedArea() == null ? 0.0 : building.getSharedArea();
@@ -2742,12 +2752,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         GetApartmentDetailResponse response = new GetApartmentDetailResponse();
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST, "address not exist");
         }
         Community community = checkCommunity(address.getCommunityId());
         Long organizationId = findOrganizationByCommunity(community);
-        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-
+        //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理，
+        //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的
+        //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         response = ConvertHelper.convert(address, GetApartmentDetailResponse.class);
         if (communityAddressMapping != null) {
             response.setStatus(communityAddressMapping.getLivingStatus());
@@ -2819,7 +2831,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         //设置所在楼宇的楼层数
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         response.setBuildingFloorNumber(building.getFloorNumber());
-response.setBuildingId(building.getId());//房源的授权价
+        response.setBuildingId(building.getId());//房源的授权价
         AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, building.getId(), address.getId());
         if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null) {
         	String chargingItemName = PaymentChargingItemType.fromCode(addressProperties.getChargingItemsId()).getDesc();
@@ -2933,7 +2945,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public void deleteApartment(DeleteApartmentCommand cmd) {
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters");
+        	throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST, "address not exist");
         }
         List<Contract> contracts = contractProvider.listContractByAddressId(address.getId());
         if (contracts != null && contracts.size() > 0) {
@@ -3043,16 +3055,20 @@ response.setBuildingId(building.getId());//房源的授权价
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 		//删除门牌
-		//// TODO: 2018/5/11
-		addressProvider.deleteAddressById(cmd.getId());
+		//// TODO: 2018/5/11 
+        //删除门牌应该以置状态的方式，而不能直接去删除数据库里的记录，不然会对房源招商，租户管理，个人客户管理等模块的业务产生影响，by 唐岑
+		//addressProvider.deleteAddressById(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
-            if (communityAddressMapping == null) {
+        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
+        	if (communityAddressMapping == null) {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -3090,6 +3106,7 @@ response.setBuildingId(building.getId());//房源的授权价
             }
             //门牌转化成门牌id列表
             List<Long> aptIdList = aptList.stream().map(a -> a.getId()).collect(Collectors.toList());
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
             //处理小区地址关联表
             Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(aptIdList);
             LOGGER.info("listApartments communityAddressMappingMap: {}", communityAddressMappingMap);
@@ -3101,6 +3118,10 @@ response.setBuildingId(building.getId());//房源的授权价
                     } else {
                         apt.setLivingStatus(AddressMappingStatus.LIVING.getCode());
                     }
+                }
+                if(community != null) {
+                    apt.setCommunityName(community.getName());
+                    apt.setCommunityId(community.getId());
                 }
                 apartments.add(apt);
             });
@@ -3386,7 +3407,7 @@ response.setBuildingId(building.getId());//房源的授权价
 			OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
 			if(orgCom == null){
 				LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
-				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_NOT_EXIST,
 						"Unable to find the community by organizationId");
 			}
 			cmd.setCommunityId(orgCom.getCommunityId());
@@ -3569,7 +3590,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public void importPmBills(Long orgId, MultipartFile[] files) {
         if (files == null) {
             LOGGER.error("files is null");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_FILE,
                     "files is null");
         }
         this.checkOrganizationIdIsNull(orgId);
@@ -3599,14 +3620,14 @@ response.setBuildingId(building.getId());//房源的授权价
             File file2 = new File(filePath2);
             if (file2 == null || !file2.exists()) {
                 LOGGER.error("parse file failure.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                         "parse file failure.");
             }
             List<CommunityPmBill> bills = this.convertExcelFileToPmBills(file2);
             createPmBills(bills, orgId);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_FILE,
                     e.getMessage());
         } finally {
             File file = new File(filePath1);
@@ -3648,7 +3669,7 @@ response.setBuildingId(building.getId());//房源的授权价
                         CommunityPmBill existedBill = this.propertyMgrProvider.findPmBillByAddressIdAndTime(mapping.getAddressId(), bill.getStartDate(), bill.getEndDate());
                         if (existedBill != null) {
                             LOGGER.error("the bill is exist.please don't import repeat data.address=" + bill.getAddress() + ",startDate=" + format.format(bill.getStartDate()) + ",endDate=" + format.format(bill.getEndDate()));
-                            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REPEATED_BILL,
                                     "the bill is exist.please don't import repeat data.address=" + bill.getAddress() + ",startDate=" + format.format(bill.getStartDate()) + ",endDate=" + format.format(bill.getEndDate()));
                         }
 
@@ -3937,7 +3958,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkOrganizationIdIsNull(Long organizationId) {
         if (organizationId == null) {
             LOGGER.error("propterty organizationId paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "propterty organizationId paramter can not be null or empty");
         }
     }
@@ -3946,7 +3967,7 @@ response.setBuildingId(building.getId());//房源的授权价
         Organization org = organizationProvider.findOrganizationById(orgId);
         if (org == null) {
             LOGGER.error("Unable to find the organization.organizationId=" + orgId);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_NOT_EXIST,
                     "Unable to find the organization.");
         }
         return org;
@@ -3996,7 +4017,7 @@ response.setBuildingId(building.getId());//房源的授权价
             return startDate;
         } catch (ParseException e) {
             LOGGER.error("date format is wrong.must be yyyy-MM");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_DATE_FORMAT,
                     "date format is wrong.must be yyyy-MM");
         }
     }
@@ -4016,7 +4037,7 @@ response.setBuildingId(building.getId());//房源的授权价
             return endDate;
         } catch (ParseException e) {
             LOGGER.error("date format is wrong.must be yyyy-MM");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_PARSE_DATE_FORMAT,
                     "date format is wrong.must be yyyy-MM");
         }
     }
@@ -4025,7 +4046,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public void deletePmBills(DeletePmBillsCommand cmd) {
         if (cmd.getIds() == null || cmd.getIds().isEmpty()) {
             LOGGER.error("ids paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "ids paramter can not be null or empty");
         }
         this.dbProvider.execute(s -> {
@@ -4065,7 +4086,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public void insertPmBills(InsertPmBillsCommand cmd) {
         if (cmd.getInsertList() == null || cmd.getInsertList().isEmpty()) {
             LOGGER.error("insertList paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "insertList paramter can not be null or empty");
         }
 
@@ -4099,7 +4120,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public int updatePmBills(UpdatePmBillsCommand cmd) {
         if (cmd.getUpdateList() == null || cmd.getUpdateList().isEmpty()) {
             LOGGER.error("updateList paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "updateList paramter can not be null or empty");
         }
 
@@ -4145,7 +4166,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public void updatePmBill(UpdatePmBillCommand bill) {
         if (bill.getId() == null || bill.getOrganizationId() == null) {
             LOGGER.error("id or organizationId paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "id or organizationId paramter can not be null or empty");
         }
 
@@ -4234,19 +4255,19 @@ response.setBuildingId(building.getId());//房源的授权价
     public void insertPmBill(InsertPmBillCommand cmd) {
         if (cmd.getOrganizationId() == null || cmd.getAddress() == null) {
             LOGGER.error("propterty organizationId or address paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "propterty organizationId or address paramter can not be null or empty");
         }
         Organization organization = this.organizationProvider.findOrganizationById(cmd.getOrganizationId());
         if (organization == null) {
             LOGGER.error("Insert failure.Unable to find the organization.organizationId=" + cmd.getOrganizationId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                     "Insert failure.Unable to find the organization.");
         }
         if (cmd.getAddress() == null || cmd.getAddress().equals("") || cmd.getDueAmount() == null || cmd.getEndDate() == null ||
                 cmd.getPayDate() == null || cmd.getStartDate() == null) {
             LOGGER.error("address or dueAmount or endDate or payDate or startDate paramter can not be null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "address or dueAmount or endDate or payDate or startDate paramter can not be null or empty");
         }
 
@@ -4257,7 +4278,7 @@ response.setBuildingId(building.getId());//房源的授权价
         CommunityAddressMapping addressMapping = this.organizationProvider.findOrganizationAddressMappingByOrgIdAndAddress(cmd.getOrganizationId(), cmd.getAddress());
         if (addressMapping == null) {
             LOGGER.error("Insert failure.the address not find");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_MAPPING_NOT_EXIST,
                     "Insert failure.the address not find");
         }
 
@@ -4458,7 +4479,7 @@ response.setBuildingId(building.getId());//房源的授权价
         Group family = this.groupProvider.findGroupById(familyId);
         if (family == null) {
             LOGGER.error("the family is not exist.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_FAMILY_NOT_EXIST,
                     "the family is not exist");
         }
         return family;
@@ -4467,7 +4488,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkFamilyIdIsNull(Long familyId) {
         if (familyId == null) {
             LOGGER.error("familyId paramter is null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "familyId paramter is null or empty");
         }
     }
@@ -4475,7 +4496,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkAddressIdIsNull(Long addressId) {
         if (addressId == null) {
             LOGGER.error("addressId paramter is null or empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "addressId paramter is null or empty");
         }
     }
@@ -4508,10 +4529,9 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkBillDate(String billDate) {
         if (billDate == null || billDate.equals("")) {
             LOGGER.error("billDate paramter is empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "billDate paramter is empty");
         }
-
     }
 
     @Override
@@ -4627,7 +4647,7 @@ response.setBuildingId(building.getId());//房源的授权价
         Organization org = this.findOrganizationByAddressId(addressId);
         if (org == null) {
             LOGGER.error("could not found organization by addressId.addressId=" + addressId);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_NOT_EXIST,
                     "could not found organization by addressId.");
         }
         return org;
@@ -4670,7 +4690,7 @@ response.setBuildingId(building.getId());//房源的授权价
     public int payPmBillByAddressId(PayPmBillByAddressIdCommand cmd) {
         if (cmd.getPaidType() == null || cmd.getPayAmount() == null || cmd.getPayTime() == null || cmd.getTxType() == null) {
             LOGGER.error("paidType or payAmount or payTime or txType paramteris empty");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "paidType or payAmount or payTime or txType paramter is empty");
         }
         this.checkAddressIdIsNull(cmd.getAddressId());
@@ -4682,7 +4702,7 @@ response.setBuildingId(building.getId());//房源的授权价
         CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
         if (bill == null) {
             LOGGER.error("the bill is not exist by addressId=" + addressId);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                     "the bill is not exist");
         }
 
@@ -4802,7 +4822,7 @@ response.setBuildingId(building.getId());//房源的授权价
         CommunityPmBill bill = this.propertyMgrProvider.findNewestBillByAddressId(addressId);
         if (bill == null) {
             LOGGER.error("the bill is not exist by addressId=" + addressId);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                     "the bill is not exist");
         }
 
@@ -4810,7 +4830,7 @@ response.setBuildingId(building.getId());//房源的授权价
         BigDecimal waitPayAmount = bill.getDueAmount().add(bill.getOweAmount()).subtract(payAmount);
         if (waitPayAmount.compareTo(BigDecimal.ZERO) <= 0) {//不欠费
             LOGGER.error("The family don't owed pm fee.Should not send pm pay message.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_SEND_MESSAGE_ALLOWED,
                     "The family don't owed pm fee.Should not send pm pay message.");
         }
         //短信发送物业缴费通知
@@ -4977,7 +4997,7 @@ response.setBuildingId(building.getId());//房源的授权价
         Address address = this.addressProvider.findAddressById(addressId);
         if (address == null) {
             LOGGER.error("Unable to find the address.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST,
                     "Unable to find the address.");
         }
         return address;
@@ -5199,7 +5219,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkVendorTypeFormat(String vendorType) {
         if (VendorType.fromCode(vendorType) == null) {
             LOGGER.error("vendor type is wrong.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_VENDOR_TYPE,
                     "vendor type is wrong.");
         }
     }
@@ -5208,7 +5228,7 @@ response.setBuildingId(building.getId());//房源的授权价
         CommunityPmBill bill = this.organizationProvider.findOranizationBillById(billId);
         if (bill == null) {
             LOGGER.error("the bill not found.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                     "the bill not found.");
         }
         return bill;
@@ -5254,7 +5274,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkPayAmountIsNull(String payAmount) {
         if (payAmount == null || payAmount.trim().equals("")) {
             LOGGER.error("payAmount is null or empty.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "payAmount or is null or empty.");
         }
 
@@ -5263,7 +5283,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkVendorTypeIsNull(String vendorType) {
         if (vendorType == null || vendorType.trim().equals("")) {
             LOGGER.error("vendorType is null or empty.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "vendorType is null or empty.");
         }
 
@@ -5272,7 +5292,7 @@ response.setBuildingId(building.getId());//房源的授权价
     private void checkOrderNoIsNull(String orderNo) {
         if (orderNo == null || orderNo.trim().equals("")) {
             LOGGER.error("orderNo is null or empty.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "orderNo is null or empty.");
         }
 
@@ -5290,20 +5310,20 @@ response.setBuildingId(building.getId());//房源的授权价
     public PmBillForOrderNoDTO findPmBillByOrderNo(FindPmBillByOrderNoCommand cmd) {
         if (cmd.getOrderNo() == null || cmd.getOrderNo().isEmpty()) {
             LOGGER.error("orderNo is null or empty.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "orderNo is null or empty.");
         }
         Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
         OrganizationOrder order = this.organizationProvider.findOrganizationOrderById(orderId);
         if (order == null) {
             LOGGER.error("the order not found.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORDER_NOT_EXIST,
                     "the order not found.");
         }
         CommunityPmBill bill = this.organizationProvider.findOranizationBillById(order.getBillId());
         if (bill == null) {
             LOGGER.error("the bill not found.");
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                     "the bill not found.");
         }
 
@@ -5321,19 +5341,19 @@ response.setBuildingId(building.getId());//房源的授权价
         try {
             if (cmd.getBillId() == null || cmd.getAmount() == null) {
                 LOGGER.error("billId or amount is null.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                         "billId or amount is null.");
             }
             CommunityPmBill bill = this.organizationProvider.findOranizationBillById(cmd.getBillId());
             if (bill == null) {
                 LOGGER.error("the bill not found.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                         "the bill not found.");
             }
             CommunityPmBill nowBill = this.propertyMgrProvider.findNewestBillByAddressId(bill.getEntityId());
             if (nowBill == null || nowBill.getId().compareTo(bill.getId()) != 0) {
                 LOGGER.error("the bill is invalid.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                         "the bill is invalid.");
             }
 
@@ -5359,7 +5379,7 @@ response.setBuildingId(building.getId());//房源的授权价
             this.setSignatureParam(dto);
             return dto;
         } catch (Exception e) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                     e.getMessage());
         }
     }
@@ -5410,19 +5430,19 @@ response.setBuildingId(building.getId());//房源的授权价
             //自定义接口处理
             if (cmd.getBillId() == null || cmd.getAmount() == null) {
                 LOGGER.error("billId or amount is null.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                         "billId or amount is null.");
             }
             CommunityPmBill bill = this.organizationProvider.findOranizationBillById(cmd.getBillId());
             if (bill == null) {
                 LOGGER.error("the bill not found.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_EXIST,
                         "the bill not found.");
             }
             CommunityPmBill nowBill = this.propertyMgrProvider.findNewestBillByAddressId(bill.getEntityId());
             if (nowBill == null || nowBill.getId().compareTo(bill.getId()) != 0) {
                 LOGGER.error("the bill is invalid.");
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_BILL_NOT_VALID,
                         "the bill is invalid.");
             }
 
@@ -5448,7 +5468,7 @@ response.setBuildingId(building.getId());//房源的授权价
             CommonOrderDTO dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
             return dto;
         } catch (Exception e) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                     e.getMessage());
         }
     }
@@ -5460,7 +5480,7 @@ response.setBuildingId(building.getId());//房源的授权价
         User currentUser = UserContext.current().getUser();
         if (currentUser.getNamespaceId() == 999971) {
             LOGGER.error("Insufficient privilege, updateOrganizationOwner");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INSUFFICIENT_PRIVILEGE,
                     "Insufficient privilege");
         }
         Tuple<CommunityPmOwner, Boolean> tuple =
@@ -5630,7 +5650,7 @@ response.setBuildingId(building.getId());//房源的授权价
 //		User currentUser = UserContext.current().getUser();
         if (cmd.getNamespaceId() == 999971) {
             LOGGER.error("Insufficient privilege, createOrganizationOwner");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INSUFFICIENT_PRIVILEGE,
                     "Insufficient privilege");
         }
         OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeById(cmd.getOrgOwnerTypeId());
@@ -5885,7 +5905,7 @@ response.setBuildingId(building.getId());//房源的授权价
 
     private void leaveFamily(Long addressId, String contactToken, Integer namespaceId) {
         if (null == addressId) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
                     "Invalid addressId parameter");
         }
         Address address = this.addressProvider.findAddressById(addressId);
@@ -6029,7 +6049,7 @@ response.setBuildingId(building.getId());//房源的授权价
                 currentNamespaceId(), cmd.getId());
         if (behavior == null) {
             LOGGER.error("Organization owner behavior is not exist, id = {}", cmd.getId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ORGANIZATION_OWNER_BEHAVIOR_NOT_EXIST,
                     "Organization owner behavior is not exist, id = %s", cmd.getId());
         }
         if (!Objects.equals(behavior.getStatus(), OrganizationOwnerBehaviorStatus.DELETE.getCode())) {
@@ -6046,7 +6066,7 @@ response.setBuildingId(building.getId());//房源的授权价
                 cmd.getNamespaceId(), cmd.getId());
         if (attachment == null) {
             LOGGER.error("Organization owner attachment is not exist. id = {}", cmd.getId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ATTACHMENT_NOT_EXIST,
                     "Organization owner attachment is not exist. id = %s", cmd.getId());
         }
         propertyMgrProvider.deleteOrganizationOwnerAttachment(attachment);
@@ -6062,7 +6082,7 @@ response.setBuildingId(building.getId());//房源的授权价
                 currentNamespaceId(), cmd.getId());
         if (attachment == null) {
             LOGGER.error("Organization owner car attachment is not exist. id = {}", cmd.getId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ATTACHMENT_NOT_EXIST,
                     "Organization owner car attachment is not exist. id = %s", cmd.getId());
         }
         propertyMgrProvider.deleteOrganizationOwnerCarAttachment(attachment);
@@ -6076,7 +6096,7 @@ response.setBuildingId(building.getId());//房源的授权价
         User currentUser = UserContext.current().getUser();
         if (currentUser.getNamespaceId() == 999971) {
             LOGGER.error("Insufficient privilege, deleteOrganizationOwner");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INSUFFICIENT_PRIVILEGE,
                     "Insufficient privilege");
         }
         CommunityPmOwner pmOwner = propertyMgrProvider.findPropOwnerById(cmd.getId());
@@ -7198,7 +7218,7 @@ response.setBuildingId(building.getId());//房源的授权价
         User user = UserContext.current().getUser();
         if (cmd.getNamespaceId() == 999971) {
             LOGGER.error("Insufficient privilege, importOrganizationOwners");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+            throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INSUFFICIENT_PRIVILEGE,
                     "Insufficient privilege");
         }
         Long communityId = cmd.getCommunityId();
@@ -7253,7 +7273,7 @@ response.setBuildingId(building.getId());//房源的授权价
             return task;
         } else {
             LOGGER.error("excel data format is not correct.rowCount=" + resultList);
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXCEL_DATA_FORMAT,
                     "excel data format is not correct");
         }
     }
@@ -7650,7 +7670,7 @@ response.setBuildingId(building.getId());//房源的授权价
 
     private void invalidParameterException(String name, Object param) {
         LOGGER.error("Invalid parameter {} [ {} ].", name, param);
-        throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER,
                 "Invalid parameter %s [ %s ].", name, param);
     }
 
@@ -7663,7 +7683,7 @@ response.setBuildingId(building.getId());//房源的授权价
             result.stream().map(r -> r.getPropertyPath().toString() + " [ " + r.getInvalidValue() + " ]")
                     .reduce((i, a) -> i + ", " + a).ifPresent(r -> {
                 LOGGER.error("Invalid parameter {}", r);
-                throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
+                throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
         }
     }
@@ -7671,7 +7691,7 @@ response.setBuildingId(building.getId());//房源的授权价
     @Override
     public GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd) {
         if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+            throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameter");
         }
         EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
         Long requestId = cmd.getRequestId();  //表示那条记录的id
@@ -7725,7 +7745,7 @@ response.setBuildingId(building.getId());//房源的授权价
 		DefaultChargingItem item = defaultChargingItemProvider.findById(id);
 		if(item == null || !CommonStatus.ACTIVE.equals(CommonStatus.fromCode(item.getStatus()))) {
 			LOGGER.error("DefaultChargingItem id: {} is not exist or active!", id);
-			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CHARGING_ITEM_NOT_EXIST,
 					"DefaultChargingItem id is not exist or active.");
 		}
 		return item;
@@ -7758,7 +7778,16 @@ response.setBuildingId(building.getId());//房源的授权价
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
 		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(items != null && items.size() > 0) {
-			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			List<DefaultChargingItemDTO> list = items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			for(DefaultChargingItemDTO itemDto : list) {
+				if(itemDto.getBillGroupId() != null) {
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(itemDto.getBillGroupId());
+					if(group != null) {
+						itemDto.setBillGroupName(group.getName());
+					}
+				}
+			}
+			return list;
 		}
 		return null;
 	}
@@ -7771,7 +7800,7 @@ response.setBuildingId(building.getId());//房源的授权价
 		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
 		for(PmResourceReservation r : existReservations){
 			if(DateUtil.hasIntersection(r.getStartTime(), r.getEndTime(), start, end)){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "in this period of time, there had been" +
+				throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CREATE_RESERVATION_FAILURE, "in this period of time, there had been" +
 						"valid reservations exist");
 			}
 		}
@@ -7797,7 +7826,7 @@ response.setBuildingId(building.getId());//房源的授权价
 			//int effectedRow = addressProvider.changeAddressLivingStatus(cmd.getAddressId(), AddressLivingStatus.OCCUPIED.getCode());
         	int effectedRow = addressProvider.changeAddressLivingStatus(address.getId(),address.getAddress(), AddressLivingStatus.OCCUPIED.getCode());
 			if(effectedRow != 1){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "address living status change" +
+				throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_CREATE_RESERVATION_FAILURE, "address living status change" +
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
 			}
 			propertyMgrProvider.insertResourceReservation(resourceReservation);
@@ -8038,7 +8067,7 @@ response.setBuildingId(building.getId());//房源的授权价
 	@Override
 	public void setAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (cmd.getNamespaceId() == null || cmd.getCommunityId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -8098,7 +8127,7 @@ response.setBuildingId(building.getId());//房源的授权价
 	@Override
 	public AuthorizePriceDTO authorizePriceDetail(AuthorizePriceCommand cmd) {
 		if (cmd.getId() == null || cmd.getNamespaceId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8109,7 +8138,7 @@ response.setBuildingId(building.getId());//房源的授权价
 	@Override
 	public void updateAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8132,7 +8161,7 @@ response.setBuildingId(building.getId());//房源的授权价
 	@Override
 	public void deleteAuthorizePrice(AuthorizePriceCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 
@@ -8307,7 +8336,7 @@ response.setBuildingId(building.getId());//房源的授权价
 
 	private List<ImportFileResultLog<ImportAuthorizePriceDataDTO>> importApartment(List<ImportAuthorizePriceDataDTO> datas, Long userId, ImportAddressCommand cmd) {
 		if (null == cmd.getCommunityId() || cmd.getBuildingId() == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
@@ -8535,4 +8564,24 @@ response.setBuildingId(building.getId());//房源的授权价
 
 		return apartments;
 	}
+
+	@Override
+    public OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd){
+	    CommunityPmOwner owner;
+        owner = propertyMgrProvider.findOrganizationOwnerByContactToken(cmd.getContactToken(), cmd.getNamespaceId());
+	    if(owner == null || owner.getId() == null){
+	        owner = propertyMgrProvider.findOrganizationOwnerByContactExtraTels("\"" + cmd.getContactToken() + "\"", cmd.getNamespaceId());
+        }
+
+        if (owner != null) {
+            return convertOwnerToDTO(owner);
+        } else {
+            LOGGER.error("The organization owner contactToken {} is not exist.", cmd.getContactToken());
+            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                    "The organization owner %s is not exist.", cmd.getContactToken());
+        }
+
+    }
+
+
 }

@@ -1,23 +1,87 @@
 package com.everhomes.general_approval;
 
-import java.util.*;
-import java.sql.Timestamp;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowAutoStepDTO;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseTree;
+import com.everhomes.flow.FlowEventLog;
+import com.everhomes.flow.FlowEventLogProvider;
+import com.everhomes.flow.FlowNode;
+import com.everhomes.flow.FlowNodeProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormFieldValueProcessor;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.organization.OrganizationMemberDetails;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.enterpriseApproval.EnterpriseApprovalErrorCode;
+import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowEventType;
+import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowNodeLogDTO;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowPostSubjectCommand;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
+import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
+import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
+import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.GeneralApprovalDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
+import com.everhomes.rest.general_approval.GeneralApprovalScopeMapDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
+import com.everhomes.rest.general_approval.GeneralApprovalStatus;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormNumDTO;
+import com.everhomes.rest.general_approval.GeneralFormRenderType;
+import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
+import com.everhomes.rest.general_approval.GeneralFormTemplateType;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
+import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.GetUserRealNameCommand;
+import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
+import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.OrderGeneralApprovalsCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.general_approval.QueryGeneralFormByFlowNodeType;
+import com.everhomes.rest.general_approval.SetGeneralApprovalFormCommand;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
+import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.VerifyApprovalNameCommand;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.workReport.WorkReportService;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -30,40 +94,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.GeneralApprovalDTO;
-import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
-import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
-import com.everhomes.rest.general_approval.GeneralApprovalStatus;
-import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormNumDTO;
-import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
-import com.everhomes.rest.general_approval.GeneralFormTemplateType;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
-import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
-import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
-import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -76,6 +117,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
+    @Autowired
+    private GeneralApprovalValProvider generalApprovalValProvider;
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -91,10 +134,33 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
     @Autowired
     private WorkReportService workReportService;
-
+    @Autowired
+    private GeneralFormFieldValueProcessor generalFormFieldValueProcessor;
+    @Autowired
+    private FlowNodeProvider flowNodeProvider;
+    @Autowired
+    private FlowEventLogProvider flowEventLogProvider;
+    @Autowired
+    private GeneralApprovalValChangeLogUtils generalApprovalValChangeLogUtils;
+    @Autowired
+    private DbProvider dbProvider;
     private StringTemplateLoader templateLoader;
-
     private Configuration templateConfig;
+
+    private static final List<String> NON_EDITABLE_FIELD_TYPES;
+
+    static {
+        NON_EDITABLE_FIELD_TYPES = new ArrayList<>();
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.CONTACT.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.ASK_FOR_LEAVE.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.CANCEL_FOR_LEAVE.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.BUSINESS_TRIP.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.OVERTIME.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.GO_OUT.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.ABNORMAL_PUNCH.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.EMPLOY_APPLICATION.getCode());
+        NON_EDITABLE_FIELD_TYPES.add(GeneralFormFieldType.DISMISS_APPLICATION.getCode());
+    }
 
     @Override
     public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
@@ -690,5 +756,321 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
             return member.getContactName();
         //  若没有真实姓名则返回昵称
         return user.getNickName();
+    }
+
+    private GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {
+        for (GeneralFormFieldDTO val : fieldDTOs) {
+            if (val.getFieldName().equals(fieldName))
+                return val;
+        }
+        return null;
+    }
+
+    @Override
+    public void fullGeneralApprovalFormValues(List<GeneralFormFieldDTO> fields, GeneralForm form, List<GeneralApprovalVal> values) {
+        if (form == null || CollectionUtils.isEmpty(fields) || CollectionUtils.isEmpty(values)) {
+            return;
+        }
+        for (GeneralApprovalVal val : values) {
+            //  若没有值则不用填充
+            if (StringUtils.isEmpty(val.getFieldStr3())) {
+                continue;
+            }
+            GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(), fields);
+            //  若没有找到字段则跳过
+            if (dto == null) {
+                continue;
+            }
+
+            PostApprovalFormItem formVal = new PostApprovalFormItem();
+
+            GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(val.getFieldType());
+            if (null != fieldType) {
+                switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+                    case SINGLE_LINE_TEXT:
+                    case NUMBER_TEXT:
+                    case DATE:
+                    case DROP_BOX:
+                        formVal = generalFormFieldValueProcessor.processDropBoxField(formVal, val.getFieldStr3(), NormalFlag.NEED.getCode());
+                        break;
+                    case MULTI_LINE_TEXT:
+                        formVal = generalFormFieldValueProcessor.processMultiLineTextField(formVal, val.getFieldStr3(), NormalFlag.NEED.getCode());
+                        break;
+                    case IMAGE:
+                        formVal = generalFormFieldValueProcessor.processImageField(formVal, val.getFieldStr3());
+                        break;
+                    case FILE:
+                        formVal = generalFormFieldValueProcessor.processFileField(formVal, val.getFieldStr3());
+                        break;
+                    case INTEGER_TEXT:
+                        formVal = generalFormFieldValueProcessor.processIntegerTextField(formVal, val.getFieldStr3(), NormalFlag.NEED.getCode());
+                        break;
+                    case SUBFORM:
+                        formVal = generalFormFieldValueProcessor.processSubFormField(formVal, dto.getFieldExtra(), val.getFieldStr3(), NormalFlag.NEED.getCode());
+                        break;
+                    default:
+                        formVal.setFieldValue(val.getFieldStr3());
+                }
+                dto.setFieldValue(formVal.getFieldValue());
+            }
+        }
+    }
+
+    @Override
+    public ListGeneralFormResponse getGeneralFormsAndValuesByFlowNode(GetGeneralFormsAndValuesByFlowNodeCommand cmd) {
+        FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
+        checkFlowCaseValid(cmd.getFlowCaseId(), cmd.getCurrentFlowNodeId());
+
+        ListGeneralFormResponse response = new ListGeneralFormResponse();
+        response.setNonEditableFieldTypes(NON_EDITABLE_FIELD_TYPES);
+        response.setForms(new ArrayList<>());
+
+        Map<String, List<GeneralApprovalVal>> map = new HashMap<>();
+        List<FlowNode> flowNodes = new ArrayList<>();
+        if (QueryGeneralFormByFlowNodeType.BEFORE_AND_CURRENT_NODE == QueryGeneralFormByFlowNodeType.fromCode(cmd.getQueryType())) {
+            GeneralFormDTO flowForm = getGeneralApprovalFormAndValues(flowCase.getRootFlowCaseId());
+            response.getForms().add(flowForm);
+            map = generalApprovalValsMap(queryGeneralApprovalValsExcludeFlowFormVal(flowCase.getRootFlowCaseId(), null));
+            flowNodes = getBeforeAndCurrentNodes(flowCase.getRootFlowCaseId(), cmd.getCurrentFlowNodeId());
+        } else {
+            map = generalApprovalValsMap(queryGeneralApprovalValsExcludeFlowFormVal(flowCase.getRootFlowCaseId(), cmd.getCurrentFlowNodeId()));
+            flowNodes.add(flowNodeProvider.getFlowNodeById(cmd.getCurrentFlowNodeId()));
+        }
+
+
+        if (CollectionUtils.isEmpty(flowNodes)) {
+            return response;
+        }
+        for (FlowNode node : flowNodes) {
+            if (node.getFormOriginId() == null || node.getFormOriginId() == 0 || TrueOrFalseFlag.TRUE != TrueOrFalseFlag.fromCode(node.getFormStatus())) {
+                continue;
+            }
+            GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(node.getFormOriginId(), node.getFormVersion());
+            if (form == null) {
+                continue;
+            }
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+            GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+            dto.setFlowCaseId(flowCase.getRootFlowCaseId());
+            dto.setFlowNodeId(node.getId());
+            dto.setFormFields(fieldDTOs);
+            String key = String.format("%d-%d-%d", node.getId(), node.getFormOriginId(), node.getFormVersion());
+            List<GeneralApprovalVal> values = map.get(key);
+            if (!CollectionUtils.isEmpty(values)) {
+                fullGeneralApprovalFormValues(fieldDTOs, form, values);
+            }
+            response.getForms().add(dto);
+        }
+        return response;
+    }
+
+    private Map<String, List<GeneralApprovalVal>> generalApprovalValsMap(List<GeneralApprovalVal> values) {
+        if (CollectionUtils.isEmpty(values)) {
+            return new HashMap<>();
+        }
+        Map<String, List<GeneralApprovalVal>> map = new HashMap<>();
+        for (GeneralApprovalVal val : values) {
+            String key = String.format("%d-%d-%d", val.getFlowNodeId(), val.getFormOriginId(), val.getFormVersion());
+            List<GeneralApprovalVal> list = map.get(key);
+            if (list == null) {
+                list = new ArrayList<>();
+                map.put(key, list);
+            }
+            list.add(val);
+        }
+        return map;
+    }
+
+    private List<Long> getProcessingFlowNodeIds(Long flowCaseId) {
+        FlowCaseTree flowCaseTree = flowService.getProcessingFlowCaseTree(flowCaseId);
+        if (flowCaseTree == null || CollectionUtils.isEmpty(flowCaseTree.getLeafNodes())) {
+            return new ArrayList<>();
+        }
+        List<Long> ids = new ArrayList<>();
+        for (FlowCaseTree flowNode : flowCaseTree.getLeafNodes()) {
+            if (flowNode.getFlowCase() != null && flowNode.getFlowCase().getCurrentNodeId() != null) {
+                ids.add(flowNode.getFlowCase().getCurrentNodeId());
+            }
+        }
+        return ids;
+    }
+
+    private List<FlowNode> getBeforeAndCurrentNodes(Long flowCaseId, Long currentNodeId) {
+        List<FlowCase> allFlowCases = flowService.getAllFlowCase(flowCaseId);
+        List<FlowNodeLogDTO> allFlowNodes = flowService.getStepTrackerLogs(allFlowCases);
+        List<Long> currentNodeIds = getProcessingFlowNodeIds(flowCaseId);
+        List<Long> beforeAndCurrentNodeIds = new ArrayList<>();
+        for (FlowNodeLogDTO node : allFlowNodes) {
+            if (currentNodeIds.contains(node.getNodeId()) && Long.compare(currentNodeId, node.getNodeId()) != 0) {
+                continue;
+            }
+            beforeAndCurrentNodeIds.add(node.getNodeId());
+        }
+        return flowNodeProvider.queryFlowNodes(new ListingLocator(), Integer.MAX_VALUE - 1, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_NODES.ID.in(beforeAndCurrentNodeIds));
+            return query;
+        });
+    }
+
+    private List<GeneralApprovalVal> queryGeneralApprovalValsExcludeFlowFormVal(Long flowCaseId, Long flowNodeId) {
+        List<GeneralApprovalVal> values = generalApprovalValProvider.queryGeneralApprovalVals(new ListingLocator(), Integer.MAX_VALUE, (locator, query) -> {
+            query.addConditions(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(flowCaseId));
+            if (flowNodeId != null) {
+                query.addConditions(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_NODE_ID.eq(flowNodeId));
+            } else {
+                query.addConditions(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_NODE_ID.gt(0L));
+            }
+            query.addOrderBy(Tables.EH_GENERAL_APPROVAL_VALS.CREATE_TIME.asc());
+            return query;
+        });
+        return values;
+    }
+
+    @Override
+    public void createOrUpdateGeneralFormValuesWithFlow(CreateOrUpdateGeneralFormValuesWithFlowCommand cmd) {
+        FlowCase flowCase = flowService.getFlowCaseById(cmd.getFlowCaseId());
+        checkFlowCaseValid(cmd.getFlowCaseId(), cmd.getFlowNodeId());
+
+        List<GeneralFormDTO> befores = new ArrayList<>();
+        List<GeneralFormDTO> afters = new ArrayList<>();
+        dbProvider.execute(transactionStatus -> {
+            for (PostGeneralFormValCommand valCommand : cmd.getPostGeneralFormValCommands()) {
+                List<GeneralApprovalVal> values = generalApprovalValProvider.getGeneralApprovalVal(valCommand.getFormOriginId(), valCommand.getFormVersion(), flowCase.getRootFlowCaseId(), valCommand.getFlowNodeId());
+                GeneralFormDTO before = getGeneralApprovalFormAndValues(valCommand.getFormOriginId(), valCommand.getFormVersion(), flowCase.getRootFlowCaseId(), valCommand.getFlowNodeId(), values);
+                for (PostApprovalFormItem item : valCommand.getValues()) {
+                    GeneralApprovalVal val = findGeneralApprovalVal(values, item.getFieldName());
+                    if (val == null) {
+                        val = new GeneralApprovalVal();
+                        val.setNamespaceId(UserContext.getCurrentNamespaceId());
+                        val.setApprovalId(flowCase.getReferId());
+                        val.setFormOriginId(valCommand.getFormOriginId());
+                        val.setFormVersion(valCommand.getFormVersion());
+                        val.setFlowCaseId(flowCase.getRootFlowCaseId());
+                        val.setFlowNodeId(valCommand.getFlowNodeId());
+                        val.setFieldName(item.getFieldName());
+                        val.setFieldType(item.getFieldType());
+                        val.setFieldStr3(item.getFieldValue());
+                        this.generalApprovalValProvider.createGeneralApprovalVal(val);
+                    } else {
+                        val.setFieldStr3(item.getFieldValue());
+                        this.generalApprovalValProvider.updateGeneralApprovalVal(val);
+                    }
+                }
+                GeneralFormDTO after = getGeneralApprovalFormAndValues(valCommand.getFormOriginId(), valCommand.getFormVersion(), flowCase.getRootFlowCaseId(), valCommand.getFlowNodeId(), null);
+                befores.add(before);
+                afters.add(after);
+            }
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(UserContext.currentUserId(), cmd.getOrganizationId());
+            String contactName = memberDetail != null ? memberDetail.getContactName() : UserContext.current().getUser().getNickName();
+            String logContent = generalApprovalValChangeLogUtils.changeLog(befores, afters, contactName);
+
+            trackChangeLog(flowCase.getRootFlowCaseId(), contactName, logContent);
+            return null;
+        });
+    }
+
+    private void trackChangeLog(Long rootFlowCaseId, String flowUserName, String logContent) {
+        FlowCase rootFlowCase = flowService.getFlowCaseById(rootFlowCaseId);
+        FlowPostSubjectCommand flowPostSubjectCommand = new FlowPostSubjectCommand();
+        flowPostSubjectCommand.setFlowEntityId(rootFlowCase.getCurrentNodeId());
+        flowPostSubjectCommand.setFlowEntityType(FlowEntityType.FLOW_NODE.getCode());
+        flowPostSubjectCommand.setContent(logContent);
+        FlowSubjectDTO subject = flowService.postSubject(flowPostSubjectCommand);
+        FlowEventLog log = new FlowEventLog();
+        log.setId(flowEventLogProvider.getNextId());
+        log.setFlowMainId(rootFlowCase.getFlowMainId());
+        log.setFlowVersion(rootFlowCase.getFlowVersion());
+        log.setNamespaceId(rootFlowCase.getNamespaceId());
+        log.setFlowNodeId(rootFlowCase.getCurrentNodeId());
+        log.setFlowCaseId(rootFlowCase.getId());
+        log.setStepCount(rootFlowCase.getStepCount());
+        log.setSubjectId(subject.getId());
+        log.setParentId(0L);
+        log.setFlowUserId(UserContext.currentUserId());
+        log.setFlowUserName(flowUserName);
+        log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+        log.setButtonFiredStep(FlowStepType.NO_STEP.getCode());
+        log.setTrackerApplier(1L); // 申请人可以看到此条log，为0则看不到
+        log.setTrackerProcessor(1L);// 处理人可以看到此条log，为0则看不到
+        log.setLogContent(flowUserName + " 编辑了表单");
+        List<FlowEventLog> logList = new ArrayList<>(1);
+        logList.add(log);
+
+        FlowAutoStepDTO flowAutoStepDTO = new FlowAutoStepDTO();
+        flowAutoStepDTO.setFlowCaseId(rootFlowCase.getId());
+        flowAutoStepDTO.setFlowNodeId(rootFlowCase.getCurrentNodeId());
+        flowAutoStepDTO.setStepCount(rootFlowCase.getStepCount());
+        flowAutoStepDTO.setAutoStepType(FlowStepType.NO_STEP.getCode());
+        flowAutoStepDTO.setEventType(FlowEventType.BUTTON_FIRED.getCode());
+        flowAutoStepDTO.setEventLogs(logList);
+        flowAutoStepDTO.setOperatorId(UserContext.currentUserId());
+        flowService.processAutoStep(flowAutoStepDTO);
+    }
+
+    private GeneralApprovalVal findGeneralApprovalVal(List<GeneralApprovalVal> values, String fieldName) {
+        if (CollectionUtils.isEmpty(values)) {
+            return null;
+        }
+        for (GeneralApprovalVal val : values) {
+            if (val.getFieldName().equals(fieldName)) {
+                return val;
+            }
+        }
+        return null;
+    }
+
+    private GeneralFormDTO getGeneralApprovalFormAndValues(Long flowCaseId) {
+        List<GeneralApprovalVal> values = generalApprovalValProvider.queryGeneralApprovalValsByFlowCaseId(flowCaseId);
+        if (CollectionUtils.isEmpty(values)) {
+            return null;
+        }
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(values.get(0).getFormOriginId(), values.get(0).getFormVersion());
+        if (form == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
+
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        dto.setFlowCaseId(flowCaseId);
+        dto.setFormFields(fieldDTOs);
+        fullGeneralApprovalFormValues(fieldDTOs, form, values);
+        return dto;
+    }
+
+    private GeneralFormDTO getGeneralApprovalFormAndValues(Long formOriginId, Long formVersion, Long flowCaseId, Long flowNodeId, List<GeneralApprovalVal> values) {
+        if (flowNodeId == null) {
+            return getGeneralApprovalFormAndValues(flowCaseId);
+        }
+
+        GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(formOriginId, formVersion);
+        if (form == null)
+            throw RuntimeErrorException.errorWith(EnterpriseApprovalErrorCode.SCOPE,
+                    EnterpriseApprovalErrorCode.ERROR_FORM_NOT_FOUND, "form not found");
+
+        List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+        GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
+        dto.setFlowCaseId(flowCaseId);
+        dto.setFlowNodeId(flowNodeId);
+        dto.setFormFields(fieldDTOs);
+        List<GeneralApprovalVal> fieldValues = null;
+        if (CollectionUtils.isEmpty(values)) {
+            fieldValues = generalApprovalValProvider.getGeneralApprovalVal(formOriginId, formVersion, flowCaseId, flowNodeId);
+        } else {
+            fieldValues = values;
+        }
+
+        if (!CollectionUtils.isEmpty(fieldValues)) {
+            fullGeneralApprovalFormValues(fieldDTOs, form, fieldValues);
+        }
+        return dto;
+    }
+
+    private void checkFlowCaseValid(Long flowCaseId, Long flowNodeId) {
+        List<Long> currentNodeIds = getProcessingFlowNodeIds(flowCaseId);
+        if (!currentNodeIds.contains(flowNodeId)) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
+        }
     }
 }

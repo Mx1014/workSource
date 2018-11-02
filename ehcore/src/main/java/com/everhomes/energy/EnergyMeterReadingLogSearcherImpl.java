@@ -167,7 +167,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         List<EnergyMeterReadingLog> logs = readingLogProvider.listMeterReadingLogs(pageAnchor, pageSize);
         while (logs != null && logs.size() > 0) {
             bulkUpdate(logs);
-            pageAnchor += (logs.size() + 1);
+            pageAnchor = logs.get(logs.size() - 1).getId() + 1;
             logs = readingLogProvider.listMeterReadingLogs(pageAnchor, pageSize);
         }
         this.optimize(1);

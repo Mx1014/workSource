@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.aclink;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -22,9 +24,29 @@ public class ListLocalCamerasCommand {
 
 	private String search;
 
+	private Long serverId;
+	
+	private List<Long> serverIds;
+
+	private Long doorAccessId; 
+	
+	private Byte enterStatus;
+	
+	private Byte linkStatus;
+	
+	private String Name;
+
 	private Long pageAnchor;
 
 	private Integer pageSize;
+
+	public String getName() {
+		return Name;
+	}
+
+	public void setName(String name) {
+		Name = name;
+	}
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -59,13 +81,53 @@ public class ListLocalCamerasCommand {
 	}
 
 	public Integer getPageSize() {
-		return pageSize;
+		return pageSize == null? 0 : pageSize;
 	}
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
 	
+	public Long getServerId() {
+		return serverId;
+	}
+
+	public void setServerId(Long serverId) {
+		this.serverId = serverId;
+	}
+
+	public Long getDoorAccessId() {
+		return doorAccessId;
+	}
+
+	public void setDoorAccessId(Long doorAccessId) {
+		this.doorAccessId = doorAccessId;
+	}
+
+	public Byte getEnterStatus() {
+		return enterStatus;
+	}
+
+	public void setEnterStatus(Byte enterStatus) {
+		this.enterStatus = enterStatus;
+	}
+
+	public Byte getLinkStatus() {
+		return linkStatus;
+	}
+
+	public void setLinkStatus(Byte linkStatus) {
+		this.linkStatus = linkStatus;
+	}
+
+	public List<Long> getServerIds() {
+		return serverIds;
+	}
+
+	public void setServerIds(List<Long> serverIds) {
+		this.serverIds = serverIds;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

@@ -28,6 +28,7 @@ import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.everhomes.yellowPage.ServiceAllianceSkipRule;
 import com.everhomes.yellowPage.ServiceAlliances;
@@ -74,6 +75,10 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+	@Autowired
+	AllianceStandardService allianceStandardService;
+    
     @Override
     public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
@@ -138,62 +143,58 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
 		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
 		StringBuilder url = new StringBuilder();
-		url.append("${home.url}/service-alliance-web/build/index.html#/home/" + config.getDisplayType());
+		url.append("${home.url}/service-alliance-web/build/index.html");
 		url.append("?displayType=" + config.getDisplayType());
 		url.append("&parentId=" + config.getType());
 		url.append("&enableComment=" + config.getEnableComment());
 		url.append("&ns=" + namespaceId);
+		url.append("#/home/"+ config.getDisplayType());
 		url.append("#sign_suffix");
 
 		return url.toString();
 	}
 
-    private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name){
-        User user = UserContext.current().getUser();
-        ServiceAllianceCategories serviceAllianceCategories = new ServiceAllianceCategories();
-        serviceAllianceCategories.setName(name);
-        serviceAllianceCategories.setNamespaceId(namespaceId);
-        serviceAllianceCategories.setParentId(0L);
-        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM",null,null,new CrossShardListingLocator(), 10);
-//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-//        if(null != communities && communities.size() > 0){
-        if(null != organizations && organizations.size() > 0){
-//            Community community = communities.get(0);
-        	Organization organization = organizations.get(0);
-            serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
-            serviceAllianceCategories.setOwnerId(organization.getId());
-            serviceAllianceCategories.setCreatorUid(user.getId());
-            serviceAllianceCategories.setDeleteUid(user.getId());
-            serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
+	private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name) {
+		
+		User user = UserContext.current().getUser();
+		ServiceAllianceCategories serviceAllianceCategories = new ServiceAllianceCategories();
+		serviceAllianceCategories.setName(name);
+		serviceAllianceCategories.setNamespaceId(namespaceId);
+		serviceAllianceCategories.setParentId(0L);
+		serviceAllianceCategories.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+		serviceAllianceCategories.setOwnerId(-1L);
+		serviceAllianceCategories.setCreatorUid(user.getId());
+		serviceAllianceCategories.setDeleteUid(user.getId());
+		serviceAllianceCategories.setStatus(YellowPageStatus.ACTIVE.getCode());
 
-            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
-            serviceAllianceCategories.setId(id);
-            serviceAllianceCategories.setEntryId(generateEntryId(namespaceId,id));
-            yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
-            ServiceAlliances serviceAlliances = new ServiceAlliances();
-            serviceAlliances.setParentId(0L);
-            serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
-            serviceAlliances.setOwnerId(organization.getId());
-            serviceAlliances.setName(name);
-            serviceAlliances.setDisplayName(name);
-            serviceAlliances.setType(serviceAllianceCategories.getId());
-            serviceAlliances.setStatus(YellowPageStatus.ACTIVE.getCode());
-            serviceAlliances.setAddress("");
-            serviceAlliances.setSupportType((byte)0);
-            serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
-            yellowPageProvider.createServiceAlliances(serviceAlliances);
-            
-            boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
-            if(iscreateMenuScope){
-            	createMenuScope(namespaceId,serviceAllianceCategories.getEntryId(),serviceAllianceCategories.getName());
-            }
-        }else{
-            LOGGER.error("namespace not pm. namespaceId = {}", namespaceId);
-        }
+		long id = this.sequenceProvider
+				.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
+		serviceAllianceCategories.setId(id);
+		serviceAllianceCategories.setEntryId(generateEntryId(namespaceId, id));
+		serviceAllianceCategories.setType(id);
+		yellowPageProvider.createServiceAllianceCategory(serviceAllianceCategories);
 
-        return serviceAllianceCategories;
-    }
+		ServiceAlliances serviceAlliances = new ServiceAlliances();
+		serviceAlliances.setParentId(0L);
+		serviceAlliances.setOwnerType(ServiceAllianceBelongType.ORGANAIZATION.getCode());
+		serviceAlliances.setOwnerId(-1L);
+		serviceAlliances.setName(name);
+		serviceAlliances.setDisplayName(name);
+		serviceAlliances.setType(serviceAllianceCategories.getId());
+		serviceAlliances.setStatus(YellowPageStatus.ACTIVE.getCode());
+		serviceAlliances.setAddress("");
+		serviceAlliances.setSupportType((byte) 0);
+		serviceAlliances.setDisplayFlag(DisplayFlagType.SHOW.getCode());
+		yellowPageProvider.createServiceAlliances(serviceAlliances);
+
+		boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
+		if (iscreateMenuScope) {
+			createMenuScope(namespaceId, serviceAllianceCategories.getEntryId(), serviceAllianceCategories.getName());
+		}
+
+		return serviceAllianceCategories;
+	}
 
     private void createMenuScope(Integer namespaceId, Integer entryId, String name) {
 		if(entryId == null || namespaceId == null){
@@ -322,44 +323,19 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	 * @param name
 	 * @return
 	 */
-	private ServiceAllianceCategories updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name){
-		
-		Long type = config.getType();
-		Byte enableComment = config.getEnableComment(); //是否允许评论
-		Byte enableProvider = config.getEnableProvider(); //是否打开供应商开关
-		
-        ServiceAllianceCategories serviceAllianceCategories = yellowPageProvider.findCategoryById(type);
-//        List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-        List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, "PM", null,null,new CrossShardListingLocator(), 10);
-        if(null != organizations && organizations.size() > 0 && null != serviceAllianceCategories){
-        	Organization organization = organizations.get(0);
-            serviceAllianceCategories.setName(name);
-            serviceAllianceCategories.setPath(name);
-            serviceAllianceCategories.setEntryId(generateEntryId(namespaceId,type));
-            boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
-            if(iscreateMenuScope){
-                createMenuScope(namespaceId, serviceAllianceCategories.getEntryId(), name);
-            }
-            yellowPageProvider.updateServiceAllianceCategory(serviceAllianceCategories);
+	private void updateServiceAlliance(Integer namespaceId, ServiceAllianceInstanceConfig config, String name) {
 
-           
-            ServiceAlliances serviceAlliances = yellowPageProvider.queryServiceAllianceTopic(ServiceAllianceBelongType.ORGANAIZATION.getCode(), organization.getId(), type);
-            if(null != serviceAlliances){
-            	//更新现有配置
-                serviceAlliances.setName(name);
-                serviceAlliances.setDisplayName(name);
-                serviceAlliances.setEnableComment(enableComment);
-                serviceAlliances.setEnableProvider(enableProvider);
-                yellowPageProvider.updateServiceAlliances(serviceAlliances);
-                
-            }else{
-                LOGGER.error("serviceAlliances is null. pmId = {}, type = {}", organization.getId(), type);
-            }
-        }else{
-            LOGGER.error("namespace not community or service alliance category is null. namespaceId = {}, type = {}", namespaceId, type);
-        }
-        return serviceAllianceCategories;
-    }
+		Long type = config.getType();
+
+		// 不清楚这个是做什么的
+		boolean iscreateMenuScope = configProvider.getBooleanValue("portal.sa.create.scope", true);
+		if (iscreateMenuScope) {
+			createMenuScope(namespaceId, generateEntryId(namespaceId, type), name);
+		}
+
+		allianceStandardService.updateHomePageCategorysByPublish(config, name);
+		return;
+	}
 
     private void updateJumps(Integer namespaceId, List<ServiceAllianceJump> jumps){
         //暂时不做
@@ -415,4 +391,5 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
 		redisTemplate.delete(key);
 	}
+	
 }

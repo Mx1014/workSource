@@ -39,4 +39,8 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_OWNER_TYPE_NOT_COMMUNITY = 11201;  //项目请求参数有误
     static final int ERROR_ALLIANCE_MAIN_CONFIG_NOT_EXIST = 11202;  //通用配置(基础)不存在
     static final int ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST = 11203;  //基础样式不存在
+    static final int ERROR_SELF_CONFIG_NOT_ENABLE = 11204;  //请先打开自定义配置开关
+    static final int ERROR_CATEGORY_NOT_EXIST = 11205;  //样式不存在
+    static final int ERROR_FLOW_CASE_SERVICE_NOT_FOUND= 11206;  //未获取到服务
+    
 }

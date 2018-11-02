@@ -979,7 +979,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("testPunchDayRefresh")
     @RestReturn(value = String.class)
     public RestResponse testPunchDayRefresh(@Valid TestPunchDayRefreshCommand cmd) {
-        punchService.testDayRefreshLogs(cmd.getRunDate());
+        punchService.testDayRefreshLogs(cmd.getRunDate(), cmd.getOrgId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

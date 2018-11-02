@@ -1087,10 +1087,10 @@ public class GroupServiceImpl implements GroupService {
 			if (g1.getCreatorUid().longValue() != operatorId && g2.getCreatorUid().longValue() == operatorId) {
 				return 1;
 			}
-			if (RoleConstants.ResourceAdmin == g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin != g2.getMemberRole()) {
+			if (Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && !Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return -1;
 			}
-			if (RoleConstants.ResourceAdmin != g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin == g2.getMemberRole()) {
+			if (!Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return 1;
 			}
 			if (g1.getJoinTime().getTime() > g2.getJoinTime().getTime()) {
@@ -6020,7 +6020,8 @@ public class GroupServiceImpl implements GroupService {
 		});
 
 		// 发送推荐帖
-        recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
+        //不需要发送推荐帖
+//         recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 
         // 审核group成功事件
         LocalEventBus.publish(event -> {
