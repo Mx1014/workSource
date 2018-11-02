@@ -400,8 +400,10 @@ public class PortalServiceImpl implements PortalService {
 			return null;
 		}
 		ServiceModuleAppDTO dto = ConvertHelper.convert(moduleApp, ServiceModuleAppDTO.class);
+
+		ServiceModule serviceModule  = null;
 		if(null != moduleApp.getModuleId() && moduleApp.getModuleId() != 0){
-			ServiceModule serviceModule = checkServiceModule(moduleApp.getModuleId());
+			serviceModule = checkServiceModule(moduleApp.getModuleId());
 			dto.setModuleName(serviceModule.getName());
 
 			PortalPublishHandler handler = getPortalPublishHandler(moduleApp.getModuleId());
@@ -412,6 +414,10 @@ public class PortalServiceImpl implements PortalService {
 
 		if(moduleApp.getIconUri() != null){
 			String url = contentServerService.parserUri(moduleApp.getIconUri(), ServiceModuleApp.class.getSimpleName(), moduleApp.getId());
+			dto.setIconUrl(url);
+		}else if(serviceModule != null && serviceModule.getIconUri() != null){
+			//使用模块默认图标
+			String url = contentServerService.parserUri(serviceModule.getIconUri(), ServiceModule.class.getSimpleName(), serviceModule.getId());
 			dto.setIconUrl(url);
 		}
 
@@ -2418,13 +2424,13 @@ public class PortalServiceImpl implements PortalService {
 		item.setMinVersion(1L);
 		item.setItemGroup(itemGroup.getName());
 		item.setItemLocation(location);
-		if(StringUtils.isEmpty(instanceConfig.getTitle())){
+		if(StringUtils.isEmpty(itemGroup.getTitle())){
 			//查询的时候itemName为空会报错
 			item.setItemLabel("default");
 			item.setItemName("default");
 		}else {
-			item.setItemLabel(instanceConfig.getTitle());
-			item.setItemName(instanceConfig.getTitle());
+			item.setItemLabel(itemGroup.getTitle());
+			item.setItemName(itemGroup.getTitle());
 		}
 
 		item.setDeleteFlag(DeleteFlagType.YES.getCode());

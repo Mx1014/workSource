@@ -4,6 +4,7 @@ package com.everhomes.rest.parking;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -87,6 +88,11 @@ public class ParkingLotDTO {
     private String summary;
     private Byte noticeFlag;
     private String noticeContact;
+    private List<String> data;
+    private String province;
+    private String city;
+    private Byte invoiceTypeFlag;
+
     
     public Byte getIdentityCardFlag() {
         return identityCardFlag;
@@ -338,6 +344,38 @@ public class ParkingLotDTO {
 
 	public void setNoticeContact(String noticeContact) {
 		this.noticeContact = noticeContact;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public List<String> getData() {
+		return data;
+	}
+
+	public void setData(List<String> data) {
+		this.data = data;
+	}
+
+	public Byte getInvoiceTypeFlag() {
+		return invoiceTypeFlag;
+	}
+
+	public void setInvoiceTypeFlag(Byte invoiceTypeFlag) {
+		this.invoiceTypeFlag = invoiceTypeFlag;
 	}
 
 	@Override

@@ -20,6 +20,8 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
+-- REMARK: /yellowPage/transferMainAllianceOwnerType 参数ownerId 填 1802， 将返回的字符串发给我确认
+-- REMARK: /yellowPage/transferAllianceModuleUrl 参数ownerId 填 1802， 将返回的字符串发给我确认
 -- REMARK: /yellowPage/transferApprovalToForm 参数ownerId 填 1802， 将返回的字符串发给我确认
 -- REMARK: /yellowPage/transferPadItems 参数ownerId 填 1802， 将返回的字符串发给我确认
 
@@ -38,7 +40,7 @@
 update eh_service_alliance_categories ca, eh_service_alliances sa 
 set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
 ,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
-where ca.parent_id = 0 and sa.`type` = ca.id;
+where ca.parent_id = 0 and sa.`type` = ca.id and a.owner_type = 'organaization';
 
 
 -- 迁移2.调整ca表子类的ownerType ownerId, type

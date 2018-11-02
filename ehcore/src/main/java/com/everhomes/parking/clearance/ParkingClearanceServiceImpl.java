@@ -194,8 +194,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(Long orgId, Long parkingLotId) {
-        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
-                !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
+//        if (!userPrivilegeMgr.checkSuperAdmin(currUserId(), orgId) ||
+//                !checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
+        if (!checkApplyUser(parkingLotId, ParkingClearanceOperatorType.APPLICANT)) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Insufficient privilege");
         }
@@ -205,6 +206,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     private boolean checkApplyUser(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
         ParkingClearanceOperator applicant = clearanceOperatorProvider
                 .findByParkingLotIdAndUid(parkingLotId, currUserId(), operatorType.getCode());
+        
+        LOGGER.info("userID : " + currUserId() + " parkingLot : " + parkingLotId);
         if (applicant == null) {
             return false;
         }
@@ -354,7 +357,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
-
         this.validate(cmd);
         this.checkApplicantAuthority(cmd.getOrganizationId(), cmd.getParkingLotId());
 
@@ -529,9 +531,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             }
         } else {
             parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
-            if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
-                for (ParkingLot parkingLot : parkingLots) {
-                    try {
+        }
+        if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
+            for (ParkingLot parkingLot : parkingLots) {
+                try {
+
 
                         checkApplicantAuthority(cmd.getOrganizationId(), parkingLot.getId());
 
@@ -543,7 +547,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                     }
                 }
             }
-        }
         return new CheckAuthorityResponse(status.getCode(), message);
     }
 
