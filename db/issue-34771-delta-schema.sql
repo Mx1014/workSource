@@ -163,14 +163,14 @@ ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '�
 ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
 
 -- AUTHOR: 杨崇鑫   20181017
--- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表）
 -- REMARK: 增加项目-时间段（月份）统计结果集表
 CREATE TABLE `eh_payment_bill_statistic_community` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
   `owner_id` BIGINT,
-  `owner_type` VARCHAR(64),  
-  `date_str` VARCHAR(10),  
+  `owner_type` VARCHAR(64),
+  `date_str` VARCHAR(10),
   `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
   `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
   `tax_amount` DECIMAL(10,2) COMMENT '税额',
@@ -179,26 +179,26 @@ CREATE TABLE `eh_payment_bill_statistic_community` (
   `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
   `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
   `amount_exemption` DECIMAL(10,2) COMMENT 'amount reduced',
-  `amount_supplement` DECIMAL(10,2) COMMENT 'amount increased',  
-  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `amount_supplement` DECIMAL(10,2) COMMENT 'amount increased',
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数',
   `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
   `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
   `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='项目-时间段（月份）统计结果集表';
 
 -- AUTHOR: 杨崇鑫   20181022
--- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表）
 -- REMARK: 增加楼宇-时间段（月份）统计结果集表
 CREATE TABLE `eh_payment_bill_statistic_building` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER,
   `owner_id` BIGINT,
-  `owner_type` VARCHAR(64), 
+  `owner_type` VARCHAR(64),
   `building_id` BIGINT(20),
   `building_name` VARCHAR(256),
-  `date_str` VARCHAR(10), 
+  `date_str` VARCHAR(10),
   `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
   `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
   `tax_amount` DECIMAL(10,2) COMMENT '税额',
@@ -206,17 +206,17 @@ CREATE TABLE `eh_payment_bill_statistic_building` (
   `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
   `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
   `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
-  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数',
   `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
   `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
   `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
-  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇-时间段（月份）统计结果集表';
 
 -- AUTHOR: 唐岑   20181021
--- REMARK: 资产管理V3.4（资产统计报表） 
--- REMARK: 项目信息报表结果集（项目-月份） 
+-- REMARK: 资产管理V3.4（资产统计报表）
+-- REMARK: 项目信息报表结果集（项目-月份）
 CREATE TABLE `eh_property_statistic_community` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11),
@@ -242,8 +242,8 @@ CREATE TABLE `eh_property_statistic_community` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目信息报表结果集（项目-月份）';
 
 -- AUTHOR: 唐岑   20181021
--- REMARK: 资产管理V3.4（资产统计报表） 
--- REMARK: 楼宇信息报表结果集（楼宇-月份） 
+-- REMARK: 资产管理V3.4（资产统计报表）
+-- REMARK: 楼宇信息报表结果集（楼宇-月份）
 CREATE TABLE `eh_property_statistic_building` (
   `id` bigint(20) NOT NULL,
   `namespace_id` int(11),
@@ -266,7 +266,7 @@ CREATE TABLE `eh_property_statistic_building` (
   `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）';
 
 
 -- AUTHOR: 李清岩 20181029
@@ -516,7 +516,14 @@ ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint
 
 -- AUTHOR: 唐岑
 -- REMARK： 删除eh_organization_address_mappings表中的外键
-ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;-- 标注版zuolin-base-2.1之前的脚本
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+
+-- AUTHOR: 刘一麟
+-- REMARK： 门禁临时授权有效期添加默认值
+ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
+-- 标注版zuolin-base-2.1之前的脚本
 
 
 -- -- 广告管理 v1.4 加字段    add by xq.tian  2018/03/07
@@ -1340,10 +1347,3 @@ ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
 
 
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
-
-
--- AUTHOR: 刘一麟
--- REMARK： 门禁临时授权有效期添加默认值
-ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
-ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
-ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
