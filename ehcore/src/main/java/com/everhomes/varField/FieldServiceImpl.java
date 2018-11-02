@@ -258,7 +258,7 @@ public class FieldServiceImpl implements FieldService {
             cccmd.setNamespaceId(UserContext.getCurrentNamespaceId());
             List<CustomerConfigurationDTO> customerConfigurations = customerService.listSyncPotentialCustomer(cccmd);
             for(CustomerConfigurationDTO dto : customerConfigurations){
-                if(dto.getScopeType().equals("activity") && dto.getStatus() == 2){
+                if(dto.getScopeType().equals("activity") && dto.getStatus() == 2 && dto.getValue() == 1){
                     List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
                     if (activityCategories != null && activityCategories.size() > 0) {
                         activityCategories.forEach((a) -> {
@@ -273,7 +273,7 @@ public class FieldServiceImpl implements FieldService {
                     }
                     continue;
                 }
-                if(dto.getScopeType().equals("service_alliance") && dto.getStatus() == 2){
+                if(dto.getScopeType().equals("service_alliance") && dto.getStatus() == 2 && dto.getValue() == 1){
                     //add service alliance categories
                     ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
                     cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -653,7 +653,7 @@ public class FieldServiceImpl implements FieldService {
             cccmd.setNamespaceId(namespaceId);
             List<CustomerConfigurationDTO> customerConfigurations = customerService.listSyncPotentialCustomer(cccmd);
             for(CustomerConfigurationDTO ccdto : customerConfigurations){
-                if(ccdto.getScopeType().equals("activity") && ccdto.getStatus() == 2){
+                if(ccdto.getScopeType().equals("activity") && ccdto.getStatus() == 2 && ccdto.getValue() == 1){
                     List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
                     if (activityCategories != null && activityCategories.size() > 0) {
                         activityCategories.forEach((a) -> {
@@ -668,7 +668,7 @@ public class FieldServiceImpl implements FieldService {
                     }
                     continue;
                 }
-                if(ccdto.getScopeType().equals("service_alliance") && ccdto.getStatus() == 2){
+                if(ccdto.getScopeType().equals("service_alliance") && ccdto.getStatus() == 2 && ccdto.getValue() == 1){
                     //add service alliance categories
                     ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
                     cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
