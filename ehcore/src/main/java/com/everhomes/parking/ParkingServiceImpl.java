@@ -57,10 +57,13 @@ import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
 import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.promotion.merchant.GetPayUserByMerchantIdCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantCommand;
 import com.everhomes.rest.promotion.merchant.GetPayUserListByMerchantDTO;
 import com.everhomes.rest.promotion.merchant.ListPayUsersByMerchantIdsCommand;
 import com.everhomes.rest.promotion.merchant.controller.GetMerchantListByPayUserIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
+import com.everhomes.rest.promotion.merchant.controller.GetPayerInfoByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.merchant.controller.ListPayUsersByMerchantIdsRestResponse;
 import com.everhomes.rest.promotion.order.BusinessPayerType;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderResponse;
@@ -69,6 +72,7 @@ import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
 import com.everhomes.rest.promotion.order.OrderDescriptionEntity;
+import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
 import com.everhomes.rest.order.*;
 import com.everhomes.rest.order.OrderType;
@@ -339,7 +343,14 @@ public class ParkingServiceImpl implements ParkingService {
 						RuleSourceType.RESOURCE.getCode(), dto.getId());
 				dto.setVipParkingUrl(homeUrl + detailUrl);
 			}
-
+			if (r.getDefaultData() != null && r.getDefaultData().length() >0){
+				dto.setData(Arrays.asList(r.getDefaultData().split(",")));
+			}
+			if (r.getDefaultPlate() != null && r.getDefaultPlate().length() >0){
+				String[] plate = r.getDefaultPlate().split(",");
+				dto.setProvince(plate[0]);
+				dto.setCity(plate[1]);
+			}
 			dto.setFlowId(null);
 			dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 			if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
@@ -1062,9 +1073,11 @@ public class ParkingServiceImpl implements ParkingService {
 		CreateOrderCommand createOrderCommand = new CreateOrderCommand();
 		//公众号支付
 		String paySource = ParkingPaySourceType.APP.getCode();
-		if (paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+		if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
 			paySource = ParkingPaySourceType.QRCODE.getCode();
 //			createOrderCommand.setPayerUserId(configProvider.getLongValue("parking.order.defaultpayer",1041));
+		} else if(paymentType != null && paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			paySource = ParkingPaySourceType.PUBLICACCOUNT.getCode();
 		}
 
 //		ListBizPayeeAccountDTO payerDto = parkingProvider.createPersonalPayUserIfAbsent(user.getId() + "",
@@ -1077,12 +1090,15 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_NO_PAYEE_ACCOUNT,
 					"");
 		}
-
+		//根据merchantId获取payeeId
+		GetPayUserByMerchantIdCommand getPayUserByMerchantIdCommand = new GetPayUserByMerchantIdCommand();
+		getPayUserByMerchantIdCommand.setMerchantId(payeeAccounts.get(0).getPayeeId());
+		GetPayerInfoByMerchantIdRestResponse getPayerInfoByMerchantIdRestResponse = orderService.getPayerInfoByMerchantId(getPayUserByMerchantIdCommand);
 		createOrderCommand.setAccountCode(sNamespaceId);
 		createOrderCommand.setBizOrderNum(generateBizOrderNum(sNamespaceId,OrderType.OrderTypeEnum.PARKING.getPycode(),parkingRechargeOrder.getId()));
 		createOrderCommand.setClientAppName(clientAppName);//todoed
 
-		createOrderCommand.setPayeeUserId(payeeAccounts.get(0).getPayeeId());
+		createOrderCommand.setPayeeUserId(getPayerInfoByMerchantIdRestResponse.getResponse().getId());
 		
 		parkingRechargeOrder.setPayeeId(createOrderCommand.getPayeeUserId());
 		parkingRechargeOrder.setInvoiceStatus((byte)0);
@@ -1093,6 +1109,7 @@ public class ParkingServiceImpl implements ParkingService {
 		createOrderCommand.setGoodsName(extendInfo);
 		createOrderCommand.setSourceType(1);//下单源，参考com.everhomes.pay.order.SourceType，0-表示手机下单，1表示电脑PC下单
         String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+		//String homeurl = "http://10.1.110.79:8080";
 		//String callbackurl = String.format(configProvider.getValue("parking.pay.callBackUrl", "%s/evh/parking/notifyParkingRechargeOrderPaymentV2"), homeurl);
 		String callbackurl = homeurl + contextPath + configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.pay.callBackUrl", "/parking/notifyParkingRechargeOrderPaymentV2");
 		createOrderCommand.setBackUrl(callbackurl);
@@ -1113,6 +1130,17 @@ public class ParkingServiceImpl implements ParkingService {
 			Map<String, String> flattenMap = new HashMap<>();
 			flattenMap.put("acct",user.getNamespaceUserToken());
 			//flattenMap.put("acct","11");
+//			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
+//			flattenMap.put("vspCusid",vspCusid);
+			flattenMap.put("payType","no_credit");
+			createOrderCommand.setPaymentParams(flattenMap);
+			createOrderCommand.setCommitFlag(1);
+			createOrderCommand.setOrderType(3);
+			createOrderCommand.setAccountCode(configProvider.getValue(UserContext.getCurrentNamespaceId(),"parking.wx.subnumberpay","NS"+UserContext.getCurrentNamespaceId()));
+		} else if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()){
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			Map<String, String> flattenMap = new HashMap<>();
+			flattenMap.put("acct",user.getNamespaceUserToken());
 //			String vspCusid = configProvider.getValue(UserContext.getCurrentNamespaceId(), "tempVspCusid", "550584053111NAJ");
 //			flattenMap.put("vspCusid",vspCusid);
 			flattenMap.put("payType","no_credit");
@@ -3766,7 +3794,10 @@ public class ParkingServiceImpl implements ParkingService {
 					RuleSourceType.RESOURCE.getCode(), dto.getId());
 			dto.setVipParkingUrl(homeUrl + detailUrl);
 		}
-
+		dto.setData(Arrays.asList(r.getDefaultData().split(",")));
+		String[] plate = r.getDefaultPlate().split(",");
+		dto.setProvince(plate[0]);
+		dto.setCity(plate[1]);
 		dto.setFlowId(null);
 		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 		if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
@@ -3924,7 +3955,8 @@ public class ParkingServiceImpl implements ParkingService {
 		if(lot.getMonthCardFlag()!=null && ParkingConfigFlag.fromCode(lot.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {
 			response.setMonthCardFlow(Byte.valueOf(lot.getFlowMode() == null? (ParkingRequestFlowType.FORBIDDEN.getCode()+""):(lot.getFlowMode() + "")));
 		}
-
+		response.setDefaultData(lot.getDefaultData());
+		response.setDefaultPlate(lot.getDefaultPlate());
 		response.setFlowModeList(flowModeList);
 
 		return response;

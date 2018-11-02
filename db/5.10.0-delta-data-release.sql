@@ -84,6 +84,7 @@ UPDATE eh_service_modules SET client_handler_type = 1 WHERE id in (90100,  18000
 -- REMARK: issue-null 设置路由相关参数
 UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
 UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
+UPDATE eh_service_modules SET `host` = 'community-map' WHERE id = 40070;
 
 
 
@@ -317,12 +318,57 @@ INSERT INTO `eh_flow_predefined_params` (`id`, `namespace_id`, `owner_id`, `owne
 SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id + 1, 'enterpriseApproval.error', '30002', 'zh_CN', '关联表单需要填写才能进入下一步');
 
+-- AUTHOR: 张智伟 20181031
+-- REMARK: issue-40880 离职申请执行下一步，提示“No rights to remove the admin.”无法执行成功。
+SET @string_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@string_id := @string_id +1, 'archives', '200002', 'zh_CN', '无法删除管理员，请先解除其管理权限再重试');
 
 
 -- AUTHOR: 黄良铭
 -- REMARK: 修改积分系统状态
 UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 
+-- AUTHOR: 马世亨 20181031
+-- REMARK: 访客1.3合并访客与访客管理后清除app
+-- REMARK: 访客1.3园区访客地址修改
+delete from eh_service_module_apps where module_id in (42100,52200);
+update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
+
+-- AUTHOR: 黄明波
+-- REMARK: 修改默认新闻为 NewsFlash
+update eh_service_modules set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55, client_handler_type =  0  where id = 10800 and instance_config not like '%"widget"%';
+
+update eh_service_module_apps set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55  where module_id = 10800 and instance_config not like '%"widget"%' ;
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
+where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
+where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+
+
+
+-- AUTHOR: 黄鹏宇 2018年11月1日
+--REMARK: 更改楼宇房源
+update eh_var_fields set display_name = '楼宇' where id = 10965;
+update eh_var_fields set display_name = '房源' where id = 10966;
+update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
+update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
+
+
+-- AUTHOR: 缪洲 2018年11月1日
+--REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
+
+-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌的默认值
+UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
+UPDATE eh_parking_lots SET default_plate = '粤,B';
+
+
+-- AUTHOR: 吴寒
+-- REMARK: 会议室预定发邮件的内容修改
+UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
@@ -399,7 +445,6 @@ INSERT INTO eh_configurations (name, value, description, namespace_id, display_n
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: nanshanquzhengfu
 -- DESCRIPTION: 此SECTION只在南山区政府-999931执行的脚本
-
 -- AUTHOR: 黄良铭
 -- REMARK: 新增ＩＤ为1的积分系统
 INSERT INTO `eh_point_systems` (`id`, `namespace_id`, `display_name`, `point_name`, `point_exchange_flag`, `exchange_point`, `exchange_cash`, `user_agreement`, `status`, `create_time`, `creator_uid`, `update_time`, `update_uid`)

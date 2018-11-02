@@ -9660,7 +9660,8 @@ public class PunchServiceImpl implements PunchService {
                 dto.setRuleType(pr.getRuleType());
                 //获取当天的排班
                 PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
-                if (ptr != null) {
+                //2018-11-1 对未排班的判断增加用unscheduledFlag
+                if (ptr != null && NormalFlag.YES != NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                     dto.setTimeRuleId(ptr.getId());
                     if (ptr.getId() == null || ptr.getId() == 0) {
                         dto.setTimeRuleName("休息");

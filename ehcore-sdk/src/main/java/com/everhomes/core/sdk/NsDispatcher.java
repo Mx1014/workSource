@@ -41,6 +41,7 @@ public class NsDispatcher {
         GetDomainInfoCommand cmd = new GetDomainInfoCommand();
         cmd.setDomain(host);
 
+        // 先使用 default 是为了独立部署的不至于走没用的代码
         SdkClient defaultClient = sdkClientMap.get(NS_DEFAULT);
         DomainDTO domain = getDomain(defaultClient, host);
         if (domain != null && host.equalsIgnoreCase(domain.getDomain())) {
@@ -56,8 +57,9 @@ public class NsDispatcher {
             }
         }
 
-        LOGGER.warn("Dispatcher failed to dispatcher, host={}, ns={}, func={}", host, namespaceId, function);
-        return null;
+        // 没找到的话最后还是用 default
+        LOGGER.warn("Use default client for dispatcher, host={}, ns={}, func={}", host, namespaceId, function);
+        return function.apply(defaultClient);
     }
 
     private DomainDTO getDomain(SdkClient sdkClient, String host) {

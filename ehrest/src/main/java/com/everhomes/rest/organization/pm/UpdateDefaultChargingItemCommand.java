@@ -43,6 +43,7 @@ public class UpdateDefaultChargingItemCommand {
     private Long chargingExpiredTime;
     @ItemType(DefaultChargingItemPropertyDTO.class)
     private List<DefaultChargingItemPropertyDTO> apartments;
+    private Long billGroupId;
 
     public List<DefaultChargingItemPropertyDTO> getApartments() {
         return apartments;
@@ -163,4 +164,12 @@ public class UpdateDefaultChargingItemCommand {
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
     }
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
 }
