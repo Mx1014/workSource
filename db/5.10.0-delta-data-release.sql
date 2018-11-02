@@ -334,6 +334,19 @@ UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 delete from eh_service_module_apps where module_id in (42100,52200);
 update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
 
+-- AUTHOR: 黄明波
+-- REMARK: 修改默认新闻为 NewsFlash
+update eh_service_modules set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55, client_handler_type =  0  where id = 10800 and instance_config not like '%"widget"%';
+
+update eh_service_module_apps set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55  where module_id = 10800 and instance_config not like '%"widget"%' ;
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
+where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
+where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+
+
 
 -- AUTHOR: 黄鹏宇 2018年11月1日
 --REMARK: 更改楼宇房源
@@ -343,8 +356,14 @@ update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10
 update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
 
 
+-- AUTHOR: 缪洲 2018年11月1日
+--REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
-
+-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌的默认值
+UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
+UPDATE eh_parking_lots SET default_plate = '粤,B';
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
