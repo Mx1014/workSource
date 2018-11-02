@@ -351,6 +351,11 @@ UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id
 -- REMARK: 增加用户自定义上传资料与默认车牌的默认值
 UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
 UPDATE eh_parking_lots SET default_plate = '粤,B';
+
+-- AUTHOR: 缪洲
+-- REMARK: 科兴科学园发票类型字段
+UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCarFlag":0,"searchCarFlag":1,"currentInfoType":2,"contact":"18718523489","invoiceFlag":1,"businessLicenseFlag":0,"vipParkingFlag":0,"monthRechargeFlag":1,"identityCardFlag":1,"monthCardFlag":1,"noticeFlag":0,"flowMode":3,"invoiceTypeFlag":1}' WHERE id = 10006;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
