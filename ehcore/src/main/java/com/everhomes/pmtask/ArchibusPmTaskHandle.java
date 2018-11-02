@@ -273,7 +273,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         try {
             for(JSONObject filePath : filePaths){
                 String filename = UUID.randomUUID().toString();
-                json = service.submitEventFile(pk_crop,orderId,filePath.getString("contentUrl"),filename,"",file_type);
+                json = service.submitEventFile(pk_crop,orderId,filePath.getString("contentUrl"),filename,"99999",file_type);
                 LOGGER.debug(json);
                 ArchibusEntity<JSONObject> result = JSONObject.parseObject(json,new TypeReference<ArchibusEntity<JSONObject>>(){});
                 if(!result.isSuccess()){
