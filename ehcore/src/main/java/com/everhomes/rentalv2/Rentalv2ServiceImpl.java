@@ -2437,7 +2437,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
 		//续费 欠费订单重新生成订单号
-		if (bill.getStatus() != SiteBillStatus.PAYINGFINAL.getCode()) {
+		if (bill.getStatus() != SiteBillStatus.PAYINGFINAL.getCode() &&
+				bill.getStatus() != SiteBillStatus.APPROVING.getCode()) {
 			bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 			rentalv2Provider.updateRentalBill(bill);//更新新的订单号
 		}

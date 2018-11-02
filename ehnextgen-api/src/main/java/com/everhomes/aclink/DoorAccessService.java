@@ -276,7 +276,7 @@ public interface DoorAccessService {
     //门禁v3.0.2 创建门禁分组 add by liqingyan
     AclinkGroup createDoorGroup(CreateDoorAccessGroupCommand cmd);
 
-    AclinkGroup updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
+    void updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
 
     ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
 }

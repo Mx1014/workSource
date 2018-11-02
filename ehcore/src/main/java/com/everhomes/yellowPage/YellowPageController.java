@@ -1022,4 +1022,24 @@ public class YellowPageController  extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /yellowPage/transferApprovalFlowCases</b>
+	 * <p>
+	 * 迁移工作流case
+	 * </p>
+	 */
+	@RequestMapping("transferApprovalFlowCases")
+	@RestReturn(value = String.class)
+	public RestResponse transferApprovalFlowCases(UpdateAllianceTagCommand cmd) {
+		if (cmd.getOwnerId() == null || !cmd.getOwnerId().equals(1802L)) {
+			return new RestResponse();
+		}
+		
+		String ret = allianceStandardService.transferApprovalFlowCases();
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription(ret);
+		return response;
+	}
+	
 }

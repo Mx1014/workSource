@@ -180,7 +180,10 @@ public class WechatMessageServiceImpl implements WeChatMessageService {
 
             String accessToken = weChatService.getAccessToken();
 
+            LOGGER.info("sendTemplateMessage info url={}, jsonData={}", SEND_TEMPLATE_URL + accessToken, json);
+
             jsonResult = HttpUtils.postJson(SEND_TEMPLATE_URL + accessToken, json, 30, HTTP.UTF_8);
+
         } catch (IOException e) {
             LOGGER.info("sendTemplateMessage error");
         }
