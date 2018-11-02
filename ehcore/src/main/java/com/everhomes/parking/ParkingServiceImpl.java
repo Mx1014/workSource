@@ -257,6 +257,9 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 
 			for(ParkingCardDTO card: cards) {
+				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()){
+					card.setMonthlyDiscount(parkingLot.getMonthlyDiscount());
+				}
 				if(StringUtils.isBlank(card.getPlateOwnerName())) {
 					card.setPlateOwnerName(plateOwnerName);
 				}
@@ -2065,6 +2068,7 @@ public class ParkingServiceImpl implements ParkingService {
 					BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
 							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					dto.setPrice(newPrice);
+					dto.setTempFeeDiscount(parkingLot.getTempFeeDiscount());
 				}
 			}
 		}
