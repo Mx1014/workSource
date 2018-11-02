@@ -56,6 +56,9 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/pmtask" -d '
           },
           "star" : {
               "type" : "String"
+          },
+          "taskCategoryId" : {
+              "type" : "long"
           }
         }
       }
