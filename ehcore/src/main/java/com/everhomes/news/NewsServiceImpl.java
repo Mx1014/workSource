@@ -2241,27 +2241,37 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 
-	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
+	@Override
+	public String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
 
 		String encodeTitile = null;
-		try {
-			// 标题为中文时需要转码
-			encodeTitile = URLEncoder.encode(title, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("news title name not can't be encoded :"+ title);
+		if (null != title) {
+			try {
+				// 标题为中文时需要转码
+				encodeTitile = URLEncoder.encode(title, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("news title name not can't be encoded :" + title);
+			}
 		}
-
+	
 		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
 		StringBuilder renderUrl = new StringBuilder(homeUrl);
 		renderUrl.append("/park-news-web/build/index.html?");
 		renderUrl.append("categoryId=" + categoryId);
-		renderUrl.append("&title=" + encodeTitile);
-		renderUrl.append("&widget=" + widget);
+		
+		if (null != title) {
+			renderUrl.append("&title=" + encodeTitile);
+		}
+		
+		if (null == widget) {
+			renderUrl.append("&widget=NewsFlash");
+		} else {
+			renderUrl.append("&widget=" + widget);
+		}
 		renderUrl.append("&timeWidgetStyle=" + timeWidgetStyle);
 		renderUrl.append("&ns=" + namespaceId);
 		renderUrl.append("#/newsList#sign_suffix");
-
 		return renderUrl.toString();
 	}
 
