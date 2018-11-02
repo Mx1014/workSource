@@ -32,7 +32,10 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
     @Override
     public PostGeneralFormDTO postGeneralFormVal(PostGeneralFormValCommand cmd) {
     	
-    	if (YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME.equals(cmd.getSourceType())) {
+    	//为兼容之前版本IOS不支持表单问题，暂时服务联盟以这种方式做特殊处理，下个版本删除
+    	if (cmd.getSourceId() < 0) {
+    		cmd.setSourceType(YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME);
+    		cmd.setSourceId(-cmd.getSourceId());
     		return generalFormService.postGeneralForm(cmd);
     	}
     	
@@ -59,7 +62,11 @@ public class GeneralApprovalFormModuleHandler implements GeneralFormModuleHandle
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-    	if (YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME.equals(cmd.getSourceType())) {
+    	
+    	//为兼容之前版本IOS不支持表单问题，暂时服务联盟以这种方式做特殊处理，下个版本删除
+    	if (cmd.getSourceId() < 0) {
+    		cmd.setSourceType(YellowPageService.SERVICE_ALLIANCE_HANDLER_NAME);
+    		cmd.setSourceId(-cmd.getSourceId());
     		return generalFormService.getTemplateBySourceId(cmd);
     	}
     	
