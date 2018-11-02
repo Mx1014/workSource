@@ -8917,7 +8917,7 @@ public class PunchServiceImpl implements PunchService {
     		result.setPunchType(PunchType.NOT_WORKDAY.getCode());
             if (pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
                 //ptr的id 是空 就是 没排班
-            	if(ptr.getId() == null){
+            	if(NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag()) || ptr.getId() == null){
             		result.setPunchType(PunchType.MEIPAIBAN.getCode());
                 }
             }
