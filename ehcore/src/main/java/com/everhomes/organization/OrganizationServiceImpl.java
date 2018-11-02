@@ -13800,7 +13800,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization org = checkOrganization(organizationId);
         
         //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），非null则更新，null则插入
-        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(organizationMember.getTargetId(),organizationMember.getGroupType(),organizationMember.getOrganizationId(),organizationMember.getContactToken());
+        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(organizationMember.getTargetId(),"DIRECT_UNDER_ENTERPRISE",organizationMember.getOrganizationId(),organizationMember.getContactToken());
         OrganizationMember member = new OrganizationMember();
         member.setOrganizationId(organizationId);
         member.setTargetType(OrganizationMemberTargetType.USER.getCode());
