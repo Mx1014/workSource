@@ -1,5 +1,6 @@
 package com.everhomes.flow_statistics;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.FlowNodeType;
@@ -14,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,9 @@ import java.util.stream.Collectors;
 public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowStatisticsServiceImpl.class);
+
+    //默认小数位
+    private static final int DEFAULT_DECIMAL = 3 ;
 
     @Autowired
     private FlowProvider flowProvider ;
@@ -37,6 +43,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     @Autowired
     private FlowLaneProvider flowLaneProvider ;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     /**
      * 工作流版本查询
@@ -165,6 +174,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             //由秒转化为小时
             if(averageCycle!=0){
                 average = averageCycle.doubleValue()/60/60 ;
+                average = handleDecimal(average);
             }
             dto.setHandleTimes(times);
             dto.setAverageHandleCycle(average);
@@ -186,6 +196,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         //由秒转化为小时
         if(averageCycle != 0){
             average = averageCycle.doubleValue()/60/60 ;
+            average = handleDecimal(average);
         }
         response.setCurrentCycleNodesAverage(average);
         return response;
@@ -244,6 +255,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             //由秒转化为小时
             if(lastAverageCycle!=0){
                 lastAverage = lastAverageCycle.doubleValue()/60/60 ;
+                lastAverage = handleDecimal(lastAverage);
             }
 
             dto.setLastCycleAverage(lastAverage);
@@ -261,6 +273,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             //由秒转化为小时
             if(averageCycle!=0){
                 average = averageCycle.doubleValue()/60/60 ;
+                average = handleDecimal(average);
             }
             dto.setCurrentCycleAverage(average);
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
@@ -270,6 +283,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             }
             if(average != 0){
                 earlyComaredVal = (lastAverage - average) /average ;
+                earlyComaredVal = handleDecimal(earlyComaredVal);
             }
             dto.setEarlyComparedVal(earlyComaredVal);
             response.getDtos().add(dto);
@@ -288,6 +302,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         //由秒转化为小时
         if(averageCycle!=0){
             average = averageCycle.doubleValue()/60/60 ;
+            average = handleDecimal(average);
         }
         response.setCurrentCycleLanesAverage(average);
         return response ;
@@ -343,6 +358,24 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             }
         }
         return false ;
+    }
+
+    //处理小数位数
+    private Double handleDecimal(Double d ){
+
+        if(d == null){
+            return d ;
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String decimalStr = configProvider.getValue(namespaceId,"flow.statistic.decimal", DEFAULT_DECIMAL+"");
+        int decimal = Integer.parseInt(decimalStr);
+        NumberFormat nf = NumberFormat.getNumberInstance();
+        // 保留两位小数
+        nf.setMaximumFractionDigits(decimal);
+        // 四舍五入
+        nf.setRoundingMode(RoundingMode.HALF_UP);
+        String result = nf.format(d);
+        return Double.valueOf(result);
     }
 
 }
