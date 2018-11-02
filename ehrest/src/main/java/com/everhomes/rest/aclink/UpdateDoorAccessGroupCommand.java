@@ -11,7 +11,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>groupId:门禁组id 必填</li>
  * <li>groupName:门禁组名称</li>
- * <li>doorIds:下属门禁id</li>
  * <li>status:删除时传0</li>
  * </ul>
  */

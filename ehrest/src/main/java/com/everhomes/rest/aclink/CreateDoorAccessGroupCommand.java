@@ -10,6 +10,24 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateDoorAccessGroupCommand {
 	private String groupName;
+	private Long ownerId;
+	private Byte ownerType;
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Byte getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(Byte ownerType) {
+		this.ownerType = ownerType;
+	}
 
 	public String getGroupName() {
 		return groupName;
