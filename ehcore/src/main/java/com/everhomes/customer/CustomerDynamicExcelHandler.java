@@ -1342,6 +1342,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             customerAdminString = customerAdminString.replaceAll("\n", "");
             customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
 
+
+
             List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
             if(records!=null && records.size()>0){
                 for (CustomerAdminRecord record: records) {
