@@ -355,6 +355,11 @@ update eh_var_fields set display_name = '房源' where id = 10966;
 update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
 update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
 
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸报错信息 20181022
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10026', 'zh_CN', '用户不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10027', 'zh_CN', '初始化失败');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10028', 'zh_CN', '获取数据失败');
 
 -- AUTHOR: 缪洲 2018年11月1日
 --REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
@@ -364,7 +369,15 @@ UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id
 -- REMARK: 增加用户自定义上传资料与默认车牌的默认值
 UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
 UPDATE eh_parking_lots SET default_plate = '粤,B';
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181025
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('6', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0', NULL, '0');
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('9', '0', '0', '投诉建议', '投诉建议', '0', '2', '2017-12-04 13:09:45', NULL, NULL, NULL, '0', NULL, '0');
 
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 国贸对接项目标识 20181031
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.handler-999948', 'archibus', 'archibus handler', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.archibus.areaid-999948', '000000201807140AU8ME', '物业报修国贸区域ID', '0', NULL, NULL);
 
 -- AUTHOR: 缪洲
 -- REMARK: 科兴科学园发票类型字段
@@ -375,6 +388,23 @@ UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCar
 -- REMARK: 会议室预定发邮件的内容修改
 UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
 
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+UPDATE eh_service_modules SET multiple_flag = 1 WHERE id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷app值
+UPDATE eh_service_module_apps SET instance_config = '{"categoryId":0}' WHERE module_id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷广告数据入口
+UPDATE eh_banners SET category_id = 0;
+
+-- AUTHOR: 梁燕龙
+-- REMARK: issue-36940 用户认证，邮箱认证提示文案
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 

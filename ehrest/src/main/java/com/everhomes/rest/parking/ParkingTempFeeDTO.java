@@ -15,7 +15,11 @@ import com.everhomes.util.StringHelper;
  * <li>orderToken: 订单token</li>
  * <li>originalPrice: 原价</li>
  * <li>remainingTime: 剩余免费时间</li>
+<<<<<<< HEAD
  * <li>tempFeeDiscount: 临时车优惠折扣</li>
+=======
+ * <li>temfeeDiscount：临时车优惠折扣</li>
+>>>>>>> 5.10.0
  * </ul>
  */
 public class ParkingTempFeeDTO {

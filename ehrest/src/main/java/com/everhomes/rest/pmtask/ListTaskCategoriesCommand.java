@@ -24,6 +24,8 @@ public class ListTaskCategoriesCommand {
 
 	private Long organizationId;
 
+	private Long appId;
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
@@ -99,5 +101,13 @@ public class ListTaskCategoriesCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 }

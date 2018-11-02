@@ -13,6 +13,7 @@ import java.util.List;
  *     <li>posterPath: 图片uri</li>
  *     <li>targetType: 跳转类型 {@link com.everhomes.rest.banner.BannerTargetType}</li>
  *     <li>targetData: 跳转类型对应的data,每种targetType对应的data都不一样,将targetData对象转换成json字符串的形式</li>
+ *     <li>categoryId: 应用入口ID</li>
  * </ul>
  */
 public class CreateBannerCommand {
@@ -28,6 +29,15 @@ public class CreateBannerCommand {
     @NotNull
     private String targetType;
     private String targetData;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;
