@@ -364,7 +364,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
 			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
 			
-			result.setBuildingCount(buildingCount!=null ? buildingCount : 0);
+			result.setBuildingCount(buildingCount!=null ? buildingCount : null);
 			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
 			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
 			result.setRentApartmentCount(rentApartmentCount!=null ? rentApartmentCount.intValue() : null);
