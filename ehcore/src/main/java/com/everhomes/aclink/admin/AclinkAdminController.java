@@ -521,7 +521,7 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
         doorAccessService.updateDoorGroup(cmd);
-        RestResponse response = new RestResponse(doorAccessService.updateDoorGroup(cmd));
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
