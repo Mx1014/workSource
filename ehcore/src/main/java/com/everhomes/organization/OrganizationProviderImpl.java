@@ -7036,4 +7036,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return userProvider.findUserTargetById(userId);
 	}
+
+	@Override
+	public OrganizationMember listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(
+			Long memberUid, String groupType, Long organizationId, String contactToken) {
+        //1.获取上下文
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        //2.查询eh_organization_members表
+        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
+        
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, OrganizationMember.class));
+            return null;
+        });
+
+        if (null != result && 0 != result.size()) {
+            return result.get(0);
+        }
+        return null;
+
+	}
 }
