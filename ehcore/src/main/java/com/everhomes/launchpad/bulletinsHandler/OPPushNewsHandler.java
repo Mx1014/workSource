@@ -94,7 +94,11 @@ public class OPPushNewsHandler implements OPPushHandler{
 
 
                String host = "news-feed";
-               String router = "zl://" + host + card.getRouterPath() + "?moduleId=10800&clientHandlerType="+card.getClientHandlerType()+"&" + card.getRouterQuery();
+               String router = "zl://" + host + card.getRouterPath() 
+               + "?moduleId=10800&clientHandlerType="+card.getClientHandlerType()
+               +"&newsToken=" + dto.getNewsToken()
+               +"&" + card.getRouterQuery()
+               ;
                card.setRouter(router);
 
                List<Object> properties = new ArrayList<>();

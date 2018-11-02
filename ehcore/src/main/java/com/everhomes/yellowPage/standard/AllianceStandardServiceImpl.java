@@ -685,11 +685,11 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		List<GeneralApprovalVal> vals = queryApprovalVals();
 		for (GeneralApprovalVal val : vals) {
 			total++;
-			List<GeneralFormVal> fVals = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(),
-					val.getFlowCaseId());
-			if (!CollectionUtils.isEmpty(fVals)) {
-				continue;
-			}
+//			List<GeneralFormVal> fVals = generalFormValProvider.queryGeneralFormVals(EhFlowCases.class.getSimpleName(),
+//					val.getFlowCaseId());
+//			if (!CollectionUtils.isEmpty(fVals)) {
+//				continue;
+//			}
 			
 			GeneralForm form = generalFormProvider.getGeneralFormByApproval(val.getFormOriginId(), val.getFormVersion());
 			if (null == form) {
