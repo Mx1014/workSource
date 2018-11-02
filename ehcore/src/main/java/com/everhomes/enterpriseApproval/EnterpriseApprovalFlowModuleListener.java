@@ -229,7 +229,7 @@ public class EnterpriseApprovalFlowModuleListener implements FlowModuleListener 
                         break;
                     case MULTI_SELECT:
                         //多选　
-                        generalApprovalFieldProcessor.processMultiSelectField(entities,e, val.getFieldStr3());
+                        generalApprovalFieldProcessor.processMultiSelectField(entities,e, value.getFieldValue());
                         break;
                 }
             }
