@@ -27,6 +27,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
@@ -1627,10 +1628,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		AppContext appContext = UserContext.current().getAppContext();
 		ListNewsCommand listCmd = new ListNewsCommand();
 		listCmd.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
-		listCmd.setOwnerId(appContext.getCommunityId());
+		listCmd.setOwnerId(getCommunityIdByAppContext());
 		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setPageAnchor(cmd.getPageAnchor());
 		listCmd.setPageSize(cmd.getPageSize());
@@ -1941,9 +1941,8 @@ public class NewsServiceImpl implements NewsService {
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
-		AppContext appContext = UserContext.current().getAppContext();
 
-		String jsonString = getSearchJson(appContext.getCommunityId(), null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
+		String jsonString = getSearchJson(getCommunityIdByAppContext(), null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
 				NewsStatus.ACTIVE.getCode(), true);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
@@ -2617,6 +2616,20 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		return null;
+	}
+	
+	private Long getCommunityIdByAppContext() {
+		AppContext appContext = UserContext.current().getAppContext();
+		if (null != appContext.getCommunityId()) {
+			return appContext.getCommunityId();
+		}
+		
+		List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+		if (!CollectionUtils.isEmpty(requests)) {
+			return requests.get(0).getCommunityId();
+		}
+		 
+		 return null;
 	}
 
 
