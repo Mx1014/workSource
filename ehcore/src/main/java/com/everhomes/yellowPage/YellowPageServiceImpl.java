@@ -17,6 +17,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
@@ -26,6 +27,7 @@ import com.everhomes.flow.FlowEvaluateItemProvider;
 import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.GeneralForm;
@@ -386,7 +388,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	AllianceStandardService allianceStandardService;
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
-	
+	@Autowired
+	private FlowProvider flowProvider;
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
