@@ -174,7 +174,12 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
-
+        
+    	//传入参数id必须不能为null，add by moubinmo，20181102
+    	if(id == null){
+    		return new Community();
+    	}
+    	
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
             (DSLContext context, Object reducingContext) -> {
                 EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
