@@ -714,8 +714,9 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationSystemAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+    	//查看管理员的功能不进行权限校验 #41146
+        //SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        //resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSystemAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

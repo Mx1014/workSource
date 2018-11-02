@@ -55,6 +55,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
@@ -9644,12 +9645,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return map;
     }
 
-    public static void main(String[] args) {
-        String s = "/1000750/1003880/1003883/1003903";
-        String[] pathArr = s.split("/");
-        System.out.println();
-    }
-
     /**
      * 修改用户 通讯录的对应信息
      *
@@ -13271,6 +13266,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
+
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+        // 说明这是一个子模块, 再看他有没有父模块的责任部门授权
+        if (module != null && module.getPath().split("/").length > 2) {
+            String[] split = module.getPath().split("/");
+            for (int i = 2; i < split.length; i++) {
+                // 父模块授权信息
+                assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), Long.valueOf(split[i])));
+            }
+        }
+
         //如果本身是子项目,则查询其父项目对应的assignments
         ResourceCategory rc = communityProvider.findResourceCategoryById(cmd.getOwnerId());
         if(rc != null){//是子项目

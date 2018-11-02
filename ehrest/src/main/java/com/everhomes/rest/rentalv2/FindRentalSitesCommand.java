@@ -36,6 +36,7 @@ public class FindRentalSitesCommand {
 	private Byte endTimeAmOrPm;
 
 	private String sceneType;
+	private String sceneToken;
 
 	private Long anchor;
 	private Integer pageSize;
@@ -146,5 +147,13 @@ public class FindRentalSitesCommand {
 
 	public void setEndTimeAmOrPm(Byte endTimeAmOrPm) {
 		this.endTimeAmOrPm = endTimeAmOrPm;
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
 	}
 }

@@ -346,6 +346,8 @@ where namespace_id=999938 and action_type in (48, 55) and action_data like '%"wi
 update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
 where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
 
+update eh_service_modules set client_handler_type = 2 where id = 10500;
+
 
 
 -- AUTHOR: 黄鹏宇 2018年11月1日
