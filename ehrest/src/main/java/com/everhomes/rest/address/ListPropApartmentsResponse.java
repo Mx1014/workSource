@@ -33,8 +33,26 @@ public class ListPropApartmentsResponse {
 	private Integer hasOwnerCount;
 	private Integer noOwnerCount;
 	private Integer occupiedCount;
+	private Integer signedUpCount;
+	private Integer waitingRoomCount;
 	@ItemType(PropFamilyDTO.class)
 	private List<PropFamilyDTO> resultList;
+
+	public Integer getSignedUpCount() {
+		return signedUpCount;
+	}
+
+	public void setSignedUpCount(Integer signedUpCount) {
+		this.signedUpCount = signedUpCount;
+	}
+
+	public Integer getWaitingRoomCount() {
+		return waitingRoomCount;
+	}
+
+	public void setWaitingRoomCount(Integer waitingRoomCount) {
+		this.waitingRoomCount = waitingRoomCount;
+	}
 
 	public Integer getOccupiedCount() {
 		return occupiedCount;

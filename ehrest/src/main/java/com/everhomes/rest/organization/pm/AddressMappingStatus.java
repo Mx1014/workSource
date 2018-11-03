@@ -20,7 +20,9 @@ public enum AddressMappingStatus {
 	FREE((byte)3, "待租"),
 	SALED((byte)4, "已售"),
 	UNSALE((byte)5, "待售"),
-    OCCUPIED((byte)6, "已占用");
+    OCCUPIED((byte)6, "已占用"),
+	SIGNEDUP((byte)7, "待签约"),
+    WAITINGROOM((byte)8, "待接房");
     
     private byte code;
     private String desc;

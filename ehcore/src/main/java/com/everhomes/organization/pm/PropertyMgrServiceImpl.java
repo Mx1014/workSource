@@ -3302,6 +3302,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		map.put(AddressMappingStatus.SALED.getCode(), 0);
 		map.put(AddressMappingStatus.UNSALE.getCode(), 0);
 		map.put(AddressMappingStatus.OCCUPIED.getCode(), 0);
+		map.put(AddressMappingStatus.SIGNEDUP.getCode(), 0);
+		map.put(AddressMappingStatus.WAITINGROOM.getCode(), 0);
 
 		for (PropFamilyDTO propFamilyDTO : resultList) {
 			map.put(propFamilyDTO.getLivingStatus(), map.get(propFamilyDTO.getLivingStatus()) + 1);
@@ -3315,7 +3317,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		statistics.setSaledCount(map.get(AddressMappingStatus.SALED.getCode()));
 		statistics.setUnsaleCount(map.get(AddressMappingStatus.UNSALE.getCode()));
 		statistics.setOccupiedCount(map.get(AddressMappingStatus.OCCUPIED.getCode()));
-		statistics.setAptCount(statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
+		statistics.setSignedUpCount(map.get(AddressMappingStatus.SIGNEDUP.getCode()));
+		statistics.setWaitingRoomCount(map.get(AddressMappingStatus.WAITINGROOM.getCode()));
+		
+		statistics.setAptCount(statistics.getWaitingRoomCount() + statistics.getSignedUpCount() + statistics.getDefaultCount() + statistics.getLiveCount() + statistics.getRentCount() + statistics.getFreeCount() + statistics.getSaledCount() + statistics.getUnsaleCount() + statistics.getOccupiedCount());
 		statistics.setUserCount(userCount);
 		statistics.setHasOwnerCount(statistics.getLiveCount() + statistics.getRentCount() + statistics.getSaledCount());
 		statistics.setNoOwnerCount(statistics.getFreeCount() + statistics.getUnsaleCount());

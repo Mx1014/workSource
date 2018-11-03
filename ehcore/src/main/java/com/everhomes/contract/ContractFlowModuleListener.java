@@ -46,11 +46,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.jsp.jstl.core.LoopTag;
 
 /**
  * Created by ying.xiong on 2017/8/21.
@@ -189,6 +186,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         if(FlowStepType.APPROVE_STEP.equals(ctx.getStepType()) || FlowStepType.END_STEP.equals(ctx.getStepType())) {
             if(ContractStatus.WAITING_FOR_APPROVAL.equals(ContractStatus.fromStatus(contract.getStatus()))) {
                 contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
+                dealAddressLivingStatus(contract, AddressMappingStatus.WAITINGROOM.getCode());
                 contractProvider.updateContract(contract);
                 contractSearcher.feedDoc(contract);
                 //记录合同事件日志，by tangcen
@@ -210,7 +208,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         			
         			long assetCategoryId = 0l;
     				if(contract.getCategoryId() != null){
-    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(21200l, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
+    					assetCategoryId = assetProvider.getOriginIdFromMappingApp(ServiceModuleConstants.CONTRACT_MODULE, contract.getCategoryId(), ServiceModuleConstants.ASSET_MODULE);
     		        }
         			
         			BigDecimal totalAmount = assetProvider.getBillExpectanciesAmountOnContract(contract.getContractNumber(),contract.getId(), assetCategoryId, contract.getNamespaceId());
