@@ -361,10 +361,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
         }
         
-        if(categoryId != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
-        }
-        
         // 必须传对应parentId，如旧版本有数据问题需通过sql解决
     	query.addConditions(ALLIANCES.PARENT_ID.eq(parentId).and(ALLIANCES.PARENT_ID.ne(0L)));
 

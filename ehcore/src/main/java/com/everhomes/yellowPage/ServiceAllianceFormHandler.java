@@ -107,8 +107,11 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 				this.generalFormProvider.updateGeneralForm(form);
 			}
 
-			Flow flow = sa.getFlowId() == null ? null : flowProvider.getSnapshotFlowById(sa.getFlowId());
-
+			Flow flow = null;
+			if (null != sa.getFlowId() && 0 != sa.getFlowId()) {
+				flow = flowProvider.getSnapshotFlowById(sa.getFlowId());
+			}
+			
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
 			cmd21.setApplyUserId(user.getId());
 			cmd21.setReferType(FlowReferType.SERVICE_ALLIANCE.getCode());

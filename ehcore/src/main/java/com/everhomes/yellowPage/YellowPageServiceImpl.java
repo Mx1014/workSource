@@ -1050,12 +1050,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (null == dto.getModuleUrl() || null == dto.getFormId()) {
 			return false;
 		}
+		
+		if (null != dto.getFlowId() && 0 ==  dto.getFlowId()) {
+			return false;
+		}
 
-		if (null != dto.getFlowId()) {
+		if (null != dto.getFlowId() && 0 <  dto.getFlowId()) {
 			Flow flow = flowProvider.getSnapshotFlowById(dto.getFlowId());
 			if (null == flow) {
 				return false;
 			}
+		}
+		
+		if (null == dto.getFlowId() || 0 ==  dto.getFlowId()) {
+			return false;
 		}
 
 		GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(dto.getFormId());
