@@ -14468,6 +14468,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+
+
+                    //在这里我们还需要维护eh_organization_community_requests这张表
+                    //创建OrganizationCommunityRequest类的对象
+                    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                    //将数据封装在对象OrganizationCommunityRequest对象中
+                    organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
+                    organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //// TODO: 2018/5/22
+                    enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
+
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
                         //说明楼栋和门牌不为空，注意他是一个集合
@@ -14493,6 +14507,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             //持久化到数据库
                             //// TODO: 2018/5/28
                             organizationProvider.insertIntoOrganizationAddress(organizationAddress);
+
                         }
                     }
 
