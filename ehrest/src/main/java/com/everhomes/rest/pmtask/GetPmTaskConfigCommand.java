@@ -17,6 +17,8 @@ public class GetPmTaskConfigCommand {
     private Long ownerId;
     private Long taskCategoryId;
 
+    private Long appId;
+
     public Long getId() {
         return id;
     }
@@ -55,5 +57,13 @@ public class GetPmTaskConfigCommand {
 
     public void setTaskCategoryId(Long taskCategoryId) {
         this.taskCategoryId = taskCategoryId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }
