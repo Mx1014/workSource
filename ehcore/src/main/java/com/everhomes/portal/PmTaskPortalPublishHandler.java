@@ -1,21 +1,14 @@
 package com.everhomes.portal;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.pmtask.PmTaskProvider;
-import com.everhomes.pmtask.PmTaskTarget;
-import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.pmtask.PmTaskAppType;
-import com.everhomes.rest.portal.PmTaskInstanceConfig;
+import com.everhomes.rest.portal.*;
 import com.everhomes.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by sfyan on 2017/8/30.
@@ -46,7 +36,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     public final static String SEPARATOR = "/";
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
+    public String publish(Integer namespaceId, String instanceConfig, String itemLabel, HandlerPublishCommand cmd) {
         PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
 
         Long taskCategoryId = pmTaskInstanceConfig.getTaskCategoryId();
@@ -100,12 +90,12 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         String homeUrl = configurationProvider.getValue(namespaceId,"home.url","");
         String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix");
         String Url = homeUrl + SEPARATOR + Uri;
@@ -161,12 +151,12 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 //    }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig){
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd){
 
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
             PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
@@ -192,7 +182,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String actionData, String instanceConfig){
         if(moudleId.equals(FlowConstants.PM_TASK_MODULE)){
-            String taskCategoryId = getCustomTag(namespaceId, moudleId, instanceConfig);
+            String taskCategoryId = getCustomTag(namespaceId, moudleId, instanceConfig, null);
             if (Long.valueOf(taskCategoryId) == PmTaskAppType.REPAIR_ID) {
                 return 20100L;
             }else if (Long.valueOf(taskCategoryId) == PmTaskAppType.SUGGESTION_ID) {

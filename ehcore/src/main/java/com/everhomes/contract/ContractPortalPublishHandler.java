@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.everhomes.rest.portal.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.news.NewsStatus;
-import com.everhomes.rest.portal.ContractInstanceConfig;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
@@ -33,7 +33,7 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 	private ConfigurationProvider configurationProvider;
 
 	@Override
-	public String publish(Integer namespaceId, String instanceConfig, String appName) {
+	public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
 		LOGGER.error("publish contract. instanceConfig = {}, itemLabel = {}", instanceConfig, appName);
 		ContractInstanceConfig contractInstanceConfig = (ContractInstanceConfig) StringHelper
 				.fromJsonString(instanceConfig, ContractInstanceConfig.class);
@@ -52,12 +52,12 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
 		return instanceConfig;
 	}
 
 	@Override
-	public String getItemActionData(Integer namespaceId, String instanceConfig) {
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
 		ContractInstanceConfig map = (ContractInstanceConfig) StringHelper.fromJsonString(instanceConfig,
 				ContractInstanceConfig.class);
 		String categoryId = String.valueOf(map.getCategoryId());
@@ -72,14 +72,14 @@ public class ContractPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+	public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
 		return actionData;
 	}
 
 	final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*)");
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
 		if (instanceConfig != null && instanceConfig.length() != 0) {
 			Matcher m = pattern.matcher(instanceConfig);
 			if (m.find()) {

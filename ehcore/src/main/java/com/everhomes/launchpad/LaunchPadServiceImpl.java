@@ -68,6 +68,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.portal.ClientHandlerType;
+import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.servicemoduleapp.ListServiceModuleAppsByOrganizationIdCommand;
@@ -2982,7 +2983,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
 			String itemActionData = serviceModuleApp.getInstanceConfig();
 			if(portalPublishHandler != null){
-				itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+				HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+				handlerCmd.setAppId(serviceModuleApp.getId());
+				handlerCmd.setAppOriginId(serviceModuleApp.getOriginId());
+				itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig(), handlerCmd);
 			}
 
 
@@ -3091,7 +3095,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				if(serviceModuleApp != null){
 					PortalPublishHandler portalPublishHandler = portalService.getPortalPublishHandler(serviceModuleApp.getModuleId());
 					if(portalPublishHandler != null){
-						itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig());
+						HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+						handlerCmd.setAppOriginId(serviceModuleApp.getOriginId());
+						handlerCmd.setAppId(serviceModuleApp.getId());
+
+						itemActionData = portalPublishHandler.getItemActionData(serviceModuleApp.getNamespaceId(), serviceModuleApp.getInstanceConfig(), handlerCmd);
 					}
 				}
 			}
