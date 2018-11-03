@@ -457,6 +457,49 @@ UPDATE eh_banners SET category_id = 0;
 SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 任务迁移
+-- REMARK: 执行前备份eh_pm_tasks表！！！
+update eh_pm_tasks t1,eh_categories t2 set t1.app_id = t2.parent_id where t2.id = t1.task_category_id;
+update eh_pm_tasks t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.app_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 通用配置迁移
+update eh_pm_task_configs t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.task_category_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 物业报修类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 6;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 6);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 6));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 6 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 物业报修类型迁移 END
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 投诉建议类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 9;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 9);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 9));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 9 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 投诉建议类型迁移 END
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
