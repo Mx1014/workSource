@@ -5226,6 +5226,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public void excuteMessage(AclinkWebSocketMessage cmd) {
 		String msg = cmd.getPayload();
 		String uuid = cmd.getUuid();
+		LOGGER.info(String.format("decoding msg:{%s} from device uuid: {%s}", msg,uuid));
 		DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(uuid);
 		if(door == null){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
@@ -5260,16 +5261,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				LOGGER.info("validate auth count failed");
 			}
 		}else if(cmdNumber == 0xf){
-//			AclinkLogCreateCommand cmds = new AclinkLogCreateCommand();
-//			List<AclinkLogItem> listLogItems = new ArrayList<AclinkLogItem>();
 			AclinkLogItem logItem = new AclinkLogItem();
-//			logItem.setAuthId(authId);
-//			logItem.setKeyId(keyId);
-//			logItem.setNamespaceId(namespaceId);
+			Long userId = DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14));
+			// logItem.setKeyId(keyId);
+			// logItem.setNamespaceId(namespaceId);
+			logItem.setUserId(userId);
 			logItem.setDoorId(door.getId());
-			logItem.setUserId(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14)));
 			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)) * 1000);
-			switch (msgArr[14]){
+			switch (msgArr[14]) {
 			case 0x1:
 				logItem.setEventType(3L);
 				break;
@@ -5287,18 +5286,29 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 
 			AclinkLog aclinkLog = ConvertHelper.convert(logItem, AclinkLog.class);
+
 			UserInfo user = userService.getUserSnapshotInfo(logItem.getUserId());
-			
-        	if(user.getPhones() != null && user.getPhones().size() > 0) {
-                   aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());    
-               }
-        	aclinkLog.setUserName(logItem.getUserId() == 1L?"访客":user.getNickName());
-        	aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
-            aclinkLog.setHardwareId(door.getHardwareId());
-            aclinkLog.setOwnerId(door.getOwnerId());
-            aclinkLog.setOwnerType(door.getOwnerType());
-            aclinkLog.setDoorType(door.getDoorType());
-            aclinkLogProvider.createAclinkLog(aclinkLog);
+			if (logItem.getUserId() > 1 && user != null) {
+				if (user.getPhones() != null && user.getPhones().size() > 0) {
+					aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());
+				}
+				aclinkLog.setUserName(user.getNickName());
+
+				// TODO 已失效授权的会查不出,日志整体流程会在3.0之后修改 by liuyilin 20181102
+				DoorAuth auth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(door.getId(), userId, null);
+				if (auth != null) {
+					aclinkLog.setAuthId(auth.getId());
+				}
+			} else {
+				aclinkLog.setUserName("访客");
+			}
+
+			aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
+			aclinkLog.setHardwareId(door.getHardwareId());
+			aclinkLog.setOwnerId(door.getOwnerId());
+			aclinkLog.setOwnerType(door.getOwnerType());
+			aclinkLog.setDoorType(door.getDoorType());
+			aclinkLogProvider.createAclinkLog(aclinkLog);
 		}
 	}
 
