@@ -3788,7 +3788,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else{
 			taskCategoryId = 9L;
 		}
-		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),null,cmd.getAppId());
 		if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
 			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
