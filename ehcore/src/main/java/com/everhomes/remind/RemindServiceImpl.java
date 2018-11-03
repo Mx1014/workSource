@@ -285,6 +285,9 @@ public class RemindServiceImpl implements RemindService  {
     }
 
     private List<EhRemindShares> buildRemindShares(List<ShareMemberDTO> shareMemberDTOS, Remind remind, List<RemindShare> historyShareReminds) {
+    	return buildRemindShares(shareMemberDTOS, remind, historyShareReminds, true);
+    }
+    private List<EhRemindShares> buildRemindShares(List<ShareMemberDTO> shareMemberDTOS, Remind remind, List<RemindShare> historyShareReminds, Boolean sendCreateRemindFlag) {
         if (CollectionUtils.isEmpty(shareMemberDTOS)) {
             return Collections.emptyList();
         }
@@ -304,18 +307,21 @@ public class RemindServiceImpl implements RemindService  {
             remindShare.setSharedSourceName(shareMember.getSourceName());
             shares.add(remindShare);
             if(ShareMemberSourceType.MEMBER_DETAIL == ShareMemberSourceType.fromCode(shareMember.getSourceType())){
-            	if(checkShareRemindInHistory(historyShareReminds, shareMember)){
-            		//已经在历史版本里存在的,就不发消息
-            	}else{
-		            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(shareMember.getSourceId());
-		            if(null != detail && !detail.getTargetId().equals(0L)){
-			            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
-			            trackRemind.setUserId(detail.getTargetId());
-			            trackRemind.setTrackRemindId(remind.getId());
-			            trackRemind.setTrackContractName(remind.getContactName());
-			            trackRemind.setTrackRemindUserId(remind.getUserId());
-			            trackReminds.add(trackRemind);
-		            }
+            	//对于要发共享消息提醒的
+            	if(sendCreateRemindFlag){
+	            	if(checkShareRemindInHistory(historyShareReminds, shareMember)){
+	            		//已经在历史版本里存在的,就不发消息
+	            	}else{
+			            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(shareMember.getSourceId());
+			            if(null != detail && !detail.getTargetId().equals(0L)){
+				            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
+				            trackRemind.setUserId(detail.getTargetId());
+				            trackRemind.setTrackRemindId(remind.getId());
+				            trackRemind.setTrackContractName(remind.getContactName());
+				            trackRemind.setTrackRemindUserId(remind.getUserId());
+				            trackReminds.add(trackRemind);
+			            }
+	            	}
             	}
             }
         });
@@ -1337,7 +1343,7 @@ public class RemindServiceImpl implements RemindService  {
             remindProvider.createRemind(repeatRemind);
             setRemindRedis(repeatRemind);
 
-            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind, null));
+            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind, null, false));
             //origin日程点完成后,origin日程被追踪的日程也会重复一份
             originSubscribeReminds.forEach(remind -> {
                 createSubscribeRemind(repeatRemind, remind.getContactName(), remind.getUserId());
