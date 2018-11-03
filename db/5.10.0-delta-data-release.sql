@@ -524,6 +524,7 @@ update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.ori
 -- AUTHOR: 马世亨
 -- REMARK: 物业报修V3.8 多应用 父类型迁移
 update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `app_id`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('0', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '190', '0', NULL, '0');
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
