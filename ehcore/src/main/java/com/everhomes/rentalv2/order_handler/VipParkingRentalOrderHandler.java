@@ -202,7 +202,7 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     public Long getAccountId(RentalOrder order) {
         List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, order.getNamespaceId(), "community",
                 order.getCommunityId(), order.getRentalResourceId(), "vipParking");
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getPayeeId() != null)
             return  accounts.get(0).getPayeeId();
         //如果没有 查看是否有商户号
         Long merchantId = this.gerMerchantId(order);

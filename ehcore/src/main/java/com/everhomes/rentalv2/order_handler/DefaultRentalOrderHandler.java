@@ -62,12 +62,12 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         //查特殊账户
         List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                 null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
         //查通用账户
         accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                 null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
 
         //如果都没有 查看是否有商户号
