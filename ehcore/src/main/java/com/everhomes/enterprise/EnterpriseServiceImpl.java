@@ -1067,26 +1067,50 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         //设置第几页
         locator.setAnchor(cmd.getPageAnchor());
         //进行非空校验
-        if(cmd.getNamespaceId() != null && cmd.getCommunityId() != null){
-            //说明传进来的参数不为空，那么我们首先需要根据这两个参数进行查询eh_communitys表中
-            //在该域空间下不包含该项目当中的所有项目的编号，注意他会返回一个集合List<Long>
-            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId());
-            //进行非空校验
-            if(CollectionUtils.isNotEmpty(communityIdList)){
-                //说明集合不为空，那么我们就根据该集合进行查询eh_organization_community_requests表，得到一个公司id的集合
-                List<Integer> organizationIdList = organizationProvider.findOrganizationIdListByCommunityIdList(communityIdList);
-                //进行非空校验
-                if(CollectionUtils.isNotEmpty(organizationIdList)){
-                    //说明集合不为空，那么我们就根据该公司编号的集合在eh_organizations表中查询对应的公司的信息，注意他会返回一个List<Organization>集合
-                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
-                    if(CollectionUtils.isNotEmpty(organizationList)){
-                        listEnterpriseResponse.setEnterprises(organizationList);
-                        listEnterpriseResponse.setNextPageAnchor(locator.getAnchor());
-                        return listEnterpriseResponse;
-                    }
-                }
+
+
+        //wtf，我重写好吧
+
+//        if(cmd.getNamespaceId() != null && cmd.getCommunityId() != null){
+//            //说明传进来的参数不为空，那么我们首先需要根据这两个参数进行查询eh_communitys表中
+//            //在该域空间下不包含该项目当中的所有项目的编号，注意他会返回一个集合List<Long>
+//            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId());
+//            //进行非空校验
+//            if(CollectionUtils.isNotEmpty(communityIdList)){
+//                //说明集合不为空，那么我们就根据该集合进行查询eh_organization_community_requests表，得到一个公司id的集合
+//                List<Integer> organizationIdList = organizationProvider.findOrganizationIdListByCommunityIdList(communityIdList);
+//                //进行非空校验
+//                if(CollectionUtils.isNotEmpty(organizationIdList)){
+//                    //说明集合不为空，那么我们就根据该公司编号的集合在eh_organizations表中查询对应的公司的信息，注意他会返回一个List<Organization>集合
+//                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
+//                    if(CollectionUtils.isNotEmpty(organizationList)){
+//                        listEnterpriseResponse.setEnterprises(organizationList);
+//                        listEnterpriseResponse.setNextPageAnchor(locator.getAnchor());
+//                        return listEnterpriseResponse;
+//                    }
+//                }
+//            }
+//        }
+
+
+        if(cmd.getNamespaceId() != null){
+            List<Organization> orgs = organizationProvider.listOrganizationsByNamespaceId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getKeyword(), locator, pageSize);
+
+            if (orgs.size() > pageSize) {
+                Organization organization = orgs.get(pageSize);
+                listEnterpriseResponse.setNextPageAnchor(organization.getId());
+                orgs.remove(orgs.size() - 1);
             }
+
+            List<EnterpriseDTO> dtos = new ArrayList<>();
+
+            for(Organization org: orgs){
+                EnterpriseDTO dto = ConvertHelper.convert(org, EnterpriseDTO.class);
+                dtos.add(dto);
+            }
+            listEnterpriseResponse.setEnterprises(dtos);
         }
+
         return listEnterpriseResponse;
     }
 
