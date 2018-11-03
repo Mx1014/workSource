@@ -184,11 +184,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
-        }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
-        }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
         }
+//        else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }
         return listBookedVisitorsWithOutACL(cmd);
     }
 
@@ -928,9 +929,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
-        } else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
         }
+//        else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
+//        }
         if(cmd.getPairingCode()==null){
             throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown pairingCode "+cmd.getPairingCode());
@@ -994,9 +996,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
-        } else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
         }
+//        else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         ListDevicesResponse devicesResponse = new ListDevicesResponse();
@@ -1881,9 +1884,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysOwnerType visitorsysOwnerType = checkOwnerType(cmd.getOwnerType());
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
-        }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
-            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
         }
+//        else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
+//        }
     }
     @Override
     public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
