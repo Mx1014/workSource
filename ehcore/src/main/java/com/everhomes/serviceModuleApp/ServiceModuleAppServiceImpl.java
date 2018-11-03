@@ -289,6 +289,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 continue;
             }
             ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+            ServiceModuleApp temp = this.serviceModuleAppProvider.findServiceModuleAppById(app.getId());
+            if (temp != null) {
+                dto.setName(app.getName());
+            }
             PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 
             if(null != handler){

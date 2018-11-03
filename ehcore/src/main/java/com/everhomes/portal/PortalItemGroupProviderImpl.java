@@ -147,7 +147,7 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 				.where(Tables.EH_PORTAL_ITEM_GROUPS.INSTANCE_CONFIG.like(instanceConfig))
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.WIDGET.eq(Widget.BANNERS.getCode()))
                 .and(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
-				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.desc())
+				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}
 
