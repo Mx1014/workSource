@@ -370,7 +370,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
         //2、收款商户是否存在，无则报错
         cmd.setMerchantId(this.getRentalOrderMerchant(order.getId()));
-        PayUserDTO payUserDTO = new PayUserDTO();
+        PayUserDTO payUserDTO = null;
         if (cmd.getMerchantId() != null){
             GetPayAccountByMerchantIdCommand cmd2 = new GetPayAccountByMerchantIdCommand();
             cmd2.setId(cmd.getMerchantId());

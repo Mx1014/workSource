@@ -346,10 +346,12 @@ where namespace_id=999938 and action_type in (48, 55) and action_data like '%"wi
 update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
 where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
 
+update eh_service_modules set client_handler_type = 2 where id = 10500;
+
 
 
 -- AUTHOR: 黄鹏宇 2018年11月1日
---REMARK: 更改楼宇房源
+-- REMARK: 更改楼宇房源
 update eh_var_fields set display_name = '楼宇' where id = 10965;
 update eh_var_fields set display_name = '房源' where id = 10966;
 update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
@@ -374,6 +376,55 @@ UPDATE eh_parking_lots SET default_plate = '粤,B';
 INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('6', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0', NULL, '0');
 INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('9', '0', '0', '投诉建议', '投诉建议', '0', '2', '2017-12-04 13:09:45', NULL, NULL, NULL, '0', NULL, '0');
 
+-- AUTHOR: 黄鹏宇 2018年11月1日
+-- REMARK: 更改楼宇房源
+update eh_general_forms set template_text = replace(template_text,'楼栋门牌','楼宇房源') where module_id = 25000;
+update eh_general_form_templates set template_text = '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"remark": "系统自动获取客户管理中该项目下所有客户信息供用户选择；",
+	"disabled": 1,
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼宇房源",
+	"fieldDisplayName": "楼宇房源",
+	"fieldExtra": "{}",
+	"fieldName": "楼宇房源",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"remark": "系统自动获取资产管理中该项目下所有待租门牌供用户选择；",
+	"disabled": 1,
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"remark": "系统自动根据不同的触发不同的操作；",
+	"disabled": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]' where module_id = 25000;
+
 -- AUTHOR: 马世亨
 -- REMARK: 物业报修3.8 国贸对接项目标识 20181031
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.handler-999948', 'archibus', 'archibus handler', '0', NULL, '1');
@@ -384,9 +435,10 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCarFlag":0,"searchCarFlag":1,"currentInfoType":2,"contact":"18718523489","invoiceFlag":1,"businessLicenseFlag":0,"vipParkingFlag":0,"monthRechargeFlag":1,"identityCardFlag":1,"monthCardFlag":1,"noticeFlag":0,"flowMode":3,"invoiceTypeFlag":1}' WHERE id = 10006;
 
 
--- AUTHOR: 吴寒
+-- AUTHOR: 吴寒z
 -- REMARK: 会议室预定发邮件的内容修改
 UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
+
 
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 广告管理修改为多应用
