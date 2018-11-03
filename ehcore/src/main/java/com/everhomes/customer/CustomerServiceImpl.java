@@ -4300,6 +4300,11 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             result = customerAdminContacts;
         }
+        if(result != null && result.size() > 0){
+            List<OrganizationContactDTO> oneAdmin = new ArrayList<>();
+            oneAdmin.add(result.get(0));
+            return oneAdmin;
+        }
         return result;
     }
 
@@ -4950,6 +4955,12 @@ public class CustomerServiceImpl implements CustomerService {
         checkCustomerAuth(cmd.getNamespaceId(), PrivilegeConstants.ENTERPRISE_CUSTOMER_MANAGE_LIST, cmd.getOrgId(), cmd.getCommunityId());
         UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
         organizationService.updateSuperAdmin(cmd2);
+
+        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
+        customer.setAdminFlag((byte)1);
+        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+        enterpriseCustomerSearcher.feedDoc(customer);
+
     }
 
 }
