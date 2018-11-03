@@ -76,6 +76,7 @@ import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.rentalv2.SceneType;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.scheduler.RunningFlag;
@@ -2437,7 +2438,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
 		//续费 欠费订单重新生成订单号
-		if (bill.getStatus() != SiteBillStatus.PAYINGFINAL.getCode()) {
+		if (bill.getStatus() != SiteBillStatus.PAYINGFINAL.getCode() &&
+				bill.getStatus() != SiteBillStatus.APPROVING.getCode()) {
 			bill.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
 			rentalv2Provider.updateRentalBill(bill);//更新新的订单号
 		}
@@ -2493,6 +2495,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (ifCreateNewOrder){
             order.setOrderNo(onlinePayService.createBillId(DateHelper.currentGMTTime().getTime()).toString());
             rentalv2Provider.updateRentalBill(order);//更新新的订单号
+			preOrderCommand.setOrderId(Long.valueOf(order.getOrderNo()));
         }return preOrderCommand;
 	}
 
@@ -5330,7 +5333,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setApprovingUserPrice(dto.getApprovingUserPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberPrice(dto.getOrgMemberPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
-					dto.setOrgMemberOriginalPrice(dto.getApprovingUserOriginalPrice()==null?null:dto.getApprovingUserOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
+					dto.setOrgMemberOriginalPrice(dto.getOrgMemberOriginalPrice()==null?null:dto.getOrgMemberOriginalPrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setApprovingUserInitiatePrice(dto.getApprovingUserInitiatePrice()==null?null:dto.getApprovingUserInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
 					dto.setOrgMemberInitiatePrice(dto.getOrgMemberInitiatePrice()==null?null:dto.getOrgMemberInitiatePrice().multiply(new BigDecimal(rsr.getTimeStep()*2)));
@@ -8980,5 +8983,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (RentalType.HOUR.getCode() == resourceOrders.get(0).getRentalType())
 		    result = result.replaceAll("-","~");//弱智需求。。
 		return result;
+	}
+
+	@Override
+	public String parseSceneToken(String sceneToken) {
+		if (null != sceneToken) {
+			User user = UserContext.current().getUser();
+			SceneTokenDTO sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
+			if (sceneTokenDTO != null){
+				String scene = sceneTokenDTO.getScene();
+				return scene;
+			}
+		}
+		return null;
 	}
 }

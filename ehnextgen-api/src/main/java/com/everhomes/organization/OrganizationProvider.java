@@ -73,6 +73,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
+    OrganizationMember listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(Long memberUid,String groupType,Long organizationId,String contactToken);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 
@@ -965,7 +966,8 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
             Long targetId, Long organizationId);
-    
+    OrganizationMemberDetails findOrganizationMemberDetailsByEmail(String email, Long organizationId);
+
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);
  /**
@@ -989,4 +991,14 @@ public interface OrganizationProvider {
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
 
 	Integer countOrganizationMemberDetails(Long orgId, Long departmentId);
+
+	//用户认证审核
+	Long createUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+	void updateUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+    UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId);
+
+    List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag);
+    //用户认证审核end
 }

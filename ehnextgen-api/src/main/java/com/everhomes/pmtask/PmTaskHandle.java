@@ -16,6 +16,7 @@ public interface PmTaskHandle {
 	String YUE_KONG_JIAN = "yue_kong_jian";
 	String TECHPARK_REDIS_KEY_PREFIX = "techparkSynchronizedData-pmtask";
 	String ZHUZONG = "zhuzong";
+	String ARCHIBUS = "archibus";
 
 	 PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone);
 	 
@@ -39,5 +40,13 @@ public interface PmTaskHandle {
 	Object createThirdTask(HttpServletRequest req);
 	Object listThirdTasks(HttpServletRequest req);
 	Object getThirdTaskDetail(HttpServletRequest req);
+
+	Object getThirdCategories(HttpServletRequest req);
+	Object getThirdProjects(HttpServletRequest req);
+
+	Object createThirdEvaluation(HttpServletRequest req);
+	Object getThirdEvaluation(HttpServletRequest req);
+
+	Object submitThirdAttachment(HttpServletRequest req);
 
 }

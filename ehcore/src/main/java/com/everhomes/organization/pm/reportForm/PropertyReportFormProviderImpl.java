@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
@@ -54,6 +56,9 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 	
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
 	public void createBuildingStatistics(BuildingStatistics buildingStatistics) {
@@ -234,7 +239,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		EhPropertyStatisticCommunity a = Tables.EH_PROPERTY_STATISTIC_COMMUNITY;
 		
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(DSL.sum(a.BUILDING_COUNT),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
+		query.addSelect(DSL.countDistinct(a.COMMUNITY_ID),DSL.sum(a.BUILDING_COUNT),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
 				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
 				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
 		query.addFrom(a);
@@ -244,6 +249,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
 			
+			Integer communityCount = r.getValue(DSL.countDistinct(a.COMMUNITY_ID));
 			BigDecimal buildingCount = r.getValue(DSL.sum(a.BUILDING_COUNT));
 			BigDecimal totalApartmentCount = r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT));
 			BigDecimal freeApartmentCount = r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT));
@@ -252,6 +258,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
 			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
 			
+			result.setCommunityCount(communityCount!=null ? communityCount : null);
 			result.setBuildingCount(buildingCount!=null ? buildingCount.intValue() : null);
 			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
 			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
@@ -288,7 +295,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		EhPropertyStatisticBuilding b = Tables.EH_PROPERTY_STATISTIC_BUILDING;
 		
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(a.ID,a.NAME,
+		query.addSelect(a.ID,a.NAME,a.COMMUNITY_ID,
 				b.TOTAL_APARTMENT_COUNT,b.FREE_APARTMENT_COUNT,b.RENT_APARTMENT_COUNT,
 				b.OCCUPIED_APARTMENT_COUNT,b.LIVING_APARTMENT_COUNT,b.SALED_APARTMENT_COUNT,
 				b.AREA_SIZE,b.RENT_AREA,b.FREE_AREA,b.RENT_RATE,b.FREE_RATE);
@@ -305,6 +312,11 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.fetch().forEach(r->{
 			BuildingReportFormDTO dto = new BuildingReportFormDTO();
 			
+			dto.setCommunityId(r.getValue(a.COMMUNITY_ID));
+			Community community = communityProvider.findCommunityById(dto.getCommunityId());
+			if (community!=null) {
+				dto.setCommunityName(community.getName());
+			}
 			dto.setBuildingId(r.getValue(a.ID));
 			dto.setBuildingName(r.getValue(a.NAME));
 			dto.setTotalApartmentCount(r.getValue(b.TOTAL_APARTMENT_COUNT));
@@ -333,7 +345,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		EhPropertyStatisticBuilding a = Tables.EH_PROPERTY_STATISTIC_BUILDING;
 		
 		SelectQuery<Record> query = context.selectQuery();
-		query.addSelect(DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
+		query.addSelect(DSL.countDistinct(a.BUILDING_ID),DSL.sum(a.TOTAL_APARTMENT_COUNT),DSL.sum(a.FREE_APARTMENT_COUNT),
 				DSL.sum(a.RENT_APARTMENT_COUNT),DSL.sum(a.OCCUPIED_APARTMENT_COUNT),DSL.sum(a.LIVING_APARTMENT_COUNT),
 				DSL.sum(a.SALED_APARTMENT_COUNT),DSL.sum(a.AREA_SIZE),DSL.sum(a.RENT_AREA),DSL.sum(a.FREE_AREA));
 		query.addFrom(a);
@@ -344,6 +356,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
 		query.fetch().forEach(r->{
 			
+			Integer buildingCount = r.getValue(DSL.countDistinct(a.BUILDING_ID));
 			BigDecimal totalApartmentCount = r.getValue(DSL.sum(a.TOTAL_APARTMENT_COUNT));
 			BigDecimal freeApartmentCount = r.getValue(DSL.sum(a.FREE_APARTMENT_COUNT));
 			BigDecimal rentApartmentCount = r.getValue(DSL.sum(a.RENT_APARTMENT_COUNT));
@@ -351,6 +364,7 @@ public class PropertyReportFormProviderImpl implements PropertyReportFormProvide
 			BigDecimal livingApartmentCount = r.getValue(DSL.sum(a.LIVING_APARTMENT_COUNT));
 			BigDecimal saledApartmentCount = r.getValue(DSL.sum(a.SALED_APARTMENT_COUNT));
 			
+			result.setBuildingCount(buildingCount!=null ? buildingCount : null);
 			result.setTotalApartmentCount(totalApartmentCount!=null ? totalApartmentCount.intValue() : null);
 			result.setFreeApartmentCount(freeApartmentCount!=null ? freeApartmentCount.intValue() : null);
 			result.setRentApartmentCount(rentApartmentCount!=null ? rentApartmentCount.intValue() : null);

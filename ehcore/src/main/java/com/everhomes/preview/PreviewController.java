@@ -38,8 +38,6 @@ public class PreviewController extends ControllerBase {
     @RequestMapping("addPreview")
     @RestReturn(value=PreviewDTO.class)
     public RestResponse addPreview(@Valid AddPreviewCommand cmd) {
-        String content = XssCleaner.clean(cmd.getContent());
-        cmd.setContent(content);
     	PreviewDTO result = previewService.addPreview(cmd);
     	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

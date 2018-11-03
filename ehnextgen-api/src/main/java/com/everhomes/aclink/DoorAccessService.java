@@ -13,7 +13,7 @@ public interface DoorAccessService {
     public void onDoorMessageTimeout(Long cmdId);
 
     List<DoorAccessDTO> listDoorAccessByOwnerId(CrossShardListingLocator locator, Long ownerId,
-            DoorAccessOwnerType ownerType, int count);
+                                                DoorAccessOwnerType ownerType, int count);
 
     ListDoorAccessResponse listDoorAccessByOwnerId(ListDoorAccessByOwnerIdCommand cmd);
 
@@ -96,8 +96,9 @@ public interface DoorAccessService {
     AclinkLogListResponse createAclinkLog(AclinkLogCreateCommand cmd);
 
     AclinkQueryLogResponse queryLogs(AclinkQueryLogCommand cmd);
+
     //20180914 add by liqingyan
-    CheckMobilePrivilegeResponse checkMobilePrivilege (CheckMobilePrivilegeCommand cmd);
+    CheckMobilePrivilegeResponse checkMobilePrivilege(CheckMobilePrivilegeCommand cmd);
 
 //    void test();
 
@@ -113,7 +114,7 @@ public interface DoorAccessService {
 
     ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd);
 
-	void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId);
+    void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId);
 
     ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd);
 
@@ -122,24 +123,26 @@ public interface DoorAccessService {
     DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
-//add by liqingyan
+
+    //add by liqingyan
     void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
-//add by liqingyan
-    DoorStatisticResponse doorStatistic (DoorStatisticCommand cmd);
 
-    DoorStatisticByTimeResponse doorStatisticByTime (DoorStatisticByTimeCommand cmd);
+    //add by liqingyan
+    DoorStatisticResponse doorStatistic(DoorStatisticCommand cmd);
 
-    TempStatisticByTimeResponse tempStatisticByTime (TempStatisticByTimeCommand cmd);
+    DoorStatisticByTimeResponse doorStatisticByTime(DoorStatisticByTimeCommand cmd);
+
+    TempStatisticByTimeResponse tempStatisticByTime(TempStatisticByTimeCommand cmd);
 
     String checkAllDoorAuthList();
 
-	public void remoteOpenDoor(String hardwareId);
+    public void remoteOpenDoor(String hardwareId);
 
-	AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
+    AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
 
-	public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
+    public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
 
-	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
+    void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
 
     void exportVisitorDoorAuth(ExportDoorAuthCommand cmd, HttpServletResponse httpResponse);
 
@@ -148,70 +151,71 @@ public interface DoorAccessService {
     String aliTest2(HttpServletRequest request);
 
     ListDoorAuthLevelResponse listDoorAuthLevel(ListDoorAuthLevelCommand cmd);
-    
+
     void deleteDoorAuthLevel(Long id);
-    
+
 //    String faceTest();
 
     //要不要生成门禁二维码信息，如果是 web 端，则需要直接生成给 web
     ListDoorAccessQRKeyResponse listDoorAccessQRKeyAndGenerateQR(
-    		DoorAccessDriverType driverType, boolean generate);
+            DoorAccessDriverType driverType, boolean generate);
 
     void doAlipayRedirect(HttpServletRequest request,
-            HttpServletResponse response);
+                          HttpServletResponse response);
 
     GetVisitorResponse getAlipayQR(HttpServletRequest r);
 
-	public void excuteMessage(AclinkWebSocketMessage cmd);
+    public void excuteMessage(AclinkWebSocketMessage cmd);
 
     DoorAccessGroupResp listDoorAccessByUser(ListDoorAccessByUserCommand cmd);
 
 
-	public QueryDoorAccessByServerResponse listDoorAccessByServerId(QueryDoorAccessByServerCommand cmd);
+    public QueryDoorAccessByServerResponse listDoorAccessByServerId(QueryDoorAccessByServerCommand cmd);
 
-	public ListDoorAccessByGroupIdResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd);
+    public ListDoorAccessByGroupIdResponse listDoorAccessByGroupId(ListDoorAccessByGroupIdCommand cmd);
 
-	public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd);
+    public ListFacialRecognitionKeyByUserResponse listFacialAesUserKeyByUser(ListFacialRecognitionKeyByUserCommand cmd);
 
-	public AesUserKey getAesUserKey(User user, DoorAuth doorAuth);
+    public AesUserKey getAesUserKey(User user, DoorAuth doorAuth);
 
-	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
+    public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
 
-	public int invalidVistorAuth(Long DoorId, String phone);
+    public int invalidVistorAuth(Long DoorId, String phone);
 
-	public ListDoorAccessQRKeyResponse listBusAccessQRKey();
+    public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 
-	public void updateAccessType(Long doorId, byte doorType);
+    public void updateAccessType(Long doorId, byte doorType);
 
-	public ListZLDoorAccessResponse listDoorAccessMacByApp();
+    public ListZLDoorAccessResponse listDoorAccessMacByApp();
 
-	public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd);
+    public GetZLAesUserKeyResponse getAppAesUserKey(GetZLAesUserKeyCommand cmd);
 
-	public void createVisitorBatch(CreateVisitorBatchCommand cmd);
+    public void createVisitorBatch(CreateVisitorBatchCommand cmd);
 
-	public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd);
+    public CreateZLVisitorQRKeyResponse createZLVisitorQRKey(CreateZLVisitorQRKeyCommand cmd);
 
-	public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd);
+    public ListDoorAccessLiteResponse listDoorAccessByOwnerIdLite(QueryDoorAccessAdminCommand cmd);
 
-	public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd);
+    public DoorAccessDTO getDoorAccessById(GetDoorAccessByIdCommand cmd);
 
-	public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
+    public void deleteAuthByOwner(DeleteAuthByOwnerCommand cmd);
+
     //门禁v3.0.6 add by liqingyan
     Long deleteDoorAccessEh(Long doorAccessId);
 
     void changeDoorName(ChangeDoorNameCommand cmd);
 
-    ChangeUpdateFirmwareResponse changeUpdateFirmware (ChangeUpdateFirmwareCommand cmd);
+    ChangeUpdateFirmwareResponse changeUpdateFirmware(ChangeUpdateFirmwareCommand cmd);
 
-    FirmwareNewDTO addFirmware (AddFirmwareCommand cmd);
+    FirmwareNewDTO addFirmware(AddFirmwareCommand cmd);
 
-    FirmwareNewDTO deleteFirmware (DeleteFirmwareCommand cmd);
+    FirmwareNewDTO deleteFirmware(DeleteFirmwareCommand cmd);
 
-    ListFirmwarePackageResponse listFirmwarePackage (ListFirmwarePackageCommand cmd);
+    ListFirmwarePackageResponse listFirmwarePackage(ListFirmwarePackageCommand cmd);
 
     FirmwarePackageDTO uploadFirmwarePackage(UploadFirmwarePackageCommand cmd);
 
-    FirmwarePackageDTO deleteFirmwarePackage (DeleteFirmwarePackageCommand cmd);
+    FirmwarePackageDTO deleteFirmwarePackage(DeleteFirmwarePackageCommand cmd);
 
     void uploadWifi(UploadFirmwarePackageCommand cmd);
 
@@ -219,49 +223,65 @@ public interface DoorAccessService {
 
     void downloadWifi(DownloadBluetoothCommand cmd);
 
-    void deleteBluetooth (DeleteBluetoothCommand cmd);
+    void deleteBluetooth(DeleteBluetoothCommand cmd);
 
-    void deleteWifi (DeleteBluetoothCommand cmd);
+    void deleteWifi(DeleteBluetoothCommand cmd);
 
     ListDoorAccessEhResponse listDoorAccessEh(ListDoorAccessEhCommand cmd);
 
-    ListDoorTypeResponse listDoorType  (ListDoorTypeCommand cmd);
+    ListDoorTypeResponse listDoorType(ListDoorTypeCommand cmd);
 
-    ListFirmwareResponse listFirmware (ListFirmwareCommand cmd);
+    ListFirmwareResponse listFirmware(ListFirmwareCommand cmd);
 
-    DoorStatisticEhResponse doorStatisticEh (DoorStatisticEhCommand cmd);
+    DoorStatisticEhResponse doorStatisticEh(DoorStatisticEhCommand cmd);
+
     //门禁v3.0.2 创建临时授权 add by liqingyan
     DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd);
 
-    ListDoorAuthResponse listTempAuth (SearchDoorAuthCommand cmd);
+    ListDoorAuthResponse listTempAuth(SearchDoorAuthCommand cmd);
+
     //门禁v3.0.1
-	public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
+    public ListFormalAuthResponse listFormalAuth(ListFormalAuthCommand cmd);
 
-	public void updateAuthBatch(UpdateAuthBatchCommand cmd);
+    public void updateAuthBatch(UpdateAuthBatchCommand cmd);
 
-	public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
+    public void createFormalAuthBatch(CreateFormalAuthBatchCommand cmd);
 
-	public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
+    public ListUserAuthResponse listUserKeys(ListAesUserKeyByUserCommand cmd);
 
-	public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
+    public GetUserKeyInfoRespnose getUserKeyInfo(GetUserKeyInfoCommand cmd);
 
-	public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
+    public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
+
     //添加门禁自定义字段 add by liqingyan
-    void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd);
+    void createTempAuthCustomField(CreateTempAuthCustomFieldCommand cmd);
 
     ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd);
 
-    AclinkFormTitlesDTO changeTempAuthCustomField (ChangeTempAuthCustomFieldCommand cmd);
+    AclinkFormTitlesDTO changeTempAuthCustomField(ChangeTempAuthCustomFieldCommand cmd);
 
-	BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd);
+    BatchCreateVisitorsResponse batchCreateVisitors(BatchCreateVisitorsCommand cmd);
 
-	void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
+    void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
-	OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+    OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+    
+    /**
+	 * 常规授权,授权/取消权限,园区下的所有门禁,单个用户/企业下的所有用户,1成功,0失败 
+	 */
+	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd);
+
     //门禁v3.0.2 添加管理授权企业 add by liqingyan
-	void addDoorManagement(AddDoorManagementCommand cmd);
+    void addDoorManagement(AddDoorManagementCommand cmd);
 
     ListDoorManagementResponse listDoorManagement(ListDoorManagementCommand cmd);
 
-    void deleteDoorManagement (DeleteDoorManagementCommand cmd);
+    void deleteDoorManagement(DeleteDoorManagementCommand cmd);
+
+    //门禁v3.0.2 创建门禁分组 add by liqingyan
+    AclinkGroup createDoorGroup(CreateDoorAccessGroupCommand cmd);
+
+    void updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
+
+    ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
 }

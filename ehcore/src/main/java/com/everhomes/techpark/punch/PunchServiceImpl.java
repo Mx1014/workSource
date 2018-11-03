@@ -1884,6 +1884,7 @@ public class PunchServiceImpl implements PunchService {
                 if (isTimeIntervalFullCovered(new Date(onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
+                    return;
                 }
                 onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
                 updateSmartAlignment(onDutyLog);
@@ -8917,7 +8918,7 @@ public class PunchServiceImpl implements PunchService {
     		result.setPunchType(PunchType.NOT_WORKDAY.getCode());
             if (pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
                 //ptr的id 是空 就是 没排班
-            	if(ptr.getId() == null){
+            	if(NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag()) || ptr.getId() == null){
             		result.setPunchType(PunchType.MEIPAIBAN.getCode());
                 }
             }
@@ -9660,7 +9661,8 @@ public class PunchServiceImpl implements PunchService {
                 dto.setRuleType(pr.getRuleType());
                 //获取当天的排班
                 PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
-                if (ptr != null) {
+                //2018-11-1 对未排班的判断增加用unscheduledFlag
+                if (ptr != null && NormalFlag.YES != NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                     dto.setTimeRuleId(ptr.getId());
                     if (ptr.getId() == null || ptr.getId() == 0) {
                         dto.setTimeRuleName("休息");

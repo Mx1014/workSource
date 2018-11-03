@@ -163,10 +163,10 @@ public interface AddressProvider {
     /**
      * 根据第三方数据的id列表查询园区
      * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
-     * @param thirdPartyToken，第三方数据id
      * @return
      */
     Community findCommunityByThirdPartyId(String thirdPartyType,String thirdPartyToken);
 	int getTotalApartmentCount();
+
 	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
 }
