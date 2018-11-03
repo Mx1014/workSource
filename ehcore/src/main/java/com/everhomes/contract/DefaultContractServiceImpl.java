@@ -1890,7 +1890,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 							mappings.forEach(mapping -> {
 								//26058  已售的状态不变
 								if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(mapping.getLivingStatus()))) {
-									mapping.setLivingStatus(AddressMappingStatus.OCCUPIED.getCode());
+									mapping.setLivingStatus(AddressMappingStatus.SIGNEDUP.getCode());
 									mapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 									propertyMgrProvider.updateOrganizationAddressMapping(mapping);
 								}
