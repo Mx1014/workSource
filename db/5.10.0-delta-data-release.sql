@@ -500,6 +500,10 @@ from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 
 update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 9 and t1.namespace_id = t2.namespace_id;
 -- 物业报修V3.8 多应用 投诉建议类型迁移 END
 
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 父类型迁移
+update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 

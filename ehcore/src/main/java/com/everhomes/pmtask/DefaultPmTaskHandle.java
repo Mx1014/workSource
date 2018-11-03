@@ -188,10 +188,12 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
 		//多入口时，app始终会传taskCategoryId，根据时候传parentId来查询服务类型
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && cmd.getParentId() == null) {
+//		null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L &&
+		if(cmd.getParentId() == null) {
 			//app服务广场 物业报修配固定id  PmTaskAppType.REPAIR_ID
 			//投诉建议 配固定id PmTaskAppType.SUGGESTION_ID, 如果配置错误，则需要修改
-			parentId = cmd.getTaskCategoryId();
+//			parentId = cmd.getTaskCategoryId();
+			parentId = 0L;
 //			if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId()) {
 //
 //			}else if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId())
