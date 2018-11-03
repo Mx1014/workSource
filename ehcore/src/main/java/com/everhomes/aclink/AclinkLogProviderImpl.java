@@ -165,7 +165,8 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
         query.addConditions(Tables.EH_ACLINK_LOGS.EVENT_TYPE.ne(AclinkLogEventType.BUTTON_OPEN.getCode()));
         //auth_type
         query.addJoin(Tables.EH_DOOR_AUTH,JoinType.LEFT_OUTER_JOIN,Tables.EH_ACLINK_LOGS.AUTH_ID.eq(Tables.EH_DOOR_AUTH.ID));
-        query.addConditions(Tables.EH_ACLINK_LOGS.AUTH_ID.ne(0L));
+        //部分旧数据authId是0
+//        query.addConditions(Tables.EH_ACLINK_LOGS.AUTH_ID.ne(0L));
         if (count > 0){
             query.addLimit(count + 1);
         }
@@ -173,7 +174,7 @@ public class AclinkLogProviderImpl implements AclinkLogProvider {
             AclinkLogDTO dto = ConvertHelper.convert(r, AclinkLogDTO.class);
             dto.setId(r.getValue(Tables.EH_ACLINK_LOGS.ID));
             dto.setCreateTime(r.getValue(Tables.EH_ACLINK_LOGS.CREATE_TIME));
-            dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
+            dto.setAuthType(r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE) == null? DoorAuthType.TEMPERATE.getCode(): r.getValue(Tables.EH_DOOR_AUTH.AUTH_TYPE));
             dto.setUserName(r.getValue(Tables.EH_ACLINK_LOGS.USER_NAME));
             dto.setUserIdentifier(r.getValue(Tables.EH_ACLINK_LOGS.USER_IDENTIFIER));
             dto.setDoorName(r.getValue(Tables.EH_ACLINK_LOGS.DOOR_NAME));

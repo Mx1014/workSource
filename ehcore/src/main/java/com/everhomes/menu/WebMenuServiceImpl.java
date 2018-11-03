@@ -199,7 +199,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		Long versionId = version != null ? version.getId() : null;
 
 
-		List<Long> appOriginIds = null;
+		List<Long> appOriginIds = new ArrayList<>();
 
 		// 公司拥有所有权的园区集合
 		List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
@@ -219,9 +219,21 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
+
 			//全部appOriginIds
 			List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
-			appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
+
+			//管理公司的超管是有authCommunityIds的，普通公司没有，普通公司只拿OA应用
+			if(authCommunityIds != null && authCommunityIds.size() > 0 ){
+				appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
+			}else {
+				for(ServiceModuleApp app: allApps){
+					if(ServiceModuleAppType.fromCode(app.getAppType()) == ServiceModuleAppType.OA ){
+						appOriginIds.add(app.getOriginId());
+					}
+				}
+			}
+
 		}else {
 
 

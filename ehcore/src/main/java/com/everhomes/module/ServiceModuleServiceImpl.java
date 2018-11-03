@@ -22,6 +22,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.rest.portal.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
@@ -34,12 +35,6 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.MultipleFlag;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
@@ -1142,7 +1137,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
+                    HandlerGetCustomTagCommand gtCustomTagCommand = new HandlerGetCustomTagCommand();
+
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig, gtCustomTagCommand);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
                     webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);

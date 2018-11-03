@@ -1695,4 +1695,49 @@ public class AssetController extends ControllerBase {
 		return response;
 	}
 	
+    /**
+     * <p>对接门禁：设置缴费门禁基础参数</p>
+     * <b>URL: /asset/setDoorAccessParam</b>
+     */
+    @RequestMapping("setDoorAccessParam")
+    @RestReturn(value = String.class)
+    public RestResponse setDoorAccessParam(@Valid SetDoorAccessParamCommand cmd) {
+		assetService.setDoorAccessParam(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    
+    /**
+     * <p>对接门禁：获取缴费门禁基础参数</p>
+     * <b>URL: /asset/getDoorAccessParam</b>
+     */
+    @RequestMapping("getDoorAccessParam")
+    @RestReturn(value=ListDoorAccessParamResponse.class)
+    public RestResponse createAuthBatch(@Valid GetDoorAccessParamCommand cmd) {
+        return new RestResponse(assetService.getDoorAccessParam(cmd));
+    }
+    /**
+     * <p>对接门禁：定时任务手动</p>
+     * <b>URL: /asset/excuteDoorAccessSchedule</b>
+     */
+    @RequestMapping("excuteDoorAccessSchedule")
+    @RestReturn(value=String.class)
+    public RestResponse excuteDoorAccessSchedule() {
+    	assetService.meterAutoReading(true);
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    /**
+     * <p>对接门禁：查询公司门禁状态</p>
+     * <b>URL: /asset/getDoorAccessInfo</b>
+     */
+    @RequestMapping("getDoorAccessInfo")
+    @RestReturn(value=String.class)
+    public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
+    	return new RestResponse(assetService.getDoorAccessInfo(cmd));
+    }
 }

@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2.order_handler;
 
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -47,6 +48,8 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     private CommunityProvider communityProvider;
     @Autowired
     protected GeneralOrderService orderService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
@@ -152,6 +155,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
             returnUrl =String.format(returnUrl, order.getId(), order.getResourceType());
             returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
             cmd.setReturnUrl(returnUrl);
+            cmd.setReturnHost(configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", ""));
         }catch (Exception e){
             LOGGER.error("encode url error",e);
         }

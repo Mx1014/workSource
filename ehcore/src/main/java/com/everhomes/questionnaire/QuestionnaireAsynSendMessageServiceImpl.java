@@ -398,6 +398,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					userLevelRanges.addAll(adminList.stream().map(r->{
 						QuestionnaireScope scope = new QuestionnaireScope();
 						scope.setUserId(r);
+						scope.setOrgId(originalRange.getRange());
 						return scope;
 					}).collect(Collectors.toList()));
 				}else{

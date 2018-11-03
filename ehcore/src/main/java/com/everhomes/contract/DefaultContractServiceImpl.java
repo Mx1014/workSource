@@ -1772,6 +1772,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		contract.setDenunciationUid(cmd.getDenunciationUid());
 		contract.setDenunciationTime(new Timestamp(cmd.getDenunciationTime()));
 		contract.setCostGenerationMethod(cmd.getCostGenerationMethod());
+		contract.setContractType(ContractType.DENUNCIATION.getCode());
 		contractProvider.updateContract(contract);
 		//记录合同事件日志，by tangcen
 		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
