@@ -58,8 +58,12 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
         Long orgId = flow.getOrganizationId();
 
         FlowCase flowCase = ctx.getFlowCase();
-        String projectType = flowCase.getProjectTypeA() != null ? flowCase.getProjectTypeA() : flowCase.getProjectType();
-        Long projectId = flowCase.getProjectIdA() != null ? flowCase.getProjectIdA() : flowCase.getProjectId();
+
+        String projectType = (flowCase.getProjectTypeA() != null && flowCase.getProjectTypeA().length() > 0)
+                ? flowCase.getProjectTypeA() : flowCase.getProjectType();
+
+        Long projectId = (flowCase.getProjectIdA() != null && flowCase.getProjectIdA() != 0)
+                ? flowCase.getProjectIdA() : flowCase.getProjectId();
 
         for (FlowUserSelection sel : selections) {
             if (users.size() >= maxCount) {
