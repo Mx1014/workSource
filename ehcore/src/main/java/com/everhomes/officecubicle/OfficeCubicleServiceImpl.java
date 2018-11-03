@@ -1007,9 +1007,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
 		List<OfficeCubicleCity> list=null;
 		if(cmd.getParentName()==null){
-			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId());
+			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
 		}else{
-			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
+			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
 		}
 		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}
