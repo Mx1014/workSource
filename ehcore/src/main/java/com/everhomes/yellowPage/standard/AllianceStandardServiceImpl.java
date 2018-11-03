@@ -44,6 +44,7 @@ import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -753,7 +754,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			sa.setFlowId(baseFlowId);
 			if (null != flow) {
 				flowCount++;
-				sa.setFlowId(flow.getFlowMainId());
+				sa.setFlowId(flow.getId());
 			}
 			
 			//转成zl://form/create?sourceType=service_alliance&sourceId={id}
@@ -770,6 +771,10 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhFlowsRecord> query = context.selectQuery(Tables.EH_FLOWS);
 		query.addConditions(Tables.EH_FLOWS.STRING_TAG5.eq(approvalId + ""));
+        query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
+        query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0L));
+        query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
+        query.addOrderBy(Tables.EH_FLOWS.ID.desc());
 		List<Flow> flows = query.fetchInto(Flow.class);
 		if (!CollectionUtils.isEmpty(flows)) {
 			return flows.get(0);
