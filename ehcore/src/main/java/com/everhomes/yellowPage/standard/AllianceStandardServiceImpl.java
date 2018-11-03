@@ -611,22 +611,6 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	}
 	
 	
-	
-	@Override
-	public String transferMainAllianceOwnerType() {
-		
-		StringBuilder totalUpdate = new StringBuilder();
-		
-		dbProvider.execute(r->{
-			totalUpdate.append(" ownertype:").append(updateMainServiceAllianceOwnerType()); 
-			return null;
-		});
-		
-		return totalUpdate.toString();
-	}
-	
-	
-	
 	@Override
 	public String transferAllianceModuleUrl() {
 		
