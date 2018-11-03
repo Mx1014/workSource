@@ -23,6 +23,12 @@
 -- AUTHOR:梁家声 20181030
 -- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
 
+-- AUTHOR:黄鹏宇 20181103
+-- REMARK:解决缺陷 #38583:
+-- 第一步请执行在es上执行db/search/pmowner.sh
+-- 第二步执行同步接口/pm/syncOwnerIndex
+
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
