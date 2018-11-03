@@ -54,7 +54,7 @@ public class ParkingGeneralBillHandler implements GeneralBillHandler{
 	    		}
 			}
     	}catch (Exception e) {
-            LOGGER.error("failed to save mapping of print payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
+            LOGGER.error("failed to save mapping of parking payment in AssetPortalHandler, instanceConfig is={}", instanceConfig);
             e.printStackTrace();
         }
 	}

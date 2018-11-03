@@ -5580,11 +5580,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 value.setNamespaceId(namespaceId);
                 value.setTitleId(itemCmd.getId());
                 value.setValue(itemCmd.getName());
-                value.setType((byte)2);
+                value.setType(AclinkFormValuesType.CUSTOM_FIELD.getCode());
                 //表单记录ownerId对应授权Id
                 value.setOwnerId(auth.getId());
                 value.setOwnerType((byte)5);
                 value.setCreatorUid(user.getId());
+                value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 doorAccessProvider.createAclinkFormValues(value);
             }
         }
@@ -5720,8 +5721,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
                 }
                 if(null != cmd.getOwnerName() && cmd.getOwnerName().length() >0 ){
-                    query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(cmd.getOwnerName() + "%")
-                            .or(Tables.EH_COMMUNITIES.NAME.like(cmd.getOwnerName()+"%")));
+                    query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(cmd.getOwnerName() + "%"));
                 }
                 if(cmd.getNamespaceId() != null){
                     query.addConditions(Tables.EH_DOOR_ACCESS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
@@ -6840,6 +6840,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
 
+    @Override
+    public void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd){
+	    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+	    if(null != door && door.getGroupid() == cmd.getGroupId()){
+	        door.setGroupid(0L);
+	        doorAccessProvider.updateDoorAccess(door);
+        }
+    }
+
+    @Override
+    public ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd){
+        ListSelectDoorsResponse resp = new ListSelectDoorsResponse();
+	    List<DoorAccessNewDTO> doors = new ArrayList<DoorAccessNewDTO>();
+	    doors = doorAccessProvider.listSelectDoors(cmd);
+	    resp.setDoors(doors);
+	    return resp;
+    }
+
 	@Override
     public void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd){
 	    AclinkFormTitles form = new AclinkFormTitles();
@@ -7053,7 +7071,30 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	    doorAccessProvider.updateDoorGroup(group);
 
     }
-    
+
+    @Override
+    public void createTempAuthPriority (CreateTempAuthPriorityCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
+            for(Long doorId:cmd.getDoorIds()) {
+                if(null != doorId){
+                    AclinkFormValues value = new AclinkFormValues();
+                    value.setNamespaceId(namespaceId);
+                    value.setOwnerId(cmd.getOwnerId());
+                    value.setOwnerType(cmd.getOwnerType());
+                    value.setType(AclinkFormValuesType.AUTH_PRIORITY.getCode());
+                    value.setStatus((byte)1);
+                    value.setTitleId(0L);
+                    value.setValue(String.valueOf(doorId));
+                    value.setCreatorUid(user.getId());
+                    value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    doorAccessProvider.createAclinkFormValues(value);
+                }else continue;
+            }
+        }
+    }
+
     @Override
 	//仅修改status,各种权限记录不变,不新增授权记录
 	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
