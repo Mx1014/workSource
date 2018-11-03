@@ -2462,7 +2462,7 @@ public class CommunityServiceImpl implements CommunityService {
                 });
             }
 		}
-        dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+        dto.setMemberLogDTOs(memberLog);
 		//最新活跃时间 add by sfyan 20170620
 		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
 		if(userActivities.size() > 0){

@@ -55,6 +55,7 @@ import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.requisition.RequisitionService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
@@ -4956,10 +4957,17 @@ public class CustomerServiceImpl implements CustomerService {
         UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
         organizationService.updateSuperAdmin(cmd2);
 
+        //adminflag表示该用户有管理员,设置管理员后更新该用户有管理员
         EnterpriseCustomer customer = enterpriseCustomerProvider.findById(cmd.getCustomerId());
-        customer.setAdminFlag((byte)1);
-        enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
-        enterpriseCustomerSearcher.feedDoc(customer);
+        if(customer != null){
+            customer.setAdminFlag((byte)1);
+            enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
+            enterpriseCustomerSearcher.feedDoc(customer);
+        }else{
+            LOGGER.error("params targetId is null");
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "params targetId is null.");
+        }
 
     }
 
