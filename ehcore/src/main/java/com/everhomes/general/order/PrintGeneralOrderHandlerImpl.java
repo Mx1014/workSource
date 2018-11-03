@@ -34,7 +34,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		SiyinPrintOrder order = siyinPrintOrderProvider
 				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
 		if (null == order) {
-			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_ORDER_NOT_EXIST, "order not exist");
 		}
 		
 		order.setIsInvoiced(TrueOrFalseFlag.TRUE.getCode());
@@ -47,7 +47,7 @@ public class PrintGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 		SiyinPrintOrder order = siyinPrintOrderProvider
 				.findSiyinPrintOrderByGeneralOrderId(cmd.getCallBackInfo().getBusinessOrderId());
 		if (null == order) {
-			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_ORDER_NOT_EXIST, "order not exist");
 		}
 		
 		//TODO 更新支付状态
