@@ -55,6 +55,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
@@ -1256,7 +1257,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 //		return response.getMembers();
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(organizationId);
-        return rolePrivilegeService.listOrganizationAdministrators(command);
+        List<OrganizationContactDTO> justOneAdmin = new ArrayList<>();
+        List<OrganizationContactDTO> getAdmin = rolePrivilegeService.listOrganizationAdministrators(command);
+        //由于之前的企业可以设置多个管理员，故有可能返回多个管理员结果，此时只显示最新新增的一个
+        if(getAdmin == null || getAdmin.size() == 0){
+            return null;
+        }else{
+            justOneAdmin.add(getAdmin.get(0));
+            return justOneAdmin;
+        }
     }
 
     private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
@@ -9636,12 +9645,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return map;
     }
 
-    public static void main(String[] args) {
-        String s = "/1000750/1003880/1003883/1003903";
-        String[] pathArr = s.split("/");
-        System.out.println();
-    }
-
     /**
      * 修改用户 通讯录的对应信息
      *
@@ -10061,8 +10064,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		}
     	return listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag());
-    };
-	
+    }
+
+    @Override
+    public UserAuthenticationOrganizationDTO createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd) {
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
+        if (existsAuth != null) {
+            existsAuth.setStatus(Status.INACTIVE.getCode());
+            this.organizationProvider.updateUserAuthenticationOrganization(existsAuth);
+        }
+
+        UserAuthenticationOrganization newUserAuth = ConvertHelper.convert(cmd, UserAuthenticationOrganization.class);
+        newUserAuth.setStatus(Status.ACTIVE.getCode());
+        newUserAuth.setCreateTime(new Timestamp(new Date().getTime()));
+        newUserAuth.setCreatorUid(UserContext.currentUserId());
+        this.organizationProvider.createUserAuthenticationOrganization(newUserAuth);
+        return ConvertHelper.convert(newUserAuth, UserAuthenticationOrganizationDTO.class);
+    }
+
+    @Override
+    public UserAuthenticationOrganizationDTO getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd) {
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
+        if (existsAuth != null) {
+            return ConvertHelper.convert(existsAuth, UserAuthenticationOrganizationDTO.class);
+        }else {
+            UserAuthenticationOrganizationDTO dto = ConvertHelper.convert(cmd, UserAuthenticationOrganizationDTO.class);
+            dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            return dto;
+        }
+    }
+
+
     @Override
     public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id, List<String> groupTypes, Byte naviFlag) {
         Long startTime = System.currentTimeMillis();
@@ -12919,6 +12951,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        //用户认证邮箱认证时，校验邮箱是否已经被认证.
+        OrganizationMemberDetails details = this.organizationProvider.findOrganizationMemberDetailsByEmail(cmd.getEmail(), cmd.getOrganizationId());
+        if (details != null) {
+            LOGGER.error("email is exists, email ={}", cmd.getEmail());
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_IS_EXISTS,
+                    "email is exists, email ={}",cmd.getEmail());
+        }
         VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
         dto.setUserId(userId);
         dto.setEnterpriseId(cmd.getOrganizationId());
@@ -13227,6 +13266,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
+
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+        // 说明这是一个子模块, 再看他有没有父模块的责任部门授权
+        if (module != null && module.getPath().split("/").length > 2) {
+            String[] split = module.getPath().split("/");
+            for (int i = 2; i < split.length; i++) {
+                // 父模块授权信息
+                assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), Long.valueOf(split[i])));
+            }
+        }
+
         //如果本身是子项目,则查询其父项目对应的assignments
         ResourceCategory rc = communityProvider.findResourceCategoryById(cmd.getOwnerId());
         if(rc != null){//是子项目

@@ -257,6 +257,9 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 
 			for(ParkingCardDTO card: cards) {
+				if (ParkingConfigFlag.SUPPORT.getCode() == parkingLot.getMonthlyDiscountFlag()){
+					card.setMonthlyDiscount(parkingLot.getMonthlyDiscount());
+				}
 				if(StringUtils.isBlank(card.getPlateOwnerName())) {
 					card.setPlateOwnerName(plateOwnerName);
 				}
@@ -2065,6 +2068,7 @@ public class ParkingServiceImpl implements ParkingService {
 					BigDecimal newPrice = dto.getPrice().multiply(new BigDecimal(parkingLot.getTempFeeDiscount()))
 							.divide(new BigDecimal(10), DefaultParkingVendorHandler.TEMP_FEE_RETAIN_DECIMAL, RoundingMode.HALF_UP);
 					dto.setPrice(newPrice);
+					dto.setTempFeeDiscount(parkingLot.getTempFeeDiscount());
 				}
 			}
 		}
@@ -3794,10 +3798,14 @@ public class ParkingServiceImpl implements ParkingService {
 					RuleSourceType.RESOURCE.getCode(), dto.getId());
 			dto.setVipParkingUrl(homeUrl + detailUrl);
 		}
-		dto.setData(Arrays.asList(r.getDefaultData().split(",")));
-		String[] plate = r.getDefaultPlate().split(",");
-		dto.setProvince(plate[0]);
-		dto.setCity(plate[1]);
+		if (r.getDefaultData() != null && r.getDefaultData().length() >0){
+			dto.setData(Arrays.asList(r.getDefaultData().split(",")));
+		}
+		if (r.getDefaultPlate() != null && r.getDefaultPlate().length() >0){
+			String[] plate = r.getDefaultPlate().split(",");
+			dto.setProvince(plate[0]);
+			dto.setCity(plate[1]);
+		}
 		dto.setFlowId(null);
 		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
 		if(ParkingConfigFlag.fromCode(r.getMonthCardFlag()) == ParkingConfigFlag.SUPPORT) {

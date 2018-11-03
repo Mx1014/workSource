@@ -229,6 +229,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -247,6 +248,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.Status;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.PropertyErrorCode;
@@ -4056,6 +4058,20 @@ public class CommunityServiceImpl implements CommunityService {
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+        List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(orgIds,
+                UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())
+                && !CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+            if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
+                for (Long orgId : noAuthOrganizationIds) {
+                    if (orgIds.contains(orgId)) {
+                        orgIds.remove(orgId);
+                    }
+                }
+            }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
+                orgIds = noAuthOrganizationIds;
+            }
+        }
 		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
@@ -4085,7 +4101,6 @@ public class CommunityServiceImpl implements CommunityService {
                                           //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
                                             //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
                                             member.setId(r.getId());
-                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -4096,6 +4111,7 @@ public class CommunityServiceImpl implements CommunityService {
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                LOGGER.debug("orgmemberlogId is：{}" , orgIds);
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
@@ -4131,6 +4147,19 @@ public class CommunityServiceImpl implements CommunityService {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
                         dto.setOrganizationName(organization.getName());
+                    }
+                }
+                dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+					List<OrganizationMember> manage = this.organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(dto.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode());
+					List<Long> manageUserIds = new ArrayList<>();
+					if (!CollectionUtils.isEmpty(manage)) {
+						for (OrganizationMember member : manage) {
+							manageUserIds.add(member.getTargetId());
+						}
+					}
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId()) && !manageUserIds.contains(UserContext.currentUserId())) {
+				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
                     }
                 }
                 if (dto.getNickName() == null || dto.getNickName().isEmpty()) {

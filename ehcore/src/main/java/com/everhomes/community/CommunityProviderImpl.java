@@ -2117,4 +2117,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 		return buildings;
 	}
 
+	@Override
+	public List<Long> findCommunityIdsByOrgId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID)
+						.from(Tables.EH_ORGANIZATION_COMMUNITIES)
+						.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId))
+						.fetchInto(Long.class);
+	}
+
 }

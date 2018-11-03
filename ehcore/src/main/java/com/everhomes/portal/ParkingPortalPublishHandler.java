@@ -9,7 +9,7 @@ import com.everhomes.rentalv2.RentalResourceType;
 import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.parking.*;
-import com.everhomes.rest.portal.ParkingInstanceConfig;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.RuntimeErrorException;
@@ -34,7 +34,7 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     @Autowired
     private Rentalv2Provider rentalv2Provider;
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
 
         ParkingInstanceConfig parkingInstanceConfig = (ParkingInstanceConfig)StringHelper.fromJsonString(instanceConfig, ParkingInstanceConfig.class);
 
@@ -126,17 +126,17 @@ public class ParkingPortalPublishHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 

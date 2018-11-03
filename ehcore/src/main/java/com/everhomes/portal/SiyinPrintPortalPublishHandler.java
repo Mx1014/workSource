@@ -1,17 +1,18 @@
 package com.everhomes.portal;
 
+import com.everhomes.rest.portal.HandlerGetAppInstanceConfigCommand;
+import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
+import com.everhomes.rest.portal.HandlerProcessInstanceConfigCommand;
+import com.everhomes.rest.portal.HandlerPublishCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.everhomes.asset.AssetModuleAppMapping;
 import com.everhomes.asset.AssetService;
-import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.SiyinPrintInstanceConfig;
 
 @Component(PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX + ServiceModuleConstants.PRINT_MODULE)
@@ -23,22 +24,22 @@ public class SiyinPrintPortalPublishHandler implements PortalPublishHandler{
     protected AssetService assetService;
 
 	@Override
-	public String publish(Integer namespaceId, String instanceConfig, String appName) {
+	public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
 		return instanceConfig;
 	} 
 
 	@Override
-	public String processInstanceConfig(Integer namespaceId, String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
 		return instanceConfig;
 	}
 
 	@Override
-	public String getItemActionData(Integer namespaceId, String instanceConfig) {
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
 		return instanceConfig;
 	}
 
 	@Override
-	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+	public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
 		return actionData;
 	}
 	

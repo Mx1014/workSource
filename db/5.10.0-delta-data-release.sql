@@ -86,7 +86,10 @@ UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
 UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
 UPDATE eh_service_modules SET `host` = 'community-map' WHERE id = 40070;
 
-
+-- AUTHOR:严军 201801103
+-- REMARK: issue-null 增加内部链接，并刷新数据
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES ('90200', '内部链接', '90000', '/400/90000/90200', '1', '3', '2', '15', NULL, NULL, '13', NULL, '0', '0', '0', '1', '', '1', '1', 'module', '1', '2', NULL, NULL, NULL, NULL);
+UPDATE eh_service_module_apps SET module_id = 90200, action_type =13 WHERE module_id = 90100 AND instance_config like '%zuolin.com%';
 
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
@@ -332,7 +335,7 @@ UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 -- REMARK: 访客1.3合并访客与访客管理后清除app
 -- REMARK: 访客1.3园区访客地址修改
 delete from eh_service_module_apps where module_id in (42100,52200);
-update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
+update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix"}' where id = 41800;
 
 -- AUTHOR: 黄明波
 -- REMARK: 修改默认新闻为 NewsFlash
@@ -340,21 +343,24 @@ update eh_service_modules set  instance_config = replace(instance_config, '}', '
 
 update eh_service_module_apps set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55  where module_id = 10800 and instance_config not like '%"widget"%' ;
 
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
-where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
-
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
-where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+update eh_service_modules set client_handler_type = 2 where id = 10500;
+update eh_service_modules set client_handler_type = 2 where id = 40500;
+update eh_service_modules set client_handler_type = 2 where id = 10800;
 
 
 
 -- AUTHOR: 黄鹏宇 2018年11月1日
---REMARK: 更改楼宇房源
+-- REMARK: 更改楼宇房源
 update eh_var_fields set display_name = '楼宇' where id = 10965;
 update eh_var_fields set display_name = '房源' where id = 10966;
 update eh_var_field_scopes set field_display_name = '楼宇' where field_id = 10965 and field_display_name = '楼栋';
 update eh_var_field_scopes set field_display_name = '房源' where field_id = 10966 and field_display_name = '门牌名称';
 
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸报错信息 20181022
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10026', 'zh_CN', '用户不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10027', 'zh_CN', '初始化失败');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10028', 'zh_CN', '获取数据失败');
 
 -- AUTHOR: 缪洲 2018年11月1日
 --REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
@@ -364,16 +370,160 @@ UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id
 -- REMARK: 增加用户自定义上传资料与默认车牌的默认值
 UPDATE eh_parking_lots SET default_data = 'identity,driver,driving';
 UPDATE eh_parking_lots SET default_plate = '粤,B';
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181025
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('6', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '0', NULL, '0');
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('9', '0', '0', '投诉建议', '投诉建议', '0', '2', '2017-12-04 13:09:45', NULL, NULL, NULL, '0', NULL, '0');
 
+-- AUTHOR: 黄鹏宇 2018年11月1日
+-- REMARK: 更改楼宇房源
+update eh_general_forms set template_text = replace(template_text,'楼栋门牌','楼宇房源') where module_id = 25000;
+update eh_general_form_templates set template_text = '[{
+	"dynamicFlag": 0,
+	"fieldDesc": "客户名称",
+	"fieldDisplayName": "客户名称",
+	"fieldExtra": "{}",
+	"fieldName": "客户名称",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"remark": "系统自动获取客户管理中该项目下所有客户信息供用户选择；",
+	"disabled": 1,
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "楼宇房源",
+	"fieldDisplayName": "楼宇房源",
+	"fieldExtra": "{}",
+	"fieldName": "楼宇房源",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"remark": "系统自动获取资产管理中该项目下所有待租门牌供用户选择；",
+	"disabled": 1,
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+},
+{
+	"dynamicFlag": 0,
+	"fieldDesc": "审批状态",
+	"fieldDisplayName": "审批状态",
+	"fieldExtra": "{}",
+	"fieldName": "审批状态",
+	"fieldType": "SINGLE_LINE_TEXT",
+	"renderType": "DEFAULT",
+	"requiredFlag": 1,
+	"remark": "系统自动根据不同的触发不同的操作；",
+	"disabled": 1,
+	"validatorType": "TEXT_LIMIT",
+	"visibleType": "EDITABLE",
+	"filterFlag": 1
+}]' where module_id = 25000;
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 国贸对接项目标识 20181031
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.handler-999948', 'archibus', 'archibus handler', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('pmtask.archibus.areaid-999948', '000000201807140AU8ME', '物业报修国贸区域ID', '0', NULL, NULL);
 
 -- AUTHOR: 缪洲
 -- REMARK: 科兴科学园发票类型字段
 UPDATE eh_parking_lots SET config_json = '{"tempfeeFlag":0,"rateFlag":0,"lockCarFlag":0,"searchCarFlag":1,"currentInfoType":2,"contact":"18718523489","invoiceFlag":1,"businessLicenseFlag":0,"vipParkingFlag":0,"monthRechargeFlag":1,"identityCardFlag":1,"monthCardFlag":1,"noticeFlag":0,"flowMode":3,"invoiceTypeFlag":1}' WHERE id = 10006;
 
 
--- AUTHOR: 吴寒
+-- AUTHOR: 吴寒z
 -- REMARK: 会议室预定发邮件的内容修改
 UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${meetingBeginTime}|地点：${meetingRoomName}|发起人：${meetingSponsorName}|参会人：${meetingUserList}||${content}' WHERE  CODE =1000005 AND scope = 'meetingMessage';
+
+
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+UPDATE eh_service_modules SET multiple_flag = 1 WHERE id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷app值
+UPDATE eh_service_module_apps SET instance_config = '{"categoryId":0}' WHERE module_id = 10400;
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理修改为多应用
+-- 刷广告数据入口
+UPDATE eh_banners SET category_id = 0;
+
+-- AUTHOR: 梁燕龙
+-- REMARK: issue-36940 用户认证，邮箱认证提示文案
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
+
+-- AUTHOR: 唐岑
+-- REMARK: 更改module表中的client_handler_type类型为内部应用
+update eh_service_modules set client_handler_type = 2 where id = 150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 更新房源招商的字段模板
+UPDATE eh_general_form_templates SET template_text='[{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"用户姓名\",\r\n	\"fieldDisplayName\": \"用户姓名\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"用户的姓名；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"手机号码\",\r\n	\"fieldDisplayName\": \"手机号码\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_PHONE\",\r\n	\"fieldType\": \"NUMBER_TEXT\",\r\n	\"remark\": \"用户的手机号码；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"承租方\",\r\n	\"fieldDisplayName\": \"承租方\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"ENTERPRISE_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动输入；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"意向房源\",\r\n	\"fieldDisplayName\": \"意向房源\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"APARTMENT\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动选择；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n}]' WHERE module_id=150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 楼宇导入出错提示
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+VALUES (@max_id:=@max_id+1,'community', 10213, 'zh_CN', '楼栋名称不能超过20个汉字');
+INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+VALUES (@max_id:=@max_id+1,'community', 10214, 'zh_CN', '楼栋名称不能重复');
+
+-- AUTHOR: 丁建民 20181031
+-- REMARK: 缴费对接门禁。企业或者个人欠费将禁用该企业或个人门禁 定时器执行时间
+SET @id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,23 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
+
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 任务迁移
+-- REMARK: 执行前备份eh_pm_tasks表！！！
+update eh_pm_tasks t1,eh_categories t2 set t1.app_id = t2.parent_id where t2.id = t1.task_category_id;
+update eh_pm_tasks t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.app_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 通用配置迁移
+update eh_pm_task_configs t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.task_category_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 物业报修类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 6;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 6);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 6));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 6 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 物业报修类型迁移 END
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 投诉建议类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 9;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 9);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 9));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 9 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 投诉建议类型迁移 END
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 父类型迁移
+update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
@@ -385,6 +535,13 @@ UPDATE  eh_locale_templates SET TEXT = '主题：${meetingSubject}|时间：${me
 -- AUTHOR: xq.tian
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
+where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
+where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 

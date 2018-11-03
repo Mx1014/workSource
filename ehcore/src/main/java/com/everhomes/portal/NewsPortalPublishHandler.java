@@ -6,9 +6,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.news.NewsCategory;
 import com.everhomes.news.NewsProvider;
+import com.everhomes.news.NewsService;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.news.NewsStatus;
-import com.everhomes.rest.portal.NewsInstanceConfig;
+import com.everhomes.rest.portal.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -36,12 +37,15 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private NewsProvider newsProvider;
+    
+    @Autowired
+    private NewsService newsService;
 
     @Autowired
     private WebMenuPrivilegeProvider webMenuProvider;
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
+    public String publish(Integer namespaceId, String instanceConfig, String itemLabel, HandlerPublishCommand cmd) {
         LOGGER.error("publish news. instanceConfig = {}, itemLabel = {}", instanceConfig, itemLabel);
         NewsInstanceConfig newsInstanceConfig = (NewsInstanceConfig)StringHelper.fromJsonString(instanceConfig, NewsInstanceConfig.class);
         if(null == newsInstanceConfig.getCategoryId()){
@@ -50,17 +54,21 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
         }else{
             updateNewsCategory(namespaceId, newsInstanceConfig.getCategoryId(), itemLabel);
         }
+        
+		String url = newsService.getNewsRenderUrl(namespaceId, newsInstanceConfig.getCategoryId(), null, newsInstanceConfig.getWidget(),
+				newsInstanceConfig.getTimeWidgetStyle());
+		newsInstanceConfig.setUrl(url);
         return StringHelper.toJsonString(newsInstanceConfig);
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        return instanceConfig;
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
+    	return instanceConfig;
     }
 
     private NewsCategory createNewsCategory(Integer namespaceId, String name){
@@ -90,13 +98,13 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
     
     final Pattern pattern = Pattern.compile("^.*\"categoryId\":[\\s]*([\\d]*)");
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
     	
 //    	if(actionData!=null && actionData.length()!=0){
 //	    	Matcher m = pattern.matcher(actionData);
@@ -116,7 +124,7 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
 
     @Override
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
-        String categoryId = getCustomTag(namespaceId, moudleId, instanceConfig);
+        String categoryId = getCustomTag(namespaceId, moudleId, instanceConfig, null);
         if(categoryId == null || "0".equals(categoryId.trim())){
             return 10800L;
         }

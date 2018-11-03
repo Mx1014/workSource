@@ -5226,6 +5226,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public void excuteMessage(AclinkWebSocketMessage cmd) {
 		String msg = cmd.getPayload();
 		String uuid = cmd.getUuid();
+		LOGGER.info(String.format("decoding msg:{%s} from device uuid: {%s}", msg,uuid));
 		DoorAccess door = doorAccessProvider.queryDoorAccessByUuid(uuid);
 		if(door == null){
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND,
@@ -5260,16 +5261,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 				LOGGER.info("validate auth count failed");
 			}
 		}else if(cmdNumber == 0xf){
-//			AclinkLogCreateCommand cmds = new AclinkLogCreateCommand();
-//			List<AclinkLogItem> listLogItems = new ArrayList<AclinkLogItem>();
 			AclinkLogItem logItem = new AclinkLogItem();
-//			logItem.setAuthId(authId);
-//			logItem.setKeyId(keyId);
-//			logItem.setNamespaceId(namespaceId);
+			Long userId = DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14));
+			// logItem.setKeyId(keyId);
+			// logItem.setNamespaceId(namespaceId);
+			logItem.setUserId(userId);
 			logItem.setDoorId(door.getId());
-			logItem.setUserId(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 10, 14)));
 			logItem.setLogTime(DataUtil.byteArrayToLong(Arrays.copyOfRange(msgArr, 15, 19)) * 1000);
-			switch (msgArr[14]){
+			switch (msgArr[14]) {
 			case 0x1:
 				logItem.setEventType(3L);
 				break;
@@ -5287,18 +5286,29 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 
 			AclinkLog aclinkLog = ConvertHelper.convert(logItem, AclinkLog.class);
+
 			UserInfo user = userService.getUserSnapshotInfo(logItem.getUserId());
-			
-        	if(user.getPhones() != null && user.getPhones().size() > 0) {
-                   aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());    
-               }
-        	aclinkLog.setUserName(logItem.getUserId() == 1L?"访客":user.getNickName());
-        	aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
-            aclinkLog.setHardwareId(door.getHardwareId());
-            aclinkLog.setOwnerId(door.getOwnerId());
-            aclinkLog.setOwnerType(door.getOwnerType());
-            aclinkLog.setDoorType(door.getDoorType());
-            aclinkLogProvider.createAclinkLog(aclinkLog);
+			if (logItem.getUserId() > 1 && user != null) {
+				if (user.getPhones() != null && user.getPhones().size() > 0) {
+					aclinkLog.setUserIdentifier(userService.getUserIdentifier(logItem.getUserId()).getIdentifierToken());
+				}
+				aclinkLog.setUserName(user.getNickName());
+
+				// TODO 已失效授权的会查不出,日志整体流程会在3.0之后修改 by liuyilin 20181102
+				DoorAuth auth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(door.getId(), userId, null);
+				if (auth != null) {
+					aclinkLog.setAuthId(auth.getId());
+				}
+			} else {
+				aclinkLog.setUserName("访客");
+			}
+
+			aclinkLog.setDoorName(door.getDisplayNameNotEmpty());
+			aclinkLog.setHardwareId(door.getHardwareId());
+			aclinkLog.setOwnerId(door.getOwnerId());
+			aclinkLog.setOwnerType(door.getOwnerType());
+			aclinkLog.setDoorType(door.getDoorType());
+			aclinkLogProvider.createAclinkLog(aclinkLog);
 		}
 	}
 
@@ -7084,6 +7094,133 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
+
+    @Override
+	//仅修改status,各种权限记录不变,不新增授权记录
+	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd) {
+		UpdateFormalAuthByCommunityResponse rsp = new UpdateFormalAuthByCommunityResponse();
+		//TODO 暂无自动授权设置,门禁3.0需加上
+		List<DoorAccess> doors = doorAccessProvider.listDoorAccessByOwnerId(new CrossShardListingLocator(), cmd.getCommunityId(), DoorAccessOwnerType.COMMUNITY, 0);
+		if(doors.size() == 0){
+			rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND);
+			rsp.setMsg("doorAccess not found");
+			return rsp;
+		}
+		List<DoorAuth> auths = new ArrayList<>();
+		if (cmd.getTargetType() == 0) {
+			//单个用户(小区场景)
+			auths = doorAuthProvider.queryDoorAuth(new ListingLocator(), 0, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(cmd.getTargetId()));
+//					query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getCommunityId()).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+					//TODO 园区班车是否除外?
+					//TODO 临时授权?
+					
+					return query;
+				}
+			});
+		}else if(cmd.getTargetType() == 1){
+			//公司场景
+			//修改自动授权设置
+			List<DoorAuthLevel> authLevels = doorAuthLevelProvider.queryDoorAuthLevels(new ListingLocator(), 1000, new ListingQueryBuilderCallback() {
+	            @Override
+	            public SelectQuery<? extends Record> buildCondition(
+	                    ListingLocator locator, SelectQuery<? extends Record> query) {
+	                query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_ID.eq(cmd.getTargetId()));
+	                query.addConditions(Tables.EH_DOOR_AUTH_LEVEL.LEVEL_TYPE.eq(DoorAuthLevelType.ENTERPRISE.getCode()));
+	                return query;
+	            }
+	        });
+			if(authLevels != null && authLevels.size() > 0){
+				for(DoorAuthLevel level : authLevels){
+					level.setStatus(cmd.getStatus());
+				}
+				doorAuthLevelProvider.updateDoorAuthLevelBatch(authLevels);
+			}
+			
+			//修改权限
+			List<OrganizationMember> users = organizationProvider.listOrganizationMembers(cmd.getTargetId(),null);
+			List<Long> userIds = new ArrayList<Long>();
+			if(users == null || users.size() == 0){
+				rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_USER_NOT_FOUND);
+				rsp.setMsg("user not found");
+				return rsp;
+			}
+			for(OrganizationMember user: users){
+				userIds.add(user.getTargetId());
+			}
+			auths = doorAuthProvider.queryDoorAuth(new ListingLocator(), 0, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.in(userIds));
+//					query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+					query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(cmd.getCommunityId()).and(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+					//TODO 园区班车是否除外?
+					//TODO 临时授权?
+					return query;
+				}
+			});
+		}
+		
+		if(auths.size() == 0){
+			rsp.setErrorCode(AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR);
+			rsp.setMsg("auth not found");
+			return rsp;
+		}
+		
+		for(DoorAuth auth : auths){
+			auth.setStatus(cmd.getStatus());
+		}
+		doorAuthProvider.updateDoorAuth(auths);
+		
+		//授权日志
+		List<DoorAuthLog> logs = new ArrayList<DoorAuthLog>();
+    	if(auths != null && auths.size() > 0){
+    		for(DoorAuth doorAuth : auths){
+    			DoorAuthLog log = new DoorAuthLog();
+    			log.setDoorId(doorAuth.getDoorId());
+    			log.setUserId(doorAuth.getUserId());
+    			log.setRightContent(doorAuth.getRightOpen() + "," + doorAuth.getRightVisitor() + "," + doorAuth.getRightRemote());
+    			if(UserContext.current().getUser() != null) {
+    				log.setCreateUid(UserContext.current().getUser().getId());	
+    			} else {
+    				log.setCreateUid(doorAuth.getUserId());
+    			}
+    			
+    			String discription = "";
+    			if(doorAuth.getRightOpen() > 0){
+    				discription += "授权开门权限";
+    			}else{
+    				discription += "<font color=\"red\">取消授权开门权限</font>";
+    			}
+    			
+    			if(doorAuth.getRightVisitor() > 0){
+    				discription += "<br>授权访客授权权限";
+    			}else{
+    				discription += "<br><font color=\"red\">取消授权访客授权权限</font>";
+    			}
+    			
+    			if(doorAuth.getRightRemote() > 0){
+    				discription += "<br>授权远程开门权限";
+    			}else{
+    				discription += "<br><font color=\"red\">取消授权远程开门权限</font>";
+    			}
+    			log.setDiscription(discription);
+    			logs.add(log);
+    		}
+    		doorAuthProvider.createDoorAuthLogBatch(logs);
+    	}
+		
+		rsp.setErrorCode(200);
+		rsp.setMsg("success");
+		return rsp;
+	}
 }
 
 

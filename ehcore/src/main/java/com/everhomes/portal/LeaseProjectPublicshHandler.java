@@ -1,15 +1,9 @@
 package com.everhomes.portal;
 
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.portal.LeaseProjectInstanceConfig;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.techpark.expansion.LeasePromotionConfigType;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.techpark.expansion.EnterpriseLeaseIssuerProvider;
-import com.everhomes.techpark.expansion.LeaseProject;
 import com.everhomes.techpark.expansion.LeasePromotionConfig;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +26,7 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     @Autowired
     private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         LeaseProjectInstanceConfig leaseProjectInstanceConfig = (LeaseProjectInstanceConfig) StringHelper.fromJsonString(instanceConfig,LeaseProjectInstanceConfig.class);
 
         if(leaseProjectInstanceConfig == null){
@@ -145,7 +139,7 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         LeaseProjectInstanceConfig leaseProjectInstanceConfig = (LeaseProjectInstanceConfig) StringHelper.fromJsonString(instanceConfig,LeaseProjectInstanceConfig.class);
         if (leaseProjectInstanceConfig.getCategoryId() != null) { //不是新建的应用
             List<LeasePromotionConfig> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigs(namespaceId, leaseProjectInstanceConfig.getCategoryId().longValue());
@@ -187,17 +181,17 @@ public class LeaseProjectPublicshHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
         LeaseProjectInstanceConfig leaseProjectInstanceConfig = (LeaseProjectInstanceConfig) StringHelper.fromJsonString(instanceConfig,LeaseProjectInstanceConfig.class);
         if (leaseProjectInstanceConfig!=null && leaseProjectInstanceConfig.getCategoryId()!=null)
             return String.valueOf(leaseProjectInstanceConfig.getCategoryId());
