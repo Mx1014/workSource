@@ -8819,20 +8819,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setSiteDtos(siteDtos);*/
                     data.setBuildingNameAndApartmentName(r.getH().trim());
                 }
-                if (null != r.getI())
-                    data.setPmFlag(r.getI().trim());
-                if (null != r.getJ()){
+                if (null != r.getJ())
+                    data.setPmFlag(r.getJ().trim());
+                if (null != r.getK()){
                     /*for(String str : r.getJ().split(",")){
                         communityDTO.setName(str);
                         communityDTOList.add(communityDTO);
                     }
                     data.setCommunityDTOList(communityDTOList);*/
-                    data.setCommunityNames(r.getJ().trim());
+                    data.setCommunityNames(r.getK().trim());
                 }
-                if (null != r.getK())
-                    data.setServiceSupportFlag(r.getK().trim());
                 if (null != r.getL())
-                    data.setWorkPlatFormFlag(r.getL().trim());
+                    data.setServiceSupportFlag(r.getL().trim());
+                if (null != r.getM())
+                    data.setWorkPlatFormFlag(r.getM().trim());
                     datas.add(data);
             }
         }
