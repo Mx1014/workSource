@@ -545,6 +545,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			if (contractDetailDTO.getChargingItems() != null) {
 				chargingItems: for (int j = 0; j < contractDetailDTO.getChargingItems().size(); j++) {
 					if (contractDetailDTO.getChargingItems().get(j).getChargingItemId() != addressProperties.getChargingItemsId()) {
+						compareResult = BigDecimal.ZERO;
 						continue chargingItems;
 					}
 					// 计价条款是否包含该房源，如果不包括不用计算

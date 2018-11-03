@@ -592,6 +592,7 @@ public class ForumController extends ControllerBase {
     @RequireAuthentication(false)
     @RequestMapping("getPreviewTopic")
     @RestReturn(value=PostDTO.class)
+    @XssExclude
     public RestResponse getPreviewTopic(NewTopicCommand cmd) {
         PostDTO postDto = this.forumService.getPreviewTopic(cmd);
 

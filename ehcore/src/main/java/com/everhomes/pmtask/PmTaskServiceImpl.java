@@ -2349,7 +2349,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(familyList != null && familyList.size() > 0) {
 				familyList.forEach(f -> {
 					if(GroupMemberStatus.ACTIVE.equals(GroupMemberStatus.fromCode(f.getMembershipStatus()))) {
-						if(f.getCommunityId().equals(communityId))
+						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
 							families.add(f);
 					}
 
