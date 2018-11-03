@@ -460,6 +460,12 @@ UPDATE eh_banners SET category_id = 0;
 SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
+
+-- AUTHOR: 丁建民 20181031
+-- REMARK: 缴费对接门禁。企业或者个人欠费将禁用该企业或个人门禁 定时器执行时间
+SET @id = (SELECT MAX(id) from eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,23 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
