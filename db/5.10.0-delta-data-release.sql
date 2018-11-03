@@ -86,7 +86,10 @@ UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 40500;
 UPDATE eh_service_modules SET `host` = 'workflow' WHERE id = 13000;
 UPDATE eh_service_modules SET `host` = 'community-map' WHERE id = 40070;
 
-
+-- AUTHOR:严军 201801103
+-- REMARK: issue-null 增加内部链接，并刷新数据
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`, `instance_config`, `action_type`, `update_time`, `operator_uid`, `creator_uid`, `description`, `multiple_flag`, `module_control_type`, `access_control_type`, `menu_auth_flag`, `category`, `app_type`, `client_handler_type`, `system_app_flag`, `icon_uri`, `host`, `enable_enterprise_pay_flag`) VALUES ('90200', '内部链接', '90000', '/400/90000/90200', '1', '3', '2', '15', NULL, NULL, '13', NULL, '0', '0', '0', '1', '', '1', '1', 'module', '1', '2', NULL, NULL, NULL, NULL);
+UPDATE eh_service_module_apps SET module_id = 90200, action_type =13 WHERE module_id = 90100 AND instance_config like '%zuolin.com%';
 
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
