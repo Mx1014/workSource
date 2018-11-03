@@ -343,13 +343,9 @@ update eh_service_modules set  instance_config = replace(instance_config, '}', '
 
 update eh_service_module_apps set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55  where module_id = 10800 and instance_config not like '%"widget"%' ;
 
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
-where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
-
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
-where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
-
 update eh_service_modules set client_handler_type = 2 where id = 10500;
+update eh_service_modules set client_handler_type = 2 where id = 40500;
+update eh_service_modules set client_handler_type = 2 where id = 10800;
 
 
 
@@ -476,6 +472,13 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- AUTHOR: xq.tian
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
+where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
+where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
