@@ -526,6 +526,18 @@ update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.ori
 update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
 INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `app_id`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('0', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '190', '0', NULL, '0');
 
+-- AUTHOR: 黄鹏宇
+-- REMARK: 更新跟进信息
+update eh_customer_trackings set customer_source = 0 where namespace_id = 999954;
+update eh_customer_trackings set tracking_type = 5 where namespace_id = 999954 and tracking_type=3;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=4;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=2;
+update eh_customer_trackings set tracking_type = 3 where namespace_id = 999954 and tracking_type=13439;
+
+-- REMARK: 所有含有organization的客户都进入租客
+update eh_enterprise_customers set customer_source = 1, level_item_id  = 6 where organization_id is not null and status = 2;
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
