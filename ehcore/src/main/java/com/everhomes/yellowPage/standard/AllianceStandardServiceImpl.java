@@ -25,6 +25,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
@@ -149,6 +150,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private UserProvider userProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+	private FlowProvider flowProvider;
 
 
 	@Override
@@ -737,9 +740,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					if (null != approval) {
 						sa.setFormId(approval.getFormOriginId());
 						formCount++;
-						flow = flowService.getEnabledFlow(approval.getNamespaceId(), 40500L,
-								FlowModuleType.NO_MODULE.getCode(), approval.getId(),
-								FlowOwnerType.GENERAL_APPROVAL.getCode());
+						flow = getFlowByApprovalId(approval.getId());
 					}
 				}
 			}
@@ -762,6 +763,19 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		}
 		
 		return " t:"+total+" u:"+update+" e_aprv:"+e_aprv+" fo:"+formCount+" fl:"+flowCount;
+	}
+//	string_tag5
+	private Flow getFlowByApprovalId(Long approvalId) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhFlowsRecord> query = context.selectQuery(Tables.EH_FLOWS);
+		query.addConditions(Tables.EH_FLOWS.STRING_TAG5.eq(approvalId + ""));
+		List<Flow> flows = query.fetchInto(Flow.class);
+		if (!CollectionUtils.isEmpty(flows)) {
+			return flows.get(0);
+		}
+
+		return null;
 	}
 	
 	
