@@ -468,9 +468,9 @@ UPDATE eh_general_form_templates SET template_text='[{\r\n	\"dynamicFlag\": 0,\r
 -- AUTHOR: 唐岑
 -- REMARK: 楼宇导入出错提示
 SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
-INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'community', 10213, 'zh_CN', '楼栋名称不能超过20个汉字');
-INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'community', 10214, 'zh_CN', '楼栋名称不能重复');
 
 -- AUTHOR: 丁建民 20181031
