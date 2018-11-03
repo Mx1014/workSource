@@ -430,3 +430,6 @@ CREATE TABLE `eh_asset_dooraccess_logs` (
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表门禁记录表';
 
+-- AUTHOR: xq.tian
+-- REMARK: 删除 eh_recommendations 的外键, 因为他影响了这张表的数据操作
+ALTER TABLE eh_recommendations DROP FOREIGN KEY fk_eh_recommendations_user_idx;

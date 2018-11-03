@@ -269,10 +269,12 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                         FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
                         String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                         ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
-                        fileDTO.setUrl(url);
-                        fileDTO.setFileName(dto.getFieldName());
-                        fileDTO.setFileSize(resource.getResourceSize());
-                        files.add(fileDTO);
+                        if(resource != null){
+                            fileDTO.setUrl(url);
+                            fileDTO.setFileName(dto.getFieldName());
+                            fileDTO.setFileSize(resource.getResourceSize());
+                            files.add(fileDTO);
+                        }
 
                         FlowCaseFileValue value = new FlowCaseFileValue();
                         value.setFiles(files);
@@ -358,10 +360,12 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                         FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
                         String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                         ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
-                        fileDTO.setUrl(url);
-                        fileDTO.setFileName(dto.getFieldName());
-                        fileDTO.setFileSize(resource.getResourceSize());
-                        files.add(fileDTO);
+                        if(resource != null){
+                            fileDTO.setUrl(url);
+                            fileDTO.setFileName(dto.getFieldName());
+                            fileDTO.setFileSize(resource.getResourceSize());
+                            files.add(fileDTO);
+                        }
 
                         FlowCaseFileValue value = new FlowCaseFileValue();
                         value.setFiles(files);
