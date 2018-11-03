@@ -865,7 +865,7 @@ public class AssetStatisticProviderImpl implements AssetStatisticProvider {
         query.addOrderBy(r.BUILDING_NAME, r.APARTMENT_NAME);
         dto = convertBillStatisticByAddress(query, r, bills);
         //调用资产的提供给缴费报表的房源收费面积的接口
-        BigDecimal areaSize = propertyReportFormService.getTotalChargeArea(contractIds, buildindNames, apartmentNames);
+        BigDecimal areaSize = propertyReportFormService.getTotalChargeArea(dto.getContractIds(), dto.getBuildindNames(), dto.getApartmentNames());
         //设置收费面积
     	if(areaSize != null) {
     		areaSize = areaSize.setScale(2,BigDecimal.ROUND_HALF_DOWN);

@@ -37,6 +37,7 @@ public class AclinkManagementDTO {
     private Byte ownerType;
     private Long managerId;
     private Byte managerType;
+    private String managerName;
     private Long creatorUid;
     private Timestamp createTime;
     private Byte status;
@@ -96,7 +97,13 @@ public class AclinkManagementDTO {
     public void setManagerType(Byte managerType) {
         this.managerType = managerType;
     }
+    public String getManagerName() {
+        return managerName;
+    }
 
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
+    }
     public Long getCreatorUid() {
         return creatorUid;
     }

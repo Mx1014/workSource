@@ -54,4 +54,10 @@ public interface AllianceStandardService {
 	String transferPadItems();
 
 	ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type);
+
+	String transferAllianceModuleUrl();
+
+	String transferMainAllianceOwnerType();
+
+	String transferApprovalFlowCases();
 }

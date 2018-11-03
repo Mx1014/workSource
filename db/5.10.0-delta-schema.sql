@@ -289,6 +289,107 @@ PRIMARY KEY (`id`)
 -- REMARK: issue-40954 【标准版全量】【物业缴费】【集成】计价条款设置，新增计价条款后，列表中“账单组”不显示
 ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
 
+-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌字段
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_data` TEXT NULL COMMENT '自定义上传资料';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_plate` VARCHAR(16) NULL COMMENT '默认车牌';
+
+-- AUTHOR: 黄鹏宇 20181101
+-- REMARK: 修改请示单的创建时间为datetime类型
+ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;
+ALTER TABLE eh_general_form_val_requests MODIFY operator_time DATETIME;
+
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理单应用修改为多应用
+CREATE TABLE eh_banner_categories
+(
+  id            BIGINT                 NOT NULL
+    PRIMARY KEY,
+  owner_type    VARCHAR(32) DEFAULT '' NOT NULL
+  COMMENT 'the type of who own the category, community, etc',
+  owner_id      BIGINT DEFAULT '0'     NOT NULL,
+  parent_id     BIGINT DEFAULT '0'     NOT NULL,
+  name          VARCHAR(64)            NOT NULL,
+  path          VARCHAR(128)           NULL,
+  default_order INT                    NULL,
+  status        TINYINT DEFAULT '0'    NOT NULL
+  COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  creator_uid   BIGINT DEFAULT '0'     NOT NULL
+  COMMENT 'record creator user id',
+  create_time   DATETIME               NULL,
+  delete_uid    BIGINT DEFAULT '0'     NOT NULL
+  COMMENT 'record deleter user id',
+  delete_time   DATETIME               NULL,
+  namespace_id  INT DEFAULT '0'        NOT NULL,
+  logo_uri      VARCHAR(1024)          NULL
+  COMMENT 'default cover uri',
+  entry_id      INT                    NULL
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '广告管理应用入口表';
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理单应用修改为多应用
+ALTER TABLE eh_banners ADD COLUMN `category_id` BIGINT COMMENT '应用入口ID';
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸用户映射表 20181001
+DROP TABLE IF EXISTS `eh_pm_task_archibus_user_mapping`;
+CREATE TABLE `eh_pm_task_archibus_user_mapping` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `archibus_uid` VARCHAR(64) DEFAULT NULL COMMENT '国贸用户Id',
+  `user_id` bigint DEFAULT 0 COMMENT '用户Id',
+  `identifier_token` varchar(128) DEFAULT NULL COMMENT '用户手机号',
+  `create_time` datetime DEFAULT NOW(),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修国贸对接用户映射表';
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181001
+CREATE TABLE `eh_pm_task_categories`(
+  `id` BIGINT NOT NULL,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `create_time` DATETIME,
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used',
+  `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
+  `description` TEXT,
+  `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_category_path` (`path`),
+  KEY `i_eh_category_order` (`default_order`),
+  KEY `i_eh_category_delete_time` (`delete_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
+
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+ALTER TABLE `eh_pm_task_configs` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+-- 物业报修3.8 end
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户认证审核权限配置表
+CREATE TABLE `eh_user_authentication_organizations`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL  COMMENT '域空间ID',
+  `community_id` BIGINT COMMENT '项目ID',
+  `organization_id` BIGINT NOT NULL COMMENT '企业ID',
+  `auth_flag` TINYINT NOT NULL COMMENT '是否授权，0不授权，1授权',
+  `status` TINYINT NOT NULL COMMENT '状态, 1无效，2生效',
+  `creator_uid` BIGINT COMMENT 'creator uid',
+  `create_time` DATETIME COMMENT 'record create time',
+
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '用户认证审核权限配置表';
+
 -- AUTHOR: djm
 -- REMARK: 缴费账单对接门禁
 CREATE TABLE `eh_asset_dooraccess_params` (
@@ -328,3 +429,4 @@ CREATE TABLE `eh_asset_dooraccess_logs` (
 	`operator_time` datetime DEFAULT NULL,
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表门禁记录表';
+

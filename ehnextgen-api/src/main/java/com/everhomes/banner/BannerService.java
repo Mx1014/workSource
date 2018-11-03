@@ -49,4 +49,6 @@ public interface BannerService {
     void reorderBanners(ReorderBannersCommand cmd);
 
     BannerDTO updateBannerStatus(UpdateBannerStatusCommand cmd);
+
+    BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd);
 }

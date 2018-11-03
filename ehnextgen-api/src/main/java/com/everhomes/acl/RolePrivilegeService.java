@@ -6,6 +6,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.CommunityFetchType;
+import com.everhomes.rest.customer.createSuperAdminCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
@@ -445,4 +446,7 @@ public interface RolePrivilegeService {
 	String findTopAdminByOrgId(FindTopAdminByOrgIdCommand cmd);
 
 	boolean checkIsSystemOrAppAdmin(Long orgId, Long userId);
+
+	void updateSuperAdmin(createSuperAdminCommand cmd);
+
 }

@@ -99,7 +99,7 @@ public class CommunityAllUserApplyExportTaskHandler implements FileDownloadTaskH
         ListAllCommunityUsersCommand cmd = (ListAllCommunityUsersCommand)mapToObjeact(params, ListAllCommunityUsersCommand.class);
         Integer namespaceId = cmd.getNamespaceId();
         cmd.setPageSize(10000);
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        int pageSize =cmd.getPageSize();
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
