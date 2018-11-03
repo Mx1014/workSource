@@ -23,6 +23,12 @@
 -- AUTHOR:梁家声 20181030
 -- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
 
+-- AUTHOR:黄鹏宇 20181103
+-- REMARK:解决缺陷 #38583:
+-- 第一步请执行在es上执行db/search/pmowner.sh
+-- 第二步执行同步接口/pm/syncOwnerIndex
+
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
@@ -363,7 +369,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmt
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10028', 'zh_CN', '获取数据失败');
 
 -- AUTHOR: 缪洲 2018年11月1日
---REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+-- REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
 UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
 -- AUTHOR: 缪洲
@@ -468,9 +474,9 @@ UPDATE eh_general_form_templates SET template_text='[{\r\n	\"dynamicFlag\": 0,\r
 -- AUTHOR: 唐岑
 -- REMARK: 楼宇导入出错提示
 SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
-INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'community', 10213, 'zh_CN', '楼栋名称不能超过20个汉字');
-INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'community', 10214, 'zh_CN', '楼栋名称不能重复');
 
 -- AUTHOR: 丁建民 20181031
@@ -525,6 +531,18 @@ update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.ori
 -- REMARK: 物业报修V3.8 多应用 父类型迁移
 update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
 INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `app_id`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('0', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '190', '0', NULL, '0');
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 更新跟进信息
+update eh_customer_trackings set customer_source = 0 where namespace_id = 999954;
+update eh_customer_trackings set tracking_type = 5 where namespace_id = 999954 and tracking_type=3;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=4;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=2;
+update eh_customer_trackings set tracking_type = 3 where namespace_id = 999954 and tracking_type=13439;
+
+-- REMARK: 所有含有organization的客户都进入租客
+update eh_enterprise_customers set customer_source = 1, level_item_id  = 6 where organization_id is not null and status = 2;
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 

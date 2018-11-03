@@ -6593,15 +6593,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         //查询表EH_ORGANIZATIONS
-        SelectQuery query = context.select(Tables.EH_ORGANIZATIONS.fields()).from(Tables.EH_ORGANIZATIONS).getQuery();
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
         //添加查询条件
         query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
         query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 
         if(excludeCommunityId != null){
-            query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.ne(excludeCommunityId)));
-            //query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.ne(excludeCommunityId));
+            //查询表EH_ORGANIZATIONS
+            SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS).getQuery();
+            subQuery.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(excludeCommunityId));
+
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(subQuery));
+
         }
 
         if (!StringUtils.isEmpty(keyword)) {
