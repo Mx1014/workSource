@@ -457,6 +457,25 @@ UPDATE eh_banners SET category_id = 0;
 SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
+
+
+-- AUTHOR: 唐岑
+-- REMARK: 更改module表中的client_handler_type类型为内部应用
+update eh_service_modules set client_handler_type = 2 where id = 150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 更新房源招商的字段模板
+UPDATE eh_general_form_templates SET template_text='[{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"用户姓名\",\r\n	\"fieldDisplayName\": \"用户姓名\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"用户的姓名；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"手机号码\",\r\n	\"fieldDisplayName\": \"手机号码\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_PHONE\",\r\n	\"fieldType\": \"NUMBER_TEXT\",\r\n	\"remark\": \"用户的手机号码；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"承租方\",\r\n	\"fieldDisplayName\": \"承租方\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"ENTERPRISE_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动输入；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"意向房源\",\r\n	\"fieldDisplayName\": \"意向房源\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"APARTMENT\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动选择；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n}]' WHERE module_id=150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 楼宇导入出错提示
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+VALUES (@max_id:=@max_id+1,'community', 10213, 'zh_CN', '楼栋名称不能超过20个汉字');
+INSERT INTO eh_locale_strings (id, scope, code, locale, text);
+VALUES (@max_id:=@max_id+1,'community', 10214, 'zh_CN', '楼栋名称不能重复');
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
