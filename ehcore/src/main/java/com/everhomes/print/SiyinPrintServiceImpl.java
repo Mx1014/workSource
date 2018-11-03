@@ -699,19 +699,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
         //3、收款方是否有会员，无则报错
 		Long merchantId = getOrderPayeeMerchantId(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (null == merchantId) {
+            LOGGER.error("payeeUserId no find, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
+                    "暂未绑定收款账户");
+		}
+		
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(merchantId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
 		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND,
+                    "merchant id not found");
 		}
-		List<PayUserDTO> payUserDTOs = resp.getResponse();
-        if (payUserDTOs == null || payUserDTOs.size() == 0){
-            LOGGER.error("payeeUserId no find, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
-                    "暂未绑定收款账户");
-        }
-
+		
 		//准备创建订单的参数，包括一些支付参数以及商品
 		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, merchantId);
 		CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
@@ -1170,10 +1172,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
 		if(orderStatus == PrintOrderStatusType.PAID){
 			throwError(PrintErrorCode.ERROR_ORDER_IS_PAYED, "order have paid");
-		}
-
-		if(orderStatus == PrintOrderStatusType.WAIT_FOR_ENTERPRISE_PAY){
-			throwError(PrintErrorCode.ERROR_PRINT_ORDER_ALREADY_WAITING_PAID, "order is waiting for enterprise payments");
 		}
 
 		return order;
@@ -2038,14 +2036,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		cmd2.setUserId(key);
 		cmd2.setTag1(arrayList);
 		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+			return null;
 		}
 
 		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
-		if(payUserList==null || payUserList.size() == 0){
-			return null;
-		}
  		return payUserList.stream().map(r->{
 			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 			dto.setAccountId(r.getId());
@@ -2066,28 +2062,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		if(cmd.getId()!=null){
-			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
-			if(oldPayeeAccount == null){
-				LOGGER.error("unknown payaccountid = "+cmd.getId());
-				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
-			}
-			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
-			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
-			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
-			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
-			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
-			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider
+				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (null == oldPayeeAccount) {
+			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,
+					SiyinPrintBusinessPayeeAccount.class);
+			newPayeeAccount.setStatus((byte) 2);
 			newPayeeAccount.setMerchantId(cmd.getPayeeId());
-			newPayeeAccount.setPayeeId(oldPayeeAccount.getPayeeId());
-			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(newPayeeAccount);
-		}else{
-			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
-			newPayeeAccount.setStatus((byte)2);
-			newPayeeAccount.setMerchantId(cmd.getPayeeId());
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
+			return;
 		}
+
+		oldPayeeAccount.setPayeeId(cmd.getPayeeId());
+		oldPayeeAccount.setMerchantId(cmd.getPayeeId());
+		oldPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
+		siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(oldPayeeAccount);
 	}
 
 	@Override
@@ -2104,13 +2095,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
 		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+			throwError(PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
 		}
 
 		List<PayUserDTO> payUserDTOS = resp.getResponse();
-
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
-		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+		PayUserDTO payUserDTO = map.get(convert.getMerchantId());
 		if(payUserDTO!=null){
 			convert.setPayeeUserType(payUserDTO.getUserType());
 			convert.setPayeeUserName(payUserDTO.getRemark());
