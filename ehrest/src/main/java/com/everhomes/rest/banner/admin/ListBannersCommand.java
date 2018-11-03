@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>scope: 小区id,全部就传 0 或者不传都可以</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 每页大小</li>
+ *     <li>categoryId: 应用入口ID</li>
  * </ul>
  */
 public class ListBannersCommand {
@@ -16,6 +17,15 @@ public class ListBannersCommand {
     private Long scope;
     private Long pageAnchor;
     private Integer pageSize;
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getNamespaceId() {
         return namespaceId;

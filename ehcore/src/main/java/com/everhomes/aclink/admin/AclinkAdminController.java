@@ -462,6 +462,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/aclink/listDoorGroupNew</b>
+     * <p>创建门禁组-门禁关系</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listDoorGroupNew")
+    @RestReturn(value=ListDoorGroupResponse.class)
+    public RestResponse listDoorGroupNew(@Valid ListDoorGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorGroupNew(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/aclink/getTempAuthSettings</b>
@@ -499,13 +513,14 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/aclink/updateAccessGroupRel</b>
+     * <b>URL: /admin/aclink/updateDoorGroup</b>
      * <p>更新门禁组</p>
      * @return 门禁列表
      */
-    @RequestMapping("updateAccessGroupRel")
+    @RequestMapping("updateDoorGroup")
     @RestReturn(value=String.class)
     public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        doorAccessService.updateDoorGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -513,13 +528,14 @@ public class AclinkAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/aclink/createAccessGroupRel</b>
-     * <p>新增门禁组-门禁关系</p>
+     * <b>URL: /admin/aclink/createDoorGroup</b>
+     * <p>新增门禁组</p>
      * @return 门禁列表
      */
-    @RequestMapping("createAccessGroupRel")
+    @RequestMapping("createDoorGroup")
     @RestReturn(value=String.class)
     public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
+        doorAccessService.createDoorGroup(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

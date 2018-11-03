@@ -32,6 +32,8 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.portal.PlatformContextNoWarnning;
+import com.everhomes.portal.PortalItemGroup;
+import com.everhomes.portal.PortalItemGroupProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalService;
 import com.everhomes.region.RegionProvider;
@@ -76,6 +78,7 @@ import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
@@ -89,6 +92,7 @@ import com.everhomes.statistics.transaction.ListModelInfoResponse;
 import com.everhomes.statistics.transaction.StatTransactionConstant;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.jooq.Condition;
@@ -174,6 +178,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Autowired
 	private PortalService portalService;
+
+    @Autowired
+    private LaunchPadService launchPadService;
+
+	@Autowired
+    private PortalItemGroupProvider portalItemGroupProvider;
 	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -2893,17 +2903,44 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public ListBannersResponse listBanners(ListBannersCommand cmd) {
+        ListBannersResponse response = new ListBannersResponse();
 
 		//String sceneToken = getSceneTokenByCommunityId(cmd.getContext().getCommunityId());
 		if(UserContext.current().getAppContext() == null){
 			UserContext.current().setAppContext(cmd.getContext());
 		}
 
-		//GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
-		//bannerCmd.setSceneToken(sceneToken);
-		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(null);
+		GetBannersBySceneCommand bannerCmd = new GetBannersBySceneCommand();
+		BannersInstanceConfig config = (BannersInstanceConfig) StringHelper.fromJsonString(cmd.getInstanceConfig(), BannersInstanceConfig.class);
+		if (config != null) {
+            bannerCmd.setCategoryId(config.getCategoryId());
+            if (config.getMoreAppId() != null) {
+                ServiceModuleApp serviceModuleApp = this.serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getMoreAppId());
+                if (serviceModuleApp != null) {
+                    ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModuleApp.getModuleId());
 
-		ListBannersResponse response = new ListBannersResponse();
+                    Byte clientHandlerType = 0;
+                    String host = "";
+                    if(module != null){
+                        clientHandlerType = module.getClientHandlerType();
+                        host = module.getHost();
+                    }
+
+                    String appConfig = launchPadService.refreshActionData(serviceModuleApp.getInstanceConfig());
+                    RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), serviceModuleApp.getOriginId(), serviceModuleApp.getName(), appConfig, null, null, null, clientHandlerType);
+
+                    if(StringUtils.isEmpty(host)){
+                        host  = "default";
+                    }
+
+                    String router = "zl://" + host + routerInfo.getPath() + "?" + routerInfo.getQuery();
+                    response.setMoreRouter(router);
+                }
+            }
+		}
+		//bannerCmd.setSceneToken(sceneToken);
+		List<BannerDTO> bannerDTOS =  bannerService.getBannersBySceneNew(bannerCmd);
+
 		response.setDtos(bannerDTOS);
 		return response;
 	}

@@ -10,6 +10,7 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.customer.createSuperAdminCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -713,8 +714,9 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationSystemAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+    	//查看管理员的功能不进行权限校验 #41146
+        //SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        //resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSystemAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -774,6 +776,22 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /acl/createSuperAdmin</b>
+     * <p>创建企业管理员</p>
+     */
+    @RequestMapping("createSuperAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse createSuperAdmin(createSuperAdminCommand cmd) {
+        rolePrivilegeService.updateSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 
 }

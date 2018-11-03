@@ -280,7 +280,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 				if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.USER) {
 					sendMessageToUser(range.getUserId(),String.format(body,"您"),meta,sendedranges);
 				}else if(QuestionnaireTargetType.fromCode(questionnaire.getTargetType()) == QuestionnaireTargetType.ORGANIZATION) {
-					for (String organizationName : userMapingOrganizationList.get(range)) {
+					for (String organizationName : userMapingOrganizationList.get(range.getUserId())) {
 						sendMessageToUser(range.getUserId(),String.format(body,organizationName),meta,sendedranges);
 					}
 				}
@@ -398,6 +398,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					userLevelRanges.addAll(adminList.stream().map(r->{
 						QuestionnaireScope scope = new QuestionnaireScope();
 						scope.setUserId(r);
+						scope.setOrgId(originalRange.getRange());
 						return scope;
 					}).collect(Collectors.toList()));
 				}else{

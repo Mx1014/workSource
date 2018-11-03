@@ -29,6 +29,7 @@ public class AddRentalBillCommand {
 	@ItemType(RentalBillRuleDTO.class)
 	private List<RentalBillRuleDTO> rules;
 	private String sceneType;
+	private String sceneToken;
 	private String packageName;
 
 	public String getResourceType() {
@@ -109,9 +110,16 @@ public class AddRentalBillCommand {
 	public void setRules(List<RentalBillRuleDTO> rules) {
 		this.rules = rules;
 	}
-  
- 
-//	public List<SiteItemDTO> getRentalItems() {
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
+
+	//	public List<SiteItemDTO> getRentalItems() {
 //		return rentalItems;
 //	}
 //

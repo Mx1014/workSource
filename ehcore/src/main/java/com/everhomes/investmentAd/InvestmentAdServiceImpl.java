@@ -212,7 +212,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		
 		//管理公司全部项目范围
 		if (cmd.getAllScope() != null && cmd.getAllScope() == 1) {
-			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			List<Long> communityIds = communityProvider.findCommunityIdsByOrgId(cmd.getOrganizationId());
 			cmd.setCommunityIds(communityIds);
 		}
 		

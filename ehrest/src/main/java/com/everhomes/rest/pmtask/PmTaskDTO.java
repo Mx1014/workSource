@@ -108,6 +108,8 @@ public class PmTaskDTO {
 
 	private String feeModel;
 
+	private Long appId;
+
 	public Long getId() {
 		return id;
 	}
@@ -383,6 +385,14 @@ public class PmTaskDTO {
 
 	public void setFeeModel(String feeModel) {
 		this.feeModel = feeModel;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 
 	@Override

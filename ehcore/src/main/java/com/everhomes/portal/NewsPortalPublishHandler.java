@@ -6,6 +6,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.news.NewsCategory;
 import com.everhomes.news.NewsProvider;
+import com.everhomes.news.NewsService;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.rest.portal.NewsInstanceConfig;
@@ -36,6 +37,9 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
 
     @Autowired
     private NewsProvider newsProvider;
+    
+    @Autowired
+    private NewsService newsService;
 
     @Autowired
     private WebMenuPrivilegeProvider webMenuProvider;
@@ -50,6 +54,10 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
         }else{
             updateNewsCategory(namespaceId, newsInstanceConfig.getCategoryId(), itemLabel);
         }
+        
+		String url = newsService.getNewsRenderUrl(namespaceId, newsInstanceConfig.getCategoryId(), null, newsInstanceConfig.getWidget(),
+				newsInstanceConfig.getTimeWidgetStyle());
+		newsInstanceConfig.setUrl(url);
         return StringHelper.toJsonString(newsInstanceConfig);
     }
 
@@ -59,8 +67,8 @@ public class NewsPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
-        return instanceConfig;
+	public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    	return instanceConfig;
     }
 
     private NewsCategory createNewsCategory(Integer namespaceId, String name){
