@@ -794,7 +794,9 @@ public interface OrganizationProvider {
 	 */
 	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword, CrossShardListingLocator locator, int pageSize);
 
-	/**
+    List<Organization> listOrganizationsByNamespaceId(Integer namesapceId, Long excludeCommunityId, String keyword, CrossShardListingLocator locator, int pageSize);
+
+    /**
 	 * 根据项目编号communityId查询eh_organization_workPlaces表中的信息
 	 * @param communityId
 	 * @return
