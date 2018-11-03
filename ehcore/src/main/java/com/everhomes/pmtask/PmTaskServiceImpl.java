@@ -3371,7 +3371,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
 		User user = UserContext.current().getUser();
-		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		if(null != result){
 			if(null != cmd.getContentHint())
 				result.setContentHint(cmd.getContentHint());
@@ -3401,7 +3401,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
-		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
