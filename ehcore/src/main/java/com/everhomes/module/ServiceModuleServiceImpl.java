@@ -63,6 +63,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.*;
@@ -599,7 +600,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
@@ -607,6 +607,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(moduleIds.size() == 0){
             return response;
         }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(namespaceId, cmd.getOwnerId()).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        //判断是否是仅仅有 OA 应用的普通公司
+        boolean isOaOnly = false;
+        if(authCommunityIds == null || authCommunityIds.size() == 0) {
+        	isOaOnly = true;
+        }
+        final boolean oaOnly = isOaOnly; 
+        
         List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
@@ -617,13 +627,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         tempList.stream().filter(r->!"".equals(r.getModuleControlType()) && r.getModuleControlType() != null && r.getLevel() == 3).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
-                    communityControlList.add(r);
+                	if(!oaOnly) {
+                		communityControlList.add(r);	
+                	}
                     break;
                 case ORG_CONTROL:
                     orgControlList.add(r);
                     break;
                 case UNLIMIT_CONTROL:
+                	if(!oaOnly) {
                     unlimitControlList.add(r);
+                	}
                     break;
             }
             return null;
