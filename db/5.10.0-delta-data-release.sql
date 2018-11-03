@@ -337,7 +337,7 @@ update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-app
 -- AUTHOR: 丁建民 20181031
 -- REMARK: 缴费对接门禁。企业或者个人欠费将禁用该企业或个人门禁 定时器执行时间
 SET @id = (SELECT MAX(id) from eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,5 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,23 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
