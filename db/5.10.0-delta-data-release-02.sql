@@ -76,6 +76,9 @@ update eh_flows fl, eh_general_approvals ap
 set fl.owner_id = ap.module_id, fl.owner_type = 'SERVICE_ALLIANCE', fl.string_tag5 = ap.id, fl.project_type = 'EhCommunities', fl.project_id = -1
 where fl.owner_type = 'GENERAL_APPROVAL' and fl.module_id = 40500 and fl.owner_id = ap.id and fl.owner_type <> 'SERVICE_ALLIANCE' ;
 
+-- 迁移6.1 表单
+update eh_general_forms set project_id = -1 where module_type = 'service_alliance';
+
 
 -- 迁移7.添加基础数据
 DELIMITER $$  -- 开始符
