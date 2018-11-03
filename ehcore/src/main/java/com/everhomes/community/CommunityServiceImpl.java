@@ -2341,7 +2341,7 @@ public class CommunityServiceImpl implements CommunityService {
                 @Override
                 public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
                     if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
-                        return 0;
+                        return -1;
                     }
                     return o2.getApproveTime().compareTo(o1.getApproveTime());
                 }
@@ -2455,7 +2455,7 @@ public class CommunityServiceImpl implements CommunityService {
                     @Override
                     public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
                         if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
-                            return 0;
+                            return -1;
                         }
                         return o2.getOperateTime().compareTo(o1.getOperateTime());
                     }
@@ -2534,7 +2534,7 @@ public class CommunityServiceImpl implements CommunityService {
                     @Override
                     public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
                         if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
-                            return 0;
+                            return -1;
                         }
                         return o2.getOperateTime().compareTo(o1.getOperateTime());
                     }
@@ -2579,7 +2579,7 @@ public class CommunityServiceImpl implements CommunityService {
                     @Override
                     public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
                         if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
-                            return 0;
+                            return -1;
                         }
                         return o2.getApproveTime().compareTo(o1.getApproveTime());
                     }
