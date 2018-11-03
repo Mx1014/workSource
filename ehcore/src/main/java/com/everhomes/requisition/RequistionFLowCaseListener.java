@@ -259,32 +259,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                         break;
                     }
                 }
-                /*if(fieldName.equals("uris")){
-                    if (StringUtils.isNotBlank(fieldValue)) {
-                        fieldValue = fieldValue.replace("[","");
-                        fieldValue = fieldValue.replace("]","");
-                        fieldValue = fieldValue.replace("\"","");
-                        List<FlowCaseFileDTO> files = new ArrayList<>();
-
-                        FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                        String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                        ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
-                        if(resource != null){
-                            fileDTO.setUrl(url);
-                            fileDTO.setFileName(dto.getFieldName());
-                            fileDTO.setFileSize(resource.getResourceSize());
-                            files.add(fileDTO);
-                        }
-
-                        FlowCaseFileValue value = new FlowCaseFileValue();
-                        value.setFiles(files);
-                        fieldValue = JSON.toJSONString(value);
-
-                        break;
-                    }
-                }*/
-
-                if(fieldName.equals("urls")){
+                if(fieldName.equals("uris")){
                     if (StringUtils.isNotBlank(fieldValue)) {
                         fieldValue = fieldValue.replace("[","");
                         fieldValue = fieldValue.replace("]","");
@@ -308,7 +283,6 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                         break;
                     }
                 }
-
 
             }
             e.setValue(fieldValue);
@@ -392,6 +366,7 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                             fileDTO.setFileSize(resource.getResourceSize());
                             files.add(fileDTO);
                         }
+
                         FlowCaseFileValue value = new FlowCaseFileValue();
                         value.setFiles(files);
                         fieldValue = JSON.toJSONString(value);
