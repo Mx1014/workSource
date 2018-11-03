@@ -278,6 +278,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("addRentalBill")
 	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		RentalBillDTO res = rentalService.addRentalBill(cmd); 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);

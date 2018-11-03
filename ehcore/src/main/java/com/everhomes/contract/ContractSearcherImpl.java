@@ -330,9 +330,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
         
-        if(cmd.getOrgId() != null) {
+        /*合同跟着园区，不跟着管理公司
+         * if(cmd.getOrgId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("partyAId", cmd.getOrgId()));
-        }
+        }*/
         if(cmd.getDepositStatus() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("depositStatus", cmd.getDepositStatus()));
         }

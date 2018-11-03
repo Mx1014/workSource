@@ -23,6 +23,7 @@ import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateChargingItemCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
@@ -42,6 +43,7 @@ import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
@@ -491,4 +493,22 @@ public interface AssetProvider {
 	 */
 	String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId,
 			Long categoryId);
+	
+	//缴费对接门禁
+	void createDoorAccessParam(AssetDooraccessParam asseDooraccessParam);
+	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
+	AssetDooraccessParam findDoorAccessParamById(Long id);
+	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
+	Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
+	PaymentBillOrder getPaymentBillOrderByBillId(String billId);
+	AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd);
+	List<AssetDooraccessParam> listDooraccessParamsList(byte status);
+	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus);
+
+	
 }

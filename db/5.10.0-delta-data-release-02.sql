@@ -20,10 +20,11 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
+-- REMARK: 备份eh_service_alliances, eh_flows表
 -- REMARK: 以下接口参数ownerId 填 1802，需将返回字符串发给我
+-- REMARK: /yellowPage/transferApprovalToForm 执行完后，需观察eh_general_form_vals表是否有记录持续新增（后台会持续更新10分钟左右，更新期间可以继续做后面接口,sql操作)。
 -- REMARK: /yellowPage/transferMainAllianceOwnerType
 -- REMARK: /yellowPage/transferAllianceModuleUrl 
--- REMARK: /yellowPage/transferApprovalToForm 
 -- REMARK: /yellowPage/transferApprovalFlowCases
 -- REMARK: /yellowPage/transferPadItems 
 
@@ -41,8 +42,8 @@
 -- 迁移1.调整ca表的ownerType和ownerId
 update eh_service_alliance_categories ca, eh_service_alliances sa 
 set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
-,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
-where ca.parent_id = 0 and sa.`type` = ca.id and a.owner_type = 'organaization';
+,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0), ca.description = sa.description
+where ca.parent_id = 0 and sa.`type` = ca.id and sa.owner_type = 'organaization';
 
 
 -- 迁移2.调整ca表子类的ownerType ownerId, type
