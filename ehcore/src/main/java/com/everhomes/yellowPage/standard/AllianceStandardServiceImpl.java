@@ -697,7 +697,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 			sa.setFlowId(baseFlowId);
 			if (null != flow) {
 				flowCount++;
-				sa.setFlowId(flow.getId());
+				sa.setFlowId(flow.getFlowMainId());
 			}
 			
 			//转成zl://form/create?sourceType=service_alliance&sourceId={id}
