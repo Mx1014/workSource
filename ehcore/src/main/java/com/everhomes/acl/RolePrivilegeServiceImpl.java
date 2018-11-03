@@ -4558,9 +4558,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         organizationService.updateSuperAdmin(cmd2);
 
 
+        //adminflag表示该用户有管理员,设置管理员后更新该用户有管理员
 		EnterpriseCustomer customer = customerProvider.findByOrganizationIdAndCommunityId(cmd.getOrganizationId(), cmd.getCommunityId());
-		customer.setAdminFlag((byte)1);
-		customerProvider.updateEnterpriseCustomer(customer);
-		customerSearcher.feedDoc(customer);
+		if(customer != null){
+			customer.setAdminFlag((byte)1);
+			customerProvider.updateEnterpriseCustomer(customer);
+			customerSearcher.feedDoc(customer);
+		}else{
+			LOGGER.error("params targetId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetId is null.");
+		}
+
 	}
 }
