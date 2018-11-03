@@ -39,7 +39,7 @@ public class PusherVendorServiceImpl implements PusherVendorService {
     AppUrlService appUrlService;
     
     ConcurrentMap<String, PusherVender> pusherMap = new ConcurrentHashMap<String, PusherVender>();
-    private static ScheduledExecutorService schExecutor = ThreadUtil.newScheduledExecutorService(3, "pushervendor");
+    private static ScheduledExecutorService schExecutor = ThreadUtil.newScheduledExecutorService(6, "pushervendor");
     
     @Override
     public void pushMessageAsync(PusherVenderType venderType, UserLogin senderLogin, UserLogin destLogin, com.everhomes.msgbox.Message msg, DeviceMessage devMessage) {
