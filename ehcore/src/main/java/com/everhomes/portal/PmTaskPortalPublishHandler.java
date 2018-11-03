@@ -44,6 +44,9 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         Byte feeModel = pmTaskInstanceConfig.getFeeModel();
         Byte appAgentSwitch = pmTaskInstanceConfig.getAppAgentSwitch();
         Byte bgAgentSwitch =pmTaskInstanceConfig.getBgAgentSwitch();
+
+        pmTaskInstanceConfig.setAppId(cmd.getAppOriginId());
+
         if(null == taskCategoryId){
             if(999983 == namespaceId)
                 taskCategoryId = 1L;
@@ -69,23 +72,23 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         }
 
         if(0 == agentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),1);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + cmd.getAppOriginId(),1);
         } else if (1 == agentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + taskCategoryId.toString(),0);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent." + cmd.getAppOriginId(),0);
         }
 
         if(0 == appAgentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + taskCategoryId.toString(),1);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + cmd.getAppOriginId(),1);
         } else if (1 == appAgentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + taskCategoryId.toString(),0);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.app" + cmd.getAppOriginId(),0);
         }
 
         if(0 == bgAgentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + taskCategoryId.toString(),1);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + cmd.getAppOriginId(),1);
         } else if (1 == bgAgentSwitch.byteValue()){
-            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + taskCategoryId.toString(),0);
+            configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + cmd.getAppOriginId(),0);
         }
-        configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + taskCategoryId.toString(),feeModel.toString());
+        configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + cmd.getAppOriginId(),feeModel.toString());
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
 
@@ -97,7 +100,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         String homeUrl = configurationProvider.getValue(namespaceId,"home.url","");
-        String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s#home#sign_suffix");
+        String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s&appId=%s#home#sign_suffix");
         String Url = homeUrl + SEPARATOR + Uri;
         PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
         Long taskCategoryId =  pmTaskInstanceConfig.getTaskCategoryId();
@@ -116,7 +119,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("url encode error.");
         }
-        Url = String.format(Url,namespaceId,taskCategoryId,displayname);
+        Url = String.format(Url,namespaceId,taskCategoryId,displayname,cmd.getAppOriginId());
         JSONObject actionData = new JSONObject();
         actionData.put("url",Url);
         return actionData.toJSONString();
