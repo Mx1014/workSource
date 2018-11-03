@@ -543,6 +543,11 @@ where namespace_id=999938 and action_type in (48, 55) and action_data like '%"wi
 update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
 where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
 
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20800;
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20600;
+
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20600;
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
@@ -554,6 +559,13 @@ where namespace_id=999938 and  action_type in (48, 55) and action_data not like 
 -- REMARK: 标准版数据库的标识
 INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
   VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
+
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20800;
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20600;
+
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"${home.url}/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20600;
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
