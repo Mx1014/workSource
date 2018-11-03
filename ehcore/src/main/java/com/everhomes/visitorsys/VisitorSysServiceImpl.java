@@ -286,59 +286,99 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-        ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
+
         Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
         Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
         List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
-
-        if(ownerType.getCode().equals(VisitorsysOwnerType.ENTERPRISE.getCode())){
-
-//          同步数据
-            FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
-            orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-            orgCmd.setOrganizationId(cmd.getOwnerId());
-            OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
-            List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
-
-            if(null != list && list.size() > 0){
-                for (OfficeSiteDTO r : list){
-                    boolean isExist = false;
-                    for (VisitorSysOfficeLocation r1 : visitorSysOfficeLocations){
-                        if(r.getId().equals(r1.getReferId())){
-                            r1.setOfficeLocationName(r.getSiteName());
-                            isExist = true;
-                            visitorSysOfficeLocationProvider.updateVisitorSysOfficeLocation(r1);
-                            break;
-                        }
-                    }
-                    if(!isExist){
-                        VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
-                        location.setOfficeLocationName(r.getSiteName());
-                        location.setReferId(r.getId());
-                        location.setReferType("EhOrganizationWorkplaces");
-                        location.setStatus(CommonStatus.ACTIVE.getCode());
-                        visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
-                    }
-                }
-            }
-
-            List<VisitorSysOfficeLocation> resultlist = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
-            response.setOfficeLocationList(resultlist.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
-        } else {
-            if(visitorSysOfficeLocations.size() == 0){
-                VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+        ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
+        if(visitorSysOfficeLocations!=null && visitorSysOfficeLocations.size()==pageSize){
+            response.setNextPageAnchor(visitorSysOfficeLocations.get(pageSize-1).getId());
+        }
+        if(visitorSysOfficeLocations.size()==0) {
+            List<BaseOfficeLocationDTO> officeLocationList = new ArrayList<>();
+            VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+            if (ownerType.ENTERPRISE == ownerType) {
+                Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+                location.setOfficeLocationName(organization.getName());
+            } else {
                 Community community = communityProvider.findCommunityById(cmd.getOwnerId());
                 location.setOfficeLocationName(community.getName());
-                location.setStatus(CommonStatus.ACTIVE.getCode());
-                visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
-
-                visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
             }
-
+            Tuple<VisitorSysOfficeLocation, Boolean> enter = coordinationProvider.getNamedLock(CoordinationLocks.VISITOR_SYS_LOCATION
+                    + cmd.getOwnerType()
+                    + cmd.getOwnerId()).enter(() -> {
+                List<VisitorSysOfficeLocation> locations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+                if(locations.size()==0) {
+                    location.setStatus(CommonStatus.ACTIVE.getCode());
+                    visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+                    return location;
+                }
+                return locations.get(0);
+            });
+            officeLocationList.add(ConvertHelper.convert(enter.first(), BaseOfficeLocationDTO.class));
+            response.setOfficeLocationList(officeLocationList);
+        }else {
             response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
         }
         return response;
     }
+
+//    @Override
+//    public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
+//        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//        ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
+//        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
+//        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
+//        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//
+//        if(ownerType.getCode().equals(VisitorsysOwnerType.ENTERPRISE.getCode())){
+//
+////          同步数据
+//            FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
+//            orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//            orgCmd.setOrganizationId(cmd.getOwnerId());
+//            OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
+//            List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
+//
+//            if(null != list && list.size() > 0){
+//                for (OfficeSiteDTO r : list){
+//                    boolean isExist = false;
+//                    for (VisitorSysOfficeLocation r1 : visitorSysOfficeLocations){
+//                        if(r.getId().equals(r1.getReferId())){
+//                            r1.setOfficeLocationName(r.getSiteName());
+//                            isExist = true;
+//                            visitorSysOfficeLocationProvider.updateVisitorSysOfficeLocation(r1);
+//                            break;
+//                        }
+//                    }
+//                    if(!isExist){
+//                        VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//                        location.setOfficeLocationName(r.getSiteName());
+//                        location.setReferId(r.getId());
+//                        location.setReferType("EhOrganizationWorkplaces");
+//                        location.setStatus(CommonStatus.ACTIVE.getCode());
+//                        visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//                    }
+//                }
+//            }
+//
+//            List<VisitorSysOfficeLocation> resultlist = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//            response.setOfficeLocationList(resultlist.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+//        } else {
+//            if(visitorSysOfficeLocations.size() == 0){
+//                VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//                Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+//                location.setOfficeLocationName(community.getName());
+//                location.setStatus(CommonStatus.ACTIVE.getCode());
+//                visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//
+//                visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//            }
+//
+//            response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+//        }
+//        return response;
+//    }
 
     @Override
     public ListCommunityOrganizationsResponse listCommunityOrganizations(ListCommunityOrganizationsCommand cmd) {
