@@ -253,7 +253,7 @@ public interface DoorAccessService {
 
     public ListAccessGroupRelResponse listDoorGroupRel(ListDoorAccessGroupCommand cmd);
 
-    //添加门禁自定义字段 add by liqingyan
+    //门禁v3.0.2 添加门禁自定义字段 add by liqingyan
     void createTempAuthCustomField(CreateTempAuthCustomFieldCommand cmd);
 
     ListTempAuthCustomFieldResponse listTempAuthCustomField(ListTempAuthCustomFieldCommand cmd);
@@ -265,7 +265,10 @@ public interface DoorAccessService {
     void invalidVistorAuths(InvalidVistorAuthsCommand cmd);
 
     OpenQueryLogResponse openQueryLogs(OpenQueryLogCommand cmd);
+    //门禁v3.0.2 临时授权优先门禁 add by liqingyan
+    void createTempAuthPriority (CreateTempAuthPriorityCommand cmd);
 
+    AclinkFormValuesDTO listTempAuthPriority(ListTempAuthPriorityCommand cmd);
     //门禁v3.0.2 添加管理授权企业 add by liqingyan
     void addDoorManagement(AddDoorManagementCommand cmd);
 
@@ -279,4 +282,9 @@ public interface DoorAccessService {
     void updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
 
     ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
+
+    void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd);
+
+    ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd);
+
 }
