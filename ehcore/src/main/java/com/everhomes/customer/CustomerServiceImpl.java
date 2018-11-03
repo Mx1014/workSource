@@ -4300,6 +4300,11 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             result = customerAdminContacts;
         }
+        if(result != null && result.size() > 0){
+            List<OrganizationContactDTO> oneAdmin = new ArrayList<>();
+            oneAdmin.add(result.get(0));
+            return oneAdmin;
+        }
         return result;
     }
 
