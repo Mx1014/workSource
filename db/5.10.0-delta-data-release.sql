@@ -363,7 +363,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmt
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10028', 'zh_CN', '获取数据失败');
 
 -- AUTHOR: 缪洲 2018年11月1日
---REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+-- REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
 UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
 -- AUTHOR: 缪洲
