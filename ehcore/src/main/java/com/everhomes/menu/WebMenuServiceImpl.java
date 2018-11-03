@@ -199,7 +199,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		Long versionId = version != null ? version.getId() : null;
 
 
-		List<Long> appOriginIds = null;
+		List<Long> appOriginIds = new ArrayList<>();
 
 		// 公司拥有所有权的园区集合
 		List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());

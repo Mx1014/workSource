@@ -38,6 +38,7 @@ import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.AllOrMoreType;
+import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -292,7 +293,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 
             if(null != handler){
-                dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig()));
+				HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+				handlerCmd.setAppOriginId(app.getOriginId());
+				handlerCmd.setAppId(app.getId());
+                dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig(), handlerCmd));
             }
             dtos.add(dto);
         }
@@ -714,7 +718,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 		if(handler != null){
-			String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
+
+			HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+			handlerCmd.setAppOriginId(app.getOriginId());
+			handlerCmd.setAppId(app.getId());
+			String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig(), handlerCmd);
 			if(itemActionData != null){
 				app.setInstanceConfig(itemActionData);
 			}

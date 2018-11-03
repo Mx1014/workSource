@@ -4,6 +4,7 @@ package com.everhomes.visitorsys;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.visitorsys.VisitorsysConstant;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
@@ -24,7 +25,7 @@ public class VisitorsysEnterpriseManagePortalPublishHandler implements PortalPub
     @Autowired
     private ServiceModuleAppProvider serviceModuleAppProvider;
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
         List<ServiceModuleApp> serviceModuleApps = serviceModuleAppProvider.listServiceModuleApp(namespaceId, releaseVersion == null ? null : releaseVersion.getId(), VisitorsysConstant.COMMUNITY_MODULE_ID);
         if(serviceModuleApps!=null && serviceModuleApps.size()>0){
@@ -34,22 +35,22 @@ public class VisitorsysEnterpriseManagePortalPublishHandler implements PortalPub
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
         return null;
     }
 
