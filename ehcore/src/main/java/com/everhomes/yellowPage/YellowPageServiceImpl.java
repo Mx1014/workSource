@@ -841,9 +841,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
 		ServiceAllianceDTO dto = null;
 		if (null != cmd.getSourceRequestType() && ServiceAllianceSourceRequestType.CLIENT.getCode() == cmd.getSourceRequestType()) {
-			dto = getServiceAllianceByScene(cmd);
+			dto = getServiceAlliance(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), true);
 		} else {
-			dto = getServiceAllianceByAdmin(cmd);
+			dto = getServiceAlliance(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), false);
 		}
 		
 		return dto == null ? new ServiceAllianceDTO() : dto;
@@ -874,11 +874,22 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return dto;
 	}
 	
-	private ServiceAllianceDTO getServiceAllianceByAdmin(GetServiceAllianceCommand cmd) {
-		ServiceAllianceCategories homePageCa = allianceStandardService.queryHomePageCategoryByAdmin(cmd.getOwnerType(),
-				cmd.getOwnerId(), cmd.getType());
+	private ServiceAllianceDTO getServiceAlliance(String ownerType, Long ownerId, Long type, boolean isByScene) {
+		ServiceAllianceCategories homePageCa = null;
+		if (isByScene) {
+			if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+				throwError(YellowPageServiceErrorCode.ERROR_OWNER_TYPE_NOT_COMMUNITY, "ownerType must be community");
+			}
+			
+			homePageCa = allianceStandardService.queryHomePageCategoryByScene(type, ownerId);
+		} else {
+			homePageCa = allianceStandardService.queryHomePageCategoryByAdmin(ownerType,
+					ownerId, type);
+		}
+		
 		if (null == homePageCa) {
-			LOGGER.error("getServiceAllianceByAdmin can not find the homePage cmd = " + cmd.toString());
+			LOGGER.error("getServiceAllianceByAdmin can not find the homePage ownerType:" + ownerType + " ownerId:"
+					+ ownerId + " type:" + type + " isByScene:" + isByScene);
 			return null;
 		}
 
@@ -887,11 +898,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 		sa.setId(homePageCa.getId());
 		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, HOME_PAGE_ATTACH_OWNER_TYPE);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
+		
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
+		dto.setId(homePageCa.getId());
+		dto.setName(homePageCa.getName());
 		dto.setDisplayMode(homePageCa.getDisplayMode());
 		dto.setSkipType(homePageCa.getSkipType());
+		dto.setDescription(homePageCa.getDescription());
 		return dto;
 	}
+
 
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(GetServiceAllianceEnterpriseListCommand cmd) {
