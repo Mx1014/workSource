@@ -1,5 +1,6 @@
 package com.everhomes.remind;
 
+import com.everhomes.category.Category;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -63,10 +64,12 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRemindCategoryDefaultShares;
 import com.everhomes.server.schema.tables.pojos.EhRemindShares;
+import com.everhomes.share.ShareService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -1010,7 +1013,7 @@ public class RemindServiceImpl implements RemindService  {
         cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Remind remind = remindProvider.getRemindDetail(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), UserContext.currentUserId(), cmd.getRemindId());
-        if (remind == null) {
+        if (remind == null || !checkRemindShare(remind)) {
             throw RuntimeErrorException
                     .errorWith(
                             RemindErrorCode.SCOPE,
@@ -1057,7 +1060,35 @@ public class RemindServiceImpl implements RemindService  {
         return response;
     }
 
-    @Override
+    private boolean checkRemindShare(Remind remind) {
+    	//验证是否为日程所有人
+    	if(remind.getUserId().equals(UserContext.currentUserId()))
+    		return true;
+    	//验证是否为在日程分类共享人
+    	if(remind.getRemindCategoryId() != null){
+    		List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(remind.getRemindCategoryId());
+    		if(!CollectionUtils.isEmpty(shares))
+    			for(RemindCategoryDefaultShare share : shares){
+    				OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(share.getSharedSourceId());
+    	            if (detail != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+    	                 return true;
+    	            }
+    			}
+    	}
+    	//验证是否为日程共享人
+		List<RemindShare> shares = remindProvider.findShareMemberDetailsByRemindId(remind.getId());
+		if(!CollectionUtils.isEmpty(shares))
+			for(RemindShare share : shares){
+				OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(share.getSharedSourceId());
+	            if (detail != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+	                 return true;
+	            }
+			} 
+		//验证不通过
+		return false;
+	}
+
+	@Override
     public void subscribeShareRemind(SubscribeShareRemindCommand cmd) {
         cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
