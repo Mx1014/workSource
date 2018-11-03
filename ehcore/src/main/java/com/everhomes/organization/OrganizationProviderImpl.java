@@ -6579,6 +6579,58 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+
+
+
+    /**
+     * 排除特定园区以为的公司
+     * @param
+     * @return
+     */
+    @Override
+    public List<Organization> listOrganizationsByNamespaceId(Integer namesapceId, Long excludeCommunityId, String keyword, CrossShardListingLocator locator, int pageSize){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        //查询表EH_ORGANIZATIONS
+        SelectQuery query = context.select(Tables.EH_ORGANIZATIONS.fields()).from(Tables.EH_ORGANIZATIONS).getQuery();
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+
+        if(excludeCommunityId != null){
+            query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.ne(excludeCommunityId)));
+            //query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.ne(excludeCommunityId));
+        }
+
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+            }
+            query.addConditions(conditionkeyword);
+        }
+
+
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addLimit(pageSize + 1);
+
+        List<Organization> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(RecordHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
+    }
+
+
+
     /**
      * 根据项目编号communityId查询eh_organization_workPlaces表和eh_organizations表（联查）中的信息
      * @param communityId
