@@ -15,9 +15,11 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhBannerCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhBannerClicksDao;
 import com.everhomes.server.schema.tables.daos.EhBannerOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhBannersDao;
+import com.everhomes.server.schema.tables.pojos.EhBannerCategories;
 import com.everhomes.server.schema.tables.pojos.EhBannerClicks;
 import com.everhomes.server.schema.tables.pojos.EhBannerOrders;
 import com.everhomes.server.schema.tables.pojos.EhBanners;
@@ -395,13 +397,18 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId) {
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
         SelectQuery<EhBannersRecord> query = context.selectFrom(t).getQuery();
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
-
+        if (categoryId == null) {
+            //兼容旧数据
+            query.addConditions(t.CATEGORY_ID.eq(0L));
+        }else {
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
         query.addConditions(t.SCOPE_ID.eq(communityId));
 
@@ -441,7 +448,7 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, int pageSize, ListingLocator locator) {
+    public List<Banner> listBannersByCommunityId(Integer namespaceId, Long communityId, Long categoryId, int pageSize, ListingLocator locator) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
@@ -449,7 +456,12 @@ public class BannerProviderImpl implements BannerProvider {
         query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()));
         query.addConditions(t.STATUS.ne(BannerStatus.DELETE.getCode()));
-
+        if (categoryId == null) {
+            //兼容旧数据
+            query.addConditions(t.CATEGORY_ID.eq(0L));
+        }else {
+            query.addConditions(t.CATEGORY_ID.eq(categoryId));
+        }
         query.addOrderBy(t.STATUS);
 
         if (communityId != null && communityId != 0) {
@@ -479,16 +491,45 @@ public class BannerProviderImpl implements BannerProvider {
     }
 
     @Override
-    public Map<Long, Integer> countEnabledBannersByScope(Integer namespaceId) {
+    public Map<Long, Integer> countEnabledBannersByScope(Integer namespaceId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhBanners t = EH_BANNERS;
 
         return context.select(t.SCOPE_ID, DSL.count(t.ID))
                 .from(t)
                 .where(t.NAMESPACE_ID.eq(namespaceId))
+                .and(t.CATEGORY_ID.eq(categoryId))
                 .and(t.SCOPE_CODE.eq(ScopeType.COMMUNITY.getCode()))
                 .and(t.STATUS.eq(BannerStatus.ACTIVE.getCode()))
                 .groupBy(t.SCOPE_ID)
                 .fetchMap(t.SCOPE_ID, DSL.count(t.ID));
+    }
+
+    @Override
+    public void createBannerCategory(BannerCategory bannerCategory) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class));
+
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBannerCategories.class));
+        bannerCategory.setId(id);
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        dao.insert(bannerCategory);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBannerOrders.class, null);
+    }
+
+    @Override
+    public BannerCategory findBannerCategoryById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+
+        assert(id != null);
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), BannerCategory.class);
+    }
+
+    @Override
+    public void updateBannerCategory(BannerCategory bannerCategory) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class));
+        EhBannerCategoriesDao dao = new EhBannerCategoriesDao(context.configuration());
+        dao.update(bannerCategory);
     }
 }

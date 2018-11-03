@@ -102,6 +102,8 @@ public interface NewsService {
 	ListOpenNewsResponse listNewsOpenApi(ListOpenNewsCommand cmd, Integer namespaceId);
 
 	ListNewsResponse listNews(ListNewsCommand cmd, boolean isScene);
+
+	String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget, String timeWidgetStyle);
 }
 
 

@@ -71,6 +71,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.openapi.FamilyAddressDTO;
@@ -492,6 +493,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	dto.setLinkStatus(DoorAccessLinkStatus.FAILED.getCode());
                 }
             
+            //旧数据会有空值,新激活的门禁会设置默认值 by liuyilin 20181101
+			if (dto.getEnableAmount() == null && dto.getEnableDuration() == null) {
+				dto.setEnableDuration(DoorAuthStatus.VALID.getCode());
+				dto.setMaxDuration(dto.getMaxDuration() == null ? 60 : dto.getMaxDuration());
+			}
+            
             //User user = userProvider.findUserById(da.getCreatorUserId());
             UserInfo user = userService.getUserSnapshotInfoWithPhone(dto.getCreatorUserId());
             if(user != null) {
@@ -517,7 +524,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     dto.setGroupName(group.getDisplayNameNotEmpty());
                 }
             }
-            
+
             if(dto.getDisplayName() == null) {
                 dto.setDisplayName(dto.getName());
             }
@@ -1553,6 +1560,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setGroupid(cmd.getGroupId());
                 doorAcc.setDisplayName(cmd.getDisplayName());
                 doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
+                //激活时设置默认值 by liuyilin 20181101
+                //TODO 门禁3.0实现默认配置后,拿默认配置
+                doorAcc.setEnableDuration(DoorAuthStatus.VALID.getCode());
+                doorAcc.setMaxDuration(60);
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
@@ -2317,6 +2328,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             //查询自定义表单
             List<AclinkFormValuesDTO> values = doorAccessProvider.findAclinkFormValuesByAuthId(auth.getId());
             dto.setValues(values);
+            List<AclinkFormTitlesDTO> titles = new ArrayList<AclinkFormTitlesDTO>();
+            if(null != values && !values.isEmpty()){
+                for(AclinkFormValuesDTO value:values){
+                    if(value.getTitleId() != null){
+                        AclinkFormTitles title = doorAccessProvider.findAclinkFormTitlesById(value.getTitleId());
+                        titles.add(ConvertHelper.convert(title, AclinkFormTitlesDTO.class));
+                    }
+                }
+            }
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
@@ -5543,19 +5563,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         DoorAuth auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //创建自定义表单记录
-        for(CreateCustomFieldCommand itemCmd:cmd.getList()){
-            if(itemCmd == null || itemCmd.getId() == null) continue;
-            AclinkFormValues value = new AclinkFormValues();
-            value.setNamespaceId(namespaceId);
-            value.setTitleId(itemCmd.getId());
-            value.setValue(itemCmd.getName());
-            value.setType((byte)2);
-            //表单记录ownerId对应授权Id
-            value.setOwnerId(auth.getId());
-            value.setOwnerType((byte)5);
-            value.setCreatorUid(user.getId());
-            doorAccessProvider.createAclinkFormValues(value);
+        if(null != cmd.getList() && !cmd.getList().isEmpty()){
+            for(CreateCustomFieldCommand itemCmd:cmd.getList()){
+                if(itemCmd == null || itemCmd.getId() == null) continue;
+                AclinkFormValues value = new AclinkFormValues();
+                value.setNamespaceId(namespaceId);
+                value.setTitleId(itemCmd.getId());
+                value.setValue(itemCmd.getName());
+                value.setType((byte)2);
+                //表单记录ownerId对应授权Id
+                value.setOwnerId(auth.getId());
+                value.setOwnerType((byte)5);
+                value.setCreatorUid(user.getId());
+                doorAccessProvider.createAclinkFormValues(value);
+            }
         }
+
         DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
         dto.setQrString(auth.getQrKey());
         if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
@@ -6782,7 +6805,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		if(cmd.getPageAnchor() != null){
 			locator.setAnchor(cmd.getPageAnchor());
 		}
-		Integer count = cmd.getPageSize() == null ? 0 : cmd.getPageSize();
+		Integer count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		List<DoorAccessGroupRelDTO> groupRels = doorAccessProvider.listDoorGroupRel(locator,count,cmd);
 		rsp.setGroupRels(groupRels);
 		if(locator.getAnchor() != null){
@@ -6790,6 +6813,22 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		}
 		return rsp;
 	}
+
+    @Override
+    public ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd){
+	    ListDoorGroupResponse resp = new ListDoorGroupResponse();
+	    CrossShardListingLocator locator = new CrossShardListingLocator();
+        if(cmd.getPageAnchor() != null){
+            locator.setAnchor(cmd.getPageAnchor());
+        }
+        Integer count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<AclinkGroupDTO> groups = doorAccessProvider.listAclinkGroup(locator, count, cmd);
+        resp.setGroup(groups);
+        if(locator.getAnchor() != null){
+            resp.setNextPageAnchor(locator.getAnchor());
+        }
+        return resp;
+    }
 
 	@Override
     public void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd){
@@ -6966,6 +7005,44 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		
 	}
 
+	@Override
+    public AclinkGroup createDoorGroup(CreateDoorAccessGroupCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    AclinkGroup group = new AclinkGroup();
+	    group.setName(cmd.getGroupName());
+	    group.setNamespaceId(namespaceId);
+	    group.setStatus((byte)1);
+	    group.setOwnerId(cmd.getOwnerId());
+	    group.setOwnerType(cmd.getOwnerType());
+	    group.setCreatorUid(user.getId());
+	    group.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        return doorAccessProvider.createDoorGroup(group);
+    }
+
+    @Override
+    public void updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
+	    AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getGroupId());
+	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
+	        group.setName(cmd.getGroupName());
+        }
+        if(cmd.getStatus() != null){
+            group.setStatus(cmd.getStatus());
+            doorAccessProvider.deleteAllDoorGroupRel(cmd.getGroupId());
+        }
+        User user = UserContext.current().getUser();
+        group.setOperatorUid(user.getId());
+        group.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
+            for(Long id :cmd.getDoorIds()){
+                if(null != id){
+                    doorAccessProvider.createDoorGroupRel(cmd.getGroupId(),id);
+                }
+            }
+        }
+	    doorAccessProvider.updateDoorGroup(group);
+
+    }
 }
 
 

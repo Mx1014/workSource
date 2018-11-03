@@ -20,8 +20,12 @@
 
 
 -- AUTHOR: 黄明波 2018年10月27日17:31:00
--- REMARK: /yellowPage/transferApprovalToForm 参数ownerId 填 1802， 将返回的字符串发给我确认
--- REMARK: /yellowPage/transferPadItems 参数ownerId 填 1802， 将返回的字符串发给我确认
+-- REMARK: 以下接口参数ownerId 填 1802，需将返回字符串发给我
+-- REMARK: /yellowPage/transferMainAllianceOwnerType
+-- REMARK: /yellowPage/transferAllianceModuleUrl 
+-- REMARK: /yellowPage/transferApprovalToForm 
+-- REMARK: /yellowPage/transferApprovalFlowCases
+-- REMARK: /yellowPage/transferPadItems 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
@@ -38,7 +42,7 @@
 update eh_service_alliance_categories ca, eh_service_alliances sa 
 set ca.owner_type = sa.owner_type, ca.owner_id = sa.owner_id, ca.`type` = ca.id 
 ,ca.enable_provider = ifnull(sa.integral_tag3, 0) , ca.enable_comment = ifnull(sa.enable_comment, 0)
-where ca.parent_id = 0 and sa.`type` = ca.id;
+where ca.parent_id = 0 and sa.`type` = ca.id and a.owner_type = 'organaization';
 
 
 -- 迁移2.调整ca表子类的ownerType ownerId, type
@@ -68,7 +72,7 @@ where sa.parent_id = 0 and sa.owner_id > 0 and sa.`type` <> 0 and st.owner_type 
 
 -- 迁移6.工作流
 update eh_flows fl, eh_general_approvals ap 
-set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE'
+set fl.owner_id = ap.owner_id, fl.owner_type = 'SERVICE_ALLIANCE', fl.string_tag5 = ap.id
 where fl.owner_type = 'GENERAL_APPROVAL' and fl.module_id = 40500 and fl.owner_id = ap.id and fl.owner_type <> 'SERVICE_ALLIANCE' ;
 
 
@@ -177,7 +181,7 @@ DROP PROCEDURE IF EXISTS alliance_transfer_add_match;  -- 删除该存储过程
 -- REMARK:云打印账号迁移
 update eh_siyin_print_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 update eh_service_modules set client_handler_type = 2 where id = 40500;
-update eh_service_modules set client_handler_type = 0 where id = 10800;
+update eh_service_modules set client_handler_type = 2 where id = 10800;
 
 
 

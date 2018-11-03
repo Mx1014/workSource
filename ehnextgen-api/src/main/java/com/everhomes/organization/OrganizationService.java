@@ -633,4 +633,9 @@ public interface OrganizationService {
 	//	物业组所需获取企业员工的唯一标识符
 	String getAccountByTargetIdAndOrgId(Long targetId, Long orgId);
 	OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd);
+
+	//用户认证授权
+    UserAuthenticationOrganizationDTO createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd);
+
+    UserAuthenticationOrganizationDTO getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd);
 }

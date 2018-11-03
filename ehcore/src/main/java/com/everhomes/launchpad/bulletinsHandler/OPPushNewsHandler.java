@@ -84,7 +84,7 @@ public class OPPushNewsHandler implements OPPushHandler{
     	   
     	   for (BriefNewsDTO dto : resp.getNewsList() ) {
                OPPushCard card = new OPPushCard();
-               card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
+               card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
                card.setRouterPath("/detail");
 				try {
 					card.setRouterQuery("url=" + URLEncoder.encode(dto.getNewsUrl(), "utf-8"));
@@ -94,7 +94,11 @@ public class OPPushNewsHandler implements OPPushHandler{
 
 
                String host = "news-feed";
-               String router = "zl://" + host + card.getRouterPath() + "?moduleId=10800&clientHandlerType=2&" + card.getRouterQuery();
+               String router = "zl://" + host + card.getRouterPath() 
+               + "?moduleId=10800&clientHandlerType="+card.getClientHandlerType()
+               +"&newsToken=" + dto.getNewsToken()
+               +"&" + card.getRouterQuery()
+               ;
                card.setRouter(router);
 
                List<Object> properties = new ArrayList<>();

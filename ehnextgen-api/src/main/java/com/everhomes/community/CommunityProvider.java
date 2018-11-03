@@ -183,5 +183,6 @@ public interface CommunityProvider {
 	Long getOrganizationIdByCommunityId(Long communityId);
 	String findCommunityCategoryByCommunityId(Long communityId);
 	List<Building> findBuildingsByIds(List<Long> buildingIds);
+	List<Long> findCommunityIdsByOrgId(Long organizationId);
 	
 }

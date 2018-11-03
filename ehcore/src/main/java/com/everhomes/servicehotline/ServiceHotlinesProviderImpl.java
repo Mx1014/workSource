@@ -1,5 +1,6 @@
 package com.everhomes.servicehotline;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -22,7 +23,9 @@ import com.everhomes.server.schema.tables.records.EhServiceHotlinesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.servicehotline.ServiceHotline;
 import com.everhomes.techpark.servicehotline.ServiceHotlinesProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 @Component
 public class ServiceHotlinesProviderImpl implements ServiceHotlinesProvider {
 	@Autowired
@@ -40,6 +43,9 @@ public class ServiceHotlinesProviderImpl implements ServiceHotlinesProvider {
 				long id = sequenceProvider.getNextSequence(key);
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         obj.setId(id);
+        obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        obj.setCreatorUid(UserContext.current().getUser().getId());
+        obj.setDefaultOrder(obj.getId().intValue());
         prepareObj(obj);
         EhServiceHotlinesDao dao = new EhServiceHotlinesDao(context.configuration());
         dao.insert(obj);
@@ -50,6 +56,10 @@ public class ServiceHotlinesProviderImpl implements ServiceHotlinesProvider {
     public void updateServiceHotline(ServiceHotline obj) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhServiceHotlinesDao dao = new EhServiceHotlinesDao(context.configuration());
+        obj.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if (null == obj.getDefaultOrder()) {
+        	obj.setDefaultOrder(0);
+        }
         dao.update(obj);
     }
 
@@ -138,6 +148,8 @@ public class ServiceHotlinesProviderImpl implements ServiceHotlinesProvider {
 			if (null != status) {
 				query.addConditions(Tables.EH_SERVICE_HOTLINES.STATUS.eq(status));
 			}
+			
+			query.addOrderBy(Tables.EH_SERVICE_HOTLINES.DEFAULT_ORDER.asc());
 
 			return query;
 		});
