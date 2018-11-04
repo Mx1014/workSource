@@ -66,8 +66,8 @@ class PmTaskCommonServiceImpl {
     private SmsProvider smsProvider;
     @Autowired
     private AddressProvider addressProvider;
-    @Autowired
-    private CategoryProvider categoryProvider;
+//    @Autowired
+//    private CategoryProvider categoryProvider;
     @Autowired
     private CommunityProvider communityProvider;
     @Autowired
@@ -327,7 +327,7 @@ class PmTaskCommonServiceImpl {
         PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 
         //查询服务类型
-            Category category = categoryProvider.findCategoryById(task.getCategoryId());
+        PmTaskCategory category = pmTaskProvider.findCategoryById(task.getCategoryId());
         PmTaskCategory taskCategory = checkCategory(task.getTaskCategoryId());
         if(null != category)
             dto.setCategoryName(category.getName());
