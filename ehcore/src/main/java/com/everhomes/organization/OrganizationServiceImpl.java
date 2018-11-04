@@ -7628,6 +7628,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return dto;
         }).collect(Collectors.toList()));
 
+        Collections.sort(response.getMembers(), new Comparator<OrganizationMemberDTO>() {
+            @Override
+            public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
+                if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                    return -1;
+                }
+                return o2.getApproveTime().compareTo(o1.getApproveTime());
+            }
+        });
         return response;
     }
 
