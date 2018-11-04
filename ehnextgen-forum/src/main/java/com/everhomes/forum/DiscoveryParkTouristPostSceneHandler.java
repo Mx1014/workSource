@@ -1,5 +1,7 @@
 package com.everhomes.forum;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,8 +142,14 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
             filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
-                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+            String excludeCategories = "";
+            try {
+                excludeCategories = URLEncoder.encode("excludeCategories[0]", "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("encode excludeCategories error",e);
+            }
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&%s=%s", serverContectPath,
+                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(),excludeCategories, CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             filterDto.setAvatar(avatarUri);
