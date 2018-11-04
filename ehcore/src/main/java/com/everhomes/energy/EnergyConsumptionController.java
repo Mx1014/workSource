@@ -1,5 +1,7 @@
 package com.everhomes.energy;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -78,6 +80,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.scheduler.EnergyTaskScheduleJob;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -114,7 +117,9 @@ public class EnergyConsumptionController extends ControllerBase {
 
     @Autowired
     private EnergyTaskScheduleJob energyTaskScheduleJob;
-
+    
+    @Autowired
+    private AclProvider aclProvider;
 
     /**
      * <p>新建表记(水表, 电表等)</p>
@@ -764,7 +769,28 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(value = String.class)
     @RequestMapping("calculateTaskFeeByTaskId")
     public RestResponse calculateTaskFeeByTaskId(CalculateTaskFeeByTaskIdCommand cmd) {
+    	//增加系统管理员验证
+    	if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
         energyTaskScheduleJob.calculateTaskFeeByTaskId(cmd.getTaskId());
+        return success();
+    }
+    
+    /**
+     * <p>手动触发定时任务计算任务费用</p>
+     * <b>URL: /energy/calculateTaskFee</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("calculateTaskFee")
+    public RestResponse calculateTaskFee() {
+    	//增加系统管理员验证
+    	if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+            UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+        }
+        energyTaskScheduleJob.calculateTaskFee();
         return success();
     }
 
