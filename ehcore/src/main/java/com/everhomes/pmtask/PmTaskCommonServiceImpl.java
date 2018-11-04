@@ -199,7 +199,7 @@ class PmTaskCommonServiceImpl {
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
-        Category taskCategory = checkCategory(taskCategoryId);
+        PmTaskCategory taskCategory = checkCategory(taskCategoryId);
 
         final PmTask task = new PmTask();
 
@@ -254,8 +254,8 @@ class PmTaskCommonServiceImpl {
         return task;
     }
 
-    Category checkCategory(Long id){
-        Category category = categoryProvider.findCategoryById(id);
+    PmTaskCategory checkCategory(Long id){
+        PmTaskCategory category = pmTaskProvider.findCategoryById(id);
         if(null == category) {
             LOGGER.error("Category not found, categoryId={}", id);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -328,7 +328,7 @@ class PmTaskCommonServiceImpl {
 
         //查询服务类型
             Category category = categoryProvider.findCategoryById(task.getCategoryId());
-        Category taskCategory = checkCategory(task.getTaskCategoryId());
+        PmTaskCategory taskCategory = checkCategory(task.getTaskCategoryId());
         if(null != category)
             dto.setCategoryName(category.getName());
         dto.setTaskCategoryName(taskCategory.getName());
