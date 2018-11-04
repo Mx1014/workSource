@@ -794,7 +794,7 @@ public class RemindServiceImpl implements RemindService  {
         cmd.setUserId(cmd.getUserId() != null ? cmd.getUserId() : UserContext.currentUserId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Remind remind = remindProvider.getRemindDetail(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getUserId(), cmd.getId());
-        if (remind == null) {
+        if (remind == null || !checkRemindShare(remind)) {
             throw RuntimeErrorException
                     .errorWith(
                             RemindErrorCode.SCOPE,
@@ -1019,7 +1019,7 @@ public class RemindServiceImpl implements RemindService  {
         cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Remind remind = remindProvider.getRemindDetail(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), UserContext.currentUserId(), cmd.getRemindId());
-        if (remind == null || !checkRemindShare(remind)) {
+        if (remind == null) {
             throw RuntimeErrorException
                     .errorWith(
                             RemindErrorCode.SCOPE,
