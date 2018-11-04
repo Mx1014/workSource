@@ -70,7 +70,7 @@ public interface PmTaskProvider {
 
 	PmTaskConfig createPmTaskConfig(PmTaskConfig bean);
 	PmTaskConfig updatePmTaskConfig(PmTaskConfig bean);
-	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId);
+	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId, Long appId);
 
 //	订单明细CRUD
 	void createOrderDetails(List<PmTaskOrderDetail> beans);

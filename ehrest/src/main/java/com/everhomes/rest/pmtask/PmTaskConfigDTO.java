@@ -28,6 +28,8 @@ public class PmTaskConfigDTO {
     private Byte paymentAccountType;
     private String contentHint;
 
+    private Long appId;
+
     public Long getId() {
         return id;
     }
@@ -98,6 +100,14 @@ public class PmTaskConfigDTO {
 
     public void setTaskCategoryId(Long taskCategoryId) {
         this.taskCategoryId = taskCategoryId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     @Override

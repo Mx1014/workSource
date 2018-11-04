@@ -19,6 +19,11 @@ public class PrintErrorCode {
 	public static final int ERROR_ORDER_IS_PAYED = 10011; //订单已支付
 	public static final int ERROR_LOCK_ORDER_FAILED = 10012; //锁定订单失败
 	public static final int ERROR_EXPORT_EXCEL_FAILED = 10013; //文件导出失败
+	
+	
+	public static final int ERROR_PAYEE_ACCOUNT_NOT_CONFIG= 11000;//收款账户未设置
+	public static final int ERROR_MERCHANT_ID_NOT_FOUND= 11001;//该商户id不存在
+	
 
 	//eh_locale_strings
 	public static final String PRINT_COURSE_LIST= "print_course_list";//打印教程 ‘|’做分割
@@ -35,17 +40,5 @@ public class PrintErrorCode {
 	public static final String PRINT_LOGON_SCAN_TIMOUT= "print.logon.scan.timout";//二维码是否被扫描检测的延迟时间,单位毫秒 ：10000
 	public static final String PRINT_SIYIN_PATTERN= "print.siyin.pattern";//1:司印方配置成不解锁打印机，直接打印的模式，2:司印方配置成发送文档到打印机，需要解锁再打印的模式。
 	public static final String PRINT_SIYIN_JOB_COUNT_TIMEOUT= "print.siyin.job.count.timeout";//用户正在打印任务数量放到redis中的，设置一个默认超时时间 10 单位分钟
-	
-	
-	// error code
-	public static final int ERROR_PRINT_ORDER_NOT_FOUND = 10001; //未找到支付订单
-	public static final int ERROR_PRINT_ORDER_IS_PAID = 10002;//该支付订单已支付
-	public static final int ERROR_PRINT_ORDER_ALREADY_WAITING_PAID = 10003;//该订单已记账
-	public static final int ERROR_CREATE_GENERAL_BILL= 10004;//创建统一订单失败
-	public static final int ERROR_GET_JOBS_FAILED= 10005;//获取打印renwu失败
-	
-	
 
-	public static final int ERROR_PAYEE_ACCOUNT_NOT_CONFIG= 11000;//收款账户未设置
-	
 }

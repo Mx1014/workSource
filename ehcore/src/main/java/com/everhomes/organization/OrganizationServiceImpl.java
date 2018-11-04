@@ -8828,20 +8828,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setSiteDtos(siteDtos);*/
                     data.setBuildingNameAndApartmentName(r.getH().trim());
                 }
-                if (null != r.getI())
-                    data.setPmFlag(r.getI().trim());
-                if (null != r.getJ()){
+                if (null != r.getJ())
+                    data.setPmFlag(r.getJ().trim());
+                if (null != r.getK()){
                     /*for(String str : r.getJ().split(",")){
                         communityDTO.setName(str);
                         communityDTOList.add(communityDTO);
                     }
                     data.setCommunityDTOList(communityDTOList);*/
-                    data.setCommunityNames(r.getJ().trim());
+                    data.setCommunityNames(r.getK().trim());
                 }
-                if (null != r.getK())
-                    data.setServiceSupportFlag(r.getK().trim());
                 if (null != r.getL())
-                    data.setWorkPlatFormFlag(r.getL().trim());
+                    data.setServiceSupportFlag(r.getL().trim());
+                if (null != r.getM())
+                    data.setWorkPlatFormFlag(r.getM().trim());
                     datas.add(data);
             }
         }
@@ -14468,6 +14468,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+
+
+                    //在这里我们还需要维护eh_organization_community_requests这张表
+                    //创建OrganizationCommunityRequest类的对象
+                    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                    //将数据封装在对象OrganizationCommunityRequest对象中
+                    organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
+                    organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //// TODO: 2018/5/22
+                    enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
+
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
                         //说明楼栋和门牌不为空，注意他是一个集合
@@ -14493,6 +14507,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             //持久化到数据库
                             //// TODO: 2018/5/28
                             organizationProvider.insertIntoOrganizationAddress(organizationAddress);
+
                         }
                     }
 

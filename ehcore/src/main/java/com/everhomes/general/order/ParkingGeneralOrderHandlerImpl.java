@@ -33,7 +33,7 @@ public class ParkingGeneralOrderHandlerImpl extends DefaultGeneralOrderHandler{
 	void dealInvoiceCallBack(OrderCallBackCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderByBizOrderNum(cmd.getCallBackInfo().getBusinessOrderId());
 		if (null == order) {
-			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PRINT_ORDER_NOT_FOUND, "order not exist");
+			throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_ORDER_NOT_EXIST, "order not exist");
 		}
 		
 		order.setInvoiceStatus((byte)2);

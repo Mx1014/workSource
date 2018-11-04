@@ -26,7 +26,7 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ArchibusPmTaskHandle.class);
 
-    public static final String THIRDURL = "http://www.xboxad.com:8080/archibus/webServices/fmWork?wsdl";
+    public static String THIRDURL = "http://www.xboxad.com:8080/archibus/webServices/fmWork?wsdl";
 
     public static final String pk_crop = "GMFW";
 
@@ -36,7 +36,9 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
 
     private static FmWorkDataService service;
     public FmWorkDataService getService(){
-        if(service == null){
+        String newURL = configProvider.getValue("pmtask.archibus.url","http://fm.chinaworldservice.cn:8080/archibus/webServices/fmWork?wsdl");
+        if(!THIRDURL.equals(newURL) || service == null){
+            THIRDURL = newURL;
             FmWorkDataServiceImplServiceLocator locator = new FmWorkDataServiceImplServiceLocator();
             locator.setFmWorkDataServiceImplPortEndpointAddress(THIRDURL);
             try {

@@ -291,6 +291,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
+		} else {
+//			用appId实现多应用,去除taskcategoryId
+			cmd.setTaskCategoryId(null);
 		}
 
 		//检查多入口应用权限
@@ -306,7 +309,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
+
 		return handler.searchTasks(cmd);
 	}
 
@@ -3371,7 +3374,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
 		User user = UserContext.current().getUser();
-		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		if(null != result){
 			if(null != cmd.getContentHint())
 				result.setContentHint(cmd.getContentHint());
@@ -3401,7 +3404,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
-		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
@@ -3788,7 +3791,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else{
 			taskCategoryId = 9L;
 		}
-		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),null,task.getAppId());
 		if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
 			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));

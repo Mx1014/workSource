@@ -22,6 +22,7 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.customer.createSuperAdminCommand;
 import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.user.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
@@ -239,6 +240,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private EnterpriseCustomerSearcher customerSearcher;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -4552,5 +4556,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.ORG_ADMIN_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
         UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
         organizationService.updateSuperAdmin(cmd2);
+
+
+        //adminflag表示该用户有管理员,设置管理员后更新该用户有管理员
+		EnterpriseCustomer customer = customerProvider.findByOrganizationIdAndCommunityId(cmd.getOrganizationId(), cmd.getCommunityId());
+		if(customer != null){
+			customer.setAdminFlag((byte)1);
+			customerProvider.updateEnterpriseCustomer(customer);
+			customerSearcher.feedDoc(customer);
+		}else{
+			LOGGER.error("params targetId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetId is null.");
+		}
+
 	}
 }
