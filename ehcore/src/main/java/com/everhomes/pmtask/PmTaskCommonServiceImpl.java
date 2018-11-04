@@ -3,8 +3,6 @@ package com.everhomes.pmtask;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -66,8 +64,6 @@ class PmTaskCommonServiceImpl {
     private SmsProvider smsProvider;
     @Autowired
     private AddressProvider addressProvider;
-//    @Autowired
-//    private CategoryProvider categoryProvider;
     @Autowired
     private CommunityProvider communityProvider;
     @Autowired
