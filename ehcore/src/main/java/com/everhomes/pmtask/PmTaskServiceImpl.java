@@ -291,6 +291,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
+		} else {
+//			用appId实现多应用,去除taskcategoryId
+			cmd.setTaskCategoryId(null);
 		}
 
 		//检查多入口应用权限
@@ -306,7 +309,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
+
 		return handler.searchTasks(cmd);
 	}
 

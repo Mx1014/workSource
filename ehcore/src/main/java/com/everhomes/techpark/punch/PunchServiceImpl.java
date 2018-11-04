@@ -10696,7 +10696,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public String getAdjustRuleUrl(HttpServletRequest request){
         String homeUrl = request.getHeader("Host");
-        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
+        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html";
     }
 
     private Integer getPunchStatisticCountByItemType(PunchDayLog pdl, PunchStatusStatisticsItemType itemType) {
