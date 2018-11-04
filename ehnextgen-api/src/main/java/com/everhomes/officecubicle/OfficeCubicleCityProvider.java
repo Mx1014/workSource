@@ -23,9 +23,9 @@ public interface OfficeCubicleCityProvider {
 	OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName, String cityName, Integer namespaceId);
 	OfficeCubicleCity findOfficeCubicleCityByProvinceAndCity(String provinceName,String cityName,Integer namespaceId,String ownerType,Long ownerId);
 
-	List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId);
+	List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId,Long ownerId);
 
-	List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId);
+	List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId,Long ownerId);
 
 	List<OfficeCubicleCity> listOfficeCubicleCityByOwnerId(String ownerType,Long ownerId);
 

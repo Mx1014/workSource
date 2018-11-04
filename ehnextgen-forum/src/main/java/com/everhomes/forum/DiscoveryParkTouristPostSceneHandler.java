@@ -222,6 +222,11 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         //if(sceneType == SceneType.PARK_TOURIST) {
 
         AppContext appContext = UserContext.current().getAppContext();
+        if(appContext == null || appContext.getCommunityId() == null){
+            LOGGER.error("Unsupported scene for simple user, appContext={}", appContext);
+            return filterList;
+        }
+
         Community community = communityProvider.findCommunityById(appContext.getCommunityId());
             if(community != null) {
                 filterList = getDiscoveryTopicSentScopes(user, null, community);

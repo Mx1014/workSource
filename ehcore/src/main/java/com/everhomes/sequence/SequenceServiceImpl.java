@@ -5,7 +5,6 @@ import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.message.MessageProvider;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
@@ -15,8 +14,8 @@ import com.everhomes.schema.tables.pojos.*;
 import com.everhomes.schema.tables.pojos.EhConfigurations;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Schema;
 import org.jooq.Table;
@@ -26,8 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -35,7 +35,9 @@ public class SequenceServiceImpl implements SequenceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SequenceServiceImpl.class);
 
-    private Long DEFAULT_MAX_ID = 500000000L;
+    private static final Long STD_DEFAULT_MAX_ID = 500000000L;
+
+    private Long DEFAULT_MAX_ID = 1L;
 
     @Autowired
     private DbProvider dbProvider;
@@ -66,9 +68,18 @@ public class SequenceServiceImpl implements SequenceService {
     private final Set<Table<?>> excludeTables = new HashSet<>();
     private final Set<String> excludeTableNames = new HashSet<>();
 
+    private final Map<String, Long> stdDefaultIdMap = new HashMap<>();
+
     {
-        // Add exclude table here.
-        // excludeTables.add(Tables.EH_RENTALV2_CELLS);
+        stdDefaultIdMap.put(Tables.EH_PM_NOTIFY_LOGS.getName(), STD_DEFAULT_MAX_ID + 193460427L);
+        stdDefaultIdMap.put(Tables.EH_RENTALV2_CELLS.getName(), STD_DEFAULT_MAX_ID + 862484218L);
+        stdDefaultIdMap.put(Tables.EH_MESSAGE_RECORDS.getName(), STD_DEFAULT_MAX_ID + 20151290L);
+        stdDefaultIdMap.put(Tables.EH_SERVICE_MODULES.getName(), STD_DEFAULT_MAX_ID + 10800001L);
+        stdDefaultIdMap.put(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES.getName(), STD_DEFAULT_MAX_ID + 4920049200L);
+        stdDefaultIdMap.put(Tables.EH_WEB_MENUS.getName(), STD_DEFAULT_MAX_ID + 76010000L);
+        stdDefaultIdMap.put(Tables.EH_ADDRESSES.getName(), STD_DEFAULT_MAX_ID + 239825274387476000L);
+        stdDefaultIdMap.put(Tables.EH_COMMUNITIES.getName(), STD_DEFAULT_MAX_ID + 240111044332061000L);
+        stdDefaultIdMap.put(Tables.EH_COMMUNITY_GEOPOINTS.getName(), STD_DEFAULT_MAX_ID + 240111044331094000L);
     }
 
     @Override
@@ -2157,9 +2168,8 @@ public class SequenceServiceImpl implements SequenceService {
         dbProvider.mapReduce(spec, null, (dbContext, contextObj) -> {
             //Long max = dbContext.select(Tables.EH_USERS.ID.max()).from(Tables.EH_USERS).fetchOne().value1();
             Long max = callback.maxSequence(dbContext);
-
             if(max != null && max > result[0]) {
-                result[0] = max;
+                result[0] = determineMax(tableName, dbContext, max);
             }
             return true;
         });
@@ -2173,8 +2183,34 @@ public class SequenceServiceImpl implements SequenceService {
         }
     }
 
+    private Long determineMax(String tableName, DSLContext dbContext, Long max) {
+        boolean isStandard = configurationProvider.getBooleanValue("server.standard.flag", false);
+
+        Long determinedMax;
+        // 标准版
+        if (isStandard) {
+            determinedMax = max;
+        } else {
+            Long stdDefaultId = STD_DEFAULT_MAX_ID;
+            // id 较大的表处理
+            if (stdDefaultIdMap.containsKey(tableName)) {
+                stdDefaultId = stdDefaultIdMap.get(tableName);
+            }
+
+            // 基线从数据库查出来的 id > stdDefaultId
+            if (max >= stdDefaultId) {
+                Field<Long> id = DSL.fieldByName(DSL.getDataType(Long.class), "id");
+                determinedMax = dbContext.select(id.max()).from(DSL.table(tableName)).where(id.lt(stdDefaultId)).fetchOne().value1();
+            } else {
+                // 使用数据库里的值
+                determinedMax = max;
+            }
+        }
+        return determinedMax;
+    }
+
     private void syncUserAccountName() {
-        int pageCount = 1000;
+        /*int pageCount = 1000;
         int pageNum = 1;
         CrossShardListingLocator locator = new CrossShardListingLocator();
         List<User> userList = null;
@@ -2201,7 +2237,16 @@ public class SequenceServiceImpl implements SequenceService {
                     + ", dbSize=" + userList.size() + ", elapse=" + (endTime - startTime));
             }
             pageNum++;
-        } while(userList.size() > 0);
+        } while(userList.size() > 0);*/
+
+        long maxAccountSequence = STD_DEFAULT_MAX_ID + 999437843496L;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        com.everhomes.server.schema.tables.EhUsers t = Tables.EH_USERS;
+        Long maxAccountName = context.select(DSL.max(DSL.cast(t.ACCOUNT_NAME, Long.class))).from(t).fetchOne().value1();
+        if (maxAccountName > maxAccountSequence) {
+            maxAccountSequence = maxAccountName;
+        }
 
         if(maxAccountSequence > 0) {
             String key = "usr";

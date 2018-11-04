@@ -35,6 +35,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,6 +175,7 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
                 .setQuery(qb);
+        builder.addSort("createTime", SortOrder.DESC);
 
         SearchResponse rsp = builder.execute().actionGet();
         return getIds(rsp);
@@ -253,7 +255,9 @@ public class PMOwnerSearcherImpl extends AbstractElasticSearch implements PMOwne
                 List<String> contactExtraTelsList = (List<String>)StringHelper.fromJsonString(contactExtraTels, ArrayList.class);
                 b.field("contactExtraTels", contactExtraTelsList.toString());  
 			}
-                  
+
+            b.field("createTime", owner.getCreateTime());
+            b.field("id", owner.getId());
             b.field("contactToken", owner.getContactToken());
             b.field("contactName", owner.getContactName());
 //            b.field("communityId", owner.getCommunityId());

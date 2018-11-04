@@ -7,7 +7,7 @@ import com.everhomes.rentalv2.Rentalv2Provider;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.common.RentalActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.portal.RentalInstanceConfig;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.util.StringHelper;
@@ -36,7 +36,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
 
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
+    public String publish(Integer namespaceId, String instanceConfig, String itemLabel, HandlerPublishCommand cmd) {
         RentalInstanceConfig rentalInstanceConfig = (RentalInstanceConfig)StringHelper.fromJsonString(instanceConfig, RentalInstanceConfig.class);
         if(null == rentalInstanceConfig.getResourceTypeId()){
             createRentalResourceType(namespaceId, itemLabel, rentalInstanceConfig);
@@ -47,12 +47,12 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         return instanceConfig;
     }
 
@@ -102,12 +102,12 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
         RentalActionData actionDataObject = (RentalActionData)StringHelper.fromJsonString(instanceConfig,RentalActionData.class);
         if (actionDataObject!=null && actionDataObject.getResourceTypeId()!=null)
             return String.valueOf(actionDataObject.getResourceTypeId());

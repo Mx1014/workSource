@@ -1564,7 +1564,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return context.selectFrom(Tables.EH_ORGANIZATION_MEMBERS)
                 .where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc())
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.CREATE_TIME.desc())
                 .fetchInto(OrganizationMember.class);
     }
 
@@ -2220,7 +2220,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             condition = condition.and(t1.field("id").lt(locator.getAnchor()));
         }
 
-        result = context.select().from(t1).where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize).fetch()
+        result = context.select().from(t1).where(condition).orderBy(t1.field("create_time").desc()).limit(pageSize).fetch()
                 .map((r) -> {
                     return ConvertHelper.convert(r, OrganizationMember.class);
                 });
@@ -4198,7 +4198,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.le(locator.getAnchor()));
         }
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(OperationType.JOIN.getCode()));
-        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATE_TIME.desc());
         query.addLimit(pageSize + 1);
 
        // List<OrganizationMemberLog> list = query.fetchInto(OrganizationMemberLog.class);
@@ -6578,6 +6578,62 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return result;
     }
+
+
+
+
+    /**
+     * 排除特定园区以为的公司
+     * @param
+     * @return
+     */
+    @Override
+    public List<Organization> listOrganizationsByNamespaceId(Integer namesapceId, Long excludeCommunityId, String keyword, CrossShardListingLocator locator, int pageSize){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        //查询表EH_ORGANIZATIONS
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        //添加查询条件
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
+
+        if(excludeCommunityId != null){
+            //查询表EH_ORGANIZATIONS
+            SelectQuery<Record1<Long>> subQuery = context.select(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS).getQuery();
+            subQuery.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(excludeCommunityId));
+
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.notIn(subQuery));
+
+        }
+
+        if (!StringUtils.isEmpty(keyword)) {
+            Condition conditionkeyword = Tables.EH_ORGANIZATIONS.NAME.like("%" +keyword + "%");
+            try {
+                Long aLong = Long.valueOf(keyword);
+                conditionkeyword = conditionkeyword.or(Tables.EH_ORGANIZATIONS.ID.eq(aLong));
+            }catch (Exception ex){
+            }
+            query.addConditions(conditionkeyword);
+        }
+
+
+        if (null != locator.getAnchor()) {
+            query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+        query.addLimit(pageSize + 1);
+
+        List<Organization> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(RecordHelper.convert(r, Organization.class));
+            return null;
+        });
+        return result;
+    }
+
+
 
     /**
      * 根据项目编号communityId查询eh_organization_workPlaces表和eh_organizations表（联查）中的信息

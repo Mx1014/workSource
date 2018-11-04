@@ -9,8 +9,18 @@ public class createSuperAdminCommand {
     private Byte isJoined;
     private String contactor;
 
+    private Long customerId;
+
     private Long communityId;
     private Long orgId;
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
 
     public String getEntries() {
         return entries;

@@ -5,12 +5,8 @@ import com.everhomes.acl.WebMenuPrivilegeProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.common.ServiceAllianceActionData;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -22,7 +18,6 @@ import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.DisplayFlagType;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
-import com.everhomes.rest.yellowPage.ServiceAllianceOwnerType;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
@@ -31,7 +26,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
-import com.everhomes.yellowPage.ServiceAllianceSkipRule;
 import com.everhomes.yellowPage.ServiceAlliances;
 import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageService;
@@ -46,7 +40,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,7 +78,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	private YellowPageService yellowPageService;
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String itemLabel) {
+    public String publish(Integer namespaceId, String instanceConfig, String itemLabel, HandlerPublishCommand cmd) {
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig)StringHelper.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
         if(null == serviceAllianceInstanceConfig.getType()){
             ServiceAllianceCategories serviceAllianceCategories = createServiceAlliance(namespaceId, serviceAllianceInstanceConfig.getDetailFlag(), itemLabel);
@@ -103,7 +96,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
      * 注：当该域空间没有layout的时候会调用
      */
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         ServiceAllianceActionData serviceAllianceActionData = (ServiceAllianceActionData)StringHelper.fromJsonString(actionData, ServiceAllianceActionData.class);
         ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = new ServiceAllianceInstanceConfig();
         serviceAllianceInstanceConfig.setType(serviceAllianceActionData.getParentId());
@@ -118,8 +111,8 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
      * 获取需要展示在客户端的config
      */
     @Override
-	public String getItemActionData(Integer namespaceId, String instanceConfig) {
-
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
+    	
 		ServiceAllianceInstanceConfig config = (ServiceAllianceInstanceConfig) StringHelper
 				.fromJsonString(instanceConfig, ServiceAllianceInstanceConfig.class);
 
@@ -322,13 +315,13 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
     
     final Pattern pattern = Pattern.compile("^.*\"type\":[\\s]*([\\d]*)");
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
         LOGGER.info("ServiceAlliancePortalPublishHandler instanceConfig = {}",instanceConfig);
         if(instanceConfig == null || instanceConfig.length() == 0){
             return null;
@@ -342,7 +335,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 
     @Override
     public Long getWebMenuId(Integer namespaceId, Long moudleId, String instanceConfig) {
-       String categoriesId = this.getCustomTag(namespaceId,moudleId,instanceConfig);
+       String categoriesId = this.getCustomTag(namespaceId,moudleId,instanceConfig, null);
        ServiceAllianceCategories category = yellowPageProvider.findCategoryById(Long.valueOf(categoriesId));
        if(category == null || category.getEntryId() == null){
            return null;

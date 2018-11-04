@@ -199,7 +199,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 		Long versionId = version != null ? version.getId() : null;
 
 
-		List<Long> appOriginIds = null;
+		List<Long> appOriginIds = new ArrayList<>();
 
 		// 公司拥有所有权的园区集合
 		List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(UserContext.getCurrentNamespaceId(), organizationId).stream().map(r->r.getProjectId()).collect(Collectors.toList());
@@ -213,25 +213,31 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 		List<ServiceModuleApp> unlimitApps = serviceModuleAppService.listServiceModuleApp(UserContext.getCurrentNamespaceId(), versionId, null, null, null, ModuleManagementType.UNLIMIT_CONTROL.getCode());
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		//TODO do better here 全部appOriginIds
+		List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(namespaceId);
+		List<ServiceModuleApp> oaApps = new ArrayList<ServiceModuleApp>();//
+		for(ServiceModuleApp app: allApps){
+			if(ServiceModuleAppType.fromCode(app.getAppType()) == ServiceModuleAppType.OA ){
+				oaApps.add(app);
+			}
+		}
+		if(!namespacesService.isStdNamespace(namespaceId)) {
+			//非标准版，则使用所有的模块定义的 oa 应用。
+			orgApps = oaApps;
+		}
+		
 		//填充OA和无限制的应用id
 		orgApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
 		unlimitApps.stream().map(r->authAppIds.add(r.getOriginId())).collect(Collectors.toList());
 
 		// 超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path) {
-
-			//全部appOriginIds
-			List<ServiceModuleApp> allApps = this.serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
-
 			//管理公司的超管是有authCommunityIds的，普通公司没有，普通公司只拿OA应用
 			if(authCommunityIds != null && authCommunityIds.size() > 0 ){
 				appOriginIds = allApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
 			}else {
-				for(ServiceModuleApp app: allApps){
-					if(ServiceModuleAppType.fromCode(app.getAppType()) == ServiceModuleAppType.OA ){
-						appOriginIds.add(app.getOriginId());
-					}
-				}
+				appOriginIds = orgApps.stream().map(r->r.getOriginId()).collect(Collectors.toList());
 			}
 
 		}else {
@@ -258,6 +264,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 			types.add(ModuleManagementType.COMMUNITY_CONTROL.getCode());
 			appTuples.addAll(authorizationProvider.getAuthorizationAppModuleIdsByTargetWithTypesAndConfigIds(targets,types, authCommunityIds));
 
+			final List<ServiceModuleApp> finalOrgApps = orgApps; 
 			appTuples.stream().map(r -> {
 				if (Long.valueOf(r.first()) == 0L) {
 					List<ServiceModuleApp> appDtos = null;
@@ -266,7 +273,7 @@ public class WebMenuServiceImpl implements WebMenuService {
 							appDtos = communityApps;
 							break;
 						case ORG_CONTROL:
-							appDtos = orgApps;
+							appDtos = finalOrgApps;
 							break;
 						case UNLIMIT_CONTROL:
 							appDtos = unlimitApps;
@@ -290,7 +297,6 @@ public class WebMenuServiceImpl implements WebMenuService {
 		if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
 			//这里需要优化，需要缓存
 			List<Long> authAppIdsWithoutZeroProjects = new ArrayList<>();
-			List<ServiceModuleApp> allApps = serviceModuleAppService.listReleaseServiceModuleApps(UserContext.getCurrentNamespaceId());
 			Map<Long, ServiceModuleApp> communityAppMap = new HashMap<Long, ServiceModuleApp>();
 			for(ServiceModuleApp r: allApps) {
 				if(r.getAppType() != null && r.getAppType().equals(ServiceModuleAppType.COMMUNITY.getCode())) {

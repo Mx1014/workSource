@@ -23,6 +23,12 @@
 -- AUTHOR:梁家声 20181030
 -- REMARK: 对照营销的core_key，在eh_apps中插入营销core_key对
 
+-- AUTHOR:黄鹏宇 20181103
+-- REMARK:解决缺陷 #38583:
+-- 第一步请执行在es上执行db/search/pmowner.sh
+-- 第二步执行同步接口/pm/syncOwnerIndex
+
+
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
 
@@ -335,7 +341,7 @@ UPDATE  eh_point_systems SET STATUS='2' ,point_exchange_flag='1' WHERE id = 1;
 -- REMARK: 访客1.3合并访客与访客管理后清除app
 -- REMARK: 访客1.3园区访客地址修改
 delete from eh_service_module_apps where module_id in (42100,52200);
-update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community#/home#sign_suffix"}' where id = 41800;
+update eh_service_modules set instance_config = '{"url":"${home.url}/visitor-appointment/build/index.html?ns=%s&appId=%s&ownerType=community&sceneType=1#/home#sign_suffix"}' where id = 41800;
 
 -- AUTHOR: 黄明波
 -- REMARK: 修改默认新闻为 NewsFlash
@@ -343,13 +349,9 @@ update eh_service_modules set  instance_config = replace(instance_config, '}', '
 
 update eh_service_module_apps set  instance_config = replace(instance_config, '}', ',"widget":"NewsFlash"}') , action_type = 55  where module_id = 10800 and instance_config not like '%"widget"%' ;
 
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
-where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
-
-update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
-where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
-
 update eh_service_modules set client_handler_type = 2 where id = 10500;
+update eh_service_modules set client_handler_type = 2 where id = 40500;
+update eh_service_modules set client_handler_type = 2 where id = 10800;
 
 
 
@@ -367,7 +369,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmt
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10028', 'zh_CN', '获取数据失败');
 
 -- AUTHOR: 缪洲 2018年11月1日
---REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
+-- REMARK: 把资源预约，停车缴费，云打印加入企业支付授权
 UPDATE eh_service_module_apps SET enable_enterprise_pay_flag = 1 WHERE module_id in (40800,41400,40400);
 
 -- AUTHOR: 缪洲
@@ -461,10 +463,86 @@ SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
 INSERT INTO eh_locale_strings (id, scope, code, locale, text)
 VALUES (@max_id:=@max_id+1,'organization', 900039, 'zh_CN', '该邮箱已被认证');
 
+-- AUTHOR: 唐岑
+-- REMARK: 更改module表中的client_handler_type类型为内部应用
+update eh_service_modules set client_handler_type = 2 where id = 150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 更新房源招商的字段模板
+UPDATE eh_general_form_templates SET template_text='[{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"用户姓名\",\r\n	\"fieldDisplayName\": \"用户姓名\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"用户的姓名；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"手机号码\",\r\n	\"fieldDisplayName\": \"手机号码\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"USER_PHONE\",\r\n	\"fieldType\": \"NUMBER_TEXT\",\r\n	\"remark\": \"用户的手机号码；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"承租方\",\r\n	\"fieldDisplayName\": \"承租方\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"ENTERPRISE_NAME\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动输入；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n},\r\n{\r\n	\"dynamicFlag\": 0,\r\n	\"fieldDesc\": \"意向房源\",\r\n	\"fieldDisplayName\": \"意向房源\",\r\n	\"fieldExtra\": \"{}\",\r\n	\"fieldName\": \"APARTMENT\",\r\n	\"fieldType\": \"SINGLE_LINE_TEXT\",\r\n	\"remark\": \"允许用户手动选择；\",\r\n	\"disabled\": 1,\r\n	\"renderType\": \"DEFAULT\",\r\n	\"requiredFlag\": 1,\r\n	\"validatorType\": \"TEXT_LIMIT\",\r\n	\"visibleType\": \"EDITABLE\",\r\n	\"filterFlag\": 1\r\n}]' WHERE module_id=150010;
+
+-- AUTHOR: 唐岑
+-- REMARK: 楼宇导入出错提示
+SET @max_id = IFNULL((SELECT MAX(`id`) FROM `eh_locale_strings`),1);
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES (@max_id:=@max_id+1,'community', 10213, 'zh_CN', '楼栋名称不能超过20个汉字');
+INSERT INTO eh_locale_strings (id, scope, code, locale, text)
+VALUES (@max_id:=@max_id+1,'community', 10214, 'zh_CN', '楼栋名称不能重复');
+
 -- AUTHOR: 丁建民 20181031
 -- REMARK: 缴费对接门禁。企业或者个人欠费将禁用该企业或个人门禁 定时器执行时间
 SET @id = (SELECT MAX(id) from eh_configurations);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ((@id:=@id+1), 'asset.dooraccess.cronexpression', '0 0 3,23 * * ?', '欠费禁用门禁的定时任务执行时间', '0', NULL, '1');
+
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 任务迁移
+-- REMARK: 执行前备份eh_pm_tasks表！！！
+update eh_pm_tasks t1,eh_categories t2 set t1.app_id = t2.parent_id where t2.id = t1.task_category_id;
+update eh_pm_tasks t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.app_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 通用配置迁移
+update eh_pm_task_configs t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t1.namespace_id = t2.namespace_id and t1.task_category_id = t2.custom_tag;
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 物业报修类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 6;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 6);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 6));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 6 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 物业报修类型迁移 END
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 投诉建议类型迁移
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id = 9;
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id = 9);
+
+insert into eh_pm_task_categories(id,parent_id,link_id,name,path,default_order,status,create_time,delete_time,logo_uri,description,namespace_id,owner_type,owner_id)
+select t1.id,t1.parent_id,t1.link_id,t1.name,t1.path,t1.default_order,t1.status,t1.create_time,t1.delete_time,t1.logo_uri,t1.description,t1.namespace_id,t1.owner_type,t1.owner_id
+from eh_categories t1 where t1.parent_id in (select t2.id from eh_categories t2 where t2.parent_id in (select t3.id from eh_categories t3 where t3.parent_id = 9));
+
+update eh_pm_task_categories t1,eh_service_module_apps t2 set t1.app_id = t2.origin_id where t2.module_id = 20100 and t2.custom_tag = 9 and t1.namespace_id = t2.namespace_id;
+-- 物业报修V3.8 多应用 投诉建议类型迁移 END
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修V3.8 多应用 父类型迁移
+update eh_pm_task_categories set parent_id = 0 where parent_id in (6,9);
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `app_id`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('0', '0', '0', '物业报修', '物业报修', '0', '2', '2015-09-28 06:09:03', NULL, NULL, NULL, '190', '0', NULL, '0');
+
+-- AUTHOR: 黄鹏宇
+-- REMARK: 更新跟进信息
+update eh_customer_trackings set customer_source = 0 where namespace_id = 999954;
+update eh_customer_trackings set tracking_type = 5 where namespace_id = 999954 and tracking_type=3;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=4;
+update eh_customer_trackings set tracking_type = 4 where namespace_id = 999954 and tracking_type=2;
+update eh_customer_trackings set tracking_type = 3 where namespace_id = 999954 and tracking_type=13439;
+
+-- REMARK: 所有含有organization的客户都进入租客
+update eh_enterprise_customers set customer_source = 1, level_item_id  = 6 where organization_id is not null and status = 2;
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
@@ -477,6 +555,18 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 -- REMARK: 把基线的 2 域空间删掉，标准版不执行这个 sql
 DELETE FROM eh_namespaces WHERE id=2;
 
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '"News"', '"NewsFlash"')
+where namespace_id=999938 and action_type in (48, 55) and action_data like '%"widget"%';
+
+update eh_launch_pad_items set action_type=55, action_data = replace(action_data, '}', ',"widget":"NewsFlash"}')
+where namespace_id=999938 and  action_type in (48, 55) and action_data not like '%"widget"%';
+
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20800;
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20600;
+
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20600;
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -487,6 +577,13 @@ DELETE FROM eh_namespaces WHERE id=2;
 -- REMARK: 标准版数据库的标识
 INSERT INTO eh_configurations (name, value, description, namespace_id, display_name)
   VALUES ('server.standard.flag','true','标准版 server 标识',2, '标准版 server 标识');
+
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://oa.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20800;
+UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://oa.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE id=20600;
+
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://oa.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
+UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://oa.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20600;
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 

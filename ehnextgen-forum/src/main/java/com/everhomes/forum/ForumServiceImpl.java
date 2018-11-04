@@ -6336,16 +6336,32 @@ public class ForumServiceImpl implements ForumService {
 //        }
         
         List<TopicScopeDTO> sentScopeList = null;
+        //标准版融合兼容旧APP
+        SceneType sceneType = null;
+        SceneTokenDTO sceneToken = null;
+        if (appContext.getCommunityId() == null) {
+            sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+            sceneType= SceneType.fromCode(sceneToken.getScene());
+        }
+
         PostFilterType filterType = PostFilterType.fromCode(cmd.getScopeType());
         if(filterType == null) {
             LOGGER.error("Unsupported post sent scope type, cmd={}, appContext={}", cmd, appContext);
             return sentScopeList;
         }
+
+        //兼容旧版本
+        String handlerEnd = "park_tourist";
+        if (sceneType != null) {
+            handlerEnd = sceneToken.getScene();
+        }else {
+            sceneToken = null;
+        }
         
-        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + "park_tourist";
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + handlerEnd;
         PostSceneHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
-            sentScopeList = handler.getTopicSentScopes(user, null);
+            sentScopeList = handler.getTopicSentScopes(user, sceneToken);
         } else {
             LOGGER.error("No handler found for post sent scope, cmd={}, appContext={}, handlerName={}", cmd, appContext, handlerName);
         }

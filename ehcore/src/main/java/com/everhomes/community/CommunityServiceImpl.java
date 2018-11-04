@@ -325,6 +325,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1945,6 +1946,15 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             memberDTOList = listCommunityWaitingApproveUserAddress(cmd, groupIds, locator, pageSize);
         }
+		Collections.sort(memberDTOList, new Comparator<GroupMemberDTO>() {
+			@Override
+			public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
@@ -2335,6 +2345,16 @@ public class CommunityServiceImpl implements CommunityService {
                 groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                 memberLogs.add(groupMemberDTO);
             });
+            //按照时间倒叙排列
+            Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                @Override
+                public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                    if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                        return -1;
+                    }
+                    return o2.getApproveTime().compareTo(o1.getApproveTime());
+                }
+            });
         }
         dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
@@ -2425,7 +2445,7 @@ public class CommunityServiceImpl implements CommunityService {
             dto.setVipLevel(user.getVipLevel());
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
-		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
 		if(null != memberLogs){
 			for(OrganizationMemberLog log : memberLogs){
 				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
@@ -2436,10 +2456,22 @@ public class CommunityServiceImpl implements CommunityService {
 				User operator = this.userProvider.findUserById(log.getOperatorUid());
 				if(null != operator)
 					logDTO.setOperatorNickName(operator.getNickName());
-				dto.getMemberLogDTOs().add(logDTO);
+                memberLog.add(logDTO);
 			}
+			if (!CollectionUtils.isEmpty(memberLog)) {
+                //按照时间倒叙排列
+                Collections.sort(memberLog, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
+            }
 		}
-
+        dto.setMemberLogDTOs(memberLog);
 		//最新活跃时间 add by sfyan 20170620
 		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
 		if(userActivities.size() > 0){
@@ -2506,6 +2538,16 @@ public class CommunityServiceImpl implements CommunityService {
                         pending = true;
                     }
                 }
+                //按照时间倒叙排列
+                Collections.sort(memberLogDTOs, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
                 communityUserAddressDTO.setOrgDtos(orgDtos);
                 communityUserAddressDTO.setAddressDtos(addressDtos);
                 communityUserAddressDTO.setMemberLogDTOs(memberLogDTOs);
@@ -2539,6 +2581,17 @@ public class CommunityServiceImpl implements CommunityService {
                     }
                     groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                     memberLogs.add(groupMemberDTO);
+                });
+
+                //按照时间倒叙排列
+                Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                    @Override
+                    public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                        if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                            return -1;
+                        }
+                        return o2.getApproveTime().compareTo(o1.getApproveTime());
+                    }
                 });
             }
             communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
@@ -4172,7 +4225,15 @@ public class CommunityServiceImpl implements CommunityService {
             }).collect(Collectors.toList());
 
         response.setMembers(dtoList);
-
+		Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+			@Override
+			public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
 		return response;
 	}
 

@@ -6,6 +6,7 @@ import com.everhomes.banner.BannerProvider;
 import com.everhomes.portal.PortalPublishHandler;
 import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.portal.*;
 import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -28,7 +29,7 @@ public class BannerPortalPublishHandler implements PortalPublishHandler {
 
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         LOGGER.error("publish news. instanceConfig = {}, itemLabel = {}", instanceConfig, appName);
         BannersInstanceConfig bannersInstanceConfig = (BannersInstanceConfig) StringHelper.fromJsonString(instanceConfig, BannersInstanceConfig.class);
         if (bannersInstanceConfig == null) {
@@ -44,22 +45,22 @@ public class BannerPortalPublishHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId, String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
 
         BannersInstanceConfig bannersInstanceConfig = (BannersInstanceConfig)StringHelper.fromJsonString(instanceConfig, BannersInstanceConfig.class);
 
