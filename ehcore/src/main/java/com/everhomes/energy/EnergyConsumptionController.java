@@ -767,6 +767,17 @@ public class EnergyConsumptionController extends ControllerBase {
         energyTaskScheduleJob.calculateTaskFeeByTaskId(cmd.getTaskId());
         return success();
     }
+    
+    /**
+     * <p>手动触发定时任务计算任务费用</p>
+     * <b>URL: /energy/calculateTaskFee</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("calculateTaskFee")
+    public RestResponse calculateTaskFee() {
+        energyTaskScheduleJob.calculateTaskFee();
+        return success();
+    }
 
     /**
      * <p>导出计划的任务</p>
