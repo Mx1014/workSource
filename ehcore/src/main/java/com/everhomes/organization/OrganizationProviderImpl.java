@@ -2220,7 +2220,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             condition = condition.and(t1.field("id").lt(locator.getAnchor()));
         }
 
-        result = context.select().from(t1).where(condition).groupBy(t1.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize).fetch()
+        result = context.select().from(t1).where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch()
                 .map((r) -> {
                     return ConvertHelper.convert(r, OrganizationMember.class);
                 });
