@@ -443,6 +443,10 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 				dto.setCategory(category);
 			}else {
 				CommunityBriefStaticsDTO communityBriefStaticsDTO = new CommunityBriefStaticsDTO();
+				Community community = communityProvider.findCommunityById(communityId);
+				if (community != null) {
+					communityBriefStaticsDTO.setCommunityName(community.getName());
+				}
 				String category = communityProvider.findCommunityCategoryByCommunityId(communityId);
 				communityBriefStaticsDTO.setCategory(category);
 				result.put(communityId, communityBriefStaticsDTO);
@@ -483,6 +487,7 @@ public class PropertyReportFormServiceImpl implements PropertyReportFormService,
 			BuildingBriefStaticsDTO dto = result.get(buildingName);
 			if (dto == null) {
 				BuildingBriefStaticsDTO buildingBriefStaticsDTO = new BuildingBriefStaticsDTO();
+				buildingBriefStaticsDTO.setBuildingName(buildingName);
 				result.put(buildingName, buildingBriefStaticsDTO);
 			}
 		}
