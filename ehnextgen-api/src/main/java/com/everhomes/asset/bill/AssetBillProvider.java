@@ -11,6 +11,8 @@ public interface AssetBillProvider {
 	void batchDeleteBill(Integer namespaceId, String ownerType, Long ownerId, List<Long> billIdList);
 
 	Byte checkContractIsProduceBill(Integer namespaceId, String ownerType, Long ownerId, Long contractId);
+
+	void deleteBillFromContract(Integer namespaceId, String ownerType, Long ownerId, Long contractId);
 	
 	
 	

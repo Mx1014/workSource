@@ -28,7 +28,9 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
@@ -1780,6 +1782,19 @@ public class AssetController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <p>缴费V7.3(账单组规则定义)：批量删除合同产生的相关账单、费项明细数据（合同模块调用）</p>
+	 * <b>URL: /asset/batchDeleteBillFromContract</b>
+	 */
+	@RequestMapping("batchDeleteBillFromContract")
+	@RestReturn(value = ListCheckContractIsProduceBillResponse.class)
+	public RestResponse batchDeleteBillFromContract(BatchDeleteBillFromContractCmd cmd) {
+		ListBatchDeleteBillFromContractResponse res = assetBillService.batchDeleteBillFromContract(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
 
     
 }
