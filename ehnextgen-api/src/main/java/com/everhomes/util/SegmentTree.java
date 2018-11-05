@@ -63,14 +63,29 @@ public class SegmentTree {
         List<SegmentNode> covers = new ArrayList<>();
         if (lborder == rborder)
             return covers;
+        if (lborder >= this.root.getRborder()){
+            SegmentNode node = new SegmentNode();
+            node.setLborder(lborder);
+            node.setRborder(rborder);
+            covers.add(node);
+            return covers;
+        }
+
+        covers.addAll(getZeroConverNodes(this.root,lborder,rborder > root.getRborder() ? root.getRborder() : rborder));
         if (rborder > this.root.getRborder()) {
-            rborder = this.root.getRborder();
             SegmentNode node = new SegmentNode();
             node.setLborder(this.root.getRborder());
             node.setRborder(rborder);
             covers.add(node);
         }
-        covers.addAll(getZeroConverNodes(this.root,lborder,rborder));
+
+        //合并时间段
+        for (int i = covers.size() - 1;i > 0;i--){
+            if (covers.get(i).getLborder() == covers.get(i - 1).getRborder()){
+                covers.get(i - 1).setRborder(covers.get(i).getRborder());
+                covers.remove(i);
+            }
+        }
         return covers;
     }
 

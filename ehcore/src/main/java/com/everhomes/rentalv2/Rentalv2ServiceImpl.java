@@ -1371,13 +1371,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         }
 
         List<SegmentNode> zeroConverNodes = segmentTree.getZeroConverNodes(showTimeStart, showTimeEnd);
-        //合并时间段
-        for (int i = zeroConverNodes.size() - 1;i > 0;i--){
-            if (zeroConverNodes.get(i).getLborder() == zeroConverNodes.get(i - 1).getRborder()){
-                zeroConverNodes.get(i - 1).setRborder(zeroConverNodes.get(i).getRborder());
-                zeroConverNodes.remove(i);
-            }
-        }
+
         return zeroConverNodes.stream().map(r->{
             RangeDTO dto = new RangeDTO();
             dto.setRangeStart(r.getLborder());
