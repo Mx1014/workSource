@@ -28,6 +28,8 @@ import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
@@ -1763,6 +1765,21 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
+	
+	/**
+	 * <p>缴费V7.3(账单组规则定义)：校验合同是否产生已缴账单接口（合同模块调用）</p>
+	 * <b>URL: /asset/checkContractIsProduceBill</b>
+	 */
+	@RequestMapping("checkContractIsProduceBill")
+	@RestReturn(value = ListCheckContractIsProduceBillResponse.class)
+	public RestResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd) {
+		ListCheckContractIsProduceBillResponse res = assetBillService.checkContractIsProduceBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
 
     
 }

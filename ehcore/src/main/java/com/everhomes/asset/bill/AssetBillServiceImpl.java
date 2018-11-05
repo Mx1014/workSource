@@ -1,12 +1,18 @@
 
 package com.everhomes.asset.bill;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 
 /**
  * @author created by ycx
@@ -27,6 +33,24 @@ public class AssetBillServiceImpl implements AssetBillService {
 		String result = "OK";
         assetBillProvider.batchDeleteBill(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getBillIdList());
         return result;
+	}
+
+	public ListCheckContractIsProduceBillResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd) {
+		ListCheckContractIsProduceBillResponse response = new ListCheckContractIsProduceBillResponse();
+		List<CheckContractIsProduceBillDTO> list = new ArrayList<CheckContractIsProduceBillDTO>();
+		Integer namespaceId = cmd.getNamespaceId();
+	    String ownerType = cmd.getOwnerType();
+	    Long ownerId = cmd.getOwnerId();
+	    List<Long> contractIdList = cmd.getContractIdList();
+	    for(Long contractId : contractIdList) {
+	    	CheckContractIsProduceBillDTO dto = new CheckContractIsProduceBillDTO();
+	    	Byte paymentStatus = assetBillProvider.checkContractIsProduceBill(namespaceId, ownerType, ownerId, contractId);
+	    	dto.setContractId(contractId);
+	    	dto.setPaymentStatus(paymentStatus);
+	    	list.add(dto);
+	    }
+		response.setList(list);
+		return response;
 	}
 	
 

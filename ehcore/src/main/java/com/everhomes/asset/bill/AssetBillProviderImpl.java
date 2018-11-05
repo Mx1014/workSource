@@ -48,6 +48,14 @@ public class AssetBillProviderImpl implements AssetBillProvider {
             return null;
         });
 	}
+
+	public Byte checkContractIsProduceBill(Integer namespaceId, String ownerType, Long ownerId, Long contractId) {
+		
+		
+		
+		
+		return AssetPaymentBillStatus.PAID.getCode();
+	}
  
     
     

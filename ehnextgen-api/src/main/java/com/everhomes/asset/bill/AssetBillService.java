@@ -2,6 +2,8 @@
 package com.everhomes.asset.bill;
 
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 
 /**
  * @author created by ycx
@@ -10,6 +12,8 @@ import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 public interface AssetBillService {
 
 	String batchDeleteBill(BatchDeleteBillCommand cmd);
+
+	ListCheckContractIsProduceBillResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd);
 	
 	
 	
