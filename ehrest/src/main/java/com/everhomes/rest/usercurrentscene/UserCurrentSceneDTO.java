@@ -11,6 +11,8 @@ import java.sql.Timestamp;
  * <li>namespaceId: 域空间id</li>
  * <li>communityId: 园区ID</li>
  * <li>communityType: 园区类型</li>
+ * <li>signToken: signToken</li>
+ * <li>extra: 其他自定义信息</li>
  * <li>createTime: </li>
  * <li>updateTime: </li>
  * </ul>
@@ -22,6 +24,7 @@ public class UserCurrentSceneDTO {
     private Long communityId ;
     private Byte communityType ;
     private String signToken ;
+    private String extra ;
     private Timestamp createTime;
     private Timestamp updateTime;
 
@@ -31,6 +34,14 @@ public class UserCurrentSceneDTO {
 
     public void setSignToken(String signToken) {
         this.signToken = signToken;
+    }
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
 
     public Long getId() {
