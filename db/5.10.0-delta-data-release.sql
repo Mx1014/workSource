@@ -28,6 +28,10 @@
 -- 第一步请执行在es上执行db/search/pmowner.sh
 -- 第二步执行同步接口/pm/syncOwnerIndex
 
+-- AUTHOR: liangqishi 20181105
+-- REMARK: 有些地址的城市ID不对，需要调用接口刷新一下
+-- REMARK: 先登录，再调用接口/address/fixInvalidCityInAddresses
+
 
 
 -- --------------------- SECTION END OPERATION------------------------------------------------
