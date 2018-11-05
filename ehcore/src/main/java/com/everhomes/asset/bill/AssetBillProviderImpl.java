@@ -43,7 +43,7 @@ public class AssetBillProviderImpl implements AssetBillProvider {
             context.update(Tables.EH_PAYMENT_BILL_ITEMS)
 	    		.set(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG, AssetPaymentBillDeleteFlag.DELETE.getCode())
 	            .where(Tables.EH_PAYMENT_BILL_ITEMS.BILL_ID.in(billIdList))
-	            .and(Tables.EH_PAYMENT_BILLS.STATUS.notEqual(AssetPaymentBillStatus.PAID.getCode())) //已支付的不允许删除
+	            .and(Tables.EH_PAYMENT_BILL_ITEMS.STATUS.notEqual(AssetPaymentBillStatus.PAID.getCode())) //已支付的不允许删除
 	            .execute();
             return null;
         });
