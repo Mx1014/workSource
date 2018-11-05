@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.asset.app.AssetAppService;
+import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
@@ -26,6 +27,7 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
@@ -68,6 +70,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetStatisticService assetStatisticService;
+	
+	@Autowired
+	private AssetBillService assetBillService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -1740,4 +1745,24 @@ public class AssetController extends ControllerBase {
     public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
     	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
+    
+    /**
+	 * <p>缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口</p>
+	 * <b>URL: /asset/batchDeleteBill</b>
+	 */
+	@RequestMapping("batchDeleteBill")
+	@RestReturn(value = String.class)
+	public RestResponse batchDeleteBill(BatchDeleteBillCommand cmd) {
+		String result = assetBillService.batchDeleteBill(cmd);
+		RestResponse response = new RestResponse();
+		if (result.equals("OK")) {
+			response.setErrorDescription("OK");
+		} else {
+			response.setErrorDescription(result);
+		}
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+
+    
 }
