@@ -5067,6 +5067,17 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 //	        break;
 //	    }
 
+
+
+        //旧版本的家庭场景没有communityId，又跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
+
         if(appContext.getCommunityId() != null){
             resp = listActivitiesByScope(null, cmd, geoCharCount, appContext.getCommunityId(), scope);
         }else if(appContext.getOrganizationId() != null){
