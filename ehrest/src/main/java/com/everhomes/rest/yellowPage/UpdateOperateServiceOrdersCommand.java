@@ -1,6 +1,4 @@
-package com.everhomes.rest.yellowPage.faq;
-
-import com.everhomes.rest.yellowPage.AllianceAdminCommand;
+package com.everhomes.rest.yellowPage;
 
 /**
  * <ul>

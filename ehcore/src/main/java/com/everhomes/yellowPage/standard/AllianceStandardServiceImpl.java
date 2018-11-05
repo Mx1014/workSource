@@ -81,6 +81,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceConfigState;
 import com.everhomes.yellowPage.AllianceConfigStateProvider;
 import com.everhomes.yellowPage.AllianceOperateService;
+import com.everhomes.yellowPage.AllianceOperateServiceProvider;
 import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.AllianceTagProvider;
 import com.everhomes.yellowPage.ServiceAllianceAttachment;
@@ -153,6 +154,8 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 	private OrganizationProvider organizationProvider;
 	@Autowired
 	private FlowProvider flowProvider;
+	@Autowired
+	private AllianceOperateServiceProvider allianceOperateServiceProvider;
 
 
 	@Override
@@ -211,7 +214,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		
 		allianceFAQProvider.deleteFAQTypes(cmd);
 		allianceFAQProvider.deleteFAQs(cmd);
-		allianceFAQProvider.deleteOperateServices(cmd);
+		allianceOperateServiceProvider.deleteOperateServices(cmd);
 		allianceFAQProvider.deleteFAQOnlineService(cmd);
 	}
 

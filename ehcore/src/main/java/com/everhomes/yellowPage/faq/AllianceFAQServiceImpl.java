@@ -24,7 +24,10 @@ import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
+import com.everhomes.rest.yellowPage.ListOperateServicesResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
+import com.everhomes.rest.yellowPage.UpdateOperateServiceOrdersCommand;
+import com.everhomes.rest.yellowPage.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.faq.CreateFAQCommand;
 import com.everhomes.rest.yellowPage.faq.CreateFAQTypeCommand;
@@ -41,8 +44,6 @@ import com.everhomes.rest.yellowPage.faq.ListFAQTypesCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQTypesResponse;
 import com.everhomes.rest.yellowPage.faq.ListFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQsResponse;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesCommand;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesResponse;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsResponse;
 import com.everhomes.rest.yellowPage.faq.ListUiFAQsCommand;
@@ -56,8 +57,6 @@ import com.everhomes.rest.yellowPage.faq.UpdateFAQOnlineServiceCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQSolveTimesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServiceOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQFlagCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.rest.yellowPage.faq.updateFAQOrderCommand;
@@ -66,6 +65,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceOperateService;
+import com.everhomes.yellowPage.AllianceOperateServiceProvider;
 import com.everhomes.yellowPage.AllianceStandardService;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecord;
 import com.everhomes.yellowPage.ServiceAllianceApplicationRecordProvider;
@@ -99,9 +99,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Autowired
 	private AllianceStandardService allianceStandardService;
 	@Autowired
-	private YellowPageProvider yellowPageProvider;
-	@Autowired
 	private YellowPageService yellowPageService;
+
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
@@ -313,76 +312,6 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public void updateFAQSolveTimes(UpdateFAQSolveTimesCommand cmd) {
 		allianceFAQProvider.updateFAQSolveTimes(cmd.getFAQId(), cmd.getSolveStaus());
-	}
-
-	@Override
-	public ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd) {
-		
-		
-		List<AllianceOperateService> list = allianceFAQProvider.listOperateServices(cmd);
-
-		List<OperateServiceDTO> dtos = list.stream().map(r -> {
-			OperateServiceDTO dto = new OperateServiceDTO();
-			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(r.getServiceId(), null, null);
-			if (null != sa) {
-				dto.setServiceId(sa.getId());
-				dto.setServiceName(sa.getName());
-			}
-			
-			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), r.getServiceId());
-			if (null != match) {
-				dto.setServiceTypeName(match.getCategoryName());
-			}
-//			
-			return dto;
-		}).collect(Collectors.toList());
-		
-		ListOperateServicesResponse resp = new ListOperateServicesResponse();
-		resp.setDtos(dtos);
-		return resp;
-	}
-
-	@Override
-	public void updateOperateServices(UpdateOperateServicesCommand cmd) {
-
-		dbProvider.execute(r -> {
-
-			// 删除所有
-			allianceFAQProvider.deleteOperateServices(cmd);
-			if (CollectionUtils.isEmpty(cmd.getServiceIds())) {
-				return null;
-			}
-
-			// 添加所有
-			for (Long serviceId : cmd.getServiceIds()) {
-				AllianceOperateService op = ConvertHelper.convert(cmd, AllianceOperateService.class);
-				op.setServiceId(serviceId);
-				allianceFAQProvider.createOperateService(op);
-			}
-
-			return null;
-		});
-	}
-
-	@Override
-	public void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
-
-		AllianceOperateService upItem = allianceFAQProvider.getOperateService(cmd.getUpOperateServiceId());
-		AllianceOperateService lowItem = allianceFAQProvider.getOperateService(cmd.getLowOperateServiceId());
-		if (null == upItem ||null == lowItem) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
-		}		
-		
-		if (upItem.getDefaultOrder() < lowItem.getDefaultOrder()) {
-			return;
-		}
-		
-		dbProvider.execute(r->{
-			allianceFAQProvider.updateOperateServiceOrder(upItem.getId(), lowItem.getDefaultOrder());
-			allianceFAQProvider.updateOperateServiceOrder(lowItem.getId(), upItem.getDefaultOrder());
-			return null;
-		});
-	
 	}
 
 	@Override

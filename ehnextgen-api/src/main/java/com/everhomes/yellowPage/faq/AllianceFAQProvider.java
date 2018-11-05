@@ -39,19 +39,6 @@ public interface AllianceFAQProvider {
 	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 	
 	void updateTopFAQOrder(Long upFAQId, Long lowFAQId);
-
-	
-	//运营商模块
-	List<AllianceOperateService> listOperateServices(AllianceCommonCommand cmd);
-
-	void deleteOperateServices(AllianceCommonCommand cmd);
-	
-	void createOperateService(AllianceOperateService operateService);
-	
-	AllianceOperateService getOperateService(Long itemId);
-
-	void updateOperateServiceOrder(Long itemId, Long newOrder);
-	
 	
 	//热线
 	void updateFAQOnlineService(AllianceFAQServiceCustomer onlineService);

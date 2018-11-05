@@ -1,13 +1,8 @@
 package com.everhomes.rest.yellowPage;
 
 /**
- * 与{@link com.everhomes.rest.flow.FlowCaseStatus} 状态保持一致
- * UNKNOWN(-1):未知
- * NONE(1):无
- * PROCESSING(2):处理中
- * INVALID(3):已取消
- * RESIDED_IN(4): 已完成
- * SUSPEND(6): 暂缓
+ * HOUSE_KEEPER("housekeeper", "list"), 
+ * FAQ("", "faq")
  * */
 public enum AllianceDisplayType {
 

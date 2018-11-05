@@ -96,30 +96,6 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 		allianceFaqsProvider.updateTopFAQOrder(faqId, newTopOrder);
 	}
 
-	@Override
-	public List<AllianceOperateService> listOperateServices(AllianceCommonCommand cmd) {
-		return allianceOperateServiceProvider.listOperateServices(cmd);
-	}
-
-	@Override
-	public void deleteOperateServices(AllianceCommonCommand cmd) {
-		allianceOperateServiceProvider.deleteOperateServices(cmd);
-	}
-
-	@Override
-	public AllianceOperateService getOperateService(Long itemId) {
-		return allianceOperateServiceProvider.getOperateService(itemId);
-	}
-
-	@Override
-	public void createOperateService(AllianceOperateService operateService) {
-		allianceOperateServiceProvider.createOperateService(operateService);
-	}
-
-	@Override
-	public void updateOperateServiceOrder(Long itemId, Long newOrder) {
-		allianceOperateServiceProvider.updateOperateServiceOrder(itemId, newOrder);
-	}
 
 	@Override
 	public void updateFAQOnlineService(AllianceFAQServiceCustomer onlineService) {

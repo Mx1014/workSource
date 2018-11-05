@@ -1,5 +1,8 @@
 package com.everhomes.yellowPage.faq;
 
+import com.everhomes.rest.yellowPage.ListOperateServicesResponse;
+import com.everhomes.rest.yellowPage.UpdateOperateServiceOrdersCommand;
+import com.everhomes.rest.yellowPage.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.faq.CreateFAQCommand;
 import com.everhomes.rest.yellowPage.faq.CreateFAQTypeCommand;
 import com.everhomes.rest.yellowPage.faq.DeleteFAQCommand;
@@ -14,8 +17,6 @@ import com.everhomes.rest.yellowPage.faq.ListFAQTypesCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQTypesResponse;
 import com.everhomes.rest.yellowPage.faq.ListFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQsResponse;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesCommand;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesResponse;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsResponse;
 import com.everhomes.rest.yellowPage.faq.ListUiFAQsCommand;
@@ -27,8 +28,6 @@ import com.everhomes.rest.yellowPage.faq.UpdateFAQOnlineServiceCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQSolveTimesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServiceOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQFlagCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.rest.yellowPage.faq.updateFAQOrderCommand;
@@ -57,11 +56,6 @@ public interface AllianceFAQService {
 
 	void updateTopFAQOrders(UpdateTopFAQOrdersCommand cmd);
 
-	ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd);
-
-	void updateOperateServices(UpdateOperateServicesCommand cmd);
-
-	void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd);
 
 	GetLatestServiceStateResponse getLatestServiceState(GetLatestServiceStateCommand cmd);
 

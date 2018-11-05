@@ -26,8 +26,6 @@ import com.everhomes.rest.yellowPage.faq.ListFAQTypesCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQTypesResponse;
 import com.everhomes.rest.yellowPage.faq.ListFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListFAQsResponse;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesCommand;
-import com.everhomes.rest.yellowPage.faq.ListOperateServicesResponse;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsCommand;
 import com.everhomes.rest.yellowPage.faq.ListTopFAQsResponse;
 import com.everhomes.rest.yellowPage.faq.ListUiFAQsCommand;
@@ -39,8 +37,6 @@ import com.everhomes.rest.yellowPage.faq.UpdateFAQOnlineServiceCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQSolveTimesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateFAQTypeOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServiceOrdersCommand;
-import com.everhomes.rest.yellowPage.faq.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQFlagCommand;
 import com.everhomes.rest.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.rest.yellowPage.faq.updateFAQOrderCommand;
@@ -1162,7 +1158,7 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("listOperateServices")
     @RestReturn(value = ListOperateServicesResponse.class)
 	public RestResponse listOperateServices(ListOperateServicesCommand cmd) {
-		ListOperateServicesResponse resp = allianceFAQService.listOperateServices(cmd);
+		ListOperateServicesResponse resp = yellowPageService.listOperateServices(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1175,7 +1171,7 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("updateOperateServices")
     @RestReturn(value = String.class)
 	public RestResponse updateOperateServices(UpdateOperateServicesCommand cmd) {
-		allianceFAQService.updateOperateServices(cmd);
+		yellowPageService.updateOperateServices(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1188,7 +1184,7 @@ public class YellowPageController  extends ControllerBase {
 	@RequestMapping("updateOperateServiceOrders")
     @RestReturn(value = String.class)
 	public RestResponse updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
-		allianceFAQService.updateOperateServiceOrders(cmd);
+		yellowPageService.updateOperateServiceOrders(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

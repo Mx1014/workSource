@@ -1,7 +1,8 @@
-package com.everhomes.rest.yellowPage.faq;
+package com.everhomes.rest.yellowPage;
 
 import java.util.List;
 
+import com.everhomes.rest.yellowPage.faq.OperateServiceDTO;
 import com.everhomes.util.StringHelper;
 
 public class ListOperateServicesResponse {

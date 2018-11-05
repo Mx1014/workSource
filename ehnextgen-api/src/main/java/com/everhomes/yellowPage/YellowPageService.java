@@ -136,5 +136,12 @@ public interface YellowPageService {
 	ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd);
 
 	String buildAllianceUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
+	
+	ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd);
 
+	void updateOperateServices(UpdateOperateServicesCommand cmd);
+
+	void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd);
+
+	String processDetailUrl(Long serviceId, String serviceName, String ownerType, Long ownerId);
 }

@@ -159,6 +159,8 @@ import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
 import com.everhomes.rest.yellowPage.UpdateAllianceTagCommand;
+import com.everhomes.rest.yellowPage.UpdateOperateServiceOrdersCommand;
+import com.everhomes.rest.yellowPage.UpdateOperateServicesCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
@@ -174,6 +176,9 @@ import com.everhomes.rest.yellowPage.YellowPageListResponse;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.rest.yellowPage.ListOperateServicesCommand;
+import com.everhomes.rest.yellowPage.ListOperateServicesResponse;
+import com.everhomes.rest.yellowPage.faq.OperateServiceDTO;
 import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.ClickCountDTO;
 import com.everhomes.rest.yellowPage.stat.ClickStatDTO;
@@ -382,7 +387,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	LaunchPadProvider launchPadProvider;
-
+	
+	@Autowired
+	private AllianceOperateServiceProvider allianceOperateServiceProvider;
 
 	@Autowired
 	OrganizationService organizationService;
@@ -1274,23 +1281,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	private void processDetailUrl(ServiceAllianceDTO dto) {
-		try {
-			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-			String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
-			String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
-
-			String ownerType = dto.getOwnerType();
-			ownerType = (ownerType == null) ? "" : ownerType;
-			Long ownerId = dto.getOwnerId();
-			ownerId = (ownerId == null) ? 0 : ownerId;
-			detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2),
-					ownerType, ownerId);
-
-			dto.setDetailUrl(homeUrl + detailUrl);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		dto.setDetailUrl(processDetailUrl(dto.getId(), dto.getName(), dto.getOwnerType(), dto.getOwnerId()));
 	}
+	
+	
 
 	@Override
 	public void updateServiceAlliance(UpdateServiceAllianceCommand cmd) {
@@ -4181,6 +4175,96 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		url.append("#sign_suffix");
 		return url.toString();
+	}
+	
+	@Override
+	public ListOperateServicesResponse listOperateServices(ListOperateServicesCommand cmd) {
+		
+		
+		List<AllianceOperateService> list = allianceOperateServiceProvider.listOperateServices(cmd);
+
+		List<OperateServiceDTO> dtos = list.stream().map(r -> {
+			OperateServiceDTO dto = new OperateServiceDTO();
+			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(r.getServiceId(), null, null);
+			if (null != sa) {
+				dto.setServiceId(sa.getId());
+				dto.setServiceName(sa.getName());
+			}
+			
+			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), r.getServiceId());
+			if (null != match) {
+				dto.setServiceTypeName(match.getCategoryName());
+			}
+//			
+			return dto;
+		}).collect(Collectors.toList());
+		
+		ListOperateServicesResponse resp = new ListOperateServicesResponse();
+		resp.setDtos(dtos);
+		return resp;
+	}
+
+	@Override
+	public void updateOperateServices(UpdateOperateServicesCommand cmd) {
+
+		dbProvider.execute(r -> {
+
+			// 删除所有
+			allianceOperateServiceProvider.deleteOperateServices(cmd);
+			if (CollectionUtils.isEmpty(cmd.getServiceIds())) {
+				return null;
+			}
+
+			// 添加所有
+			for (Long serviceId : cmd.getServiceIds()) {
+				AllianceOperateService op = ConvertHelper.convert(cmd, AllianceOperateService.class);
+				op.setServiceId(serviceId);
+				allianceOperateServiceProvider.createOperateService(op);
+			}
+
+			return null;
+		});
+	}
+
+	@Override
+	public void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
+
+		AllianceOperateService upItem = allianceOperateServiceProvider.getOperateService(cmd.getUpOperateServiceId());
+		AllianceOperateService lowItem = allianceOperateServiceProvider.getOperateService(cmd.getLowOperateServiceId());
+		if (null == upItem ||null == lowItem) {
+			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
+		}		
+		
+		if (upItem.getDefaultOrder() < lowItem.getDefaultOrder()) {
+			return;
+		}
+		
+		dbProvider.execute(r->{
+			allianceOperateServiceProvider.updateOperateServiceOrder(upItem.getId(), lowItem.getDefaultOrder());
+			allianceOperateServiceProvider.updateOperateServiceOrder(lowItem.getId(), upItem.getDefaultOrder());
+			return null;
+		});
+	
+	}
+
+	@Override
+	public String processDetailUrl(Long serviceId, String serviceName, String ownerType, Long ownerId) {
+
+		try {
+			String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+			String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
+			String name = org.apache.commons.lang.StringUtils.trimToEmpty(serviceName);
+
+			ownerType = (ownerType == null) ? "" : ownerType;
+			ownerId = (ownerId == null) ? 0 : ownerId;
+			detailUrl = String.format(detailUrl, serviceId, URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2),
+					ownerType, ownerId);
+			return homeUrl + detailUrl;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 }

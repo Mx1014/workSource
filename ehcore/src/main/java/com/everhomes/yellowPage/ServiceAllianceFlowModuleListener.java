@@ -167,7 +167,8 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(yellowPage.getOwnerType(),
 				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
 		if (null != match) {
-			flowCase.setTitle(match.getCategoryName());
+			yellowPage.setCategoryId(match.getCategoryId());
+			yellowPage.setServiceType(match.getCategoryName());
 		}
 		
 		StringBuffer contentBuffer = new StringBuffer();
@@ -419,37 +420,6 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-//		syncRequest(ctx);
-	}
-	
-	private void syncRequest(FlowCaseState ctx) {
-		 // 更新状态
-       FlowCase flowCase = ctx.getFlowCase();
-       Byte status = flowCase.getStatus();
-
-       if (status != null) {
-   		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
-   		List<GeneralFormVal> lists = generalFormValProvider.queryGeneralFormVals(FORM_VAL_SOURCE_TYPE_NAME, flowCase.getId());
-	    List<PostApprovalFormItem> values = lists.stream().map(r -> {
-	         PostApprovalFormItem value = new PostApprovalFormItem();
-	         value.setFieldName(r.getFieldName());
-	         value.setFieldType(r.getFieldType());
-	         value.setFieldValue(r.getFieldValue());
-	         return value;
-	    }).collect(Collectors.toList());
-	    PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
-   		Long yellowPageId = 0L;
-   		ServiceAlliances  yellowPage = null;
-   		if(null != sourceVal){
-   			yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-   			yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
-   			request.setServiceAllianceId(yellowPageId);
-   			request.setType(yellowPage.getParentId());
-   			
-   		}
-   		syncRequest(values, request, flowCase,yellowPage,status);
-       }
-	
 	}
 	
 	@Override
