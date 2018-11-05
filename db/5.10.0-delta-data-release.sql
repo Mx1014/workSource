@@ -544,6 +544,54 @@ update eh_customer_trackings set tracking_type = 3 where namespace_id = 999954 a
 update eh_enterprise_customers set customer_source = 1, level_item_id  = 6 where organization_id is not null and status = 2;
 
 
+
+
+
+
+-- AUTHOR: yanjun  20180811
+-- REMARK: 电商模块的oppush改成指向应用    不在标准版执行
+DROP PROCEDURE IF EXISTS update_bizUrl_module_function;
+DELIMITER //
+CREATE PROCEDURE `update_bizUrl_module_function` ()
+BEGIN
+  DECLARE aid LONG;
+  DECLARE ans INTEGER;
+  DECLARE aversionid LONG;
+	DECLARE aname VARCHAR(200);
+	DECLARE ainstanceConfig VARCHAR(10240);
+	DECLARE atype INTEGER;
+  DECLARE amoduleid LONG;
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE cur CURSOR FOR SELECT id, namespace_id, version_id, label, instance_config from eh_portal_item_groups WHERE widget = 'OPPush' and instance_config like '%"bizUrl"%' AND instance_config not LIKE '%moduleAppId%';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  OPEN cur;
+  read_loop: LOOP
+
+        FETCH cur INTO aid, ans, aversionid, aname, ainstanceConfig;
+ 				IF done THEN
+ 					LEAVE read_loop;
+ 				END IF;
+
+				SET @appId = (SELECT MAX(id) + 1 from eh_service_module_apps);
+
+				INSERT INTO `eh_service_module_apps` (`id`, `namespace_id`, `version_id`, `origin_id`, `name`, `module_id`, `instance_config`, `status`, `action_type`, `create_time`, `update_time`, `operator_uid`, `creator_uid`, `module_control_type`, `custom_tag`, `custom_path`, `access_control_type`) VALUES (@appId, ans, aversionid, @appId, aname, 92100, replace(ainstanceConfig, '"bizUrl"', '"url"'), '2', NULL, NOW(), NOW(), '1', '1', 'unlimit_control', NULL, NULL, '0');
+
+				UPDATE eh_portal_item_groups SET instance_config = '{}' WHERE id = aid AND instance_config is NULL;
+
+				UPDATE eh_portal_item_groups SET instance_config = replace(instance_config, '{', CONCAT('{"moduleAppId":',@appId,',')) WHERE id = aid;
+
+  END LOOP;
+  CLOSE cur;
+END
+//
+DELIMITER ;
+CALL update_bizUrl_module_function;
+DROP PROCEDURE IF EXISTS update_bizUrl_module_function;
+
+
+
+
+
 -- AUTHOR: 黄鹏宇 2018-11-5
 -- remark: 将入驻信息插入租客中
 SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
@@ -571,6 +619,7 @@ UPDATE eh_service_modules SET instance_config='{"realm":"equipmentInspection","e
 
 UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20800;
 UPDATE eh_service_module_apps SET instance_config='{"realm":"equipmentInspection","entryUrl":"https://core.zuolin.com/nar/equipmentInspection/dist/index.html?hideNavigationBar=1#sign_suffix"}' WHERE module_id = 20600;
+
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
