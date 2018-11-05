@@ -286,9 +286,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		&& null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		if(namespaceId == 999983) {
 			handle = PmTaskHandle.EBEI;
+			cmd.setTaskCategoryId(PmTaskHandle.EBEI_TASK_CATEGORY);
 		} else {
 //			用appId实现多应用,去除taskcategoryId
 			cmd.setTaskCategoryId(null);
@@ -326,9 +328,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		if(namespaceId == 999983) {
 			handle = PmTaskHandle.EBEI;
+			cmd.setTaskCategoryId(PmTaskHandle.EBEI_TASK_CATEGORY);
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
@@ -735,9 +739,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		if(namespaceId == 999983) {
 			handle = PmTaskHandle.EBEI;
+			cmd.setTaskCategoryId(PmTaskHandle.EBEI_TASK_CATEGORY);
 		}
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
@@ -885,9 +891,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		if(namespaceId == 999983) {
 			handle = PmTaskHandle.EBEI;
+			cmd.setTaskCategoryId(PmTaskHandle.EBEI_TASK_CATEGORY);
 		}
 
 		//检查多入口应用权限
