@@ -3799,5 +3799,47 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 		BigDecimal digit = new BigDecimal(input);
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
+	
+	public void fixInvalidCityInAddresses(Integer namespaceId) {
+	    long startTime = System.currentTimeMillis();
+	    Integer pageSize = 1000;
+	    Long pageAnchor = 0L;
+	    
+	    int count = 0;
+	    List<Address> list = null;
+	    while(pageAnchor != null) {
+	        list = addressProvider.listAddressesOfInvalidCity(namespaceId, pageAnchor, pageSize + 1);
+	        
+	        pageAnchor = null;
+	        if(list != null) {
+	            if(list.size() > pageSize) {
+                    pageAnchor = list.get(list.size() - 1).getId();
+                    list.remove(list.size() - 1);
+	            }
+                count += list.size();
+                
+                for(Address address : list) {
+                    // 使用小区来获取城市比地址里的城市名称来获取城市更准确
+                    // Region region = regionProvider.findRegionByName(address.getNamespaceId(), address.getCityName());
+                    Community community = communityProvider.findCommunityById(address.getCommunityId());
+                    if(community == null) {
+                        LOGGER.warn("Fix invalid city id in addresses, community not found, namespaceId={}, addressId={}, communityId={}", 
+                                address.getNamespaceId(), address.getId(), address.getCommunityId());
+                    } else {
+                        addressProvider.updateAddressOfCityId(address.getId(), community.getCityId());
+                    }
+                }
+            }
+            
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("Fix invalid city id in addresses, namespaceId={}, count={}, pageAnchor={}", namespaceId, count, pageAnchor);
+            }
+	    }
+	    
+	    long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Fix invalid city id in addresses end, namespaceId={}, count={}, elapse={}", namespaceId, count, (endTime - startTime));
+        }
+	}
 
 }
