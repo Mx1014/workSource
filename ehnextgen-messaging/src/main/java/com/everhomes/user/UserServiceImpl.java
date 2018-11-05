@@ -6901,7 +6901,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 			if(familyDtos != null && familyDtos.size() > 0){
 				for(FamilyDTO family : familyDtos){
-					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())){
+					if((cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())) || (family.getCommunityId() == null)){ //防止null值，这里对CommunityId进行判断
 						continue;
 					}
 
