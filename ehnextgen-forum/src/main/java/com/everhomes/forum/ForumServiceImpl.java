@@ -5484,7 +5484,7 @@ public class ForumServiceImpl implements ForumService {
         Long currentOrgId = null;
 
         AppContext appContext = UserContext.current().getAppContext();
-        if (appContext.getCommunityId() != null) {
+        if (appContext != null && appContext.getCommunityId() != null) {
             visibleRegionType = VisibleRegionType.COMMUNITY;
             visibleRegionId = appContext.getCommunityId();
         }else {
