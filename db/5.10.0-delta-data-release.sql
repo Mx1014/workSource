@@ -592,6 +592,11 @@ DROP PROCEDURE IF EXISTS update_bizUrl_module_function;
 
 
 
+-- AUTHOR: 黄鹏宇 2018-11-5
+-- remark: 将入驻信息插入租客中
+SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12114,'enterprise_customer','enterprise_customer');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
