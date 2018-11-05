@@ -1257,8 +1257,6 @@ ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
 
 
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
-﻿
-
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
 ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
