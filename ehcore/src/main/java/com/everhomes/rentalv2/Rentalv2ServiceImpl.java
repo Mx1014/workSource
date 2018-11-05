@@ -1331,6 +1331,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         RentalDefaultRule rule = this.rentalv2Provider.getRentalDefaultRule(null, null,
                 rentalSite.getResourceType(), rentalSite.getResourceTypeId(), RuleSourceType.RESOURCE.getCode(), rentalSite.getId());
         Long now = new java.util.Date().getTime();
+        now = now - now % (1800 * 1000) + 1800 * 1000;
         //至多提前时间
         if (NormalFlag.NEED.getCode() == rule.getRentalStartTimeFlag()) {
             Long time = now + rule.getRentalStartTime();
