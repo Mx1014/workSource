@@ -544,6 +544,11 @@ update eh_customer_trackings set tracking_type = 3 where namespace_id = 999954 a
 update eh_enterprise_customers set customer_source = 1, level_item_id  = 6 where organization_id is not null and status = 2;
 
 
+-- AUTHOR: 黄鹏宇 2018-11-5
+-- remark: 将入驻信息插入租客中
+SET @id = IFNULL((select max(id) from eh_var_field_ranges), 1);
+INSERT INTO eh_var_field_ranges VALUES(@id:=@id+1,'/1/10/',12114,'enterprise_customer','enterprise_customer');
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 
 
