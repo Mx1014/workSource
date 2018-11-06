@@ -137,12 +137,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 			pageRealDisplayType = AllianceDisplayType.HOUSE_KEEPER.getShowType();
 		}
 
-		json.put("url", yellowPageService.buildAllianceUrl(namespaceId, config, pageRealDisplayType));
+		
 		if (namespaceId == 999953) { // 先在万智汇上做测试
 			json.put("realm", config.getRealm());
-			json.put("entryUrl", buildEntryUrl(namespaceId, config));
+			json.put("entryUrl", buildEntryUrl(namespaceId, config, pageRealDisplayType));
 		} else {
-			 json.put("url", buildRenderUrl(namespaceId, config));
+			json.put("url", yellowPageService.buildAllianceUrl(namespaceId, config, pageRealDisplayType));
 		}
 
 		return json.toJSONString();
@@ -160,22 +160,27 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 	}
 
 
-    private String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config) {
+    private String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType) {
 
         // 服务联盟v3.4 web化之后，直接设置为跳转链接即可
         // http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
         StringBuilder url = new StringBuilder();
         String homeUrl = configProvider.getValue(namespaceId, "home.url", "");
-        url.append(homeUrl+"/nar/serviceAlliance/build/index.html#/home/" + config.getDisplayType());
+        url.append(homeUrl+"/nar/serviceAlliance/build/index.html");
         url.append("?displayType=" + config.getDisplayType());
         url.append("&parentId=" + config.getType());
         url.append("&enableComment=" + config.getEnableComment());
         url.append("&ns=" + namespaceId);
+		if (null == pageRealDisplayType) {
+			url.append("#/home/"+ config.getDisplayType());
+		} else {
+			url.append("#/home/"+ pageRealDisplayType);
+		}
         url.append("#sign_suffix");
 
         return url.toString();
     }
-
+    
 	private ServiceAllianceCategories createServiceAlliance(Integer namespaceId, Byte detailFlag, String name) {
 
 		User user = UserContext.current().getUser();
