@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.launchpad.oppushHandler;
 
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.OPPushHandler;
 import com.everhomes.news.NewsService;
 import com.everhomes.rest.launchpadbase.AppContext;
@@ -11,6 +13,7 @@ import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.sms.DateUtil;
@@ -45,48 +48,70 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 	
 	@Autowired
 	YellowPageService yellowPageService;
-	
 	@Autowired
 	YellowPageProvider yellowPageProvider;
+	@Autowired
+	private ContentServerService contentServerService;
 	
     @Override
 	public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
 
-//		OPPushInstanceConfig config = (OPPushInstanceConfig) StringHelper.fromJsonString(instanceConfig.toString(),
-//				OPPushInstanceConfig.class);
-//
-//		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
-//		Long type = StringUtils.isBlank(app.getCustomTag()) ? 0L : Long.parseLong(app.getCustomTag());
-//
-//		AllianceCommonCommand cmd = new AllianceCommonCommand();
-//		List<AllianceOperateService> dtos = allianceOperateServiceProvider.listOperateServices(cmd);
-//		List<OPPushCard> listCards = new ArrayList<>();
-//		String host = "service-alliance";
-//
-//		for (AllianceOperateService dto : dtos) {
-//			OPPushCard card = new OPPushCard();
-//			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getId(), null, null);
-//			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
-//			card.setRouterPath("/detail");
-//			String url = yellowPageService.processDetailUrl(sa.getId(), sa.getName(), sa.getOwnerType(), sa.getOwnerId());
-//			card.setRouterQuery("url=" + url); // native时需要的参数
-//			String router = 
-//					"zl://" + host + card.getRouterPath() 
-//					+ "?moduleId=40500&clientHandlerType=" + card.getClientHandlerType() // 固定参数
-//					+ "&" + card.getRouterQuery();
-//			card.setRouter(router); 
-//
-//			List<Object> properties = new ArrayList<>();
-//			properties.add(dto.getCoverUri() == null ? "" : dto.getCoverUri());
-//			properties.add(dto.getTitle() == null ? "" : dto.getTitle());
-//			properties.add(dto.getTopFlag() == null ? "0" : "" + dto.getTopFlag());
-//			properties.add(DateUtil.dateToStr(dto.getPublishTime(), "yyyy-MM-dd HH:mm"));
-//			properties.add(dto.getLikeCount() == null ? "0" : "" + dto.getLikeCount());
-//			card.setProperties(properties);
-//			listCards.add(card);
-//		}
-//
-//		return listCards;
-		return null;
+		OPPushInstanceConfig config = (OPPushInstanceConfig) StringHelper.fromJsonString(instanceConfig.toString(),
+				OPPushInstanceConfig.class);
+
+		ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(config.getAppId());
+		Long type = StringUtils.isBlank(app.getCustomTag()) ? null : Long.parseLong(app.getCustomTag());
+
+		AllianceCommonCommand cmd = new AllianceCommonCommand();
+		cmd.setNamespaceId(app.getNamespaceId());
+		cmd.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+		cmd.setOwnerId(context.getCommunityId());
+		cmd.setType(type);
+		List<AllianceOperateService> dtos = allianceOperateServiceProvider.listOperateServices(cmd);
+		List<OPPushCard> listCards = new ArrayList<>();
+		String host = "service-alliance";
+		for (AllianceOperateService dto : dtos) {
+			OPPushCard card = new OPPushCard();
+			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getId(), null, null);
+			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
+			card.setRouterPath("/detail");
+			String url = yellowPageService.processDetailUrl(sa.getId(), sa.getName(), sa.getOwnerType(),
+					sa.getOwnerId());
+			card.setRouterQuery("url=" + url);
+			String router = "zl://" + host + card.getRouterPath() + "?moduleId=40500&clientHandlerType="
+					+ card.getClientHandlerType() // 固定参数
+					+ "&" + card.getRouterQuery();
+			card.setRouter(router);
+
+			List<Object> properties = new ArrayList<>();
+			String imgUrl = getUrlFromUri(sa.getPosterUri());
+			properties.add(imgUrl == null ? "" : imgUrl);
+			properties.add(sa.getName() == null ? "" : sa.getName());
+			if (null == sa.getUpdateTime()) {
+				properties.add(DateUtil.dateToStr(sa.getCreateTime(), "yyyy-MM-dd HH:mm"));
+			} else {
+				properties.add(DateUtil.dateToStr(sa.getUpdateTime(), "yyyy-MM-dd HH:mm"));
+			}
+			card.setProperties(properties);
+			listCards.add(card);
+		}
+		
+		return listCards;
 	}
+    
+    
+    private String getUrlFromUri(String uri) {
+    	if (StringUtils.isBlank(uri)) {
+    		return null;
+    	}
+    	
+		try {
+			return contentServerService.parserUri(uri, EntityType.USER.getCode(),
+					UserContext.current().getUser().getId());
+		} catch (Exception e) {
+			LOGGER.error("Failed to parse poster uri of ServiceAlliances, uri =" + uri + " e:" + e);
+		}
+		
+		return null;
+    }
 }
