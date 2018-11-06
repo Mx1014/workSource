@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *	<li>paidType : 支付方式,10001-支付宝，10002-微信 com.everhomes.rest.organization.VendorType</li>
  * 	<li>revId : 账单ID（是一个list，同时缴纳多个item的费用）</li>
  * 	<li>pmPayerId : 物业缴费用户的ID(存在左邻这边的用户ID)</li>
+ *  <li>haianCommunityName : 海岸的园区名称</li>
  *</ul>
  *
  */
@@ -34,7 +35,8 @@ public class CreatePmsyBillOrderCommand {
 	
 	private String clientAppName;
 	
-	
+	private String haianCommunityName;
+	 
 	public String getProjectId() {
 		return projectId;
 	}
@@ -94,5 +96,11 @@ public class CreatePmsyBillOrderCommand {
 	}
 	public void setClientAppName(String clientAppName) {
 		this.clientAppName = clientAppName;
+	}
+	public String getHaianCommunityName() {
+		return haianCommunityName;
+	}
+	public void setHaianCommunityName(String haianCommunityName) {
+		this.haianCommunityName = haianCommunityName;
 	}
 }

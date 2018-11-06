@@ -21,7 +21,19 @@ public class ListFieldItemCommand {
 
 	private Long categoryId;
 
-	public Long getCategoryId() {
+    private Long ownerId;
+
+	private String moduleName;
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public Long getCategoryId() {
 		return categoryId;
 	}
 
@@ -51,6 +63,14 @@ public class ListFieldItemCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override

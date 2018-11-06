@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>siteId：场所id</li>
  * <li>ruleDate：日期</li>
  * <li>packageName:套餐名</li>
- * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
+ * <li>sceneType: 场景标识，用一个标识代替原来用多个字段共同表示的标识</li>
  * <li>rentalType: 价格类型，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceType: 0 按时长定价 1 起步价模式</li>
  * </ul>
@@ -25,6 +25,7 @@ public class  FindRentalSiteWeekStatusCommand {
 	private Byte rentalType;
 	private Byte priceType;
 	private String packageName;
+	private String sceneType;
 	private String sceneToken;
 
 	public String getResourceType() {
@@ -43,12 +44,12 @@ public class  FindRentalSiteWeekStatusCommand {
 		this.rentalType = rentalType;
 	}
 
-	public String getSceneToken() {
-		return sceneToken;
+	public String getSceneType() {
+		return sceneType;
 	}
 
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
+	public void setSceneType(String sceneType) {
+		this.sceneType = sceneType;
 	}
 
 	@Override
@@ -86,5 +87,13 @@ public class  FindRentalSiteWeekStatusCommand {
 
 	public void setPriceType(Byte priceType) {
 		this.priceType = priceType;
+	}
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
 	}
 }

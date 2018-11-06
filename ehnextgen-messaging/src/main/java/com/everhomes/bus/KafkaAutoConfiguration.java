@@ -11,12 +11,12 @@ import org.springframework.kafka.support.ProducerListener;
 
 @Configuration
 @ConditionalOnClass(KafkaTemplate.class)
-@EnableConfigurationProperties(KafkaProperties.class)
+@EnableConfigurationProperties(ExtendKafkaProperties.class)
 public class KafkaAutoConfiguration {
 
-    private final KafkaProperties properties;
+    private final ExtendKafkaProperties properties;
 
-    public KafkaAutoConfiguration(KafkaProperties properties) {
+    public KafkaAutoConfiguration(ExtendKafkaProperties properties) {
         this.properties = properties;
     }
 
@@ -26,12 +26,12 @@ public class KafkaAutoConfiguration {
             ProducerListener<Object, Object> kafkaProducerListener) {
         KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<Object, Object>(
                 kafkaProducerFactory);
-        if (!"disable".equals(properties.getClientId())) {
+        if (properties.isEnabled()) {
             kafkaTemplate.setProducerListener(kafkaProducerListener);
             kafkaTemplate.setDefaultTopic(this.properties.getTemplate().getDefaultTopic());
             return kafkaTemplate;
         }
-        return null;
+        return new NoopKafkaTemplate();
     }
 
     @Bean

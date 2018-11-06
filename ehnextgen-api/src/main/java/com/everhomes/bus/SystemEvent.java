@@ -22,6 +22,8 @@ public enum SystemEvent {
     ACCOUNT__FAMILY_AUTH_SUCCESS("account.family.auth_success"),
     ACCOUNT_COMPLETE_INFO("account.complete_info"),
     ACCOUNT_OPEN_APP("account.open_app"),
+    ACCOUNT_LEAVE_ENTERPRISE("account.leave.enterprise"),//离开企业
+    ACCOUNT_LEAVE_FAMILY("account.leave.family"),//离开地址
 
     // 论坛
     FORUM_POST_CREATE("forum.post_create"),
@@ -82,8 +84,10 @@ public enum SystemEvent {
     RENTAL_RESOURCE_APPLY_CANCEL("rental.resource_apply_cancel"),
 
    //服务联盟
-    SERVICE_ALLIANCE_CREATE("service.alliance_create");
+    SERVICE_ALLIANCE_CREATE("service.alliance_create"),
 
+	//云打印
+	SIYIN_PRINT_PAID("siyin_print.paid");
     private String code;
 
     SystemEvent(String code) {

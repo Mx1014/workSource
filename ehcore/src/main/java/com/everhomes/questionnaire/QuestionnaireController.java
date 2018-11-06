@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import com.everhomes.rest.organization.OrganizationAndDetailDTO;
 import com.everhomes.rest.questionnaire.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,6 +185,16 @@ public class QuestionnaireController extends ControllerBase {
 	public RestResponse reSendQuesionnaireMessages(){
 		questionnaireService.reSendQuesionnaireMessages();
 		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /questionnaire/listRangeOrgs</b>
+	 * <p>查询问卷范围企业新信息</p>
+	 */
+	@RequestMapping("listRangeOrg")
+	@RestReturn(value = OrganizationAndDetailDTO.class,collection = true)
+	public RestResponse listRangeOrgs(ListRangeOrgsCommand cmd){
+		return new RestResponse(questionnaireService.listRangeOrgs(cmd));
 	}
 
 }

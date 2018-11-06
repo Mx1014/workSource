@@ -2,6 +2,8 @@
 package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.building.Building;
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -10,6 +12,7 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,6 +24,12 @@ public interface AddressProvider {
     void updateAddress(Address address);
     void deleteAddress(Address address);
     void deleteAddressById(long id);
+
+    /**
+     * 根据addressId来查询eh_addresses表中对应的楼栋和门牌信息
+     * @param id
+     * @return
+     */
     Address findAddressById(long id);
 
     Address findGroupAddress(Long groupId);
@@ -77,6 +86,27 @@ public interface AddressProvider {
     List<AddressAttachment> listAddressAttachments(Long addressId);
 
     String findLastVersionByNamespace(Integer namespaceId, Long communityId);
+
+    /**
+     * 根据门牌地址Id集合addressIds进行批量删除门牌地址
+     * @param addressIds
+     */
+    void betchDisclaimAddress(List<Long> addressIds);
+
+    /**
+     * 根据id的集合来批量的查询eh_addresses表中信息
+     * @param ids
+     * @return
+     */
+    List<Address> findAddressByIds(List<Long> ids,Integer namespaceId);
+
+    /**
+     * 根据buildingName和CommunityId来查询eh_addersses表中的门牌的数量
+     * @param buildingName
+     * @param communityId
+     * @return
+     */
+    int getApartmentCountByBuildNameAndCommunityId(String buildingName,Long communityId);
     
 	List<ContractBuildingMapping> findContractBuildingMappingByAddressId(Long addressId);
     ContractBuildingMapping findContractBuildingMappingByContractId(Long contractId);
@@ -114,4 +144,29 @@ public interface AddressProvider {
 	List<Address> findActiveAddressByBuildingNameAndCommunityId(String buildingName, Long communityId);
 
     List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
+    List<Address> findActiveApartmentsByBuildingId(Long buildingId);
+    
+    /**
+     * 根据第三方数据的id列表查询房源
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */ 
+    Address findApartmentByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询楼宇
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */
+    Building findBuildingByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询园区
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @return
+     */
+    Community findCommunityByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+	int getTotalApartmentCount();
+
+	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
 }

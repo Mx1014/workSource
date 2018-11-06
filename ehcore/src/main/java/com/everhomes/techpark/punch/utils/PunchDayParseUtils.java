@@ -61,7 +61,7 @@ public final class PunchDayParseUtils {
                 s.append(hourUnit);
             }
         }
-        return s.toString();
+        return s.toString().replace(".0", "");
     }
 
     // 该方法用于将天数换算成“3.5天1.5小时”的格式，0时显示单位

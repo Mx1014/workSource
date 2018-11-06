@@ -195,7 +195,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 
     @Override
     public GroupQueryResult query(SearchOrganizationCommand cmd) {
-        GroupQueryFilter filter = new GroupQueryFilter();
+//        GroupQueryFilter filter = new GroupQueryFilter();
         int pageNum = 0;
         if(cmd.getPageAnchor() != null) {
             pageNum = cmd.getPageAnchor().intValue();
@@ -305,7 +305,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         fbList.add(fb);
 
-        if(cmd.getBuildingName() != null) {
+        if(!StringUtils.isEmpty(cmd.getBuildingName())) {
             //fix bug for #15397
 //            qbs.add(QueryBuilders.queryString(cmd.getBuildingName()).field("buildings"));
             FilterBuilder buildFilter = FilterBuilders.termFilter("buildings", cmd.getBuildingName());

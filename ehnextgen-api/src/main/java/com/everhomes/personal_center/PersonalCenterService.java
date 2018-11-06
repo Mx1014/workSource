@@ -12,6 +12,8 @@ import com.everhomes.rest.personal_center.ListUserOrganizationCommand;
 import com.everhomes.rest.personal_center.ListUserOrganizationResponse;
 import com.everhomes.rest.personal_center.ListVersionListCommand;
 import com.everhomes.rest.personal_center.ListVersionListResponse;
+import com.everhomes.rest.personal_center.ShowPrivateSettingCommand;
+import com.everhomes.rest.personal_center.ShowPrivateSettingResponse;
 import com.everhomes.rest.personal_center.UpdateShowCompanyCommand;
 import com.everhomes.rest.personal_center.UpdateUserCompanyCommand;
 import com.everhomes.rest.user.UserInfo;
@@ -25,4 +27,5 @@ public interface PersonalCenterService {
     ListPersonalCenterSettingsResponse listPersonalCenterSettingsByNamespaceIdAndVersion(ListPersonalCenterSettingsCommand cmd);
     CreatePersonalCenterSettingsResponse createPersonalCenterSettings(CreatePersonalSettingCommand cmd);
     ListVersionListResponse listVersion(ListVersionListCommand cmd);
+    ShowPrivateSettingResponse showPrivateSetting(ShowPrivateSettingCommand cmd);
 }

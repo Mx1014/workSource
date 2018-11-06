@@ -25,4 +25,6 @@ public interface EnterpriseCustomerSearcher {
     List<EasySearchEnterpriseCustomersDTO> easyQueryEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd);
 
     List<EasySearchEnterpriseCustomersDTO> listEnterpriseCustomers(EasySearchEnterpriseCustomersCommand cmd);
+
+    SearchEnterpriseCustomerResponse queryEnterpriseCustomersById(SearchEnterpriseCustomerCommand cmd);
 }

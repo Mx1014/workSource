@@ -52,7 +52,7 @@ public interface WebMenuPrivilegeProvider {
 
 	List<WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId);
 
-	List<WebMenu> listWebMenus(Long parentId, String type);
+	List<WebMenu> listWebMenus(Long parentId, String type, Byte sceneType);
 
 	List<WebMenu> listWebMenusByPath(String path, List<String> types);
 

@@ -69,6 +69,7 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
         return context().selectFrom(EH_ENERGY_METERS)
                 .where(EH_ENERGY_METERS.ID.ge(pageAnchor))
                 .and(EH_ENERGY_METERS.STATUS.eq(EnergyMeterStatus.ACTIVE.getCode()))
+                .orderBy(EH_ENERGY_METERS.ID)
                 .limit(pageSize).fetchInto(EnergyMeter.class);
     }
 

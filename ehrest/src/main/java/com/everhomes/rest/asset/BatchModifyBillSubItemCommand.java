@@ -20,6 +20,7 @@ import java.util.List;
  * <li>billIdList:账单id列表</li>
  * <li>billGroupId:账单组id</li>
  * <li>subItemDTOList:减免费项的集合，参考{@link com.everhomes.rest.asset.SubItemDTO}</li>
+ * <li>organizationId：当前登陆的企业ID</li>
  *</ul>
  */
 public class BatchModifyBillSubItemCommand {
@@ -30,6 +31,8 @@ public class BatchModifyBillSubItemCommand {
     private Long billGroupId;
     @ItemType(SubItemDTO.class)
     private List<SubItemDTO> subItemDTOList;
+    //物业缴费V6.0 新增权限
+    private Long organizationId;
     
 	public List<Long> getBillIdList() {
 		return billIdList;
@@ -66,5 +69,11 @@ public class BatchModifyBillSubItemCommand {
 	}
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

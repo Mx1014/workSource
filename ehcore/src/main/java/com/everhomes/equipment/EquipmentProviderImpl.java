@@ -498,9 +498,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionAccessoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.eq(id));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.OWNER_ID.eq(ownerId));
-
+        if(ownerId!=null && !StringUtils.isNullOrEmpty(ownerType)){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.OWNER_TYPE.eq(ownerType));
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.OWNER_ID.eq(ownerId));
+        }
         List<EquipmentInspectionAccessories> result = new ArrayList<EquipmentInspectionAccessories>();
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, EquipmentInspectionAccessories.class));
@@ -982,7 +983,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId, Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
+    public List<EquipmentInspectionTasks> listDelayTasks(Long inspectionCategoryId, List<Long> planIds, String targetType, Long targetId,Integer offset, Integer pageSize, Byte adminFlag, Timestamp startTime) {
         List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2144,7 +2145,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<TaskCountDTO> statEquipmentTasks(Long ownerId, String ownerType, Long targetId, String targetType,
+    public List<TaskCountDTO> statEquipmentTasks(Long targetId, String targetType,
                                                  Long inspectionCategoryId, Long startTime, Long endTime, Integer offset, Integer pageSize) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
@@ -2161,8 +2162,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         query.addSelect(fields);
         query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 
         if (!StringUtils.isNullOrEmpty(targetType)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
@@ -2627,7 +2628,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
     @Override
     public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId,
-                                                Timestamp startTime, Timestamp endTime,Integer namespaceId) {
+                                                Timestamp startTime, Timestamp endTime, Integer namespaceId) {
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         TasksStatData resp = new TasksStatData();
@@ -2672,6 +2673,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         if (!StringUtils.isNullOrEmpty(targetType)) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
         }
+
+//        if (ownerId != null) {
+//            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+//        }
+//        if (!StringUtils.isNullOrEmpty(ownerType)) {
+//            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//        }
 
         if (inspectionCategoryId != null && inspectionCategoryId != 0L) {
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
@@ -3030,11 +3038,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId) {
+    public void deleteReviewExpireDaysByScope(Byte scopeType, Long scopeId,Long targetId,String targetType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        if(targetId!=null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
+        }
+        if(StringUtils.isNullOrEmpty(targetType)){
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
+        }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
         query.fetch().map((r)->{
             deleteReviewExpireDays(r.getId());
@@ -3067,11 +3081,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     }
 
     @Override
-    public List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType) {
+    public List<EquipmentInspectionReviewDate> getEquipmentInspectiomExpireDays(Long scopeId, Byte scopeType,Long targetId,String targetType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEquipmentInspectionReviewDateRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE);
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_TYPE.eq(scopeType));
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.SCOPE_ID.eq(scopeId));
+        if(targetId!=null) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_ID.eq(targetId));
+        }
+        if(!StringUtils.isNullOrEmpty(targetType)) {
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.TARGET_TYPE.eq(targetType));
+        }
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_REVIEW_DATE.STATUS.eq(PmNotifyConfigurationStatus.VAILD.getCode()));
         return query.fetchInto(EquipmentInspectionReviewDate.class);
 

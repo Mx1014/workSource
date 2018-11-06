@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.portal.HandlerGetAppInstanceConfigCommand;
+import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
+import com.everhomes.rest.portal.HandlerProcessInstanceConfigCommand;
+import com.everhomes.rest.portal.HandlerPublishCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +18,17 @@ public class DecorationPortalPublishHandler implements PortalPublishHandler {
     private ConfigurationProvider configurationProvider;
 
     @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String processInstanceConfig(String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
         String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
         JSONObject json = new JSONObject();
         if (!homeUrl.endsWith("/"))
@@ -35,7 +39,7 @@ public class DecorationPortalPublishHandler implements PortalPublishHandler {
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
         return actionData;
     }
 }

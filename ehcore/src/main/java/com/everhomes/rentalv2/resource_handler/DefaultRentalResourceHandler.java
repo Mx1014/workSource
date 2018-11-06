@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         Integer pageSize = Integer.MAX_VALUE;
         List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
                 cmd.getRentalSiteId(), new CrossShardListingLocator(), cmd.getBillStatus(), cmd.getVendorType(), pageSize, cmd.getStartTime(), cmd.getEndTime(),
-                null, null);
+                null, null,cmd.getPayChannel());
         if(null == bills){
             bills = new ArrayList<>();
         }
@@ -143,6 +144,7 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
         row.createCell(++i).setCellValue("使用详情");
         row.createCell(++i).setCellValue("预订人");
         row.createCell(++i).setCellValue("总价");
+        row.createCell(++i).setCellValue("支付类型");
         row.createCell(++i).setCellValue("支付方式");
         row.createCell(++i).setCellValue("订单状态");
     }
@@ -168,6 +170,12 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
             row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
         else
             row.createCell(++i).setCellValue("0");
+        //支付类型
+        PayChannel payChannel = PayChannel.fromCode(dto.getPayChannel());
+        if (null != payChannel)
+            row.createCell(++i).setCellValue(payChannel.getDescribe());
+        else
+            row.createCell(++i).setCellValue("");
         //支付方式
         if(null != dto.getVendorType())
             row.createCell(++i).setCellValue(VendorType.fromCode(dto.getVendorType()).getDescribe());
@@ -175,15 +183,18 @@ public class DefaultRentalResourceHandler implements RentalResourceHandler {
             row.createCell(++i).setCellValue("");
         //订单状态
         if(dto.getStatus() != null)
-            row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+            row.createCell(++i).setCellValue(statusToString(dto.getStatus(),dto.getPaidPrice()));
         else
             row.createCell(++i).setCellValue("");
 
     }
 
-    private String statusToString(Byte status) {
-
+    private String statusToString(Byte status, BigDecimal paidPrice) {
         SiteBillStatus siteBillStatus = SiteBillStatus.fromCode(status);
+        if (siteBillStatus == SiteBillStatus.FAIL && paidPrice.compareTo(new BigDecimal(0))>0)
+            return SiteBillStatus.FAIL_PAID.getDescribe();
+        else if (siteBillStatus == SiteBillStatus.FAIL)
+            return "已取消(未支付)";
         return null != siteBillStatus ? siteBillStatus.getDescribe() : "";
     }
 

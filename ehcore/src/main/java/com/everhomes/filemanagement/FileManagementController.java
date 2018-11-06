@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/fileManagement")
 public class FileManagementController extends ControllerBase {
@@ -172,6 +170,37 @@ public class FileManagementController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+ 
+	/**
+	 * <p>移动文件</p>
+	 * <b>URL: /fileManagement/moveFileContent</b>
+	 */
+	@RequestMapping("moveFileContent")
+	@RestReturn(String.class)
+	public RestResponse moveFileContent(MoveFileContentCommand cmd){
+		fileManagementService.moveFileContent(cmd);
+		return new RestResponse();
+	}
+
+    /**
+     * <p>根据后缀查询文件图标列表</p>
+     * <b>URL: /fileManagement/getFileIconList</b>
+     */
+    @RequestMapping("getFileIconList")
+    @RestReturn(GetFileIconListResponse.class)
+    public RestResponse getFileIconList(){
+        return new RestResponse(fileManagementService.getFileIconList());
+    }
+
+    /**
+     * <p>获取目录文件夹的树状结构</p>
+     * <b>URL: /fileManagement/listAllFloders</b>
+     */
+    @RequestMapping("listAllFloders")
+    @RestReturn(ListAllFlodersResponse.class)
+    public RestResponse listAllFloders(ListAllFlodersCommand cmd){
+        return new RestResponse(fileManagementService.listAllFloders(cmd));
     }
 
 }

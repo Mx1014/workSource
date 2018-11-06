@@ -50,6 +50,7 @@ import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateVacationBalancesCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.techpark.punch.PunchService;
+import com.everhomes.techpark.punch.PunchVacationBalanceService;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
@@ -76,6 +77,8 @@ public class PunchAdminController extends ControllerBase {
     private PunchService punchService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private PunchVacationBalanceService punchVacationBalanceService;
 //	/**
 //	 * <b>URL: /punch/addPunchTimeRule</b>
 //	 * <p>
@@ -933,24 +936,6 @@ public class PunchAdminController extends ControllerBase {
 
     /**
      * <p>
-     * 查询公司某部门/某人 考勤规则
-     * 已经废弃-by 2.5
-     * </p>
-     * <b>URL: /punch/getTargetPunchAllRule</b>
-     */
-    @Deprecated
-    @RequestMapping("getTargetPunchAllRule")
-    @RestReturn(value = GetTargetPunchAllRuleResponse.class)
-    public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
-        GetTargetPunchAllRuleResponse resp = punchService.getTargetPunchAllRule(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <p>
      * 设置公司某部门/某人 考勤规则
      * 已经废弃-by2.5
      * </p>
@@ -994,7 +979,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("testPunchDayRefresh")
     @RestReturn(value = String.class)
     public RestResponse testPunchDayRefresh(@Valid TestPunchDayRefreshCommand cmd) {
-        punchService.testDayRefreshLogs(cmd.getRunDate());
+        punchService.testDayRefreshLogs(cmd.getRunDate(), cmd.getOrgId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1111,7 +1096,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("listVacationBalances")
     @RestReturn(ListVacationBalancesResponse.class)
     public RestResponse listVacationBalances(ListVacationBalancesCommand cmd) {
-        return new RestResponse(punchService.listVacationBalances(cmd));
+        return new RestResponse(punchVacationBalanceService.listVacationBalances(cmd));
     }
 
     /**
@@ -1121,7 +1106,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("updateVacationBalances")
     @RestReturn(String.class)
     public RestResponse updateVacationBalances(UpdateVacationBalancesCommand cmd) {
-        punchService.updateVacationBalances(cmd);
+        punchVacationBalanceService.updateVacationBalancesAndSendMessage(cmd);
         return new RestResponse();
     }
 
@@ -1132,7 +1117,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("batchUpdateVacationBalances")
     @RestReturn(String.class)
     public RestResponse batchUpdateVacationBalances(BatchUpdateVacationBalancesCommand cmd) {
-        punchService.batchUpdateVacationBalances(cmd);
+        punchVacationBalanceService.batchUpdateVacationBalances(cmd);
         return new RestResponse();
     }
 
@@ -1143,7 +1128,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("listVacationBalanceLogs")
     @RestReturn(ListVacationBalanceLogsResponse.class)
     public RestResponse listVacationBalanceLogs(ListVacationBalanceLogsCommand cmd) {
-        return new RestResponse(punchService.listVacationBalanceLogs(cmd));
+        return new RestResponse(punchVacationBalanceService.listVacationBalanceLogs(cmd));
     }
 
     /**
@@ -1153,7 +1138,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("exportVacationBalances")
     @RestReturn(String.class)
     public RestResponse exportVacationBalances(ExportVacationBalancesCommand cmd) {
-        punchService.exportVacationBalances(cmd);
+        punchVacationBalanceService.exportVacationBalances(cmd);
         return new RestResponse();
     }
 
@@ -1164,7 +1149,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("importVacationBalances")
     @RestReturn(ImportFileTaskDTO.class)
     public RestResponse importVacationBalances(@RequestParam(value = "attachment") MultipartFile[] files, ImportVacationBalancesCommand cmd) {
-        ImportFileTaskDTO dto = punchService.importVacationBalances(files, cmd);
+        ImportFileTaskDTO dto = punchVacationBalanceService.importVacationBalances(files, cmd);
         return new RestResponse(dto);
     }
     

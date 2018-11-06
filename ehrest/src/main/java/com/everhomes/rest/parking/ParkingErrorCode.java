@@ -41,6 +41,19 @@ public interface ParkingErrorCode {
 
     int CAR_ENTRY_INFO_NOT_FOUND = 10033;
     
+    int PARAMTER_LOSE = 10034;
+
+    int PARAMTER_UNUSUAL = 10035;
+
+    int ORDER_UNUSUAL = 10036;
+
+    int FAIL_EXPORT_FILE = 10037;
+
+    int NO_WORK_FLOW_ENABLE = 10038;
+
+    int OBJECT_NO_FOUND = 10039;
+
+
     //------------------------vip 车位----------------------------
     int ERROR_RAISE_PARKING_LOCK = 10022; // 升起车锁失败
     int ERROR_DOWN_PARKING_LOCK = 10023; //  降下车锁失败
@@ -67,6 +80,16 @@ public interface ParkingErrorCode {
     int ERROR_DELETE_PARKING_CLEARANCE_OPERATOR = 10001;  //删除用户失败
     int ERROR_NO_WORK_FLOW_ENABLED = 10002;  //没有启用的工作流
     int ERROR_USER_ALREADY_IN_DATABASE = 10003;  //用户已添加
-
-
+    
+    
+    
+    // ------------------ 捷顺科技对接 ----------------------
+    String SCOPE_JIESHUN = "parking.jieshun";
+    int ERROR_FETCH_TOKEN = 10001;  //token获取失败
+    int ERROR_MAKE_MD5 = 10002;  //生成摘要失败
+    int ERROR_CURRENT_RECHARGE_TYPE_NOT_SUPPORTED = 10003;  //当前充值类型不支持
+    int ERROR_RECHARGE_BY_DAY_NOT_SUPPORTED = 10004;  //不支持按天计算yuqi金额
+    int ERROR_CARD_INFO_NOT_FOUND = 10005;  //未找到月卡信息
+    int ERROR_CARD_TYPES_NOT_FOUND = 10006;  //未获取到费率信息
+    int ERROR_CARD_FEE_ITEM_NOT_FOUND = 10007;  //未获取到月卡对应的费率信息
 }

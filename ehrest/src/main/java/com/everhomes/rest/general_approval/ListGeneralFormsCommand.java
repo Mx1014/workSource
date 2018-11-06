@@ -13,10 +13,13 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class ListGeneralFormsCommand {
+
 	private Long ownerId;
 	private String ownerType;
 	private Long moduleId;
 	private String moduleType;
+	private Long projectId;
+	private String projectType;
 
 	public Long getModuleId() {
 		return moduleId;
@@ -41,7 +44,22 @@ public class ListGeneralFormsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
- 
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
 
 	@Override
     public String toString() {

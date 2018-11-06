@@ -12,6 +12,8 @@ import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
+
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -147,7 +149,7 @@ public interface ParkingService {
 
     void delBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd);
 
-    void notifyParkingRechargeOrderPaymentV2(OrderPaymentNotificationCommand cmd);
+    void notifyParkingRechargeOrderPaymentV2(MerchantPaymentNotificationCommand cmd);
 
     void initPayeeAccount(MultipartFile[] files);
 
@@ -175,5 +177,13 @@ public interface ParkingService {
 
     void exportParkingCarVerifications(SearchParkingCarVerificationsCommand cmd, HttpServletResponse resp);
 
-    void notifyParkingRechargeOrderPaymentWechat(WechatPayNotifyCommand cmd);
+    void updateParkingUserNotice(UpdateUserNoticeCommand cmd);
+
+    CreateParkingGeneralOrderResponse createParkingTempGeneralOrder(CreateParkingTempOrderCommand cmd);
+
+	CreateParkingGeneralOrderResponse createParkingRechargeGeneralOrder(CreateParkingRechargeOrderCommand cmd);
+
+	GetInvoiceUrlResponse getInvoiceUrl(GetInvoiceUrlCommand cmd);
+
+	void notifyParkingRechargeOrderPayment(PayNotifyCommand cmd);
 }

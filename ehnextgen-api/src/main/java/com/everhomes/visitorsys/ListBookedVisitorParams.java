@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>endVisitTime: (选填)实际到访企业/公司时间结束，访客管理用</li>
  * <li>pageAnchor: (选填)锚点</li>
  * <li>pageSize: (选填)每页的数量</li>
+ * <li>idNumber: (选填)证件号</li>
  * </ul>
  */
 public class ListBookedVisitorParams{
@@ -43,6 +44,7 @@ public class ListBookedVisitorParams{
     private Long endVisitTime;
     private Long pageAnchor;
     private Integer pageSize;
+    private String idNumber;
 
     //统计所用
     private Long startVisitorCountTime;
@@ -279,6 +281,14 @@ public class ListBookedVisitorParams{
 
     public void setVisitorPhone(String visitorPhone) {
         this.visitorPhone = visitorPhone;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     @Override

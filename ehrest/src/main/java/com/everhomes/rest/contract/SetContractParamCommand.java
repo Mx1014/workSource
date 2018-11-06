@@ -196,8 +196,8 @@ public class SetContractParamCommand {
     public void setReceivableUnit(Byte receivableUnit) {
         this.receivableUnit = receivableUnit;
     }
-    
-	@Override
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

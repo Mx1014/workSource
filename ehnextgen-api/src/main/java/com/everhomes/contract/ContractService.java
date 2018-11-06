@@ -2,12 +2,13 @@
 package com.everhomes.contract;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 import com.everhomes.rest.contract.*;
 import com.everhomes.rest.openapi.OrganizationDTO;
+import com.everhomes.rest.varField.FieldDTO;
 
 public interface ContractService {
 	String CONTRACT_PREFIX = "contract-";
@@ -37,8 +38,7 @@ public interface ContractService {
 	ContractDetailDTO createPaymentContract(CreatePaymentContractCommand cmd);
 	List<OrganizationDTO> getUserGroups(GetUserGroupsCommand cmd);
     ListContractsBySupplierResponse listContractsBySupplier(ListContractsBySupplierCommand cmd);
-    //add by jm.ding
-	void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response);
+    //合同模板
 	ContractTemplateDTO addContractTemplate(AddContractTemplateCommand cmd);
 	ContractTemplateDTO updateContractTemplate(UpdateContractTemplateCommand cmd);
 	ListContractTemplatesResponse searchContractTemplates(listContractTemplateCommand cmd);
@@ -47,7 +47,6 @@ public interface ContractService {
 	void deleteContractTemplate(DeleteContractTemplateCommand cmd);
 	List<Long> checkPrintPreviewprivilege(PrintPreviewPrivilegeCommand cmd);
 
-    //add by tangcen
 	DurationParamDTO getDuration(GetDurationParamCommand cmd);
 
 	default Byte filterAptitudeCustomer(FilterAptitudeCustomerCommand cmd){
@@ -67,6 +66,13 @@ public interface ContractService {
 
 	public EnterpriseContractDTO EnterpriseContractDetail(EnterpriseContractCommand cmd);
 	void deletePrintContractTemplate(SetPrintContractTemplateCommand cmd);
+
+	List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd);
+
 	void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd);
+	//导出对接下载中心
+	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
+	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
+	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
    
 }

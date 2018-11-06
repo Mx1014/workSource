@@ -103,7 +103,11 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/visitorsys" -d '
                  "statsWeek" : {
                     "type": "string",
                     "index": "not_analyzed"
-                 }
+                 },
+                 "idNumber" : {
+                     "type": "string",
+                     "index": "not_analyzed"
+                  }
 
             }
           }

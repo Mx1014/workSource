@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.news.News;
 import com.everhomes.news.NewsProvider;
 import com.everhomes.news.NewsService;
@@ -28,7 +30,6 @@ import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.IdNameDTO;
-import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.news.GetNewsDetailInfoCommand;
@@ -76,6 +77,9 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	@Autowired
 	private CommunityProvider communityProvider;
 	
+	@Autowired
+	ServiceModuleService serviceModuleService;
+
 	@Override
 	public CreateNewsResponse createNews(CreateOpenNewsCommand cmd) {
 
@@ -175,7 +179,7 @@ public class NewsOpenServiceImpl implements NewsOpenService {
 	public List<TagDTO> listNewsTags(ListNewsTagsCommand cmd) {
 		Integer namespaceId = getNamespaceId();
 		Long categoryId = getCategoryId(namespaceId, cmd.getCategoryId());
-		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, categoryId);
+		List<NewsTag> allTags = newsProvider.listNewsTag(getNamespaceId(), null, null, null, null, null, null, categoryId);
 		if (CollectionUtils.isEmpty(allTags)) {
 			return null;
 		}

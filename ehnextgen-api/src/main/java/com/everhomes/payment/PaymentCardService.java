@@ -4,35 +4,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.payment.ApplyCardCommand;
-import com.everhomes.rest.payment.CardInfoDTO;
-import com.everhomes.rest.payment.CardIssuerDTO;
-import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
-import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
-import com.everhomes.rest.payment.GetCardPaidResultCommand;
-import com.everhomes.rest.payment.GetCardPaidResultDTO;
-import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
-import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
-import com.everhomes.rest.payment.ListCardInfoCommand;
-import com.everhomes.rest.payment.ListCardIssuerCommand;
-import com.everhomes.rest.payment.ListCardTransactionsCommand;
-import com.everhomes.rest.payment.ListCardTransactionsResponse;
-import com.everhomes.rest.payment.NotifyEntityCommand;
-import com.everhomes.rest.payment.NotifyEntityDTO;
-import com.everhomes.rest.payment.RechargeCardCommand;
-import com.everhomes.rest.payment.ResetCardPasswordCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
-import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
-import com.everhomes.rest.payment.SearchCardTransactionsCommand;
-import com.everhomes.rest.payment.SearchCardTransactionsResponse;
-import com.everhomes.rest.payment.SearchCardUsersCommand;
-import com.everhomes.rest.payment.SearchCardUsersResponse;
-import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
-import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
-import com.everhomes.rest.payment.SetCardPasswordCommand;
-import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
+import com.everhomes.rest.payment.*;
 
 public interface PaymentCardService {
 
@@ -75,4 +50,20 @@ public interface PaymentCardService {
     void exportCardTransactions(SearchCardTransactionsCommand cmd,HttpServletResponse response);
     
     void updateCardRechargeOrder(UpdateCardRechargeOrderCommand cmd);
+
+    void payNotify(OrderPaymentNotificationCommand cmd);
+
+    void refundNotify(OrderPaymentNotificationCommand cmd);
+
+    PaymentCardHotlineDTO getHotline(GetHotlineCommand cmd);
+
+    void updateHotline(UpdateHotlineCommand cmd);
+
+    void freezeCard(FreezeCardCommand cmd);
+
+    void unbunleCard(Long cardId);
+
+    CardInfoDTO getCardInfo(Long cardId);
+
+    void refundOrderV2(Long orderId);
 }

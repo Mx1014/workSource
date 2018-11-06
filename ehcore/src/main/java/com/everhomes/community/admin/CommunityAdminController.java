@@ -118,7 +118,26 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/community/updateCommunityPartial</b>
+     * <p>更新小区部分信息，传了那个字段更新那个字段</p>
+     */
+    @RequestMapping("updateCommunityPartial")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityPartial(@Valid UpdateCommunityPartialAdminCommand cmd) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        this.communityService.updateCommunityPartial(cmd);
+
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/community/getCommunityById</b>
      * <p>根据小区id获取小区信息</p>
@@ -236,6 +255,7 @@ public class CommunityAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/community/updateBuilding</b>
      */
+    
 	@RequestMapping("updateBuilding")
 	@RestReturn(value = BuildingDTO.class)
 	public RestResponse updateBuilding(UpdateBuildingAdminCommand cmd) {
@@ -359,7 +379,7 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /admin/community/exportBuildingByCommunityId</b>
      * <p>后台管理 楼栋列表</p>
@@ -438,7 +458,20 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/community/qryCommunityUserAllByUserId</b>
+     * <p>查询用户所在的地址</p>
+     */
+    @RequestMapping("qryCommunityUserAllByUserId")
+    @RestReturn(value=CommunityUserAddressDTO.class)
+    public RestResponse qryCommunityUserAllByUserId(@Valid QryCommunityUserAllByUserIdCommand cmd) {
+
+        RestResponse response =  new RestResponse(communityService.qryCommunityUserAllByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     /**
      * <b>URL: /admin/community/listOwnerBycommunityId</b>
      * <p>查询未注册的用户</p>
@@ -535,6 +568,22 @@ public class CommunityAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /admin/community/createCommunities</b>
+     * <p>
+     * 创建小区
+     * </p>
+     */
+    @RequestMapping("createCommunities")
+    @RestReturn(value = CreateCommunitiesResponse.class)
+    public RestResponse createCommunities(CreateCommunitiesCommand cmd) {
+        CreateCommunitiesResponse result = communityService.createCommunities(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /admin/community/importCommunity</b>
@@ -659,6 +708,23 @@ public class CommunityAdminController extends ControllerBase {
 
 
     /**
+     * <b>URL: /admin/community/changeOrganizationCommunities</b>
+     * <p>更改园区管理公司</p>
+     */
+    @RequestMapping("changeOrganizationCommunities")
+    @RestReturn(String.class)
+    public RestResponse changeOrganizationCommunities(@Valid ChangeOrganizationCommunitiesCommand cmd){
+        communityService.changeOrganizationCommunities(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+
+    /**
      * <b>URL: /admin/community/checkUserAuditing</b>
      * <p>判断当前用户是否有审核的权限</p>
      */
@@ -671,7 +737,7 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /admin/community/importBuildingData</b>
      * <p>导入楼栋信息excel</p>
@@ -693,7 +759,7 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     }
 
-    
+
     /**
      * <b>URL: /admin/community/exportBuildingByKeywords</b>
      * <p>后台管理 楼栋列表</p>
@@ -707,7 +773,7 @@ public class CommunityAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /admin/community/exportApartmentsInCommunity</b>
      * <p>导出项目下的房源信息</p>

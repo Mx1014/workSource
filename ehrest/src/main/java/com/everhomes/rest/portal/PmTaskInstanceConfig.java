@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>feeModel: 费用清单模式 0 关闭 1 开启</li>
  *     <li>type: 样式</li>
  *     <li>url: url</li>
+ *     <li>appAgentSwitch: app代发开关 0 关闭 1 开启</li>
+ *     <li>bgAgentSwitch: 后台代发开关 0 关闭 1 开启</li>
  * </ul>
  */
 public class PmTaskInstanceConfig {
@@ -23,6 +25,12 @@ public class PmTaskInstanceConfig {
 	private String type;
 
 	private String url;
+
+	private	Byte appAgentSwitch;
+
+	private Byte bgAgentSwitch;
+
+	private Long appId;
 
 	public Long getTaskCategoryId() {
 		return taskCategoryId;
@@ -62,6 +70,30 @@ public class PmTaskInstanceConfig {
 
 	public void setFeeModel(Byte feeModel) {
 		this.feeModel = feeModel;
+	}
+
+	public Byte getAppAgentSwitch() {
+		return appAgentSwitch;
+	}
+
+	public void setAppAgentSwitch(Byte appAgentSwitch) {
+		this.appAgentSwitch = appAgentSwitch;
+	}
+
+	public Byte getBgAgentSwitch() {
+		return bgAgentSwitch;
+	}
+
+	public void setBgAgentSwitch(Byte bgAgentSwitch) {
+		this.bgAgentSwitch = bgAgentSwitch;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 
 	@Override

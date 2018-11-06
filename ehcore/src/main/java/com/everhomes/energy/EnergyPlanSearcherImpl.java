@@ -173,7 +173,7 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
         List<EnergyPlan> plans = energyPlanProvider.listEnergyPlans(pageAnchor, pageSize);
         while (plans != null && plans.size() > 0) {
             bulkUpdate(plans);
-            pageAnchor += (plans.size() + 1);
+            pageAnchor = plans.get(plans.size() - 1).getId() + 1;
             plans = energyPlanProvider.listEnergyPlans(pageAnchor, pageSize);
         }
         this.optimize(1);
@@ -207,13 +207,15 @@ public class EnergyPlanSearcherImpl extends AbstractElasticSearch implements Ene
 
         if(cmd.getStartTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("startTime");
-            rf.gt(cmd.getStartTime());
+            //rf.gt(cmd.getStartTime());
+            rf.gte(cmd.getStartTime());//修复缺陷 #39719 【标准版全量】左邻 能耗管理 计划管理 查询栏 by ycx
             fb = FilterBuilders.andFilter(fb, rf);
         }
 
         if(cmd.getEndTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("endTime");
-            rf.lt(cmd.getEndTime());
+            //rf.lt(cmd.getEndTime());
+            rf.lte(cmd.getEndTime());//修复缺陷 #39719 【标准版全量】左邻 能耗管理 计划管理 查询栏 by ycx
             fb = FilterBuilders.andFilter(fb, rf);
         }
 

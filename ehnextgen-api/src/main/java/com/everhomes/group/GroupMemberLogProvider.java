@@ -13,6 +13,7 @@ public interface GroupMemberLogProvider {
 
     List<GroupMemberLog> listGroupMemberLogByGroupId(Long groupId, String keyword, Long from, int pageSize);
 
+    List<GroupMemberLog> listGroupMemberLogByUserId(Long userId, Byte status);
     void createGroupMemberLog(GroupMemberLog groupMemberLog);
 
     List<GroupMemberLog> queryGroupMemberLog(String userInfoKeyword,String identifierToken, String communityKeyword, List<Long> communityIds, Byte status, CrossShardListingLocator locator, int pageSize);

@@ -29,6 +29,10 @@ import java.sql.Timestamp;
  * <li>enterpriseName: (选填)公司名称，园区访客必填</li>
  * <li>officeLocationId: (选填)办公地点id,公司访客必填</li>
  * <li>officeLocationName: (选填)办公地点,公司访客必填</li>
+ * <li>doorAccessAuthDurationType: 访客授权有效期种类,0 天数，1 小时数</li>
+ * <li>doorAccessAuthDuration: 访客授权有效期</li>
+ * <li>doorAccessEnableAuthCount: 访客授权次数开关 0 关 1 开</li>
+ * <li>doorAccessAuthCount: 访客授权次数</li>
  * </ul>
  */
 public class BaseVisitorDTO extends BaseVisitorsysCommand{
@@ -56,6 +60,15 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
     private Long officeLocationId;
     private String officeLocationName;
     private Timestamp createTime;
+
+    private Byte doorAccessAuthDurationType;
+    private Integer doorAccessAuthDuration;
+    private Byte doorAccessEnableAuthCount;
+    private Integer doorAccessAuthCount;
+
+    private String idNumber;
+
+    private Long doorAccessEndTime;
 
     public Long getId() {
         return id;
@@ -199,6 +212,54 @@ public class BaseVisitorDTO extends BaseVisitorsysCommand{
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Byte getDoorAccessAuthDurationType() {
+        return doorAccessAuthDurationType;
+    }
+
+    public void setDoorAccessAuthDurationType(Byte doorAccessAuthDurationType) {
+        this.doorAccessAuthDurationType = doorAccessAuthDurationType;
+    }
+
+    public Integer getDoorAccessAuthDuration() {
+        return doorAccessAuthDuration;
+    }
+
+    public void setDoorAccessAuthDuration(Integer doorAccessAuthDuration) {
+        this.doorAccessAuthDuration = doorAccessAuthDuration;
+    }
+
+    public Byte getDoorAccessEnableAuthCount() {
+        return doorAccessEnableAuthCount;
+    }
+
+    public void setDoorAccessEnableAuthCount(Byte doorAccessEnableAuthCount) {
+        this.doorAccessEnableAuthCount = doorAccessEnableAuthCount;
+    }
+
+    public Integer getDoorAccessAuthCount() {
+        return doorAccessAuthCount;
+    }
+
+    public void setDoorAccessAuthCount(Integer doorAccessAuthCount) {
+        this.doorAccessAuthCount = doorAccessAuthCount;
+    }
+
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public Long getDoorAccessEndTime() {
+        return doorAccessEndTime;
+    }
+
+    public void setDoorAccessEndTime(Long doorAccessEndTime) {
+        this.doorAccessEndTime = doorAccessEndTime;
     }
 
     @Override

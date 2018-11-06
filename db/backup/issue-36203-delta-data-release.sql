@@ -53,3 +53,6 @@ INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name
 VALUES ((@id := @id + 1),0,'我的报名','我的报名',2,2,3,1,1,11,2,'',1,1);
 INSERT INTO `eh_personal_center_settings` (id, namespace_id, name, function_name, region,group_type, sort_num, showable, editable, type, status, icon_uri, create_uid, update_uid)
 VALUES ((@id := @id + 1),0,'设置','设置',2,3,1,1,0,12,2,'',1,1);
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`)
+VALUES ('personal.show.private.flag', 'true', '个人中心是否展示隐私设置', '999929', NULL, '1');

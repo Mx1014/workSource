@@ -1,7 +1,10 @@
 package com.everhomes.workReport;
 
-import com.everhomes.rest.workReport.WorkReportDTO;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface WorkReportProvider {
@@ -17,6 +20,8 @@ public interface WorkReportProvider {
     WorkReport getWorkReportByTemplateId(Integer namespaceId, Long moduleId, Long ownerId, String ownerType, Long templateId);
 
     List<WorkReport> listWorkReports(Long pageAnchor, Integer pageSize, Long organizationId, String ownerType, Long moduleId, Byte status);
+
+    List<WorkReport> queryWorkReports(ListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 
     void disableWorkReportByFormOriginId(Long formOriginId, Long moduleId, String moduleType);
 
@@ -34,4 +39,13 @@ public interface WorkReportProvider {
 
     List<WorkReportTemplate> listWorkReportTemplates(Long moduleId);
 
+    Long createWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    void deleteWorkReportScopeMsg();
+
+    void deleteWorkReportScopeMsgByReportId(Long reportId);
+
+    void updateWorkReportScopeMsg(WorkReportScopeMsg msg);
+
+    List<WorkReportScopeMsg> listWorkReportScopeMsgByTime(java.sql.Timestamp startTime, java.sql.Timestamp endTime);
 }

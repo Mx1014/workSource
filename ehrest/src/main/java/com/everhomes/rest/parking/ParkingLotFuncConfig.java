@@ -16,6 +16,8 @@ import java.util.List;
  * <li>enableMonthCard:  月卡申请功能是否启用, 0：不启用，1：启用 {@link com.everhomes.rest.parking.ParkingConfigFlag}</li>
  * <li>monthCardFlow:  当前月卡工作流标识，参考 {@link com.everhomes.rest.parking.ParkingRequestFlowType}</li>
  * <li>flowModeList: 月卡模式列表， 参考{@link com.everhomes.rest.parking.ParkingRequestFlowType}</li>
+ * <li>enableNotice: 用户须知功能是否启用，0：不启用，1：启用</li>
+ * <li>enableInvoice: 发票功能是否启用，0：不启用，1：启用</li>
  *</ul>
  */
 
@@ -35,6 +37,10 @@ public class ParkingLotFuncConfig {
     private Byte monthCardFlow;
 
     private List<Byte> flowModeList;
+    
+    private String defaultData;
+    
+    private String defaultPlate;
 
     public String getOwnerType() {
         return ownerType;
@@ -100,7 +106,24 @@ public class ParkingLotFuncConfig {
         this.flowModeList = flowModeList;
     }
 
-    @Override
+    
+    public String getDefaultData() {
+		return defaultData;
+	}
+
+	public void setDefaultData(String defaultData) {
+		this.defaultData = defaultData;
+	}
+
+	public String getDefaultPlate() {
+		return defaultPlate;
+	}
+
+	public void setDefaultPlate(String defaultPlate) {
+		this.defaultPlate = defaultPlate;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

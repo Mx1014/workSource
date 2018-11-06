@@ -1,6 +1,5 @@
 package com.everhomes.workReport;
 
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.workReport.*;
 
 public interface WorkReportService {
@@ -10,6 +9,8 @@ public interface WorkReportService {
     void deleteWorkReport(WorkReportIdCommand cmd);
 
     WorkReportDTO updateWorkReport(UpdateWorkReportCommand cmd);
+
+    WorkReportDTO getWorkReport(WorkReportIdCommand cmd);
 
     ListWorkReportsResponse listWorkReports(ListWorkReportsCommand cmd);
 
@@ -39,9 +40,9 @@ public interface WorkReportService {
 
     ListWorkReportsValResponse listReceivedWorkReportsVal(ListWorkReportsValCommand cmd);
 
-    Integer countUnReadWorkReportsVal();
+    Integer countUnReadWorkReportsVal(WorkReportOrgIdCommand cmd);
 
-    void markWorkReportsValReading();
+    void markWorkReportsValReading(WorkReportOrgIdCommand cmd);
 
     WorkReportValDTO getWorkReportValDetail(WorkReportValIdCommand cmd);
 
@@ -50,4 +51,12 @@ public interface WorkReportService {
     Long getUserDetailId(Long userId, Long ownerId);
 
     String getUserAvatar(Long userId);
+
+    void syncWorkReportReceiver();
+
+    void updateWorkReportReceiverAvatar();
+
+    void updateWorkReportValAvatar();
+
+//    void updateWorkReportReceiverReportId();
 }

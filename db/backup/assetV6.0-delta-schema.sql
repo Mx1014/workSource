@@ -1,0 +1,1 @@
+alter table eh_payment_bills modify column noticeTel varchar(255) COMMENT '催缴手机号码';

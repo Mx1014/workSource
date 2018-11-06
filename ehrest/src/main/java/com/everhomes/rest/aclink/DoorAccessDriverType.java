@@ -13,9 +13,9 @@ package com.everhomes.rest.aclink;
  * @author janson
  *
  */
-public enum DoorAccessDriverType { 
-    ZUOLIN("zuolin"), LINGLING("lingling"), PHONE_VISIT("phone_visit"), ZUOLIN_V2("zuolin_v2"), HUARUN_ANGUAN("huarun_anguan"), WANG_LONG("wanglong"), BUS("bus"),
-    UCLBRT("uclbrt");
+public enum DoorAccessDriverType {
+    ZUOLIN("zuolin"), LINGLING("lingling"), PHONE_VISIT("phone_visit"), ZUOLIN_V2("zuolin_v2"), HUARUN_ANGUAN("huarun_anguan"), WANG_LONG("wanglong"),
+    UCLBRT("uclbrt") ,BUS("bus");
 
     private String code;
     private DoorAccessDriverType(String code) {

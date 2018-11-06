@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  *<li>refundTime:退款时间</li>
  *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
  *<li>signupStatusText:报名状态text</li>
+ * <li>activityName: 活动名称</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -74,8 +75,26 @@ public class SignupInfoDTO {
     private Timestamp refundTime;
 	private Byte status;
 	private String signupStatusText;
+	private String activitySubject;
+	private String activityName;
 
-    public String getRealName() {
+	public String getActivityName() {
+		return activityName;
+	}
+
+	public void setActivityName(String activityName) {
+		this.activityName = activityName;
+	}
+
+	public String getActivitySubject() {
+		return activitySubject;
+	}
+
+	public void setActivitySubject(String activitySubject) {
+		this.activitySubject = activitySubject;
+	}
+
+	public String getRealName() {
         return realName;
     }
 

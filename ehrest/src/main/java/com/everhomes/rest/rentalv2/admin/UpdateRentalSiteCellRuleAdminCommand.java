@@ -19,6 +19,7 @@ import java.util.List;
  * <li>initiatePrice: 园区客户起步后价格</li>
  * <li>counts: 可预约数量</li>
  * <li>loopType: 循环方式 参考{@link com.everhomes.rest.rentalv2.LoopType}</li>
+ * <li>wholeDayFlag: 是否修改全天的单元格(按小时预约)</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
  * <li>orgMemberOriginalPrice: 原价-如果打折则有(企业内部价)</li>
@@ -49,6 +50,7 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	private java.lang.Double counts;
 	private Byte loopType;
+	private Byte wholeDayFlag;
 
 	private Long beginDate;
 	private Long endDate;
@@ -239,5 +241,13 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	public void setUserPriceType(Byte userPriceType) {
 		this.userPriceType = userPriceType;
+	}
+
+	public Byte getWholeDayFlag() {
+		return wholeDayFlag;
+	}
+
+	public void setWholeDayFlag(Byte wholeDayFlag) {
+		this.wholeDayFlag = wholeDayFlag;
 	}
 }

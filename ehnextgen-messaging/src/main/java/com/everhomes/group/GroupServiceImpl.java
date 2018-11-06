@@ -19,6 +19,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -88,6 +89,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
@@ -211,7 +213,12 @@ public class GroupServiceImpl implements GroupService {
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getDescription());
+        cmd.setDescription(content);
+        //敏感词过滤
         filter(cmd);
+
     	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
@@ -571,6 +578,10 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupDTO updateGroup(UpdateGroupCommand cmd) {
         CreateGroupCommand createGroupCommand = ConvertHelper.convert(cmd, CreateGroupCommand.class);
+        //xss过滤
+        String content = XssCleaner.clean(cmd.getDescription());
+        cmd.setDescription(content);
+
         filter(createGroupCommand);
         User operator = UserContext.current().getUser();
         long operatorUid = operator.getId();
@@ -1076,10 +1087,10 @@ public class GroupServiceImpl implements GroupService {
 			if (g1.getCreatorUid().longValue() != operatorId && g2.getCreatorUid().longValue() == operatorId) {
 				return 1;
 			}
-			if (RoleConstants.ResourceAdmin == g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin != g2.getMemberRole()) {
+			if (Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && !Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return -1;
 			}
-			if (RoleConstants.ResourceAdmin != g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin == g2.getMemberRole()) {
+			if (!Long.valueOf(RoleConstants.ResourceAdmin).equals(g1.getMemberRole()) && Long.valueOf(RoleConstants.ResourceAdmin).equals(g2.getMemberRole())) {
 				return 1;
 			}
 			if (g1.getJoinTime().getTime() > g2.getJoinTime().getTime()) {
@@ -4655,6 +4666,120 @@ public class GroupServiceImpl implements GroupService {
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
+    /**
+     * 开启或者关闭工作台发消息
+     * @param uid
+     * @param content
+     * @param openOrCloseType
+     */
+    @Override
+    public void workBenchSendMessageToUser(Long uid , String content , String openOrCloseType){
+        //首先需要进行非空校验
+        if(uid != null && !StringUtils.isEmpty(content) && !StringUtils.isEmpty(openOrCloseType)){
+            //说明传过来的参数都不为空，那么我们才能进行发送消息
+            //接下来我们需要判断我们现在做的操作是开启工作台还是关闭工作台，这个需要根据我们传进来的openOrCloseType字段，来进行判断
+            //根据uid来查询eh_organization_members表，然后拿到所有的公司的id
+//            List<Long> orgIdList = organizationProvider.findOrganizationIdListByTargetId(uid);
+//            boolean openWorkBench = false;
+            if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode())){
+                //说明我们需要做的是开启工作台
+                //接下来我们需要做的是查询该员工所在的公司是否已经开启了工作台，如果都没有开启工作台，那么我们就给该客户发消息说将要开启工作台，如果
+                //只要存在一个公司已经开启了工作台，那么我们就不需要给该用户发消息了
+                //接下来进行非空校验
+//                if(!CollectionUtils.isEmpty(orgIdList)){
+                    //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
+                    /*for(Long lon : orgIdList){
+                        //接下来根据每一个公司id来查询eh_organizations 表中的工作台（work_platform_flag）是否是1,1-表示的是已经开启了工作台，0-表示的是没有开启工作台
+                        Organization organization = organizationProvider.findOrganizationById(lon);
+                        if(organization.getWorkPlatformFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                            //说明该公司已经开启了工作台，那么我们就不需要给该员工发送将要开启工作台的消息了
+                            //直接跳出
+                            openWorkBench = true;
+                            break;
+                        }
+                        //说明该公司之前是没有开启工作台，那么我们就直接continue操作，进行第二次循环，目的是循环完所有的公司，如果都是没有开启工作台，那么我们就给该
+                        //用户进行发送消息，说将要开启工作台
+                        continue;
+                    }*/
+//                    if(!openWorkBench){
+                        //说明该员工所在的公司之前都没有开启工作台，那么我们就该该员工发送消息，说将要开启工作台
+                    //在这里是这样设置的，不管是开启工作台还是关闭工作台都需要分别发送两条消息，一条是带有meta_object_type的，一条是不带有meta_object_type的
+                    //首先我们来发送一条不带有meta_object_type的消息
+/*
+                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto.setBody(content);
+                messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+//                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());*/
+                //再发送一条带有meta_object_type的消息
+                MessageDTO messageDto1 = new MessageDTO();
+                messageDto1.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto1.setSenderUid(User.SYSTEM_UID);
+                messageDto1.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                messageDto1.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto1.setBody(content);
+                messageDto1.setMetaAppId(AppConstants.APPID_GROUP);
+                messageDto1.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_OPEN.getCode());
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uid.toString(), messageDto1, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                    }
+
+            }else if(openOrCloseType.equals(MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode())){
+                //说明我们需要做的是关闭工作台
+                //接下来对orgIdList集合进行非空校验
+//                if(!CollectionUtils.isEmpty(orgIdList)){
+                //说明查询到的公司的id的集合不为空，那么我们采用forEach循环进行遍历
+                /*for(Long lon : orgIdList){
+                    //接下来根据每一个公司id来查询eh_organizations 表中的工作台（work_platform_flag）是否是1,1-表示的是已经开启了工作台，0-表示的是没有开启工作台
+                    Organization organization = organizationProvider.findOrganizationById(lon);
+                    if(organization.getWorkPlatformFlag() == TrueOrFalseFlag.TRUE.getCode()){
+                        //说明该公司已经开启了工作台，那么我们就不需要给该员工发送将要开启工作台的消息了
+                        //直接跳出
+                        openWorkBench = true;
+                        break;
+                    }
+                    //说明该公司之前是没有开启工作台，那么我们就直接continue操作，进行第二次循环，目的是循环完所有的公司，如果都是没有开启工作台，那么我们就给该
+                    //用户进行发送消息，说将要开启工作台
+                    continue;
+                }*/
+//                    if(openWorkBench == true){
+                //说明该员工所在的公司之前都已经开启工作台，那么我们就该该员工发送消息，说将要关闭工作台
+
+/*                MessageDTO messageDto = new MessageDTO();
+                messageDto.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto.setSenderUid(User.SYSTEM_UID);
+                messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto.setBody(content);
+                messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+//                messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());*/
+
+                MessageDTO messageDto1 = new MessageDTO();
+                messageDto1.setAppId(AppConstants.APPID_MESSAGING);
+                messageDto1.setSenderUid(User.SYSTEM_UID);
+                messageDto1.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+                messageDto1.setBodyType(MessageBodyType.TEXT.getCode());
+                messageDto1.setBody(content);
+                messageDto1.setMetaAppId(AppConstants.APPID_GROUP);
+                messageDto1.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.WORK_BENCH_FLAG_CLOSE.getCode());
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                        uid.toString(), messageDto1, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+//                    }
+
+//                }
+
+            }
+        }
+    }
+
+
     private void sendSystemMessageToUser(Long uid, String content, Map<String, String> meta) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -4748,6 +4873,15 @@ public class GroupServiceImpl implements GroupService {
         
         for(Long userId: members) {
             sendSystemMessageToUser(userId, notifyTextForApplicant, null);
+
+            //发一条消息通知客户端
+            /*Map<String, String> meta = meta = new HashMap<String, String>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.GROUP_TALK_DISSOLVED.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(null));
+            sendSystemMessageToUser(userId, notifyTextForApplicant, meta);*/
+
+            //发一条消息通知客户端
+            sendGroupNotificationToIncludeUser(group.getId(), userId, notifyTextForApplicant, MetaObjectType.GROUP_TALK_DISSOLVED, null);
         }
     }
     
@@ -5886,7 +6020,8 @@ public class GroupServiceImpl implements GroupService {
 		});
 
 		// 发送推荐帖
-        recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
+        //不需要发送推荐帖
+//         recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 
         // 审核group成功事件
         LocalEventBus.publish(event -> {

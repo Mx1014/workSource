@@ -8,5 +8,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetModuleAppMappings;
  */
 
 public class AssetModuleAppMapping extends EhAssetModuleAppMappings {
-    private static final long serialVersionUID = -8171012916421029431L;
+
+	private static final long serialVersionUID = -8171012916421029431L;
+	
 }

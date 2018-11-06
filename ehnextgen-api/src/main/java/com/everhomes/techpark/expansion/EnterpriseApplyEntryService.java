@@ -1,6 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.techpark.expansion.OpenCustomRequestFormCommand;
 import com.everhomes.rest.techpark.expansion.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -59,5 +60,13 @@ public interface EnterpriseApplyEntryService {
 	String getSourceTypeName(String type);
 
 	void exportApplyEntrys(ListEnterpriseApplyEntryCommand cmd, HttpServletResponse resp);
-	
+
+	LeaseFormRequest getFormRequestByCommunityId(Integer namespaceId,Long communityId,String sourceType,Long categoryId);
+
+	void openCustomRequestForm(OpenCustomRequestFormCommand cmd);
+
+	void closeCustomRequestForm(UpdateLeasePromotionRequestFormCommand cmd);
+
+	List<Long> transformToCustomer(TransformToCustomerCommand cmd);
+
 }

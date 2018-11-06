@@ -1,6 +1,5 @@
 package com.everhomes.rest.techpark.punch;
 
-import com.everhomes.rest.techpark.punch.PunchStatus;
 /**
  * <ul>
  * <li>PAIBAN(0): 排班 </li>
@@ -19,14 +18,16 @@ public enum PunchRuleType {
     public byte getCode() {
         return this.code;
     }
-    
-    public static PunchRuleType fromCode(byte code) {
-        for(PunchRuleType t : PunchRuleType.values()) {
+
+    public static PunchRuleType fromCode(Byte code) {
+        if (code == null) {
+            return null;
+        }
+        for (PunchRuleType t : PunchRuleType.values()) {
             if (t.code == code) {
                 return t;
             }
         }
-        
         return null;
     }
 }

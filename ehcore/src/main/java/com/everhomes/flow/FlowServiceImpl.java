@@ -21,13 +21,21 @@ import com.everhomes.flow.nashornfunc.NashornScriptConfigExtractor;
 import com.everhomes.flow.nashornfunc.NashornScriptConfigValidator;
 import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.flow.nashornfunc.NashornScriptValidator;
-import com.everhomes.flow.node.*;
+import com.everhomes.flow.node.FlowGraphNodeCondition;
+import com.everhomes.flow.node.FlowGraphNodeEnd;
+import com.everhomes.flow.node.FlowGraphNodeNormal;
+import com.everhomes.flow.node.FlowGraphNodeStart;
+import com.everhomes.flow.node.FlowGraphNodeSubFlow;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.gogs.*;
+import com.everhomes.gogs.GogsCommit;
+import com.everhomes.gogs.GogsRawFileParam;
+import com.everhomes.gogs.GogsRepo;
+import com.everhomes.gogs.GogsRepoType;
+import com.everhomes.gogs.GogsService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -52,7 +60,13 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -71,10 +85,22 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
+import com.everhomes.util.MD5Utils;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.ValidatorUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +122,16 @@ import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
@@ -263,6 +298,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowServiceMappingProvider flowServiceMappingProvider;
 
+    @Autowired
+    private FlowKvConfigProvider flowKvConfigProvider;
+
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -306,6 +344,7 @@ public class FlowServiceImpl implements FlowService {
         obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
         obj.setValidationStatus(FlowValidationStatus.UNKNOWN.getCode());
         obj.setStatus(FlowStatusType.CONFIG.getCode());
+        obj.setConfigStatus(FlowStatusType.CONFIG.getCode());
         obj.setOrganizationId(cmd.getOrgId());
         obj.setNamespaceId(cmd.getNamespaceId());
         obj.setProjectType(cmd.getProjectType() != null ? cmd.getProjectType() : EntityType.COMMUNITY.getCode());
@@ -375,7 +414,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowNode == null) {
                     return null;
                 }
-                if (flowNode.getFlowMainId().equals(0l)) {
+                if (flowNode.getFlowMainId().equals(0L)) {
                     return null;
                 }
                 return getFlowByEntity(flowNode.getFlowMainId(), FlowEntityType.FLOW, ++loop);
@@ -384,7 +423,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowButton == null) {
                     return null;
                 }
-                if (flowButton.getFlowMainId().equals(0l)) {
+                if (flowButton.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowButton.getFlowNodeId(), FlowEntityType.FLOW_NODE, ++loop);
                     if (flow != null) {
                         flowButton.setFlowMainId(flow.getTopId());
@@ -402,7 +441,7 @@ public class FlowServiceImpl implements FlowService {
                     return null;
                 }
 
-                if (flowAction.getFlowMainId().equals(0l)) {
+                if (flowAction.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowAction.getBelongTo(), FlowEntityType.fromCode(flowAction.getBelongEntity()), ++loop);
                     if (flow != null) {
                         flowAction.setFlowMainId(flow.getTopId());
@@ -418,7 +457,7 @@ public class FlowServiceImpl implements FlowService {
                 if (flowSel == null) {
                     return null;
                 }
-                if (flowSel.getFlowMainId().equals(0l)) {
+                if (flowSel.getFlowMainId().equals(0L)) {
                     Flow flow = getFlowByEntity(flowSel.getBelongTo(), FlowEntityType.fromCode(flowSel.getBelongEntity()), ++loop);
                     if (flow != null) {
                         flowSel.setFlowMainId(flow.getTopId());
@@ -481,7 +520,8 @@ public class FlowServiceImpl implements FlowService {
     public FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd) {
         Flow flow = flowProvider.getFlowById(cmd.getFlowMainId());
         if (flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getFlowMainId().equals(0L)) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE,
+                    FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");
         }
 
         FlowNode flowNode = this.dbProvider.execute(status -> {
@@ -1808,18 +1848,26 @@ public class FlowServiceImpl implements FlowService {
         return graphBtn;
     }
 
-    private void doSnapshot(FlowGraph flowGraph) {
+    private void doSnapshot(FlowGraph flowGraph, boolean isMirror) {
         //step1 create flow
         Flow flow = flowGraph.getFlow();
-        flow.setFlowMainId(flow.getId());
-        flow.setId(null);
-        flow.setConfigStatus(FlowStatusType.SNAPSHOT.getCode());
+
+        // 只是镜像
+        if (isMirror) {
+            flow.setId(null);
+            flow.setConfigStatus(FlowStatusType.CONFIG.getCode());
+        } else {
+            flow.setFlowMainId(flow.getId());
+            flow.setId(null);
+            flow.setConfigStatus(FlowStatusType.SNAPSHOT.getCode());
+
+            updateFlowVersion(flow);// 版本号加 1
+        }
 
         // 新版本把旧的评价的起始节点配置去掉，避免影响评价按钮出现的时机
         flow.setEvaluateStart(0L);
         flow.setEvaluateEnd(0L);
 
-        updateFlowVersion(flow);// 版本号加 1
         flowProvider.createFlow(flow);
 
         //step2 create flowNodes
@@ -1828,7 +1876,7 @@ public class FlowServiceImpl implements FlowService {
             FlowNode flowNode = node.getFlowNode();
             Long oldFlowNodeId = flowNode.getId();
             flowNode.setId(null);
-            flowNode.setFlowMainId(flow.getFlowMainId());
+            flowNode.setFlowMainId(flow.getTopId());
             flowNode.setFlowVersion(flow.getFlowVersion());
             flowNodeProvider.createFlowNode(flowNode);
 
@@ -1852,7 +1900,7 @@ public class FlowServiceImpl implements FlowService {
             if (selections != null && selections.size() > 0) {
                 for (FlowUserSelection sel : selections) {
                     sel.setBelongTo(flowNode.getId());
-                    sel.setFlowMainId(flow.getFlowMainId());
+                    sel.setFlowMainId(flow.getTopId());
                     sel.setFlowVersion(flow.getFlowVersion());
                     flowUserSelectionProvider.createFlowUserSelection(sel);
                 }
@@ -1912,27 +1960,34 @@ public class FlowServiceImpl implements FlowService {
         doSnapshotScriptConfig(flow);
 
         //step9 copy flow's isTrue
-        List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(), FlowConstants.FLOW_CONFIG_VER);
+        List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getTopId(), FlowConstants.FLOW_CONFIG_VER);
         if (items != null && items.size() > 0) {
             items.forEach(item -> {
                 item.setId(null);
-                item.setFlowMainId(flow.getFlowMainId());
+                item.setFlowMainId(flow.getTopId());
                 item.setFlowVersion(flow.getFlowVersion());
             });
             flowEvaluateItemProvider.createFlowEvaluateItem(items);
         }
 
-        flowGraph = getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
-        flow.setStartNode(flowGraph.getStartNode().getFlowNode().getId());
-        flow.setEndNode(flowGraph.getEndNode().getFlowNode().getId());
+        flowGraph = getFlowGraph(flow.getTopId(), flow.getFlowVersion());
+
+        FlowGraphNode startNode = flowGraph.getStartNode();
+        if (startNode != null) {
+            flow.setStartNode(startNode.getFlowNode().getId());
+        }
+        FlowGraphNode endNode = flowGraph.getEndNode();
+        if (endNode != null) {
+            flow.setEndNode(endNode.getFlowNode().getId());
+        }
         flowProvider.updateFlow(flow);
     }
 
     private void doSnapshotScriptConfig(Flow flow) {
-        List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByFlow(flow.getFlowMainId(), flow.getFlowVersion());
+        List<FlowScriptConfig> scriptConfigs = flowScriptConfigProvider.listByFlow(flow.getTopId(), flow.getFlowVersion());
         for (FlowScriptConfig config : scriptConfigs) {
             config.setId(null);
-            config.setFlowMainId(flow.getFlowMainId());
+            config.setFlowMainId(flow.getTopId());
             config.setFlowVersion(flow.getFlowVersion());
         }
         flowScriptConfigProvider.createFlowScriptConfigs(scriptConfigs);
@@ -1941,7 +1996,7 @@ public class FlowServiceImpl implements FlowService {
     private void doSnapshotSupervisor(Flow flow) {
         FlowButton flowButton = new FlowButton();
 
-        flowButton.setFlowMainId(flow.getFlowMainId());
+        flowButton.setFlowMainId(flow.getTopId());
         flowButton.setFlowVersion(flow.getFlowVersion());
         flowButton.setFlowNodeId(0L);
         flowButton.setButtonName(buttonDefName(flow.getNamespaceId(), FlowStepType.SUPERVISE));
@@ -1985,20 +2040,20 @@ public class FlowServiceImpl implements FlowService {
                 , FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
 
         //step8 copy flow's supervisor
-        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flow.getFlowMainId()
+        List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flow.getTopId()
                 , FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), FlowConstants.FLOW_CONFIG_VER);
         if (selections != null && selections.size() > 0) {
             for (FlowUserSelection sel : selections) {
                 // 这个副本是为了给flowCase创建督办人
-                sel.setBelongTo(flow.getFlowMainId());
-                sel.setFlowMainId(flow.getFlowMainId());
+                sel.setBelongTo(flow.getTopId());
+                sel.setFlowMainId(flow.getTopId());
                 sel.setFlowVersion(flow.getFlowVersion());
                 flowUserSelectionProvider.createFlowUserSelection(sel);
 
                 /*// 这个副本是为了关联flowAction
                 sel.setBelongEntity(FlowEntityType.FLOW_ACTION.getCode());
                 sel.setBelongTo(flowAction.getId());
-                sel.setFlowMainId(flow.getFlowMainId());
+                sel.setFlowMainId(flow.getTopId());
                 sel.setFlowVersion(flow.getFlowVersion());
                 flowUserSelectionProvider.createFlowUserSelection(sel);*/
             }
@@ -2008,7 +2063,7 @@ public class FlowServiceImpl implements FlowService {
     private void doSnapshotFlowBranch(Flow flow, FlowGraphBranch branch, Long originalNodeId, Long convergenceNodeId) {
         FlowBranch flowBranch = branch.getFlowBranch();
         flowBranch.setId(null);
-        flowBranch.setFlowMainId(flow.getFlowMainId());
+        flowBranch.setFlowMainId(flow.getTopId());
         flowBranch.setFlowVersion(flow.getFlowVersion());
         flowBranch.setOriginalNodeId(originalNodeId);
         flowBranch.setConvergenceNodeId(convergenceNodeId);
@@ -2019,7 +2074,7 @@ public class FlowServiceImpl implements FlowService {
                                      Long flowNodeId, Long nextNodeId, Map<Long, Long> configNodeIdToSnapshotNodeIdMap) {
         FlowCondition cond = condition.getCondition();
         cond.setId(null);
-        cond.setFlowMainId(flow.getFlowMainId());
+        cond.setFlowMainId(flow.getTopId());
         cond.setFlowVersion(flow.getFlowVersion());
         cond.setNextNodeId(nextNodeId);
         cond.setFlowNodeId(flowNodeId);
@@ -2033,7 +2088,7 @@ public class FlowServiceImpl implements FlowService {
                                                FlowConditionExpression expression, Map<Long, Long> configNodeIdToSnapshotNodeIdMap) {
         expression.setId(null);
         expression.setFlowConditionId(cond.getId());
-        expression.setFlowMainId(flow.getFlowMainId());
+        expression.setFlowMainId(flow.getTopId());
         expression.setFlowVersion(flow.getFlowVersion());
 
         if (Objects.equals(expression.getEntityType1(), FlowEntityType.FLOW.getCode())) {
@@ -2053,7 +2108,7 @@ public class FlowServiceImpl implements FlowService {
     private void doSnapshotLink(Flow flow, FlowGraphLink link, Long toNodeId, Long fromNodeId) {
         FlowLink flowLink = link.getFlowLink();
         flowLink.setId(null);
-        flowLink.setFlowMainId(flow.getFlowMainId());
+        flowLink.setFlowMainId(flow.getTopId());
         flowLink.setFlowVersion(flow.getFlowVersion());
         flowLink.setFromNodeId(fromNodeId);
         flowLink.setToNodeId(toNodeId);
@@ -2063,7 +2118,7 @@ public class FlowServiceImpl implements FlowService {
     private void doSnapshotFlowLane(Flow flow, FlowGraphLane lane, Long identifierNodeId) {
         FlowLane flowLane = lane.getFlowLane();
         flowLane.setId(null);
-        flowLane.setFlowMainId(flow.getFlowMainId());
+        flowLane.setFlowMainId(flow.getTopId());
         flowLane.setFlowVersion(flow.getFlowVersion());
         flowLane.setIdentifierNodeId(identifierNodeId);
         flowLaneProvider.createFlowLane(flowLane);
@@ -2073,7 +2128,7 @@ public class FlowServiceImpl implements FlowService {
         FlowButton flowButton = button.getFlowButton();
 
         flowButton.setId(null);
-        flowButton.setFlowMainId(flow.getFlowMainId());
+        flowButton.setFlowMainId(flow.getTopId());
         flowButton.setFlowVersion(flow.getFlowVersion());
         flowButton.setFlowNodeId(flowNode.getId());
         if (!flowButton.getGotoNodeId().equals(0L)) {
@@ -2101,7 +2156,7 @@ public class FlowServiceImpl implements FlowService {
         FlowAction flowAction = action.getFlowAction();
         Long oldFlowActionId = flowAction.getId();
         flowAction.setId(null);
-        flowAction.setFlowMainId(flow.getFlowMainId());
+        flowAction.setFlowMainId(flow.getTopId());
         flowAction.setFlowVersion(flow.getFlowVersion());
         flowAction.setBelongTo(belongTo);
         flowActionProvider.createFlowAction(flowAction);
@@ -2143,7 +2198,7 @@ public class FlowServiceImpl implements FlowService {
 
     private void clearSnapshotGraph(Flow snapshotFlow) {
         if (snapshotFlow != null) {
-            String fmt = String.format("%d:%d", snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
+            String fmt = String.format("%d:%d", snapshotFlow.getTopId(), snapshotFlow.getFlowVersion());
             graphMap.remove(fmt);
         }
     }
@@ -2277,7 +2332,7 @@ public class FlowServiceImpl implements FlowService {
 
                 FlowGraphLane graphLane = new FlowGraphLane();
                 FlowLane lane = new FlowLane();
-                lane.setFlowMainId(flow.getFlowMainId());
+                lane.setFlowMainId(flow.getTopId());
                 lane.setFlowVersion(flow.getFlowVersion());
                 lane.setNamespaceId(flow.getNamespaceId());
                 lane.setStatus(FlowCommonStatus.VALID.getCode());
@@ -2719,6 +2774,7 @@ public class FlowServiceImpl implements FlowService {
         return flowServiceMappingProvider.findConfigMapping(namespaceId, projectType, projectId, moduleType, moduleId, ownerType, ownerId);
     }
 
+
     @Override
     public FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd) {
         Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCaseCmd.getFlowMainId(), flowCaseCmd.getFlowVersion());
@@ -2767,11 +2823,11 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setStartNodeId(snapshotFlow.getStartNode());
         flowCase.setEndNodeId(snapshotFlow.getEndNode());
 
-        List<FlowLink> startLink = flowLinkProvider.listFlowLinkByFromNodeId(snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion(), flowCase.getStartNodeId());
+        List<FlowLink> startLink = flowLinkProvider.listFlowLinkByFromNodeId(snapshotFlow.getTopId(), snapshotFlow.getFlowVersion(), flowCase.getStartNodeId());
         if (startLink.size() > 0) {
             flowCase.setStartLinkId(startLink.get(0).getId());
         }
-        List<FlowLink> endLink = flowLinkProvider.listFlowLinkByToNodeId(snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion(), flowCase.getEndNodeId());
+        List<FlowLink> endLink = flowLinkProvider.listFlowLinkByToNodeId(snapshotFlow.getTopId(), snapshotFlow.getFlowVersion(), flowCase.getEndNodeId());
         if (endLink.size() > 0) {
             flowCase.setEndLinkId(endLink.get(0).getId());
         }
@@ -3068,7 +3124,7 @@ public class FlowServiceImpl implements FlowService {
 
         //isTrue
         dto.setNeedEvaluate((byte) 0);
-        List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
+        List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getTopId(), snapshotFlow.getFlowVersion());
         if (evas != null && evas.size() > 0) {
             dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
         } else if (type == 1) {
@@ -3106,9 +3162,10 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEventLog> enterLogs = new ArrayList<>();
         for (FlowCase aCase : allFlowCase) {
             if (organizationId == null) {
+
                 organizationId = aCase.getOrganizationId();
             }
-            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(aCase.getCurrentNodeId(), aCase.getId(), aCase.getStepCount());
+            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeNotCompleteEnterLogs(aCase.getCurrentNodeId(), aCase.getId(), aCase.getStepCount());
             if (logs.size() > 0) {
                 enterLogs.addAll(logs);
             }
@@ -3165,7 +3222,6 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
-            cmd.setOrganizationId(null);
             details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
@@ -3879,6 +3935,7 @@ public class FlowServiceImpl implements FlowService {
         return localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
     }
 
+
     @Override
     public String templateRender(int code, Map<String, Object> map) {
         String scope = FlowTemplateCode.SCOPE;
@@ -3977,7 +4034,7 @@ public class FlowServiceImpl implements FlowService {
 
         CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
         cmd.setApplyUserId(applyUserId);
-        cmd.setFlowMainId(flow.getFlowMainId());
+        cmd.setFlowMainId(flow.getTopId());
         cmd.setFlowVersion(flow.getFlowVersion());
         cmd.setReferId(0l);
         cmd.setReferType("test-type");
@@ -4037,7 +4094,7 @@ public class FlowServiceImpl implements FlowService {
 
         Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
         if (snapshotFlow != null) {
-            deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion(), userId);
+            deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getTopId(), snapshotFlow.getFlowVersion(), userId);
         }
     }
 
@@ -4066,7 +4123,7 @@ public class FlowServiceImpl implements FlowService {
 
         Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
         if (snapshotFlow != null) {
-            addAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), flow.getFlowVersion(), userId);
+            addAllNodeProcessors(snapshotFlow, snapshotFlow.getTopId(), flow.getFlowVersion(), userId);
         }
     }
 
@@ -4106,7 +4163,7 @@ public class FlowServiceImpl implements FlowService {
 
         if (action == null) {
             action = new FlowAction();
-            action.setFlowMainId(flow.getFlowMainId());
+            action.setFlowMainId(flow.getTopId());
             action.setFlowVersion(flowVer);
             action.setActionStepType(actionStepType);
             action.setActionType(actionType);
@@ -4917,19 +4974,26 @@ public class FlowServiceImpl implements FlowService {
         Long formVersion = 0L;
 
         FlowEntityType type = FlowEntityType.fromCode(entityType);
-        switch (type) {
-            case FLOW:
-                Flow flow = flowProvider.getFlowById(entityId);
-                formOriginId = flow.getFormOriginId();
-                formVersion = flow.getFlowVersion().longValue();
-                break;
-            case FLOW_NODE:
-                FlowNode flowNode = flowNodeProvider.getFlowNodeById(entityId);
-                formOriginId = flowNode.getFormOriginId();
-                formVersion = flowNode.getFormVersion();
-                break;
-            default:
-                break;
+
+        if (type == null) {
+            // 兼容老的数据, 老的没有 entityType
+            formOriginId = ctx.getFlowGraph().getFlow().getFormOriginId();
+            formVersion = ctx.getFlowGraph().getFlow().getFlowVersion().longValue();
+        } else {
+            switch (type) {
+                case FLOW:
+                    Flow flow = flowProvider.getFlowById(entityId);
+                    formOriginId = flow.getFormOriginId();
+                    formVersion = flow.getFormVersion();
+                    break;
+                case FLOW_NODE:
+                    FlowNode flowNode = flowNodeProvider.getFlowNodeById(entityId);
+                    formOriginId = flowNode.getFormOriginId();
+                    formVersion = flowNode.getFormVersion();
+                    break;
+                default:
+                    break;
+            }
         }
 
         String fieldName = formFieldProcessorManager.parseFormFieldName(ctx, variable, extra);
@@ -5696,7 +5760,7 @@ public class FlowServiceImpl implements FlowService {
             boolean isOk = true;
             try {
                 dbProvider.execute((s) -> {
-                    doSnapshot(flowGraph);
+                    doSnapshot(flowGraph,false);
                     return true;
                 });
             } catch (Exception ex) {
@@ -5812,6 +5876,82 @@ public class FlowServiceImpl implements FlowService {
             mapping = new FlowServiceMapping();
         }
         return toFlowServiceMappingDTO(mapping);
+    }
+
+
+    @Override
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, FlowKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType(FlowModuleType.NO_MODULE.getCode());
+            }
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+            config.setStatus(FlowCommonStatus.VALID.getCode());
+            flowKvConfigProvider.createFlowKvConfig(config);
+        }
+    }
+
+    @Override
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        List<Flow> list = flowProvider.listConfigFlowByCond(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId());
+
+        for (Flow flow : list) {
+            flow.setStatus(FlowStatusType.INVALID.getCode());
+            flowProvider.updateFlow(flow);
+        }
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
+            flowKvConfigProvider.updateFlowKvConfig(config);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        FlowKvConfig config = flowKvConfigProvider.findByKey(cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(),
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId(), FlowConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFlowMirror(DoFlowMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long flowId : cmd.getFlowIds()) {
+            FlowGraph flowGraph = getFlowGraph(flowId, FlowConstants.FLOW_CONFIG_VER);
+            Flow flow = flowGraph.getFlow();
+            flow.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);// 设置成 0
+
+            if (cmd.getModuleType() != null) {
+                flow.setModuleType(cmd.getModuleType());
+            }
+            flow.setModuleId(cmd.getModuleId());
+            flow.setProjectType(cmd.getProjectType());
+            flow.setProjectId(cmd.getProjectId());
+            flow.setOwnerType(cmd.getOwnerType());
+            flow.setOwnerId(cmd.getOwnerId());
+
+            doSnapshot(flowGraph, /*isMirror*/true);
+        }
     }
 
     private FlowServiceMappingDTO toFlowServiceMappingDTO(FlowServiceMapping mapping) {
@@ -5985,7 +6125,7 @@ public class FlowServiceImpl implements FlowService {
         if (dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
             return null;
         }
-
+        dto.setContactAvatar(getUserAvatar(dto.getApplyUserId()));
         if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
@@ -6152,6 +6292,7 @@ public class FlowServiceImpl implements FlowService {
         FlowGraph flowGraph = ctx.getFlowGraph();
 
         FlowCaseBriefDTO dto = ConvertHelper.convert(flowCase, FlowCaseBriefDTO.class);
+        dto.setContactAvatar(getUserAvatar(dto.getApplyUserId()));
         if (dto.getTitle() == null) {
             dto.setTitle(dto.getModuleName());
         }
@@ -6203,6 +6344,20 @@ public class FlowServiceImpl implements FlowService {
             }
         }
         return dto;
+    }
+
+    /**
+     * 获取用户头像
+     */
+    private String getUserAvatar(Long userId) {
+        if (userId == null) {
+            return "";
+        }
+        User user = userProvider.findUserById(userId);
+        if (user != null) {
+            return contentServerService.parserUri(user.getAvatar());
+        }
+        return "";
     }
 
     /**
@@ -6288,9 +6443,12 @@ public class FlowServiceImpl implements FlowService {
         List<FlowCaseEntity> entities = getFlowCaseEntities(flowUserTypes, flowCase);
         if (dto instanceof FlowCaseBriefDTO) {
             ((FlowCaseBriefDTO) dto).setEntities(entities);
+            ((FlowCaseBriefDTO) dto).setCustomObject(flowCase.getCustomObject());
         } else if (dto instanceof FlowCaseDetailDTOV2) {
             ((FlowCaseDetailDTOV2) dto).setEntities(entities);
+            ((FlowCaseDetailDTOV2) dto).setCustomObject(flowCase.getCustomObject());
         }
+        
         return dto;
     }
 
@@ -6313,9 +6471,10 @@ public class FlowServiceImpl implements FlowService {
         cmd.setOrganizationId(null);
 
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
-        RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
+        RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
 
-        List<FlowServiceTypeDTO> dtoList = (List<FlowServiceTypeDTO>) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
+        String dtoListStr = (String) template.opsForHash().get("flow-service-type", String.valueOf(namespaceId));
+        List<FlowServiceTypeDTO> dtoList = new Gson().fromJson(dtoListStr, new TypeToken<List<FlowServiceTypeDTO>>(){}.getType());
 
         Stream<FlowServiceTypeDTO> stream = dtoList.stream();
         if (cmd.getOrganizationId() != null) {
@@ -6358,13 +6517,14 @@ public class FlowServiceImpl implements FlowService {
         if (userId == null && TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) != TrueOrFalseFlag.TRUE) {
             userId = UserContext.currentUserId();
         }
+        cmd.setUserId(userId);
+
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, 20);
 
-        List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(
-                cmd.getModuleId(), cmd.getFlowCaseId(), userId, cmd.getServiceType(), cmd.getKeyword(), pageSize, locator);
+        List<FlowOperateLogDTO> operateLogs = flowEventLogProvider.searchOperateLogs(cmd, pageSize, locator);
 
         SearchFlowOperateLogResponse response = new SearchFlowOperateLogResponse();
         response.setLogs(operateLogs);
@@ -6623,6 +6783,71 @@ public class FlowServiceImpl implements FlowService {
         return currentNodeId;
     }
 
+    /**
+     * node_enter_log 节点的实际处理人
+     * @see FlowServiceImpl#getStepTrackerLogs(java.util.List)
+     */
+    @Override
+    public List<FlowEventLog> getNodeEnterLogs(Long flowCaseId, Long flowNodeId, Long stepCount) {
+        return flowEventLogProvider.findNodeEnterLogs(flowNodeId, flowCaseId, stepCount);
+    }
+
+    /**
+     * 节点的处理人列表，不管是否已经处理，转交后以转交后的为准
+     */
+    @Override
+    public List<FlowEventLog> getNodeEnterLogsIgnoreCompleteFlag(Long flowCaseId, Long flowNodeId) {
+        Long maxStepCount = flowEventLogProvider.findMaxStepCountByNodeEnterLog(flowNodeId, flowCaseId);
+        return flowEventLogProvider.findNodeEnterLogs(flowNodeId, flowCaseId, maxStepCount);
+    }
+
+    /**
+     * step_tracker_log 经过的节点列表
+     * @param allFlowCase   所有的任务列表
+     * @see com.everhomes.flow.FlowServiceImpl#getAllFlowCase(java.lang.Long)
+     */
+    @Override
+    public List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase) {
+        List<Long> flowCaseIdList = allFlowCase.stream().map(FlowCase::getId).collect(Collectors.toList());
+        //got all nodes tracker logs
+        List<FlowEventLog> stepLogs = flowEventLogProvider.findStepEventLogs(flowCaseIdList);
+        List<FlowNodeLogDTO> nodeDTOS = new ArrayList<>();
+
+        FlowNode currNode = null;
+        FlowGraph flowGraph = null;
+
+        // 构建有stepLog的节点信息
+        for (FlowEventLog eventLog : stepLogs) {
+            //获取工作流经过的节点日志
+            if (currNode == null || !currNode.getId().equals(eventLog.getFlowNodeId())) { // 相邻相同去重
+                if (flowGraph == null) {
+                    flowGraph = getFlowGraph(eventLog.getFlowMainId(), eventLog.getFlowVersion());
+                }
+                currNode = flowGraph.getGraphNode(eventLog.getFlowNodeId()).getFlowNode();
+                final FlowNodeLogDTO nodeLogDTO = new FlowNodeLogDTO();
+                nodeLogDTO.setNodeId(currNode.getId());
+                nodeLogDTO.setFlowCaseId(eventLog.getFlowCaseId());
+                nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
+                nodeLogDTO.setNodeName(currNode.getNodeName());
+                nodeLogDTO.setParams(currNode.getParams());
+                nodeLogDTO.setLaneId(currNode.getFlowLaneId());
+                nodeLogDTO.setNodeEnterTime(eventLog.getCreateTime().getTime());
+                nodeLogDTO.setFormOriginId(currNode.getFormOriginId());
+                nodeLogDTO.setFormVersion(currNode.getFormVersion());
+                nodeLogDTO.setStepCount(eventLog.getStepCount());
+
+                for (FlowCase aCase : allFlowCase) {
+                    if (eventLog.getFlowCaseId().equals(aCase.getId()) && aCase.getStepCount().equals(eventLog.getStepCount())) {
+                        nodeLogDTO.setIsCurrentNode((byte) 1);
+                        break;
+                    }
+                }
+                nodeDTOS.add(nodeLogDTO);
+            }
+        }
+        return nodeDTOS;
+    }
+
     private List<FlowLaneLogDTO> getFlowLaneLogDTOList(FlowGraph flowGraph, Set<FlowUserType> flowUserTypes,
                                                        FlowCase flowCase, List<FlowCase> allFlowCase, List<FlowLane> laneList) {
         List<Long> flowCaseIdList = allFlowCase.stream().map(FlowCase::getId).collect(Collectors.toList());
@@ -6862,7 +7087,7 @@ public class FlowServiceImpl implements FlowService {
         exp.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
         exp.setFlowConditionId(condition.getId());
         exp.setLogicOperator(expressionCmd.getLogicOperator());
-        exp.setRelationalOperator(expressionCmd.getRelationalOperator());
+        exp.setRelationalOperator(StringEscapeUtils.unescapeHtml(expressionCmd.getRelationalOperator()));
         exp.setVariable1(expressionCmd.getVariable1());
         exp.setVariable2(expressionCmd.getVariable2());
         exp.setVariableExtra1(expressionCmd.getVariableExtra1());
@@ -7082,10 +7307,10 @@ public class FlowServiceImpl implements FlowService {
         return RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData);
     }
 
-    @Scheduled(fixedRate = 30 * 60 * 1000L)
+    @Scheduled(fixedRate = 30 * 60 * 1000L, initialDelay = 10000)
     public void refreshFlowServiceType() {
         Accessor accessor = bigCollectionProvider.getMapAccessor("flow-service-type", "");
-        RedisTemplate template = accessor.getTemplate(new JdkSerializationRedisSerializer());
+        RedisTemplate template = accessor.getTemplate(new StringRedisSerializer());
 
         List<Namespace> namespaces = namespaceProvider.listNamespaces();
         for (Namespace ns : namespaces) {
@@ -7102,7 +7327,8 @@ public class FlowServiceImpl implements FlowService {
                             return dto;
                         }).collect(Collectors.toList());
 
-                template.opsForHash().put("flow-service-type", String.valueOf(ns.getId()), dtoList);
+                template.opsForHash().delete("flow-service-type", String.valueOf(ns.getId()));
+                template.opsForHash().put("flow-service-type", String.valueOf(ns.getId()), StringHelper.toJsonString(dtoList));
             } catch (Exception e) {
                 e.printStackTrace();
             }

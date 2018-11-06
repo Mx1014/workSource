@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude： 维度</li>
  * <li>longitude： 经度</li>
  * <li>clockStatus：打卡状态 参考{@link com.everhomes.rest.techpark.punch.PunchStatus}</li>
+ * <li>createType： 创建类型 参考{@link com.everhomes.rest.techpark.punch.CreateType}</li>
  * <li>statusString：打卡状态文字</li>
  * <li>requestToken： 异常申请的token </li>
  * <li>approvalStatus： 审批的状态 参考{@link com.everhomes.rest.approval.ApprovalStatus}  </li>
@@ -58,8 +59,12 @@ public class PunchLogDTO {
 
     private Byte deviceChangeFlag;
 	private Long punchOrgnizationId;
-    
-    @Override
+	private Long punchRuleId;
+	private Long punchRuleTimeId;
+	private Byte createType;
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
@@ -267,5 +272,29 @@ public class PunchLogDTO {
 
 	public void setStatusString(String statusString) {
 		this.statusString = statusString;
+	}
+
+	public Long getPunchRuleId() {
+		return punchRuleId;
+	}
+
+	public void setPunchRuleId(Long punchRuleId) {
+		this.punchRuleId = punchRuleId;
+	}
+
+	public Long getPunchRuleTimeId() {
+		return punchRuleTimeId;
+	}
+
+	public void setPunchRuleTimeId(Long punchRuleTimeId) {
+		this.punchRuleTimeId = punchRuleTimeId;
+	}
+
+	public Byte getCreateType() {
+		return createType;
+	}
+
+	public void setCreateType(Byte createType) {
+		this.createType = createType;
 	}
 }

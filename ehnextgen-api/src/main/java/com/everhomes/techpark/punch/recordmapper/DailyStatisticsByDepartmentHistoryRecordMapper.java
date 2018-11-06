@@ -18,6 +18,9 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
     @PunchStatusStatisticsItem(defaultOrder = 4, type = PunchStatusStatisticsItemType.LEAVE_EARLY)
     private Integer leaveEarlyMemberCount;
 
+    @PunchStatusStatisticsItem(defaultOrder = 5, type = PunchStatusStatisticsItemType.GO_OUT)
+    private Integer goOutPunchDayCount;
+
     @PunchExceptionRequestStatisticsItem(defaultOrder = 1, type = PunchExceptionRequestStatisticsItemType.ASK_FOR_LEAVE)
     private Integer askForLeaveRequestMemberCount;
 
@@ -119,6 +122,7 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
         data.setAskForLeaveRequestMemberCount(record.getValue("askForLeaveRequestMemberCount", Integer.class));
         data.setGoOutRequestMemberCount(record.getValue("goOutRequestMemberCount", Integer.class));
         data.setBusinessTripRequestMemberCount(record.getValue("businessTripRequestMemberCount", Integer.class));
+        data.setGoOutPunchDayCount(record.getValue("goOutPunchDayCount", Integer.class));
         data.setOvertimeRequestMemberCount(record.getValue("overtimeRequestMemberCount", Integer.class));
         data.setPunchExceptionRequestCount(record.getValue("punchExceptionRequestCount", Integer.class));
         if (data.getShouldArrivedMemberCount() == null || data.getShouldArrivedMemberCount() <= 0
@@ -133,5 +137,13 @@ public class DailyStatisticsByDepartmentHistoryRecordMapper extends DailyStatist
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Integer getGoOutPunchDayCount() {
+        return goOutPunchDayCount;
+    }
+
+    public void setGoOutPunchDayCount(Integer goOutPunchDayCount) {
+        this.goOutPunchDayCount = goOutPunchDayCount;
     }
 }

@@ -81,6 +81,11 @@ public interface RemindProvider {
 
     boolean checkRemindDemoHasCreated(Integer namespaceId, String ownerType, Long ownerId, Long userId);
 
-    List<Remind> findUndoRemindsByRemindTime(Timestamp remindTime, int count);
+    List<Remind> findUndoRemindsByRemindTime(Timestamp remindStartTime, Timestamp remindEndTime, int count);
+
+	Remind getRemindById(Long trackRemindId);
+
+	List<Remind> findUndoRemindsByRemindTimeByPage(Timestamp remindStartTime,
+			Timestamp remindEndTime, int pageSize, int offset);
 
 }

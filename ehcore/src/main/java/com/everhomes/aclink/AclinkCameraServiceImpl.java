@@ -63,6 +63,8 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 		camera.setLinkStatus((byte) 2);//TODO delete
 		camera.setKeyCode(cmd.getKeyCode());
 		camera.setAccount(cmd.getAccount());
+		camera.setOwnerId(cmd.getOwnerId());
+		camera.setOwnerType(cmd.getOwnerType());
 		aclinkCameraProvider.createLocalCamera(camera);
 		//内网服务器下属设备有变动,更新服务器的上次操作时间
 		AclinkServer server = aclinkServerProvider.findServerById(camera.getServerId());
@@ -114,24 +116,12 @@ public class AclinkCameraServiceImpl implements AclinkCameraService {
 	}
 
 	@Override
-	public ListLocalCamerasResponse listLocalCameras(CrossShardListingLocator locator, Long ownerId, Byte ownerType,
-			Long serverId, Long doorAccessId, Byte enterStatus, Byte linkStatus, Integer pageSize) {
+	public ListLocalCamerasResponse listLocalCameras(ListLocalCamerasCommand cmd) {
 		ListLocalCamerasResponse resp = new ListLocalCamerasResponse();
-		int count = PaginationConfigHelper.getPageSize(configProvider, pageSize);
-		List<Long> serverIds = new ArrayList<Long>();
-		DoorAccessOwnerType typ = DoorAccessOwnerType.fromCode(ownerType);
-		if(serverId == null){
-			List<AclinkServer> servers = aclinkServerProvider.listLocalServers(new CrossShardListingLocator(), ownerId, typ, null, 0);
-			if(servers.size()>0){
-				for(AclinkServer server: servers){
-					serverIds.add(server.getId());
-				}
-			}else{
-				return resp;
-			}
-		}
-		
-		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, serverId, serverIds, doorAccessId, enterStatus, linkStatus, count);
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AclinkCamera> cameras = aclinkCameraProvider.listLocalCameras(locator, cmd);
 		List<AclinkCameraDTO> dtos = new ArrayList<AclinkCameraDTO>();
 		for(AclinkCamera camera : cameras){
 			AclinkCameraDTO dto = ConvertHelper.convert(camera, AclinkCameraDTO.class);

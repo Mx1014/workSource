@@ -41,7 +41,7 @@ import java.util.List;
  *  <li>buttonTitle: 按钮名称</li>
  *  <li>email: 邮箱地址</li>
  *  <li>detailUrl: 服务详情页面URL</li>
- *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 4：第三方跳转 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>isApprovalActive : 其他-激活 0-非激活</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
@@ -59,6 +59,9 @@ import java.util.List;
  *  <li>displayMode:类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode} </li>
  *  <li>startDate : 用于policydeclare样式 开始日期 格式yyyy-MM-dd</li>
  *  <li>endDate : 用于policydeclare样式 结束日期 格式 yyyy-MM-dd</li>
+ *  <li>formId : 表单id</li>
+ *  <li>flowId : 工作流id</li>
+ *  <li>isGeneralConfig : 1-是通用配置 0/null-项目配置</li>
  *  <li>tagGroups : 该服务的筛选组列表(list) {@link com.everhomes.rest.yellowPage.AllianceTagGroupDTO}</li>
  * </ul>
  */
@@ -143,7 +146,7 @@ public class ServiceAllianceDTO {
 	private String moduleUrl;
 	
 	private Byte isApprovalActive;
-	
+
 	private Byte supportType;
 
 	private Long jumpId;
@@ -171,6 +174,10 @@ public class ServiceAllianceDTO {
 	
 	private String endDate;
 	
+	private Long     formId;
+
+	private Long     flowId;
+
 	@ItemType(AllianceTagGroupDTO.class)
 	private List<AllianceTagGroupDTO> tagGroups;
 	
@@ -555,5 +562,21 @@ public class ServiceAllianceDTO {
 
 	public void setIsApprovalActive(Byte isApprovalActive) {
 		this.isApprovalActive = isApprovalActive;
+	}
+
+	public Long getFormId() {
+		return formId;
+	}
+
+	public void setFormId(Long formId) {
+		this.formId = formId;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
 	}
 }

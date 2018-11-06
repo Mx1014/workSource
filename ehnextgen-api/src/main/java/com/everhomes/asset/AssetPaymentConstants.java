@@ -18,10 +18,10 @@ public interface AssetPaymentConstants {
 
     //错误信息
     public static final String DELETE_CHARGING_STANDARD_UNSAFE = "删除失败，该计费标准已经被账单组关联使用";
-    public static final String DELETE_GROUP_RULE_UNSAFE = "删除失败，该账单组的计价条款已经关联合同，或者产生了账单";
+    public static final String DELETE_GROUP_RULE_UNSAFE = "删除失败，该账单组的计价条款已经关联合同，或者产生了账单，或者已被其他应用所关联";
     public static final String CREATE_CHARGING_ITEM_FAIL = "添加失败，一个收费项只能在一个账单组存在";
     public static final String MODIFY_GROUP_RULE_UNSAFE = "修改失败，该账单组的计价条款已经关联合同，或者产生了账单";
-    public static final String DELTE_GROUP_UNSAFE = "删除失败，该账单组已经关联合同，或者产生了账单";
+    public static final String DELTE_GROUP_UNSAFE = "删除失败，该账单组已经关联合同，或者产生了账单，或者已被其他应用所关联";
 
     public static final String CHARGING_ITEM_NAME_WATER = "水费";
     public static final String CHARGING_ITEM_NAME_ELECTRICITY = "电费";

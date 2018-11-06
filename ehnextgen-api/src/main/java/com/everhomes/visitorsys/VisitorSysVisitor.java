@@ -17,6 +17,11 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 	private Integer statsWeek;
 	private Long communityId;
 
+	private Long doorAccessEndTime;
+
+	//  扫码登记或ipad自助登记标志
+	private Byte fromDevice;
+
 	public List<VisitorsysApprovalFormItem> getCommunityFormValues() {
 		return communityFormValues;
 	}
@@ -63,6 +68,26 @@ public class VisitorSysVisitor extends EhVisitorSysVisitors {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public Long getDoorAccessEndTime() {
+		return doorAccessEndTime;
+	}
+
+	public void setDoorAccessEndTime(Long doorAccessEndTime) {
+		this.doorAccessEndTime = doorAccessEndTime;
+	}
+
+	public Byte getFromDevice() {
+		return fromDevice;
+	}
+
+	public void setFromDevice(Byte fromDevice) {
+		this.fromDevice = fromDevice;
 	}
 
 	@Override

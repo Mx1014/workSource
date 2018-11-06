@@ -11,7 +11,9 @@ import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemType;
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.everhomes.rest.techpark.punch.PunchType;
 import com.everhomes.rest.techpark.punch.UserPunchStatusCount;
+import com.everhomes.server.schema.tables.pojos.EhPunchNotifications;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsHistoryRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyPunchStatusStatisticsTodayRecordMapper;
 import com.everhomes.techpark.punch.recordmapper.DailyStatisticsByDepartmentBaseRecordMapper;
@@ -36,6 +38,8 @@ public interface PunchProvider {
 	public List<Date> listPunchLogsBwteenTwoDay(Long userId, Long companyId, String beginDate, String endDate);
 
 	public void createPunchLog(PunchLog punchLog);
+
+	void deletePunchLog(PunchLog punchLog);
 
 	public List<PunchGeopoint> listPunchGeopointsByCompanyId(Long companyId);
 
@@ -262,8 +266,6 @@ public interface PunchProvider {
 
 	List<PunchDayLog> listPunchDayLogs(Long userId, Long companyId, String startDay, String endDay);
 
-	List<PunchStatistic> queryPunchStatistics(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
-
 	PunchStatistic getPunchStatisticById(Long id);
 
 	void deletePunchStatistic(PunchStatistic obj);
@@ -272,8 +274,8 @@ public interface PunchProvider {
 
 	Long createPunchStatistic(PunchStatistic obj);
 
-	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
-			List<Long> detailIds, CrossShardListingLocator locator, int i);
+	List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, List<String> months, Byte exceptionStatus,
+											  List<Long> detailIds, Integer pageOffset, Integer pageSize);
 
 	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long detailId);
 
@@ -455,7 +457,38 @@ public interface PunchProvider {
 
 	void setPunchSchedulingsStatus(Long prId, Byte targetStatus, Date beginDate);
 
-	public Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate,
-			Long userId, Long ownerId);
- 
+	Integer countDeviceChanges(java.sql.Date theFirstDate, java.sql.Date theLastDate, Long userId, Long ownerId);
+
+	void batchCreatePunchNotifications(List<EhPunchNotifications> punchNotifications);
+
+	int countPunchNotifications(Integer namespaceId, Long organizationId, Long punchRuleId, Date punchDate);
+
+	List<PunchNotification> findPunchNotificationList(QueryPunchNotificationCondition condition);
+
+	int invalidPunchNotificationList(QueryPunchNotificationCondition condition);
+
+	PunchNotification findPunchNotification(Integer namespaceId, Long organizationId, Long detailId, Date punchDate, PunchType punchType, Integer punchIntervalNo);
+
+	List<PunchNotification> findPunchNotificationList(Integer namespaceId, Long organizationId, Long userId, Date punchDate);
+
+	void updatePunchNotification(PunchNotification punchNotification);
+
+	int deleteAllPunchNotificationsBeforeDate(Date beforePunchDate);
+
+	Integer countPunchSatisticsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			String queryByMonth);
+
+	Integer countPunchDayLogsByItemTypeAndDeptIds(Long organizationId, List<Long> deptIds,
+			java.util.Date queryDate);
+
+	void createPUnchGoOutLog(PunchGoOutLog log);
+
+	PunchGoOutLog findPunchGoOutLogById(Long id);
+
+	void updatePunchGoOutLog(PunchGoOutLog log);
+
+	Byte processGoOutPunchFlag(Date punchDate, Long targetId);
+
+	List<PunchGoOutLog> listPunchGoOutLogs(Long userId, Long enterpriseId,
+			java.sql.Date pDate);
 }

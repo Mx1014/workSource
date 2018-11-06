@@ -14,6 +14,7 @@ import com.everhomes.rest.organization.GetOrganizationDetailByIdCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.techpark.expansion.OpenCustomRequestFormCommand;
 import com.everhomes.rest.techpark.expansion.AddLeaseIssuerCommand;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
@@ -45,6 +46,8 @@ import com.everhomes.rest.techpark.expansion.ListLeaseIssuerBuildingsResponse;
 import com.everhomes.rest.techpark.expansion.ListLeaseIssuersCommand;
 import com.everhomes.rest.techpark.expansion.ListLeaseIssuersResponse;
 import com.everhomes.rest.techpark.expansion.SetLeasePromotionConfigCommand;
+import com.everhomes.rest.techpark.expansion.TransformToCustomerCommand;
+import com.everhomes.rest.techpark.expansion.TransformToCustomerResponse;
 import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionOrderCommand;
@@ -519,6 +522,38 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
+	 * <b>URL: /techpark/entry/openCustomRequestForm</b>
+	 * <p> 开启自定义并复制表单 </p>
+	 */
+	@RequestMapping("openCustomRequestForm")
+	@RestReturn(value=LeaseFormRequestDTO.class)
+	public RestResponse openCustomRequestForm(@Valid OpenCustomRequestFormCommand cmd) {
+
+		enterpriseApplyEntryService.openCustomRequestForm(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/closeCustomRequestForm</b>
+	 * <p> 关闭自定义表单 </p>
+	 */
+	@RequestMapping("closeCustomRequestForm")
+	@RestReturn(value=String.class)
+	public RestResponse closeCustomRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd) {
+
+		enterpriseApplyEntryService.closeCustomRequestForm(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
 	 *
 	 * <b>URL: /techpark/entry/updateLeasePromotionOrder</b>
 	 * <p>
@@ -530,6 +565,20 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	public RestResponse updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd){
 		enterpriseApplyEntryService.updateLeasePromotionOrder(cmd);
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/transformToCustomer</b>
+	 * <p>转为意向客户（园区入驻模块）</p>
+	 */
+	@RequestMapping("transformToCustomer")
+	@RestReturn(value=Long.class,collection=true)
+	public RestResponse transformToCustomer(TransformToCustomerCommand cmd){
+		List<Long> result = enterpriseApplyEntryService.transformToCustomer(cmd);
+		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

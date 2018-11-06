@@ -42,9 +42,13 @@ public interface BannerService {
 
     List<BannerDTO> getBannersBySceneNew(GetBannersBySceneCommand cmd);
 
+    List<BannerDTO> listBannerByCommunityId(Long communityId);
+
     CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd);
 
     void reorderBanners(ReorderBannersCommand cmd);
 
     BannerDTO updateBannerStatus(UpdateBannerStatusCommand cmd);
+
+    BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd);
 }

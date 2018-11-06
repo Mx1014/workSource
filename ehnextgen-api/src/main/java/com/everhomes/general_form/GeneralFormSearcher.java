@@ -12,4 +12,5 @@ public interface GeneralFormSearcher {
     void feedDoc(List<GeneralFormVal> generalFormVals);
     void syncFromDb();
     ListGeneralFormValResponse queryGeneralForm(SearchFormValsCommand cmd);
+	void syncFromDbV2();
 }

@@ -111,6 +111,14 @@ public class AppNamespaceMappingProviderImpl implements AppNamespaceMappingProvi
 		return null;
 	}
 
+	public List<App> listAppsByExcludeAppKey(List<String> appKeys) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhApps t = com.everhomes.schema.Tables.EH_APPS;
+		return context.selectFrom(t)
+				.where(t.APP_KEY.notIn(appKeys))
+				.fetchInto(App.class);
+	}
+
 	@Override
     public void deleteNamespaceMapping(AppNamespaceMapping mapping) {
         getReadWriteDao().delete(mapping);

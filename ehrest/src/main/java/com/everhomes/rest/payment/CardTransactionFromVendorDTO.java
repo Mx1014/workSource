@@ -12,23 +12,13 @@ import com.everhomes.util.StringHelper;
  * <li>merchant: 商户</li>
  * <li>transactionType: 交易类型   1：充值   2 ：消费</li>
  * <li>vendorName: 第三方厂商</li>
+ * <li>paidType: 支付类型</li>
  * <li>vendorResult: </li>
  * </ul>
  */
-//<li>id: id</li>
-//* <li>mobile: 手机号</li>
-//* <li>userName: 用户名称</li>
-//* <li>cardNo: 卡号</li>
-//* <li>orderNo: 订单号</li>
-//* <li>comsumeType: 消费类型</li>
 public class CardTransactionFromVendorDTO implements Comparable<CardTransactionFromVendorDTO>{
 	
-//	private java.lang.Long       id;
-//	private java.lang.String     userName;
-//	private java.lang.String     mobile;
-//	private java.lang.String     cardNo;
-//	private java.lang.Long       orderNo;
-//	private java.lang.Byte       consumeType;
+
 	private java.lang.String     itemName;
 	private java.math.BigDecimal amount;
 	private Long   transactionTime;
@@ -38,6 +28,7 @@ public class CardTransactionFromVendorDTO implements Comparable<CardTransactionF
 	private String transactionType;
 	private String vendorName;
 	private String vendorResult;
+	private String paidType;
 	
     private Long nextPageAnchor;
 	
@@ -111,6 +102,14 @@ public class CardTransactionFromVendorDTO implements Comparable<CardTransactionF
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
 	}
 
 	@Override

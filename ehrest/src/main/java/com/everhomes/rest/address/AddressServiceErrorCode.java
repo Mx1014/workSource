@@ -2,7 +2,8 @@
 package com.everhomes.rest.address;
 
 public interface AddressServiceErrorCode {
-    String SCOPE = "address";
+    
+	String SCOPE = "address";
     int ERROR_ADDRESS_NOT_EXIST = 10001;
     
     
@@ -19,6 +20,7 @@ public interface AddressServiceErrorCode {
     int ERROR_SHARE_AREA_NOT_NUMBER = 20008;
     int ERROR_CHARGE_AREA_NOT_NUMBER = 20009;
     int ERROR_RENT_AREA_NOT_NUMBER = 20010;
+    int ERROR_APPARTMENT_NAME_OVER_FLOW = 20011;//门牌名称不能超过20个汉字
 
     int ERROR_APARTMENT_STATUS_EMPTY = 20011;
     int ERROR_APARTMENT_ORIENTATION_LENTH = 20012;
@@ -26,6 +28,8 @@ public interface AddressServiceErrorCode {
 	int ERROR_FREE_AREA_NOT_NUMBER = 20014;
 	int ERROR_FUTURE_ADDRESS_HAS_CONTRACT = 20015;
 	int ERROR_FLOORNUMBER_FORMAT = 20016;
+	int ERROR_AUTHORIZE_PRICE_TYPE = 20017;
+	int ERROR_AUTHORIZE_PRICE_FORMAT = 20018;
 	
 	int ERROR_AREA_SIZE_LESS_THAN_ZERO = 30001;
 	int ERROR_CHARGE_AREA_LESS_THAN_ZERO = 30002;

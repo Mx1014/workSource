@@ -65,6 +65,8 @@ public interface ServiceModuleProvider {
 
     void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
 
+    List<ServiceModule> listServiceModules(Byte appType, String keyword);
+
     List<ServiceModule> listServiceModulesByMenuAuthFlag(Byte menuAuthFlag);
 
     List<ServiceModule> listServiceModule(String path);
@@ -115,4 +117,6 @@ public interface ServiceModuleProvider {
 	Long getServiceModuleFromBlackId(Integer namespaceId, Long moduleId);
 
 	void createServiceModuleExcludeFunction(ServiceModuleExcludeFunction serviceModuleExcludeFunction);
+
+	List<Long> listExcludeCauseWhiteList();
 }

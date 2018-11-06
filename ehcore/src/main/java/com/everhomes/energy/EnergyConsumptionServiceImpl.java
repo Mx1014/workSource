@@ -168,6 +168,7 @@ import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.EnergyMeterTaskSearcher;
 import com.everhomes.search.EnergyPlanSearcher;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategoryMap;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -455,6 +456,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
         userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ENERGY_MODULE, ActionType.OFFICIAL_URL.getCode(), null, orgId, communityId);
     }
     
+	@Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            init();
+        }
+    }
+
+	
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
     //@PostConstruct
@@ -472,13 +481,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
                 scheduleProvider.scheduleCronJob(autoReading, autoReading,
                         "0 10 5 L * ?", EnergyAutoReadingJob.class, null);
             }
-        }
-    }
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext().getParent() == null) {
-            init();
         }
     }
     
@@ -1707,7 +1709,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
             EnergyMeterCategory category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getBillCategory());
             if (category == null) {
                 //历史问题  只校验了community下的类型 没有去搜所有下面的应用范围
-                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(), EnergyCategoryType.BILL.getCode());
+                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(),cmd.getOwnerId(), EnergyCategoryType.BILL.getCode());
                 if (categoryMap.get(str.getBillCategory()) == null) {
                     LOGGER.error("energy meter bill category is not exist, data = {}", str);
                     log.setData(str);
@@ -1724,7 +1726,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
             category = meterCategoryProvider.findByName(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCommunityId(), str.getServiceCategory());
             if (category == null) {
                 //历史问题  只校验了community下的类型 没有去搜所有下面的应用范围
-                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(), EnergyCategoryType.SERVICE.getCode());
+                Map<String, EnergyMeterCategory> categoryMap = getAllScopeCategories(cmd.getCommunityId(),cmd.getOwnerId(), EnergyCategoryType.SERVICE.getCode());
                 if (categoryMap.get(str.getServiceCategory()) == null) {
                     LOGGER.error("energy meter service category is not exist, data = {}", str);
                     log.setData(str);
@@ -1825,8 +1827,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
         return errorDataLogs;
     }
 
-    private  Map<String, EnergyMeterCategory> getAllScopeCategories(Long communityId, Byte categoryType) {
-        List<EnergyMeterCategoryMap> meterCategoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(communityId);
+    private  Map<String, EnergyMeterCategory> getAllScopeCategories(Long communityId,Long ownerId, Byte categoryType) {
+        List<EnergyMeterCategoryMap> meterCategoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(communityId,ownerId);
         List<Long> categoryIds = new ArrayList<>();
         if (meterCategoryMaps != null && meterCategoryMaps.size() > 0) {
             categoryIds = meterCategoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
@@ -2776,21 +2778,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
 //        checkCurrentUserNotInOrg(cmd.getOwnerId());
 //        userPrivilegeMgr.checkCurrentUserAuthority(EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOwnerId(), PrivilegeConstants.ENERGY_SETTING);
         List<EnergyMeterCategory> categoryList = new ArrayList<>();
-        //全部则查全部的和各个项目的
-        if(cmd.getCommunityId() == null) {
+        //全部则查全部的和各个项目的  标准版 这里不存在项目查不到,查询所有的概念，存在应用范围的概念
+        if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 1) {
             categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                    cmd.getOwnerId(), cmd.getOwnerType(), null);
+                    null, null, cmd.getCommunityIds());
+            // get all scope general data of this owner
+            List<EnergyMeterCategory> categories =  meterCategoryProvider.listOrgGeneralMeterCategories(cmd.getNamespaceId(), cmd.getCategoryType(), cmd.getOwnerId(), 0L);
+            if(categories!=null && categories.size()>0){
+                categoryList.addAll(categories);
+            }
         }
 
         //单项目则查自己加的和关联的全部的
-        else if(cmd.getCommunityId() != null) {
+        else if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() == 1) {
             categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                    cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
-            List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+                    null,null, cmd.getCommunityIds());
+            List<EnergyMeterCategoryMap> maps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityIds().get(0),null);
             if(maps != null && maps.size() > 0) {
-                List<Long> categoryIds = maps.stream().map(map -> {
-                    return map.getCategoryId();
-                }).collect(Collectors.toList());
+                List<Long> categoryIds = maps.stream().map(EhEnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
                 List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());
                 if(categories != null && categories.size() > 0) {
                     categoryList.addAll(categories);
@@ -5029,8 +5034,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService, A
         Timestamp taskUpdateTime = dateStrToTimestamp(cmd.getTaskUpdateTime());
         List<EnergyMeterCategory> categoryList = new ArrayList<>();
         categoryList = meterCategoryProvider.listMeterCategories(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), cmd.getCategoryType(),
-                null, null, cmd.getCommunityId(), categoryUpdateTime);
-        List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId());
+                cmd.getOwnerId(), null, cmd.getCommunityId(), categoryUpdateTime);
+        List<EnergyMeterCategoryMap> categoryMaps = energyMeterCategoryMapProvider.listEnergyMeterCategoryMap(cmd.getCommunityId(),cmd.getOwnerId());
         if(categoryMaps != null && categoryMaps.size() > 0) {
             List<Long> categoryIds = categoryMaps.stream().map(EnergyMeterCategoryMap::getCategoryId).collect(Collectors.toList());
             List<EnergyMeterCategory> categories = meterCategoryProvider.listMeterCategories(categoryIds, cmd.getCategoryType());

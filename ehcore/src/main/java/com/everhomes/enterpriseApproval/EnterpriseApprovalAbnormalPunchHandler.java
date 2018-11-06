@@ -18,21 +18,18 @@ import java.util.Calendar;
 @Component(EnterpriseApprovalHandler.ENTERPRISE_APPROVAL_PREFIX + "ABNORMAL_PUNCH")
 public class EnterpriseApprovalAbnormalPunchHandler extends EnterpriseApprovalPunchDefaultHandler {
 
-    //  use the father's function
     @Override
     public PunchExceptionRequest onFlowCaseEnd(FlowCase flowCase) {
-        //把狀態置为审批通过
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
         PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
-        if (null == request) {
+        if (request == null) {
             return null;
         }
         request.setStatus(ApprovalStatus.AGREEMENT.getCode());
-        punchService.approveAbnormalPunch(request);
-        Calendar punCalendar = Calendar.getInstance();
-        punCalendar.setTime(request.getPunchDate());
         punchProvider.updatePunchExceptionRequest(request);
         try {
+            Calendar punCalendar = Calendar.getInstance();
+            punCalendar.setTime(request.getPunchDate());
             OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(request.getUserId(), request.getEnterpriseId());
             punchService.refreshPunchDayLog(memberDetail, punCalendar);
         } catch (ParseException e) {
@@ -40,5 +37,29 @@ public class EnterpriseApprovalAbnormalPunchHandler extends EnterpriseApprovalPu
                     + request.getEnterpriseId() + "] day[" + request.getPunchDate() + "]");
         }
         return request;
+    }
+
+    @Override
+    public void onFlowCaseDeleted(FlowCase flowCase) {
+        GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
+        PunchExceptionRequest request = punchProvider.findPunchExceptionRequestByRequestId(ga.getOrganizationId(), flowCase.getApplyUserId(), flowCase.getId());
+        if (request == null) {
+            return;
+        }
+        // 如果流程删除之前是审批通过状态，则删除以后，需要重新校准考勤状态，否则不需要
+        boolean showRefreshPunchDayLog = ApprovalStatus.REJECTION != ApprovalStatus.fromCode(request.getStatus());
+        punchProvider.deletePunchExceptionRequest(request);
+
+        if (!showRefreshPunchDayLog) {
+            return;
+        }
+        try {
+            Calendar punCalendar = Calendar.getInstance();
+            punCalendar.setTime(request.getPunchDate());
+            OrganizationMemberDetails memberDetail = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(request.getUserId(), request.getEnterpriseId());
+            punchService.refreshPunchDayLog(memberDetail, punCalendar);
+        } catch (Exception e) {
+            LOGGER.error("refreshPunchDayLog error user_id = {}", flowCase.getApplyUserId());
+        }
     }
 }

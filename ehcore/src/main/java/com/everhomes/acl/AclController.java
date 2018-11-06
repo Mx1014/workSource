@@ -10,9 +10,9 @@ import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.customer.createSuperAdminCommand;
 import com.everhomes.rest.module.ListServiceModuleAppsAdministratorResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,23 +33,22 @@ public class AclController extends ControllerBase {
     private ServiceModuleService serviceModuleService;
 
 
-    /**
-     * <b>URL: /acl/createOrganizationAdmin</b>
-     * <p>创建公司管理员</p>
-     */
-    @RequestMapping("createOrganizationAdmin")
-    @RestReturn(value=OrganizationContactDTO.class)
-    @Deprecated
-    public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
-        /*SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
-            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
-        }*/
-        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationAdmin(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /acl/createOrganizationAdmin</b>
+//     * <p>创建公司管理员</p>
+//     */
+//    @RequestMapping("createOrganizationAdmin")
+//    @RestReturn(value=OrganizationContactDTO.class)
+//    public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+//            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_CREATE);
+//        }
+//        RestResponse response =  new RestResponse(rolePrivilegeService.createOrganizationAdmin(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /acl/createOrganizationSuperAdmin</b>
@@ -142,24 +141,23 @@ public class AclController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /acl/deleteOrganizationAdministrators</b>
-     * <p>删除公司管理员</p>
-     */
-    @RequestMapping("deleteOrganizationAdministrators")
-    @RestReturn(value=String.class)
-    @Deprecated
-    public RestResponse deleteOrganizationAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
-        /*SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
-            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_DELETE);
-        }*/
-        rolePrivilegeService.deleteOrganizationAdministrators(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /acl/deleteOrganizationAdministrators</b>
+//     * <p>删除公司管理员</p>
+//     */
+//    @RequestMapping("deleteOrganizationAdministrators")
+//    @RestReturn(value=String.class)
+//    public RestResponse deleteOrganizationAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+//            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_DELETE);
+//        }
+//        rolePrivilegeService.deleteOrganizationAdministrators(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /acl/deleteOrganizationSuperAdministrators</b>
@@ -209,23 +207,22 @@ public class AclController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /acl/listOrganizationAdministrators</b>
-     * <p>公司管理员列表</p>
-     */
-    @RequestMapping("listOrganizationAdministrators")
-    @RestReturn(value=OrganizationContactDTO.class, collection = true)
-    @Deprecated
-    public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        /*SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
-            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_LIST);
-        }*/
-        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /acl/listOrganizationAdministrators</b>
+//     * <p>公司管理员列表</p>
+//     */
+//    @RequestMapping("listOrganizationAdministrators")
+//    @RestReturn(value=OrganizationContactDTO.class, collection = true)
+//    public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        if(!resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOwnerId())){
+//            resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.ORG_ADMIN_LIST);
+//        }
+//        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 
     /**
@@ -494,39 +491,38 @@ public class AclController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /acl/createServiceModuleAdministrators</b>
-     * <p>创建业务模块管理员</p>
-     */
-    @RequestMapping("createServiceModuleAdministrators")
-    @RestReturn(value=String.class)
-    @Deprecated
-    public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_CREATE);
-        rolePrivilegeService.createServiceModuleAdministrators(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /acl/updateServiceModuleAdministrators</b>
-     * <p>修改业务模块管理员</p>
-     */
-    @RequestMapping("updateServiceModuleAdministrators")
-    @RestReturn(value=String.class)
-    @Deprecated
-    public RestResponse updateServiceModuleAdministrators(@Valid UpdateServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_UPDATE);
-        rolePrivilegeService.updateServiceModuleAdministrators(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+    // by lei.lv 废弃代码
+//    /**
+//     * <b>URL: /acl/createServiceModuleAdministrators</b>
+//     * <p>创建业务模块管理员</p>
+//     */
+//    @RequestMapping("createServiceModuleAdministrators")
+//    @RestReturn(value=String.class)
+//    public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_CREATE);
+//        rolePrivilegeService.createServiceModuleAdministrators(cmd);
+//        RestResponse response =  new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /acl/updateServiceModuleAdministrators</b>
+//     * <p>修改业务模块管理员</p>
+//     */
+//    @RequestMapping("updateServiceModuleAdministrators")
+//    @RestReturn(value=String.class)
+//    public RestResponse updateServiceModuleAdministrators(@Valid UpdateServiceModuleAdministratorsCommand cmd) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.MODULE_ADMIN_UPDATE);
+//        rolePrivilegeService.updateServiceModuleAdministrators(cmd);
+//        RestResponse response =  new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /acl/listServiceModuleAdministrators</b>
@@ -718,8 +714,9 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationSystemAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSystemAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
+    	//查看管理员的功能不进行权限校验 #41146
+        //SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        //resolver.checkCurrentUserAuthority(cmd.getOrganizationId(), PrivilegeConstants.SUPER_ADMIN_LIST);
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSystemAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -779,6 +776,22 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /acl/createSuperAdmin</b>
+     * <p>创建企业管理员</p>
+     */
+    @RequestMapping("createSuperAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse createSuperAdmin(createSuperAdminCommand cmd) {
+        rolePrivilegeService.updateSuperAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 
 }

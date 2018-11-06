@@ -1,33 +1,40 @@
 package com.everhomes.contract;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProperties;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.customer.CustomerEntryInfo;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.flow.*;
+import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
-import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.ChargingVariable;
+import com.everhomes.rest.asset.ChargingVariables;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.contract.ContractDetailDTO;
-import com.everhomes.rest.contract.ContractStatus;
-import com.everhomes.rest.contract.ContractTrackingTemplateCode;
-import com.everhomes.rest.contract.ContractType;
-import com.everhomes.rest.contract.FindContractCommand;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.slf4j.Logger;
@@ -39,8 +46,11 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.jsp.jstl.core.LoopTag;
 
 /**
  * Created by ying.xiong on 2017/8/21.
@@ -82,7 +92,13 @@ public class ContractFlowModuleListener implements FlowModuleListener {
     
     @Autowired
 	private AssetProvider assetProvider;
-
+    
+    @Autowired
+    private AddressProvider addressProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
+    
     @Override
     public List<FlowServiceTypeDTO> listServiceTypes(Integer namespaceId, String ownerType, Long ownerId) {
         List<FlowServiceTypeDTO> list = new ArrayList<>();
@@ -134,7 +150,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contractProvider.updateContract(contract);
             contractSearcher.feedDoc(contract);
             //审批不通过的续约合同，变更合同不修改资产状态
-			if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+			if ((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
 					&& ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
 				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			}
@@ -178,7 +194,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 //记录合同事件日志，by tangcen
         		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
-            	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+            	if ((contractCategory== null && exist.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 	                 //查询企业客户信息，客户状态会由已成交客户变为历史客户
 	           		 if (contract.getCustomerType()==0) {
@@ -214,6 +230,14 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 addressMapping.setLivingStatus(livingStatus);
                 propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
             }
+            //#37329 企业客户管理-入驻信息tab里面关联的该楼栋门牌清理掉
+            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listAddressEntryInfos(mapping.getAddressId());
+            entryInfos.forEach(entryInfo -> {
+            	CustomerEntryInfo customerEntryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(entryInfo.getId());
+            	customerEntryInfo.setStatus(CommonStatus.INACTIVE.getCode());
+            	enterpriseCustomerProvider.updateCustomerEntryInfo(customerEntryInfo);
+                
+            });
         });
     }
 
@@ -440,7 +464,227 @@ public class ContractFlowModuleListener implements FlowModuleListener {
         return sdf.format(time);
     }
 
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("合同价格总额");
+		dto.setValue("contractPrice");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		List<String> operatorsList = new ArrayList<>();
+		operatorsList.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL.getCode());
+		dto.setOperators(operatorsList);
+		list.add(dto);
+		
+		dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("楼宇授权价");
+		dto.setValue("apartAuthorizePrice");
+		dto.setFieldType(GeneralFormFieldType.NUMBER_TEXT.getCode());
+		operatorsList = new ArrayList<>();
+		operatorsList.add(FlowConditionRelationalOperatorType.GREATER_OR_EQUAL.getCode());
+		operatorsList.add(FlowConditionRelationalOperatorType.LESS_OR_EQUAL.getCode());
+		dto.setOperators(operatorsList);
+		list.add(dto);
 
+		return list;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("step into onFlowConditionVariableRender, ctx: {}", ctx);
+		}
+		// 基本的信息
+		FlowCase flowCase = ctx.getFlowCase();
+		FindContractCommand cmd = new FindContractCommand();
+		cmd.setId(flowCase.getReferId());
+		cmd.setNamespaceId(flowCase.getNamespaceId());
+		cmd.setCommunityId(flowCase.getProjectId());
+		cmd.setCategoryId(flowCase.getOwnerId());
+		ContractService contractService = getContractService(flowCase.getNamespaceId());
+		ContractDetailDTO contractDetailDTO = contractService.findContract(cmd);
+
+		// 合同与楼宇的授权进行比较产生的结果（0表示合同总额小于授权价，1表示合同总额大于等于授权价，免审批）
+		if ("contractPrice".equals(variable)) {
+			BigDecimal compareResult = compareAuthorizePriceResult(contractDetailDTO);
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(compareResult);
+			return flowConditionNumberVariable;
+		}
+		// 房源产生的租赁金额
+		if ("apartAuthorizePrice".equals(variable)) {
+			BigDecimal authorizePrice = BigDecimal.ONE;
+			FlowConditionNumberVariable flowConditionNumberVariable = new FlowConditionNumberVariable(authorizePrice);
+			return flowConditionNumberVariable;
+		}
+		return null;
+	}
+	
+	//计算合同与楼宇的授权进行比较产生的结果（0表示合同总额小于授权价，1表示合同总额大于等于授权价，免审批）
+	public BigDecimal compareAuthorizePriceResult(ContractDetailDTO contractDetailDTO) {
+		BigDecimal contractPrice = BigDecimal.ZERO; // 合同租赁总额
+		BigDecimal compareResult = BigDecimal.ONE; // 比较结果
+		Community community = communityProvider.findCommunityById(contractDetailDTO.getCommunityId());
+
+		// 获取房源设置的费项类型，
+		apartment: for (int i = 0; i < contractDetailDTO.getApartments().size(); i++) {
+			Long addressId = contractDetailDTO.getApartments().get(i).getAddressId();
+			
+			// 获得房源的详细信息
+			Address address = addressProvider.findAddressById(addressId);
+			AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, address.getBuildingId(), addressId);
+
+			if (addressProperties == null || addressProperties.getApartmentAuthorizeType() == null || addressProperties.getAuthorizePrice() == null || addressProperties.getChargingItemsId() == null) {
+				return BigDecimal.ZERO;
+			}
+
+			BigDecimal resultPrice = addressProperties.getAuthorizePrice();
+			BigDecimal addressPrice = addressProperties.getAuthorizePrice();
+
+			if (contractDetailDTO.getChargingItems() != null) {
+				chargingItems: for (int j = 0; j < contractDetailDTO.getChargingItems().size(); j++) {
+					if (contractDetailDTO.getChargingItems().get(j).getChargingItemId() != addressProperties.getChargingItemsId()) {
+						compareResult = BigDecimal.ZERO;
+						continue chargingItems;
+					}
+					// 计价条款是否包含该房源，如果不包括不用计算
+					apartments: for (int j2 = 0; j2 < contractDetailDTO.getChargingItems().get(j).getApartments().size(); j2++) {
+
+						BuildingApartmentDTO buildingApartment = contractDetailDTO.getChargingItems().get(j).getApartments().get(j2);
+
+						if (addressId.equals(buildingApartment.getAddressId())) {
+							break;
+						} else {
+							int apartmentsTag = j2 + 1;
+							if (apartmentsTag >= contractDetailDTO.getChargingItems().get(j).getApartments().size()) {
+								int chargingItemsTag = j + 1;
+								if (chargingItemsTag >= contractDetailDTO.getChargingItems().size()) {
+									continue apartment;
+								} else {
+									continue chargingItems;
+								}
+							} else {
+								continue apartments;
+							}
+						}
+					}
+					
+					String chargingVariables = contractDetailDTO.getChargingItems().get(j).getChargingVariables();
+					if (chargingVariables.contains("\"variableIdentifier\":\"gdje\"")) {// 固定金额
+						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper
+								.fromJsonString(chargingVariables, ChargingVariables.class);
+						if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+							for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+								if (chargingVariable.getVariableIdentifier() != null
+										&& chargingVariable.getVariableIdentifier().equals("gdje")) {
+
+									BigDecimal gdje = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+
+									if (null != contractDetailDTO.getChargingItems().get(j).getBillingCycle()) {// 为null代表无此分类的应用
+										byte billingCycle = contractDetailDTO.getChargingItems().get(j).getBillingCycle();
+										contractPrice = getMonthlyExpectAmount(billingCycle, gdje);
+
+									} else {
+										LOGGER.error("compareAuthorizePriceResult getBillingCycle is error!");
+										throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+												ContractErrorCode.ERROR_BILLINGCYCLE_IS_EMPTY, "compareAuthorizePriceResult getBillingCycle is error!");
+									}
+
+									if (null != addressProperties.getApartmentAuthorizeType()) {// 为null代表无此分类的应用
+										byte partmentAuthorizeType = addressProperties.getApartmentAuthorizeType();
+										resultPrice = getMonthlyExpectAmount(partmentAuthorizeType, addressPrice);
+
+									} else {
+										LOGGER.error("compareAuthorizePriceResult getBillingCycle is error!");
+										throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+												ContractErrorCode.ERROR_BILLINGCYCLE_IS_EMPTY, "compareAuthorizePriceResult getBillingCycle is error!");
+									}
+									if (contractPrice.compareTo(resultPrice) >= 0) {
+										continue chargingItems;
+									} else {
+										return BigDecimal.ZERO;
+									}
+								}
+							}
+						}
+					} else if (chargingVariables.contains("\"variableIdentifier\":\"dj\"")) {// 单价
+						ChargingVariables chargingVariableList = (ChargingVariables) StringHelper.fromJsonString(chargingVariables, ChargingVariables.class);
+						if (chargingVariableList != null && chargingVariableList.getChargingVariables() != null) {
+							BigDecimal dj = BigDecimal.ZERO;// 单价
+							BigDecimal mj = BigDecimal.ZERO;
+							for (ChargingVariable chargingVariable : chargingVariableList.getChargingVariables()) {
+								if (chargingVariable.getVariableIdentifier() != null) {
+									if (chargingVariable.getVariableIdentifier().equals("dj")) {
+										dj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+									}
+									if (chargingVariable.getVariableIdentifier().equals("mj")) {
+										mj = BigDecimal.valueOf(Double.parseDouble(chargingVariable.getVariableValue() + ""));
+									}
+								}
+							}
+							if (null != contractDetailDTO.getChargingItems().get(j).getBillingCycle()) {// 为null代表无此分类的应用
+								byte billingCycle = contractDetailDTO.getChargingItems().get(j).getBillingCycle();
+								contractPrice = getMonthlyExpectAmount(billingCycle, dj.multiply(mj));
+
+							} else {
+								LOGGER.error("compareAuthorizePriceResult getBillingCycle is error!");
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+										ContractErrorCode.ERROR_BILLINGCYCLE_IS_EMPTY, "compareAuthorizePriceResult getBillingCycle is error!");
+							}
+
+							if (null != addressProperties.getApartmentAuthorizeType()) {// 为null代表无此分类的应用
+								byte partmentAuthorizeType = addressProperties.getApartmentAuthorizeType();
+								resultPrice = getMonthlyExpectAmount(partmentAuthorizeType, addressPrice);
+							} else {
+								LOGGER.error("compareAuthorizePriceResult getBillingCycle is error!");
+								throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
+										ContractErrorCode.ERROR_BILLINGCYCLE_IS_EMPTY, "compareAuthorizePriceResult getBillingCycle is error!");
+							}
+							if (contractPrice.compareTo(resultPrice) >= 0) {
+								continue chargingItems;
+							} else {
+								return BigDecimal.ZERO;
+							}
+						}
+					}
+				}
+			}
+		}
+		return compareResult;
+	}
+
+	//传入金额和计费周期，计算出每月的金额
+	private BigDecimal getMonthlyExpectAmount(Byte cycleType, BigDecimal amount) {
+		BigDecimal ResultPrice = BigDecimal.ZERO;
+		switch (ApartmentRentType.fromCode(cycleType)) {
+		case DAY:
+			ResultPrice = amount.multiply(BigDecimal.valueOf(ApartmentRentType.DAY.getOffset()));
+			break;
+		case NATURAL_MONTH:
+		case CONTRACT_MONTH:
+			ResultPrice = amount;
+			break;
+		case NATURAL_QUARTER:
+		case CONTRACT_QUARTER:
+			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_QUARTER.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
+			break;
+		case NATURAL_YEAR:
+		case CONTRACT_YEAR:
+			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_YEAR.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
+			break;	
+		case CONTRACT_TWOMONTH:
+			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_TWOMONTH.getOffset()), 2, BigDecimal.ROUND_HALF_UP);
+			break;
+		case CONTRACT_SIXMONTH:
+			ResultPrice = amount.divide(BigDecimal.valueOf(ApartmentRentType.CONTRACT_SIXMONTH.getOffset()), 2, BigDecimal.ROUND_HALF_UP);;
+			break;
+		default:
+			break;
+		}
+		return ResultPrice;
+	}
+	
     @Override
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
         return null;

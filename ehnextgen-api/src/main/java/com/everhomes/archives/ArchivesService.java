@@ -6,11 +6,14 @@ import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.organization.GetArchivesContactCommand;
 import com.everhomes.rest.organization.GetImportFileResultCommand;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.OutputStream;
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -28,12 +31,6 @@ public interface ArchivesService {
     void stickArchivesContact(StickArchivesContactCommand cmd);
 
     ListArchivesContactsResponse listArchivesContacts(ListArchivesContactsCommand cmd);
-
-    void exportArchivesContacts(ListArchivesContactsCommand cmd);
-
-    OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
-
-    void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
 
     ListArchivesEmployeesResponse listArchivesEmployees(ListArchivesEmployeesCommand cmd);
 
@@ -108,4 +105,5 @@ public interface ArchivesService {
     void cleanRedundantArchivesDetails();
     /* 同步数据接口 end */
 
+	ArchivesContactDTO getArchivesContact(GetArchivesContactCommand cmd);
 }

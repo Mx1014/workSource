@@ -4,8 +4,8 @@ package com.everhomes.rest.portal;
  * <ul>
  * <li>label: 门户导航栏名称</li>
  * <li>description: 门户导航栏描述</li>
- * <li>targetId: 对象id</li>
- * <li>targetType: 对象类型</li>
+ * <li>type: 对象id</li>
+ * <li>configJson: 对象类型</li>
  * <li>iconUrl: 导航的icon图片url</li>
  * <li>selectedIconUrl: 选中导航的icon图片url</li>
  *  <li>createTime: 创建时间</li>
@@ -21,8 +21,8 @@ public class PortalNavigationBarDTO {
     private String label;
     private String contentName;
     private String description;
-    private Long targetId;
-    private String targetType;
+    private Byte type;
+    private String configJson;
     private String iconUrl;
     private String iconUri;
     private String selectedIconUrl;
@@ -114,20 +114,20 @@ public class PortalNavigationBarDTO {
         this.operatorUName = operatorUName;
     }
 
-    public Long getTargetId() {
-        return targetId;
+    public Byte getType() {
+        return type;
     }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
+    public void setType(Byte type) {
+        this.type = type;
     }
 
-    public String getTargetType() {
-        return targetType;
+    public String getConfigJson() {
+        return configJson;
     }
 
-    public void setTargetType(String targetType) {
-        this.targetType = targetType;
+    public void setConfigJson(String configJson) {
+        this.configJson = configJson;
     }
 
     public String getIconUrl() {

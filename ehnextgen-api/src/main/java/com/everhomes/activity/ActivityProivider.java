@@ -174,6 +174,8 @@ public interface ActivityProivider {
 	void CreateActivityPayee(ActivityBizPayee activityBizPayee);
 
 	void updateActivityPayee(ActivityBizPayee activityBizPayee);
+
+	List<ActivityRoster> listActivityRosterByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize);
 	
 //	void createActivityRosterError(ActivityRosterError rosterError);
 //

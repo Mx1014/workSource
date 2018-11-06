@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- * <li>BillGroupId:账单组id</li>
- * <li>BillGroupName:账单组名称</li>
+ * <li>billGroupId:账单组id</li>
+ * <li>billGroupName:账单组名称</li>
  * <li>defaultOrder:账单组排序，数值小着优先度高</li>
  * <li>billingCycle:计费周期,1:按天;2:按月;3:按季度;4:按年;</li>
  * <li>billingDay:出账单日</li>
@@ -16,11 +16,12 @@ import com.everhomes.util.StringHelper;
  * <li>bizPayeeAccount:收款方账户</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
+ * <li>accountAliasName:收款方名称</li>
  *</ul>
  */
 public class ListBillGroupsDTO {
-    private Long BillGroupId;
-    private String BillGroupName;
+    private Long billGroupId;
+    private String billGroupName;
     private Integer defaultOrder;
     private Byte billingCycle;
     private Integer billingDay;
@@ -57,28 +58,12 @@ public class ListBillGroupsDTO {
         this.defaultOrder = defaultOrder;
     }
 
-    public Long getBillGroupId() {
-        return BillGroupId;
-    }
-
-    public void setBillGroupId(Long billGroupId) {
-        BillGroupId = billGroupId;
-    }
-
-    public String getBillGroupName() {
-        return BillGroupName;
-    }
-
     public Byte getDueDayType() {
         return dueDayType;
     }
 
     public void setDueDayType(Byte dueDayType) {
         this.dueDayType = dueDayType;
-    }
-
-    public void setBillGroupName(String billGroupName) {
-        BillGroupName = billGroupName;
     }
 
     public Byte getBillingCycle() {
@@ -155,6 +140,22 @@ public class ListBillGroupsDTO {
 
 	public void setBrotherGroupId(Long brotherGroupId) {
 		this.brotherGroupId = brotherGroupId;
+	}
+
+	public Long getBillGroupId() {
+		return billGroupId;
+	}
+
+	public void setBillGroupId(Long billGroupId) {
+		this.billGroupId = billGroupId;
+	}
+
+	public String getBillGroupName() {
+		return billGroupName;
+	}
+
+	public void setBillGroupName(String billGroupName) {
+		this.billGroupName = billGroupName;
 	}
 
 }

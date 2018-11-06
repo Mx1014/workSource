@@ -4,21 +4,20 @@ package com.everhomes.rest.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMenuResponse;
 
 public class OrgListAllChildrenOrganizationsRestResponse extends RestResponseBase {
 
-    private List<OrganizationDTO> response;
+    private OrganizationMenuResponse response;
 
     public OrgListAllChildrenOrganizationsRestResponse () {
     }
 
-    public List<OrganizationDTO> getResponse() {
+    public OrganizationMenuResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<OrganizationDTO> response) {
+    public void setResponse(OrganizationMenuResponse response) {
         this.response = response;
     }
 }

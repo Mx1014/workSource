@@ -33,6 +33,8 @@ public interface CommunityService {
 
     CommunityDTO getCommunityById(GetCommunityByIdCommand cmd);
 
+	CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd);
+
     CommunityDTO getCommunityByUuid(GetCommunityByUuidCommand cmd);
 
 	ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd);
@@ -61,7 +63,13 @@ public interface CommunityService {
 
 	CommunityUserResponse listUserCommunitiesV2(ListCommunityUsersCommand cmd);
 
+	ListAllCommunityUserResponse listAllUserCommunities(ListAllCommunityUsersCommand cmd);
+
 	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
+
+	void exportAllCommunityUsers(ExportAllCommunityUsersCommand cmd);
+
+	void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	
@@ -72,7 +80,9 @@ public interface CommunityService {
     CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityUserAddressDTO qryCommunityUserEnterpriseByUserId(QryCommunityUserAddressByUserIdCommand cmd);
-	
+
+	CommunityUserAddressDTO qryCommunityUserAllByUserId(QryCommunityUserAllByUserIdCommand cmd);
+
 	CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd);
 	
 	CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd);
@@ -141,8 +151,26 @@ public interface CommunityService {
 	
 	ListCommunitiesByOrgIdResponse listCommunitiesByOrgId(ListCommunitiesByOrgIdCommand cmd);
 
-	//导入项目信息
+	ListAllCommunitiesResponse listAllCommunities();
+
+	CommunityInfoDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd);
+
+	CommunityInfoDTO findDefaultCommunity();
+
+    ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd);
+
+	CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd);
+
+    void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd);
+
+	void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd);
+
+	void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId);
+
+		//导入项目信息
 	ImportFileTaskDTO importCommunityDataAdmin(ImportCommunityCommand cmd, MultipartFile multipartFile);
+
+	ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd);
 
 	CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd);
 
@@ -173,5 +201,7 @@ public interface CommunityService {
 	void caculateAllCommunityArea();
 
 	void caculateAllBuildingArea();
+
+	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
 
 }

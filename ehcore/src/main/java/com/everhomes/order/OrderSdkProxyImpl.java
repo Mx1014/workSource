@@ -8,12 +8,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.rest.gorder.http.RestClientSettings;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
+import com.everhomes.rest.promotion.http.RestClientSettings;
 
 @Component
-public class OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{
+public class    OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEvent>{
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSdkProxyImpl.class);
     
     @Autowired
@@ -46,9 +47,9 @@ public class OrderSdkProxyImpl implements ApplicationListener<ContextRefreshedEv
     
     private boolean initRestClientSettings() {
         boolean isChanged = false;
-        String appKey = configurationProvider.getValue(0,"gorder.server.app_key", "");
-        String appSecret = configurationProvider.getValue(0,"gorder.server.app_secret", "");
-        String connectUrl = configurationProvider.getValue(0,"gorder.server.connect_url", "");
+        String appKey = configurationProvider.getValue(0, PaymentConstants.KEY_ORDER_SERVER_APP_KEY, "");
+        String appSecret = configurationProvider.getValue(0, PaymentConstants.KEY_ORDER_SERVER_APP_SECRET, "");
+        String connectUrl = configurationProvider.getValue(0, PaymentConstants.KEY_ORDER_SERVER_CONNECTION_URL, "");
         
         if(this.setting == null) {
             isChanged = true;

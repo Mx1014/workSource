@@ -483,7 +483,13 @@ public interface FlowService {
      */
     FlowCaseTree getProcessingFlowCaseTree(Long flowCaseId);
 
-    FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+    List<FlowEventLog> getNodeEnterLogs(Long flowCaseId, Long flowNodeId, Long stepCount);
+
+    List<FlowEventLog> getNodeEnterLogsIgnoreCompleteFlag(Long flowCaseId, Long flowNodeId);
+
+    List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase);
+
+	FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
 
@@ -543,4 +549,12 @@ public interface FlowService {
 	void updateSubFlowInfo(UpdateSubFlowInfoCommand cmd);
 
     FlowServiceMappingDTO getFlowServiceMapping(GetFlowServiceMappingCommand cmd);
+
+	void enableProjectCustomize(EnableProjectCustomizeCommand cmd);
+
+	void disableProjectCustomize(DisableProjectCustomizeCommand cmd);
+
+    Byte getProjectCustomize(GetProjectCustomizeCommand cmd);
+
+    void doFlowMirror(DoFlowMirrorCommand cmd);
 }

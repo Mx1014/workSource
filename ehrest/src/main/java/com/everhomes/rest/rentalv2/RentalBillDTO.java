@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactPhonenum: 电话号码</li>
  * <li>userName: userName</li>
  * <li>userPhone: userPhone</li>
+ * <li>accountName: 收款账户名称</li>
  * <li>introduction: introduction</li>
  * <li>notice: notice</li>
  * <li>startTime: 开始时间</li>
@@ -43,6 +44,7 @@ import com.everhomes.util.StringHelper;
  * <li>cancelFlag: 是否允许取消,永远为1</li>
  * <li>useDetail: 使用详情</li>
  * <li>vendorType: 支付方式,10001-支付宝，10002-微信</li>
+ * <li>payChannel：支付类型  0个人支付1企业支付(记账)2企业支付(完成)  参考{@link com.everhomes.rest.rentalv2.PayChannel}</li>
  * <li>resourceTypeId: 广场图标id</li>
  * <li>unpayCancelTime: 未支付取消时间</li>
  * <li>doorAuthTime: 门禁二维码有效期</li>
@@ -73,6 +75,7 @@ public class RentalBillDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String accountName;
 	private String userName;
 	private String userPhone;
 	private String introduction;
@@ -101,6 +104,7 @@ public class RentalBillDTO {
 	private Byte payMode;
 	private String offlinePayName;
 	private String offlinePayPhone;
+	private String payChannel;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -607,5 +611,21 @@ public class RentalBillDTO {
 
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+
+	public String getPayChannel() {
+		return payChannel;
+	}
+
+	public void setPayChannel(String payChannel) {
+		this.payChannel = payChannel;
 	}
 }

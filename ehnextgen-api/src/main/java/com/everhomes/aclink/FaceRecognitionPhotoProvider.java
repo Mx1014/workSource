@@ -28,5 +28,7 @@ public interface FaceRecognitionPhotoProvider {
 	List<FaceRecognitionPhoto> findFaceRecognitionPhotoByIds(List<Long> photoIds);
 
 	void updateFacialRecognitionPhotos(List<FaceRecognitionPhoto> listPhotos);
+	
+	FaceRecognitionPhoto findPhotoByAuthId(Long authId);
 
 }

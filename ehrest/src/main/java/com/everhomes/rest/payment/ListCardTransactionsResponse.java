@@ -23,6 +23,7 @@ public class ListCardTransactionsResponse {
 	public void setRequests(List<CardTransactionOfMonth> requests) {
 		this.requests = requests;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.archives.ArchivesUtil;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community_form.CommunityFormProvider;
 import com.everhomes.community_form.CommunityFormType;
@@ -165,6 +166,7 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoCommand;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.activity.ManualSignupCommand;
@@ -230,19 +232,19 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.controller.CreateRefundOrderRestResponse;
-import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessOrderType;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.CreateRefundOrderCommand;
-import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
-import com.everhomes.rest.gorder.order.RefundOrderCommandResponse;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.CreateRefundOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.BusinessOrderType;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.CreateRefundOrderCommand;
+import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.OrderErrorCode;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.PurchaseOrderDTO;
+import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.promotion.order.RefundOrderCommandResponse;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
@@ -296,6 +298,10 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.launchpadbase.AppContext;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
@@ -423,6 +429,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -439,7 +446,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
-public class ActivityServiceImpl implements ActivityService , ApplicationListener<ContextRefreshedEvent> {
+public class ActivityServiceImpl implements ActivityService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityServiceImpl.class);
     
@@ -596,7 +603,6 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
     }
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if(event.getApplicationContext().getParent() == null) {
@@ -857,6 +863,13 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1350,7 +1363,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         createPurchaseOrderCommand.setOrderRemark3(null);
         createPurchaseOrderCommand.setOrderRemark4(null);
         createPurchaseOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         return createPurchaseOrderCommand;
     }
@@ -1406,7 +1419,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -1739,6 +1752,14 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	            if (cmd.getValues() != null) {
                     //报名对接表单，添加表单值数据
                     addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
+
+                    ActivityRoster creator = this.activityProvider.findRosterByUidAndActivityId(activity.getId(), activity.getCreatorUid(), ActivityRosterStatus.NORMAL.getCode());
+                    if (creator != null) {
+                        GeneralForm form = this.generalFormProvider.findGeneralFormById(creator.getFormId());
+                        if (form != null) {
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+                        }
+                    }
                     addGeneralFormValuesCommand.setGeneralFormId(cmd.getFormOriginId());
                     addGeneralFormValuesCommand.setSourceId(roster.getId());
                     addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1799,6 +1820,16 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
+
+        User user = userProvider.findUserById(activityRoster.getUid());
+        if (user == null) {
+            user = new User();
+            user.setId(0L);
+            user.setExecutiveTag((byte) 0);
+        }
+        signupInfoDTO.setNickName(user.getNickName());
+        signupInfoDTO.setType(getAuthFlag(user));
+
         GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
 		getGeneralFormValuesCommand.setSourceId(activityRoster.getId());
 		getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
@@ -1833,17 +1864,17 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
                     signupInfoDTO.setPhone(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
                 }
+                if (StringUtils.isEmpty(signupInfoDTO.getNickName()) && postApprovalFormItem.getFieldName().equals("USER_NAME")) {
+                    signupInfoDTO.setNickName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                }
             }
             signupInfoDTO.setValues(results);
         }
-        User user = getUserFromPhone(signupInfoDTO.getPhone());
-        signupInfoDTO.setNickName(user.getNickName());
-        signupInfoDTO.setType(getAuthFlag(user));
 		if(activityRoster.getCreateTime() != null){
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
 		}
-		
+		signupInfoDTO.setActivityName(activity.getSubject());
 		return signupInfoDTO;
 	}
 
@@ -1967,6 +1998,20 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		return user;
 	}
 
+    private User getUserFromPhoneWithNamespaceId(String phone, Integer namespaceId) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+        if (userIdentifier != null) {
+            User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+            if (user != null) {
+                return user;
+            }
+        }
+        User user = new User();
+        user.setId(0L);
+        user.setExecutiveTag((byte) 0);
+        return user;
+    }
+
 	@Override
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
 		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
@@ -1988,6 +2033,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                 this.generalFormValProvider.deleteGeneralFormVals(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP,roster.getId());
                 addGeneralFormValuesCommand addGeneralFormValuesCommand = new addGeneralFormValuesCommand();
                 addGeneralFormValuesCommand.setGeneralFormId(formOriginId);
+                addGeneralFormValuesCommand.setGeneralFormVersion(list.get(0).getFormVersion());
                 addGeneralFormValuesCommand.setSourceId(roster.getId());
                 addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                 addGeneralFormValuesCommand.setValues(cmd.getValues());
@@ -2060,6 +2106,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(oldRoster.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         activityProvider.updateRoster(oldRoster);
@@ -2075,6 +2122,8 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
                             addGeneralFormValuesCommand.setSourceId(r.getId());
                             addGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
                             addGeneralFormValuesCommand.setValues(values.get(i));
+                            addGeneralFormValuesCommand.setGeneralFormVersion(form.getFormVersion());
+
                             this.generalFormService.addGeneralFormValues(addGeneralFormValuesCommand);
                         }
                         // 报名活动事件
@@ -2485,7 +2534,27 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
-	@Override
+    @Override
+    public ListSignupInfoByOrganizationIdResponse listSignupInfoByOrganizationId(Long organizationId, Integer namespaceId, Long pageAnchor, int pageSize) {
+        ListSignupInfoByOrganizationIdResponse response = new ListSignupInfoByOrganizationIdResponse();
+	    List<ActivityRoster> list = this.activityProvider.listActivityRosterByOrganizationId(organizationId, namespaceId, pageAnchor, pageSize);
+	    if (list.size() > pageSize){
+            ActivityRoster remove = list.remove(list.size() -1);
+            response.setNextAnchor(remove.getId());
+        }
+        List<SignupInfoDTO> signupInfoDTOList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(list)) {
+	        for (ActivityRoster activityRoster : list) {
+                Activity activity = checkActivityExist(activityRoster.getActivityId());
+                SignupInfoDTO signupInfoDTO = convertActivityRoster(activityRoster, activity);
+                signupInfoDTOList.add(signupInfoDTO);
+            }
+        }
+        response.setSignupInfoDTOs(signupInfoDTOList);
+        return response;
+    }
+
+    @Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
@@ -2796,6 +2865,10 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 //	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
 //	             forumProvider.createPost(p);
 	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+                 ActivityRoster cancelRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.CANCEL.getCode());
+                 if (cancelRoster != null && cancelRoster.getPayFlag() != null && cancelRoster.getPayFlag().equals(ActivityRosterPayFlag.REFUND.getCode())) {
+                     dto.setUserPayFlag(ActivityRosterPayFlag.REFUND.getCode());
+                 }
 	             dto.setActivityId(activity.getId());
 	             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 	             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
@@ -2993,11 +3066,12 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 
     private CreateRefundOrderCommand prepareRefundCommand(ActivityRoster roster){
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         createRefundOrderCommand.setAccountCode(generateAccountCode());
         createRefundOrderCommand.setBusinessOrderNumber(roster.getOrderNo());
-        createRefundOrderCommand.setAmount(roster.getPayAmount().longValue());
+        Double payAmount = roster.getPayAmount().doubleValue() * 100;
+        createRefundOrderCommand.setAmount(payAmount.longValue());
         createRefundOrderCommand.setBusinessOperatorType(BusinessPayerType.USER.getCode());
         createRefundOrderCommand.setBusinessOperatorId(String.valueOf(UserContext.currentUserId()));
         createRefundOrderCommand.setCallbackUrl(getPayCallbackUrl());
@@ -4944,52 +5018,63 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	    User user = UserContext.current().getUser();
 	    Long userId = user.getId();
 	    Integer namespaceId = UserContext.getCurrentNamespaceId();
-	    SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
-	    
-	    int geoCharCount = 6; // 默认使用6位GEO字符
+	    //SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
+
+        AppContext appContext = UserContext.current().getAppContext();
+
+        int geoCharCount = 6; // 默认使用6位GEO字符
 	    ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
 	    if(scope == ActivityLocationScope.SAME_CITY) {
 	        geoCharCount = 4;
 	    }
 	    
 	    ListActivitiesReponse resp = null;
-	    SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
+	    //SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
         //检查游客是否能继续访问此场景 by sfyan 20161009
-        userService.checkUserScene(sceneType);
-	    switch(sceneType) {
-	    case DEFAULT:
-	    case PARK_TOURIST:
-	        resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId(), scope);
-	        break;
-	    case FAMILY:
-	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
-	        if(family != null) {
-	            resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, family.getCommunityId(), scope);
-	        } else {
-	            if(LOGGER.isWarnEnabled()) {
-	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
-	            }
-	        }
-	        break;
-        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
-        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
-	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
-            if(organization != null) {
-                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, communityId, scope);
-            }
-            break;
-	    case PM_ADMIN:
-			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
-			//resp = listOrgNearbyActivities(execOrgCmd);
-			execOrgCmd.setSceneToken(cmd.getSceneToken());
-			resp = listOrgActivitiesByScope(execOrgCmd);
-	        break;
-	    default:
-	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
-	        break;
-	    }
+//        userService.checkUserScene(sceneType);
+//	    switch(sceneType) {
+//	    case DEFAULT:
+//	    case PARK_TOURIST:
+//	        resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId(), scope);
+//	        break;
+//	    case FAMILY:
+//	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+//	        if(family != null) {
+//	            resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, family.getCommunityId(), scope);
+//	        } else {
+//	            if(LOGGER.isWarnEnabled()) {
+//	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+//	            }
+//	        }
+//	        break;
+//        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+//	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+//            if(organization != null) {
+//                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+//                resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, communityId, scope);
+//            }
+//            break;
+//	    case PM_ADMIN:
+//			ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+//			execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+//			//resp = listOrgNearbyActivities(execOrgCmd);
+//			execOrgCmd.setSceneToken(cmd.getSceneToken());
+//			resp = listOrgActivitiesByScope(execOrgCmd);
+//	        break;
+//	    default:
+//	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+//	        break;
+//	    }
+
+        if(appContext.getCommunityId() != null){
+            resp = listActivitiesByScope(null, cmd, geoCharCount, appContext.getCommunityId(), scope);
+        }else if(appContext.getOrganizationId() != null){
+            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+			execOrgCmd.setOrganizationId(appContext.getOrganizationId());
+            resp = listOrgActivitiesByScope(execOrgCmd);
+        }
+
 	    
 	    if(LOGGER.isDebugEnabled()) {
 	        long endTime = System.currentTimeMillis();
@@ -5003,21 +5088,25 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd,
 														int geoCharCount, Long communityId, ActivityLocationScope scope){
-		if(scope != null && scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
-			return listOfficialActivitiesByScene(cmd);
-		}else{
-			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
-		}
+		//if(scope != null && scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
+
+        //现在应该都是园区的
+        return listOfficialActivitiesByScene(cmd);
+//		}else{
+//			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+//		}
 	}
 
 	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
 	private  ListActivitiesReponse listOrgActivitiesByScope(ListOrgNearbyActivitiesCommand execOrgCmd){
-		if(execOrgCmd.getScope() != null && execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
-			ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
+		//if(execOrgCmd.getScope() != null && execOrgCmd.getScope() == ActivityLocationScope.COMMUNITY.getCode()){
+
+        //现在应该都是园区的
+        ListNearbyActivitiesBySceneCommand command = ConvertHelper.convert(execOrgCmd, ListNearbyActivitiesBySceneCommand.class);
 			return listOfficialActivitiesByScene(command);
-		}else{
-			return listOrgNearbyActivities(execOrgCmd);
-		}
+//		}else{
+//			return listOrgNearbyActivities(execOrgCmd);
+//		}
 	}
 	
 	//根据小区获取活动
@@ -5314,9 +5403,31 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
 		Long userId = UserContext.current().getUser().getId();
 		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
-		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
-		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
-		cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+		//SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
+		//processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
+
+        AppContext appContext = UserContext.current().getAppContext();
+
+        if(appContext.getCommunityId() != null && appContext.getOrganizationId() != null){
+            cmd.setCommunityId(appContext.getCommunityId());
+            cmd.setOrganizationId(appContext.getOrganizationId());
+        }else if(appContext.getCommunityId() != null){
+            cmd.setCommunityId(appContext.getCommunityId());
+            List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(appContext.getCommunityId());
+            if (list != null && list.size() > 0) {
+                cmd.setOrganizationId(list.get(0).getOrganizationId());
+            }
+        }else if(appContext.getOrganizationId() != null) {
+            cmd.setOrganizationId(appContext.getOrganizationId());
+            OrganizationDTO org = organizationService.getOrganizationById(appContext.getOrganizationId());
+            if (org != null && org.getCommunityId() != null) {
+                cmd.setCommunityId(org.getCommunityId());
+            }
+
+        }
+
+
+        cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
 		cmd.setEmbeddedAppId(AppConstants.APPID_ACTIVITY);
 		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
 		cmd.setPageAnchor(command.getPageAnchor());
@@ -6879,6 +6990,27 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
 				listDto.add(tempDto);
 			});
 		}
+		//将所有获取不到企业名称的数据合为一个。
+		Integer size = listDto.size();
+		if (!CollectionUtils.isEmpty(listDto)) {
+            Iterator<StatisticsOrganizationDTO> iterator = listDto.iterator();
+            Integer anotherPeopleCount = 0;
+            Integer anotherActivityCount = 0;
+            while (iterator.hasNext()) {
+                StatisticsOrganizationDTO dto = iterator.next();
+                if (StringUtils.isEmpty(dto.getOrgName())) {
+                    anotherPeopleCount += dto.getSignPeopleCount();
+                    anotherActivityCount += dto.getSignActivityCount();
+                    iterator.remove();
+                }
+            }
+            if (size > listDto.size()) {
+                StatisticsOrganizationDTO anotherDto = new StatisticsOrganizationDTO();
+                anotherDto.setSignPeopleCount(anotherPeopleCount);
+                anotherDto.setSignActivityCount(anotherActivityCount);
+                listDto.add(anotherDto);
+            }
+        }
 		response.setList(listDto);
 		return response;
 	}
@@ -7207,7 +7339,7 @@ public class ActivityServiceImpl implements ActivityService , ApplicationListene
         }
 
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(0, "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         getPurchaseOrderCommand.setAccountCode(generateAccountCode());
         getPurchaseOrderCommand.setBusinessOrderNumber(cmd.getBizOrderNum());

@@ -9,11 +9,13 @@ import javax.validation.constraints.NotNull;
 /**
  *<ul>
  * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者type</li>
+ * <li>ownerType: 所属者type community</li>
  * <li>namespaceId:域空间</li>
  * <li>chargingItemId:收费项目id</li>
  * <li>pageAnchor:锚点</li>
  * <li>pageSize:每页大小</li>
+ * <li>organizationId:管理公司ID</li>
+ * <li>appId:应用ID</li>
  *</ul>
  */
 public class ListChargingStandardsCommand {
@@ -30,6 +32,10 @@ public class ListChargingStandardsCommand {
     private Long categoryId;
     private Long moduleId;
     private Long billGroupId;
+    
+    private Long organizationId;
+    private Long appId;
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     public Long getModuleId() {
 		return moduleId;
@@ -112,5 +118,29 @@ public class ListChargingStandardsCommand {
 
 	public void setBillGroupId(Long billGroupId) {
 		this.billGroupId = billGroupId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
 	}
 }

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.AddressProperties;
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
@@ -532,5 +534,22 @@ public interface PropertyMgrProvider {
 	PmResourceReservation findReservationById(Long reservationId);
 
 	void updateReservation(PmResourceReservation oldReservation);
+
+	void createAuthorizePrice(AddressProperties addressProperties);
+
+	List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, Integer pageSize);
+
+	AddressProperties findAddressPropertiesById(Long id);
+
+	void updateAuthorizePrice(AddressProperties addressProperties);
+
+	void deleteAuthorizePrice(AddressProperties addressProperties);
+
+	AddressProperties findAddressPropertiesByApartmentId(Community community, Long buildingId, Long address);
+
+	CommunityPmOwner findOrganizationOwnerByContactToken(String contactToken, Integer namespaceId);
+
+	CommunityPmOwner findOrganizationOwnerByContactExtraTels(String contactToken, Integer namespaceId);
+
 
 }

@@ -16,7 +16,11 @@ import com.everhomes.rest.archives.EmployArchivesEmployeesCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterpriseApproval.ApprovalFlowIdsCommand;
 import com.everhomes.rest.enterpriseApproval.ComponentEmployApplicationValue;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.user.UserContext;
@@ -137,5 +141,9 @@ public class EnterpriseApprovalEmployHandler implements EnterpriseApprovalHandle
         Long userId = UserContext.currentUserId();
         return enterpriseApprovalService.checkArchivesApproval(userId, cmd.getCurrentOrganizationId(), cmd.getSourceId(),
                 ArchivesOperationType.EMPLOY.getCode());
+    }
+
+    @Override
+    public void onFlowCaseDeleted(FlowCase flowCase) {
     }
 }

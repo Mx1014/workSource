@@ -6,36 +6,40 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * <ul> 
- * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
- * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
- * <li>organizationId: 属于的公司 ID</li>
- * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
- * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
- * <li>formName: 表单名字</li>
- * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
- * <li>approvalAttribute: 表单属性 比如: DEFAULT-系统默认 参考{@link com.everhomes.rest.general_approval.GeneralApprovalAttribute}</li>
- * <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
- * <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
+ * <ul>
+ *     <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId</li>
+ *     <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
+ *     <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
+ *     <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
+ *     <li>organizationId: 属于的公司 ID</li>
+ *     <li>formName: 表单名字</li>
+ *     <li>projectId: projectId</li>
+ *     <li>projectType: projectType</li>
+ *     <li>formAttribute: formAttribute</li>
+ *     <li>modifyFlag: 是否可修改 0-不可修改 1-可以修改</li>
+ *     <li>deleteFlag: 是否可删除 0-不可删除 1-可以删除</li>
+ *     <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * </ul>
- * @author janson
- *
  */
 public class CreateApprovalFormCommand {
-    private Long     ownerId;
-    private String     ownerType;
-    private Long     moduleId;
-    private String     moduleType;
-    private Long     organizationId;
-    private String     formName;
+
+	private Long ownerId;
+	private String ownerType;
+	private Long moduleId;
+	private String moduleType;
+	private Long organizationId;
+	private String formName;
+
+	private Long projectId;
+	private String projectType;
 
 	//added by R.
 	private String formAttribute;
 	private Byte modifyFlag;
 	private Byte deleteFlag;
 
-    @ItemType(GeneralFormFieldDTO.class)
-    List<GeneralFormFieldDTO> formFields;
+	@ItemType(GeneralFormFieldDTO.class)
+	List<GeneralFormFieldDTO> formFields;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -117,8 +121,24 @@ public class CreateApprovalFormCommand {
 		this.deleteFlag = deleteFlag;
 	}
 
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

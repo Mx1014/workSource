@@ -70,6 +70,9 @@ ContentType.prototype = {
             return template.queryStringBuilder().vars(flattenMap).build("");
         }
         else if (this.contentType.indexOf("application/json") !== -1) {
+            if (typeof param === 'string') {
+                return param;
+            }
             return JSON.stringify(param);
         }
         else {

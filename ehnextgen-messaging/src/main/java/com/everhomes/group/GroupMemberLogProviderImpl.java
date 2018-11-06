@@ -63,6 +63,20 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
     }
 
     @Override
+    public List<GroupMemberLog> listGroupMemberLogByUserId(Long userId, Byte status) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select().from(Tables.EH_GROUP_MEMBER_LOGS).getQuery();
+        query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_ID.eq(userId));
+        if(status != null){
+            query.addConditions(Tables.EH_GROUP_MEMBER_LOGS.MEMBER_STATUS.eq(status));
+        }
+        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc());
+        List<GroupMemberLog> list = query.fetch().map(r -> ConvertHelper.convert(r, GroupMemberLog.class));
+
+        return  list;
+    }
+
+    @Override
     public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
         Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
         groupMemberLog.setId(id);
@@ -81,6 +95,12 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
 
         query.addSelect(Tables.EH_USERS.NICK_NAME);
         query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBER_LOGS.MEMBER_ID.eq(Tables.EH_USERS.ID));
+        
+        if (StringUtils.isNotBlank(identifierToken)) {
+        	//联表EH_USER_IDENTIFIERS，由于用户认证分邮箱与手机号两种匹配方式，因为客户端暂只开放手机号，所以这里指定 IDENTIFIER_TYPE 为 0（手机号） ;add by moubinmo,18/10/25
+        	query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID).and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte)0)));        	
+        }
+
         query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 
         query.addSelect(Tables.EH_COMMUNITIES.NAME);

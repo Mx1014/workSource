@@ -1,9 +1,9 @@
 package com.everhomes.contract;
 
 
+import java.math.BigDecimal;
 import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,8 @@ import com.everhomes.asset.szwwyjf.SZWQuery;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
+import com.everhomes.rest.contract.ContractCategoryCommand;
+import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractEventDTO;
@@ -250,7 +252,7 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
-	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd, HttpServletResponse response) {
+	public void exportContractListByCommunityCategoryId(SearchContractCommand cmd) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -322,9 +324,13 @@ public class SZWContractHandler implements ContractService{
 	}
 
 	@Override
+	public List<ContractCategoryListDTO> getContractCategoryList(ContractCategoryCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	public void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd) {
 		// TODO Auto-generated method stub
-		
+
 	}
-    
+
 }

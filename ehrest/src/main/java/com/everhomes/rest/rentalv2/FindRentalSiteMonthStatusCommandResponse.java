@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>rentalSiteId：场所id</li> 
  * <li>siteName：场所名称</li>
+ * <li>resourceCounts：场所数量</li>
  * <li>introduction：详情</li>
  * <li>notice：备注文字</li>
  * <li>address：地址</li>
@@ -38,7 +39,8 @@ import com.everhomes.util.StringHelper;
  */
 public class FindRentalSiteMonthStatusCommandResponse {
 	private Long rentalSiteId; 
-	private String siteName; 
+	private String siteName;
+	private Double resourceCounts;
 	private String introduction;  
 	private String notice;
 	private String address;
@@ -101,10 +103,15 @@ public class FindRentalSiteMonthStatusCommandResponse {
 	public void setSiteDays(List<RentalSiteDayRulesDTO> siteDays) {
 		this.siteDays = siteDays;
 	}
- 
 
- 
 
+	public Double getResourceCounts() {
+		return resourceCounts;
+	}
+
+	public void setResourceCounts(Double resourceCounts) {
+		this.resourceCounts = resourceCounts;
+	}
 
 	public String getIntroduction() {
 		return introduction;

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
+import java.util.List;
 
 @RestDoc(value = "visitorsys Controller", site = "core")
 @RestController
@@ -393,7 +394,7 @@ public class VisitorSysController extends ControllerBase {
 	/**
 	 * <b>URL: /visitorsys/listDoorGuards</b>
 	 * <p>
-	 * 22.门禁列表-后台管理
+	 * 22.门禁列表-后台管理(从门禁系统获取)
 	 * </p>
 	 */
 	@RequestMapping("listDoorGuards")
@@ -402,6 +403,69 @@ public class VisitorSysController extends ControllerBase {
 		ListDoorGuardsResponse baseResponse = visitorSysService.listDoorGuards(cmd);
 
 		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/listDoorAccess</b>
+	 * <p>
+	 * 22.门禁授权规则列表-后台管理
+	 * </p>
+	 */
+	@RequestMapping("listDoorAccess")
+	@RestReturn(value = VisitorSysDoorAccessDTO.class,collection = true)
+	public RestResponse listDoorAccess(BaseVisitorsysCommand cmd) {
+		RestResponse response = new RestResponse(visitorSysService.listDoorAccess(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/createDoorAccess</b>
+	 * <p>
+	 * 22.创建门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("createDoorAccess")
+	@RestReturn(String.class)
+	public RestResponse createDoorAccess(CreateOrUpdateDoorAccessCommand cmd) {
+		visitorSysService.createDoorAccess(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/deleteDoorAccess</b>
+	 * <p>
+	 * 22.删除门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("deleteDoorAccess")
+	@RestReturn(String.class)
+	public RestResponse deleteDoorAccess(DeleteDoorAccessCommand cmd) {
+		visitorSysService.deleteDoorAccess(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/setDefaultAccess</b>
+	 * <p>
+	 * 22.设置默认门禁授权规则-后台管理
+	 * </p>
+	 */
+	@RequestMapping("setDefaultAccess")
+	@RestReturn(String.class)
+	public RestResponse setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
+		visitorSysService.setDefaultAccess(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -889,5 +953,56 @@ public class VisitorSysController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /visitorsys/getIDCardInfo</b>
+	 * <p>
+	 * 身份正读卡器接口
+	 * </p>
+	 */
+	@RequestMapping("getIDCardInfo")
+	@RestReturn(IdentifierCardDTO.class)
+	public RestResponse getIDCardInfo() {
+
+		RestResponse response = new RestResponse(visitorSysService.getIDCardInfo());
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/getConfigurationForManage</b>
+	 * <p>
+	 * 1.获取配置-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("getConfigurationForManage")
+	@RestReturn(GetConfigurationResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getConfigurationForManage(GetConfigurationCommand cmd) {
+		GetConfigurationResponse baseResponse = visitorSysService.getConfigurationForManage(cmd);
+
+		RestResponse response = new RestResponse(baseResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /visitorsys/listDoorAccessForManage</b>
+	 * <p>
+	 * 22.门禁授权规则列表-h5 100055 权限校验失败（客户端/微信端 web企业访客/园区访客管理用）
+	 * </p>
+	 */
+	@RequestMapping("listDoorAccessForManage")
+	@RestReturn(value = VisitorSysDoorAccessDTO.class,collection = true)
+	@RequireAuthentication(false)
+	public RestResponse listDoorAccessForManage(BaseVisitorsysCommand cmd) {
+		RestResponse response = new RestResponse(visitorSysService.listDoorAccessForManage(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 }

@@ -65,6 +65,18 @@ public class CommunityFormServiceImpl implements CommunityFormService{
         }
     }
 
+    private List<Long> getCommunityIds(ProjectDTO projectDTO) {
+        List<Long> communnityIds = new ArrayList<>();
+        if (projectDTO != null) {
+            communnityIds.add(projectDTO.getProjectId());
+            if (!CollectionUtils.isEmpty(projectDTO.getProjects())) {
+                for (ProjectDTO p : projectDTO.getProjects()) {
+                    communnityIds.addAll(getCommunityIds(p));
+                }
+            }
+        }
+        return communnityIds;
+    }
     @Override
     public ListCommunityFormResponse listCommunityForm(ListCommunityFormCommand cmd) {
         ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class);
@@ -78,7 +90,13 @@ public class CommunityFormServiceImpl implements CommunityFormService{
         }
         Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
         if (!CollectionUtils.isEmpty(projects)) {
-            List<Long> communnityIds = projects.stream().map(ProjectDTO::getProjectId).collect(Collectors.toList());
+            List<Long> communnityIds = new ArrayList<>();
+            for (ProjectDTO projectDTO : projects) {
+                if (projectDTO == null)
+                    continue;
+
+                communnityIds.addAll(getCommunityIds(projectDTO));
+            }
             List<CommunityGeneralForm> generalFormList = this.communityFormProvider.listCommunityGeneralFormByCommunityIds(communnityIds,cmd.getType(),offset,pageSize+1);
             if (!CollectionUtils.isEmpty(generalFormList)) {
                 for (CommunityGeneralForm communityGeneralForm : generalFormList) {

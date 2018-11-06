@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import com.everhomes.rest.parking.jieshun.VendorNameEnum;
+
 /**
  * <p>停车场厂商</p>
  * <ul>
@@ -12,11 +14,13 @@ package com.everhomes.rest.parking;
  * <li>INNOSPRING("INNOSPRING"): 创源</li>
  * <li>JIN_YI("JIN_YI"): 金溢(清华信息港)</li>
  * <li>ZHONG_BAI_CHANG("ZHONG_BAI_CHANG"): 中百畅(广兴源)</li>
- * <li>GUANG_DA_WE_GU("GUANG_DA_WE_GU"): 光大we谷停车场</li>
+ * <li>GUANG_DA_WE_GU("GUANG_DA_WE_GU"): 光大we谷A区停车场</li>
  * <li>KEXIN_XIAOMAO("KEXIN_XIAOMAO"): 科兴正中时代广场停车场(小猫)</li>
  * <li>YINXINGZHIJIE_TECHPARK("YINXINGZHIJIE_TECHPARK"): 银星科技园停车场</li>
  * <li>YINXINGZHIJIE_XIAOMAO("YINXINGZHIJIE_XIAOMAO"): 银星工业区停车场</li>
  * <li>ELIVE_JIESHUN("ELIVE_JIESHUN"): 住总停车场</li>
+ * <li>JIESHUN_GQY2("JIESHUN_GQY2"): 光大we谷B区停车场</li>
+ * <li>JIESHUN_DSHCXMall("JIESHUN_DSHCXMall"): 大沙河创新大厦/li>
  * </ul>
  */
 public enum ParkingLotVendor {
@@ -42,7 +46,11 @@ public enum ParkingLotVendor {
 	BEE_SUBTWO("BEE_SUBTWO"),
 	BEE_SUBTHREE("BEE_SUBTHREE"),
 	BEE_SUBFOUR("BEE_SUBFOUR"),
-	BEE_SUBFIVE("BEE_SUBFIVE");
+	BEE_SUBFIVE("BEE_SUBFIVE"),
+	JIESHUN_GQY2(VendorNameEnum.JIESHUN_GQY2),
+	JIESHUN_DSHCXMall(VendorNameEnum.JIESHUN_DSHCXMall),
+	KETUO_TEST("KETUO_TEST"),
+	NONE(""); //用于结束
 
     private String code;
     private ParkingLotVendor(String code) {

@@ -179,7 +179,25 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("exportCommunityUsers")
     public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
         communityService.exportCommunityUsers(cmd, response);
+    }
 
+    /**
+     * <b>URL: /community/exportCommunityAllUsers</b>
+     * <p>导出域空间下所有用户列表</p>
+     */
+    @RequestMapping("exportCommunityAllUsers")
+    public void exportCommunityAllUsers(ExportAllCommunityUsersCommand cmd) {
+        communityService.exportAllCommunityUsers(cmd);
+
+    }
+
+    /**
+     * <b>URL: /community/exportBatchCommunityUsers</b>
+     * <p>导出域空间下多个项目的用户列表</p>
+     */
+    @RequestMapping("exportBatchCommunityUsers")
+    public void exportBatchCommunityUsers(ExportBatchCommunityUsersCommand cmd) {
+        communityService.exportBatchCommunityUsers(cmd);
 
     }
 	
@@ -211,7 +229,6 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    	
     }
 
     /**
@@ -440,7 +457,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/listBuildingsByKeywords</b>
      * <p>按照楼栋信息、关键字搜索搜索楼栋，分页</p>
@@ -454,7 +471,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/getCommunityStatistics</b>
      * <p>获取园区的统计信息</p>
@@ -467,8 +484,8 @@ public class CommunityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    } 
-    
+    }
+
     /**
      * <b>URL: /community/getCommunityDetail</b>
      * <p>获取园区的详细信息</p>
@@ -482,7 +499,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     //（新增接口，添加一些字段，在租面积之类的，同时处理园区的分类问题）
     /**
      * <b>URL: /community/updateCommunityAndCategory</b>
@@ -497,7 +514,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/getBuildingStatistics</b>
      * <p>获取楼栋的统计信息</p>
@@ -511,7 +528,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/listApartmentsInCommunity</b>
      * <p>获取园区的房源信息</p>
@@ -525,7 +542,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/getFloorRange</b>
      * <p>获取楼层查询范围</p>
@@ -539,7 +556,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/changeBuildingOrder</b>
      * <p>更新楼层的排序</p>
@@ -553,8 +570,8 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
+
+
     /**
      * <b>URL: /community/caculateCommunityArea</b>
      * <p>计算园区各个面积</p>
@@ -568,7 +585,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/caculateBuildingArea</b>
      * <p>计算楼栋各个面积</p>
@@ -582,7 +599,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/caculateAllCommunityArea</b>
      * <p>计算所有园区的各个面积（建筑面积、在租面积、收费面积、可招租面积）</p>
@@ -596,7 +613,7 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /community/caculateAllBuildingArea</b>
      * <p>计算所有楼宇的各个面积（建筑面积、在租面积、收费面积、可招租面积）</p>
@@ -606,6 +623,135 @@ public class CommunityController extends ControllerBase {
     public RestResponse caculateAllBuildingArea() {
     	this.communityService.caculateAllBuildingArea();
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/listAllCommunities</b>
+     * <p>查询所有园区、小区及园区和用户的相关信息</p>
+     */
+    @RequestMapping("listAllCommunities")
+    @RestReturn(value=ListAllCommunitiesResponse.class)
+    public RestResponse listAllCommunities() {
+
+        ListAllCommunitiesResponse res = communityService.listAllCommunities();
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /community/findNearbyMixCommunity</b>
+     * <p>获取最近的园区</p>
+     */
+    @RequestMapping("findNearbyMixCommunity")
+    @RestReturn(value=CommunityInfoDTO.class)
+    public RestResponse findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
+
+        CommunityInfoDTO res = communityService.findNearbyMixCommunity(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /community/findDefaultCommunity</b>
+     * <p>获取默认园区，比如游客模式拿不到最近园区时可用</p>
+     */
+    @RequestMapping("findDefaultCommunity")
+    @RestReturn(value=CommunityInfoDTO.class)
+    public RestResponse findDefaultCommunity() {
+
+        CommunityInfoDTO res = communityService.findDefaultCommunity();
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /community/listCommunities</b>
+     * <p>查询园区</p>
+     */
+    @RequestMapping("listCommunities")
+    @RestReturn(value=ListCommunitiesResponse.class)
+    public RestResponse listCommunities(ListCommunitiesCommand cmd) {
+
+        ListCommunitiesResponse cmdResponse = this.communityService.listCommunities(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+    /**
+     * <b>URL: /community/listCommunitiesByOrgIdAndAppId</b>
+     * <p>查询当前公司在这个应用中能管理的项目</p>
+     */
+    @RequestMapping("listCommunitiesByOrgIdAndAppId")
+    @RestReturn(value=ListCommunitiesByOrgIdResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
+
+        ListCommunitiesByOrgIdAndAppIdResponse cmdResponse = this.communityService.listCommunitiesByOrgIdAndAppId(cmd);
+        RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+
+    }
+
+
+
+    /**
+     * <b>URL: /community/listAllCommunityUsers</b>
+     * <p>查询域空间所有项目用户列表</p>
+     */
+    @RequestMapping("listAllCommunityUsers")
+    @RestReturn(value=ListAllCommunityUserResponse.class)
+    public RestResponse listAllCommunityUsers(ListAllCommunityUsersCommand cmd) {
+        ListAllCommunityUserResponse res = communityService.listAllUserCommunities(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /community/getOrgIdByCommunityId</b>
+     * <p>通过园区id（communityId）获得其管理公司的id（OrgId）</p>
+     */
+    @RequestMapping("getOrgIdByCommunityId")
+    @RestReturn(value=OrgDTO.class)
+    public RestResponse getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+    	OrgDTO result = communityService.getOrgIdByCommunityId(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/getCommunityForSdkById</b>
+     * <p>根据园区ID获取园区信息</p>
+     */
+    @RequestMapping("getCommunityForSdkById")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityForSdkById(GetCommunityByIdCommand cmd, HttpServletRequest request, HttpServletResponse paramResponse) {
+        CommunityDTO community = this.communityService.getCommunityForSdkById(cmd);
+
+        RestResponse response =  new RestResponse();
+
+        response.setResponseObject(community);
+
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

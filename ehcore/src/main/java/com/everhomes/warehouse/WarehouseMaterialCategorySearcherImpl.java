@@ -1,13 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialCategoriesCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialCategoriesResponse;
 import com.everhomes.rest.warehouse.WarehouseMaterialCategoryDTO;
@@ -15,10 +9,7 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseMaterialCategorySearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -126,8 +117,9 @@ public class WarehouseMaterialCategorySearcherImpl extends AbstractElasticSearch
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
+        // adapt to zuolin base ,remove searching with ownerId conditions
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
 
         if(cmd.getParentId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("parentId", cmd.getParentId()));

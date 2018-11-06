@@ -2,7 +2,6 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 /**
@@ -49,8 +48,6 @@ public class ListArchivesEmployeesCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
-
-    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     public ListArchivesEmployeesCommand() {
     }

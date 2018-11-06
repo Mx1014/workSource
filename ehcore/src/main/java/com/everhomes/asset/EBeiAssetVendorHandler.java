@@ -1,5 +1,6 @@
 package com.everhomes.asset;
 
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.openapi.ContractProvider;
@@ -37,6 +38,9 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
 
     @Autowired
     private ContractProvider contractProvider;
+    
+    @Autowired
+    private AssetGroupProvider assetGroupProvider;
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
@@ -162,7 +166,7 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
         }
         String fiProperty = null;
         if(billGroupId != null){
-            PaymentBillGroup group = assetProvider.getBillGroupById(billGroupId);
+            PaymentBillGroup group = assetGroupProvider.getBillGroupById(billGroupId);
             if(group!=null){
                 fiProperty = getFiPropertyName(group.getName());
             }
@@ -180,7 +184,8 @@ public class EBeiAssetVendorHandler extends AssetVendorHandler {
         for(int i = 0; i < data.size(); i ++){
             GetLeaseContractBillOnFiPropertyData source = data.get(i);
             ListBillsDTO dto = new ListBillsDTO();
-            dto.setNoticeTel(source.getNoticeTels());
+            //dto.setNoticeTel(source.getNoticeTels());
+            dto.setNoticeTelList(Arrays.asList(source.getNoticeTels().split(",")));
             dto.setOwnerType("community");
             dto.setDateStr(source.getChargePeriod());
             dto.setDateStrBegin(source.getChargePeriod());//为了兼容账单开始时间

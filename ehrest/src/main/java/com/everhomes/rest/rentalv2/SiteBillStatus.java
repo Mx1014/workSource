@@ -23,7 +23,7 @@ public enum SiteBillStatus {
 	SUCCESS((byte)2,"已预约"),
 	PAYINGFINAL((byte)3,"待付款"),
 	FAIL((byte)4,"已取消"),
-    FAIL_PAID((byte)5,"已取消(已付款)"),
+    FAIL_PAID((byte)5,"已取消(已支付)"),
 
 	COMPLETE((byte)7,"已完成"),
 	OVERTIME((byte)8,"已过期"),

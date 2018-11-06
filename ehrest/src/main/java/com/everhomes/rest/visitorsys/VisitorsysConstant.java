@@ -69,6 +69,16 @@ public class VisitorsysConstant {
     public final static int ERROR_REGISTED_IPAD= 1409;  //此ipad已被注册过
     public final static int ERROR_PLANNED_VISITTIME= 1410;  //计划到访时间不能早于当前时间
     public final static int ERROR_PAIRING_CODE= 1411;  //非法配对码
+    public final static int ERROR_READ_CARD = 1412;  //读卡错误
+    public final static int ERROR_ALREADY_EXIST = 1413;  //已存在
+//  修改应用开小差
+    public final static int ERROR_SYNC_ES_FAIL = 1414;//同步搜索引擎失败
+    public final static int ERROR_QUERY_ES_INVALD_PARAMS = 1415;//接口参数异常
+    public final static int ERROR_INVALD_PARAMS = 1416;//接口参数缺失
+    public final static int ERROR_DOWNLOAD_QRCODE = 1417;//二维码下载失败
+    public final static int ERROR_NOT_EXIST = 1418;//对象不存在
+    public final static int ERROR_FILE_EXPORT_FAIL = 1419;//文件导出失败
+
 
     //常规常量
     public static final long COMMUNITY_MODULE_ID = 41800 ;//园区访客模块Id

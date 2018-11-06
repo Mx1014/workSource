@@ -14,13 +14,28 @@ public class UpdateShakeOpenDoorCommand {
 	
 	@NotNull
 	private Byte shakeOpenDoor;
+	
+	private String hardwareId;
  
-	 
+	
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public String getHardwareId() {
+		return hardwareId;
+	}
+
+
+
+	public void setHardwareId(String hardwareId) {
+		this.hardwareId = hardwareId;
+	}
+
 
 
 	public Byte getShakeOpenDoor() {

@@ -7,6 +7,7 @@ import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmtask.zhuzong.*;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -56,7 +57,7 @@ import java.util.concurrent.TimeUnit;
 public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZhuzongPmTaskHandle.class);
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-    private static final String GET_ADDRESSES = "/phoneServer/QueryHouseByPhoneNumber";
+    private static final String GET_ADDRESSES = "/phoneServer/wxClientHouse";
     private static final String CREATE_TASK = "/phoneServer/ZLAddWorkBill";
     private static final String QUERY_TASKS = "/phoneServer/QueryBillList";
     private static final String GET_TASK_DETAIL = "/phoneServer/QueryBillDetail";
@@ -135,7 +136,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements Applicat
                     ises.add(is);
                 }catch (IOException e){
                     LOGGER.error("Pmtask request error, param={}", url, e);
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                             "Pmtask download imgs error.");
                 }
             }
@@ -216,7 +217,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements Applicat
             }
         }catch (Exception e){
             LOGGER.error("Pmtask request error, param={}", params.toJSONString(), e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                     "Pmtask request error.");
         }finally {
             if (null != response) {
@@ -258,7 +259,7 @@ public class ZhuzongPmTaskHandle extends DefaultPmTaskHandle implements Applicat
 
         } catch (IOException e) {
             LOGGER.error("Pmtask request error, param={}", params.toJSONString(), e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                     "Pmtask request error.");
         } finally {
             if (null != response) {

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.address;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -20,6 +22,8 @@ import com.everhomes.util.StringHelper;
  * <li>orientation: 朝向</li>
  * <li>freeArea: 可招租面积</li>
  * <li>apartmentFloor: 房源所在楼层</li>
+ * <li>apartmentRent: 房源的租金</li>
+ * <li>apartmentRentType: 房源的租金类型</li>
  * </ul>
  */
 public class CreateApartmentCommand {
@@ -38,7 +42,24 @@ public class CreateApartmentCommand {
 	private String orientation;
 	private Double freeArea;
 	private String apartmentFloor;
-	
+	private BigDecimal apartmentRent;
+	private Byte apartmentRentType;
+
+	public BigDecimal getApartmentRent() {
+		return apartmentRent;
+	}
+
+	public void setApartmentRent(BigDecimal apartmentRent) {
+		this.apartmentRent = apartmentRent;
+	}
+
+	public Byte getApartmentRentType() {
+		return apartmentRentType;
+	}
+
+	public void setApartmentRentType(Byte apartmentRentType) {
+		this.apartmentRentType = apartmentRentType;
+	}
 	public String getApartmentFloor() {
 		return apartmentFloor;
 	}
@@ -54,6 +75,7 @@ public class CreateApartmentCommand {
 	public void setFreeArea(Double freeArea) {
 		this.freeArea = freeArea;
 	}
+	private Long  ownerId;
 
 	public Double getBuildArea() {
 		return buildArea;
@@ -157,6 +179,15 @@ public class CreateApartmentCommand {
 
 	public void setAreaSize(Double areaSize) {
 		this.areaSize = areaSize;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

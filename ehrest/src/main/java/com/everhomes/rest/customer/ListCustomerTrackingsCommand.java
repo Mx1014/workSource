@@ -20,6 +20,8 @@ public class ListCustomerTrackingsCommand {
 
     private Long orgId;
 
+    private Byte customerSource;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -58,6 +60,14 @@ public class ListCustomerTrackingsCommand {
 
     public void setCustomerType(Byte customerType) {
         this.customerType = customerType;
+    }
+
+    public Byte getCustomerSource() {
+        return customerSource;
+    }
+
+    public void setCustomerSource(Byte customerSource) {
+        this.customerSource = customerSource;
     }
 
     @Override

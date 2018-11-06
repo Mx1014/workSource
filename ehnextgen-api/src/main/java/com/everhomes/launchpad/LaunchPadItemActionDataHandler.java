@@ -8,5 +8,5 @@ public interface LaunchPadItemActionDataHandler {
     String DEFAULT = "default";
     String URL_ORG_PARAM = "urlOrgParam";
 
-    String  refreshActionData(String actionData, SceneTokenDTO sceneToken);
+    String  refreshActionData(String actionData);
 }

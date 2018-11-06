@@ -49,14 +49,14 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
         Long requestFormId;
-        if (null == request) {
+        if (null == request || request.getSourceId() == null) {
             //查询初始默认数据
             GeneralForm defaultForm = handler.getDefaultGeneralForm(EntityType.BUILDING.getCode());
             requestFormId = defaultForm.getFormOriginId();
@@ -77,7 +77,8 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
         String contactPhone = null;
         String enterpriseName = null;
         String description = null;
-
+        String customerName = null;
+        
         for (PostApprovalFormItem item: values) {
             GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
 
@@ -93,6 +94,9 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
                     case USER_COMPANY:
                         //工作流images怎么传
                         enterpriseName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                    case CUSTOMER_NAME:
+                    	customerName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                     case CUSTOM_DATA:
                         json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
@@ -119,6 +123,7 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
         cmd2.setContactPhone(contactPhone);
         cmd2.setEnterpriseName(enterpriseName);
         cmd2.setDescription(description);
+        cmd2.setCustomerName(customerName);
 
         cmd2.setRequestFormId(requestFormId);
         cmd2.setNamespaceId(cmd.getNamespaceId());
@@ -147,15 +152,15 @@ public class BuildingApplyEntryFormHandler implements GeneralFormModuleHandler {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                null, null, cmd.getSourceType(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         GeneralFormDTO dto;
 
         GeneralForm form = getDefaultGeneralForm(cmd.getSourceType());
         List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 
-        if (null != request) {
+        if (null != request && request.getSourceId() == null) {
             try{
                 GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
                 cmd2.setFormId(request.getSourceId());

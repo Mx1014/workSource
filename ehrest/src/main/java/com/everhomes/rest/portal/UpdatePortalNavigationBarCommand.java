@@ -1,39 +1,35 @@
 // @formatter:off
 package com.everhomes.rest.portal;
 
+import com.everhomes.rest.launchpadbase.IndexType;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * <ul>参数:
- * <li>id: 门户导航栏的id</li>
- * <li>label: 门户itemGroup名称</li>
- * <li>description: 门户itemGroup描述</li>
- * <li>targetType: 对象类型</li>
- * <li>targetId: 对象id</li>
- * <li>iconUri: icon 图片</li>
- * <li>selectedIconUri: icon选中图片</li>
+ * <ul>
+ *     <li>id: 门户导航栏的id</li>
+ *     <li>name: 主页签名称</li>
+ *     <li>description: 描述</li>
+ *     <li>type: 主页签类型，参考{@link IndexType}</li>
+ *     <li>configJson: 配置信息</li>
+ *     <li>iconUri: icon 图片</li>
+ *     <li>selectedIconUri: icon选中图片</li>
  * </ul>
  */
 public class UpdatePortalNavigationBarCommand {
 
 	private Long id;
 
-	private String label;
+	private String name;
 
 	private String description;
 
-	private String targetType;
+	private Byte type;
 
-	private Long targetId;
+	private String configJson;
 
 	private String iconUri;
 
 	private String selectedIconUri;
-
-	public UpdatePortalNavigationBarCommand() {
-
-	}
 
 	public Long getId() {
 		return id;
@@ -43,12 +39,12 @@ public class UpdatePortalNavigationBarCommand {
 		this.id = id;
 	}
 
-	public String getLabel() {
-		return label;
+	public String getName() {
+		return name;
 	}
 
-	public void setLabel(String label) {
-		this.label = label;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getDescription() {
@@ -59,20 +55,20 @@ public class UpdatePortalNavigationBarCommand {
 		this.description = description;
 	}
 
-	public String getTargetType() {
-		return targetType;
+	public Byte getType() {
+		return type;
 	}
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
+	public void setType(Byte type) {
+		this.type = type;
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public String getConfigJson() {
+		return configJson;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setConfigJson(String configJson) {
+		this.configJson = configJson;
 	}
 
 	public String getIconUri() {

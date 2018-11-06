@@ -14,9 +14,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.pmtask.PmTaskAppType;
-import com.everhomes.rest.pmtask.PmtaskCreatorType;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -41,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -83,6 +80,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
             b.field("star",task.getStar());
             b.field("amount",task.getAmount());
+//          多应用标识
+            b.field("appId",task.getAppId());
 
             Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
@@ -94,7 +93,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             return b;
         } catch (IOException ex) {
             LOGGER.error("Create pmtask error, taskId={}", task.getId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
     				"Create pmtask error.");
         }
     }
@@ -332,6 +331,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             qb = qb.must(sb);
         }
 
+        if(null != cmd.getAppId()){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getAppId().toString()).field("appId");
+            qb = qb.must(sb);
+        }
+
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         if(null != pageSize)
             builder.setSize(pageSize);
@@ -376,11 +380,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
             doc.setStar( null != source.get("star") ? (String)source.get("star"):"");
             doc.setAmount(SearchUtils.getLongField(source.get("amount")));
+//          多应用标识
+            doc.setAppId(SearchUtils.getLongField(source.get("appId")));
             
             return doc;
         }catch (Exception ex) {
             LOGGER.error("Pmtask readDoc failed, source={}, id={}", source, idAsStr);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_QUERY_ES_FAIL,
     				"readDoc Exception.");
         }
 

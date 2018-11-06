@@ -29,6 +29,9 @@ public class FindContractCommand {
     private Long organizationId;
     @NotNull
     private Long categoryId;
+
+    private Long orgId;
+
     
     public Long getCategoryId() {
 		return categoryId;
@@ -96,7 +99,16 @@ public class FindContractCommand {
     public void setPartyAId(Long partyAId) {
         this.partyAId = partyAId;
     }
-    
+
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

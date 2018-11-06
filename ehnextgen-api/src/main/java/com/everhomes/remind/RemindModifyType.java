@@ -3,7 +3,7 @@ package com.everhomes.remind;
 
 public enum RemindModifyType {
 
-    DELETE((byte) 0), SETTING_UPDATE((byte) 1), STATUS_UNDO((byte) 2), STATUS_DONE((byte) 3);
+    DELETE((byte) 0), SETTING_UPDATE((byte) 1), STATUS_UNDO((byte) 2), STATUS_DONE((byte) 3), UN_SUBSCRIBE((byte) 4), CREATE_SUBSCRIBE((byte) 5);
 
     private byte code;
 

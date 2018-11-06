@@ -13,12 +13,12 @@ import java.sql.Timestamp;
  *     <li>categoryName: 积分模块名称</li>
  *     <li>ruleId: 积分规则id</li>
  *     <li>ruleName: 积分规则名称</li>
- *     <li>arithmeticType: arithmeticType {@link com.everhomes.rest.point.PointArithmeticType}</li>
+ *     <li>arithmeticType: arithmeticType {@link PointArithmeticType}</li>
  *     <li>points: 积分数量</li>
  *     <li>targetUid: 用户id</li>
  *     <li>targetName: 用户昵称</li>
  *     <li>targetPhone: 用户phone</li>
- *     <li>operatorType: 系统操作还是手动操作 {@link com.everhomes.rest.point.PointOperatorType}</li>
+ *     <li>operatorType: 系统操作还是手动操作 {@link PointOperatorType}</li>
  *     <li>operatorUid: 操作用户id</li>
  *     <li>operatorName: 操作用户昵称</li>
  *     <li>operatorPhone: 操作用户电话</li>
@@ -51,6 +51,7 @@ public class PointLogDTO {
     private Byte status;
     private Timestamp createTime;
     private String extra;
+    private String appName;
 
     private Float discountPrice;
 
@@ -220,6 +221,14 @@ public class PointLogDTO {
 
     public void setDiscountPrice(Float discountPrice) {
         this.discountPrice = discountPrice;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     @Override

@@ -32,4 +32,5 @@ public interface QualityConstant {
 
     Long QUALITY_MODULE= 20600L;
     Long CUSTOMER_MODULE= 21100L;
+    Long INVITED_CUSTOMER = 150020L;
 }

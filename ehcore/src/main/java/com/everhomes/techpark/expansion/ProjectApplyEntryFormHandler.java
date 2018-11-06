@@ -40,13 +40,13 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
             cmd.setSourceId(EnterpriseApplyEntryServiceImpl.DEFAULT_CATEGORY_ID);
         }
 
-        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASE_PROJECT.getCode(), cmd.getSourceId());
+        LeaseFormRequest request = enterpriseApplyEntryService.getFormRequestByCommunityId(cmd.getNamespaceId(),
+                cmd.getOwnerId(),cmd.getSourceType(),cmd.getSourceId());
 
         BuildingApplyEntryFormHandler handler = PlatformContext.getComponent(
                 GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
         Long requestFormId;
-        if (null == request) {
+        if (null == request || request.getSourceId() == null) {
             //查询初始默认数据
             GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASE_PROJECT.getCode());
             requestFormId = form.getFormOriginId();
@@ -67,6 +67,7 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
         String enterpriseName = null;
         String description = null;
         String communityId = null;
+        String customerName = null;
 
         for (PostApprovalFormItem item: values) {
             GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
@@ -83,6 +84,9 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
                     case USER_COMPANY:
                         //工作流images怎么传
                         enterpriseName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                    case CUSTOMER_NAME:
+                    	customerName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                     case CUSTOM_DATA:
                         json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
@@ -112,7 +116,8 @@ public class ProjectApplyEntryFormHandler implements GeneralFormModuleHandler {
         cmd2.setContactPhone(contactPhone);
         cmd2.setEnterpriseName(enterpriseName);
         cmd2.setDescription(description);
-
+        cmd2.setCustomerName(customerName);
+        
         cmd2.setRequestFormId(requestFormId);
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());

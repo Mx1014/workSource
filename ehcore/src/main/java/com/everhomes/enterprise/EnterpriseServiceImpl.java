@@ -7,15 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
-
-
-
-
-
-
-
+import com.everhomes.organization.*;
+import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.organization.OrganizationSiteApartmentDTO;
+import org.apache.commons.collections.CollectionUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -42,34 +41,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
-import com.everhomes.rest.enterprise.EnterpriseAddressDTO;
-import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.enterprise.EnterpriseContactEntryType;
-import com.everhomes.rest.enterprise.EnterpriseContactStatus;
-import com.everhomes.rest.enterprise.EnterpriseDTO;
-import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
-import com.everhomes.rest.enterprise.GetEnterpriseInfoCommand;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseCommunityResponse;
-import com.everhomes.rest.enterprise.ListEnterpriseResponse;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
-import com.everhomes.rest.enterprise.SetCurrentEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateContactorCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -153,6 +129,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     
     @Override
@@ -231,6 +210,74 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         resp.setEnterprises(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+    /**
+     * 根据项目编号communityId来查询在该项目下的所有公司
+     * @param cmd
+     * @return
+     */
+    @Override
+    public ListEnterprisesResponse listEnterprisesByCommunityId(ListEnterpriseByCommunityIdCommand cmd){
+        List<OrganizationSiteApartmentDTO> organizationSiteApartmentDTOList = Lists.newArrayList();
+        ListEnterprisesResponse response = new ListEnterprisesResponse();
+        List<EnterprisePropertyDTO> newEnterprisePropertyDTOS = Lists.newArrayList();
+
+        //首先需要进行非空校验
+        if(cmd.getCommunityId() != null){
+            //说明项目编号不为空，那么我们就根据该communityId进行查询eh_organization_workPlaces表中对应的所有的公司的id
+            ListingLocator locator = new ListingLocator();
+            //设置pageAnchor
+            locator.setAnchor(cmd.getPageAnchor());
+            int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+            List<EnterprisePropertyDTO> enterprisePropertyDTOS = organizationProvider.findEnterpriseListByCommunityId(locator,cmd.getCommunityId(),pageSize,cmd.getKeyword());
+
+            //首先需要进行非空校验
+            if(CollectionUtils.isNotEmpty(enterprisePropertyDTOS)){
+                Map<Long, List<EnterprisePropertyDTO>> collect = enterprisePropertyDTOS.stream()
+                        .collect(Collectors.groupingBy(EnterprisePropertyDTO::getOrganizationId));
+
+                collect.forEach((k , v) -> {
+                    EnterprisePropertyDTO dto = new EnterprisePropertyDTO();
+                    dto.setName(v.iterator().next().getName());
+                    dto.setOrganizationId(k);
+                    dto.setId(v.iterator().next().getId());
+                    if(v.iterator().next().getWholeAddressName() != null){
+                        v.stream().map(EnterprisePropertyDTO::getWholeAddressName).reduce((r1, r2) -> r1+","+r2).ifPresent(dto::setWholeAddressName);
+                        dto.setWholeAddressName(v.iterator().next().getWholeAddressName());
+                    }else{
+                        dto.setWholeAddressName("");
+                    }
+                    newEnterprisePropertyDTOS.add(dto);
+                });
+
+
+                //说明查询出来的集合List<EnterprisePropertyDTO>不为空，那么我们就进行遍历
+                for(EnterprisePropertyDTO enterprisePropertyDTO : enterprisePropertyDTOS){
+                    //得到每一个对象EnterprisePropertyDTO
+                    //然后我们将对应的楼栋和门牌设置进去
+                    //根据community_id来查询eh_communityAndBuilding_relationes表中的addressId信息
+                    List<Long> addressIdList = Lists.newArrayList();
+                    addressIdList = organizationProvider.getCommunityAndBuildingRelationesAddressIdsByCommunityId(cmd.getCommunityId());
+
+                    if(CollectionUtils.isNotEmpty(addressIdList) && cmd.getNamespaceId() != null){
+                        //说明查询出来的addressIdList集合不为空，那么我们就根据这些addressIdList来查询eh_addresses表中信息，从而得到对应的楼栋和门牌
+                        List<Address> addressList = addressProvider.findAddressByIds(addressIdList,cmd.getNamespaceId());
+                        if(CollectionUtils.isNotEmpty(addressList)){
+                            for(Address address : addressList){
+                                OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
+                                organizationSiteApartmentDTO.setBuildingName(address.getBuildingName());
+                                organizationSiteApartmentDTO.setApartmentName(address.getApartmentName());
+                                organizationSiteApartmentDTOList.add(organizationSiteApartmentDTO);
+                            }
+                            enterprisePropertyDTO.setSiteDtos(organizationSiteApartmentDTOList);
+                        }
+                    }
+                }
+            }
+        }
+        response.setEnterprises(newEnterprisePropertyDTOS);
+        return response;
     }
     
     @Override
@@ -1003,5 +1050,102 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		Enterprise enterprise = enterpriseProvider.findEnterpriseByAddressId(addressId);
 		return ConvertHelper.convert(enterprise, EnterpriseDTO.class);
 	}
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param cmd
+     * @return
+     */
+    @Override
+	public ListEnterpriseResponse listEnterpriseNoReleaseWithCommunityId(listEnterpriseNoReleaseWithCommunityIdCommand cmd){
+        //创建ListEnterpriseResponse类的对象
+        ListEnterpriseResponse listEnterpriseResponse = new ListEnterpriseResponse();
+        listEnterpriseResponse.setEnterprises(null);
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        //创建分页的对象
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        //设置第几页
+        locator.setAnchor(cmd.getPageAnchor());
+        //进行非空校验
+
+
+        //wtf，我重写好吧
+
+//        if(cmd.getNamespaceId() != null && cmd.getCommunityId() != null){
+//            //说明传进来的参数不为空，那么我们首先需要根据这两个参数进行查询eh_communitys表中
+//            //在该域空间下不包含该项目当中的所有项目的编号，注意他会返回一个集合List<Long>
+//            List<Long> communityIdList = communityProvider.findOrganizationIdsByNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId());
+//            //进行非空校验
+//            if(CollectionUtils.isNotEmpty(communityIdList)){
+//                //说明集合不为空，那么我们就根据该集合进行查询eh_organization_community_requests表，得到一个公司id的集合
+//                List<Integer> organizationIdList = organizationProvider.findOrganizationIdListByCommunityIdList(communityIdList);
+//                //进行非空校验
+//                if(CollectionUtils.isNotEmpty(organizationIdList)){
+//                    //说明集合不为空，那么我们就根据该公司编号的集合在eh_organizations表中查询对应的公司的信息，注意他会返回一个List<Organization>集合
+//                    List<EnterpriseDTO> organizationList = organizationProvider.findOrganizationsByOrgIdList(organizationIdList,cmd.getKeyword(),locator,pageSize);
+//                    if(CollectionUtils.isNotEmpty(organizationList)){
+//                        listEnterpriseResponse.setEnterprises(organizationList);
+//                        listEnterpriseResponse.setNextPageAnchor(locator.getAnchor());
+//                        return listEnterpriseResponse;
+//                    }
+//                }
+//            }
+//        }
+
+
+        if(cmd.getNamespaceId() != null){
+            List<Organization> orgs = organizationProvider.listOrganizationsByNamespaceId(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getKeyword(), locator, pageSize);
+
+            if (orgs.size() > pageSize) {
+                Organization organization = orgs.get(pageSize);
+                listEnterpriseResponse.setNextPageAnchor(organization.getId());
+                orgs.remove(orgs.size() - 1);
+            }
+
+            List<EnterpriseDTO> dtos = new ArrayList<>();
+
+            for(Organization org: orgs){
+                EnterpriseDTO dto = ConvertHelper.convert(org, EnterpriseDTO.class);
+                dtos.add(dto);
+            }
+            listEnterpriseResponse.setEnterprises(dtos);
+        }
+
+        return listEnterpriseResponse;
+    }
+
+    /**
+     * 根据组织ID和项目Id来删除该项目下面的公司
+     * @param cmd
+     */
+    @Override
+    public void deleteEnterpriseByOrgIdAndCommunityId(DeleteEnterpriseCommand cmd){
+        //首先进行非空校验
+        if(cmd.getEnterpriseId() != null && cmd.getCommunityId() != null){
+            //说明传过来的参数不为空，那么我们就根据这两个参数来删除表eh_organization_workplaces中的对应的数据，同时删除表eh_enterprise_community_map
+            //中的数据
+            //这两个操作必须保持在同一个事务中进行
+            dbProvider.execute((TransactionStatus status) -> {
+                //创建一个OrganizationWorkPlaces类的对象
+                OrganizationWorkPlaces organizationWorkPlaces = new OrganizationWorkPlaces();
+                //将数据封装在对象OrganizationWorkPlaces中
+                organizationWorkPlaces.setOrganizationId(cmd.getEnterpriseId());
+                organizationWorkPlaces.setCommunityId(cmd.getCommunityId());
+                //调用enterpriseProvider接口中的deleteEnterpriseByOrgIdAndCommunityId(OrganizationWorkPlaces organizationWorkPlaces)方法，
+                //将表eh_organization_workPlaces中的数据进行删除
+                enterpriseProvider.deleteEnterpriseByOrgIdAndCommunityId(organizationWorkPlaces);
+                //接下来我们来删除表eh_enterprise_community_map表中的对应的数据
+                //创建EnterpriseCommunityMap类的对象
+                EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+                //将数据封装在EnterpriseCommunityMap对象中
+                enterpriseCommunityMap.setMemberId(cmd.getEnterpriseId());
+                enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
+                //调用enterpriseProvider中的deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(EnterpriseCommunityMap enterpriseCommunityMap)
+                //方法来删除表eh_enterprise_community_map中的数据
+                enterpriseProvider.deleteEnterpriseFromEnterpriseCommunityMapByOrgIdAndCommunityId(enterpriseCommunityMap);
+                return null;
+            });
+        }
+    }
 	
 }

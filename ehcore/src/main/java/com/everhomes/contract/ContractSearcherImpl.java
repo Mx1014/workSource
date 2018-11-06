@@ -19,7 +19,12 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.contract.*;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractStatus;
+import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.contract.SearchContractCommand;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -28,8 +33,10 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.varField.FieldProvider;
@@ -93,6 +100,9 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+	protected UserProvider userProvider;
 
     @Override
     public String getIndexType() {
@@ -142,6 +152,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.field("contractStartDate", contract.getContractStartDate());
             builder.field("contractEndDate", contract.getContractEndDate());
             builder.field("customerType", contract.getCustomerType());
+            builder.field("partyAId", contract.getPartyAId());
+            //builder.field("depositStatus", contract.getDepositStatus());
             if(contract.getPaymentFlag() == null){
                 builder.field("paymentFlag", 0);
             }else{
@@ -302,16 +314,36 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
+        Long pageNumber = 1l;
+        //cmd.setPageNumber(pageNumber);
+        
+        //传入的变为页码 pageNumber
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
+        }
+        
+        if(cmd.getPageNumber() != null) {
+        	pageNumber = cmd.getPageNumber();
         }
         
         if(cmd.getCategoryId() != null) {
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         }
+        
+        /*合同跟着园区，不跟着管理公司
+         * if(cmd.getOrgId() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("partyAId", cmd.getOrgId()));
+        }*/
+        if(cmd.getDepositStatus() != null) {
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("depositStatus", cmd.getDepositStatus()));
+        }
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
-        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        
+        //builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize + 1);
+        builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize);
+        
         builder.setQuery(qb);
         if(cmd.getSortField() != null && cmd.getSortType() != null) {
             if(cmd.getSortType() == 0) {
@@ -323,6 +355,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             builder.addSort("updateTime", SortOrder.DESC);
         }
         SearchResponse rsp = builder.execute().actionGet();
+        Long totalHits = rsp.getHits().getTotalHits();
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("ContractSearcherImpl query builder: {}, rsp: {}", builder, rsp);
@@ -330,10 +363,11 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         List<Long> ids = getIds(rsp);
         ListContractsResponse response = new ListContractsResponse();
 
-        if(ids.size() > pageSize) {
+        response.setTotalNum(totalHits);
+        /*if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
-        }
+        }*/
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
@@ -364,12 +398,34 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 
                 }
                 if(contract.getCategoryItemId() != null) {
-                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(), contract.getCommunityId(), contract.getCategoryItemId());
+                    ScopeFieldItem item =  fieldProvider.findScopeFieldItemByFieldItemId(contract.getNamespaceId(),cmd.getOrgId(), contract.getCommunityId(), contract.getCategoryItemId());
                     if(item != null) {
                         dto.setCategoryItemName(item.getItemDisplayName());
                     }
                 }
+                
+				if (contract.getSponsorUid() != null) {
+					// 用户可能不在组织架构中 所以用nickname,//由于瑞安传过来的是名字,没有办法获取id，所以对于对接的发起人直接存名字
+					if (cmd.getNamespaceId() == 999929) {
+						dto.setSponsorName(contract.getSponsorUid());
+					} else {
+						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));
+						if (user != null) {
+							dto.setSponsorName(user.getNickName());
+						}
+					}
+				}
+                
                 processContractApartments(dto);
+                //查询合同适用场景，物业合同不修改资产状态。
+		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+		        if (contractCategory != null) {
+		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
+		        /*if (contract.getDepositStatus() != null) {
+					dto.setDepositStatus(contract.getDepositStatus());
+				}*/
+		        
                 dtos.add(dto);
             });
         }

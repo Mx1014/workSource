@@ -1,20 +1,25 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.AddressProperties;
+import com.everhomes.community.Community;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.openapi.ContractTemplate;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhContractTemplates;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
@@ -23,6 +28,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2244,4 +2250,139 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		dao.update(oldReservation);
 
 	}
+
+	//一房一价
+	@Override
+	public void createAuthorizePrice(AddressProperties addressProperties) {
+		long id = this.dbProvider.allocPojoRecordId(EhAddressProperties.class);
+		addressProperties.setId(id);
+		addressProperties.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		addressProperties.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+		addressProperties.setCreatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class, id));
+        EhAddressPropertiesDao dao = new EhAddressPropertiesDao(context.configuration());
+        dao.insert(addressProperties);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAddressProperties.class, null);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public List<AddressProperties> listAuthorizePrices(Integer namespaceId, Long buildingId, Long communityId, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class));
+		SelectJoinStep<Record> query = context.select(Tables.EH_ADDRESS_PROPERTIES.fields()).from(Tables.EH_ADDRESS_PROPERTIES);
+		Condition cond = Tables.EH_ADDRESS_PROPERTIES.NAMESPACE_ID.eq(namespaceId);
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.BUILDING_ID.eq(buildingId));
+		cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.COMMUNITY_ID.eq(communityId));
+		
+		if(null != pageAnchor && pageAnchor != 0){
+			cond = cond.and(Tables.EH_ADDRESS_PROPERTIES.ID.gt(pageAnchor));
+		}
+		query.orderBy(Tables.EH_ADDRESS_PROPERTIES.CREATE_TIME.desc());
+		
+		if(null != pageSize)
+			query.limit(pageSize);
+		
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listCommunityPmOwnersByTel, sql = {}" , query.getSQL());
+			LOGGER.debug("listCommunityPmOwnersByTel, bindValues = {}" , query.getBindValues());
+		}
+		
+		List<AddressProperties> result = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_ADDRESS_PROPERTIES.recordType(), AddressProperties.class));
+
+		return result;
+	}
+
+	@Override
+	public AddressProperties findAddressPropertiesById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAddressProperties.class, id));
+		EhAddressPropertiesDao dao = new EhAddressPropertiesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), AddressProperties.class);
+	}
+
+	@Override
+	public void updateAuthorizePrice(AddressProperties addressProperties) {
+		assert(addressProperties.getId() != null);
+		addressProperties.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		addressProperties.setOperatorUid(UserContext.currentUserId());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class, addressProperties.getId()));
+        EhAddressPropertiesDao dao = new EhAddressPropertiesDao(context.configuration());
+        dao.update(addressProperties);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressProperties.class, addressProperties.getId());
+	}
+
+	@Override
+	public void deleteAuthorizePrice(AddressProperties addressProperties) {
+		assert(addressProperties.getId() != null);
+		addressProperties.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		addressProperties.setOperatorUid(UserContext.currentUserId());
+		addressProperties.setStatus(ContractTemplateStatus.INACTIVE.getCode());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddressProperties.class, addressProperties.getId()));
+        EhAddressPropertiesDao dao = new EhAddressPropertiesDao(context.configuration());
+        dao.update(addressProperties);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAddressProperties.class, addressProperties.getId());
+	}
+
+	@Override
+	public AddressProperties findAddressPropertiesByApartmentId(Community community, Long buildingId, Long addressId) {
+		
+		final AddressProperties[] result = new AddressProperties[1];
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhAddressPropertiesRecord> query = context.selectQuery(Tables.EH_ADDRESS_PROPERTIES);
+		query.addConditions(Tables.EH_ADDRESS_PROPERTIES.NAMESPACE_ID.eq(community.getNamespaceId()));
+		query.addConditions(Tables.EH_ADDRESS_PROPERTIES.BUILDING_ID.eq(buildingId));
+		query.addConditions(Tables.EH_ADDRESS_PROPERTIES.ADDRESS_ID.eq(addressId));
+		query.addConditions(Tables.EH_ADDRESS_PROPERTIES.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, AddressProperties.class);
+			return null;
+		});
+
+		return result[0];
+	}
+
+	@Override
+	public CommunityPmOwner findOrganizationOwnerByContactToken(String contactToken, Integer namespaceId){
+		final CommunityPmOwner[] result = new CommunityPmOwner[1];
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq((byte)1));
+
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, CommunityPmOwner.class);
+			return null;
+		});
+
+		return result[0];
+	}
+
+	@Override
+	public CommunityPmOwner findOrganizationOwnerByContactExtraTels(String contactToken, Integer namespaceId){
+		final CommunityPmOwner[] result = new CommunityPmOwner[1];
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_EXTRA_TELS.like(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			if(r != null)
+				result[0] = ConvertHelper.convert(r, CommunityPmOwner.class);
+			return null;
+		});
+
+		return result[0];
+	}
+
+
 }

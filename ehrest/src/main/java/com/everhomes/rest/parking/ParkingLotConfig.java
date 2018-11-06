@@ -28,6 +28,8 @@ public class ParkingLotConfig {
     private Byte identityCardFlag = 0;
     private Byte monthCardFlag = 0;
     private Integer flowMode;
+    private Byte noticeFlag = 0;
+    private Byte invoiceTypeFlag = 0;
 
     public Integer getFlowMode() {
         return flowMode;
@@ -117,14 +119,6 @@ public class ParkingLotConfig {
         this.contact = contact;
     }
 
-    public Byte getInvoiceFlag() {
-        return invoiceFlag;
-    }
-
-    public void setInvoiceFlag(Byte invoiceFlag) {
-        this.invoiceFlag = invoiceFlag;
-    }
-
     public Byte getMonthRechargeFlag() {
         return monthRechargeFlag;
     }
@@ -133,7 +127,32 @@ public class ParkingLotConfig {
         this.monthRechargeFlag = monthRechargeFlag;
     }
 
-    @Override
+
+	public Byte getInvoiceFlag() {
+		return invoiceFlag;
+	}
+
+	public void setInvoiceFlag(Byte invoiceFlag) {
+		this.invoiceFlag = invoiceFlag;
+	}
+
+	public Byte getNoticeFlag() {
+		return noticeFlag;
+	}
+
+	public void setNoticeFlag(Byte noticeFlag) {
+		this.noticeFlag = noticeFlag;
+	}
+	
+	public Byte getInvoiceTypeFlag() {
+		return invoiceTypeFlag;
+	}
+
+	public void setInvoiceTypeFlag(Byte invoiceTypeFlag) {
+		this.invoiceTypeFlag = invoiceTypeFlag;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

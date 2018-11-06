@@ -21,6 +21,7 @@ public class ParkingRechargeConfig {
     private String tempFeeDiscount;
     private String contact;
 
+
     public String getContact() {
         return contact;
     }
@@ -92,4 +93,5 @@ public class ParkingRechargeConfig {
     public void setExpiredRechargeType(Byte expiredRechargeType) {
         this.expiredRechargeType = expiredRechargeType;
     }
+    
 }

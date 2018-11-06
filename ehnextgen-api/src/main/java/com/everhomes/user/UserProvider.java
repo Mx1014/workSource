@@ -8,6 +8,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.user.InvitationRoster;
+import com.everhomes.rest.user.UserDTO;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,10 @@ import java.util.List;
 
 public interface UserProvider {
     void createUser(User user);
+    //统一用户同步数据使用
+    void createUserFromUnite(User user);
     void updateUser(User user);
+    void updateUserFromUnite(User user);
     void deleteUser(User user);
     void deleteUser(long id);
     void deleteUserAndUserIdentifiers(Integer namespaceId, List<String> namespaceUserTokens, String namespaceUserType);
@@ -23,12 +27,15 @@ public interface UserProvider {
     User findUserByNamespaceUserTokenAndType(String token, String type);
     User findUserByAccountName(String accountName);
     List<User> queryUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
-    
+    List<User> listUsers(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
     List<UserIdentifier> listUserIdentifiersOfUser(long userId);
     UserIdentifier findUserIdentifiersOfUser(long userId, Integer namespaceId);
 
     void createIdentifier(UserIdentifier userIdentifier);
+    //统一用户同步数据使用
+    void createIdentifierFromUnite(UserIdentifier userIdentifier);
     void updateIdentifier(UserIdentifier userIdentifier);
+    void updateIdentifierFromUnite(UserIdentifier userIdentifier);
     void updateIdentifierByUid(UserIdentifier userIdentifier);
     void deleteIdentifier(UserIdentifier userIdentifier);
     void deleteIdentifier(long id);
@@ -41,7 +48,7 @@ public interface UserProvider {
     UserIdentifier findClaimedIdentifierByToken(String identifierToken);
 
     List<User> listAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
-
+    /**根据域空间id和注册的手机号来查询对应的注册信息**/
     UserIdentifier findClaimedIdentifierByToken(Integer namespaceId, String identifierToken);
     UserIdentifier findClaimedIdentifierByOwnerAndType(long ownerId, byte identifierType);
     UserIdentifier findClaimingIdentifierByToken(Integer namespaceId, String identifierToken);
@@ -176,12 +183,40 @@ public interface UserProvider {
 	
 	String findMobileByUid(Long contactId);
 
+    /**
+     * 根据UserId来查询用户信息
+     * @param userId
+     * @return
+     */
+    UserDTO findUserInfoByUserId(Long userId);
+
+    /**
+     * 查询该手机号是否已经进行注册
+     * @param contactToken
+     * @return
+     */
+    UserIdentifier getUserByToken(String contactToken,Integer namespaceId);
+
+    /**
+     * 根据手机号和域空间来查询eh_user_identifiers表中的数据
+     * @param identifierToken
+     * @param namespaceId
+     * @return
+     */
+    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(String identifierToken,Integer namespaceId);
+
+    /**
+     * 根据ownerUid和namespaceId来查询手机号
+     * @param ownerUid
+     * @param namespaceId
+     * @return
+     */
+    String findContactTokenByOwnerUidAndNamespaceId(Long ownerUid , Integer namespaceId);
     String findUserTokenOfUser(Long userId);
 
-    UserIdentifier findClaimedIdentifierByTokenAndNamespaceId(
-            String identifierToken, Integer namespaceId);
 
     Integer countAppAndWeiXinUserByCreateTime(Integer namespaceId, LocalDateTime start, LocalDateTime end, List<Long> excludeUIDs);
 
     String getNickNameByUid(Long creatorUid);
+
 }

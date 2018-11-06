@@ -37,6 +37,11 @@ public interface EnterpriseApprovalHandler {
      */
     void onFlowCaseAbsorted(FlowCaseState flowCase);
 
+    /**
+     * 当流程被删除，使用该方法处理业务数据
+     */
+    void onFlowCaseDeleted(FlowCase flowCase);
+
     //  add by wuhan.
     /**
      * 当用户触发按钮或者程序触发 flowCase 正常结束，会触发该方法的调用

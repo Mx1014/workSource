@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.acl.ServiceModuleCategory;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.rest.module.ServiceModuleStatus;
@@ -328,6 +329,27 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
             results.add(ConvertHelper.convert(r, ServiceModule.class));
             return null;
         });
+        return results;
+    }
+
+    @Override
+    public List<ServiceModule> listServiceModules(Byte appType, String keyword) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        query.addConditions(Tables.EH_SERVICE_MODULES.CATEGORY.eq(ServiceModuleCategory.MODULE.getCode()));
+
+        if(appType != null){
+            query.addConditions(Tables.EH_SERVICE_MODULES.APP_TYPE.eq(appType));
+        }
+
+        if(!org.springframework.util.StringUtils.isEmpty(keyword)){
+            Condition condition = Tables.EH_SERVICE_MODULES.NAME.like("%" + keyword.trim() + "%");
+            condition = condition.or(Tables.EH_SERVICE_MODULES.ID.like("%" + keyword.trim() + "%"));
+
+            query.addConditions(condition);
+        }
+        query.addOrderBy(Tables.EH_SERVICE_MODULES.ID.asc());
+        List<ServiceModule> results = query.fetch().map((r) -> ConvertHelper.convert(r, ServiceModule.class));
         return results;
     }
 
@@ -813,6 +835,23 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         return results;
     }
 
+    @Override
+    public List<Long> listExcludeCauseWhiteList(){
+        List<Long> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
+        SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
+
+        context.select(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .from(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS)
+                .groupBy(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID)
+                .fetch().map(r -> {
+            results.add(r.getValue(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.FUNCTION_ID));
+            return null;
+        });
+        return results;
+
+    }
+
 
     @Override
     public List<ServiceModuleIncludeFunction> listIncludeFunctions(Integer namespaceId, Long communityId, Long moduleId) {
@@ -820,13 +859,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ServiceModuleIncludeFunction.class));
         SelectQuery<EhServiceModuleIncludeFunctionsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS);
 
-        Condition cond = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.NAMESPACE_ID.ne(namespaceId);
+        Condition cond = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.NAMESPACE_ID.eq(namespaceId);
         Condition cond2 = null;
         if (communityId != null) {
-            cond2 = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(communityId);
-            cond2 = cond2.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.ne(0L));
-            cond2 = cond2.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.isNotNull());
-            cond = cond.or(cond2);
+            cond2 = Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.eq(communityId);
+            cond2 = cond2.or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.eq(0L));
+            cond2 = cond2.or(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.COMMUNITY_ID.isNull());
+            cond = cond.and(cond2);
         }
         if (moduleId != null)
             cond = cond.and(Tables.EH_SERVICE_MODULE_INCLUDE_FUNCTIONS.MODULE_ID.eq(moduleId));

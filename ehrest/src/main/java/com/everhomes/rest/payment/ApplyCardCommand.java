@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>mobile: 手机号</li>
  * <li>password: 支付密码</li>
  * <li>issuerId: 卡发行人ID</li>
+ * <li>userId: 账号id</li>
  * </ul>
  */
 public class ApplyCardCommand {
@@ -18,6 +19,8 @@ public class ApplyCardCommand {
 	private String mobile;
 	private String password;
 	private Long issuerId;
+	private String userId;
+	private String name;
 	
 	public String getOwnerType() {
 		return ownerType;
@@ -43,7 +46,23 @@ public class ApplyCardCommand {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

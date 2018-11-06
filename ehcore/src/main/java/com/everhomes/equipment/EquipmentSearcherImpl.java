@@ -147,6 +147,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        } else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+            // only all scope field term with ownerId followed by this rule
+            fb = FilterBuilders.termsFilter("targetId", cmd.getTargetIds());
         }
 
         if(cmd.getStatus() != null)
@@ -157,6 +160,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         
         if(cmd.getInspectionCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+        //MultiManagement company
+        if (cmd.getOwnerId() != null && cmd.getOwnerId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//            if (!StringUtils.isNullOrEmpty(cmd.getOwnerType()))
+//                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -312,11 +321,12 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("namespaceId", equipment.getNamespaceId());
+            b.field("ownerId", equipment.getOwnerId());
             b.field("targetId", equipment.getTargetId());
             b.field("targetType", equipment.getTargetType());
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
-            b.field("name", equipment.getName()).field("index","not_analyzed");
+            b.field("name", equipment.getName());
             b.field("customNumber", equipment.getCustomNumber());
             b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 

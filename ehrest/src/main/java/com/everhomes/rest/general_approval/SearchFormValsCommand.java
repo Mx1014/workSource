@@ -21,13 +21,31 @@ public class SearchFormValsCommand {
     private Long formOriginId;
     private Long formVersion;
     private Long ownerId;
+    private String referType;
     private String ownerType;
     private String moduleId;
+    private String moduleName;
     private List<SearchGeneralFormItem> filteredFields;
     private List<SearchGeneralFormItem> displayFields;
     private List<SearchGeneralFormItem> conditionFields;
     private Long pageAnchor;
     private Integer pageSize;
+
+    public String getReferType() {
+        return referType;
+    }
+
+    public void setReferType(String referType) {
+        this.referType = referType;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
 
     public Long getApprovalId() {
         return approvalId;

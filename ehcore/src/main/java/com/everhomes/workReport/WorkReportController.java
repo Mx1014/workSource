@@ -22,6 +22,9 @@ public class WorkReportController extends ControllerBase{
     @Autowired
     private WorkReportService workReportService;
 
+    @Autowired
+    private WorkReportMessageService workReportMessageService;
+
     /**
      * <b>URL: /workReport/addWorkReport</b>
      * <p>1-1.新增汇报</p>
@@ -65,8 +68,22 @@ public class WorkReportController extends ControllerBase{
     }
 
     /**
+     * <b>URL: /workReport/getWorkReport</b>
+     * <p>1-4.获取汇报详情</p>
+     */
+    @RequestMapping("getWorkReport")
+    @RestReturn(value = WorkReportDTO.class)
+    public RestResponse getWorkReport(WorkReportIdCommand cmd){
+        WorkReportDTO res = workReportService.getWorkReport(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /workReport/listWorkReports</b>
-     * <p>1-4.工作汇报列表</p>
+     * <p>1-5.工作汇报列表</p>
      */
     @RequestMapping("listWorkReports")
     @RestReturn(value = ListWorkReportsResponse.class)
@@ -80,7 +97,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/updateWorkReportName</b>
-     * <p>1-5.修改汇报名称</p>
+     * <p>1-6.修改汇报名称</p>
      */
     @RequestMapping("updateWorkReportName")
     @RestReturn(value = WorkReportDTO.class)
@@ -94,7 +111,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/enableWorkReport</b>
-     * <p>1-6.启用工作汇报</p>
+     * <p>1-7.启用工作汇报</p>
      * <p>(若 formOriginId 为 0 时则不能执行此方法，具体流程类似于审批设置的启用)</p>
      */
     @RequestMapping("enableWorkReport")
@@ -109,7 +126,7 @@ public class WorkReportController extends ControllerBase{
 
     /**
      * <b>URL: /workReport/disableWorkReport</b>
-     * <p>1-7.关闭工作汇报</p>
+     * <p>1-8.关闭工作汇报</p>
      */
     @RequestMapping("disableWorkReport")
     @RestReturn(value = String.class)
@@ -255,8 +272,8 @@ public class WorkReportController extends ControllerBase{
      */
     @RequestMapping("countUnReadWorkReportsVal")
     @RestReturn(value=Integer.class)
-    public RestResponse countUnReadWorkReportsVal() {
-        Integer res = workReportService.countUnReadWorkReportsVal();
+    public RestResponse countUnReadWorkReportsVal(WorkReportOrgIdCommand cmd) {
+        Integer res = workReportService.countUnReadWorkReportsVal(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -269,8 +286,8 @@ public class WorkReportController extends ControllerBase{
      */
     @RequestMapping("markWorkReportsValReading")
     @RestReturn(value=String.class)
-    public RestResponse markWorkReportsValReading() {
-        workReportService.markWorkReportsValReading();
+    public RestResponse markWorkReportsValReading(WorkReportOrgIdCommand cmd) {
+        workReportService.markWorkReportsValReading(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -286,6 +303,48 @@ public class WorkReportController extends ControllerBase{
     public RestResponse getWorkReportValDetail(WorkReportValIdCommand cmd) {
         WorkReportValDTO res = workReportService.getWorkReportValDetail(cmd);
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/syncWorkReportReceiver</b>
+     * <p>同步工作汇报接收人公司信息(当版本高于5.9.0后可以删除该接口) </p>
+     */
+    @RequestMapping("syncWorkReportReceiver")
+    @RestReturn(value=String.class)
+    public RestResponse syncWorkReportReceiver() {
+        workReportService.syncWorkReportReceiver();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/updateWorkReportReceiverAvatar</b>
+     * <p>更新工作汇报接收人头像(当版本高于5.9.0后可以删除该接口) </p>
+     */
+    @RequestMapping("updateWorkReportReceiverAvatar")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkReportReceiverAvatar() {
+        workReportService.updateWorkReportReceiverAvatar();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /workReport/updateWorkReportValAvatar</b>
+     * <p>更新工作汇值头像 </p>
+     */
+    @RequestMapping("updateWorkReportValAvatar")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkReportValAvatar() {
+        workReportService.updateWorkReportValAvatar();
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -2,8 +2,6 @@ package com.everhomes.rest.archives;
 
 import com.everhomes.util.StringHelper;
 
-import java.sql.Date;
-
 /**
  * <ul>
  * <li>organizationId: 公司 id</li>

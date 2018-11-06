@@ -9,6 +9,8 @@ public interface OfficeCubicleErrorCode {
 	int ERROR_DELETE_CITYS = 10004;//城市名称为空
 	int ERROR_UNENABLE_FLOW = 10005;//工作流未启用
 
+	int ERROR_AlREADY_CUSTOMIZE_CONFIG = 10006;//已经为自定义配置
+	int ERROR_AlREADY_GENERAL_CONFIG = 10007;//已经为通用配置
 
 
 }

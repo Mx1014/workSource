@@ -7,11 +7,12 @@ package com.everhomes.rest.payment;
  * <li>UNRECHARGED(1): 未充值,处理中</li>
  * <li>RECHARGED(2): 充值成功</li>
  * <li>COMPLETE(3): 处理完成</li>
- * <li>REFUNDED(4): 已退款</li>
+ * <li>REFUNDING(4): 退款中</li>
+ * <li>REFUNDED(5): 已退款</li>
  * </ul>
  */
 public enum CardRechargeStatus {
-	FAIL((byte)0), UNRECHARGED((byte)1), RECHARGED((byte)2) ,COMPLETE((byte)3),REFUNDED((byte)4);
+	FAIL((byte)0), UNRECHARGED((byte)1), RECHARGED((byte)2) ,COMPLETE((byte)3),REFUNDING((byte)4),REFUNDED((byte)5);
     
     private byte code;
     

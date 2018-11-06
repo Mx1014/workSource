@@ -20,6 +20,8 @@ public class GetLeasePromotionRequestFormCommand {
 
     private Long categoryId;
 
+    private Long organizationId;
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -58,6 +60,14 @@ public class GetLeasePromotionRequestFormCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override

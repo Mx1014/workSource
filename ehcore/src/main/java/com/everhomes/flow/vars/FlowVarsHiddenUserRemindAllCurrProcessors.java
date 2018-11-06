@@ -17,18 +17,31 @@ import java.util.stream.Collectors;
 public class FlowVarsHiddenUserRemindAllCurrProcessors implements FlowVariableUserResolver {
 
 	@Autowired
-	FlowVarsButtonMsgCurrentProcessors flowVarsButtonMsgCurrentProcessors;
+	FlowEventLogProvider flowEventLogProvider;
 
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx,
 			Map<String, Long> processedEntities, FlowEntityType fromEntity,
 			Long entityId, FlowUserSelection userSelection, int loopCnt) {
 
-        List<Long> users = new ArrayList<>();
-        for (FlowCaseState flowCaseState : ctx.getAllFlowState()) {
-            users.addAll(flowVarsButtonMsgCurrentProcessors.variableUserResolve(
-            		flowCaseState, processedEntities, fromEntity, entityId, userSelection, loopCnt));
-        }
+		List<Long> users = new ArrayList<>();
+
+		if (ctx.getCurrentNode() == null) {
+			return users;
+		}
+		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeNotCompleteEnterLogs(
+				ctx.getCurrentNode().getFlowNode().getId(),
+				ctx.getFlowCase().getId(),
+				ctx.getFlowCase().getStepCount()
+		);
+
+		if(logs != null && logs.size() > 0) {
+			for(FlowEventLog log : logs) {
+				if(log.getFlowUserId() != null && log.getFlowUserId() > 0 && log.getStepCount() > -1) {
+					users.add(log.getFlowUserId());
+				}
+			}
+		}
 		return users.stream().distinct().collect(Collectors.toList());
 	}
 }

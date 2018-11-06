@@ -9,25 +9,25 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.*;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -37,10 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +48,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralFormServiceImpl.class);
 
+    private static final String FORM_PRINT_TEMPLATE_OWNER_TYPE = "EhGeneralForm";
     @Autowired
     private GeneralFormProvider generalFormProvider;
 
@@ -69,10 +68,19 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private GeneralApprovalValProvider generalApprovalValProvider;
 
     @Autowired
+    private GeneralFormKvConfigProvider generalFormKvConfigProvider;
+
+    @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
 
     @Autowired
     private GeneralFormSearcher generalFormSearcher;
+
+    @Autowired
+    private GogsService gogsService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd) {
@@ -545,6 +553,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
                         }
+                        if (cmd.getProjectId() != null && cmd.getProjectType() != null) {
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_ID.eq(cmd.getProjectId()));
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_TYPE.eq(cmd.getProjectType()));
+                        }
                         condition = condition.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
                         query.addConditions(condition);
                         query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.asc());
@@ -584,7 +596,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(),
                 cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
         if (form != null)
             return ConvertHelper.convert(form, GeneralFormDTO.class);
@@ -669,8 +682,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public Long deleteGeneralFormVal(PostGeneralFormValCommand cmd){
-        if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getCurrentOrganizationId() != null && cmd.getOwnerId() != null ){
-            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getOwnerId(), cmd.getSourceId());
+        if(cmd.getSourceId() != null && cmd.getModuleId() != null){
+            generalFormProvider.deleteGeneralFormVal(cmd.getNamespaceId(), cmd.getModuleId(), cmd.getSourceId());
             //generalFormProvider.updateGeneralFormValRequestStatus(cmd.getRequisitionId(), (byte)0);
             generalFormSearcher.deleteById(cmd.getSourceId());
             return cmd.getSourceId();
@@ -748,7 +761,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                 generalForm = generalFormProvider.getActiveGeneralFormByOriginId(generalApproval.getFormOriginId());
             }
             if(cmd.getSourceId() != null && cmd.getNamespaceId() !=null && cmd.getOwnerId() != null && generalForm != null) {
-                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), generalForm.getFormOriginId(), generalForm.getFormVersion());
+                source_id = generalFormProvider.saveGeneralFormValRequest(cmd.getNamespaceId(), cmd.getSourceType(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getSourceId(), cmd.getInvestmentAdId(),generalForm.getFormOriginId(), generalForm.getFormVersion());
             }else{
                 LOGGER.error("getGeneralFormVal false: param cannot be null. namespaceId: " + cmd.getNamespaceId() + ", ownerType: "
                         + cmd.getOwnerType() + ", sourceType: " + cmd.getSourceType() + ", ownerId: " + cmd.getOwnerId() + ", sourceId: " + cmd.getSourceId());
@@ -757,9 +770,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             }
             String source_type = "EhGeneralFormValRequests";
 
-
             addGeneralFormValuesCommand cmd2 = new addGeneralFormValuesCommand();
-
             cmd2.setGeneralFormVersion(generalForm.getFormVersion());
             cmd2.setGeneralFormId(generalForm.getFormOriginId());
             cmd2.setSourceId(source_id);
@@ -841,5 +852,261 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     }
 
+
+    @Override
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType("any-module");
+            }
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+            generalFormKvConfigProvider.createGeneralFormKvConfig(config);
+        }
+    }
+
+    @Override
+    public GeneralForm mirrorGeneralForm(Long formId, String mirrorModuleType, Long mirrorModuleId,
+                                         String mirrorProjectType, Long mirrorProjectId, String mirrorOwnerType, Long mirrorOwnerId) {
+        GeneralForm generalForm = generalFormProvider.getGeneralFormById(formId);
+
+        if (mirrorModuleType != null) {
+            generalForm.setModuleType(mirrorModuleType);
+        }
+        if (mirrorModuleId != null) {
+            generalForm.setModuleId(mirrorModuleId);
+        }
+        if (mirrorProjectType != null) {
+            generalForm.setProjectType(mirrorProjectType);
+        }
+        if (mirrorProjectId != null) {
+            generalForm.setProjectId(mirrorProjectId);
+        }
+        if (mirrorOwnerType != null) {
+            generalForm.setOwnerType(mirrorOwnerType);
+        }
+        if (mirrorOwnerId != null) {
+            generalForm.setOwnerId(mirrorOwnerId);
+        }
+        generalForm.setFormOriginId(null);
+        generalFormProvider.createGeneralForm(generalForm);
+        return generalForm;
+    }
+
+    @Override
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        }
+
+        List<GeneralForm> list = generalFormProvider.listGeneralForm(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId());
+        for (GeneralForm form : list) {
+            form.setStatus(GeneralFormStatus.INVALID.getCode());
+            generalFormProvider.updateGeneralForm(form);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFormMirror(DoFormMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long id : cmd.getFormIds()) {
+            mirrorGeneralForm(id, cmd.getModuleType(), cmd.getModuleId(),
+                    cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId());
+        }
+    }
+
+    @Override
+    public GeneralFormPrintTemplateDTO createGeneralFormPrintTemplate(AddGeneralFormPrintTemplateCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getOwnerId());
+        if (form == null) {
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getOwnerId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
+                    "generalForm is null");
+        }
+        GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
+        generalFormPrintTemplate.setName(form.getFormName());
+        generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
+        generalFormPrintTemplate.setOwnerId(form.getId());
+        //使用gogs存储合同内容
+        //1.建仓库 不同应用建立不同仓库
+        try {
+            String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
+            GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+            //2.提交脚本
+            GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), "", cmd.getContents(), true);
+            //3.存储提交脚本返回的id
+            generalFormPrintTemplate.setLastCommit(commit.getId());
+
+            generalFormProvider.createGeneralFormPrintTemplate(generalFormPrintTemplate);
+        } catch (GogsConflictException e) {
+            LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
+                    "generalFormPrintTemplate is already exist");
+        } catch (GogsNotExistException e) {
+            LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
+                    "generalFormGogsFileNotExist not exist");
+        } catch (Exception e){
+            LOGGER.error("Gogs OthersException .", e);
+        }
+        return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
+    }
+
+    @Override
+    public GeneralFormPrintTemplateDTO updateGeneralFormPrintTemplate(UpdateGeneralFormPrintTemplateCommand cmd) {
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+                .getOwnerId());
+        if (form == null) {
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getOwnerId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
+                    "generalForm is null");
+        }
+        GeneralFormPrintTemplate generalFormPrintTemplate = ConvertHelper.convert(cmd, GeneralFormPrintTemplate.class);
+        generalFormPrintTemplate.setOwnerType(FORM_PRINT_TEMPLATE_OWNER_TYPE);
+        generalFormPrintTemplate.setOwnerId(form.getId());
+        generalFormPrintTemplate.setName(form.getFormName());
+        boolean isNewFile = false;
+        GeneralFormPrintTemplate oldTemplate = generalFormProvider.getGeneralFormPrintTemplateById(cmd.getId());
+        if (!oldTemplate.getName().equals(form.getFormName())) {
+            isNewFile = true;
+        }
+        //使用gogs存储合同内容
+        //1.建仓库 不同应用建立不同仓库
+        try {
+            String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
+            //如果表单ID不一致，则新增一条数据，以免旧模板的commit被冲掉
+            if (!oldTemplate.getOwnerId().equals(generalFormPrintTemplate.getOwnerId())) {
+                GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+                //2.提交脚本
+                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), "", cmd.getContents(), true);
+                //3.存储提交脚本返回的id
+                generalFormPrintTemplate.setLastCommit(commit.getId());
+                generalFormProvider.createGeneralFormPrintTemplate(generalFormPrintTemplate);
+            }else {
+                GogsRepo repo = gogsRepo(cmd.getNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+                //如果改了名称，在版本仓库里必须删掉原来的，在创建新的
+                if (isNewFile) {
+                    gogsDeleteScript(repo,oldTemplate.gogsPath(),oldTemplate.getLastCommit());
+                }
+                //2.提交脚本
+                GogsCommit commit = gogsCommitScript(repo, generalFormPrintTemplate.gogsPath(), oldTemplate.getLastCommit(), cmd.getContents(), isNewFile);
+                //3.存储提交脚本返回的id
+                generalFormPrintTemplate.setLastCommit(commit.getId());
+                generalFormProvider.updateGeneralFormPrintTemplate(generalFormPrintTemplate);
+            }
+        } catch (GogsConflictException e) {
+            LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
+                    "generalFormPrintTemplate is already exist");
+        } catch (GogsNotExistException e) {
+            LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
+                    "generalFormGogsFileNotExist not exist");
+        } catch (Exception e){
+            LOGGER.error("Gogs OthersException .", e);
+        }
+        return ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
+    }
+
+    @Override
+    public GeneralFormPrintTemplateDTO getGeneralFormPrintTemplate(GetGeneralFormPrintTemplateCommand cmd) {
+        GeneralForm generalForm = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId());
+        if (generalForm == null) {
+            LOGGER.error("generalForm is null,formOriginId = {}", cmd.getFormOriginId());
+            throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_IS_NOT_EXISTS,
+                    "generalForm is null");
+        }
+        GeneralFormPrintTemplate generalFormPrintTemplate = this.generalFormProvider.getGeneralFormPrintTemplate(cmd.getNamespaceId(),
+                generalForm.getId(),FORM_PRINT_TEMPLATE_OWNER_TYPE);
+        if (generalFormPrintTemplate == null) {
+            LOGGER.error("generalFormPrintTemplate in namespace {} not exist!", UserContext.getCurrentNamespaceId());
+            return null;
+        }
+        String moduleType = "GeneralFormPrintTemplate_" + generalFormPrintTemplate.getOwnerId();
+        GogsRepo repo = gogsRepo(UserContext.getCurrentNamespaceId(), moduleType, 0L, FORM_PRINT_TEMPLATE_OWNER_TYPE, generalFormPrintTemplate.getOwnerId());
+        String contents = gogsGet(repo,generalFormPrintTemplate.gogsPath(),generalFormPrintTemplate.getLastCommit());
+        GeneralFormPrintTemplateDTO generalFormPrintTemplateDTO = ConvertHelper.convert(generalFormPrintTemplate, GeneralFormPrintTemplateDTO.class);
+        generalFormPrintTemplateDTO.setContents(contents);
+        if (generalFormPrintTemplate.getCreatorUid() != null) {
+            UserInfo user  = this.userService.getUserInfo(generalFormPrintTemplate.getCreatorUid());
+            generalFormPrintTemplateDTO.setCreatorName(user.getNickName());
+        }
+        return generalFormPrintTemplateDTO;
+    }
+
+    private GogsRepo gogsRepo(Integer namespaceId, String moduleType, Long moduleId, String ownerType, Long ownerId) {
+        GogsRepo repo = gogsService.getAnyRepo(namespaceId, moduleType, moduleId, ownerType, ownerId);
+        if (repo == null) {
+            repo = new GogsRepo();
+            repo.setName("generalFormPrintTemplate");
+            repo.setNamespaceId(namespaceId);
+            repo.setModuleType(moduleType);
+            repo.setModuleId(moduleId);
+            repo.setOwnerType(ownerType);
+            repo.setOwnerId(ownerId);
+            repo.setRepoType(GogsRepoType.NORMAL.name());
+            repo = gogsService.createRepo(repo);
+        }
+        return repo;
+    }
+
+    private GogsCommit gogsCommitScript(GogsRepo repo, String path, String lastCommit, String content, boolean isNewFile) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setNewFile(isNewFile);
+        param.setContent(content);
+        param.setLastCommit(lastCommit);
+        return gogsService.commitFile(repo, path, param);
+    }
+
+    private String gogsCommitMessage() {
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.currentUserId());
+        return String.format(
+                "Author: %s\n UID: %s\n Identifier: %s", userInfo.getNickName(), userInfo.getId(), userInfo.getPhones());
+    }
+
+    private GogsCommit gogsDeleteScript(GogsRepo repo, String path, String lastCommit) {
+        GogsRawFileParam param = new GogsRawFileParam();
+        param.setCommitMessage(gogsCommitMessage());
+        param.setLastCommit(lastCommit);
+        return gogsService.deleteFile(repo, path, param);
+    }
+
+    private String gogsGet(GogsRepo repo, String path, String lastCommit) {
+        byte[] file = gogsService.getFile(repo, path, lastCommit);
+        return new String(file, Charset.forName("UTF-8"));
+    }
 }
 
