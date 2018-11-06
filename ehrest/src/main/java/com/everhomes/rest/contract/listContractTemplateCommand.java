@@ -36,7 +36,14 @@ public class listContractTemplateCommand {
 	private Long orgId;
 	private Long pageAnchor = 0L;
 	private Integer pageSize;
+	private Long appId;
 	
+	public Long getAppId() {
+		return appId;
+	}
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}

@@ -3,6 +3,8 @@ package com.everhomes.techpark.punch.recordmapper;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestStatisticsItemDTO;
 import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemDTO;
+import com.everhomes.rest.techpark.punch.PunchStatusStatisticsItemType;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation.ANONYMOUS;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public interface PunchStatisticsParser {
                 item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
                 item.setNum(value != null ? (int) value : 0);
+                item.setUnit(annotation.type().getUnit());
                 items.put(annotation.defaultOrder(), item);
             }
         } catch (IllegalAccessException e) {
@@ -66,6 +69,7 @@ public interface PunchStatisticsParser {
                 item.setItemName(itemName);
                 item.setItemType(annotation.type().getCode());
                 item.setNum(value != null ? (int) value : 0);
+                item.setUnit("次");
                 items.put(annotation.defaultOrder(), item);
             }
         } catch (IllegalAccessException e) {

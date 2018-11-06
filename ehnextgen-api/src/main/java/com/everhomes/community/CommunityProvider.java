@@ -131,6 +131,8 @@ public interface CommunityProvider {
     Long findDefaultCommunityByCommunityId(Integer namespaceId, Long originId);
 	List<Community> listCommunitiesByOrgId(ListingLocator locator, int i, Long orgId, String keyword);
 
+    List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, Byte ownerFlag, ListingLocator locator, int count);
+
     //在给予的communityIds的范围内根据参数中的经纬度进行排序
     List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds);
 
@@ -145,7 +147,28 @@ public interface CommunityProvider {
 
     List<Community> listNamespaceCommunities(Integer namespaceId);
     List<Community> listAllCommunitiesWithNamespaceToken();
-    //导入项目信息，查询项目是否存在
+
+    Community findDefaultCommunity(Integer namespaceId);
+
+    Community findAnyCommunity(Integer namespaceId);
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param communityId
+     * @param namespaceId
+     * @return
+     */
+    List<Long> findOrganizationIdsByNamespaceId(Long communityId , Integer namespaceId);
+
+    /**
+     * 根据项目名称和域空间Id来查询项目
+     * @param name
+     * @param namespaceId
+     * @return
+     */
+    Community findCommunityByNameAndNamespaceId(String name,Integer namespaceId);
+	
+	   //导入项目信息，查询项目是否存在
 	Community findCommunityByNamespaceIdAndName(Integer namespaceId, String name);
 	Community findCommunityByNumber(String communityNumber, Integer namespaceId);
 	Integer countActiveBuildingsByCommunityId(Long communityId);
@@ -157,5 +180,9 @@ public interface CommunityProvider {
 	List<Building> findBuildingsByCommunityId(Long communityId);
 	List<Building> findBuildingsByNamespaceId(Integer namespaceId);
 	Map<Long, Building> mapBuildingIdAndBuilding(List<Long> buildingIds);
+	Long getOrganizationIdByCommunityId(Long communityId);
+	String findCommunityCategoryByCommunityId(Long communityId);
+	List<Building> findBuildingsByIds(List<Long> buildingIds);
+	List<Long> findCommunityIdsByOrgId(Long organizationId);
 	
 }

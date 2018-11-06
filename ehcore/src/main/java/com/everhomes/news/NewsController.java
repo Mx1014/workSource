@@ -139,23 +139,6 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/searchNews</b>
-	 * <p>
-	 * 后台关键字搜索新闻列表
-	 * </p>
-	 */
-	@RequestMapping("searchNews")
-	@RestReturn(SearchNewsResponse.class)
-	public RestResponse searchNews(SearchNewsCommand cmd) {
-		SearchNewsResponse searchNewsResponse = newsService.searchNews(cmd);
-
-		RestResponse response = new RestResponse(searchNewsResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /news/getNewsDetailInfo</b>
 	 * <p>
 	 * 查询新闻详情（共用）
@@ -443,9 +426,55 @@ public class NewsController extends ControllerBase {
 		return response;
 	}
 
+
+
+	/**
+	 * <b>URL: /news/enableSelfDefinedConfig</b>
+	 * <p>
+	 * 开启自定义配置
+	 * </p>
+	 */
+	@RequestMapping("enableSelfDefinedConfig")
+	@RestReturn(String.class)
+	public RestResponse enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		newsService.enableSelfDefinedConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/disableSelfDefinedConfig</b>
+	 * <p>
+	 * 关闭自定义配置
+	 * </p>
+	 */
+	@RequestMapping("disableSelfDefinedConfig")
+	@RestReturn(String.class)
+	public RestResponse disableSelfDefinedConfig(GetSelfDefinedStateCommand cmd) {
+		newsService.disableSelfDefinedConfig(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/getSelfDefinedState</b>
+	 * <p>
+	 * 获取自定义配置状态
+	 * </p>
+	 */
+	@RequestMapping("getSelfDefinedState")
+	@RestReturn(GetSelfDefinedStateResponse.class)
+	public RestResponse getSelfDefinedState(GetSelfDefinedStateCommand cmd) {
+		RestResponse response = new RestResponse(newsService.getSelfDefinedState(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
-
-
 //@Aspect
 //@Component
 // class MyPoxy {

@@ -6,9 +6,13 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.AclRoleDescriptor;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.ServiceModuleAppAuthorization;
+import com.everhomes.acl.ServiceModuleAppAuthorizationProvider;
+import com.everhomes.acl.ServiceModuleAppAuthorizationService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -20,6 +24,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
@@ -44,6 +49,7 @@ import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
@@ -58,6 +64,7 @@ import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationWorkPlaces;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -66,7 +73,6 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
@@ -91,9 +97,11 @@ import com.everhomes.rest.community.BuildingStatus;
 import com.everhomes.rest.community.CaculateBuildingAreaCommand;
 import com.everhomes.rest.community.CaculateCommunityAreaCommand;
 import com.everhomes.rest.community.ChangeBuildingOrderCommand;
+import com.everhomes.rest.community.ChangeOrganizationCommunitiesCommand;
 import com.everhomes.rest.community.CommunityAuthPopupConfigDTO;
 import com.everhomes.rest.community.CommunityDetailDTO;
 import com.everhomes.rest.community.CommunityGeoPointDTO;
+import com.everhomes.rest.community.CommunityInfoDTO;
 import com.everhomes.rest.community.CommunityNotificationTemplateCode;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityStatisticsDTO;
@@ -102,6 +110,7 @@ import com.everhomes.rest.community.CreateChildProjectCommand;
 import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
 import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.community.DeleteChildProjectCommand;
+import com.everhomes.rest.community.FindNearbyMixCommunityCommand;
 import com.everhomes.rest.community.FloorRangeDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetBuildingStatisticsCommand;
@@ -117,6 +126,7 @@ import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.community.GetTreeProjectCategoriesCommand;
 import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.community.ImportCommunityDataDTO;
+import com.everhomes.rest.community.ListAllCommunitiesResponse;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
 import com.everhomes.rest.community.ListApartmentsInCommunityResponse;
 import com.everhomes.rest.community.ListBuildingCommand;
@@ -128,8 +138,12 @@ import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordResponse;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdCommand;
+import com.everhomes.rest.community.ListCommunitiesByOrgIdAndAppIdResponse;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdCommand;
 import com.everhomes.rest.community.ListCommunitiesByOrgIdResponse;
+import com.everhomes.rest.community.ListCommunitiesCommand;
+import com.everhomes.rest.community.ListCommunitiesResponse;
 import com.everhomes.rest.community.ListResourceCategoryCommand;
 import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
 import com.everhomes.rest.community.ResourceCategoryDTO;
@@ -159,12 +173,15 @@ import com.everhomes.rest.community.admin.CommunityUserOrgDetailDTO;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
+import com.everhomes.rest.community.admin.CreateCommunitiesCommand;
+import com.everhomes.rest.community.admin.CreateCommunitiesResponse;
 import com.everhomes.rest.community.admin.CreateCommunityCommand;
 import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ExportAllCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ExportBatchCommunityUsersCommand;
+import com.everhomes.rest.community.admin.GetOrgIdByCommunityIdCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListAllCommunityUserResponse;
 import com.everhomes.rest.community.admin.ListAllCommunityUsersCommand;
@@ -178,6 +195,7 @@ import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
 import com.everhomes.rest.community.admin.OperateType;
+import com.everhomes.rest.community.admin.OrgDTO;
 import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.QryCommunityUserAllByUserIdCommand;
@@ -185,6 +203,7 @@ import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityPartialAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
@@ -194,6 +213,7 @@ import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
@@ -209,6 +229,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -227,9 +248,10 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.Status;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
-import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.PropertyErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -259,6 +281,7 @@ import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.VersionRange;
@@ -268,9 +291,11 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -291,6 +316,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -299,6 +325,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -408,11 +435,26 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
 
+	@Autowired
+	private FamilyProvider familyProvider;
+
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+    @Autowired
+    private ServiceModuleAppAuthorizationProvider serviceModuleAppAuthorizationProvider;
+
+    @Autowired
+	private BuildingProvider buildingProvider;
+
     @Autowired
     private UserPrivilegeMgr userPrivilegeMgr;
 
     @Autowired
 	private TaskService taskService;
+    
+    @Autowired
+    private NamespacesService namespacesService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -460,7 +502,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateCommunity(UpdateCommunityAdminCommand cmd) {
 		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid communityId parameter");
 		}
 
@@ -491,13 +533,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Region city = regionProvider.findRegionById(cmd.getCityId());
 		if(city == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid cityId parameter,city is not found.");
 		}
 
 		Region area = regionProvider.findRegionById(cmd.getAreaId());
 		if(area == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 					"Invalid areaId parameter,area is not found.");
 		}
 		if(StringUtils.isNotBlank(cmd.getCommunityNumber())) {
@@ -798,7 +840,30 @@ public class CommunityServiceImpl implements CommunityService {
 			communityDTO.setGeoPointList(getPointDTOs);
 		}
 
+		List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(communityDTO.getId());
+		if(orgcoms != null && orgcoms.size() > 0){
+			Organization org = organizationProvider.findOrganizationById(orgcoms.get(0).getOrganizationId());
+			if(org != null){
+				communityDTO.setPmOrgId(org.getId());
+				communityDTO.setPmOrgName(org.getName());
+			}
+		}
+
 		return communityDTO;
+	}
+
+	@Override
+	public CommunityDTO getCommunityForSdkById(GetCommunityByIdCommand cmd) {
+		if(cmd.getId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter");
+		}
+        Community community = this.communityProvider.findCommunityById(cmd.getId());
+        if (community == null) {
+            return null;
+        }
+        CommunityDTO communityDTO = ConvertHelper.convert(community, CommunityDTO.class);
+        return communityDTO;
 	}
 
 
@@ -829,7 +894,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public ListCommunitiesByKeywordResponse listCommunitiesByKeyword(ListComunitiesByKeywordAdminCommand cmd) {
+	public ListCommunitiesByKeywordResponse listCommunitiesByKeyword(
+			ListComunitiesByKeywordAdminCommand cmd) {
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -888,6 +954,18 @@ public class CommunityServiceImpl implements CommunityService {
 
         	return dto;
         }).collect(Collectors.toList());
+
+        if(CollectionUtils.isNotEmpty(dtoList)){
+
+			//由于之前在返回给前端的楼栋信息中没有门牌的数量，所以在这里添加上
+			//遍历楼栋的集合
+			for(BuildingDTO buildingDTO : dtoList){
+				//拿到每一个楼栋的名称，然后根据楼栋名称和项目编号查询eh_addresses表中的门牌总数
+				//// TODO: 2018/5/11
+				int apartmentCount = addressProvider.getApartmentCountByBuildNameAndCommunityId(buildingDTO.getName(),cmd.getCommunityId());
+				buildingDTO.setApartmentCount(apartmentCount);
+			}
+		}
 
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
@@ -972,7 +1050,8 @@ public class CommunityServiceImpl implements CommunityService {
 		Building building = communityProvider.findBuildingById(cmd.getBuildingId());
 		if(building != null) {
             if(BuildingStatus.ACTIVE != BuildingStatus.fromCode(building.getStatus())) {
-        		LOGGER.error("Building is already deleted");
+
+        		LOGGER.error("Building isalready deleted");
         		throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE,
         				BuildingServiceErrorCode.ERROR_BUILDING_DELETED, "Building already deleted");
             }
@@ -1014,7 +1093,7 @@ public class CommunityServiceImpl implements CommunityService {
 		 } else {
 
 			 dto.setBuildingName(dto.getName());
-			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+			 dto.setName(StringUtils.isBlank(dto.getAliasName()) ? dto.getName() : dto.getName());
 
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
@@ -1139,6 +1218,16 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 
+		//首先需要根据namespaceId和communityId来进行查询数据库eh_building中是否存在楼栋名称相同的楼栋
+		//// TODO: 2018/5/11
+		List<com.everhomes.building.Building> buildingList = buildingProvider.getBuildingByCommunityIdAndNamespaceId(cmd.getCommunityId(),cmd.getNamespaceId(),cmd.getName());
+		//非空校验 exclude itself
+		if(CollectionUtils.isNotEmpty(buildingList) && buildingList.size()>1){
+			//说明库里面之前就有和该楼栋名称相同的楼栋，那么就不能用该名称作为新建的楼栋，直接给前端报错
+			LOGGER.error("the buildingName has been used");
+			throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, BuildingServiceErrorCode.ERROR_BUILDINGNAME_HASBEENUSED,
+					"the buildingName has been used");
+		}
 		Building building = ConvertHelper.convert(cmd, Building.class);
 
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
@@ -1511,6 +1600,9 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
+
+
+
 			if (building == null) {
 				building = new Building();
 				building.setName(data.getName());
@@ -1579,6 +1671,8 @@ public class CommunityServiceImpl implements CommunityService {
 				if (StringUtils.isNotBlank(data.getAliasName())) {
 					building.setAliasName(data.getAliasName());
 				}
+
+
 //				building.setNamespaceBuildingType(data.getNamespaceBuildingType());
 //				building.setNamespaceBuildingToken(data.getNamespaceBuildingToken());
 				building.setNamespaceId(community.getNamespaceId());
@@ -1601,12 +1695,37 @@ public class CommunityServiceImpl implements CommunityService {
 			log.setErrorLog("building name cannot be empty");
 			return log;
 		}
-		if (StringUtils.isEmpty(data.getAddress())) {
+		LOGGER.info(String.valueOf(data.getName().length()));
+		//校验楼栋名称的长度不能大于20个汉字
+		if(data.getName().length() > 20){
+			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_OVER_FLOW);
+			log.setData(data);
+			log.setErrorLog("building name cannot over than 20");
+			return log;
+		}
+
+		//merge conflic
+//
+//		//进行非空校验
+//		if(building != null){
+//			if(building.getName().equals(data.getName())){
+//				log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_REPEATED);
+//				log.setData(data);
+//				log.setErrorLog("building name is repeat");
+//				return log;
+//			}
+//		}
+
+
+
+/*		if (StringUtils.isEmpty(data.getAddress())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
 			log.setData(data);
 			log.setErrorLog("address cannot be empty");
 			return log;
-		}
+		}*/
+
+
 		if (StringUtils.isEmpty(data.getContactor())) {
 			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
 			log.setData(data);
@@ -1793,7 +1912,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW, cmd.getCommunityId(), cmd.getAppId());
 		// Long communityId = cmd.getCommunityId();
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<NamespaceResource> resourceList = namespaceResourceProvider.listResourceByNamespace(cmd.getNamespaceId(), NamespaceResourceType.COMMUNITY);
@@ -2009,6 +2128,8 @@ public class CommunityServiceImpl implements CommunityService {
 			groupIds.add(group.getId());
 		}
 
+
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2215,6 +2336,16 @@ public class CommunityServiceImpl implements CommunityService {
                 groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                 memberLogs.add(groupMemberDTO);
             });
+            //按照时间倒叙排列
+            Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                @Override
+                public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                    if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                        return -1;
+                    }
+                    return o2.getApproveTime().compareTo(o1.getApproveTime());
+                }
+            });
         }
         dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
@@ -2236,6 +2367,7 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
+			dto.setIdentityNumber(user.getIdentityNumberTag());
 			//dto.setAddressDtos(addressDtos);
             String showVipFlag = this.configurationProvider.getValue(user.getNamespaceId(), ConfigConstants.SHOW_USER_VIP_LEVEL, "");
             if ("true".equals(showVipFlag)) {
@@ -2267,7 +2399,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2277,7 +2409,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					break;
-				}
+                }else if (OrganizationMemberStatus.WAITING_FOR_APPROVAL == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                    dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                    break;
+                }
 			}
 		}
 
@@ -2300,9 +2435,8 @@ public class CommunityServiceImpl implements CommunityService {
             }
             dto.setVipLevel(user.getVipLevel());
         }
-
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
-		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
 		if(null != memberLogs){
 			for(OrganizationMemberLog log : memberLogs){
 				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
@@ -2313,10 +2447,22 @@ public class CommunityServiceImpl implements CommunityService {
 				User operator = this.userProvider.findUserById(log.getOperatorUid());
 				if(null != operator)
 					logDTO.setOperatorNickName(operator.getNickName());
-				dto.getMemberLogDTOs().add(logDTO);
+                memberLog.add(logDTO);
 			}
+			if (!CollectionUtils.isEmpty(memberLog)) {
+                //按照时间倒叙排列
+                Collections.sort(memberLog, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
+            }
 		}
-
+        dto.setMemberLogDTOs(memberLog);
 		//最新活跃时间 add by sfyan 20170620
 		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
 		if(userActivities.size() > 0){
@@ -2351,6 +2497,7 @@ public class CommunityServiceImpl implements CommunityService {
             User user = this.userProvider.findUserById(cmd.getUserId());
             if (user != null) {
                 communityUserAddressDTO = ConvertHelper.convert(user, CommunityUserAddressDTO.class);
+                communityUserAddressDTO.setIdentityNumber(user.getIdentityNumberTag());
             }
 
             //是否展示会员等级
@@ -2382,6 +2529,16 @@ public class CommunityServiceImpl implements CommunityService {
                         pending = true;
                     }
                 }
+                //按照时间倒叙排列
+                Collections.sort(memberLogDTOs, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
                 communityUserAddressDTO.setOrgDtos(orgDtos);
                 communityUserAddressDTO.setAddressDtos(addressDtos);
                 communityUserAddressDTO.setMemberLogDTOs(memberLogDTOs);
@@ -2415,6 +2572,17 @@ public class CommunityServiceImpl implements CommunityService {
                     }
                     groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                     memberLogs.add(groupMemberDTO);
+                });
+
+                //按照时间倒叙排列
+                Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                    @Override
+                    public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                        if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                            return -1;
+                        }
+                        return o2.getApproveTime().compareTo(o1.getApproveTime());
+                    }
                 });
             }
             communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
@@ -3340,15 +3508,32 @@ public class CommunityServiceImpl implements CommunityService {
 			cmd.setAreaId(areaId);
 			Community community = createCommunity(userId, cmd);
 			cs.add(community);
-			//创建经纬度数据
+//创建经纬度数据
 			CommunityGeoPoint point = createCommunityGeoPoint(community.getId(), cmd.getLatitude(), cmd.getLongitude());
-			//添加园区与域空间的关联
+//添加园区与域空间的关联
 			createNamespaceResource(namespaceId, community.getId());
-			//添加企业可见园区,管理公司可以看到添加的园区
-			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
-			organizationCommunity.setCommunityId(community.getId());
-			organizationCommunity.setOrganizationId(cmd.getOrganizationId());
-			organizationProvider.createOrganizationCommunity(organizationCommunity);
+
+
+
+			//标准版先写的使用pmOrgId创建OrganizationCommunity，后面定制版又使用了organizationId通过接口创建园区。
+			//TODO 以后谁有心情把它统一一下吧，现在就这样
+			//增加管理公司
+			if(cmd.getPmOrgId() != null){
+				organizationService.createOrganizationCommunity(cmd.getPmOrgId(), community.getId());
+			}else if(cmd.getOrganizationId() != null){
+				//添加企业可见园区,管理公司可以看到添加的园区
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(community.getId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId());
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}
+
+
+			if(namespacesService.isStdNamespace(namespaceId) && cmd.getPmOrgId() != null){
+				//新增所有已安装应用的授权
+				serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(namespaceId, cmd.getPmOrgId(), community.getId());
+			}
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -3378,7 +3563,7 @@ public class CommunityServiceImpl implements CommunityService {
 		//如果左邻域下也没有就抛出异常
 		LOGGER.error(
 				"Invalid region, operatorId=" + userId + ", path=" + path);
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_REGION_NOT_EXIST,
 				"Invalid region");
 	}
 
@@ -3386,9 +3571,11 @@ public class CommunityServiceImpl implements CommunityService {
 		//创建社区
 		Community community = ConvertHelper.convert(cmd, Community.class);
 		community.setAptCount(0);
+
+
 		//设置默认的forumId，要使用原有的项目里的forumId
 		ListingLocator locator = new ListingLocator();
-		List<Community> communities = communityProvider.listCommunities(cmd.getNamespaceId(), locator, 1, null);
+		List<Community> communities = communityProvider.listCommunities(UserContext.getCurrentNamespaceId(), locator, 1, null);
 		if(communities != null && communities.size() > 0){
 			community.setDefaultForumId(communities.get(0).getDefaultForumId());
 			community.setFeedbackForumId(communities.get(0).getFeedbackForumId());
@@ -3396,7 +3583,14 @@ public class CommunityServiceImpl implements CommunityService {
 			community.setDefaultForumId(1L);
 			community.setFeedbackForumId(2L);
 		}
-		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}else {
+			community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		}
+
 		communityProvider.createCommunity(userId, community);
 
 		return community;
@@ -3462,8 +3656,8 @@ public class CommunityServiceImpl implements CommunityService {
 			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
 		} catch (IOException e) {
 			LOGGER.error("processStat Excel error, operatorId=" + userId + ", cmd=" + cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_GENERAL_EXCEPTION, "processStat Excel error");
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_PARSE_FILE, "processStat Excel error");
 		}
 
 		if (resultList != null && resultList.size() > 0) {
@@ -3490,7 +3684,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return list;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+		throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_EXCEL_DATA_FORMAT,
 				"excel data format is not correct");
 	}
 
@@ -3885,7 +4079,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 
-	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId());
+	    checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_LIST_VIEW,cmd.getCommunityId(), cmd.getAppId());
 		// TODO Auto-generated method
         ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
 
@@ -3908,6 +4102,20 @@ public class CommunityServiceImpl implements CommunityService {
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+        List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(orgIds,
+                UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())
+                && !CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+            if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
+                for (Long orgId : noAuthOrganizationIds) {
+                    if (orgIds.contains(orgId)) {
+                        orgIds.remove(orgId);
+                    }
+                }
+            }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
+                orgIds = noAuthOrganizationIds;
+            }
+        }
 		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
@@ -3937,7 +4145,6 @@ public class CommunityServiceImpl implements CommunityService {
                                           //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
                                             //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
                                             member.setId(r.getId());
-                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -3948,6 +4155,7 @@ public class CommunityServiceImpl implements CommunityService {
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                LOGGER.debug("orgmemberlogId is：{}" , orgIds);
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
@@ -3985,6 +4193,19 @@ public class CommunityServiceImpl implements CommunityService {
                         dto.setOrganizationName(organization.getName());
                     }
                 }
+                dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+					List<OrganizationMember> manage = this.organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(dto.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode());
+					List<Long> manageUserIds = new ArrayList<>();
+					if (!CollectionUtils.isEmpty(manage)) {
+						for (OrganizationMember member : manage) {
+							manageUserIds.add(member.getTargetId());
+						}
+					}
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId()) && !manageUserIds.contains(UserContext.currentUserId())) {
+				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+                    }
+                }
                 if (dto.getNickName() == null || dto.getNickName().isEmpty()) {
                     User user = userProvider.findUserById(dto.getTargetId());
                     if (user != null && user.getId() != 0) {
@@ -3999,18 +4220,18 @@ public class CommunityServiceImpl implements CommunityService {
 		return response;
 	}
 
-	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId){
-        return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.AUTHENTIFICATION_MODULE_ID, null, null, null,communityId);
+	private boolean checkUserPrivilege(Long orgId, Long privilegeId, Long communityId, Long appId){
+		return userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, appId,null,communityId);
 	}
 	@Override
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) {
 		if(null == cmd.getUserId() )
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid userid parameter");
 		User user = userProvider.findUserById(cmd.getUserId());
 
 		if(null == user)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_USER_NOT_EXIST,
 					"Invalid userid parameter: no this user");
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 
@@ -4103,8 +4324,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
 		checkResourceCategoryIsNull(category);
-
-		//删除分类时，删除园区与该分类的关联关系
+//删除分类时，删除园区与该分类的关联关系
 		List<ResourceCategoryAssignment> assignments = communityProvider.listResourceCategoryAssignment(category.getId(), category.getNamespaceId());
 		if (assignments!=null && assignments.size()>0) {
 			for (ResourceCategoryAssignment assignment : assignments) {
@@ -4511,13 +4731,13 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateBuildingOrder(UpdateBuildingOrderCommand cmd) {
 		if (null == cmd.getId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
 		}
 		if (null == cmd.getExchangeId()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid exchangeId parameter in the command");
 		}
 		Building building = communityProvider.findBuildingById(cmd.getId());
@@ -4525,14 +4745,14 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if (null == building) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 		if (null == exchangeBuilding) {
 			LOGGER.error("Building not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE,
+					PropertyErrorCode.ERROR_BUILDING_NOT_EXIST,
 					"Building not found");
 		}
 
@@ -4665,7 +4885,7 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public CheckUserAuditingAdminResponse checkUserAuditing(CheckUserAuditingAdminCommand cmd) {
         CheckUserAuditingAdminResponse response = new CheckUserAuditingAdminResponse();
-        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId());
+        boolean isAuditing = checkUserPrivilege(cmd.getCurrentOrgId(), PrivilegeConstants.AUTHENTIFICATION_AUDITING, cmd.getCommunityId(), cmd.getAppId());
         if (isAuditing) {
             response.setIsAuditing(CheckAuditingType.YES.getCode());
         }else {
@@ -4992,6 +5212,347 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
+
+	@Override
+	public ListAllCommunitiesResponse listAllCommunities() {
+
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+
+		Set<Long> familyCommunityIdSet = new HashSet<>();
+		Set<Long> orgCommunityIdSet = new HashSet<>();
+
+		User user = UserContext.current().getUser();
+
+		//登录的话找加入的家庭和公司
+		if(user != null && user.getId() != null){
+			orgCommunityIdSet = getWorkPlaceCommunityIdsByUserId(user.getId());
+			familyCommunityIdSet = getFamilyCommunityIdsByUserId(user.getId());
+		}
+
+
+		List<CommunityInfoDTO> dtos = new ArrayList<>();
+		for (Community com: communities){
+			CommunityInfoDTO dto = ConvertHelper.convert(com, CommunityInfoDTO.class);
+
+			if(familyCommunityIdSet.contains(com.getId())){
+				dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
+
+			if(orgCommunityIdSet.contains(com.getId())){
+				dto.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+			}
+
+			String pinyin = PinYinHelper.getPinYin(dto.getName());
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+			dtos.add(dto);
+		}
+
+		ListAllCommunitiesResponse response = new ListAllCommunitiesResponse();
+		response.setDtos(dtos);
+
+		return response;
+	}
+
+	private Set<Long> getFamilyCommunityIdsByUserId(Long userId){
+
+
+		Set<Long> familyCommunityIdSet = new HashSet<>();
+
+		List<FamilyDTO> familyDtos = familyProvider.getUserFamiliesByUserId(userId);
+
+		if(familyDtos != null && familyDtos.size() > 0){
+			for(FamilyDTO dto: familyDtos){
+				if(GroupMemberStatus.ACTIVE == GroupMemberStatus.fromCode(dto.getMembershipStatus())){
+					familyCommunityIdSet.add(dto.getCommunityId());
+				}
+			}
+		}
+
+		return familyCommunityIdSet;
+	}
+
+
+	private Set<Long> getWorkPlaceCommunityIdsByUserId(Long userId){
+
+
+		Set<Long> orgCommunityIdSet = new HashSet<>();
+
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(null, OrganizationMemberTargetType.USER.getCode(), userId);
+		if(members != null){
+			for (OrganizationMember member: members) {
+				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+
+
+					//定制版要直接使用OrganizationCommunityRequest表的数据
+					if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+						List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
+						if(workPlaces != null && workPlaces.size() > 0){
+							for (OrganizationWorkPlaces workPlace: workPlaces){
+								orgCommunityIdSet.add(workPlace.getCommunityId());
+							}
+						}
+					}else {
+
+						OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(member.getOrganizationId());
+						if(organizationCommunityRequest != null){
+							orgCommunityIdSet.add(organizationCommunityRequest.getCommunityId());
+						}
+
+					}
+
+				}
+			}
+		}
+
+		return orgCommunityIdSet;
+
+	}
+
+
+	@Override
+	public CommunityInfoDTO findNearbyMixCommunity(FindNearbyMixCommunityCommand cmd) {
+
+		List<CommunityGeoPoint> pointList;
+
+
+
+		for(int i = 12; i > 3; i--){
+			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
+			if(pointList != null && pointList.size() > 0){
+				for(CommunityGeoPoint point: pointList){
+
+
+					Community community = communityProvider.findCommunityById(point.getCommunityId());
+					if(community == null || !community.getNamespaceId().equals(UserContext.getCurrentNamespaceId())){
+						continue;
+					}
+
+					CommunityInfoDTO dto = ConvertHelper.convert(community, CommunityInfoDTO.class);
+
+					Set<Long> familyCommunityIdSet;
+					Set<Long> orgCommunityIdSet;
+
+					User user = UserContext.current().getUser();
+
+					//登录的话找加入的家庭和公司
+					if(user != null && user.getId() != null){
+						orgCommunityIdSet = getWorkPlaceCommunityIdsByUserId(user.getId());
+						if(orgCommunityIdSet.contains(community.getId())){
+							dto.setSiteFlag(TrueOrFalseFlag.TRUE.getCode());
+						}
+						familyCommunityIdSet = getFamilyCommunityIdsByUserId(user.getId());
+						if(familyCommunityIdSet.contains(community.getId())){
+							dto.setApartmentFlag(TrueOrFalseFlag.TRUE.getCode());
+						}
+					}
+
+					String pinyin = PinYinHelper.getPinYin(dto.getName());
+					dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+					dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+					return dto;
+				}
+
+			}
+		}
+
+
+		return null;
+	}
+
+	@Override
+	public CommunityInfoDTO findDefaultCommunity() {
+		Community defaultCommunity = communityProvider.findDefaultCommunity(UserContext.getCurrentNamespaceId());
+		if(defaultCommunity == null){
+			defaultCommunity = communityProvider.findAnyCommunity(UserContext.getCurrentNamespaceId());
+		}
+
+
+		if(defaultCommunity != null){
+			CommunityInfoDTO dto = ConvertHelper.convert(defaultCommunity, CommunityInfoDTO.class);
+			String pinyin = PinYinHelper.getPinYin(dto.getName());
+			dto.setFullPinyin(pinyin.replaceAll(" ", ""));
+			dto.setCapitalPinyin(PinYinHelper.getCapitalInitial(pinyin));
+
+			return dto;
+		}
+
+		return null;
+	}
+
+	@Override
+	public ListCommunitiesResponse listCommunities(ListCommunitiesCommand cmd) {
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+		ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<Community> list = this.communityProvider.listCommunities(cmd.getNamespaceId(),cmd.getCommunityType(),cmd.getOrgId(),cmd.getKeyword(),cmd.getStatus(), cmd.getOrganizationOwnerFlag(), locator, pageSize+1);
+
+		ListCommunitiesResponse response = new ListCommunitiesResponse();
+		if(list != null && list.size() > pageSize){
+			list.remove(list.size()-1);
+			response.setNextPageAnchor(list.get(list.size()-1).getId());
+		}
+		if(list != null){
+			List<CommunityDTO> dtos = new ArrayList<>();
+			for(Community community: list){
+				CommunityDTO dto = ConvertHelper.convert(community, CommunityDTO.class);
+				List<OrganizationCommunityDTO> orgcoms = organizationProvider.findOrganizationCommunityByCommunityId(dto.getId());
+				if(orgcoms != null && orgcoms.size() > 0){
+					Organization org = organizationProvider.findOrganizationById(orgcoms.get(0).getOrganizationId());
+					if(org != null){
+						dto.setPmOrgId(org.getId());
+						dto.setPmOrgName(org.getName());
+					}
+				}
+				dtos.add(dto);
+			}
+
+
+			response.setList(dtos);
+		}
+
+		return response;
+	}
+
+	@Override
+	public CreateCommunitiesResponse createCommunities(CreateCommunitiesCommand cmd) {
+		List<CommunityDTO> dtos = new ArrayList<>();
+
+		for(CreateCommunityCommand cmdOne: cmd.getCommunities()){
+			CreateCommunityResponse community = createCommunity(cmdOne);
+			dtos.add(community.getCommunityDTO());
+		}
+
+		CreateCommunitiesResponse response = new CreateCommunitiesResponse();
+		response.setDtos(dtos);
+		return response;
+	}
+
+	@Override
+	public void updateCommunityPartial(UpdateCommunityPartialAdminCommand cmd) {
+		if(cmd.getCommunityId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid communityId parameter");
+		}
+
+		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
+		if(community == null){
+			LOGGER.error("Community is not found.communityId=" + cmd.getCommunityId());
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
+		}
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+
+		if(cmd.getName() != null){
+			community.setName(cmd.getName());
+		}
+
+		if(cmd.getStatus() != null){
+			community.setStatus(cmd.getStatus());
+		}
+
+		if(cmd.getProvinceName() != null && cmd.getCityName() != null && cmd.getAreaName() != null){
+			Long provinceId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName()), 0L);  //创建省
+			Long cityId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName()), provinceId);  //创建市
+			Long areaId = createRegion(userId, community.getNamespaceId(), getPath(cmd.getProvinceName(), cmd.getCityName(), cmd.getAreaName()), cityId);  //创建区县
+			community.setProvinceId(provinceId);
+			community.setCityId(cityId);
+			community.setAreaId(areaId);
+			community.setProvinceName(cmd.getProvinceName());
+			community.setCityName(cmd.getCityName());
+			community.setAreaName(cmd.getAreaName());
+		}
+
+
+		if(cmd.getAddress() != null){
+			community.setAddress(cmd.getAddress());
+		}
+
+
+		if(cmd.getLatitude() != null && cmd.getLongitude() != null){
+			CommunityGeoPoint geoPoint = communityProvider.findCommunityGeoPointByCommunityId(community.getId());
+			if(geoPoint != null){
+				geoPoint.setLatitude(cmd.getLatitude());
+				geoPoint.setLongitude(cmd.getLongitude());
+				geoPoint.setGeohash(GeoHashUtils.encode(cmd.getLatitude(), cmd.getLongitude()));
+				communityProvider.updateCommunityGeoPoint(geoPoint);
+			}
+		}
+
+
+		community.setOperatorUid(userId);
+		communityProvider.updateCommunity(community);
+
+	}
+
+	@Override
+	public void changeOrganizationCommunities(ChangeOrganizationCommunitiesCommand cmd) {
+
+		dbProvider.execute(status -> {
+
+			if(cmd.getCommunityIds() != null && !"".equals(cmd.getCommunityIds())){
+				for (Long communityId: cmd.getCommunityIds()){
+					changeOrganizationCommunity(communityId, cmd.getFromOrgId(), cmd.getToOrgId());
+				}
+			}
+
+			return null;
+		});
+
+
+	}
+
+	@Override
+	public void changeOrganizationCommunity(Long communityId, Long fromOrgId, Long toOrgId) {
+
+		if(communityId == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid communityId parameter");
+		}
+
+		Community community = this.communityProvider.findCommunityById(communityId);
+		if(community == null){
+			LOGGER.error("Community is not found.communityId=" + communityId);
+			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+					"Community is not found.");
+		}
+
+		//查询原属记录
+		OrganizationCommunity orgcom = organizationProvider.findOrganizationProperty(communityId);
+
+
+		dbProvider.execute(status -> {
+
+			if(orgcom != null){
+				orgcom.setOrganizationId(toOrgId);
+				organizationProvider.updateOrganizationCommunity(orgcom);
+			}else {
+
+				OrganizationCommunity organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setOrganizationId(toOrgId);
+				organizationCommunity.setCommunityId(communityId);
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}
+
+
+			//更新授权，删除原有授权，新增新的授权
+			serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(community.getNamespaceId(), toOrgId, community.getId());
+
+
+			return null;
+		});
+
+
+
+	}
+
+
 	@Override
 	public ListBuildingsByKeywordsResponse listBuildingsByKeywords(ListBuildingsByKeywordsCommand cmd) {
 		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
@@ -5247,7 +5808,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		Integer relatedOrganizationOwnerNumber = addressProvider.countRelatedOrganizationOwnerNumber(building.getCommunityId(), building.getId());
 		dto.setRelatedOrganizationOwnerNumber(relatedOrganizationOwnerNumber);
-		
+
 		if (dto.getAreaSize()!=null) {
 			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
 		}
@@ -5263,7 +5824,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if(dto.getTotalRent()!=null){
 			dto.setTotalRent(doubleRoundHalfUp(dto.getTotalRent(),2));
 		}
-		
+
 		return dto;
 	}
 
@@ -5276,7 +5837,7 @@ public class CommunityServiceImpl implements CommunityService {
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
                     "Community is not exist.");
         }
-        
+
         int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 10000;
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -5285,7 +5846,8 @@ public class CommunityServiceImpl implements CommunityService {
         if (buildings != null && buildings.size() > 0) {
 			String fileName = String.format("楼栋信息导出_%s", community.getName());
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
-
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
@@ -5307,16 +5869,18 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			).collect(Collectors.toList());
 			//设置excel提示
-//			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
-//                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-//                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
-//                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-//                    "4、带有星号（*）的红色字段为必填项。\n" +
-//                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
-//                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "areaSize", "rentArea", "freeArea", "chargeArea", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription"};
-			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.setNeedTitleRemark(true).setTitleRemark("导出注意事项：\n" +
+                    "1、该导出结果可直接应用于系统的楼宇导入操作，但进行楼宇导入操作时，建筑面积、在租面积、可招租面积、收费面积这四个字段的值将不会记录到系统当中。\n" +
+                    "2、带有星号（*）的字段为导入时的必填项。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500)
+			.setNeedSequenceColumn(false)
+			.setIsCellStylePureString(true)
+			.setTitleRemarkColorIndex(HSSFColor.YELLOW.index);
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription", "areaSize", "rentArea", "freeArea", "chargeArea"};
+			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)"};
+			int[] titleSizes = {20, 20, 20, 20, 40, 25, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
@@ -5343,7 +5907,7 @@ public class CommunityServiceImpl implements CommunityService {
 			communityProvider.updateCommunity(community);
 		}
 	}
-	
+
 	private void initCommunityData(Community community){
 		community.setAptCount(0);
 		community.setAreaSize(0.0);
@@ -5382,22 +5946,29 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setFreeArea(0.0);
 		building.setSharedArea(0.0);
 	}
-	
+
 	@Override
 	public ListApartmentsInCommunityResponse listApartmentsInCommunity(ListApartmentsInCommunityCommand cmd) {
 		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
 		List<ApartmentInfoDTO> apartments = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
+
+		//管理公司全部项目范围
+		if (cmd.getAllScope() == 1) {
+			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			cmd.setCommunityIds(communityIds);
+		}
 		
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
-		
+
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
-		
+
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
-		
+
 		//用于存储已经计算过的合同id
 //		List<Long> contractIds = new ArrayList<>();
-		
+
+
 		List<Long> filterAddressIdList = new ArrayList<>();
 		for (Address address : addresses) {
 			filterAddressIdList.add(address.getId());
@@ -5412,7 +5983,7 @@ public class CommunityServiceImpl implements CommunityService {
 				filterAddressIdList.remove(address.getId());
 				continue;
 			}
-			
+
 			ApartmentInfoDTO dto = convertToApartmentInfoDTO(address,livingStatus);
 			apartments.add(dto);
 			caculateTotalApartmentStatistic(result,dto);
@@ -5446,7 +6017,8 @@ public class CommunityServiceImpl implements CommunityService {
 		double totalRent = 0;
 		totalRent = contractProvider.getTotalRentByAddressIds(filterAddressIdList);
 		result.setTotalRent(totalRent);
-		
+
+
 		//分页,每次多拿一个数据，决定要不要设置NextPageAnchor
 //		List<ApartmentInfoDTO> apartmentsForOnePage = new ArrayList<>();
 //		int pageSize =  cmd.getPageSize() != null ? cmd.getPageSize() : 1000;
@@ -5479,7 +6051,7 @@ public class CommunityServiceImpl implements CommunityService {
 //		}
 		return result;
 	}
-	
+
 	private void caculateTotalApartmentStatistic(ListApartmentsInCommunityResponse result, ApartmentInfoDTO dto) {
 		result.setTotalApartmentNumber(result.getTotalApartmentNumber() + 1);
 //		result.setTotalRelatedContractNumber(result.getTotalRelatedContractNumber() + dto.getRelatedContractNumber());
@@ -5499,7 +6071,7 @@ public class CommunityServiceImpl implements CommunityService {
 		response.setTotalChargeArea(0.0);
 		response.setTotalRent(0.0);
 	}
-	
+
 	private ApartmentInfoDTO convertToApartmentInfoDTO(Address address,byte livingStatus){
 		ApartmentInfoDTO dto = new ApartmentInfoDTO();
 		dto.setCommunityId(address.getCommunityId());
@@ -5516,7 +6088,7 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setRentArea(address.getRentArea());
 		dto.setFreeArea(address.getFreeArea());
 		dto.setChargeArea(address.getChargeArea());
-		
+
 		if (dto.getAreaSize()!=null) {
 			dto.setAreaSize(doubleRoundHalfUp(dto.getAreaSize(),2));
 		}
@@ -5534,24 +6106,24 @@ public class CommunityServiceImpl implements CommunityService {
 //		}
 		return dto;
 	}
-	
+
 	//四舍五入截断double类型数据
 	private double doubleRoundHalfUp(double input,int scale){
-		BigDecimal digit = new BigDecimal(input); 
+		BigDecimal digit = new BigDecimal(input);
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
-	
+
 	@Override
 	public FloorRangeDTO getFloorRange(GetFloorRangeCommand cmd) {
 		FloorRangeDTO dto = new FloorRangeDTO();
 		List<Building> buildings = new ArrayList<>();
-		
+
 		if (cmd.getCommunityId()!=null) {
 			buildings = communityProvider.findBuildingsByCommunityId(cmd.getCommunityId());
 		}else if (cmd.getNamespaceId()!=null) {
 			buildings = communityProvider.findBuildingsByNamespaceId(cmd.getNamespaceId());
 		}
-		
+
 		int maxFloor = 0;
 		for (Building building : buildings) {
 			if (building.getFloorNumber() == null) {
@@ -5562,7 +6134,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		dto.setMaxFloor(maxFloor);
-		
+
 		return dto;
 	}
 
@@ -5570,14 +6142,14 @@ public class CommunityServiceImpl implements CommunityService {
 	public void changeBuildingOrder(ChangeBuildingOrderCommand cmd) {
 		if (cmd.getBuildingOrders() != null && cmd.getBuildingOrders().size() > 0) {
 			List<BuildingOrderDTO> buildingOrders = cmd.getBuildingOrders();
-			
+
 			List<Long> buildingIds = new ArrayList<>();
 			Map<Long, Long> newBuildingIdOrderMap = new HashMap<>();
 			buildingOrders.stream().forEach(r->{
 				buildingIds.add(r.getBuildingId());
 				newBuildingIdOrderMap.put(r.getBuildingId(), r.getDefaultOrder());
 			});
-			
+
 			Map<Long, Building> buildingIdAndBuildingMap = communityProvider.mapBuildingIdAndBuilding(buildingIds);
 			for (Long buildingId : buildingIds) {
 				Long newOrder = newBuildingIdOrderMap.get(buildingId);
@@ -5597,7 +6169,7 @@ public class CommunityServiceImpl implements CommunityService {
 		ListApartmentsInCommunityResponse result = new ListApartmentsInCommunityResponse();
 		List<ApartmentExportDataDTO> data = new ArrayList<>();
 		initListApartmentsInCommunityResponse(result);
-		
+
 		List<Address> addresses = addressProvider.listApartmentsInCommunity(cmd);
 		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
 		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
@@ -5612,7 +6184,7 @@ public class CommunityServiceImpl implements CommunityService {
 			//按房源状态筛选
 			if (cmd.getLivingStatus()!=null && livingStatus!=cmd.getLivingStatus().byteValue()) {
 				continue;
-			}	
+			}
 			//获取在租实时均价
 			//double areaAveragePrice = 0;
 			double totalRent = 0;
@@ -5679,7 +6251,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return dto;
 	}
-	
+
 	@Override
 	public void caculateAllCommunityArea() {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
@@ -5691,7 +6263,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				LOGGER.info("caculating community area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
-				
+
 				List<Community> communities = communityProvider.findCommunitiesByNamespaceId(namespaceInfo.getId());
 				if (communities!=null && communities.size()>0) {
 					for (Community community : communities) {
@@ -5717,7 +6289,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 	}
-	
+
 	@Override
 	public void caculateAllBuildingArea() {
 		List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
@@ -5729,7 +6301,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 				LOGGER.info("caculating building area progress starts, namespace_id = {},namespace_name={}", namespaceInfo.getId(),namespaceInfo.getName());
 				long startTime = System.currentTimeMillis();
-				
+
 				List<Community> communities = communityProvider.findCommunitiesByNamespaceId(namespaceInfo.getId());
 				if (communities!=null && communities.size()>0) {
 					for (Community community : communities) {
@@ -5759,6 +6331,71 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 	}
-	
+
+
+
+	@Override
+	public ListCommunitiesByOrgIdAndAppIdResponse listCommunitiesByOrgIdAndAppId(ListCommunitiesByOrgIdAndAppIdCommand cmd) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		final List<Long> projectIds = new ArrayList<>();
+
+		if(namespacesService.isStdNamespace(namespaceId)){
+			//标准版
+			List<ServiceModuleAppAuthorization> authorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), cmd.getOrgId(), cmd.getAppId());
+
+			if(authorizations.size() > 0){
+				authorizations.forEach(r -> projectIds.add(r.getProjectId()));
+			}
+
+		}else {
+			//定制版
+
+			List<OrganizationCommunity> organizationCommunities = organizationProvider.listOrganizationCommunities(cmd.getOrgId());
+
+			if(organizationCommunities.size() > 0){
+				organizationCommunities.forEach(r -> projectIds.add(r.getCommunityId()));
+			}
+		}
+
+
+		List<Community> communities = communityProvider.listCommunities(namespaceId, new ListingLocator(), 1000000, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_COMMUNITIES.ID.in(projectIds));
+				return query;
+			}
+		});
+
+		List<ProjectDTO> dtos = new ArrayList<>();
+
+		if(communities != null && communities.size() > 0){
+
+			for (Community community: communities) {
+				ProjectDTO dto = new ProjectDTO();
+				dto.setProjectName(community.getName());
+				dto.setProjectId(community.getId());
+				dto.setCommunityType(community.getCommunityType());
+				dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+				dtos.add(dto);
+			}
+		}
+
+		ListCommunitiesByOrgIdAndAppIdResponse response = new ListCommunitiesByOrgIdAndAppIdResponse();
+		response.setDtos(dtos);
+
+		return response;
+	}
+
+	@Override
+	public OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd) {
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+		OrgDTO dto = new OrgDTO();
+		dto.setId(currentOrganizationId);
+		return dto;
+	}
+
 }
 

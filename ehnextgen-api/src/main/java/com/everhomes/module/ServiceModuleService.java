@@ -8,6 +8,8 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
 
@@ -51,4 +53,35 @@ public interface ServiceModuleService {
 	Byte checkUserRelatedProjectAllFlag(ListUserRelatedProjectByModuleCommand cmd);
 
 	ServiceModuleAppDTO findServiceModuleAppById(Long id);
+
+	ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd);
+
+	void updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd);
+
+    List<ServiceModuleDTO> listServiceModulesByAppType(ListServiceModulesByAppTypeCommand cmd);
+
+	void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd);
+
+	ListAppCategoryResponse listAppCategory(ListAppCategoryCommand cmd);
+
+	void updateAppCategory(UpdateAppCategoryCommand cmd);
+
+	AppCategoryDTO createAppCategory(CreateAppCategoryCommand cmd);
+
+	void deleteAppCategory(DeleteAppCategoryCommand cmd);
+
+	void reorderAppCategory(ReorderAppCategoryCommand cmd);
+
+	void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd);
+
+	void exportServiceModuleEntries(HttpServletResponse response);
+
+	List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId);
+	void reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd);
+
+    void deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd);
+
+	ServiceModuleEntryDTO createServiceModuleEntry(CreateServiceModuleEntryCommand cmd);
+
+	ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd);
 }

@@ -5,7 +5,32 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.AddGeneralFormPrintTemplateCommand;
+import com.everhomes.rest.general_approval.CreateOrUpdateGeneralFormValuesWithFlowCommand;
+import com.everhomes.rest.general_approval.DisableProjectCustomizeCommand;
+import com.everhomes.rest.general_approval.DoFormMirrorCommand;
+import com.everhomes.rest.general_approval.EnableProjectCustomizeCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormPrintTemplateDTO;
+import com.everhomes.rest.general_approval.GeneralFormReminderCommand;
+import com.everhomes.rest.general_approval.GeneralFormReminderDTO;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
+import com.everhomes.rest.general_approval.GetGeneralFormFilterCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormPrintTemplateCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormValCommand;
+import com.everhomes.rest.general_approval.GetGeneralFormsAndValuesByFlowNodeCommand;
+import com.everhomes.rest.general_approval.GetProjectCustomizeCommand;
+import com.everhomes.rest.general_approval.GetTemplateBySourceIdCommand;
+import com.everhomes.rest.general_approval.ListDefaultFieldsCommand;
+import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.ListGeneralFormValResponse;
+import com.everhomes.rest.general_approval.PostGeneralFormDTO;
+import com.everhomes.rest.general_approval.PostGeneralFormFilterCommand;
+import com.everhomes.rest.general_approval.PostGeneralFormValCommand;
+import com.everhomes.rest.general_approval.SearchFormValDTO;
+import com.everhomes.rest.general_approval.SearchFormValsCommand;
+import com.everhomes.rest.general_approval.UpdateGeneralFormPrintTemplateCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +54,7 @@ public class GeneralFormController extends ControllerBase {
 	 * <p> 根据业务获取表单 </p>
 	 */
 	@RequestMapping("getTemplateBySourceId")
-	@RestReturn(value=GeneralFormDTO.class)
+	@RestReturn(value = GeneralFormDTO.class)
 	public RestResponse getTemplateBySourceId(@Valid GetTemplateBySourceIdCommand cmd) {
 
 		GeneralFormDTO dto = generalFormService.getTemplateBySourceId(cmd);
@@ -40,7 +65,7 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
-    /**postGeneralFormVal
+    /**
 	 * <b>URL: /general_form/postGeneralForm</b>
 	 * <p> 提交表单值 </p>
 	 */
@@ -209,6 +234,61 @@ public class GeneralFormController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <b>URL: /general_form/enableProjectCustomize</b>
+	 * <p> 启用表单自定义 </p>
+	 */
+	@RequestMapping("enableProjectCustomize")
+	@RestReturn(value=String.class)
+	public RestResponse enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+		generalFormService.enableProjectCustomize(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/disableProjectCustomize</b>
+	 * <p> 禁用表单自定义 </p>
+	 */
+	@RequestMapping("disableProjectCustomize")
+	@RestReturn(value = String.class)
+	public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+		generalFormService.disableProjectCustomize(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/getProjectCustomize</b>
+	 * <p> 获取自定义配置属性 </p>
+	 */
+	@RequestMapping("getProjectCustomize")
+	@RestReturn(value = String.class)
+	public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+		Byte flag = generalFormService.getProjectCustomize(cmd);
+		RestResponse response = new RestResponse(flag);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /general_form/doFormMirror</b>
+	 * <p> 复制表单 </p>
+	 */
+	@RequestMapping("doFormMirror")
+	@RestReturn(value = String.class)
+	public RestResponse doFormMirror(@Valid DoFormMirrorCommand cmd) {
+		generalFormService.doFormMirror(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 
 

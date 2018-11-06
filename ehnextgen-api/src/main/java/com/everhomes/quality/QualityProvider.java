@@ -31,7 +31,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult,String planCondition);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, List<Long> targetIds, Byte reviewResult,String planCondition);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
@@ -83,7 +83,7 @@ public interface QualityProvider {
 
 	
 	void createQualityInspectionLogs(QualityInspectionLogs log);
-	List<QualityInspectionLogs> listQualityInspectionLogs(String ownerType, Long ownerId, String targetType, Long targetId,Long scopeId, ListingLocator locator, int count);
+	List<QualityInspectionLogs> listQualityInspectionLogs(String ownerType, Long ownerId, String targetType, Long targetId,List<Long> scopeId, ListingLocator locator, int count);
 	
 	QualityInspectionStandards findStandardById(Long id, String ownerType, Long ownerId, String targetType, Long targetId);
 	void deleteQualityInspectionStandardSpecificationMapByStandardId(Long standardId);
@@ -181,7 +181,7 @@ public interface QualityProvider {
 
 	List<Long> listQualityModelCommunityIdsMapByModelId(Long standard ,byte modelType);
 
-	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte inspectionType);
+	List<QualityInspectionSpecifications> listAllCommunitiesChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, List<Long> scopeIds,Byte inspectionType);
 
     void deleteQualityModelCommunityMapByModelId(Long modelId , byte modelType);
 

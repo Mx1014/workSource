@@ -4,6 +4,7 @@
 /statistics
 /logs
 
+ehcore-sdk/target/
 ehrest/target
 ehcore/target/
 ehborder/target/
@@ -56,6 +57,7 @@ ehcore/src/main/config/ehcore_custom_1.yml
 
 ehborder/pom.xml
 ehcore/pom.xml
+ehcore-sdk/pom.xml
 ehcore-persist/pom.xml
 ehnextgen-api/pom.xml
 ehnextgen-forum/pom.xml
@@ -66,3 +68,4 @@ ehrest-response/pom.xml
 ehtest-integration/pom.xml
 oauth2-client/pom.xml
 ehcore/transaction-logs/
+ehcore/src/main/config/ehcore.yml

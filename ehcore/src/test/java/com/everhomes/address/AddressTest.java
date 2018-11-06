@@ -6,9 +6,14 @@ import java.util.List;
 
 import javax.print.DocFlavor.STRING;
 
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
+import com.everhomes.ui.user.UserUiController;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.community.Community;
@@ -41,6 +46,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 
 public class AddressTest extends CoreServerTestCase {
+
+   private static final Logger logger = LoggerFactory.getLogger(AddressTest.class);
     
     @Autowired
     private AddressProvider addressProvider;
@@ -56,6 +63,9 @@ public class AddressTest extends CoreServerTestCase {
     private RegionProvider regionProvider;
     @Autowired
     private FamilyProvider familyProvider;
+
+    @Autowired
+    private UserUiController userUiController;
     
     private List<Community> communityCleanupList = new ArrayList<>();
     private List<CommunityGeoPoint> communityGeopointsCleanupList = new ArrayList<>();
@@ -358,5 +368,24 @@ public class AddressTest extends CoreServerTestCase {
         DeleteServiceAddressCommand cmd = new DeleteServiceAddressCommand();
         cmd.setId(152714L);
         this.addressService.deleteServiceAddress(cmd);
+    }
+
+    @Test
+    public void testContacts(){
+        //创建ListContactsBySceneCommand类的对象
+        ListContactsBySceneCommand listContactsBySceneCommand = new ListContactsBySceneCommand();
+        //将参数封装在对象中
+        listContactsBySceneCommand.setOrganizationId(1045176L);
+        listContactsBySceneCommand.setIsAdmin(Byte.valueOf("0"));
+        listContactsBySceneCommand.setIsSignedup(Byte.valueOf("0"));
+        listContactsBySceneCommand.setSceneToken("ewogICJjb21tdW5pdHlJZCIgOiAyNDAxMTEwNDQzMzIwNjA0MTAsCiAgIm9yZ0lkIiA6IDEwNDUxNzYKfQ");
+        //调用接口
+
+        try {
+            RestResponse re = userUiController.listContactsByScene(listContactsBySceneCommand);
+            logger.info("2222222222"+ re.getResponseObject().toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

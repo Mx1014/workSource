@@ -24,6 +24,10 @@ public class SetReviewExpireDaysCommand {
 
     private Integer reviewExpiredDays;
 
+    private Long targetId;
+
+    private String targetType;
+
     public Long getId() {
         return id;
     }
@@ -62,6 +66,22 @@ public class SetReviewExpireDaysCommand {
 
     public void setReviewExpiredDays(Integer reviewExpiredDays) {
         this.reviewExpiredDays = reviewExpiredDays;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     @Override

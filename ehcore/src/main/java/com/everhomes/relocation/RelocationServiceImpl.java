@@ -195,49 +195,55 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 	@Override
 	public RelocationInfoDTO getRelocationUserInfo(GetRelocationUserInfoCommand cmd) {
 
-		Long userId = UserContext.currentUserId();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-		SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+
 		RelocationInfoDTO dto = new RelocationInfoDTO();
-		switch(sceneType) {
-			case DEFAULT:
-			case PARK_TOURIST:
-//				community = communityProvider.findCommunityById(sceneToken.getEntityId());
-
-				break;
-			case FAMILY:
-//				FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-
-				break;
-			case PM_ADMIN:
-			case ENTERPRISE:
-			case ENTERPRISE_NOAUTH:
-				Long organizationId = sceneToken.getEntityId();
-				dto.setCurrOrgId(organizationId);
-				OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(userId, organizationId);
-				if (null != member) {
-					dto.setUserName(member.getContactName());
-					dto.setContactPhone(member.getContactToken());
-				}
-
-				OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
-				List<Organization> organizations = organizationService.listUserOrganizations(namespaceId, userId, groupType);
-
-				dto.setOrganizations(organizations.stream().map(r -> {
-					OrganizationBriefInfoDTO org = new OrganizationBriefInfoDTO();
-					org.setOrganizationId(r.getId());
-					org.setOrganizationName(r.getName());
-					return org;
-				}).collect(Collectors.toList()));
-
-				break;
-			default:
-				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-				break;
-		}
-
 		return dto;
+
+		//TODO 标准版没有场景的概念，直接使用园区场景。根据下面的逻辑，园区场景什么事情都没做，直接返回
+
+//		Long userId = UserContext.currentUserId();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//		SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+//		RelocationInfoDTO dto = new RelocationInfoDTO();
+//		switch(sceneType) {
+//			case DEFAULT:
+//			case PARK_TOURIST:
+////				community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//
+//				break;
+//			case FAMILY:
+////				FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//
+//				break;
+//			case PM_ADMIN:
+//			case ENTERPRISE:
+//			case ENTERPRISE_NOAUTH:
+//				Long organizationId = sceneToken.getEntityId();
+//				dto.setCurrOrgId(organizationId);
+//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+//				if (null != member) {
+//					dto.setUserName(member.getContactName());
+//					dto.setContactPhone(member.getContactToken());
+//				}
+//
+//				OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+//				List<Organization> organizations = organizationService.listUserOrganizations(namespaceId, userId, groupType);
+//
+//				dto.setOrganizations(organizations.stream().map(r -> {
+//					OrganizationBriefInfoDTO org = new OrganizationBriefInfoDTO();
+//					org.setOrganizationId(r.getId());
+//					org.setOrganizationName(r.getName());
+//					return org;
+//				}).collect(Collectors.toList()));
+//
+//				break;
+//			default:
+//				LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//				break;
+//		}
+//
+//		return dto;
 	}
 
 	@Override
@@ -249,21 +255,21 @@ public class RelocationServiceImpl implements RelocationService, ApplicationList
 
 		RelocationRequest request = ConvertHelper.convert(cmd, RelocationRequest.class);
 		request.setRelocationDate(new Timestamp(cmd.getRelocationDate()));
-
-		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
-//		    小区场景
-            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
-            request.setOrgOwnerTypeId(ownerType.getId());
-        }
-
-		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
-		if (null == orgRequest) {
-			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"OrganizationCommunityRequest not found.");
-		}
-		request.setOwnerId(orgRequest.getCommunityId());
-		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
+//标准版修改，由前端传入当前的项目Id
+//		if(StringUtils.isNotEmpty(cmd.getOrgOwnerType())){
+////		    小区场景
+//            OrganizationOwnerType ownerType = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(cmd.getOrgOwnerType());
+//            request.setOrgOwnerTypeId(ownerType.getId());
+//        }
+//
+//		OrganizationCommunityRequest orgRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getRequestorEnterpriseId());
+//		if (null == orgRequest) {
+//			LOGGER.error("OrganizationCommunityRequest not found, cmd={}", cmd);
+//			throw RuntimeErrorException.errorWith(RelocationErrorCode.SCOPE, RelocationErrorCode.ERROR_INVALID_PARAMETER,
+//					"OrganizationCommunityRequest not found.");
+//		}
+//		request.setOwnerId(orgRequest.getCommunityId());
+//		request.setOwnerType(RelocationOwnerType.COMMUNITY.getCode());
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 

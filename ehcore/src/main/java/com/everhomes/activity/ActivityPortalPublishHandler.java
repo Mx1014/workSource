@@ -11,6 +11,7 @@ import com.everhomes.rest.activity.ActivityEntryConfigulation;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.portal.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.user.UserContext;
@@ -50,7 +51,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * @param instanceConfig 具体模块配置的参数
 	 * @return
 	 */
-	public String publish(Integer namespaceId, String instanceConfig, String appName){
+	public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd){
 
 		LOGGER.info("ActivityPortalPublishHandler publish start namespaceId = {}, instanceConfig = {}, itemLabel = {}", namespaceId, instanceConfig, appName);
 
@@ -82,10 +83,11 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * 注：把instanceConfig中复杂的数据处理成服务广场需要的actionData字符串
 	 * @param namespaceId
 	 * @param instanceConfig
+	 * @param cmd
 	 * @return
 	 */
 	@Override
-	public String getItemActionData(Integer namespaceId, String instanceConfig){
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd){
 
 		LOGGER.info("ActivityPortalPublishHandler getItemActionData start namespaceId = {}, instanceConfig = {}", namespaceId, instanceConfig);
 
@@ -105,10 +107,11 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	 * 注：通过actionData找到对应的所有需要配置的数据组装成之前跟web端人员协商好的instanceConfig，后面用于给web端人员解析展示对应到页面的各个配置
 	 * @param namespaceId
 	 * @param actionData
+	 * @param cmd
 	 * @return
 	 */
 	@Override
-	public String getAppInstanceConfig(Integer namespaceId, String actionData){
+	public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd){
 
 		LOGGER.info("ActivityPortalPublishHandler getAppInstanceConfig start namespaceId = {}, actionData = {}", namespaceId, actionData);
 
@@ -368,7 +371,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String processInstanceConfig(String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
 		ActivityEntryConfigulation config = (ActivityEntryConfigulation)StringHelper.fromJsonString(instanceConfig, ActivityEntryConfigulation.class);
 		if(config != null && null != config.getCategoryDTOList() && config.getCategoryDTOList().size() > 0){
 			for (ActivityCategoryDTO dto: config.getCategoryDTOList()) {
@@ -382,7 +385,7 @@ public class ActivityPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
 
 		ActivityActionData actionDataObj = (ActivityActionData)StringHelper.fromJsonString(instanceConfig, ActivityActionData.class);
 

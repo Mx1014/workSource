@@ -21,7 +21,7 @@ public interface EnergyMeterCategoryProvider {
     /**
      * 获取表记分类列表
      */
-    List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId);
+    List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, List<Long> communityId);
     List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId, Timestamp lastUpdateTime);
 
     List<EnergyMeterCategory> listMeterCategories(List<Long> categoryIds, Byte categoryType);
@@ -41,4 +41,6 @@ public interface EnergyMeterCategoryProvider {
      * 删除分类
      */
     void deleteEnergyMeterCategory(EnergyMeterCategory category);
+
+    List<EnergyMeterCategory> listOrgGeneralMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, Long community);
 }

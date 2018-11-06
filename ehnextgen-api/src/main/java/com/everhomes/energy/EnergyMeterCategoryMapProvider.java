@@ -1,6 +1,5 @@
 package com.everhomes.energy;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -9,7 +8,7 @@ import java.util.List;
 public interface EnergyMeterCategoryMapProvider {
     void createEnergyMeterCategoryMap(EnergyMeterCategoryMap map);
     void updateEnergyMeterCategoryMap(EnergyMeterCategoryMap map);
-    List<EnergyMeterCategoryMap> listEnergyMeterCategoryMap(Long communityId);
+    List<EnergyMeterCategoryMap> listEnergyMeterCategoryMap(Long communityId,Long ownerId);
     List<Long> listCommunityIdByCategory(Long categoryId);
     EnergyMeterCategoryMap findEnergyMeterCategoryMap(Long community, Long categoryId);
 }

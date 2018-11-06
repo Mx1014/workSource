@@ -33,4 +33,6 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_PHONE=10029;
 	static final int ERROR_NO_ROSTER = 10030;
 	static final int ERROR_ROSTER_ALREADY_EXIST = 10031;
+
+	static final int ERROR_URL_NOTEXIST = 10501;//URL未配置
 }

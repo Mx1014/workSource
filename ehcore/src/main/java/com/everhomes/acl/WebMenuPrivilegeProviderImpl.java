@@ -271,12 +271,16 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 
 
 	@Override
-	public List<WebMenu> listWebMenus(Long parentId, String type) {
+	public List<WebMenu> listWebMenus(Long parentId, String type, Byte sceneType) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
 
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
 		if(parentId != null){
 			query.addConditions(Tables.EH_WEB_MENUS.PARENT_ID.eq(parentId));
+		}
+
+		if(sceneType != null){
+			query.addConditions(Tables.EH_WEB_MENUS.SCENE_TYPE.eq(sceneType));
 		}
 		query.addConditions(Tables.EH_WEB_MENUS.TYPE.eq(type));
 		query.addConditions(Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode()));

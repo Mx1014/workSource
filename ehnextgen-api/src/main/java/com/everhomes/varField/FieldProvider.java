@@ -7,13 +7,13 @@ import java.util.Map;
  * Created by ying.xiong on 2017/8/3.
  */
 public interface FieldProvider {
-    Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName, Long categoryId);
+    Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long ownerId,Long communityId, String moduleName, Long categoryId);
     Map<Long, ScopeFieldGroup> listScopeFieldGroups(Integer namespaceId, Long communityId, String moduleName);
     List<FieldGroup> listFieldGroups(List<Long> ids);
     FieldGroup findFieldGroup(Long id);
     List<FieldGroup> listFieldGroups(String moduleName);
     List<Long> listFieldGroupRanges(String moduleName,String moduleType);
-    Map<Long, ScopeField> listScopeFields(Integer namespaceId, Long communityId, String moduleName, String groupPath, Long categoryId);
+    Map<Long, ScopeField> listScopeFields(Integer namespaceId,Long ownerId, Long communityId, String moduleName, String groupPath, Long categoryId);
     List<Field> listFields(List<Long> ids);
     List<Long> listFieldRanges(String moduleName,String moduleType,String groupPath);
     List<Field> listFields(String moduleName, String groupPath);
@@ -27,13 +27,13 @@ public interface FieldProvider {
     FieldGroup findGroupByGroupLogicName(String groupLogicName);
 
     List<FieldItem> listFieldItems(Long fieldId);
-    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId, Long categoryId);
-    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId);
+    List<ScopeFieldItem> listScopeFieldItems(Long fieldId, Integer namespaceId, Long communityId,Long ownerId, Long categoryId);
+    Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds,Long ownerId, Integer namespaceId, Long communityId, Long categoryId,String moduleName);
     Map<Long, ScopeFieldItem> listScopeFieldsItems(List<Long> fieldIds, Integer namespaceId, Long communityId, Long categoryId, String moduleName);
-    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId, Long communityId, Long itemId);
-    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, String displayName);
-    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId, String moduleName, Long fieldId, String displayName);
-    ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId, Long communityId, String moduleName, Long fieldId, Byte businessValue);
+    ScopeFieldItem findScopeFieldItemByFieldItemId(Integer namespaceId,Long ownerId, Long communityId, Long itemId);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long communityId,Long ownerId, String moduleName, String displayName);
+    ScopeFieldItem findScopeFieldItemByDisplayName(Integer namespaceId, Long ownerId,Long communityId, String moduleName, Long fieldId, String displayName);
+    ScopeFieldItem findScopeFieldItemByBusinessValue(Integer namespaceId,Long ownerId,String ownerType, Long communityId, String moduleName, Long fieldId, Byte businessValue);
     ScopeField findScopeField(Integer namespaceId, Long communityId, Long fieldId);
 
     List<FieldItem> listFieldItems(List<Long> fieldIds);
@@ -44,7 +44,7 @@ public interface FieldProvider {
 
     void createScopeField(ScopeField scopeField);
     void updateScopeField(ScopeField scopeField);
-    ScopeField findScopeField(Long id, Integer namespaceId, Long communityId, Long categoryId);
+    ScopeField findScopeField(Long id, Integer namespaceId,Long ownerId, Long communityId, Long categoryId);
 
     void createScopeFieldItem(ScopeFieldItem scopeFieldItem);
     void updateScopeFieldItem(ScopeFieldItem scopeFieldItem);
@@ -59,7 +59,7 @@ public interface FieldProvider {
 
     List<Field> listMandatoryFields(String moduleName, Long  groupId);
 
-    List <Long>checkCustomerField(Integer namespaceId, Long communityId, String moduleName);
+    List <Long>checkCustomerField(Integer namespaceId,Long ownerId, Long communityId, String moduleName);
 
     Field findFieldById(Long fieldId);
 

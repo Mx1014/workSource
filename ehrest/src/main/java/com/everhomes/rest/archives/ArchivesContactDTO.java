@@ -23,6 +23,7 @@ import java.util.List;
  * <li>contactShortToken: 短号</li>
  * <li>workEmail: 工作邮箱</li>
  * <li>stick: 置顶状态: 0-未置顶 1-置顶</li>
+ * <li>account: 账号(唯一标识)</li>
  * </ul>
  */
 public class ArchivesContactDTO {
@@ -61,13 +62,7 @@ public class ArchivesContactDTO {
 
     private Byte visibleFlag;
 
-
-    //  export
-    private String genderString;
-
-    private String departmentString;
-
-    private String jobPositionString;
+    private String account;
 
     public ArchivesContactDTO() {
     }
@@ -192,40 +187,24 @@ public class ArchivesContactDTO {
         this.visibleFlag = visibleFlag;
     }
 
-    public String getGenderString() {
-        return genderString;
-    }
-
-    public void setGenderString(String genderString) {
-        this.genderString = genderString;
-    }
-
-    public String getDepartmentString() {
-        return departmentString;
-    }
-
-    public void setDepartmentString(String departmentString) {
-        this.departmentString = departmentString;
-    }
-
-    public String getJobPositionString() {
-        return jobPositionString;
-    }
-
-    public void setJobPositionString(String jobPositionString) {
-        this.jobPositionString = jobPositionString;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public List<OrganizationDTO> getJobLevels() {
         return jobLevels;
     }
 
     public void setJobLevels(List<OrganizationDTO> jobLevels) {
         this.jobLevels = jobLevels;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

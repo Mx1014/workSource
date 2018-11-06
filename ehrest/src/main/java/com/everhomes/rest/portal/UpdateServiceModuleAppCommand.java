@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 应用名称</li>
  * <li>instanceConfig: 应用参数配置，比如活动，服务联盟就要特殊的参数配置</li>
  * <li>accessControlType: 权限控制类型 1-全部, 2-登录, 3-认证 参考{@link com.everhomes.rest.module.AccessControlType}</li>
+ * <li>enableEnterprisePayFlag: 支持企业支付标记，0-否，1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class UpdateServiceModuleAppCommand {
@@ -27,6 +28,8 @@ public class UpdateServiceModuleAppCommand {
 	private String customPath;
 
 	private Byte accessControlType;
+
+	private Byte enableEnterprisePayFlag;
 
 	public UpdateServiceModuleAppCommand() {
 
@@ -98,5 +101,13 @@ public class UpdateServiceModuleAppCommand {
 
 	public void setAccessControlType(Byte accessControlType) {
 		this.accessControlType = accessControlType;
+	}
+
+	public Byte getEnableEnterprisePayFlag() {
+		return enableEnterprisePayFlag;
+	}
+
+	public void setEnableEnterprisePayFlag(Byte enableEnterprisePayFlag) {
+		this.enableEnterprisePayFlag = enableEnterprisePayFlag;
 	}
 }

@@ -37,4 +37,17 @@ public interface PmTaskErrorCode {
     int ERROR_CREATE_USER_ACCOUNT = 10018;//创建支付账号问题
 
     int PAYMENT_ORDER_NOT_EXIST = 10019;//订单系统找不到订单
+
+//  ------------------------- 修改应用开小差 -------------------------
+    int ERROR_SYNC_ES_FAIL = 10020;//同步搜索引擎失败
+    int ERROR_QUERY_ES_FAIL = 10021;//查询失败
+    int ERROR_FLIE_EXPORT_FAIL = 10022;//文件导出失败
+    int ERROR_NOT_EXIST = 10023;//对象不存在
+    int ERROR_REMOTE_INVOKE_FAIL = 10024;//第三方返回失败
+    int ERROR_INVALD_PARAMS = 10025;//接口参数异常
+
+    int ERROR_USER_NOT_FOUND = 10026;//对接国贸用户未对应
+    int ERROR_SERVICE_INIT_FAIL = 10027;//对接国贸初始化webservice失败
+    int ERROR_REQUEST_ARCHIBUS_FAIL = 10028;//对接国贸请求失败
+
 }

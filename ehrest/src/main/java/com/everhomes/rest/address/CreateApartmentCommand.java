@@ -44,7 +44,7 @@ public class CreateApartmentCommand {
 	private String apartmentFloor;
 	private BigDecimal apartmentRent;
 	private Byte apartmentRentType;
-	
+
 	public BigDecimal getApartmentRent() {
 		return apartmentRent;
 	}
@@ -60,7 +60,6 @@ public class CreateApartmentCommand {
 	public void setApartmentRentType(Byte apartmentRentType) {
 		this.apartmentRentType = apartmentRentType;
 	}
-
 	public String getApartmentFloor() {
 		return apartmentFloor;
 	}
@@ -76,6 +75,7 @@ public class CreateApartmentCommand {
 	public void setFreeArea(Double freeArea) {
 		this.freeArea = freeArea;
 	}
+	private Long  ownerId;
 
 	public Double getBuildArea() {
 		return buildArea;
@@ -179,6 +179,15 @@ public class CreateApartmentCommand {
 
 	public void setAreaSize(Double areaSize) {
 		this.areaSize = areaSize;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

@@ -17,6 +17,9 @@ import com.everhomes.server.schema.tables.daos.EhGeneralFormValRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormPrintTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhGeneralFormsDao;
+import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
+import com.everhomes.server.schema.tables.records.EhGeneralFormTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhGeneralFormsRecord;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormPrintTemplates;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhGeneralFormPrintTemplatesRecord;
@@ -272,6 +275,44 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		return null;
     }
 
+    @Override
+    public List<GeneralForm> listGeneralForm(Integer namespaceId, String moduleType, Long moduleId,
+											 String projectType, Long projectId, String ownerType, Long ownerId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhGeneralForms t = Tables.EH_GENERAL_FORMS;
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(t);
+
+		query.addConditions(t.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(t.MODULE_TYPE.eq(moduleType));
+		query.addConditions(t.MODULE_ID.eq(moduleId));
+		query.addConditions(t.OWNER_TYPE.eq(ownerType));
+		query.addConditions(t.OWNER_ID.eq(ownerId));
+		query.addConditions(t.PROJECT_TYPE.eq(projectType));
+		query.addConditions(t.PROJECT_ID.eq(projectId));
+
+		query.addConditions(t.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+		return query.fetchInto(GeneralForm.class);
+    }
+
+	@Override
+	public GeneralForm getActiveGeneralFormByName(String projectType, Long projectId, Long moduleId, Long ownerId, String ownerType, String formName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec
+				.readOnly());
+		SelectQuery<EhGeneralFormsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORMS);
+		if (projectType != null) {
+			query.addConditions(Tables.EH_GENERAL_FORMS.PROJECT_TYPE.eq(projectType));
+		}
+		if (projectId != null) {
+			query.addConditions(Tables.EH_GENERAL_FORMS.PROJECT_ID.eq(projectId));
+		}
+		query.addConditions(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(moduleId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_GENERAL_FORMS.FORM_NAME.eq(formName));
+		query.addConditions(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+		return query.fetchAnyInto(GeneralForm.class);
+	}
+
 	@Override
 	public GeneralFormTemplate getDefaultFieldsByModuleId(Long moduleId,Integer namespaceId) {
 		try {
@@ -348,6 +389,12 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		GeneralFormValRequest generalFormValRequests = new GeneralFormValRequest();
+		generalFormValRequests.setCreatorUid(UserContext.currentUserId());
+		Long l2 = DateHelper.currentGMTTime().getTime();
+		generalFormValRequests.setCreatedTime(new Timestamp(l2));
+
+		generalFormValRequests.setOperatorUid(UserContext.currentUserId());
+		generalFormValRequests.setOperatorTime(new Timestamp(l2));
 		//EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);

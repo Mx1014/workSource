@@ -12,6 +12,10 @@ public class DeletePmNotifyParamsCommand {
 
     private String ownerType;
 
+    private String targetType;
+
+    private Long targetId;
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -42,5 +46,21 @@ public class DeletePmNotifyParamsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 }

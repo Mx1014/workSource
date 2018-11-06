@@ -2,7 +2,9 @@ package com.everhomes.launchpad;
 
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.launchpad.UpdateUserAppsCommand;
 import com.everhomes.rest.launchpad.admin.*;
+import com.everhomes.rest.launchpadbase.*;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
@@ -18,7 +20,7 @@ public interface LaunchPadService {
     //void createLaunchPadItem(CreateLaunchPatItemCommand cmd);
     void userDefinedLaunchPad(UserDefinedLaunchPadCommand cmd);
 
-    String refreshActionData(SceneTokenDTO sceneToken, String actionData);
+    String refreshActionData(String actionData);
 
     void createLaunchPadItem(CreateLaunchPadItemAdminCommand cmd);
     void deleteLaunchPadItem(DeleteLaunchPadItemAdminCommand cmd);
@@ -84,4 +86,22 @@ public interface LaunchPadService {
      * @return
      */
     SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd);
+
+    List<IndexDTO> listIndexDtos(Integer namespaceId, Long userId);
+
+    ListBannersResponse listBanners(ListBannersCommand cmd);
+
+    ListOPPushCardsResponse listOPPushCards(ListOPPushCardsCommand cmd);
+
+    OPPushHandler getOPPushHandler(Long moduleId);
+
+    BulletinsHandler getBulletinsHandler(Long moduleId);
+
+    String getSceneTokenByCommunityId(Long communityId);
+
+    ListBulletinsCardsResponse listBulletinsCards(ListBulletinsCardsCommand cmd);
+
+    ListAllAppsResponse listAllApps(ListAllAppsCommand cmd);
+
+    void updateUserApps(UpdateUserAppsCommand cmd);
 }

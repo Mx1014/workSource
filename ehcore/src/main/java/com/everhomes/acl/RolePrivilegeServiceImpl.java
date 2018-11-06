@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.createSuperAdminCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.user.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -66,86 +72,11 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.portal.AuthorizationsAppControl;
-import com.everhomes.rest.acl.AclPrivilegeInfo;
-import com.everhomes.rest.acl.AclPrivilegeInfoResponse;
-import com.everhomes.rest.acl.AuthorizationRelationDTO;
-import com.everhomes.rest.acl.AuthorizationServiceModuleDTO;
-import com.everhomes.rest.acl.AuthorizationServiceModuleMembersDTO;
-import com.everhomes.rest.acl.CheckRoleAdministratorsCommand;
-import com.everhomes.rest.acl.CreateAuthorizationRelationCommand;
-import com.everhomes.rest.acl.CreateRoleAdministratorsCommand;
-import com.everhomes.rest.acl.CreateRoleCommand;
-import com.everhomes.rest.acl.CreateRolePrivilegesCommand;
-import com.everhomes.rest.acl.CreateServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.DeleteAuthorizationRelationCommand;
-import com.everhomes.rest.acl.DeleteAuthorizationServiceModuleCommand;
-import com.everhomes.rest.acl.DeleteRoleAdministratorsCommand;
-import com.everhomes.rest.acl.DeleteRolePrivilegesCommand;
-import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.GetAdministratorInfosByUserIdCommand;
-import com.everhomes.rest.acl.GetAdministratorInfosByUserIdResponse;
-import com.everhomes.rest.acl.GetPersonelInfoByTokenCommand;
-import com.everhomes.rest.acl.GetPersonelInfoByTokenResponse;
-import com.everhomes.rest.acl.GetPrivilegeByRoleIdResponse;
-import com.everhomes.rest.acl.IdentityType;
-import com.everhomes.rest.acl.ListAuthorizationRelationsCommand;
-import com.everhomes.rest.acl.ListAuthorizationRelationsResponse;
-import com.everhomes.rest.acl.ListAuthorizationServiceModuleCommand;
-import com.everhomes.rest.acl.ListPrivilegesByRoleIdCommand;
-import com.everhomes.rest.acl.ListRoleAdministratorsCommand;
-import com.everhomes.rest.acl.ListRolesCommand;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.ListServiceModulesByTargetCommand;
-import com.everhomes.rest.acl.ListServiceModulesCommand;
-import com.everhomes.rest.acl.ListUserRelatedPrivilegeByModuleIdCommand;
-import com.everhomes.rest.acl.ListUserRelatedProjectByMenuIdCommand;
-import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
-import com.everhomes.rest.acl.ModuleAppTarget;
-import com.everhomes.rest.acl.ModuleAssignment;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeDTO;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ProjectDTO;
-import com.everhomes.rest.acl.ResetServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.RoleAuthorizationsDTO;
-import com.everhomes.rest.acl.RoleConstants;
-import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
-import com.everhomes.rest.acl.ServiceModuleAssignmentDTO;
-import com.everhomes.rest.acl.ServiceModuleAssignmentType;
-import com.everhomes.rest.acl.ServiceModuleAuthorizationsDTO;
-import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.acl.ServiceModulePrivilegeDTO;
-import com.everhomes.rest.acl.ServiceModuleTreeVType;
-import com.everhomes.rest.acl.UpdateAuthorizationRelationCommand;
-import com.everhomes.rest.acl.UpdateRoleCommand;
-import com.everhomes.rest.acl.UpdateRolePrivilegesCommand;
-import com.everhomes.rest.acl.UpdateServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.WebMenuDTO;
-import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
-import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.acl.WebMenuType;
-import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.AuthorizationServiceModule;
-import com.everhomes.rest.acl.admin.AuthorizationServiceModuleCommand;
-import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminsCommand;
-import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
-import com.everhomes.rest.acl.admin.FindTopAdminByOrgIdCommand;
-import com.everhomes.rest.acl.admin.ListOrganizationContectDTOResponse;
-import com.everhomes.rest.acl.admin.ListRolesResponse;
-import com.everhomes.rest.acl.admin.ListWebMenuCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.acl.admin.RolePrivilege;
-import com.everhomes.rest.acl.admin.TransferOrganizationSuperAdminCommand;
-import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -196,10 +127,6 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CopyUtils;
@@ -208,6 +135,34 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
+import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -282,6 +237,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private EnterpriseCustomerSearcher customerSearcher;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -647,7 +608,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
                 "organization not find");
         }
-      if(org.getAdminTargetId() != null && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
+      if(org.getAdminTargetId() != null && org.getAdminTargetId()!= 0
+			  && !org.getAdminTargetId().equals(UserContext.currentUserId())) {
           return false;
         }
       
@@ -1630,6 +1592,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 
+	// by lei.lv 取消普通企业管理员，大胆的注释掉先
 	@Override
 	@Deprecated
 	public OrganizationContactDTO createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
@@ -1637,19 +1600,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if(cmd != null && cmd.getContactToken() != null){
 			cmd.setContactToken(cmd.getContactToken().trim());
 		}
-        OrganizationContactDTO contactDTO = dbProvider.execute(
-                r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), 
-                		cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN,false,false));
+		OrganizationContactDTO contactDTO = dbProvider.execute(
+				r -> createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(),
+						cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN, RoleConstants.ENTERPRISE_SUPER_ADMIN,false,false));
 		if(contactDTO != null) {
-            sendMessageAfterChangeOrganizationAdmin(
-                    contactDTO,
-                    OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
-                    OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
-            );
+			sendMessageAfterChangeOrganizationAdmin(
+					contactDTO,
+					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
+					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
+			);
 			return contactDTO;
 		}
 		return null;
 	}
+
 
     private void sendMessageAfterChangeOrganizationAdmin(OrganizationContactDTO contactDTO, int toTargetTemplateCode, int toOtherTemplateCode) {
         List<OrganizationContactDTO> organizationAdmin = listOrganizationAdmin(contactDTO.getOrganizationId(), ActivationFlag.YES);
@@ -1777,12 +1741,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param contactToken
 	 * @param adminPrivilegeId 超级管理员代号
 	 * @param roleId  拥有 所有权限、来创建超级管理员
-	 * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息 
-	 * @param realSuperAdmin  true 表示消息模板用超级管理员的 ,即为false 用系统管理员的 
+	 * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息
+	 * @param realSuperAdmin  true 表示消息模板用超级管理员的 ,即为false 用系统管理员的
 	 * @return
 	 */
-    private OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName, String contactToken,
-    		                                        Long adminPrivilegeId, Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin){
+    public OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
+														   String contactToken,
+    		                                        Long adminPrivilegeId,
+														   Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin){
     	boolean flag = false ;
     	//标志为true 不发消息
     	if(notSendMsgFlag){
@@ -1796,8 +1762,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(),"admin", adminPrivilegeId);
 
 			UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(member.getTargetId(), member.getNamespaceId());
+			Integer namespaceId = member.getNamespaceId();
+			Long ownerUid = member.getTargetId();
+			if(userIdentifier != null) {
+			    namespaceId = userIdentifier.getNamespaceId();
+			    ownerUid = userIdentifier.getOwnerUid();
+
+			}
 			//添加角色 同时删除角色
-			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), userIdentifier.getNamespaceId(), userIdentifier.getOwnerUid(), roleId);
+			assignmentAclRole(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), namespaceId, ownerUid, roleId);
 		}
 
 		//fix 13633 by xiongying
@@ -1820,8 +1793,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		//标志为true 不发消息,提前返回
 		if(notSendMsgFlag){
 			return processOrganizationContactDTO(member);
-		}	
-		//发送信息		
+		}
+		//发送信息
 		int targerCode = OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
 		int otherCode = OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_OTHER_TEMPLATE ;
 		if(realSuperAdmin){
@@ -1833,7 +1806,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				targerCode,
 				otherCode
 		);
-		
+
 		return processOrganizationContactDTO(member);
 	}
 
@@ -1950,7 +1923,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}*/
 
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
+
 		List<OrganizationMember> members =
 				organizationProvider.listOrganizationMembersByOrganizationIdAndMemberGroup(
 						cmd.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode(),
@@ -2042,7 +2015,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			cmd.setOwnerId(cmd.getOrganizationId());
 			cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 	    }
-	    
+
 		dbProvider.execute((TransactionStatus status) -> {
 			List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(UserContext.current().getUser().getId());
 			String token = null;
@@ -2054,7 +2027,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(phones.size() > 0) {
 				token = phones.get(0);
 			}
-	        
+
 			if(token != null && (cmd.getReservePrivilege() == null || cmd.getReservePrivilege().equals(TrueOrFalseFlag.FALSE.getCode()))) {
 				//删除旧的系统管理员
 				deleteOrganizationAdmin(cmd.getOrganizationId(), token, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,false,false);
@@ -2071,7 +2044,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					}
 				}
 			}
-			
+
 			// 删除原来此人的超管权限
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
 			LOGGER.info("updateTopAdminstrator step 02 :delete this super admin . token:{}",cmd.getContactToken());
@@ -2090,14 +2063,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			OrganizationContactDTO contactDTO = this.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
 					PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN,true,false);
 			LOGGER.info("updateTopAdminstrator step 03 :create this super admin . token:{} ;name:{}",cmd.getContactToken(),cmd.getContactName());
-			
+
 			//发送信息提示新超级管理员
 			sendMessageAfterChangeOrganizationAdmin(
 					contactDTO,
 					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE,
 					OrganizationNotificationTemplateCode.CREATE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_OTHER_TEMPLATE
 			);
-			
+
 			//为旧超级管理员发送被删除超级管理员提示(如果旧超级管理员是他自己,这里通过token 相等来判断,表示应该是新增超级管理员,不应该给他自己发删除超级管理员的信息)
 			if(token!=null && !token.equals(cmd.getContactName())){
 				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(token, cmd.getOrganizationId(), null);
@@ -2109,7 +2082,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					);
 				}
 			}
-						
+
 			Organization o = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 			if(null != o){
 				o.setAdminTargetId(cmd.getUserId());
@@ -2266,6 +2239,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,false,false);
 
 			OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+			if(detail != null && detail.getTargetId() != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+	            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+	                    "cannot delete myself");
+			}
+			deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, false, false);
 			List<Long> roleIds = Collections.singletonList(RoleConstants.PM_SUPER_ADMIN);
 			if(detail != null){
 				List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
@@ -2282,11 +2260,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param organizationId
 	 * @param contactToken
 	 * @param adminPrivilegeId
-	 * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息 
+	 * @param notSendMsgFlag 不发消息标志,默认是发消息的,除非该值为 true ,即为false 或空表示发消息
 	 * @param realSuperAdmin 为 true 表示选择超级管理员的消息模板 ,即为false ,为系统管理员的模板
 	 */
 	private void deleteOrganizationAdmin(Long organizationId, String contactToken, Long adminPrivilegeId ,
@@ -2345,7 +2323,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//默认取企业管理员的信息模板
 			int targerCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
 			int otherCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_ADMIN_MESSAGE_TO_OTHER_TEMPLATE ;
-			
+
 			if(adminPrivilegeId == PrivilegeConstants.ORGANIZATION_SUPER_ADMIN){
 				if(realSuperAdmin){//如果是超级管理员,那改为超级管理员的模板
 					targerCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SUPER_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
@@ -2354,9 +2332,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					targerCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_TARGET_TEMPLATE ;
 					 otherCode = OrganizationNotificationTemplateCode.DELETE_ORGANIZATION_SYSTEM_ADMIN_MESSAGE_TO_OTHER_TEMPLATE ;
 				}
-				 
+
 			}
-			
+
 			sendMessageAfterChangeOrganizationAdmin(
 					ConvertHelper.convert(member, OrganizationContactDTO.class),
 					targerCode,
@@ -2880,7 +2858,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return projectTrees;
 	}
 
-	private List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects) {
+	@Override
+	public List<ProjectDTO> handleTreeProject(List<ProjectDTO> projects) {
 		List<ProjectDTO> projectTrees = new ArrayList<>();
 		List<Long> categoryIds = new ArrayList<>();
 		List<Long> projectIds = new ArrayList<>();
@@ -3033,7 +3012,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	                    }
 	                    
 	                } */
-	                
+
 	            }
 	        }
 	        return null;
@@ -3072,19 +3051,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		
 		if(topId != null) {
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
-			if(identifier != null){
-				response.setTopAdminToken(identifier.getIdentifierToken());
-			}
-			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(topId, cmd.getOrganizationId());
-			if(member != null && member.getContactName() != null) {
-				response.setTopAdminName(member.getContactName());
-			} else {
-				User user = userProvider.findUserById(topId);
-				if(user != null){
-					response.setTopAdminName(user.getNickName());
-				}		
-			}
+		    OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByUIdAndOrgId(topId, cmd.getOrganizationId());
+           if(organizationMember != null){
+               response.setTopAdminToken(organizationMember.getContactToken());
+               response.setTopAdminName(organizationMember.getContactName());
+           } else {
+               UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
+               if(identifier != null){
+                   response.setTopAdminToken(identifier.getIdentifierToken());
+               }
+               User user = userProvider.findUserById(topId);
+               if(user != null){
+                   response.setTopAdminName(user.getNickName());
+               }
+           }
 
 		}
 
@@ -3092,7 +3072,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return response;
     }
 
-	private void fliterProjectTrees(ProjectDTO dto, String type){
+    private void fliterProjectTrees(ProjectDTO dto, String type){
 		if(dto.getProjects() != null){
 			for (ProjectDTO r : dto.getProjects()) {
 				if (r.getProjectType().equals(type)) {
@@ -3461,8 +3441,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		if(cmd.getPageAnchor() != null){
 			locator.setAnchor(cmd.getPageAnchor());
-		}else{
-			locator.setAnchor(99999L);
 		}
 		Integer pageSize = 20;//默认20条
 		if(cmd.getPageSize() != null){
@@ -3515,98 +3493,98 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return response;
 	}
 
-	@Override
-	@Deprecated
-	public void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd){
+//	@Override
+//	@Deprecated
+//	public void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd){
+//
+//		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//
+//		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+//
+//		List<ServiceModule> modules = getServiceModuleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
+//
+//		if(null != modules){
+//			LOGGER.error("This user has been added to the administrator list.");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
+//					"This user has been added to the administrator list.");
+//		}
+//
+//		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
+//			LOGGER.error("params allFlag is null");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+//					"params allFlag is null.");
+//		}
+//
+//		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getModuleIds() || cmd.getModuleIds().size() == 0)){
+//			LOGGER.error("params moduleIds is null");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+//					"params moduleIds is null.");
+//		}
+//
+//		User user = UserContext.current().getUser();
+//		Integer namespaceId = UserContext.getCurrentNamespaceId();
+//		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+//		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+//		authorization.setIdentityType(IdentityType.MANAGE.getCode());
+//		authorization.setNamespaceId(namespaceId);
+//		authorization.setCreatorUid(user.getId());
+//		authorization.setOperatorUid(user.getId());
+//		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//
+//		dbProvider.execute((TransactionStatus status) -> {
+//
+//			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+//				authorization.setAuthId(0L);
+//				authorizationProvider.createAuthorization(authorization);
+//				//给对象分配全部模块管理员的权限
+//				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
+//			}else{
+//				for (Long moduleId: cmd.getModuleIds()) {
+//					authorization.setAuthId(moduleId);
+//					authorizationProvider.createAuthorization(authorization);
+//					//给对象分配每个模块管理员的权限
+//					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
+//				}
+//			}
+//			return null;
+//		});
+//	}
 
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-
-		checkTarget(cmd.getTargetType(), cmd.getTargetId());
-
-		List<ServiceModule> modules = getServiceModuleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
-
-		if(null != modules){
-			LOGGER.error("This user has been added to the administrator list.");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_EXISTS,
-					"This user has been added to the administrator list.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
-			LOGGER.error("params allFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getModuleIds() || cmd.getModuleIds().size() == 0)){
-			LOGGER.error("params moduleIds is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params moduleIds is null.");
-		}
-
-		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
-		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-		authorization.setIdentityType(IdentityType.MANAGE.getCode());
-		authorization.setNamespaceId(namespaceId);
-		authorization.setCreatorUid(user.getId());
-		authorization.setOperatorUid(user.getId());
-		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-		dbProvider.execute((TransactionStatus status) -> {
-
-			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
-				authorization.setAuthId(0L);
-				authorizationProvider.createAuthorization(authorization);
-				//给对象分配全部模块管理员的权限
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
-			}else{
-				for (Long moduleId: cmd.getModuleIds()) {
-					authorization.setAuthId(moduleId);
-					authorizationProvider.createAuthorization(authorization);
-					//给对象分配每个模块管理员的权限
-					assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(),authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
-				}
-			}
-			return null;
-		});
-	}
-
-	@Override
-   @Deprecated
-	public void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd){
-
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-
-		checkTarget(cmd.getTargetType(), cmd.getTargetId());
-
-		List<ServiceModule> modules = getServiceModuleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
-
-		if(null == modules){
-			LOGGER.error("This user has not been added to the administrator list.");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
-					"This user has not been added to the administrator list.");
-		}
-
-		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
-			LOGGER.error("params allFlag is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params allFlag is null.");
-		}
-
-		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getModuleIds() || cmd.getModuleIds().size() == 0)){
-			LOGGER.error("params moduleIds is null");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params moduleIds is null.");
-		}
-
-		checkTarget(cmd.getTargetType(), cmd.getTargetId());
-		dbProvider.execute((TransactionStatus status) -> {
-			deleteServiceModuleAdministrators(ConvertHelper.convert(cmd, DeleteServiceModuleAdministratorsCommand.class));
-			createServiceModuleAdministrators(ConvertHelper.convert(cmd, CreateServiceModuleAdministratorsCommand.class));
-			return null;
-		});
-	}
+	// by lei.lv 废弃代码
+//	@Override
+//	public void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd){
+//
+//		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//
+//		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+//
+//		List<ServiceModule> modules = getServiceModuleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
+//
+//		if(null == modules){
+//			LOGGER.error("This user has not been added to the administrator list.");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_ADMINISTRATORS_LIST_NONEXISTS,
+//					"This user has not been added to the administrator list.");
+//		}
+//
+//		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
+//			LOGGER.error("params allFlag is null");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+//					"params allFlag is null.");
+//		}
+//
+//		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getModuleIds() || cmd.getModuleIds().size() == 0)){
+//			LOGGER.error("params moduleIds is null");
+//			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+//					"params moduleIds is null.");
+//		}
+//
+//		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+//		dbProvider.execute((TransactionStatus status) -> {
+//			deleteServiceModuleAdministrators(ConvertHelper.convert(cmd, DeleteServiceModuleAdministratorsCommand.class));
+//			createServiceModuleAdministrators(ConvertHelper.convert(cmd, CreateServiceModuleAdministratorsCommand.class));
+//			return null;
+//		});
+//	}
 
 	@Override
 	public void deleteServiceModuleAdministrators(DeleteServiceModuleAdministratorsCommand cmd){
@@ -4401,12 +4379,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if (AllFlagType.fromCode(cmd.getAllCommunityControlFlag()) == AllFlagType.YES) {
 						processAuthorization(authorization, 0L, 0L, ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
 						authorizationProvider.createAuthorization(authorization);
-//						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 					} else {
 						for (ModuleAppTarget target : cmd.getCommunityTarget()) {
 							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.COMMUNITY_CONTROL.getCode(), cmd.getAllCommunityControlFlag(), control_id_c, cmd.getCommunityControlOption());
 							authorizationProvider.createAuthorization(authorization);
-//							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 						}
 					}
 				}
@@ -4447,12 +4423,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if (AllFlagType.fromCode(cmd.getAllOrgControlFlag()) == AllFlagType.YES) {
 						processAuthorization(authorization, 0L, 0L, ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
 						authorizationProvider.createAuthorization(authorization);
-//						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), PrivilegeConstants.ALL_SERVICE_MODULE);
 					} else {
 						for (ModuleAppTarget target : cmd.getOrgTarget()) {
 							processAuthorization(authorization, target.getModuleId(), target.getAppId(), ModuleManagementType.ORG_CONTROL.getCode(), cmd.getAllOrgControlFlag(), control_id_oa, cmd.getOrgControlOption());
 							authorizationProvider.createAuthorization(authorization);
-//							assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.SUPER);
 						}
 					}
 				}
@@ -4574,5 +4548,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long topId = this.getOrUpdateTopAdministratorByOrganizationId(cmd.getOrgId(), members);
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
 		return identifier.getIdentifierToken();
+	}
+
+
+	@Override
+	public void updateSuperAdmin(createSuperAdminCommand cmd){
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.ORG_ADMIN_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+        UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
+        organizationService.updateSuperAdmin(cmd2);
+
+
+        //adminflag表示该用户有管理员,设置管理员后更新该用户有管理员
+		EnterpriseCustomer customer = customerProvider.findByOrganizationIdAndCommunityId(cmd.getOrganizationId(), cmd.getCommunityId());
+		if(customer != null){
+			customer.setAdminFlag((byte)1);
+			customerProvider.updateEnterpriseCustomer(customer);
+			customerSearcher.feedDoc(customer);
+		}else{
+			LOGGER.error("params targetId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetId is null.");
+		}
+
 	}
 }

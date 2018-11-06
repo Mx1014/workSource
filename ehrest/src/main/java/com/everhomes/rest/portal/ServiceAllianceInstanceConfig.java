@@ -17,6 +17,7 @@ import java.util.List;
  * <li>enableCustomerService: 是否开启客服会话查看和导出功能 0-不开启 1-开启</li>
  * <li>appType: web-跳转web链接  native-原生 这个参数用于生成web化的actionData还是原生的actionData</li>
  * <li>realm: 用于离线应用识别</li>
+ * <li>enableOnly: 0-可以在多项目显示 1-仅当前项目下显示</li>
  * </ul>
  */
 public class ServiceAllianceInstanceConfig {
@@ -36,8 +37,10 @@ public class ServiceAllianceInstanceConfig {
 	private Byte enableCustomerService;
 	
 	private String appType;
-	
+
 	private String realm;
+
+	private Byte enableOnly;
 
 	@ItemType(ServiceAllianceJump.class)
 	private List<ServiceAllianceJump> jumps;
@@ -153,6 +156,14 @@ public class ServiceAllianceInstanceConfig {
 
 	public void setRealm(String realm) {
 		this.realm = realm;
+	}
+
+	public Byte getEnableOnly() {
+		return enableOnly;
+	}
+
+	public void setEnableOnly(Byte enableOnly) {
+		this.enableOnly = enableOnly;
 	}
 
 }

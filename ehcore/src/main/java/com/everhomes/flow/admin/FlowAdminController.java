@@ -2,6 +2,7 @@ package com.everhomes.flow.admin;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.controller.XssExclude;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.FlowService;
@@ -782,6 +783,7 @@ public class FlowAdminController extends ControllerBase {
      * <b>URL: /admin/flow/createFlowScript</b>
      * <p>创建脚本</p>
      */
+    @XssExclude
     @RequestMapping("createFlowScript")
     @RestReturn(value = FlowScriptDTO.class)
     public RestResponse createFlowScript(@Valid CreateFlowScriptCommand cmd) {
@@ -810,6 +812,7 @@ public class FlowAdminController extends ControllerBase {
      * <b>URL: /admin/flow/updateFlowScript</b>
      * <p>修改脚本</p>
      */
+    @XssExclude
     @RequestMapping("updateFlowScript")
     @RestReturn(value = FlowScriptDTO.class)
     public RestResponse updateFlowScript(@Valid UpdateFlowScriptCommand cmd) {
@@ -936,6 +939,62 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(String.class)
     public RestResponse updateSubFlowInfo(@Valid UpdateSubFlowInfoCommand cmd) {
         flowService.updateSubFlowInfo(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/enableProjectCustomize</b>
+     * <p> 启用基于园区的自定义配置 </p>
+     */
+    @RequestMapping("enableProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse enableProjectCustomize(@Valid EnableProjectCustomizeCommand cmd) {
+        flowService.enableProjectCustomize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/disableProjectCustomize</b>
+     * <p> 禁用基于园区的自定义配置 </p>
+     */
+    @RequestMapping("disableProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse disableProjectCustomize(@Valid DisableProjectCustomizeCommand cmd) {
+        flowService.disableProjectCustomize(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/getProjectCustomize</b>
+     * <p> 获取自定义配置属性 </p>
+     */
+    @RequestMapping("getProjectCustomize")
+    @RestReturn(value = String.class)
+    public RestResponse getProjectCustomize(@Valid GetProjectCustomizeCommand cmd) {
+        Byte flag = flowService.getProjectCustomize(cmd);
+        RestResponse response = new RestResponse(flag);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/doFlowMirror</b>
+     * <p> 复制工作流 </p>
+     */
+    @RequestMapping("doFlowMirror")
+    @RestReturn(value = String.class)
+    public RestResponse doFlowMirror(@Valid DoFlowMirrorCommand cmd) {
+        flowService.doFlowMirror(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

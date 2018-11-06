@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -28,19 +29,22 @@ import com.everhomes.pay.user.ListBusinessUsersCommand;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.asset.BillIdAndAmount;
+import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
 import com.everhomes.rest.asset.ListBillDetailCommand;
 import com.everhomes.rest.asset.ListBillDetailResponse;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.BusinessOrderType;
-import com.everhomes.rest.gorder.order.BusinessPayerType;
-import com.everhomes.rest.gorder.order.CreatePurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.GetPurchaseOrderCommand;
-import com.everhomes.rest.gorder.order.OrderErrorCode;
-import com.everhomes.rest.gorder.order.PurchaseOrderCommandResponse;
-import com.everhomes.rest.gorder.order.PurchaseOrderDTO;
-import com.everhomes.rest.gorder.order.PurchaseOrderPaymentStatus;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.BusinessOrderType;
+import com.everhomes.rest.promotion.order.BusinessPayerType;
+import com.everhomes.rest.promotion.order.CreatePurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.GetPurchaseOrderCommand;
+import com.everhomes.rest.promotion.order.NotifyBillHasBeenPaidCommand;
+import com.everhomes.rest.promotion.order.OrderErrorCode;
+import com.everhomes.rest.promotion.order.PurchaseOrderCommandResponse;
+import com.everhomes.rest.promotion.order.PurchaseOrderDTO;
+import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
+
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.OwnerType;
 import com.everhomes.rest.order.PayMethodDTO;
@@ -92,6 +96,9 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	@Autowired
 	private AssetService assetService;
 	
+	@Autowired
+	private AssetGroupProvider assetGroupProvider;
+
 	public final long EXPIRE_TIME_15_MIN_IN_SEC = 15 * 60L;
     
     public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
@@ -151,7 +158,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         preOrderCommand.setOrderRemark3(String.valueOf(cmd.getCommunityId()));
         preOrderCommand.setOrderRemark4(null);
         preOrderCommand.setOrderRemark5(null);
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         
         return preOrderCommand;
@@ -265,7 +272,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	}
 	
 	protected PaymentBillGroup checkBillGroup(CreatePaymentBillOrderCommand cmd) {
-        PaymentBillGroup billGroup = assetProvider.getBillGroupById(cmd.getBillGroupId());
+        PaymentBillGroup billGroup = assetGroupProvider.getBillGroupById(cmd.getBillGroupId());
         if(billGroup == null) {
             LOGGER.error("Bill group not found, billGroupId={}", cmd.getBillGroupId());
             throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.BILL_GROUP_NOT_FOUND, "Bill group not found");
@@ -412,7 +419,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         } 
         // 找不到手机号则默认一个
         if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+            buyerPhone = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
         }
 
         Map<String, String> map = new HashMap<String, String>();
@@ -427,57 +434,27 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 	 * @return 扩展信息
 	 */
 	protected String genPaymentExtendInfo(CreatePaymentBillOrderCommand cmd, PaymentBillGroup billGroup) {
-	    // 通过账单ID找到ownerID，再通过ownerID找到项目名称
-        String projectName = "";
+		StringBuilder strBuilder = new StringBuilder();
         if(cmd.getBills() != null) {
-            Long billId = Long.parseLong(cmd.getBills().get(0).getBillId());
-            projectName = assetProvider.getProjectNameByBillID(billId);
-        }
-
-        String billGroupName = "";
-        if(billGroup.getName() != null) {
-            billGroupName = billGroup.getName();
-        }
-        
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append("项目名称:");
-        strBuilder.append(projectName);
-        strBuilder.append(", ");
-        strBuilder.append("账单组名称:");
-        strBuilder.append(billGroupName);
-        
-        //issue-38519 【中天】【缴费管理】完成缴费后，在支付后台的订单中，订单描述为空，无法区分费用来源，财务完全无法对账
-        //issue-38519 暂时为中天加上客户名称作为来源说明，临时方案
-        try {
-        	if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999944)) {
-        	//if(cmd.getNamespaceId() != null && cmd.getNamespaceId().equals(999951)) {
-            	String targetNames = "";
-            	List<BillIdAndAmount> bills = cmd.getBills();
-                List<String> billIds = new ArrayList<>();
-                for(int i = 0; i < bills.size(); i++){
-                    BillIdAndAmount billIdAndAmount = bills.get(i);
-                    if(billIdAndAmount.getBillId() == null || billIdAndAmount.getBillId().trim().length() == 0) {
-                        bills.remove(i);
-                        i--;
-                    } else {
-                        billIds.add(billIdAndAmount.getBillId());
-                    }
-                }
-                List<PaymentBills> paymentBillList = assetProvider.findBillsByIds(billIds);
-                for(PaymentBills paymentBill : paymentBillList) {
-                	//去重
-                	if(!targetNames.contains(paymentBill.getTargetName())) {
-                		targetNames += paymentBill.getTargetName() + "、";
+        	for(BillIdAndAmount billIdAndAmount : cmd.getBills()) {
+        		Long billId = Long.parseLong(billIdAndAmount.getBillId());
+                ListBillDetailCommand ncmd = new ListBillDetailCommand();
+                ncmd.setBillId(Long.valueOf(billId));
+                ListBillDetailResponse billDetail = listBillDetail(ncmd);
+                if(billDetail != null && billDetail.getBillGroupDTO() != null) {
+                	List<BillItemDTO> billItemDTOList = billDetail.getBillGroupDTO().getBillItemDTOList();
+                	for(BillItemDTO billItemDTO : billItemDTOList) {
+                		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(billItemDTO.getSourceType());
+                		String paymentExtendsInfo = generalBillHandler.getPaymentExtendInfo(billItemDTO);
+                		strBuilder.append(paymentExtendsInfo);
+                		strBuilder.append(",");
                 	}
                 }
-                if(targetNames.length() != 0) {
-                	targetNames = targetNames.substring(0, targetNames.length() - 1);
-                }
-                strBuilder.append(", ");
-                strBuilder.append("客户名称：" + targetNames);
-            }
-        }catch(Exception e){
-        	e.printStackTrace();
+        	}
+        }
+        //去掉最后一个逗号
+        if(strBuilder.length() != 0) {
+        	strBuilder = strBuilder.deleteCharAt(strBuilder.length() - 1);
         }
         return strBuilder.toString();
 	}
@@ -540,7 +517,7 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         }
         
         GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+        String systemId = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
         getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
         String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
         getPurchaseOrderCommand.setAccountCode(accountCode);
@@ -601,10 +578,10 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
         	ListBillDetailCommand ncmd = new ListBillDetailCommand();
             ncmd.setBillId(Long.valueOf(billId));
             ListBillDetailResponse billDetail = listBillDetail(ncmd);
-            AssetGeneralBillHandler handler = assetService.getAssetGeneralBillHandler(billDetail.getSourceType(), billDetail.getSourceId());
-            if(null != handler){
-            	handler.payNotifyBillSourceModule(billDetail);
-            }
+            //core-server这边直接调用统一订单的notifyBillHasBeenPaid的回调接口
+            NotifyBillHasBeenPaidCommand notifyBillHasBeenPaidCommand = new NotifyBillHasBeenPaidCommand();
+            notifyBillHasBeenPaidCommand.setMerchantOrderId(billDetail.getMerchantOrderId());
+            orderService.notifyBillHasBeenPaid(notifyBillHasBeenPaidCommand);
         }
     }
     

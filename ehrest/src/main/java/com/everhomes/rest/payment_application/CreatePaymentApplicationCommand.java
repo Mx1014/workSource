@@ -41,6 +41,7 @@ public class CreatePaymentApplicationCommand {
     private BigDecimal paymentAmount;
     private Double paymentRate;
     private String remark;
+    private Long orgId;
 
     public String getApplicationNumber() {
         return applicationNumber;
@@ -168,6 +169,14 @@ public class CreatePaymentApplicationCommand {
 
     public void setRequestId(Long requestId) {
         this.requestId = requestId;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
     }
 
     @Override

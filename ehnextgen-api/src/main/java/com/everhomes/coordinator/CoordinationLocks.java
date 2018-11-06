@@ -94,8 +94,8 @@ public enum CoordinationLocks {
     PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
 
     USER_APPEAL_LOG("user.appeal.log"),
-    SALARY_GROUP_LOCK("salary.group"),
-    SALARY_NEWMONTH_LOCK("salary.newmonth"),
+	SALARY_GROUP_LOCK("salary.group"),
+	SALARY_NEWMONTH_LOCK("salary.newmonth"),
     UNION_GROUP_LOCK("union.group"),
     UNION_GROUP_CLONE_LOCK("union_group_clone"),
 
@@ -152,7 +152,6 @@ public enum CoordinationLocks {
     WORK_REPORT_RX_MSG("work_report_rx_msg"),
     WORK_REPORT_AU_BASIC_MSG("work_report_au_basic_msg"),
     WORK_REPORT_AU_MSG("work_report_au_msg"),
-	
 
     VISITOR_SYS_LOCATION("visitor_sys_location"),
     ACTIVITY_SIGNUP_TIMEOUT("activity_signup_timeout"),
@@ -161,8 +160,9 @@ public enum CoordinationLocks {
     PUNCH_DAY_LOG_INIT_SCHEDULE("punchDayLogInitializeSchedule"),
     EXCUTE_ADDRESS_ARRANGEMENT("excute_address_arrangement"),
 
-    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user");
-
+    ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user"),
+	
+	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community");//issue-38508 根据项目+月份统计缴费报表
 
     private String code;
 

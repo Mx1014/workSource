@@ -6,13 +6,14 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhUserScoresDao;
 import com.everhomes.server.schema.tables.pojos.EhUserScores;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.server.schema.tables.records.EhUserScoresRecord;
+import com.everhomes.server.schema.tables.records.EhUsersRecord;
+import com.everhomes.user.User;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.collections.CollectionUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Operator;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,5 +62,7 @@ public class UserPointProviderImpl implements UserPointProvider {
         }
         return userScores.subList(0, userScores.size() - 1);
     }
+
+
 
 }

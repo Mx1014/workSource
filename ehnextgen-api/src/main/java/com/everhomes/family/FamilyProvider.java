@@ -66,6 +66,7 @@ public interface FamilyProvider {
     void updateFamily(Group group);
 
 	Map<Long, Family> mapFamilyByAddressIds(List<Long> aptIdList);
-    
+
+    List<Family> listFamilByCommunityIdAndUid(Long communityId, Long uid);
     
 }

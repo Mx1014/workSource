@@ -10,8 +10,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
@@ -27,6 +29,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.MessagePersistWorker;
 import com.everhomes.util.Name;
 import com.everhomes.util.*;
+import com.everhomes.wx.WeChatMessageService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
@@ -95,6 +100,12 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
 
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private NamespacesService namespacesService;
+
+    @Autowired
+    private WeChatMessageService weChatMessageService;
 
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -259,9 +270,93 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
         
         return ls;
     }
-    
+
     @Override
-    public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
+    public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType,
+                             String dstChannelToken, MessageDTO message, int deliveryOption) {
+
+        Integer wxNamespaceFlag = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "wx.namespace.flag", 0);
+
+        if(wxNamespaceFlag != null && wxNamespaceFlag.intValue() == 1){
+            routeMessageForWechat(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
+        }else {
+            routeMessageForApp(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
+        }
+
+    }
+
+    /**
+     * 微信消息
+     * @param context
+     * @param senderLogin
+     * @param appId
+     * @param dstChannelType
+     * @param dstChannelToken
+     * @param message
+     * @param deliveryOption
+     */
+    private void routeMessageForWechat(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
+                                       MessageDTO message, int deliveryOption){
+
+        List<Long> userIds = new ArrayList<>();
+
+        for(MessageChannel channel: message.getChannels()){
+
+            if(ChannelType.fromCode(channel.getChannelType()) == ChannelType.USER){
+                userIds.add(Long.parseLong(channel.getChannelToken()));
+            }
+        }
+
+        String url = configProvider.getValue(UserContext.getCurrentNamespaceId(),"wx.default.template.url", "");
+        String title = null;
+        if(message.getMeta() != null ){
+            Map meta = message.getMeta();
+
+            if(url != null && "message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
+
+                try {
+                    url = url + "?routerMetaObject=" + URLEncoder.encode((String)meta.get(MessageMetaConstant.META_OBJECT), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+//                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
+//                if(routerMetaObject != null){
+//                    url = routerToUrl(routerMetaObject.getUrl());
+//                }
+            }
+
+            title = (String)meta.get(MessageMetaConstant.MESSAGE_SUBJECT);
+        }
+
+        weChatMessageService.sendTemplateMessage(userIds, title, message.getBody(), url);
+    }
+
+
+    private String routerToUrl(String router){
+
+        if(router == null){
+            return null;
+        }
+
+        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+
+        router = router.replace("zl:/", "");
+
+        return homeUrl + router;
+    }
+
+    /**
+     * 客户端消息
+     * @param context
+     * @param senderLogin
+     * @param appId
+     * @param dstChannelType
+     * @param dstChannelToken
+     * @param message
+     * @param deliveryOption
+     */
+    private void routeMessageForApp(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType, String dstChannelToken,
             MessageDTO message, int deliveryOption) {
         MessageRoutingHandler handler = handlerMap.get(dstChannelType);
 
@@ -313,6 +408,11 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
             LOGGER.error(String.format("Unable to route message %s:%s", dstChannelType, dstChannelToken));
         }        
     }
+
+
+
+
+
     
     @Override
     public long getMessageCountInLoginMessageBox(UserLogin login) {

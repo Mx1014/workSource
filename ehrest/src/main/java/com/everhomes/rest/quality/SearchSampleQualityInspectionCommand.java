@@ -34,6 +34,8 @@ public class SearchSampleQualityInspectionCommand {
 
     private Integer pageSize;
 
+    private Integer namespaceId;
+
     public Long getEndTime() {
         return endTime;
     }
@@ -88,6 +90,14 @@ public class SearchSampleQualityInspectionCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

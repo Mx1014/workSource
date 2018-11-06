@@ -3,6 +3,7 @@ package com.everhomes.investmentAd;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -125,10 +126,10 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
         titleName.add("招商状态");
         titleSize.add(20);
         propertyNames.add("availableArea");
-        titleName.add("招商面积");
+        titleName.add("面积(㎡)");
         titleSize.add(20);
         propertyNames.add("assetPrice");
-        titleName.add("租金（元/平*月）");
+        titleName.add("租金（元/㎡*月）");
         titleSize.add(20);
         propertyNames.add("apartmentFloor");
         titleName.add("楼层");
@@ -140,7 +141,7 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
         titleName.add("地址");
         titleSize.add(20);
         propertyNames.add("contactPhone");
-        titleName.add("联系电话");
+        titleName.add("咨询电话");
         titleSize.add(20);
         propertyNames.add("description");
         titleName.add("描述");
@@ -173,22 +174,52 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
 			detail.put("investmentStatus", null);
 		}
     	
-    	if (investmentAd.getAvailableAreaMin()!=null && investmentAd.getAvailableAreaMax()!=null) {
-    		detail.put("availableArea", investmentAd.getAvailableAreaMin() + "-" + investmentAd.getAvailableAreaMax());
-		}else if (investmentAd.getAvailableAreaMin()!=null) {
-			detail.put("availableArea", investmentAd.getAvailableAreaMin().toString());
-		}else if(investmentAd.getAvailableAreaMax()!=null){
-			detail.put("availableArea", investmentAd.getAvailableAreaMax().toString());
+    	BigDecimal availableAreaMin = investmentAd.getAvailableAreaMin();
+		BigDecimal availableAreaMax = investmentAd.getAvailableAreaMax();
+		if (availableAreaMin != null && availableAreaMax != null) {
+			//这种操作的原因是，如果是整数的话，BigDecimal转为字符串时会保留两位小数，如100转为字符串时会成为100.00
+			//这种现象导致了issue-38616
+			if (isInteger(availableAreaMin)) {
+				availableAreaMin = availableAreaMin.setScale(0);
+			}
+			if (isInteger(availableAreaMax)) {
+				availableAreaMax = availableAreaMax.setScale(0);
+			}
+    		detail.put("availableArea", availableAreaMin + "-" + availableAreaMax);
+		}else if (availableAreaMin!=null) {
+			if (isInteger(availableAreaMin)) {
+				availableAreaMin = availableAreaMin.setScale(0);
+			}
+			detail.put("availableArea", availableAreaMin.toString());
+		}else if(availableAreaMax!=null){
+			if (isInteger(availableAreaMax)) {
+				availableAreaMax = availableAreaMax.setScale(0);
+			}
+			detail.put("availableArea", availableAreaMax.toString());
 		}else {
 			detail.put("availableArea", null);
 		}
     	
-    	if (investmentAd.getAssetPriceMin()!=null && investmentAd.getAssetPriceMax()!=null) {
-    		detail.put("assetPrice", investmentAd.getAssetPriceMin() + "-" + investmentAd.getAssetPriceMax());
-		}else if (investmentAd.getAssetPriceMin()!=null) {
-			detail.put("assetPrice", investmentAd.getAssetPriceMin().toString());
-		}else if(investmentAd.getAssetPriceMax()!=null){
-			detail.put("assetPrice", investmentAd.getAssetPriceMax().toString());
+    	BigDecimal assetPriceMin = investmentAd.getAssetPriceMin();
+		BigDecimal assetPriceMax = investmentAd.getAssetPriceMax();
+		if (assetPriceMin!=null && assetPriceMax!=null) {
+			if (isInteger(assetPriceMin)) {
+				assetPriceMin = assetPriceMin.setScale(0);
+			}
+			if (isInteger(assetPriceMax)) {
+				assetPriceMax = assetPriceMax.setScale(0);
+			}
+    		detail.put("assetPrice", assetPriceMin + "-" + assetPriceMax);
+		}else if (assetPriceMin!=null) {
+			if (isInteger(assetPriceMin)) {
+				assetPriceMin = assetPriceMin.setScale(0);
+			}
+			detail.put("assetPrice", assetPriceMin.toString());
+		}else if(assetPriceMax!=null){
+			if (isInteger(assetPriceMax)) {
+				assetPriceMax = assetPriceMax.setScale(0);
+			}
+			detail.put("assetPrice", assetPriceMax.toString());
 		}else {
 			detail.put("assetPrice", null);
 		}	
@@ -214,18 +245,32 @@ public class InvestmentAdsExportHandler implements FileDownloadTaskHandler{
 			for (InvestmentAdAsset investmentAdAsset : investmentAdAssets) {
 				if (InvestmentAdAssetType.BUILDING.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 					Building building = communityProvider.findBuildingById(investmentAdAsset.getAssetId());
-					relatedAssetsSB.append(building.getName() + ",");
+					if (building != null) {
+						relatedAssetsSB.append(building.getName() + ",");
+					}
 				}else if (InvestmentAdAssetType.APARTMENT.equals(InvestmentAdAssetType.fromCode(investmentAdAsset.getAssetType()))) {
 					Address address = addressProvider.findAddressById(investmentAdAsset.getAssetId());
-					relatedAssetsSB.append(address.getAddress() + ",");
+					if (address != null) {
+						relatedAssetsSB.append(address.getAddress() + ",");
+					}
 				}
 			}
 			String relatedAssetsStr = relatedAssetsSB.toString();
-			detail.put("relatedAssets", relatedAssetsStr.substring(0,relatedAssetsStr.length()-1));
+			if (relatedAssetsStr.length() > 0) {
+				detail.put("relatedAssets", relatedAssetsStr.substring(0,relatedAssetsStr.length()-1));
+			}
 		}
 		return detail;
 	}
 	
+	private boolean isInteger(BigDecimal num) {
+		BigDecimal intNum = new BigDecimal(num.intValue());
+		if (intNum.compareTo(num) == 0) {
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public void commit(Map<String, Object> params) {
 		// TODO Auto-generated method stub

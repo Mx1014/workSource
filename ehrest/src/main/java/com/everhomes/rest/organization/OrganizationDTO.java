@@ -5,6 +5,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  * <li>path：路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
  * <li>level：当前层级。没有填0</li>
  * <li>addressId：地址</li>
- * <li>OrganizationType：组织类型，仅用来区分机构是物业、工作站、公安、普通公司等，注意其与groupType意义的区别：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
+ * <li>organizationType：组织类型，仅用来区分机构是物业、工作站、公安、普通公司等，注意其与groupType意义的区别：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
  * <li>status：状态：参考{@link com.everhomes.rest.organization.OrganizationStatus}</li>
  * <li>memberStatus：成员状态：参考{@link com.everhomes.rest.organization.OrganizationMemberStatus}</li>
  * <li>description：组织描述</li>
@@ -47,6 +48,7 @@ import java.util.List;
  * <li>errorCode:错误码</li>
  * <li>managerFlag: 地址列表需要的默认是否是这个公司的管理员字段</li>
  * <li>managerList: 管理员列表,参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ * <li>projectsCount: 关联的项目数量</li>
  * <li>projectManageFlag: 公司是否管理项目0-否、1-是，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
@@ -60,7 +62,7 @@ public class OrganizationDTO {
 	private String  path;
 	private Integer level;
 	private Long addressId;
-	private String OrganizationType;
+	private String organizationType;
 	private Byte    status;
 	private Byte memberStatus;
 	private String description;
@@ -71,6 +73,8 @@ public class OrganizationDTO {
     private String avatarUri;
     private String avatarUrl;
     private String contact;
+
+	private Timestamp createTime;
 
     private String displayName;
 	
@@ -130,6 +134,19 @@ public class OrganizationDTO {
 
     //地址列表需要的默认是否是这个公司的管理员字段
 	private Byte managerFlag;
+
+	private Integer projectsCount;
+
+	//人员规模
+	private String memberRange;
+
+	public String getMemberRange() {
+		return memberRange;
+	}
+
+	public void setMemberRange(String memberRange) {
+		this.memberRange = memberRange;
+	}
 
 	public Long getAreaId() {
 		return areaId;
@@ -287,11 +304,11 @@ public class OrganizationDTO {
 	}
 
 	public String getOrganizationType() {
-		return OrganizationType;
+		return organizationType;
 	}
 
 	public void setOrganizationType(String organizationType) {
-		OrganizationType = organizationType;
+		this.organizationType = organizationType;
 	}
 
 	public Long getId() {
@@ -489,6 +506,22 @@ public class OrganizationDTO {
 
 	public void setManagerFlag(Byte managerFlag) {
 		this.managerFlag = managerFlag;
+	}
+
+	public Integer getProjectsCount() {
+		return projectsCount;
+	}
+
+	public void setProjectsCount(Integer projectsCount) {
+		this.projectsCount = projectsCount;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public Byte getProjectManageFlag() {

@@ -128,11 +128,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private void disConnected(WebSocketSession session, String info) throws Exception {
         String uuid = uuidFromSession(session);
         AclinkWebSocketState state = session2State.remove(session);
-        uuid2Session.remove(uuid);
 
         LOGGER.info("Aclink disConnected: uuid= " + uuid + " info=" + info);
 
         if(state != null) {
+        	uuid2Session.remove(uuid);
+        	LOGGER.info("remove uuid2Session " + uuid);
             Map<String, String> params = new HashMap<String, String>();
             params.put("id", state.getId().toString());
             params.put("uuid", uuid);
@@ -162,6 +163,10 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
+        if(session.isOpen()){  
+            session.close();  
+        }  
+        LOGGER.debug("handleTransportError, websocket connection closed");  
         disConnected(session, "error closed=" + arg1.getMessage());
     }
 

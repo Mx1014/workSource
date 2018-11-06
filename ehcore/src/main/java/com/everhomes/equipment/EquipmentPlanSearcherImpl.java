@@ -143,6 +143,9 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
             if (!StringUtils.isNullOrEmpty(cmd.getTargetType()))
                 fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        } else if (cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+            // this scope should never user organization id
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("targetId", cmd.getTargetIds()));
         }
 
 
@@ -158,6 +161,13 @@ public class EquipmentPlanSearcherImpl extends AbstractElasticSearch implements 
         //增加频次  repeatType
         if(cmd.getRepeatType()!=null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("repeatType", cmd.getRepeatType()));
+        
+      //MultiManagement company
+        if (cmd.getOwnerId() != null && cmd.getOwnerId() != 0L) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//            if (!StringUtils.isNullOrEmpty(cmd.getOwnerType()))
+//                fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0L;

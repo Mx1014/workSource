@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>resourceType: resourceType {@link RentalV2ResourceType}</li>
  * <li>sourceType: sourceType 默认规则：default_rule， 资源规则：resource_rule{@link RuleSourceType}</li>
  * <li>sourceId: 资源id，如果是默认规则，则不填</li>
- * <li>sceneToken: 当前场景信息</li>
+ * <li>sceneType: 当前场景信息</li>
  * </ul>
  */
 public class GetResourceRuleV2Command {
@@ -26,6 +26,8 @@ public class GetResourceRuleV2Command {
 
     private Long sourceId;
 
+    private String sceneType;
+
     private String sceneToken;
 
     @Override
@@ -33,12 +35,12 @@ public class GetResourceRuleV2Command {
         return StringHelper.toJsonString(this);
     }
 
-    public String getSceneToken() {
-        return sceneToken;
+    public String getSceneType() {
+        return sceneType;
     }
 
-    public void setSceneToken(String sceneToken) {
-        this.sceneToken = sceneToken;
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
 
     public String getOwnerType() {
@@ -87,5 +89,13 @@ public class GetResourceRuleV2Command {
 
     public void setSourceId(Long sourceId) {
         this.sourceId = sourceId;
+    }
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
     }
 }

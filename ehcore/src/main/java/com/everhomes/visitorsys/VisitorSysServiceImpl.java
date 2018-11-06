@@ -43,7 +43,11 @@ import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.OfficeSiteDTO;
+import com.everhomes.rest.organization.OrganizationAndDetailDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -181,6 +185,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
+//        else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.BOOKING_MANAGEMENT){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_BOOKING_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE && searchFlagType==VisitorsysSearchFlagType.VISITOR_MANAGEMENT){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_VISITOR_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }
         return listBookedVisitorsWithOutACL(cmd);
     }
 
@@ -273,6 +282,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         return visitorSysVisitorProvider.findVisitorSysVisitorById(visitor.getNamespaceId(), visitor.getParentId());
     }
+
     @Override
     public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
         VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -312,6 +322,63 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         return response;
     }
+
+//    @Override
+//    public ListOfficeLocationsResponse listOfficeLocations(ListOfficeLocationsCommand cmd) {
+//        VisitorsysOwnerType ownerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+//        ListOfficeLocationsResponse response = new ListOfficeLocationsResponse();
+//        Integer pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider, cmd.getPageSize());
+//        Long pageAnchor = cmd.getPageAnchor() == null ? Long.MAX_VALUE : cmd.getPageAnchor();//倒序使用long的最大值，正序使用0
+//        List<VisitorSysOfficeLocation> visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//
+//        if(ownerType.getCode().equals(VisitorsysOwnerType.ENTERPRISE.getCode())){
+//
+////          同步数据
+//            FindEnterpriseDetailCommand orgCmd = new FindEnterpriseDetailCommand();
+//            orgCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+//            orgCmd.setOrganizationId(cmd.getOwnerId());
+//            OrganizationAndDetailDTO orgDetail = organizationService.getOrganizationDetailByOrgId(orgCmd);
+//            List<OfficeSiteDTO> list = orgDetail.getOfficeSites();
+//
+//            if(null != list && list.size() > 0){
+//                for (OfficeSiteDTO r : list){
+//                    boolean isExist = false;
+//                    for (VisitorSysOfficeLocation r1 : visitorSysOfficeLocations){
+//                        if(r.getId().equals(r1.getReferId())){
+//                            r1.setOfficeLocationName(r.getSiteName());
+//                            isExist = true;
+//                            visitorSysOfficeLocationProvider.updateVisitorSysOfficeLocation(r1);
+//                            break;
+//                        }
+//                    }
+//                    if(!isExist){
+//                        VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//                        location.setOfficeLocationName(r.getSiteName());
+//                        location.setReferId(r.getId());
+//                        location.setReferType("EhOrganizationWorkplaces");
+//                        location.setStatus(CommonStatus.ACTIVE.getCode());
+//                        visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//                    }
+//                }
+//            }
+//
+//            List<VisitorSysOfficeLocation> resultlist = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//            response.setOfficeLocationList(resultlist.stream().map(r->ConvertHelper.convert(r,BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+//        } else {
+//            if(visitorSysOfficeLocations.size() == 0){
+//                VisitorSysOfficeLocation location = ConvertHelper.convert(cmd, VisitorSysOfficeLocation.class);
+//                Community community = communityProvider.findCommunityById(cmd.getOwnerId());
+//                location.setOfficeLocationName(community.getName());
+//                location.setStatus(CommonStatus.ACTIVE.getCode());
+//                visitorSysOfficeLocationProvider.createVisitorSysOfficeLocation(location);
+//
+//                visitorSysOfficeLocations = visitorSysOfficeLocationProvider.listVisitorSysOfficeLocation(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), pageSize, pageAnchor);
+//            }
+//
+//            response.setOfficeLocationList(visitorSysOfficeLocations.stream().map(r -> ConvertHelper.convert(r, BaseOfficeLocationDTO.class)).collect(Collectors.toList()));
+//        }
+//        return response;
+//    }
 
     @Override
     public ListCommunityOrganizationsResponse listCommunityOrganizations(ListCommunityOrganizationsCommand cmd) {
@@ -440,7 +507,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             }
         }
         String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"");
-        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-management/build/index.html?ns=%s&ownerType=%s&id=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
+        String contextUrl = configurationProvider.getValue(VisitorsysConstant.VISITORSYS_ADMIN_ROUNTE, "%s/visitor-appointment/build/index.html?ns=%s&ownerType=%s&detailId=%s&appId=%s&status=%s#/visitor-detail#sign_suffix");
 
         String url = String.format(contextUrl, homeurl,visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getId(),appId,visitor.getVisitStatus());
         List<VisitorSysMessageReceiver> list = messageReceiverProvider.listVisitorSysMessageReceiverByOwner(visitor.getNamespaceId(),visitor.getOwnerType(),visitor.getOwnerId());
@@ -748,7 +815,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(cmd.getNamespaceId(), cmd.getVisitorId());
         if(visitor==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                     "unknow visitorid = " + cmd.getVisitorId());
         }
         sendVisitorSms(visitor,VisitorsysFlagType.YES);
@@ -759,9 +826,10 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      * @param visitor
      */
     private void sendVisitorSms(VisitorSysVisitor visitor, VisitorsysFlagType sendSmsFlag) {
+        LOGGER.info("visitorsys sms is sending,visitor={}",visitor.toString());
         VisitorsysVisitorType visitorType = checkVisitorType(visitor.getVisitorType());
         if(visitor.getVisitorPhone()==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                     "not support visitor phone = " + visitor.getVisitorPhone());
         }
 
@@ -854,7 +922,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void confirmVisitor(CreateOrUpdateVisitorCommand cmd) {
         if(cmd.getId()==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown id = null");
         }
         cmd.setBookingStatus(VisitorsysStatus.HAS_VISITED.getCode());
@@ -902,8 +970,11 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
+//        else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
+//        }
         if(cmd.getPairingCode()==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown pairingCode "+cmd.getPairingCode());
         }
         AddDeviceResponse response = addDeviceByPairingCode(cmd);
@@ -966,6 +1037,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(ownerType == VisitorsysOwnerType.COMMUNITY) {
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
+//        else if(ownerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_DEV_MANAGEMENT_ENT, cmd.getAppId(), cmd.getOwnerId(), null);
+//        }
 
         List<VisitorSysDevice> deviceList = visitorSysDeviceProvider.listVisitorSysDeviceByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         ListDevicesResponse devicesResponse = new ListDevicesResponse();
@@ -1001,7 +1075,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         else{
             VisitorSysOfficeLocation old = visitorSysOfficeLocationProvider.findVisitorSysOfficeLocationById(cmd.getId());
             if(old==null){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                         "unknown officeLoation id "+cmd.getId());
             }
             convert.setOwnerType(old.getOwnerType());
@@ -1066,7 +1140,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             bos = new BufferedOutputStream(resp.getOutputStream());
             ImageIO.write(image, QRCodeConfig.FORMAT_PNG, bos);
         } catch (Exception e) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_DOWNLOAD_QRCODE,
                     "Failed to download the package file");
         } finally {
             FileHelper.closeOuputStream(out);
@@ -1182,7 +1256,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }else {
             VisitorSysBlackList blackList = visitorSysBlackListProvider.findVisitorSysBlackListById(cmd.getId());
             if(blackList==null){
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                         "unknown blackList id "+cmd.getId());
             }
             blackList.setReason(cmd.getReason());
@@ -1285,7 +1359,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         Long visitorId = checkInviationToken(cmd.getVisitorToken());
         VisitorSysVisitor visitor = visitorSysVisitorProvider.findVisitorSysVisitorById(visitorId);
         if(visitor==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown visitorToken "+cmd.getVisitorToken());
         }
 
@@ -1584,7 +1658,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     public ListBookedVisitorsResponse confirmVerificationCode(ConfirmVerificationCodeCommand cmd) {
         VisitorSysDevice device = checkDevice(cmd.getDeviceType(), cmd.getDeviceId());
         if(cmd.getVerificationCode()==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown verificatcode "+cmd.getVerificationCode());
         }
         return confirmVerificationCode(device.getNamespaceId(),device.getOwnerType(),device.getOwnerId(),cmd.getVerificationCode(),cmd.getVisitorPhone());
@@ -1603,7 +1677,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private ListBookedVisitorsResponse confirmVerificationCode(Integer namespaceId,String ownerType,Long ownerId,String vCode,String vPhone) {
         if(vCode==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                     "unknown verificatcode "+vCode);
         }
         String key = generateVerificationKey(vCode,vPhone);
@@ -1684,12 +1758,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             cmd.setOwnerId(configuration.getOwnerId());
         }else{
             LOGGER.error("beforePostForWeb is fail. {}",cmd.getOwnerToken());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown ownerToken "+cmd.getOwnerToken());
         }
         if(cmd.getNamespaceId()==null){
             LOGGER.error("namespaceId is null. {}",cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown namespaceId is null");
         }
     }
@@ -1793,7 +1867,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             DownloadUtils.download(out, resp);
         } catch (IOException e) {
             LOGGER.error("exportBookedVisitors is fail. {}",e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_FILE_EXPORT_FAIL,
                     "exportBookedVisitors is fail.");
         }
 
@@ -1851,6 +1925,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         if(visitorsysOwnerType == VisitorsysOwnerType.COMMUNITY){
             userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT, cmd.getAppId(), null, cmd.getOwnerId());
         }
+//        else if(visitorsysOwnerType == VisitorsysOwnerType.ENTERPRISE){
+//            userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getPmId(), PrivilegeConstants.VISITORSYS_MODILE_MAMAGEMENT_ENT, cmd.getAppId(),cmd.getOwnerId(), null);
+//        }
     }
     @Override
     public ListBookedVisitorsResponse listBookedVisitorsForManage(ListBookedVisitorsCommand cmd) {
@@ -2020,14 +2097,14 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             case COMMUNITY:
                 Community community = communityProvider.findCommunityById(ownerId);
                 if(community==null){
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                             "unknown ownerId "+ownerId);
                 }
                 break;
             case ENTERPRISE:
                 Organization organization = organizationProvider.findOrganizationById(ownerId);
                 if(organization==null){
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_NOT_EXIST,
                             "unknown ownerId "+ownerId);
                 }
                 break;
@@ -2044,7 +2121,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorsysOwnerType checkOwnerType(String ownerType) {
         VisitorsysOwnerType visitorsysOwnerType = VisitorsysOwnerType.fromCode(ownerType);
         if(visitorsysOwnerType==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,
                     "unknown ownerType "+ownerType);
         }
         return visitorsysOwnerType;
@@ -2129,8 +2206,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         VisitorsysStatus status = checkVisitStatus(visitStatus);
         //以下两种状态，不能在创建用户的时候传入
         if(status == VisitorsysStatus.DELETED){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild visitor visitStatus = "+visitStatus);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "invaild visitor visitStatus = "+visitStatus);
         }
         return status;
     }
@@ -2146,8 +2222,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysStatus status = VisitorsysStatus.fromBookingCode(bookingStatus);
         if(status==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor bookingStatus = "+bookingStatus);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor bookingStatus = "+bookingStatus);
         }
         return status;
     }
@@ -2163,8 +2238,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysStatus status = VisitorsysStatus.fromCode(visitStatus);
         if(status==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor visitStatus = "+ visitStatus);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor visitStatus = "+ visitStatus);
         }
         return status;
     }
@@ -2177,8 +2251,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorsysVisitorType checkVisitorType(Byte bytetype) {
         VisitorsysVisitorType visitorType = VisitorsysVisitorType.fromCode(bytetype);
         if(visitorType==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor type = "+visitorType);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor type = "+visitorType);
         }
         return visitorType;
     }
@@ -2217,14 +2290,12 @@ public class VisitorSysServiceImpl implements VisitorSysService{
      */
     private VisitorSysVisitor checkUpdateVisitor(CreateOrUpdateVisitorCommand cmd,VisitorSysVisitor oldVisitor) {
         if(oldVisitor==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor id = "+cmd.getId()+", namespaceId = "+cmd.getNamespaceId()+"");
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor id = "+cmd.getId()+", namespaceId = "+cmd.getNamespaceId()+"");
         }
         if(oldVisitor.getOwnerId().longValue()!=cmd.getOwnerId()
                 || !oldVisitor.getOwnerType().equals(cmd.getOwnerType())
                 || oldVisitor.getVisitorType().byteValue()!=cmd.getVisitorType().byteValue()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor "+cmd);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor "+cmd);
         }
         oldVisitor = VisitorSysUtils.copyNotNullProperties(cmd, oldVisitor);
         oldVisitor.setVisitorPicUri(cmd.getVisitorPicUri());
@@ -2332,7 +2403,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         //设置门禁相关的二维码，门禁的id
         checkDoorGuard(configuration,visitor);
-        visitor.setSendSmsFlag(null);
+//        visitor.setSendSmsFlag(null);
     }
 
     /**
@@ -2400,8 +2471,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         try {
             localVisitorAuth = doorAccessService.createLocalVisitorAuth(doorCmd);
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("error invoke dooraccess");
+            LOGGER.error("error invoke dooraccess,stacktrace = {}",e);
         }
         if(localVisitorAuth!=null){
             visitor.setDoorGuardId(""+localVisitorAuth.getDoorId());
@@ -2409,6 +2479,9 @@ public class VisitorSysServiceImpl implements VisitorSysService{
             if(localVisitorAuth.getValidEndMs()!=null) {
                 visitor.setDoorGuardEndTime(new Timestamp(localVisitorAuth.getValidEndMs()));
             }
+        }else{
+//          门禁授权返回空
+            LOGGER.info("DoorAccess Auth,cmd = {}",doorCmd.toString());
         }
     }
 
@@ -2685,8 +2758,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private VisitorsysSearchFlagType checkSearchFlag(Byte searchFlag) {
         VisitorsysSearchFlagType searchFlagType = VisitorsysSearchFlagType.fromCode(searchFlag);
         if(searchFlagType==null || VisitorsysSearchFlagType.SYNCHRONIZATION==searchFlagType){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor search flag = "+searchFlag);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor search flag = "+searchFlag);
         }
         return searchFlagType;
     }
@@ -2702,8 +2774,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
         }
         VisitorsysFlagType flagType = VisitorsysFlagType.fromCode(flag);
         if(flagType ==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "unknow visitor flag = "+flag);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "unknow visitor flag = "+flag);
         }
         return flagType;
     }
@@ -2729,8 +2800,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     private Long checkInviationToken(String token){
         Long id = WebTokenGenerator.getInstance().fromWebToken(token, Long.class);
         if(id==null){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL
-                    , ErrorCodes.ERROR_INVALID_PARAMETER, "invaild token "+token);
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS, "invaild token "+token);
         }
         return id;
     }
@@ -2801,7 +2871,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void deleteDoorAccess(DeleteDoorAccessCommand cmd) {
         if(null == cmd.getId()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,"invaild param id");
         }
         VisitorSysDoorAccess bean = visitorSysDoorAccessProvider.findVisitorSysDoorAccess(cmd.getId());
         if(null != bean)
@@ -2823,7 +2893,7 @@ public class VisitorSysServiceImpl implements VisitorSysService{
     @Override
     public void setDefaultAccess(CreateOrUpdateDoorAccessCommand cmd) {
         if(null == cmd.getId()){
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"invaild param id");
+            throw RuntimeErrorException.errorWith(VisitorsysConstant.SCOPE, VisitorsysConstant.ERROR_INVALD_PARAMS,"invaild param id");
         }
         List<VisitorSysDoorAccess> results = visitorSysDoorAccessProvider.listVisitorSysDoorAccessByOwner(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId());
         results.forEach(r ->{

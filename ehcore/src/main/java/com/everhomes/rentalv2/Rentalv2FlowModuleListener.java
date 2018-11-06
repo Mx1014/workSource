@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.flow.*;
 import com.everhomes.flow.conditionvariable.FlowConditionNumberVariable;
 import com.everhomes.flow.node.FlowGraphNodeEnd;
@@ -15,10 +17,12 @@ import com.everhomes.flow.node.FlowGraphNodeStart;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.server.schema.tables.EhRentalv2Orders;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +138,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}else {
 						//支付成功之后 cancelOtherOrderFlag设置成true，取消其他竞争状态的订单
 						if (null != status && SiteBillStatus.SUCCESS.getCode() == status) {
+							order.setPaidMoney(order.getPayTotalMoney());
+							if (order.getPaidMoney().compareTo(new BigDecimal(0)) >0 )
+								order.setVendorType(VendorType.OFFLINE.getCode());
 							rentalv2Service.changeRentalOrderStatus(order, status, true);
 						}
 					}
@@ -283,6 +290,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			entities.add(e);
 		}
 
+
 		//套餐名
 		if (!StringUtils.isEmpty(order.getPackageName())){
 			e = new FlowCaseEntity();
@@ -431,6 +439,29 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			}
 
 		}
+
+        //文件附件
+        List<RentalResourceFile> files = rentalv2Provider.findRentalSiteFilesByOwnerTypeAndId(order.getResourceType(), EhRentalv2Orders.class.getSimpleName(),
+                order.getId());
+        if (files != null && files.size() > 0){
+            e = new FlowCaseEntity();
+            e.setEntityType(FlowCaseEntityType.FILE.getCode());
+            FlowCaseFileValue value = new FlowCaseFileValue();
+            List<FlowCaseFileDTO> fileDTOS = new ArrayList<>();
+            for (RentalResourceFile file : files){
+                FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                String url = this.contentServerService.parserUri(file.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                ContentServerResource resource = contentServerService.findResourceByUri(file.getUri());
+                fileDTO.setUrl(url);
+                fileDTO.setFileName(file.getName());
+                fileDTO.setFileSize(resource.getResourceSize());
+                fileDTOS.add(fileDTO);
+            }
+            value.setFiles(fileDTOS);
+            e.setKey("查看附件");
+            e.setValue(JSON.toJSONString(value));
+            entities.add(e);
+        }
 		Map<String,String> customObject = new HashMap<String,String>();
 
     	Map<String, String> map = new HashMap<String, String>();

@@ -7,17 +7,13 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.CreateEquipmentRepairCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentPlanCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionPlanDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionReviewDateDTO;
 import com.everhomes.rest.equipment.EquipmentOperateLogsDTO;
@@ -33,7 +29,6 @@ import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.InspectionItemDTO;
 import com.everhomes.rest.equipment.ListAbnormalTasksCommand;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
 import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
@@ -69,7 +64,6 @@ import com.everhomes.rest.equipment.StatLastDaysEquipmentTasksResponse;
 import com.everhomes.rest.equipment.StatTodayEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatTodayEquipmentTasksResponse;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentPlanCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
@@ -731,50 +725,50 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
     
-    /**
-     * <b>URL: /equipment/updateEquipmentCategory</b>
-     * <p>修改设备类型</p>
-     */
-    @RequestMapping("updateEquipmentCategory")
-    @RestReturn(value = String.class)
-    public RestResponse updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd) {
-        equipmentService.updateEquipmentCategory(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/createEquipmentCategory</b>
-     * <p>新建设备类型</p>
-     */
-    @RequestMapping("createEquipmentCategory")
-    @RestReturn(value = String.class)
-    public RestResponse createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
-        equipmentService.createEquipmentCategory(cmd);
-        return getSuccessResponse();
-    }
-
-    /**
-     * <b>URL: /equipment/listEquipmentsCategories</b>
-     * <p>查看设备类型</p>
-     */
-    @RequestMapping("listEquipmentsCategories")
-    @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listEquipmentsCategories() {
-        List<CategoryDTO> categories = equipmentService.listEquipmentsCategories();
-        return getRestResponse(categories);
-    }
-
-
-    /**
-     * <b>URL: /pmtask/deleteEquipmentCategory</b>
-     * <p>删除设备类型</p>
-     */
-    @RequestMapping("deleteEquipmentCategory")
-    @RestReturn(value = String.class)
-    public RestResponse deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd) {
-        equipmentService.deleteEquipmentCategory(cmd);
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/updateEquipmentCategory</b>
+//     * <p>修改设备类型</p>
+//     */
+//    @RequestMapping("updateEquipmentCategory")
+//    @RestReturn(value = String.class)
+//    public RestResponse updateEquipmentCategory(UpdateEquipmentCategoryCommand cmd) {
+//        equipmentService.updateEquipmentCategory(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/createEquipmentCategory</b>
+//     * <p>新建设备类型</p>
+//     */
+//    @RequestMapping("createEquipmentCategory")
+//    @RestReturn(value = String.class)
+//    public RestResponse createEquipmentCategory(CreateEquipmentCategoryCommand cmd) {
+//        equipmentService.createEquipmentCategory(cmd);
+//        return getSuccessResponse();
+//    }
+//
+//    /**
+//     * <b>URL: /equipment/listEquipmentsCategories</b>
+//     * <p>查看设备类型</p>
+//     */
+//    @RequestMapping("listEquipmentsCategories")
+//    @RestReturn(value = CategoryDTO.class, collection = true)
+//    public RestResponse listEquipmentsCategories() {
+//        List<CategoryDTO> categories = equipmentService.listEquipmentsCategories();
+//        return getRestResponse(categories);
+//    }
+//
+//
+//    /**
+//     * <b>URL: /pmtask/deleteEquipmentCategory</b>
+//     * <p>删除设备类型</p>
+//     */
+//    @RequestMapping("deleteEquipmentCategory")
+//    @RestReturn(value = String.class)
+//    public RestResponse deleteEquipmentCategory(DeleteEquipmentCategoryCommand cmd) {
+//        equipmentService.deleteEquipmentCategory(cmd);
+//        return getSuccessResponse();
+//    }
 
 
     /**
@@ -805,19 +799,19 @@ public class EquipmentController extends ControllerBase {
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /equipment/listEquipmentInspectionCategories</b>
-	 * <p>查看巡检对象类型</p>
-	 */
-	@RequestMapping("listEquipmentInspectionCategories")
-	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
-	public RestResponse listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
-		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories(cmd);
-		RestResponse response = new RestResponse(categories);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /equipment/listEquipmentInspectionCategories</b>
+//	 * <p>查看巡检对象类型</p>
+//	 */
+//	@RequestMapping("listEquipmentInspectionCategories")
+//	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
+//	public RestResponse listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
+//		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories(cmd);
+//		RestResponse response = new RestResponse(categories);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /equipment/listUserHistoryTasks</b>
@@ -1014,18 +1008,18 @@ public class EquipmentController extends ControllerBase {
         return getSuccessResponse();
     }
 
-    /**
-     * <b>URL: /equipment/syncStandardToEqiupmentPlan</b>
-     * <p>同步所有的标准-设备关联表到计划中</p>
-     */
-    @RequestMapping("syncStandardToEqiupmentPlan")
-    @RestReturn(value = String.class)
-    public RestResponse syncStandardToEqiupmentPlan() {
-        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        equipmentService.syncStandardToEqiupmentPlan();
-        return getSuccessResponse();
-    }
+//    /**
+//     * <b>URL: /equipment/syncStandardToEqiupmentPlan</b>
+//     * <p>同步所有的标准-设备关联表到计划中</p>
+//     */
+//    @RequestMapping("syncStandardToEqiupmentPlan")
+//    @RestReturn(value = String.class)
+//    public RestResponse syncStandardToEqiupmentPlan() {
+//        UserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        equipmentService.syncStandardToEqiupmentPlan();
+//        return getSuccessResponse();
+//    }
 
     /**
      * <b>URL: /equipment/startCrontabTask</b>

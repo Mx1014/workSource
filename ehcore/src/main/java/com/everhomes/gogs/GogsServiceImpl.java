@@ -103,7 +103,7 @@ public class GogsServiceImpl implements GogsService {
     }
 
     @Override
-    public byte[] getFile(GogsRepo repo, String path, String lastCommit) throws GogsFileNotExistException {
+    public byte[] getFile(GogsRepo repo, String path, String lastCommit) throws GogsNotExistException {
         check(repo, path);
         GogsRawFileParam param = new GogsRawFileParam();
         param.setLastCommit(lastCommit);

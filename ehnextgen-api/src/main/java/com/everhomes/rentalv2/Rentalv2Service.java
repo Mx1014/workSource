@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-public interface Rentalv2Service { 
+public interface Rentalv2Service {
 
 	void addItem(AddItemAdminCommand cmd);
 
@@ -40,6 +40,8 @@ public interface Rentalv2Service {
 
 	AddRentalBillItemV2Response addRentalItemBillV2(AddRentalBillItemCommand cmd);
 
+	AddRentalBillItemV3Response addRentalItemBillV3(AddRentalBillItemCommand cmd);
+
 	ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd);
 
 	ListRentalBillsCommandResponse listRentalBillsByOrdId(ListRentalBillsByOrdIdCommand cmd);
@@ -47,7 +49,7 @@ public interface Rentalv2Service {
 	ListRentalBillsCommandResponse listActiveRentalBills(ListRentalBillsCommand cmd);
 
 	void deleteRentalBill(DeleteRentalBillCommand cmd);
- 
+
 	OnlinePayCallbackCommandResponse onlinePayCallback(
 			OnlinePayCallbackCommand cmd);
 
@@ -150,6 +152,8 @@ public interface Rentalv2Service {
 
 	PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd);
 
+	AddRentalBillItemV3Response getRentalBillPayInfoV3(GetRentalBillPayInfoCommand cmd);
+
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
 
 
@@ -200,6 +204,7 @@ public interface Rentalv2Service {
 
 	PreOrderDTO renewRentalOrderV2(RenewRentalOrderCommand cmd);
 
+
 	RentalOrderDTO completeRentalOrder(CompleteRentalOrderCommand cmd);
 
 	GetResourceRuleV2Response getResourceRuleV2(GetResourceRuleV2Command cmd);
@@ -215,6 +220,8 @@ public interface Rentalv2Service {
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd);
+
+	String parseSceneToken(String sceneToken);
 
 	void test();
 

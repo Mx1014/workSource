@@ -18,6 +18,10 @@ public class SetPmNotifyParamsCommand {
 
     private String ownerType;
 
+    private Long targetId;
+
+    private String targetType;
+
     public List<PmNotifyParams> getParams() {
         return params;
     }
@@ -32,6 +36,22 @@ public class SetPmNotifyParamsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
     }
 
     @Override

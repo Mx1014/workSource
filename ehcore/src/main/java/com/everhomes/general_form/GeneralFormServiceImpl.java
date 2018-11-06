@@ -9,35 +9,25 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_approval.*;
-import com.everhomes.gogs.GogsCommit;
-import com.everhomes.gogs.GogsConflictException;
-import com.everhomes.gogs.GogsFileNotExistException;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryServiceImpl;
-import com.everhomes.techpark.expansion.LeaseFormRequest;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -47,11 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.*;
@@ -80,6 +66,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Autowired
     private GeneralApprovalValProvider generalApprovalValProvider;
+
+    @Autowired
+    private GeneralFormKvConfigProvider generalFormKvConfigProvider;
 
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
@@ -564,6 +553,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_ID.eq(cmd.getModuleId()));
                             condition = condition.and(Tables.EH_GENERAL_FORMS.MODULE_TYPE.eq(cmd.getModuleType()));
                         }
+                        if (cmd.getProjectId() != null && cmd.getProjectType() != null) {
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_ID.eq(cmd.getProjectId()));
+                            condition = condition.and(Tables.EH_GENERAL_FORMS.PROJECT_TYPE.eq(cmd.getProjectType()));
+                        }
                         condition = condition.and(Tables.EH_GENERAL_FORMS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
                         query.addConditions(condition);
                         query.addOrderBy(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.asc());
@@ -603,7 +596,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormDTO verifyApprovalFormName(VerifyApprovalFormNameCommand cmd) {
-        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(cmd.getModuleId(),
+        GeneralForm form = this.generalFormProvider.getActiveGeneralFormByName(
+                cmd.getProjectType(), cmd.getProjectId(), cmd.getModuleId(),
                 cmd.getOwnerId(), cmd.getOwnerType(), cmd.getFormName());
         if (form != null)
             return ConvertHelper.convert(form, GeneralFormDTO.class);
@@ -860,6 +854,99 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 
     @Override
+    public void enableProjectCustomize(EnableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        } else {
+            config = ConvertHelper.convert(cmd, GeneralFormKvConfig.class);
+            if (config.getModuleType() == null) {
+                config.setModuleType("any-module");
+            }
+            config.setValue(TrueOrFalseFlag.TRUE.getCode().toString());
+            config.setKey(GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+            generalFormKvConfigProvider.createGeneralFormKvConfig(config);
+        }
+    }
+
+    @Override
+    public GeneralForm mirrorGeneralForm(Long formId, String mirrorModuleType, Long mirrorModuleId,
+                                         String mirrorProjectType, Long mirrorProjectId, String mirrorOwnerType, Long mirrorOwnerId) {
+        GeneralForm generalForm = generalFormProvider.getGeneralFormById(formId);
+
+        if (mirrorModuleType != null) {
+            generalForm.setModuleType(mirrorModuleType);
+        }
+        if (mirrorModuleId != null) {
+            generalForm.setModuleId(mirrorModuleId);
+        }
+        if (mirrorProjectType != null) {
+            generalForm.setProjectType(mirrorProjectType);
+        }
+        if (mirrorProjectId != null) {
+            generalForm.setProjectId(mirrorProjectId);
+        }
+        if (mirrorOwnerType != null) {
+            generalForm.setOwnerType(mirrorOwnerType);
+        }
+        if (mirrorOwnerId != null) {
+            generalForm.setOwnerId(mirrorOwnerId);
+        }
+        generalForm.setFormOriginId(null);
+        generalFormProvider.createGeneralForm(generalForm);
+        return generalForm;
+    }
+
+    @Override
+    public void disableProjectCustomize(DisableProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            config.setValue(TrueOrFalseFlag.FALSE.getCode().toString());
+            generalFormKvConfigProvider.updateGeneralFormKvConfig(config);
+        }
+
+        List<GeneralForm> list = generalFormProvider.listGeneralForm(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId());
+        for (GeneralForm form : list) {
+            form.setStatus(GeneralFormStatus.INVALID.getCode());
+            generalFormProvider.updateGeneralForm(form);
+        }
+    }
+
+    @Override
+    public Byte getProjectCustomize(GetProjectCustomizeCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        GeneralFormKvConfig config = generalFormKvConfigProvider.findByKey(
+                cmd.getNamespaceId(), cmd.getModuleType(), cmd.getModuleId(), cmd.getProjectType(), cmd.getProjectId(),
+                cmd.getOwnerType(), cmd.getOwnerId(), GeneralFormConstants.KV_CONFIG_PROJECT_CUSTOMIZE);
+        if (config != null) {
+            return Byte.valueOf(config.getValue());
+        }
+        return TrueOrFalseFlag.FALSE.getCode();
+    }
+
+    @Override
+    public void doFormMirror(DoFormMirrorCommand cmd) {
+        ValidatorUtil.validate(cmd);
+
+        for (Long id : cmd.getFormIds()) {
+            mirrorGeneralForm(id, cmd.getModuleType(), cmd.getModuleId(),
+                    cmd.getProjectType(), cmd.getProjectId(), cmd.getOwnerType(), cmd.getOwnerId());
+        }
+    }
+
+    @Override
     public GeneralFormPrintTemplateDTO createGeneralFormPrintTemplate(AddGeneralFormPrintTemplateCommand cmd) {
         GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
                 .getOwnerId());
@@ -887,7 +974,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
                     "generalFormPrintTemplate is already exist");
-        } catch (GogsFileNotExistException e) {
+        } catch (GogsNotExistException e) {
             LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");
@@ -943,7 +1030,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
             LOGGER.error("generalFormPrintTemplate {} in namespace {} already exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_IS_EXISTS,
                     "generalFormPrintTemplate is already exist");
-        } catch (GogsFileNotExistException e) {
+        } catch (GogsNotExistException e) {
             LOGGER.error("generalFormGogsFileNotExist {} in namespace {} not exist!", generalFormPrintTemplate.gogsPath(), cmd.getNamespaceId());
             throw RuntimeErrorException.errorWith(GeneralFormPrintTemplateErrorCode.SCOPE, GeneralFormPrintTemplateErrorCode.ERROR_FORM_PRINT_TEMPLATE_NOT_FOUND,
                     "generalFormGogsFileNotExist not exist");

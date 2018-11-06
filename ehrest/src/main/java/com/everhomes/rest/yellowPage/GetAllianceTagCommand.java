@@ -19,6 +19,13 @@ public class GetAllianceTagCommand {
 	
 	@NotNull
 	private Integer namespaceId;
+	
+	@NotNull
+	private String ownerType;
+	
+	@NotNull
+	private Long ownerId;
+	
 	@NotNull
 	private Long type;
 
@@ -60,6 +67,22 @@ public class GetAllianceTagCommand {
 
 	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 }

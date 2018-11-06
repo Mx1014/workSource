@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  *  <li>downloadUrl: URL路径</li>
  *  <li>logoUrl: logo路径</li>
  *  <li>description: 相关描述</li>
+ *  <li>themeColor: 主题色</li>
+ *  <li>包名</li>
  * </ul>
  *
  */
@@ -26,7 +28,25 @@ public class UpdateAppInfoCommand {
 	private String downloadUrl;
 	private String logoUrl;
 	private String description;
-	
+	private String themeColor;
+	private String packageName;
+
+    public String getThemeColor() {
+        return themeColor;
+    }
+
+    public void setThemeColor(String themeColor) {
+        this.themeColor = themeColor;
+    }
+
+    public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
 	public UpdateAppInfoCommand() {
 		super();
 	}

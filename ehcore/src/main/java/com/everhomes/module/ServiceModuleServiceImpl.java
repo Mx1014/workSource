@@ -7,20 +7,26 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.portal.PortalService;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.rest.portal.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
@@ -29,15 +35,12 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.portal.MultipleFlag;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserPrivilegeMgr;
@@ -47,7 +50,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -55,6 +60,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.servlet.http.HttpServletResponse;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
@@ -112,6 +120,26 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Autowired
     private ServiceModuleAppService serviceModuleAppService;
+
+    @Autowired
+    private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+
+
+    @Autowired
+    private ServiceModuleEntryProvider serviceModuleEntryProvider;
+
+    @Autowired
+    private ContentServerService contentServerService;
+
+
+    @Autowired
+    private AppCategoryProvider appCategoryProvider;
+    
+    @Autowired
+    private PortalService portalService;
+
+    @Autowired
+    private NamespacesService namespacesService;
 
 
     @Override
@@ -183,6 +211,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             dto.setUpdateTime(module.getUpdateTime().getTime());
         User operator = userProvider.findUserById(module.getOperatorUid());
         if(null != operator) dto.setOperatorUName(operator.getNickName());
+
+        if(module.getIconUri() != null){
+            String url = contentServerService.parserUri(module.getIconUri(), module.getClass().getSimpleName(), module.getId());
+            dto.setIconUrl(url);
+        }
         return dto;
     }
 
@@ -567,7 +600,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
@@ -575,6 +607,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(moduleIds.size() == 0){
             return response;
         }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(namespaceId, cmd.getOwnerId()).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        //判断是否是仅仅有 OA 应用的普通公司
+        boolean isOaOnly = false;
+        if(authCommunityIds == null || authCommunityIds.size() == 0) {
+        	isOaOnly = true;
+        }
+        final boolean oaOnly = isOaOnly; 
+        
         List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
@@ -585,13 +627,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         tempList.stream().filter(r->!"".equals(r.getModuleControlType()) && r.getModuleControlType() != null && r.getLevel() == 3).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
-                    communityControlList.add(r);
+                	if(!oaOnly) {
+                		communityControlList.add(r);	
+                	}
                     break;
                 case ORG_CONTROL:
                     orgControlList.add(r);
                     break;
                 case UNLIMIT_CONTROL:
+                	if(!oaOnly) {
                     unlimitControlList.add(r);
+                	}
                     break;
             }
             return null;
@@ -764,7 +810,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         User user = UserContext.current().getUser();
         List<CommunityDTO> dtos = new ArrayList<>();
         List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId(), null);
-        LOGGER.debug("listAuthorizationCommunityByUser step3"+ DateHelper.currentGMTTime());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -817,6 +862,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         module.setName(cmd.getName());
         module.setInstanceConfig(cmd.getInstanceConfig());
         module.setOperatorUid(user.getId());
+        module.setIconUri(cmd.getIconUri());
         serviceModuleProvider.updateServiceModule(module);
         return processServiceModuleDTO(module);
     }
@@ -837,6 +883,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return serviceModule;
     }
 
+    // Added by janson, TODO for administrator in zuolin admin
+    private boolean checkZuolinRoot(long userId) {
+        if(aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+                UserContext.current().getUser().getId(), Privilege.Write, null)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
@@ -846,7 +902,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             return true;
         }
 
-        if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
+        // by lei.lv 不再支持模块管理员
+       // if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
+        if (resolver.checkSuperAdmin(userId, organizationId)) {
             return true;
         }
         return false;
@@ -863,10 +921,29 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId, Long appId){
         boolean allProjectFlag = false;
         List<ProjectDTO> dtos = new ArrayList<>();
+
+        if(checkZuolinRoot(userId)) {
+            //如果是左邻运营后台的项目导航，则左邻后台管理员可以拿到此域空间下所有的项目，与管理公司或者普通公司无关。
+            ListingLocator locator = new ListingLocator();
+            List<Community> communities = this.communityProvider.listCommunities(UserContext.getCurrentNamespaceId() , null, null, null, CommunityAdminStatus.ACTIVE.getCode(), null, locator, 100);
+            for (Community community: communities) {
+                ProjectDTO dto = new ProjectDTO();
+                dto.setProjectId(community.getId());
+                dto.setProjectName(community.getName());
+                dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                dto.setCommunityType(community.getCommunityType());
+                dtos.add(dto);
+            }
+            return dtos;
+        }
+
         //物业超级管理员拿所有项目
+        //这一步是校验是不是超级管理员，如果是超级管理员那么就将allProjectFlag状态置为true
         if(checkModuleManage(userId, organizationId, moduleId)){
+            //说明是超级管理员
             allProjectFlag = true;
         }else{
+            //说明不是超级管理员
             List<Target> targets = new ArrayList<>();
             targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
             //获取人员的所有相关机构
@@ -874,20 +951,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             for (Long orgId: orgIds) {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
-
-            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
-            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
-            for (Project project: projects) {
-                //在模块下拥有全部项目权限
-                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
-                    allProjectFlag = true;
-                    break;
-                }else {
-                    processProject(project);
-                    dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
-                }
-            }
-
 
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
             // todo 加上应用
@@ -926,29 +989,68 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         }
 
-        if(allProjectFlag){
-            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
-            for (CommunityDTO community: communitydtos) {
-                ProjectDTO dto = new ProjectDTO();
-                dto.setProjectId(community.getId());
-                dto.setProjectName(community.getName());
-                dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
-                dto.setCommunityType(community.getCommunityType());
-                dtos.add(dto);
+        List<Long> projectIds  = new ArrayList<>();
+
+        //标准版和定制版之分
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+            //获取公司管理的全部项目
+            List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+            if(serviceModuleAppAuthorizations != null){
+                projectIds = serviceModuleAppAuthorizations.stream().map(r -> r.getProjectId()).collect(Collectors.toList());
+            }
+
+        }else {
+            List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+
+            if(communities != null){
+                projectIds = communities.stream().map(r -> r.getId()).collect(Collectors.toList());
             }
         }
 
-        //去重
-        List<Long> ids = new ArrayList<>();
-        List<ProjectDTO> projectDtos = new ArrayList<>();
-        dtos.stream().map(r->{
-            if (!ids.contains(r.getProjectId())){
-                ids.add(r.getProjectId());
-                projectDtos.add(r);
+        // 获取到了授权项目
+        if(projectIds != null && projectIds.size() >0){
+            List<ProjectDTO> projectDtos = new ArrayList<>();
+            for (Long projectId : projectIds) {
+                Community community = communityProvider.findCommunityById(projectId);
+                if (null == community) {
+                    continue;
+                }
+
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.info("community:" + community);
+
+                if (community.getNamespaceId().equals(UserContext.getCurrentNamespaceId())) {
+                    ProjectDTO dto = new ProjectDTO();
+                    dto.setProjectId(community.getId());
+                    dto.setProjectName(community.getName());
+                    dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                    dto.setCommunityType(community.getCommunityType());
+                    projectDtos.add(dto);
+                }
             }
-            return null;
-        }).collect(Collectors.toList());
-        return projectDtos;
+
+            List<Long> orgAllCommunityIds = projectDtos.stream().map(r->r.getProjectId()).collect(Collectors.toList());
+
+
+            if(allProjectFlag){
+                return projectDtos;
+            }
+
+            //其他权限 去重
+            List<Long> ids = new ArrayList<>();
+            List<ProjectDTO> processDtos = new ArrayList<>();
+            dtos.stream().map(r->{
+                if (!ids.contains(r.getProjectId())){
+                    ids.add(r.getProjectId());
+                    processDtos.add(r);
+                }
+                return null;
+            }).collect(Collectors.toList());
+
+            return processDtos.stream().filter(r->orgAllCommunityIds.contains(r.getProjectId())).collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
     }
 
 
@@ -1049,7 +1151,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
+                    HandlerGetCustomTagCommand gtCustomTagCommand = new HandlerGetCustomTagCommand();
+
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig, gtCustomTagCommand);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
                     webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);
@@ -1263,14 +1367,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
             }
 
-            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
-            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId(), targets);
-            for (Project project: projects) {
-                //在模块下拥有全部项目权限
-                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
-                    return AllFlag.ALL.getCode();
-                }
-            }
+            // by lei.lv 取消掉模块管理员的逻辑
+//            //获取人员和人员所有机构所赋予模块的所属项目范围(模块管理)
+//            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId(), targets);
+//            for (Project project: projects) {
+//                //在模块下拥有全部项目权限
+//                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+//                    return AllFlag.ALL.getCode();
+//                }
+//            }
             //获取人员和人员所有机构所赋予模块的所属项目范围(应用管理员) -- add by lei.lv
             List<Authorization> authorizations_apps =  authorizationProvider.listAuthorizations(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), userId, com.everhomes.entity.EntityType.SERVICE_MODULE_APP.getCode(), null, IdentityType.MANAGE.getCode(), true, null, null);
             if(authorizations_apps != null && authorizations_apps.size() > 0){
@@ -1309,5 +1414,514 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         handler = PlatformContext.getComponent(handlerPrefix);
 
         return handler;
+    }
+
+    @Override
+    public ListServiceModuleEntriesResponse listServiceModuleEntries(ListServiceModuleEntriesCommand cmd) {
+        ListServiceModuleEntriesResponse response = new ListServiceModuleEntriesResponse();
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), cmd.getAppCategoryId(), null, null, null);
+
+        List<ServiceModuleEntryDTO> dtos = new ArrayList<>();
+        if(entries != null){
+            for (ServiceModuleEntry entry: entries){
+                ServiceModuleEntryDTO dto = ConvertHelper.convert(entry, ServiceModuleEntryDTO.class);
+                if(dto.getIconUri() != null){
+                    String url = contentServerService.parserUri(entry.getIconUri(), entry.getClass().getSimpleName(), entry.getId());
+                    dto.setIconUrl(url);
+                }
+
+                if(dto.getAppCategoryId() != null){
+                    AppCategory appCategory = appCategoryProvider.findById(dto.getAppCategoryId());
+                    if(appCategory != null){
+                        dto.setAppCategoryName(appCategory.getName());
+                    }
+                }
+                dtos.add(dto);
+            }
+        }
+
+        response.setDtos(dtos);
+        return response;
+    }
+
+    @Override
+    public void updateServiceModuleEntries(UpdateServiceModuleEntriesCommand cmd) {
+
+        if(cmd.getModuleId() == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "moduleId = " + cmd.getModuleId());
+        }
+
+        if(cmd.getDtos() == null || cmd.getDtos().size() == 0){
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "entry size = 0 ");
+        }
+
+        dbProvider.execute((status) ->{
+
+            List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, null, null, null);
+            if(entries != null){
+                for (ServiceModuleEntry entry: entries){
+                    serviceModuleEntryProvider.delete(entry.getId());
+                }
+            }
+
+            for (ServiceModuleEntryDTO dto: cmd.getDtos()){
+                ServiceModuleEntry entry = ConvertHelper.convert(dto, ServiceModuleEntry.class);
+                entry.setModuleId(cmd.getModuleId());
+                serviceModuleEntryProvider.create(entry);
+            }
+
+            return null;
+        });
+
+
+    }
+
+
+    @Override
+    public List<ServiceModuleDTO> listServiceModulesByAppType(ListServiceModulesByAppTypeCommand cmd) {
+
+        List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModules(cmd.getAppType(), cmd.getKeyWord());
+
+
+        if(serviceModules == null){
+            return null;
+        }
+
+        List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> processServiceModuleDTO(r)).collect(Collectors.toList());
+        return dtos;
+    }
+
+
+    @Override
+    public void updateServiceModuleEntry(UpdateServiceModuleEntryCommand cmd) {
+
+        if(cmd.getId() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        ServiceModuleEntry serviceModuleEntry = serviceModuleEntryProvider.findById(cmd.getId());
+        if(serviceModuleEntry == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getAppCategoryId());
+        if(appCategory == null || !appCategory.getLocationType().equals(cmd.getLocationType())){
+            LOGGER.error("AppCategory not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory not find cmd = " + cmd.toString());
+        }
+
+
+        //可以编辑位置信息，这些字段必传
+        if(TerminalType.fromCode(cmd.getTerminalType()) == null || ServiceModuleLocationType.fromCode(cmd.getLocationType()) == null
+                || ServiceModuleSceneType.fromCode(cmd.getSceneType()) == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        //同样的位置不能有两个入口
+        List<ServiceModuleEntry> entries = serviceModuleEntryProvider.listServiceModuleEntries(serviceModuleEntry.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
+
+        if(entries != null && entries.size() > 0){
+            for (ServiceModuleEntry entry: entries){
+                if(!entry.getId().equals(cmd.getId())){
+                    LOGGER.error("entry already exists");
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+                }
+            }
+        }
+
+        serviceModuleEntry.setEntryName(cmd.getEntryName());
+        serviceModuleEntry.setIconUri(cmd.getIconUri());
+        serviceModuleEntry.setTerminalType(cmd.getTerminalType());
+        serviceModuleEntry.setLocationType(cmd.getLocationType());
+        serviceModuleEntry.setSceneType(cmd.getSceneType());
+        serviceModuleEntry.setAppCategoryId(cmd.getAppCategoryId());
+
+        serviceModuleEntryProvider.udpate(serviceModuleEntry);
+
+    }
+
+    @Override
+    public ListAppCategoryResponse listAppCategory(ListAppCategoryCommand cmd) {
+
+
+        if(cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        if(cmd.getParentId() == null){
+            cmd.setParentId(0L);
+        }
+
+        ListAppCategoryResponse response = new ListAppCategoryResponse();
+        List<AppCategoryDTO> treeDto = getTreeDto(cmd.getLocationType(), cmd.getParentId());
+        response.setDtos(treeDto);
+
+        return response;
+    }
+
+
+    private List<AppCategoryDTO> getTreeDto(Byte locationType, Long parentId){
+        List<AppCategory> appCategories = appCategoryProvider.listAppCategories(locationType, parentId);
+        if(appCategories == null || appCategories.size() == 0){
+            return null;
+        }
+
+        List<AppCategoryDTO> dtos = new ArrayList<>();
+        for(AppCategory appCategory: appCategories){
+            AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+            List<AppCategoryDTO> subTree = getTreeDto(dto.getLocationType(), dto.getId());
+            dto.setDtos(subTree);
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+    @Override
+    public void updateAppCategory(UpdateAppCategoryCommand cmd) {
+
+        if(cmd.getId() == null){
+            LOGGER.error("invalid parameter, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter, cmd = " + cmd.toString());
+        }
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getId());
+        if(appCategory == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        appCategory.setName(cmd.getName());
+        appCategoryProvider.udpate(appCategory);
+    }
+
+
+    @Override
+    public AppCategoryDTO createAppCategory(CreateAppCategoryCommand cmd) {
+
+        if(cmd.getParentId() == null){
+            cmd.setParentId(0L);
+        }else if(cmd.getParentId() != 0L){
+            AppCategory appCategory = appCategoryProvider.findById(cmd.getParentId());
+            if(appCategory == null || TrueOrFalseFlag.fromCode(appCategory.getLeafFlag()) == TrueOrFalseFlag.TRUE ){
+
+            }
+        }
+
+
+
+
+        AppCategory appCategory = ConvertHelper.convert(cmd, AppCategory.class);
+
+        Long maxDefaultOrder = appCategoryProvider.findMaxDefaultOrder(cmd.getLocationType(), cmd.getParentId());
+        if(maxDefaultOrder == null){
+            maxDefaultOrder = 0L;
+        }
+        maxDefaultOrder = maxDefaultOrder + 1;
+        appCategory.setDefaultOrder(maxDefaultOrder);
+
+        appCategoryProvider.create(appCategory);
+        AppCategoryDTO dto = toAppCategoryDTO(appCategory);
+
+        return dto;
+    }
+
+    @Override
+    public void deleteAppCategory(DeleteAppCategoryCommand cmd) {
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getId());
+        if(appCategory == null){
+            LOGGER.error("appCategory not found, id={}", cmd.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory not found, id=" + cmd.getId());
+        }
+
+        List<AppCategory> appCategories = appCategoryProvider.listAppCategories(appCategory.getLocationType(), appCategory.getId());
+        if(appCategories != null && appCategories.size() > 0){
+            LOGGER.error("it has sub AppCategory, delete denied, id={}", cmd.getId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "it has sub AppCategory, delete denied, id=" + cmd.getId());
+        }
+
+        appCategoryProvider.delete(cmd.getId());
+    }
+
+    @Override
+    public void reorderAppCategory(ReorderAppCategoryCommand cmd) {
+
+        if(cmd.getIds() == null || cmd.getIds().size() == 0 || cmd.getParentId() == null  || cmd.getLocationType() == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+
+        }
+
+        dbProvider.execute((status) -> {
+            Long order = 1L;
+            for (Long id: cmd.getIds()){
+                AppCategory appCategory = appCategoryProvider.findById(id);
+
+                if(appCategory == null || !cmd.getLocationType().equals(appCategory.getLocationType()) || !cmd.getParentId().equals(appCategory.getParentId())){
+                    LOGGER.error("appCategory parameter and cmd parameter exception, id={}", id);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "appCategory parameter and cmd parameter exception, id=" + id);
+                }
+
+                appCategory.setDefaultOrder(order);
+                appCategoryProvider.udpate(appCategory);
+                order = order + 1;
+            }
+            return null;
+        });
+
+    }
+
+    @Override
+    public void changeServiceModuleEntryCategory(ChangeServiceModuleEntryCategoryCommand cmd) {
+
+
+        if(cmd.getAppCategoryId() == null || cmd.getEntryIds() == null || cmd.getEntryIds().size() == 0){
+            LOGGER.error("error invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "error invalid parameter cmd =  " + cmd);
+        }
+
+        AppCategory appCategory = appCategoryProvider.findById(cmd.getAppCategoryId());
+        if(appCategory == null){
+            LOGGER.error("appCategory not found id = {}", cmd.getAppCategoryId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "appCategory not found id = " + cmd.getAppCategoryId());
+        }
+
+        dbProvider.execute((status) ->{
+
+            for (Long id: cmd.getEntryIds()){
+                ServiceModuleEntry entry = serviceModuleEntryProvider.findById(id);
+                if(entry == null){
+                    LOGGER.error("ServiceModuleEntry not found id = {}", id);
+                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleEntry not found id = " + id);
+                }
+
+                entry.setAppCategoryId(cmd.getAppCategoryId());
+
+                serviceModuleEntryProvider.udpate(entry);
+            }
+
+            return null;
+        });
+
+    }
+
+    @Override
+    public void exportServiceModuleEntries(HttpServletResponse response) {
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(null, null, null, null, null);
+
+        List<ServiceModuleEntryExportDTO> dtos = new ArrayList<>();
+        Integer order = 1;
+        for (ServiceModuleEntry entry: serviceModuleEntries){
+            ServiceModuleEntryExportDTO exportDto = getExportDto(entry);
+            exportDto.setOrder(order);
+            order = order + 1;
+            dtos.add(exportDto);
+        }
+
+        String fileName = String.format("应用入口信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
+        List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "moduleName", "appTypeName", "terminalTypeName", "locationTypeName", "sceneTypeName", "entryName", "appCategoryName", "defaultOrder"));
+        List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "功能模块名称", "功能分类", "应用入口终端", "应用入口位置", "应用入口属性", "应用入口名称", "应用入口分类", "分类排序"));
+
+        List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 20, 20, 20, 20, 10));
+
+        excelUtils.setNeedSequenceColumn(false);
+        excelUtils.writeExcel(propertyNames, titleNames, titleSizes, dtos);
+    }
+
+    private ServiceModuleEntryExportDTO getExportDto(ServiceModuleEntry entry){
+
+        ServiceModuleEntryExportDTO dto = ConvertHelper.convert(entry, ServiceModuleEntryExportDTO.class);
+        if(entry.getModuleId() != null && entry.getModuleId() != 0){
+            ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(entry.getModuleId());
+            if(serviceModule != null){
+                dto.setModuleName(serviceModule.getName());
+                if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.OA){
+                    dto.setAppTypeName("企业应用");
+                }else if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.COMMUNITY){
+                    dto.setAppTypeName("园区应用");
+                }else if(ServiceModuleAppType.fromCode(serviceModule.getAppType()) == ServiceModuleAppType.SERVICE){
+                    dto.setAppTypeName("服务应用");
+                }
+            }
+        }
+
+        if(TerminalType.fromCode(dto.getTerminalType()) == TerminalType.MOBILE){
+            dto.setTerminalTypeName("移动端");
+        }else if(TerminalType.fromCode(dto.getTerminalType()) == TerminalType.PC){
+            dto.setTerminalTypeName("PC端");
+        }
+
+        if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.MOBILE_COMMUNITY){
+            dto.setLocationTypeName("移动端广场");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.MOBILE_WORKPLATFORM){
+            dto.setLocationTypeName("移动端工作台");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_INDIVIDUAL){
+            dto.setLocationTypeName("PC门户");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_MANAGEMENT){
+            dto.setLocationTypeName("PC管理后台");
+        }else if(ServiceModuleLocationType.fromCode(dto.getTerminalType()) == ServiceModuleLocationType.PC_WORKPLATFORM){
+            dto.setLocationTypeName("PC工作台");
+        }
+
+
+        if(ServiceModuleSceneType.fromCode(dto.getSceneType()) == ServiceModuleSceneType.MANAGEMENT){
+            dto.setSceneTypeName("管理端");
+        }else if(ServiceModuleSceneType.fromCode(dto.getSceneType()) == ServiceModuleSceneType.CLIENT){
+            dto.setSceneTypeName("用户端");
+        }
+
+
+        if(dto.getAppCategoryId() != null){
+            AppCategory appCategory = appCategoryProvider.findById(dto.getAppCategoryId());
+            if(appCategory != null){
+                dto.setAppCategoryName(appCategory.getName());
+            }
+        }
+        return dto;
+    }
+
+    @Override
+    public void reorderServiceModuleEntries(ReorderServiceModuleEntriesCommand cmd) {
+
+
+        if(cmd.getAppCategoryId() == null || cmd.getEntryIds() == null || cmd.getEntryIds().size() == 0){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(null, cmd.getAppCategoryId(), null, null, null);
+
+        if(serviceModuleEntries != null){
+
+            Integer order = 0;
+            for (Long entryId: cmd.getEntryIds()){
+                order = order + 1;
+
+                for (ServiceModuleEntry entry: serviceModuleEntries){
+                    if(entryId.equals(entry.getId())){
+                        entry.setDefaultOrder(order);
+                        serviceModuleEntryProvider.udpate(entry);
+                        break;
+                    }
+
+                }
+            }
+        }
+    }
+
+    private AppCategoryDTO toAppCategoryDTO(AppCategory appCategory){
+        AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+        return dto;
+    }
+    
+
+    @Override
+	public List<ServiceModuleAppDTO> getModuleApps(Integer namespaceId, Long moduleId) {
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setModuleId(moduleId);
+		ListServiceModuleAppsResponse resp = portalService.listServiceModuleApps(cmd);
+		if (null == resp || CollectionUtils.isEmpty(resp.getServiceModuleApps())) {
+			return null;
+		}
+
+		return resp.getServiceModuleApps();
+	}
+
+    @Override
+    public void deleteServiceModuleEntry(DeleteServiceModuleEntryCommand cmd) {
+
+        ServiceModuleEntry serviceModuleEntry = serviceModuleEntryProvider.findById(cmd.getId());
+        if(serviceModuleEntry == null){
+            LOGGER.error("serviceModuleEntry not find, cmd = {}.", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "serviceModuleEntry not find cmd = " + cmd.toString());
+        }
+
+        serviceModuleEntryProvider.delete(serviceModuleEntry.getId());
+    }
+
+    @Override
+    public ServiceModuleEntryDTO createServiceModuleEntry(CreateServiceModuleEntryCommand cmd) {
+
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+
+        if(module == null || TerminalType.fromCode(cmd.getTerminalType()) == null || ServiceModuleLocationType.fromCode(cmd.getLocationType()) == null
+                || ServiceModuleSceneType.fromCode(cmd.getSceneType()) == null){
+            LOGGER.error("invalid parameter cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter cmd = " + cmd);
+        }
+
+        List<ServiceModuleEntry> serviceModuleEntries = serviceModuleEntryProvider.listServiceModuleEntries(cmd.getModuleId(), null, cmd.getTerminalType(), cmd.getLocationType(), cmd.getSceneType());
+
+        if(serviceModuleEntries != null && serviceModuleEntries.size() > 0){
+            LOGGER.error("entry already exists");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "entry already exists");
+        }
+
+        ServiceModuleEntry serviceModuleEntry = ConvertHelper.convert(cmd, ServiceModuleEntry.class);
+
+        serviceModuleEntry.setDefaultOrder(1000);
+
+        serviceModuleEntryProvider.create(serviceModuleEntry);
+
+        ServiceModuleEntryDTO dto = ConvertHelper.convert(serviceModuleEntry, ServiceModuleEntryDTO.class);
+        if(dto.getIconUri() != null){
+            String url = contentServerService.parserUri(serviceModuleEntry.getIconUri(), serviceModuleEntry.getClass().getSimpleName(), serviceModuleEntry.getId());
+            dto.setIconUrl(url);
+        }
+
+        if(dto.getAppCategoryId() != null){
+            AppCategory appCategory = appCategoryProvider.findById(dto.getId());
+            if(appCategory != null){
+                dto.setAppCategoryName(appCategory.getName());
+            }
+        }
+
+        return dto;
+
+    }
+
+    @Override
+    public ListLeafAppCategoryResponse listLeafAppCategory(ListLeafAppCategoryCommand cmd) {
+
+        List<AppCategoryDTO> parentDtos = new ArrayList<>();
+
+        for(ServiceModuleLocationType locationType: ServiceModuleLocationType.values()){
+
+            //接口传来location则使用传来的
+            if(cmd.getLocationType() != null && locationType.getCode() != cmd.getLocationType()){
+                continue;
+            }
+
+            AppCategoryDTO parentDto = new AppCategoryDTO();
+            parentDto.setLocationType(locationType.getCode());
+            parentDto.setParentId(0L);
+
+            List<AppCategory> appCategories = appCategoryProvider.listLeafAppCategories(locationType.getCode());
+            if(appCategories != null && appCategories.size() >= 0){
+                List<AppCategoryDTO> dtos = new ArrayList<>();
+                for(AppCategory appCategory: appCategories){
+                    AppCategoryDTO dto = ConvertHelper.convert(appCategory, AppCategoryDTO.class);
+                    dtos.add(dto);
+                }
+
+                parentDto.setDtos(dtos);
+                parentDtos.add(parentDto);
+            }
+        }
+
+        ListLeafAppCategoryResponse response = new ListLeafAppCategoryResponse();
+        response.setDtos(parentDtos);
+
+
+        return response;
     }
 }

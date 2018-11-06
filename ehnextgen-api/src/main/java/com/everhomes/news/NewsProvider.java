@@ -11,7 +11,7 @@ public interface NewsProvider {
 
 	News findNewsById(Long id);
 
-	List<News> listNews(List<Long> communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize, boolean isScene, Byte status);
+	List<News> listNews(Long ownerId, List<Long> communityId, Long categoryId, Integer namespaceId, Long from, Integer pageSize, boolean isScene, Byte status);
 
 	Long getMaxTopIndex(Integer namespaceId);
 
@@ -45,15 +45,20 @@ public interface NewsProvider {
 
 	void updateNewsTag(NewsTag newsTag);
 
-	List<NewsTag> listNewsTag(Integer namespaceId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize, Long categoryId);
+	List<NewsTag> listNewsTag(Integer namespaceId,String ownerType,Long ownerId,Byte isSearch,Long parentId,Long pageAnchor,Integer pageSize, Long categoryId);
 
 	void increaseViewCount(Long newsId, Long nViewCount);
 
 	NewsCategory getCategoryIdByEntryId(Integer entryId,Integer namespaceId);
 
+	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
+
 	Long createNewPreview(News news);
 
 	News findNewPreview(Long id);
 
-	News findNewsByNamespaceAndId(Integer namespaceId, Long id);
+
+	List<NewsTag> listParentTags(String ownerType, Long ownerId, Long categoryId);
+
+	void deleteProjectNewsTags(Long projectId, Long categoryId);
 }

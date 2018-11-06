@@ -38,4 +38,9 @@ public interface ServiceModuleConstants {
 	long PAYMENT_CARD_MODULE = 41200L;
     
 
+    long OFFICE_CUBICLE = 40200L; //工位预订
+
+    long PRINT_MODULE = 41400L; // 云打印模块
+
+    long BANNER_MODULE = 10400L;//广告模块
 }

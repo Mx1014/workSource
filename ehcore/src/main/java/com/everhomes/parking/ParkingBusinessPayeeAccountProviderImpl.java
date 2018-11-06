@@ -110,6 +110,7 @@ public class ParkingBusinessPayeeAccountProviderImpl implements ParkingBusinessP
 				.fetch().map(r -> ConvertHelper.convert(r, ParkingBusinessPayeeAccount.class));
 	}
 
+	
 	@Override
 	public List<ParkingBusinessPayeeAccount> listParkingBusinessPayeeAccountByOwner(Integer namespaceId, String ownerType, Long ownerId, Long parkingLotId,String businessType) {
 		Condition condition = Tables.EH_PARKING_BUSINESS_PAYEE_ACCOUNTS.NAMESPACE_ID.eq(namespaceId)

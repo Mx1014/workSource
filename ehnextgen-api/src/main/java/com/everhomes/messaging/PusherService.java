@@ -7,6 +7,8 @@ import com.everhomes.msgbox.Message;
 import com.everhomes.rest.messaging.DeviceMessages;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartPushMessageCommand;
+import com.everhomes.rest.pusher.ThirdPartResponseMessageDTO;
 import com.everhomes.user.UserLogin;
 
 public interface PusherService {
@@ -21,4 +23,7 @@ public interface PusherService {
      * 停止bundleId对应的连接端，add by huanglm
      */
     void  stophttp2Client(String bundleId);
+    void flushHttp2ClientMaps();
+    ThirdPartResponseMessageDTO thirdPartPushMessage(ThirdPartPushMessageCommand cmd);
+
 }

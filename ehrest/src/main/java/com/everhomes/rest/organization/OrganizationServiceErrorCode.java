@@ -97,5 +97,18 @@ public interface OrganizationServiceErrorCode {
 
     int ERROR_ORG_NAME_REPEAT = 900030; //名称重复
 
+    int ERROR_FOR_HAS_COMMUNITIES = 900031; //无法注销企业。当前企业仍存在需要管理的项目。请转移项目管理权至其它公司后再试。
+    int ERROR_ADMINNAME_ISNULL = 900032; //姓名为空
+    int ERROR_WORKPLACENAME_ISNULL = 900033;//办公地点名称为空
+    int ERROR_COMMUNITYNAME_ISNULL = 900034;//办公地点所属项目为空
+    int ERROR_PMFLAG_ISNULL = 900035;//是否属于管理公司标志为空
+    int ERROR_SERVICESUPPORT_ISNULL = 900036;//是否属于服务商标志为空
+    int ERROR_WORKPLATFORM_ISNULL = 900037;//是否开启工作台标志为空
+    int ERROR_ORGANIZATION_NAME_OVERFLOW = 900038;//公司的名称长度超过50个汉字
+
+
+    //merge 发现冲突900031
     int ERROR_USER_IS_ADMINISTRATOR = 900031; //用户为管理员，不允许退出
+
+    int ERROR_EMAIL_IS_EXISTS = 900039; //用户认证时，邮箱已被认证。
 }

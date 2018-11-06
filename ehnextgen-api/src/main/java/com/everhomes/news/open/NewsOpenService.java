@@ -15,6 +15,8 @@ import com.everhomes.rest.news.open.UpdateOpenNewsCommand;
 
 public interface NewsOpenService {
 
+	static final Long NEWS_MODULE_ID = 10800L;
+
 	CreateNewsResponse createNews(CreateOpenNewsCommand cmd);
 
 	void updateNews(UpdateOpenNewsCommand cmd);

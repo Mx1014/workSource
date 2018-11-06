@@ -14,6 +14,7 @@ import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.RentalOrderActionData;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.VendorType;
@@ -22,6 +23,8 @@ import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -71,6 +74,8 @@ public class RentalCommonServiceImpl {
     private OrganizationProvider organizationProvider;
     @Autowired
     private Rentalv2PayService  rentalv2PayService;
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
 
     public RentalResourceHandler getRentalResourceHandler(String handlerName) {
         RentalResourceHandler handler = null;
@@ -181,7 +186,7 @@ public class RentalCommonServiceImpl {
 
 
             List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
-                    rule.getId(), RentalOrderHandleType.REFUND.getCode());
+                    rule.getId(), RentalOrderHandleType.OVERTIME.getCode());
 
             List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
                     .collect(Collectors.toList());
@@ -223,8 +228,7 @@ public class RentalCommonServiceImpl {
                 }
             }
 
-            amount = amount.multiply(new BigDecimal(orderRule.getFactor()))
-                    .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
+            amount = amount.multiply(new BigDecimal(orderRule.getFactor()));
             BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
             order.setResourceTotalMoney(totalAmount);
             order.setPayTotalMoney(totalAmount);
@@ -242,7 +246,8 @@ public class RentalCommonServiceImpl {
 
         Long refundOrderNo = this.onlinePayService.createBillId(timestamp);
 
-        if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode()) {
+        if (order.getPaidVersion() == ActivityRosterPayVersionFlag.V2.getCode() ||
+                order.getPaidVersion() == ActivityRosterPayVersionFlag.V3.getCode() ) {
             //新支付退款
             Long amount = changePayAmount(orderAmount);
             rentalv2PayService.refundOrder(order,amount);
@@ -401,6 +406,18 @@ public class RentalCommonServiceImpl {
                 String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP), locale, "");
 
         return content;
+    }
+
+    public ServiceModuleApp getServiceMoudleAppByResourceTypeId(Long resourceTypeId){
+        if (resourceTypeId == null)
+            return null;
+        List<ServiceModuleApp> apps = serviceModuleAppService.listReleaseServiceModuleApp(
+                UserContext.getCurrentNamespaceId(),
+                ServiceModuleConstants.RENTAL_MODULE,
+                null, resourceTypeId.toString(), null);
+        if (apps != null && apps.size() > 0)
+            return apps.get(0);
+        return null;
     }
 
     public String processResourceCustomRefundTip(RentalDefaultRule rule){

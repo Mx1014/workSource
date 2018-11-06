@@ -8,14 +8,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.common.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise.listEnterpriseNoReleaseWithCommunityIdCommand;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
@@ -40,6 +45,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
@@ -115,6 +121,10 @@ public class CommunityProviderImpl implements CommunityProvider {
         //long id = shardingProvider.allocShardableContentId(EhCommunities.class).second();
 
         community.setId(id);
+
+        if(community.getCommunityNumber() == null){
+            community.setCommunityNumber("L"  + id);
+        }
         community.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         community.setCreatorUid(creatorId);
         community.setUuid(UUID.randomUUID().toString());
@@ -895,7 +905,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
 		//查询“未删除”状态的楼栋  by tangcen 2018年8月5日15:40:02
 		query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
-		
+
         LOGGER.debug("findBuildingByCommunityIdAndName, sql=" + query.getSQL());
         LOGGER.debug("findBuildingByCommunityIdAndName, bindValues=" + query.getBindValues());
         return ConvertHelper.convert(query.fetchOne(), Building.class);
@@ -908,7 +918,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_BUILDINGS.BUILDING_NUMBER.eq(buildingNumber));
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
-        
+
         List<Building> buildings = query.fetchInto(Building.class);
         if (buildings!=null && buildings.size()>0) {
 			return buildings.get(0);
@@ -1804,7 +1814,50 @@ public class CommunityProviderImpl implements CommunityProvider {
 
         return communities;
     }
-	
+
+
+    @Override
+    public List<Community> listCommunities(Integer namespaceId, Byte communityType, Long orgId, String keyword, Byte status, Byte ownerFlag, ListingLocator locator, int count) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES).getQuery();
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.ne(CommunityAdminStatus.INACTIVE.getCode()));
+        if(communityType != null){
+            query.addConditions(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+        }
+        if(status != null){
+            query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(status));
+        }
+
+        if(null != locator.getAnchor()){
+            query.addConditions(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        }
+
+        if(!StringUtils.isEmpty(keyword)){
+
+            query.addConditions(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.COMMUNITY_NUMBER.like('%'+keyword+'%')));
+        }
+
+        if(orgId != null){
+            query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, JoinType.JOIN, Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+            query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+        }
+
+        //查询无归属的园区
+        if(ownerFlag != null && ownerFlag.byteValue() == 0){
+            SelectQuery<EhOrganizationCommunitiesRecord> notExistsquery = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITIES);
+            notExistsquery.addConditions(Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+            query.addConditions(DSL.notExists(notExistsquery));
+        }
+
+        query.addLimit(count);
+
+        List<Community> map = query.fetch().stream().map(r -> RecordHelper.convert(r, Community.class)).collect(Collectors.toList());
+
+        return map;
+    }
+
 	@Override
     public List<CommunityGeoPoint> listCommunityGeoPointByGeoHashInCommunities(double latitude, double longitude, int geoHashLength, List<Long> communityIds) {
         List<CommunityGeoPoint> l = new ArrayList<>();
@@ -1852,6 +1905,63 @@ public class CommunityProviderImpl implements CommunityProvider {
         return ConvertHelper.convert(query.fetchOne(), Community.class);
 	}
 
+	    @Override
+    public Community findDefaultCommunity(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.DEFAULT_COMMUNITY_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+        return query.fetchAnyInto(Community.class);
+    }
+
+    @Override
+    public Community findAnyCommunity(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        return query.fetchAnyInto(Community.class);
+    }
+
+    /**
+     * 查询该域空间下不在该项目中的所有企业
+     * @param communityId
+     * @param namespaceId
+     * @return
+     */
+    @Override
+    public List<Long> findOrganizationIdsByNamespaceId(Long communityId , Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        List<Long> communityIdList = context.select(Tables.EH_COMMUNITIES.ID).from(Tables.EH_COMMUNITIES).where(
+                Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.ID.ne(communityId))
+                .fetchInto(Long.class);
+        return communityIdList;
+
+    }
+
+
+    /**
+     * 根据项目名称和域空间Id来查询项目
+     * @param name
+     * @param namespaceId
+     * @return
+     */
+    public Community findCommunityByNameAndNamespaceId(String name,Integer namespaceId){
+        //获取上下文
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        Community community = context.select().from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.NAME.eq(name))
+                .fetchAnyInto(Community.class);
+        return community;
+    }
+
+
 	@Override
 	public Integer countActiveBuildingsByCommunityId(Long communityId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1876,11 +1986,11 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Building> listBuildingsByKeywords(Integer namespaceId, Long communityId, Long buildingId,
 			String keyWords, CrossShardListingLocator locator, int pageSize) {
-		
+
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
- 
+
         if (null != namespaceId) {
             query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         }
@@ -1900,7 +2010,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
-        query.addLimit(pageSize);
+        query.addLimit(pageSize+1);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBuildingsByKeywords, sql=" + query.getSQL());
@@ -1972,6 +2082,48 @@ public class CommunityProviderImpl implements CommunityProvider {
 					result.put(r.getId(), r);
 				});
 		return result;
+	}
+	
+	@Override
+	public Long getOrganizationIdByCommunityId(Long communityId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+					  .from(Tables.EH_ORGANIZATION_COMMUNITIES)
+					  .where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
+					  .fetchAnyInto(Long.class);
+	}
+
+	@Override
+	public String findCommunityCategoryByCommunityId(Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		com.everhomes.server.schema.tables.EhResourceCategoryAssignments ehResourceCategoryAssignments = Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS;
+		com.everhomes.server.schema.tables.EhResourceCategories ehResourceCategories = Tables.EH_RESOURCE_CATEGORIES;
+		
+		return context.select(ehResourceCategories.NAME)
+					.from(ehResourceCategoryAssignments)
+					.leftOuterJoin(ehResourceCategories).on(ehResourceCategoryAssignments.RESOURCE_CATEGRY_ID.eq(ehResourceCategories.ID))
+					.where(ehResourceCategoryAssignments.RESOURCE_ID.eq(communityId))
+					.fetchAnyInto(String.class);
+	}
+
+	@Override
+	public List<Building> findBuildingsByIds(List<Long> buildingIds) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Building> buildings = context.select()
+							        		.from(Tables.EH_BUILDINGS)
+							        		.where(Tables.EH_BUILDINGS.ID.in(buildingIds))
+							        		.and(Tables.EH_BUILDINGS.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+							        		.fetchInto(Building.class);
+		return buildings;
+	}
+
+	@Override
+	public List<Long> findCommunityIdsByOrgId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID)
+						.from(Tables.EH_ORGANIZATION_COMMUNITIES)
+						.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId))
+						.fetchInto(Long.class);
 	}
 
 }

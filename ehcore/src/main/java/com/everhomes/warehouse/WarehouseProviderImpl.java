@@ -6,13 +6,40 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.warehouse.*;
+import com.everhomes.rest.warehouse.DeliveryFlag;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
+import com.everhomes.rest.warehouse.Status;
+import com.everhomes.rest.warehouse.WarehouseLogDTO;
+import com.everhomes.rest.warehouse.WarehouseMaterialStock;
+import com.everhomes.rest.warehouse.WarehouseStockOrderDTO;
 import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.daos.EhWarehouseMaterialCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseMaterialsDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseRequestMaterialsDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseStockLogsDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseStocksDao;
+import com.everhomes.server.schema.tables.daos.EhWarehouseUnitsDao;
+import com.everhomes.server.schema.tables.daos.EhWarehousesDao;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequestMaterials;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseRequests;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStockLogs;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseStocks;
+import com.everhomes.server.schema.tables.pojos.EhWarehouseUnits;
+import com.everhomes.server.schema.tables.pojos.EhWarehouses;
+import com.everhomes.server.schema.tables.records.EhWarehouseMaterialCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseMaterialsRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseRequestMaterialsRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseRequestsRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseStockLogsRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseStocksRecord;
+import com.everhomes.server.schema.tables.records.EhWarehouseUnitsRecord;
+import com.everhomes.server.schema.tables.records.EhWarehousesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserProvider;
@@ -92,8 +119,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehousesRecord> query = context.selectQuery(Tables.EH_WAREHOUSES);
         query.addConditions(Tables.EH_WAREHOUSES.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSES.COMMUNITY_ID.eq(communityId));
 
         List<Warehouses> result = new ArrayList<Warehouses>();
@@ -112,8 +139,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehousesRecord> query = context.selectQuery(Tables.EH_WAREHOUSES);
         query.addConditions(Tables.EH_WAREHOUSES.WAREHOUSE_NUMBER.eq(warehouseNumber));
-        query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSES.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_WAREHOUSES.STATUS.eq(Status.ACTIVE.getCode()));
 
@@ -163,8 +190,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialCategoriesRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+//        if (StringUtils.isNotBlank(ownerType)) {
+//            query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//        }
+//        if (ownerId != null) {
+//            query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+//        }
 
         List<WarehouseMaterialCategories> result = new ArrayList<WarehouseMaterialCategories>();
         query.fetch().map((r) -> {
@@ -182,8 +213,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialCategoriesRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.CATEGORY_NUMBER.eq(categoryNumber));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseMaterialCategories> result = new ArrayList<WarehouseMaterialCategories>();
@@ -205,8 +236,12 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         SelectQuery<EhWarehouseMaterialCategoriesRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES);
 
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.PATH.like(superiorPath));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//        if(ownerId != null) {
+//            query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+//        }
+//        if(StringUtils.isNotBlank(ownerType)) {
+//            query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//        }
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.STATUS.eq(Status.ACTIVE.getCode()));
 
 
@@ -252,8 +287,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
@@ -272,8 +307,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.MATERIAL_NUMBER.eq(materialNumber));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
         //eh_warehouse_materials表中已经规定了所属者，所以不再为了增加园区维度而新建scope表，对旧的数据找到所有公司所在的园区进行填写即可(任一个园区？或者全部）
         if(communityId != null){
             query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
@@ -296,8 +331,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_PATH.like(categoryPath + "%"));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
@@ -347,8 +382,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStockLogsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCK_LOGS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
 
         List<WarehouseStockLogs> result = new ArrayList<>();
         query.fetch().map((r) -> {
@@ -366,8 +401,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStockLogsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCK_LOGS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
         if(materialName != null){
             List<Long> fetch = context.select(Tables.EH_WAREHOUSE_MATERIALS.ID)
                     .from(Tables.EH_WAREHOUSE_MATERIALS)
@@ -473,8 +508,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
@@ -494,8 +529,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         //增加园区维度的约束,不进行非空判断，对于如何兼容还不确定方向
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
@@ -516,8 +551,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
@@ -534,8 +569,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
@@ -584,8 +619,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         if(communityId!=null){
             query.addConditions(Tables.EH_WAREHOUSE_ORDERS.COMMUNITY_ID.eq(communityId));
         }
-        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_ORDERS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_ORDERS.NAMESPACE_ID.eq(namespaceId));
         query.addOrderBy(Tables.EH_WAREHOUSE_ORDERS.CREATE_TIME.desc());
         query.addLimit(pageAnchor.intValue(),pageSize);
@@ -930,8 +965,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<Long> stockAmounts = new ArrayList<>();
@@ -951,8 +986,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<Long> stockAmounts = new ArrayList<>();
@@ -1116,8 +1151,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
         query.addConditions(Tables.EH_WAREHOUSE_UNITS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
@@ -1136,8 +1171,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
         query.addConditions(Tables.EH_WAREHOUSE_UNITS.NAME.eq(name));
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
@@ -1182,8 +1217,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     public List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
@@ -1271,8 +1306,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseRequestMaterials> result = new ArrayList<>();
@@ -1288,8 +1323,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.DELIVERY_FLAG.eq(DeliveryFlag.NO.getCode()));
 
         List<WarehouseRequestMaterials> result = new ArrayList<>();
@@ -1306,8 +1341,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());
         List<WarehouseRequestMaterials> result = new ArrayList<>();
@@ -1326,8 +1361,8 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         if(ownerType != null){
             query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
         }
-        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.COMMUNITY_ID.eq(communityId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_ID.eq(ownerId));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseRequests> result = new ArrayList<WarehouseRequests>();
         query.fetch().map((r) -> {

@@ -42,32 +42,32 @@ public interface UserPrivilegeMgr {
      */
     void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
-    /**
-     * 校验公司管理员
-     * @param currentOrgId
-     * @return
-     */
-    boolean checkOrganizationAdmin(Long userId, Long currentOrgId);
+//    /**
+//     * 校验公司管理员
+//     * @param currentOrgId
+//     * @return
+//     */
+//    boolean checkOrganizationAdmin(Long userId, Long currentOrgId);
 
-    /**
-     * 校验模块管理员权限
-     * @param userId
-     * @param ownerType
-     * @param ownerId
-     * @param privilegeId
-     * @return
-     */
-    boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long privilegeId);
-
-    /**
-     * 校验模块管理员权限
-     * @param ownerType
-     * @param ownerId
-     * @param userId
-     * @param moduleId
-     * @return
-     */
-    boolean checkModuleAdmin(String ownerType, Long ownerId, Long userId, Long moduleId);
+//    /**
+//     * 校验模块管理员权限
+//     * @param userId
+//     * @param ownerType
+//     * @param ownerId
+//     * @param privilegeId
+//     * @return
+//     */
+//    boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long privilegeId);
+//
+//    /**
+//     * 校验模块管理员权限
+//     * @param ownerType
+//     * @param ownerId
+//     * @param userId
+//     * @param moduleId
+//     * @return
+//     */
+//    boolean checkModuleAdmin(String ownerType, Long ownerId, Long userId, Long moduleId);
 
     /**
      * 校验超级管理员
@@ -93,26 +93,26 @@ public interface UserPrivilegeMgr {
      */
     void checkUserBlacklistAuthority(Long userId, String ownerType, Long ownerId, Long privilegeId);
 
-    /**
-     * 校验是否有模块全部权限
-     * @param ownerType
-     * @param ownerId
-     * @param userId
-     * @param privilegeId
-     * @return
-     */
-    boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId);
+//    /**
+//     * 校验是否有模块全部权限
+//     * @param ownerType
+//     * @param ownerId
+//     * @param userId
+//     * @param privilegeId
+//     * @return
+//     */
+//    boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId);
 
-    /**
-     * 校验模块权限
-     * @param ownerType
-     * @param ownerId
-     * @param userId
-     * @param moduleId
-     * @param type 模块管理权限类型和模块全部权限类型
-     * @return
-     */
-    boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long moduleId, ServiceModulePrivilegeType type);
+//    /**
+//     * 校验模块权限
+//     * @param ownerType
+//     * @param ownerId
+//     * @param userId
+//     * @param moduleId
+//     * @param type 模块管理权限类型和模块全部权限类型
+//     * @return
+//     */
+//    boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long moduleId, ServiceModulePrivilegeType type);
 
     /**
      * 校验模块权限
@@ -135,22 +135,22 @@ public interface UserPrivilegeMgr {
      */
     boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId);
 
-    /**
-     * 校验当前用户在项目范围内的权限
-     * @param ownerType
-     * @param ownerId
-     * @param privilegeId
-     */
-    void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId);
+//    /**
+//     * 校验当前用户在项目范围内的权限
+//     * @param ownerType
+//     * @param ownerId
+//     * @param privilegeId
+//     */
+//    void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId);
 
-    /**
-     * 校验当前用户在某一个项目范围以及当前公司内的权限
-     * @param ownerType
-     * @param ownerId
-     * @param currentOrgId
-     * @param privilegeId
-     */
-    void checkCurrentUserAuthority(String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
+//    /**
+//     * 校验当前用户在某一个项目范围以及当前公司内的权限
+//     * @param ownerType
+//     * @param ownerId
+//     * @param currentOrgId
+//     * @param privilegeId
+//     */
+//    void checkCurrentUserAuthority(String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
     /**
      * 校验用户在部分范围内以及当前公司内的权限
@@ -159,14 +159,14 @@ public interface UserPrivilegeMgr {
      */
     void checkCurrentUserAuthority(Long currentOrgId, Long privilegeId);
 
-    /**
-     * 全部模块管理员
-     * @param ownerType
-     * @param ownerId
-     * @param userId
-     * @return
-     */
-    boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId);
+//    /**
+//     * 全部模块管理员
+//     * @param ownerType
+//     * @param ownerId
+//     * @param userId
+//     * @return
+//     */
+//    boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId);
 
     /**
      * 检查应用管理员
@@ -204,15 +204,15 @@ public interface UserPrivilegeMgr {
     boolean checkModuleAppAdmin(Integer namespaceId, Long organizationId, Long userId, Long appId);
 
 
-    /**
-     * 校验权限细化
-     * @param namespaceId
-     * @param communityId
-     * @param userId
-     * @param appId
-     * @return
-     */
-    boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId);
+//    /**
+//     * 校验权限细化
+//     * @param namespaceId
+//     * @param communityId
+//     * @param userId
+//     * @param appId
+//     * @return
+//     */
+//    boolean checkModuleAppRelation(Integer namespaceId, Long communityId, Long userId, Long appId);
 
     /**
      * 校验用户权限
@@ -237,4 +237,5 @@ public interface UserPrivilegeMgr {
      * @param checkCommunityId    @return
      */
     boolean checkUserPrivilege(Long userId, Long currentOrgId, Long privilegeId, Long appId, Long checkOrgId, Long checkCommunityId);
+
 }
