@@ -8,6 +8,7 @@ import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -758,6 +759,10 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RequestMapping("getResourceAttachment")
 	@RestReturn(value = ResourceAttachmentDTO.class)
 	public RestResponse getResourceAttachment(@Valid GetResourceAttachmentCommand cmd) {
+		if (RuleSourceType.DEFAULT.getCode().equals(cmd.getSourceType())) {
+			GetResourceTimeRuleCommand cmd2 = ConvertHelper.convert(cmd, GetResourceTimeRuleCommand.class);
+			this.getResourceTimeRule(cmd2);//防止没有规则
+		}
 		RestResponse response = new RestResponse(rentalService.getResourceAttachment(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
