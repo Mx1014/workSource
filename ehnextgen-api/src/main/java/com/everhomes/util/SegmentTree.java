@@ -63,21 +63,9 @@ public class SegmentTree {
         List<SegmentNode> covers = new ArrayList<>();
         if (lborder == rborder)
             return covers;
-        if (lborder >= this.root.getRborder()){
-            SegmentNode node = new SegmentNode();
-            node.setLborder(lborder);
-            node.setRborder(rborder);
-            covers.add(node);
-            return covers;
-        }
+        modifyTree(rborder);
 
-        covers.addAll(getZeroConverNodes(this.root,lborder,rborder > root.getRborder() ? root.getRborder() : rborder));
-        if (rborder > this.root.getRborder()) {
-            SegmentNode node = new SegmentNode();
-            node.setLborder(this.root.getRborder());
-            node.setRborder(rborder);
-            covers.add(node);
-        }
+        covers.addAll(getZeroConverNodes(this.root,lborder,rborder ));
 
         //合并时间段
         for (int i = covers.size() - 1;i > 0;i--){
