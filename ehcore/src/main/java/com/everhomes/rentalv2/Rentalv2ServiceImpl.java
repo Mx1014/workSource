@@ -1254,7 +1254,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//为了降低运算量 在筛选过程前筛一遍 降低资源个数
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, Integer.MAX_VALUE, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
-		filteRentalSites(rentalSites,cmd);
+		rentalSites = filteRentalSites(rentalSites,cmd);
 		siteIds = rentalSites.stream().map(RentalResource::getId).collect(Collectors.toList());
 		siteIds = filteRentalSitesByTime(siteIds,cmd);
         rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
@@ -1380,9 +1380,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
         }).collect(Collectors.toList());
     }
 
-	private void filteRentalSites(List<RentalResource> resources,FindRentalSitesCommand cmd){
+	private List<RentalResource> filteRentalSites(List<RentalResource> resources,FindRentalSitesCommand cmd){
 		if (resources == null || resources.size()==0)
-			return;
+			return null;
 		if (cmd.getPeopleSpecLeast() != null)
 			resources = resources.stream().filter(r->r.getPeopleSpec() == null || r.getPeopleSpec()>=cmd.getPeopleSpecLeast()).collect(Collectors.toList());
 		if (cmd.getPeopleSpecMost() != null)
@@ -1399,6 +1399,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						return false;
 				return true;
 			}).collect(Collectors.toList());
+		return resources;
 	}
 
 	private List<Long> filteRentalSitesByTime(List<Long> siteIds,FindRentalSitesCommand cmd){
