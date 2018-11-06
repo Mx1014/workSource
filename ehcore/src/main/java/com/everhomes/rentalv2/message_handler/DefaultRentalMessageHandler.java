@@ -1,6 +1,8 @@
 package com.everhomes.rentalv2.message_handler;
 
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -8,6 +10,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,8 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     private RentalCommonServiceImpl rentalCommonService;
     @Autowired
     private SmsProvider smsProvider;
+    @Autowired
+    private DoorAccessService doorAccessService;
 
     @Override
     public void cancelOrderSendMessage(RentalOrder rentalBill) {
@@ -50,7 +55,7 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         if (null == user )
             return;
         managerContent.append(user.getNickName());
-        managerContent.append("取消了");
+        managerContent.append("取消预约");
         managerContent.append(rentalBill.getResourceName());
         managerContent.append("\n使用详情：");
         managerContent.append(rentalBill.getUseDetail());
@@ -70,7 +75,6 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
         RentalResource rs = rentalCommonService.getRentalResource(rentalBill.getResourceType(), rentalBill.getRentalResourceId());
 
-//			RentalResource rs = this.rentalv2Provider.getRentalSiteById(rentalBill.getRentalResourceId());
         if(null == rs)
             return;
 
@@ -88,29 +92,115 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void sendOrderOverTimeMessage(RentalOrder rentalBill) {
-
+        String useDetail = rentalBill.getUseDetail();
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", useDetail);
+        //给预约人推送消息
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map, RentalNotificationTemplateCode.UNPAID_ORDER_OVER_TIME);
     }
 
     @Override
     public void sendRentalSuccessSms(RentalOrder order){
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useTime", order.getUseDetail());
+        map.put("resourceName", order.getResourceName());
+        rentalCommonService.sendMessageCode(order.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
 
-        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
-        if(null == userIdentifier){
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+        smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+        smsProvider.addToTupleList(variables, "orderNum", order.getOrderNo());
+        smsProvider.addToTupleList(variables, "aclink", getAclinkInfo(order));
+
+        UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
+                IdentifierType.MOBILE.getCode());
+        if (null == userIdentifier) {
             LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-        }else{
-
-            String templateScope = SmsTemplateCode.SCOPE;
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
-            smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail());
-
-            int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
-
-            String templateLocale = RentalNotificationTemplateCode.locale;
-
-            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId,
-                    templateLocale, variables);
-
+        } else {
+            smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+                    templateId, templateLocale, variables);
         }
+    }
+
+    private String  getAclinkInfo(RentalOrder order){
+        if (StringHelper.hasContent(order.getDoorAuthId())){
+            StringBuilder sb = new StringBuilder().append("请点击以下链接使用门禁二维码：");
+            String [] authes = order.getDoorAuthId().split(",");
+            for (String aclinkId : authes){
+                GetVisitorCommand cmd = new GetVisitorCommand();
+                cmd.setId(aclinkId);
+                String url = doorAccessService.getVisitorUrlById(cmd);
+                if (StringHelper.hasContent(url)){
+                    sb.append(url).append("\n");
+                }
+            }
+            return sb.deleteCharAt(sb.length()-1).toString();
+        }
+        return "";
+    }
+
+    @Override
+    public void cancelOrderWithoutPaySendMessage(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+
+        int templateId = SmsTemplateCode.UNPAID_ORDER_OVER_TIME;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+    }
+
+    @Override
+    public void cancelOrderWithoutRefund(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_NO_REFUND);
+
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables,"totalAmount",rentalBill.getPayTotalMoney().toString());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER_NO_REFUND;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
+
+    }
+
+    @Override
+    public void cancelOrderNeedRefund(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("orderNum", rentalBill.getOrderNo());
+        map.put("refundAmount", rentalBill.getRefundAmount().toString());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER);
+
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables,"totalAmount",rentalBill.getPayTotalMoney().toString());
+        smsProvider.addToTupleList(variables,"refundAmount",rentalBill.getRefundAmount().toString());
+        smsProvider.addToTupleList(variables,"orderNum",rentalBill.getOrderNo());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
     }
 
     @Override
@@ -141,5 +231,26 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     @Override
     public void autoUpdateOrderSpaceSendMessage(RentalOrder rentalBill) {
 
+    }
+
+    @Override
+    public void refundOrderSuccessSendMessage(RentalOrder rentalBill) {
+        //发推送
+        Map<String, String> map = new HashMap<>();
+        map.put("useDetail", rentalBill.getUseDetail());
+        map.put("totalAmount", rentalBill.getPayTotalMoney().toString());
+        map.put("refundAmount", rentalBill.getRefundAmount().toString());
+        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
+                RentalNotificationTemplateCode.RENTAL_CANCEL_ORDER_REFUND);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables, "totalAmount", rentalBill.getPayTotalMoney().toString());
+        smsProvider.addToTupleList(variables, "refundAmount", rentalBill.getRefundAmount().toString());
+        int templateId = SmsTemplateCode.RENTAL_CANCEL_ORDER_REFUND;
+
+        String templateLocale = RentalNotificationTemplateCode.locale;
+
+        smsProvider.sendSms(rentalBill.getNamespaceId(), rentalBill.getUserPhone(), templateScope, templateId, templateLocale, variables);
     }
 }
