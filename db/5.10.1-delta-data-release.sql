@@ -14,6 +14,18 @@
 -- REMARK: issue-38802
 INSERT INTO `eh_locale_strings` (scope, code, locale, text)
     VALUES ('activity', 10033,'zh_CN','请到活动详情页扫码签到');
+
+
+
+
+-- AUTHOR: 严军 20181106
+-- REMARK: 更新部分模块的路由和客户端处理方式
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 92200;
+UPDATE eh_service_modules SET `host` = 'openWXMiniApp',client_handler_type=2 WHERE id = 190000;
+UPDATE eh_service_modules SET `host` = 'openApp' WHERE id = 180000;
+UPDATE eh_service_modules SET `host` = 'community-bus' WHERE id = 41015;
+UPDATE eh_service_modules SET client_handler_type = 2 WHERE id = 41900;
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
