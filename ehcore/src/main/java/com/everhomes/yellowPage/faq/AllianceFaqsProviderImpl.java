@@ -271,10 +271,13 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void updateTopFAQFlag(Long itemId, byte topFlag) {
-
+	public void updateTopFAQFlag(Long itemId, byte topFlag, Long maxTopOrder) {
+		
 		int updateCnt = updateSingle(itemId, query -> {
 			query.addValue(TABLE.TOP_FLAG, topFlag);
+			if (null != maxTopOrder) {
+				query.addValue(TABLE.TOP_ORDER, maxTopOrder+1);
+			}
 		});
 
 		if (updateCnt > 0) {
@@ -339,6 +342,24 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	
 	private DeleteQuery<EhAllianceFaqsRecord> deleteQuery() {
 		return readWriteContext().deleteQuery(TABLE);
+	}
+
+	@Override
+	public Long getTopFAQMaxOrder(AllianceCommonCommand cmd) {
+		
+		List<AllianceFAQ> faqs =  listTool(null, null, (l, q) -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+			q.addOrderBy(TABLE.TOP_ORDER.desc());
+			q.addConditions(TABLE.TOP_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()));
+			q.addLimit(1);
+			return q;
+		});
+		
+		return faqs.size() > 0 ? faqs.get(0).getTopOrder() : 0L;
 	}
 	
 }

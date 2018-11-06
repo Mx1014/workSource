@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
+import com.everhomes.rest.yellowPage.faq.UpdateTopFAQFlagCommand;
 import com.everhomes.yellowPage.AllianceOperateService;
 
 public interface AllianceFAQProvider {
@@ -26,7 +27,7 @@ public interface AllianceFAQProvider {
 
 	void updateFAQ(AllianceFAQ faq);
 
-	void updateTopFAQFlag(Long faqId, byte topFlag);
+	void updateTopFAQFlag(Long faqId, byte topFlag, Long maxTopOrder);
 
 	void deleteFAQ(Long faqId);
 	
@@ -58,5 +59,7 @@ public interface AllianceFAQProvider {
 	void deleteFAQs(AllianceCommonCommand cmd);
 
 	void deleteFAQOnlineService(AllianceCommonCommand cmd);
+
+	Long getTopFAQMaxOrder(AllianceCommonCommand cmd);
 
 }

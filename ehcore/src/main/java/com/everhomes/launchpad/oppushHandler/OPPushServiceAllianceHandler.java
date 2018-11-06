@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,12 +74,21 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 		String host = "service-alliance";
 		for (AllianceOperateService dto : dtos) {
 			OPPushCard card = new OPPushCard();
-			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getId(), null, null);
+			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getServiceId(), null, null);
+			if (null == sa) {
+				continue;
+			}
 			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			card.setRouterPath("/detail");
 			String url = yellowPageService.processDetailUrl(sa.getId(), sa.getName(), sa.getOwnerType(),
 					sa.getOwnerId());
-			card.setRouterQuery("url=" + url);
+			
+			try {
+				card.setRouterQuery("url=" + URLEncoder.encode(url, "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("encode Err, url:"+url+" e:"+e.getMessage());
+			}
+			
 			String router = "zl://" + host + card.getRouterPath() + "?moduleId=40500&clientHandlerType="
 					+ card.getClientHandlerType() // 固定参数
 					+ "&" + card.getRouterQuery();

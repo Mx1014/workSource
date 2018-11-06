@@ -27,6 +27,7 @@ import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.StatClickOrSortType;
 import com.everhomes.user.*;
 import com.everhomes.util.RouterBuilder;
@@ -164,8 +165,10 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(yellowPage.getOwnerType(),
-				yellowPage.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(configCmd.getOwnerType(),
+				configCmd.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
 		if (null != match) {
 			yellowPage.setCategoryId(match.getCategoryId());
 			yellowPage.setServiceType(match.getCategoryName());

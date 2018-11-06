@@ -205,7 +205,12 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			return;
 		}
 		
-		allianceFAQProvider.updateTopFAQFlag(cmd.getFAQId(), cmd.getTopFlag());
+		Long maxTopOrder = null;
+		if (cmd.getTopFlag() > 0) {
+			maxTopOrder = allianceFAQProvider.getTopFAQMaxOrder(cmd);
+		}
+		
+		allianceFAQProvider.updateTopFAQFlag(cmd.getFAQId(), cmd.getTopFlag(), maxTopOrder);
 	}
 
 	@Override

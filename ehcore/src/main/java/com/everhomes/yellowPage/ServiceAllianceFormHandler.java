@@ -116,8 +116,8 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 			cmd21.setApplyUserId(user.getId());
 			cmd21.setReferType(FlowReferType.SERVICE_ALLIANCE.getCode());
 			cmd21.setReferId(sa.getId());
-			cmd21.setProjectType(sa.getOwnerType());
-			cmd21.setProjectId(sa.getOwnerId());
+			cmd21.setProjectType(cmd.getOwnerType());
+			cmd21.setProjectId(cmd.getOwnerId());
 			// 把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
 			cmd21.setCurrentOrganizationId(currentOrganizationId);

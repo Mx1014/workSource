@@ -66,8 +66,8 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public void updateTopFAQFlag(Long faqId, byte topFlag) {
-		allianceFaqsProvider.updateTopFAQFlag(faqId, topFlag);
+	public void updateTopFAQFlag(Long faqId, byte topFlag, Long maxTopOrder) {
+		allianceFaqsProvider.updateTopFAQFlag(faqId, topFlag, maxTopOrder);
 	}
 
 	@Override
@@ -143,6 +143,11 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	public void deleteFAQOnlineService(AllianceCommonCommand cmd) {
 		allianceFaqServiceCustomerProvider.deleteFAQOnlineService(cmd);
 		
+	}
+
+	@Override
+	public Long getTopFAQMaxOrder(AllianceCommonCommand cmd) {
+		return allianceFaqsProvider.getTopFAQMaxOrder(cmd);
 	}
 
 }

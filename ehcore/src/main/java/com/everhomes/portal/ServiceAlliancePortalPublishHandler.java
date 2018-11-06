@@ -92,6 +92,12 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig, itemLabel);
         }
         
+		String pageRealDisplayType = serviceAllianceInstanceConfig.getDisplayType();
+		if (AllianceDisplayType.HOUSE_KEEPER.getCode().equals(serviceAllianceInstanceConfig.getDisplayType())) {
+			pageRealDisplayType = AllianceDisplayType.HOUSE_KEEPER.getShowType();
+		}
+
+        serviceAllianceInstanceConfig.setUrl(yellowPageService.buildAllianceUrl(namespaceId, serviceAllianceInstanceConfig, pageRealDisplayType));
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
 

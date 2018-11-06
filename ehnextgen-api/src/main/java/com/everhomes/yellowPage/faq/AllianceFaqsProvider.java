@@ -20,7 +20,7 @@ public interface AllianceFaqsProvider {
 	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
 			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
 
-	void updateTopFAQFlag(Long faqId, byte topFlag);
+	void updateTopFAQFlag(Long faqId, byte topFlag, Long maxTopOrder);
 
 	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
 
@@ -29,5 +29,7 @@ public interface AllianceFaqsProvider {
 	void plusFAQSolveCounts(Long itemId, Byte solveTimesType);
 
 	void deleteFAQs(AllianceCommonCommand cmd);
+
+	Long getTopFAQMaxOrder(AllianceCommonCommand cmd);
 
 }
