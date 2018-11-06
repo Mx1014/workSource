@@ -12,35 +12,32 @@ import com.everhomes.flow.*;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormSearcher;
 import com.everhomes.general_form.GeneralFormVal;
-import com.everhomes.general_form.GeneralFormValRequest;
-import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.openapi.Contract;
 import com.everhomes.rest.common.EntityType;
-import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.customer.EnterpriseCustomerDTO;
 import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.UpdateEnterpriseCustomerCommand;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.general_approval.GeneralFormValDTO;
 import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.tachikoma.commons.util.json.JsonHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -241,65 +238,54 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
 
             GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
             String fieldValue = dto.getFieldValue();
-            ObjectMapper mapper = new ObjectMapper();
-            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
-            Map<String,String> urMap;
-            try {
-                urMap = mapper.readValue(fieldValue, jvt);
-                for (Map.Entry<String, String> entry : urMap.entrySet()) {
-                    fieldValue  = entry.getValue();
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = jsonParser.parse(fieldValue).getAsJsonObject();
 
-                    if(entry.getKey().equals("addressId")){
-                        fieldValue = addressProvider.getAddressNameById(Long.valueOf(entry.getValue()));
+            for (Map.Entry map : jsonObject.entrySet()) {
+                fieldValue = map.getValue().toString();
+                String fieldName = map.getKey().toString();
+                if(fieldName.equals("addressId")){
+                    fieldValue = fieldValue.replace("\"","");
+                    fieldValue = addressProvider.getAddressNameById(Long.valueOf(fieldValue));
+                    break;
+                }
+                if(fieldName.equals("customerName")){
+                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(fieldValue));
+                    fieldValue = customer.getName();
+                    break;
+                }
+                if(fieldName.equals("text")) {
+                    if (StringUtils.isNotBlank(fieldValue)) {
                         break;
                     }
-                    if(entry.getKey().equals("customerName")){
-                        EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(entry.getValue()));
-                        fieldValue = customer.getName();
-                        break;
-                    }
-                    if(entry.getKey().equals("text")) {
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            break;
-                        }
-                    }
-                    if(entry.getKey().equals("uris")){
-                        if (StringUtils.isNotBlank(fieldValue)) {
+                }
+                if(fieldName.equals("uris")){
+                    if (StringUtils.isNotBlank(fieldValue)) {
+                        fieldValue = fieldValue.replace("[","");
+                        fieldValue = fieldValue.replace("]","");
+                        fieldValue = fieldValue.replace("\"","");
+                        List<FlowCaseFileDTO> files = new ArrayList<>();
 
-                            List<FlowCaseFileDTO> files = new ArrayList<>();
-
-                            FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                            String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                            ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                        FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                        String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                        ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                        if(resource != null){
                             fileDTO.setUrl(url);
                             fileDTO.setFileName(dto.getFieldName());
                             fileDTO.setFileSize(resource.getResourceSize());
                             files.add(fileDTO);
-
-                            FlowCaseFileValue value = new FlowCaseFileValue();
-                            value.setFiles(files);
-                            fieldValue = JSON.toJSONString(value);
-
-                            break;
                         }
-                    }
 
-                }
-                e.setValue(fieldValue);
-            } catch (IOException ex) {
-                if(StringUtils.isNotBlank(fieldValue) && !fieldValue.equals("\"\"")){
-                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                    JsonArray urlJsons = jo.getAsJsonArray("urls");
-                    if(urlJsons != null && urlJsons.size() > 0){
-                        fieldValue = urlJsons.get(0).getAsString();
-                    }else{
-                        caseFileDTO.setUrl("");
+                        FlowCaseFileValue value = new FlowCaseFileValue();
+                        value.setFiles(files);
+                        fieldValue = JSON.toJSONString(value);
+
+                        break;
                     }
-                    e.setValue(fieldValue);
                 }
 
             }
+            e.setValue(fieldValue);
             e.setKey(val.getFieldName());
             entities.add(e);
         }
@@ -342,74 +328,56 @@ public class RequistionFLowCaseListener implements FlowModuleListener {
                     e2.setEntityType(FlowCaseEntityType.LIST.getCode());
                     break;
             }
-            String fieldValue;
-            JsonElement jsonElement = arr.getAsJsonObject().get("fieldValue");
-            if(jsonElement != null) {
-                fieldValue = jsonElement.getAsJsonObject().toString();
-            }else{
-                fieldValue = "";
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            JavaType jvt = mapper.getTypeFactory().constructParametricType(HashMap.class,String.class,String.class);
-            Map<String,String> urMap;
-            try {
-                urMap = mapper.readValue(fieldValue, jvt);
-                for (Map.Entry<String, String> entry : urMap.entrySet()) {
-                    fieldValue  = entry.getValue();
-                    if(entry.getKey().equals("text")) {
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            break;
-                        }
+            GeneralFormValDTO dto = ConvertHelper.convert(val, GeneralFormValDTO.class);
+            String fieldValue = dto.getFieldValue();
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = jsonParser.parse(fieldValue).getAsJsonObject();
+            for (Map.Entry map : jsonObject.entrySet()) {
+                fieldValue = map.getValue().toString();
+                String fieldName = map.getKey().toString();
+                if(fieldName.equals("addressId")){
+                    fieldValue = fieldValue.replace("\"","");
+                    fieldValue = addressProvider.getAddressNameById(Long.valueOf(fieldValue));
+                    break;
+                }
+                if(fieldName.equals("customerName")){
+                    EnterpriseCustomer customer = enterpriseCustomerProvider.findById(Long.valueOf(fieldValue));
+                    fieldValue = customer.getName();
+                    break;
+                }
+                if(fieldName.equals("text")) {
+                    if (StringUtils.isNotBlank(fieldValue)) {
+                        break;
                     }
-                    if(entry.getKey().equals("uris")){
+                }
+                if(fieldName.equals("uris")){
+                    if (StringUtils.isNotBlank(fieldValue)) {
+                        fieldValue = fieldValue.replace("[","");
+                        fieldValue = fieldValue.replace("]","");
+                        fieldValue = fieldValue.replace("\"","");
+                        List<FlowCaseFileDTO> files = new ArrayList<>();
 
-                        if (StringUtils.isNotBlank(fieldValue)) {
-                            /*FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                            caseFileDTO.setUrl(fieldValue);
-                            fieldValue = StringHelper.toJsonString(caseFileDTO);
-*/
-
-                            List<FlowCaseFileDTO> files = new ArrayList<>();
-
-                            FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-                            String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-                            ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                        FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+                        String url = this.contentServerService.parserUri(fieldValue, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                        ContentServerResource resource = contentServerService.findResourceByUri(fieldValue);
+                        if(resource != null){
                             fileDTO.setUrl(url);
-                            fileDTO.setFileName(arr.getAsJsonObject().get("fieldName").toString());
+                            fileDTO.setFileName(dto.getFieldName());
                             fileDTO.setFileSize(resource.getResourceSize());
                             files.add(fileDTO);
-
-                            FlowCaseFileValue value = new FlowCaseFileValue();
-                            value.setFiles(files);
-                            fieldValue = JSON.toJSONString(value);
-
-                            break;
                         }
+
+                        FlowCaseFileValue value = new FlowCaseFileValue();
+                        value.setFiles(files);
+                        fieldValue = JSON.toJSONString(value);
+
+                        break;
                     }
-
                 }
-                e2.setValue(fieldValue);
-            } catch (IOException ex) {
-                try {
-                    JsonObject jo = new JsonParser().parse(fieldValue).getAsJsonObject();
-                    FlowCaseFileDTO caseFileDTO = new FlowCaseFileDTO();
-                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                    JsonArray urlJsons = jo.getAsJsonArray("urls");
-                    if (urlJsons != null && urlJsons.size() > 0) {
-                        fieldValue = urlJsons.get(0).getAsString();
-                    } else {
-                        caseFileDTO.setUrl("");
-                    }
 
-
-
-                    e2.setValue(fieldValue);
-                }catch (Exception e){
-                    e2.setValue(fieldValue);
-                }
             }
-            e2.setKey(arr.getAsJsonObject().get("fieldName").getAsString());
+            e2.setValue(fieldValue);
+            e2.setKey(val.getFieldName());
             subEntities.add(e2);
         }
         return subEntities;

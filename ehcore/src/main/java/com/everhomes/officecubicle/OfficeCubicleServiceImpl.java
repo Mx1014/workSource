@@ -550,6 +550,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 //		根据项目查询
 		int pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider,999999);
 		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),Long.MAX_VALUE,pageSize);
+		if(cities == null || cities.size() == 0){
+			cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,null,null,Long.MAX_VALUE,pageSize);
+		}
 		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
 		
 		return cities.stream().map(r->{
@@ -886,7 +889,7 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 		if(namespaceId==null){
 			namespaceId = UserContext.getCurrentNamespaceId();
 		}
-		checkOrgId(cmd.getOrgId());
+//		checkOrgId(cmd.getOrgId());
 		List<OfficeCubicleCity> cities = this.officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,cmd.getOrgId(),cmd.getOwnerType(),cmd.getOwnerId(),pageAnchor,pageSize+1);
 
 		if (null == cities || cities.size()==0)
@@ -1007,9 +1010,9 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
 		List<OfficeCubicleCity> list=null;
 		if(cmd.getParentName()==null){
-			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId());
+			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
 		}else{
-			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId());
+			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
 		}
 		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}

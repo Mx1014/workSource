@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>freeAmount: 免费金额</li>
  * <li>isSupportOnlinePaid: 是否支持线上支付 {@link ParkingConfigFlag}</li>
  * <li>cardStatus: cardStatus {@link ParkingCardStatus}</li>
+ * <li>monthlyDiscount: 月卡优惠折扣</li>
  * </ul>
  */
 public class ParkingCardDTO {
@@ -45,6 +46,7 @@ public class ParkingCardDTO {
 
 	private Byte cardStatus;
 
+	private String monthlyDiscount;
 	public ParkingCardDTO() {
 
 	}
@@ -192,4 +194,13 @@ public class ParkingCardDTO {
 		this.isSupportOnlinePaid = isSupportOnlinePaid;
 	}
 
+	public String getMonthlyDiscount() {
+		return monthlyDiscount;
+	}
+
+	public void setMonthlyDiscount(String monthlyDiscount) {
+		this.monthlyDiscount = monthlyDiscount;
+	}
+
+	
 }

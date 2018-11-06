@@ -517,7 +517,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         Integer namespaceId = UserContext.getCurrentNamespaceId(task.getNamespaceId());
 
         Flow flow = null;
-        Long parentTaskId = categoryProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
+        Long parentTaskId = pmTaskProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
 
         if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
@@ -533,7 +533,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
 
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-        Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+        PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
         createFlowCaseCommand.setTitle("物业报修");
         createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());

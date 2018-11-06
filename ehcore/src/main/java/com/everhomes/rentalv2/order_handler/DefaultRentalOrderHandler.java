@@ -1,13 +1,19 @@
 package com.everhomes.rentalv2.order_handler;
 
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.ParkingSpace;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
@@ -40,6 +46,10 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
     private OrganizationProvider organizationProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    protected GeneralOrderService orderService;
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long time) {
@@ -52,14 +62,36 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
         //查特殊账户
         List<Rentalv2PayAccount> accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                 null, RuleSourceType.RESOURCE.getCode(), order.getRentalResourceId(), null, null);
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
         //查通用账户
         accounts = this.rentalv2AccountProvider.listPayAccounts(null, order.getCommunityId(), RentalV2ResourceType.DEFAULT.getCode(),
                 null, RuleSourceType.DEFAULT.getCode(), order.getResourceTypeId(), null, null);
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getAccountId() != null)
             return accounts.get(0).getAccountId();
+
+        //如果都没有 查看是否有商户号
+        Long merchantId = this.gerMerchantId(order);
+        if (merchantId == null)
+            return null;
+        //根据商户号查收款账户
+        GetPayAccountByMerchantIdCommand cmd = new GetPayAccountByMerchantIdCommand();
+        cmd.setId(merchantId);
+        GetPayAccountByMerchantIdRestResponse restResponse = orderService.getPayAccountByMerchantId(cmd);
+        if(checkOrderRestResponseIsSuccess(restResponse)) {
+            PayUserDTO dto = restResponse.getResponse();
+            if (dto != null)
+                return dto.getId();
+        }
+
         return null;
+    }
+
+    private boolean checkOrderRestResponseIsSuccess(RestResponseBase response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
     }
 
     @Override
@@ -123,6 +155,7 @@ public class DefaultRentalOrderHandler implements RentalOrderHandler {
             returnUrl =String.format(returnUrl, order.getId(), order.getResourceType());
             returnUrl = URLEncoder.encode(returnUrl, "UTF-8");
             cmd.setReturnUrl(returnUrl);
+            cmd.setReturnHost(configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", ""));
         }catch (Exception e){
             LOGGER.error("encode url error",e);
         }

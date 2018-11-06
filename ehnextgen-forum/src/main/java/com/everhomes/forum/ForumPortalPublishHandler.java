@@ -8,6 +8,7 @@ import com.everhomes.rest.forum.FindDefaultForumCommand;
 import com.everhomes.rest.forum.FindDefaultForumResponse;
 import com.everhomes.rest.forum.ForumActionData;
 import com.everhomes.rest.forum.ForumEntryConfigulation;
+import com.everhomes.rest.portal.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhForumCategories;
 import com.everhomes.util.StringHelper;
@@ -33,7 +34,7 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public String publish(Integer namespaceId, String instanceConfig, String appName) {
+	public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
 
 		ForumEntryConfigulation config = (ForumEntryConfigulation) StringHelper.fromJsonString(instanceConfig, ForumEntryConfigulation.class);
 		if(config == null){
@@ -47,9 +48,9 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 
 
 		if(config.getForumEntryId() == null){
-			FindDefaultForumCommand cmd = new FindDefaultForumCommand();
-			cmd.setNamespaceId(namespaceId);
-			FindDefaultForumResponse defaultForum = forumService.findDefaultForum(cmd);
+			FindDefaultForumCommand cmd1 = new FindDefaultForumCommand();
+			cmd1.setNamespaceId(namespaceId);
+			FindDefaultForumResponse defaultForum = forumService.findDefaultForum(cmd1);
 			if(defaultForum != null || defaultForum.getDefaultForum() != null){
 				ForumCategory forumCategory = createForumCategory(namespaceId, defaultForum.getDefaultForum().getId(), appName);
 				config.setForumEntryId(forumCategory.getEntryId());
@@ -60,12 +61,12 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String getItemActionData(Integer namespaceId, String instanceConfig) {
+	public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
 		return instanceConfig;
 	}
 
 	@Override
-	public String getAppInstanceConfig(Integer namespaceId, String actionData) {
+	public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd) {
 
 		ForumEntryConfigulation config = (ForumEntryConfigulation) StringHelper.fromJsonString(actionData, ForumEntryConfigulation.class);
 		if(config == null){
@@ -79,12 +80,12 @@ public class ForumPortalPublishHandler implements PortalPublishHandler {
 	}
 
 	@Override
-	public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+	public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
 		return instanceConfig;
 	}
 
 	@Override
-	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+	public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
 
 		ForumActionData actionDataObj = (ForumActionData) StringHelper.fromJsonString(instanceConfig, ForumActionData.class);
 

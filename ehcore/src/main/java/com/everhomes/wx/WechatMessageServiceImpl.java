@@ -144,6 +144,8 @@ public class WechatMessageServiceImpl implements WeChatMessageService {
     public void sendTemplateMessage(String userOpenId, String templateId, String topColor, HashMap<String, MessageItem> params, String routerUrl){
 
 
+        LOGGER.info("sendTemplateMessage start userOpenId={}", userOpenId);
+
         TemplateMessage tm = new TemplateMessage();
         tm.setTouser(userOpenId);
         tm.setTemplate_id(templateId);
@@ -178,12 +180,15 @@ public class WechatMessageServiceImpl implements WeChatMessageService {
 
             String accessToken = weChatService.getAccessToken();
 
+            LOGGER.info("sendTemplateMessage info url={}, jsonData={}", SEND_TEMPLATE_URL + accessToken, json);
+
             jsonResult = HttpUtils.postJson(SEND_TEMPLATE_URL + accessToken, json, 30, HTTP.UTF_8);
+
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info("sendTemplateMessage error");
         }
 
-        System.out.println(jsonResult);
+        LOGGER.info("sendTemplateMessage userOpenId={}, result={}", userOpenId, jsonResult);
 
     }
 }

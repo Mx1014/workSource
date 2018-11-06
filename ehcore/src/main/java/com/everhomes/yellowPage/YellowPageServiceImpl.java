@@ -17,6 +17,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowAutoStepDTO;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
@@ -26,6 +27,7 @@ import com.everhomes.flow.FlowEvaluateItemProvider;
 import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_form.GeneralForm;
@@ -386,7 +388,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	AllianceStandardService allianceStandardService;
 	@Autowired
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
-	
+	@Autowired
+	private FlowProvider flowProvider;
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -838,9 +841,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public ServiceAllianceDTO getServiceAlliance(GetServiceAllianceCommand cmd) {
 		ServiceAllianceDTO dto = null;
 		if (null != cmd.getSourceRequestType() && ServiceAllianceSourceRequestType.CLIENT.getCode() == cmd.getSourceRequestType()) {
-			dto = getServiceAllianceByScene(cmd);
+			dto = getServiceAlliance(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), true);
 		} else {
-			dto = getServiceAllianceByAdmin(cmd);
+			dto = getServiceAlliance(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), false);
 		}
 		
 		return dto == null ? new ServiceAllianceDTO() : dto;
@@ -871,11 +874,22 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return dto;
 	}
 	
-	private ServiceAllianceDTO getServiceAllianceByAdmin(GetServiceAllianceCommand cmd) {
-		ServiceAllianceCategories homePageCa = allianceStandardService.queryHomePageCategoryByAdmin(cmd.getOwnerType(),
-				cmd.getOwnerId(), cmd.getType());
+	private ServiceAllianceDTO getServiceAlliance(String ownerType, Long ownerId, Long type, boolean isByScene) {
+		ServiceAllianceCategories homePageCa = null;
+		if (isByScene) {
+			if (!ServiceAllianceBelongType.COMMUNITY.getCode().equals(ownerType)) {
+				throwError(YellowPageServiceErrorCode.ERROR_OWNER_TYPE_NOT_COMMUNITY, "ownerType must be community");
+			}
+			
+			homePageCa = allianceStandardService.queryHomePageCategoryByScene(type, ownerId);
+		} else {
+			homePageCa = allianceStandardService.queryHomePageCategoryByAdmin(ownerType,
+					ownerId, type);
+		}
+		
 		if (null == homePageCa) {
-			LOGGER.error("getServiceAllianceByAdmin can not find the homePage cmd = " + cmd.toString());
+			LOGGER.error("getServiceAllianceByAdmin can not find the homePage ownerType:" + ownerType + " ownerId:"
+					+ ownerId + " type:" + type + " isByScene:" + isByScene);
 			return null;
 		}
 
@@ -884,11 +898,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 		sa.setId(homePageCa.getId());
 		this.yellowPageProvider.populateServiceAlliancesAttachment(sa, HOME_PAGE_ATTACH_OWNER_TYPE);
 		populateServiceAllianceAttachements(sa, sa.getCoverAttachments());
+		
 		ServiceAllianceDTO dto = ConvertHelper.convert(sa, ServiceAllianceDTO.class);
+		dto.setId(homePageCa.getId());
+		dto.setName(homePageCa.getName());
 		dto.setDisplayMode(homePageCa.getDisplayMode());
 		dto.setSkipType(homePageCa.getSkipType());
+		dto.setDescription(homePageCa.getDescription());
 		return dto;
 	}
+
 
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(GetServiceAllianceEnterpriseListCommand cmd) {
@@ -1018,7 +1037,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	private String buildFormModuleUrl(Long serviceId) {
-		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+		//为了先兼容之前版本IOS不支持的表单的bug,仍然使用approval
+		return "zl://approval/create?approvalId="+-serviceId;
+//		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+		
 	}
 
 	private boolean checkFormModuleUrlValid(ServiceAllianceDTO dto) {
@@ -1026,12 +1048,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (null == dto.getModuleUrl() || null == dto.getFormId()) {
 			return false;
 		}
+		
+		if (null != dto.getFlowId() && 0 ==  dto.getFlowId()) {
+			return false;
+		}
 
-		if (null != dto.getFlowId()) {
-			FlowDTO flow = flowService.getFlowById(dto.getFlowId());
-			if (null == flow || FlowStatusType.RUNNING.getCode() != flow.getStatus()) {
+		if (null != dto.getFlowId() && 0 <  dto.getFlowId()) {
+			Flow flow = flowProvider.getSnapshotFlowById(dto.getFlowId());
+			if (null == flow) {
 				return false;
 			}
+		}
+		
+		if (null == dto.getFlowId() || 0 ==  dto.getFlowId()) {
+			return false;
 		}
 
 		GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(dto.getFormId());

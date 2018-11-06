@@ -109,4 +109,6 @@ public interface OrganizationServiceErrorCode {
 
     //merge 发现冲突900031
     int ERROR_USER_IS_ADMINISTRATOR = 900031; //用户为管理员，不允许退出
+
+    int ERROR_EMAIL_IS_EXISTS = 900039; //用户认证时，邮箱已被认证。
 }

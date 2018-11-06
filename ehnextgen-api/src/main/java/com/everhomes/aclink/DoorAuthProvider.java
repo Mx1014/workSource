@@ -111,16 +111,15 @@ public interface DoorAuthProvider {
 	Long countCommunityDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Long communityId, Byte communityType,
 			Integer namespaceId, Byte rightType);
 
-
     List<DoorAuth> listValidDoorAuthByUser(long userId, String driver);
+    
+    void createDoorAuthLogBatch(List<DoorAuthLog> logs);
 
 	List<AclinkAuthDTO> listFormalAuth(CrossShardListingLocator locator, Integer pageSize, ListFormalAuthCommand cmd);
 
 	void createDoorAuthBatch(List<DoorAuth> cAuths);
 
 	void updateDoorAuthBatch(List<DoorAuth> uAuths);
-
-	void createDoorAuthLogBatch(List<DoorAuthLog> logs);
 
 	List<OrganizationMember> getOrganizationMemberByUserId(Long id);
 

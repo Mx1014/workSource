@@ -80,4 +80,21 @@ public interface DoorAccessProvider {
     AclinkManagement findAclinkManagementById (Long id);
 
     Long updateAclinkManagement(AclinkManagement manager);
+    //门禁v3.0.2 门禁分组 add by liqingyan
+    AclinkGroup createDoorGroup(AclinkGroup group);
+
+    AclinkGroup findAclinkGroupById(Long id);
+
+    AclinkGroup updateDoorGroup(AclinkGroup group);
+    //删除所有门禁组关系 add by liqingyan
+    void deleteAllDoorGroupRel(Long id);
+
+    List<DoorAccess> listNewDoorAccessByGroupId(Long groupId, int count);
+
+    void createDoorGroupRel(Long groupId, Long doorId);
+
+    List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
+                                                 ListDoorGroupCommand cmd);
+    List<DoorAccessNewDTO> listSelectDoors(ListSelectDoorsCommand cmd);
+
 }

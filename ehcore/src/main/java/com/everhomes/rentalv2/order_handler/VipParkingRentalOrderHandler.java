@@ -3,14 +3,19 @@ package com.everhomes.rentalv2.order_handler;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.parking.*;
+import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rentalv2.*;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.parking.ParkingSpaceStatus;
+import com.everhomes.rest.promotion.merchant.GetPayAccountByMerchantIdCommand;
+import com.everhomes.rest.promotion.merchant.controller.GetPayAccountByMerchantIdRestResponse;
 import com.everhomes.rest.promotion.order.CreateGeneralBillInfo;
 import com.everhomes.rest.promotion.order.CreateMerchantOrderCommand;
 import com.everhomes.rest.promotion.order.GoodDTO;
@@ -56,6 +61,8 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     private OrganizationProvider organizationProvider;
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    protected GeneralOrderService orderService;
     @Override
     public BigDecimal getRefundAmount(RentalOrder order, Long now) {
 
@@ -195,9 +202,29 @@ public class VipParkingRentalOrderHandler implements RentalOrderHandler {
     public Long getAccountId(RentalOrder order) {
         List<ParkingBusinessPayeeAccount> accounts = parkingBusinessPayeeAccountProvider.findRepeatParkingBusinessPayeeAccounts(null, order.getNamespaceId(), "community",
                 order.getCommunityId(), order.getRentalResourceId(), "vipParking");
-        if (accounts != null && accounts.size()>0)
+        if (accounts != null && accounts.size()>0 && accounts.get(0).getPayeeId() != null)
             return  accounts.get(0).getPayeeId();
+        //如果没有 查看是否有商户号
+        Long merchantId = this.gerMerchantId(order);
+        if (merchantId == null)
+            return null;
+        //根据商户号查收款账户
+        GetPayAccountByMerchantIdCommand cmd = new GetPayAccountByMerchantIdCommand();
+        cmd.setId(merchantId);
+        GetPayAccountByMerchantIdRestResponse restResponse = orderService.getPayAccountByMerchantId(cmd);
+        if(checkOrderRestResponseIsSuccess(restResponse)) {
+            PayUserDTO dto = restResponse.getResponse();
+            if (dto != null)
+                return dto.getId();
+        }
         return null;
+    }
+
+    private boolean checkOrderRestResponseIsSuccess(RestResponseBase response){
+        if(response != null && response.getErrorCode() != null
+                && (response.getErrorCode().intValue() == 200 || response.getErrorCode().intValue() == 201))
+            return true;
+        return false;
     }
 
     @Override

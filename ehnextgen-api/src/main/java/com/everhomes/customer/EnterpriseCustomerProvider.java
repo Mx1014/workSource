@@ -35,6 +35,7 @@ public interface EnterpriseCustomerProvider {
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
+    EnterpriseCustomer findByOrganizationIdAndCommunityId(Long organizationId, Long communityId);
     EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, Long communityId, String name);

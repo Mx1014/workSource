@@ -34,6 +34,8 @@ public class CreatePmTaskOrderCommand {
     private String ownerType;
     private Long ownerId;
 
+    private Long appId;
+
     public Long getTaskId() {
         return taskId;
     }
@@ -120,5 +122,13 @@ public class CreatePmTaskOrderCommand {
 
     public void setOwnerId(Long ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 }

@@ -14,6 +14,7 @@ public class FindRentalSiteByIdCommand {
     private Long id;
 
     private String sceneType;
+    private String sceneToken;
 
     public String getResourceType() {
         return resourceType;
@@ -37,6 +38,14 @@ public class FindRentalSiteByIdCommand {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
     }
 
     @Override

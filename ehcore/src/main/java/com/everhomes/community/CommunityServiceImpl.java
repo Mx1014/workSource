@@ -229,6 +229,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -247,6 +248,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.Status;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.PropertyErrorCode;
@@ -323,6 +325,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -2333,6 +2336,16 @@ public class CommunityServiceImpl implements CommunityService {
                 groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                 memberLogs.add(groupMemberDTO);
             });
+            //按照时间倒叙排列
+            Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                @Override
+                public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                    if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                        return -1;
+                    }
+                    return o2.getApproveTime().compareTo(o1.getApproveTime());
+                }
+            });
         }
         dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
@@ -2423,7 +2436,7 @@ public class CommunityServiceImpl implements CommunityService {
             dto.setVipLevel(user.getVipLevel());
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
-		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
 		if(null != memberLogs){
 			for(OrganizationMemberLog log : memberLogs){
 				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
@@ -2434,10 +2447,22 @@ public class CommunityServiceImpl implements CommunityService {
 				User operator = this.userProvider.findUserById(log.getOperatorUid());
 				if(null != operator)
 					logDTO.setOperatorNickName(operator.getNickName());
-				dto.getMemberLogDTOs().add(logDTO);
+                memberLog.add(logDTO);
 			}
+			if (!CollectionUtils.isEmpty(memberLog)) {
+                //按照时间倒叙排列
+                Collections.sort(memberLog, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
+            }
 		}
-
+        dto.setMemberLogDTOs(memberLog);
 		//最新活跃时间 add by sfyan 20170620
 		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
 		if(userActivities.size() > 0){
@@ -2504,6 +2529,16 @@ public class CommunityServiceImpl implements CommunityService {
                         pending = true;
                     }
                 }
+                //按照时间倒叙排列
+                Collections.sort(memberLogDTOs, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
                 communityUserAddressDTO.setOrgDtos(orgDtos);
                 communityUserAddressDTO.setAddressDtos(addressDtos);
                 communityUserAddressDTO.setMemberLogDTOs(memberLogDTOs);
@@ -2537,6 +2572,17 @@ public class CommunityServiceImpl implements CommunityService {
                     }
                     groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                     memberLogs.add(groupMemberDTO);
+                });
+
+                //按照时间倒叙排列
+                Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                    @Override
+                    public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                        if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                            return -1;
+                        }
+                        return o2.getApproveTime().compareTo(o1.getApproveTime());
+                    }
                 });
             }
             communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
@@ -3483,6 +3529,11 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 
+			if(namespacesService.isStdNamespace(namespaceId) && cmd.getPmOrgId() != null){
+				//新增所有已安装应用的授权
+				serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(namespaceId, cmd.getPmOrgId(), community.getId());
+			}
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -4051,6 +4102,20 @@ public class CommunityServiceImpl implements CommunityService {
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+        List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(orgIds,
+                UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())
+                && !CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+            if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
+                for (Long orgId : noAuthOrganizationIds) {
+                    if (orgIds.contains(orgId)) {
+                        orgIds.remove(orgId);
+                    }
+                }
+            }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
+                orgIds = noAuthOrganizationIds;
+            }
+        }
 		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
@@ -4080,7 +4145,6 @@ public class CommunityServiceImpl implements CommunityService {
                                           //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
                                             //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
                                             member.setId(r.getId());
-                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -4091,6 +4155,7 @@ public class CommunityServiceImpl implements CommunityService {
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                LOGGER.debug("orgmemberlogId is：{}" , orgIds);
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
@@ -4126,6 +4191,19 @@ public class CommunityServiceImpl implements CommunityService {
                     Organization organization = organizationProvider.findOrganizationById(dto.getOrganizationId());
                     if (organization != null) {
                         dto.setOrganizationName(organization.getName());
+                    }
+                }
+                dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+					List<OrganizationMember> manage = this.organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(dto.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode());
+					List<Long> manageUserIds = new ArrayList<>();
+					if (!CollectionUtils.isEmpty(manage)) {
+						for (OrganizationMember member : manage) {
+							manageUserIds.add(member.getTargetId());
+						}
+					}
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId()) && !manageUserIds.contains(UserContext.currentUserId())) {
+				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
                     }
                 }
                 if (dto.getNickName() == null || dto.getNickName().isEmpty()) {

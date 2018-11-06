@@ -58,6 +58,25 @@ public class GeneralFormFieldDTO {
 	// added by hpy 20180711
 	private Byte filterFlag;
 
+	// added by hpy 20181102
+	private String remark;
+	private Byte disabled;
+
+	public Byte getDisabled() {
+		return disabled;
+	}
+
+	public void setDisabled(Byte disabled) {
+		this.disabled = disabled;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
 
 	public String getFieldName() {
 		return fieldName;

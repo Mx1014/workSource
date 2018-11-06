@@ -25,6 +25,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.portal.PortalVersion;
 import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.common.OwnerType;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.launchpad.LaunchPadCategoryDTO;
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
 import com.everhomes.rest.module.AppCategoryDTO;
@@ -37,6 +38,7 @@ import com.everhomes.rest.launchpadbase.groupinstanceconfig.Card;
 import com.everhomes.rest.module.*;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.portal.AllOrMoreType;
+import com.everhomes.rest.portal.HandlerGetItemActionDataCommand;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.rest.servicemoduleapp.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -56,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -262,25 +265,45 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	@Override
 	public ListServiceModuleAppsForBannerResponse listServiceModuleAppsForBanner(ListServiceModuleAppsForBannerCommand cmd) {
 
-		List<ServiceModuleApp> apps = listReleaseServiceModuleApps(cmd.getNamespaceId());
-
-		if(apps == null){
-			return null;
-		}
-
 		List<ServiceModuleAppDTO> dtos = new ArrayList<>();
-		for (ServiceModuleApp app: apps){
-			if(app.getActionType() == null){
-				continue;
-			}
-			ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
-			PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
+        List<ServiceModuleApp> apps = new ArrayList<>();
+		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
+		if(cmd.getNamespaceId() == 2 && cmd.getCommunityId() != null) {
+            List<OrganizationCommunityDTO> communityDTOS = this.organizationProvider.findOrganizationCommunityByCommunityId(cmd.getCommunityId());
+            if (!CollectionUtils.isEmpty(communityDTOS)) {
+                Long orgId = communityDTOS.get(0).getOrganizationId();
+                apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), orgId, locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
+            }
+        }else {
+            apps = serviceModuleAppProvider.listInstallServiceModuleApps(cmd.getNamespaceId(), releaseVersion.getId(), locationType, null, sceneType, OrganizationAppStatus.ENABLE.getCode(),null);
+        }
+        if(apps == null){
+            return null;
+        }
+        for (ServiceModuleApp app: apps){
+            if(app.getActionType() == null){
+                continue;
+            }
+            if (cmd.getShowBannerAppFlag() != null && cmd.getShowBannerAppFlag().equals(TrueOrFalseFlag.FALSE.getCode()) && app.getModuleId().equals(ServiceModuleConstants.BANNER_MODULE)) {
+                continue;
+            }
+            ServiceModuleAppDTO dto = ConvertHelper.convert(app, ServiceModuleAppDTO.class);
+            ServiceModuleApp temp = this.serviceModuleAppProvider.findServiceModuleAppById(app.getId());
+            if (temp != null) {
+                dto.setName(temp.getName());
+            }
+            PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 
-			if(null != handler){
-				dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig()));
-			}
-			dtos.add(dto);
-		}
+            if(null != handler){
+				HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+				handlerCmd.setAppOriginId(app.getOriginId());
+				handlerCmd.setAppId(app.getId());
+                dto.setInstanceConfig(handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig(), handlerCmd));
+            }
+            dtos.add(dto);
+        }
 
 		ListServiceModuleAppsForBannerResponse  response = new ListServiceModuleAppsForBannerResponse();
 		response.setApps(dtos);
@@ -699,7 +722,11 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		PortalPublishHandler handler = portalService.getPortalPublishHandler(app.getModuleId());
 		if(handler != null){
-			String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig());
+
+			HandlerGetItemActionDataCommand handlerCmd = new HandlerGetItemActionDataCommand();
+			handlerCmd.setAppOriginId(app.getOriginId());
+			handlerCmd.setAppId(app.getId());
+			String itemActionData = handler.getItemActionData(app.getNamespaceId(), app.getInstanceConfig(), handlerCmd);
 			if(itemActionData != null){
 				app.setInstanceConfig(itemActionData);
 			}
