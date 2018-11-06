@@ -747,7 +747,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
             dto.setDefaultOrder(r.getDefaultOrder());
             dto.setDisplayName(r.getDisplayName());
             dto.setIconUri(r.getIconUri());
-            dto.setIsSurport((byte)1);
+            dto.setIsSurport((byte)0);
             dto.setName(r.getName());
             dto.setTemplateId(r.getId());
             return dto;
