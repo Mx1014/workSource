@@ -389,8 +389,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormFieldDTO dto = null;
         // 审批的值是在一张表
         if (moduleId == 52000L) {
-            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(
-                    formOriginId, 0L/*这张表的version好像都是0*/, ownerId, fieldName);
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(ownerId,
+                    formOriginId, 0L/*这张表的version好像都是0*/, fieldName);
             if (approvalVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(approvalVal.getFieldType());
