@@ -24,6 +24,14 @@ public class UserCurrentSceneCommand {
     private String signToken ;
     private String extra ;
 
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
     public String getSignToken() {
         return signToken;
     }
