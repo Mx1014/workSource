@@ -15,6 +15,8 @@ import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
@@ -144,5 +146,9 @@ public interface ContractProvider {
 	Map<String, BigDecimal> getChargeAreaByContractIdAndAddress(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
+
+	Boolean possibleEnterContractFuture(ContractDetailDTO contractDetailDTO,ContractBuildingMapping contractBuildingMapping);
+
+	Boolean resoucreReservationsFuture(ContractDetailDTO contractDetailDTO,BuildingApartmentDTO apartment);
 
 }

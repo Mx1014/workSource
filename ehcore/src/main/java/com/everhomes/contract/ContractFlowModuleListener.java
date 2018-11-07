@@ -166,6 +166,8 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			// 审批驳回开始节点，更新合同的状态为待发起 -- djm
 			Contract contract = contractProvider.findContractById(flowCase.getReferId());
 			contract.setStatus(ContractStatus.WAITING_FOR_LAUNCH.getCode());
+			//驳回审批，释放房源
+			dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
 		}
