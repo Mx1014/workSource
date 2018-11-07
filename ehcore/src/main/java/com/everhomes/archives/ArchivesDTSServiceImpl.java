@@ -303,7 +303,20 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         String fileName = ArchivesExcelLocaleString.C_FILENAME + "_" + employeeFormat.format(LocalDate.now()) + ".xlsx";
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
-
+    
+    public Long getTopEnterpriseId(Long organizationId) {
+        Organization organization = organizationProvider.findOrganizationById(organizationId);
+        if(organization != null){
+            if (organization.getParentId() == null)
+                return organizationId;
+            else {
+                return Long.valueOf(organization.getPath().split("/")[1]);
+            }
+        }else{
+            return organizationId;
+        }
+    }
+    
     @Override
     public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId) {
         //  title 2018年9月30日 临时去掉岗位
@@ -312,7 +325,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         //  data
         ListArchivesContactsResponse response = archivesService.listArchivesContacts(cmd);
         taskService.updateTaskProcess(taskId, 46);
-        List<Organization> orgs = organizationProvider.listOrganizationsByPath(cmd.getOrganizationId());
+        List<Organization> orgs = organizationProvider.listOrganizationsByPath(getTopEnterpriseId(cmd.getOrganizationId()));
         Map<Long, String> fullPathMap = orgs.stream().collect(Collectors.toMap(Organization::getId, Organization::getName));
         taskService.updateTaskProcess(taskId, 75);
         /*
@@ -360,7 +373,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         createExcelTitle(workbook, sheet, titleRow, title);
         //  3.data
         XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
-        for (int rowIndex = 2; rowIndex < contacts.size(); rowIndex++) {
+        for (int rowIndex = 2; rowIndex - 2 < contacts.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
             createContactsFileData(dataRow, bodyStyle, contacts.get(rowIndex - 2), fullPathMap);
         }

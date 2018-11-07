@@ -88,6 +88,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 
 	@Autowired
 	private DbProvider dbProvider;
+	
 	@Autowired
 	private FlowProvider flowProvider;
 
@@ -115,8 +116,8 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 			cmd21.setApplyUserId(user.getId());
 			cmd21.setReferType(FlowReferType.SERVICE_ALLIANCE.getCode());
 			cmd21.setReferId(sa.getId());
-			cmd21.setProjectType(sa.getOwnerType());
-			cmd21.setProjectId(sa.getOwnerId());
+			cmd21.setProjectType(cmd.getOwnerType());
+			cmd21.setProjectId(cmd.getOwnerId());
 			// 把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
 			cmd21.setCurrentOrganizationId(currentOrganizationId);
@@ -127,33 +128,10 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 				cmd21.setServiceType(category.getName());
 			}
 			Long flowCaseId = flowService.getNextFlowCaseId();
-
-			// 把values 存起来
-			List<GeneralFormVal> result = new ArrayList<>();
-			for (PostApprovalFormItem val : cmd.getValues()) {
-				GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
-				obj.setSourceType(EhFlowCases.class.getSimpleName());
-				obj.setSourceId(flowCaseId);
-				obj.setFieldName(val.getFieldName());
-				obj.setFieldType(val.getFieldType());
-				obj.setFieldValue(val.getFieldValue());
-				generalFormValProvider.createGeneralFormVal(obj);
-				result.add(obj);
-			}
-
+			
 			// add by jiarui 20180705
-			LocalEventBus.publish(event -> {
-				LocalEventContext localEventcontext = new LocalEventContext();
-				localEventcontext.setUid(UserContext.currentUserId());
-				localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
-				event.setContext(localEventcontext);
-				event.setEntityType(EntityType.GENERAL_FORM_VAL.getCode());
-				Map<String, Object> map = new HashMap<>();
-				map.put(EntityType.GENERAL_FORM_VAL.getCode(), result);
-				event.setParams(map);
-				event.setEventName(SystemEvent.SERVICE_ALLIANCE_CREATE.dft());
-			});
-
+			storeValues(form, cmd, flowCaseId);
+			
 			FlowCase flowCase;
 			if (null == flow) {
 				// 给他一个默认哑的flow
@@ -191,6 +169,36 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 		items.add(item);
 		dto.setValues(items);
 		return dto;
+	}
+	
+	private void storeValues(GeneralForm form, PostGeneralFormValCommand cmd, Long flowCaseId) {
+
+		// 把values 存起来
+		List<GeneralFormVal> result = new ArrayList<>();
+		for (PostApprovalFormItem val : cmd.getValues()) {
+			GeneralFormVal obj = ConvertHelper.convert(form, GeneralFormVal.class);
+			obj.setSourceType(EhFlowCases.class.getSimpleName());
+			obj.setSourceId(flowCaseId);
+			obj.setFieldName(val.getFieldName());
+			obj.setFieldType(val.getFieldType());
+			obj.setFieldValue(val.getFieldValue());
+			generalFormValProvider.createGeneralFormVal(obj);
+			result.add(obj);
+		}
+
+		// add by jiarui 20180705
+		LocalEventBus.publish(event -> {
+			LocalEventContext localEventcontext = new LocalEventContext();
+			localEventcontext.setUid(UserContext.currentUserId());
+			localEventcontext.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setContext(localEventcontext);
+			event.setEntityType(EntityType.GENERAL_FORM_VAL.getCode());
+			Map<String, Object> map = new HashMap<>();
+			map.put(EntityType.GENERAL_FORM_VAL.getCode(), result);
+			event.setParams(map);
+			event.setEventName(SystemEvent.SERVICE_ALLIANCE_CREATE.dft());
+		});
+
 	}
 
 	@Override

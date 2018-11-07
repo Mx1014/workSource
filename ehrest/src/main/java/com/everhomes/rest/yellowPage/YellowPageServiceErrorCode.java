@@ -43,4 +43,13 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_CATEGORY_NOT_EXIST = 11205;  //样式不存在
     static final int ERROR_FLOW_CASE_SERVICE_NOT_FOUND= 11206;  //未获取到服务
     
+    //FAQ
+    static final int ERROR_FAQ_TYPE_NOT_FOUND = 11400;  //
+    static final int ERROR_FAQ_NOT_FOUND = 11401;  //
+    static final int ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND = 11402;  //
+    static final int ERROR_FAQ_TYPE_NOT_VALID2 = 11402;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID3 = 11403;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID4 = 11404;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID5 = 11405;  //问题
+    
 }

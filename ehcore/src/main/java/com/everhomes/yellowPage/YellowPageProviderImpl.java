@@ -496,7 +496,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if (null != sa.getEndTime()) {
 			sa.setDefaultOrder(getDateDefaultOrder(sa));
 		}
-		
+		sa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		sa.setUpdateUid(UserContext.currentUserId());
         dao.update(sa);
 	}
 
@@ -1330,7 +1331,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(Long type) {
 
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME)
@@ -1341,7 +1342,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			return dto;
@@ -1461,7 +1462,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME, SA_TYPE_TABLE.PARENT_ID)
 		.from(SA_TYPE_TABLE)
@@ -1472,7 +1473,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			dto.setParentId(r.getValue(SA_TYPE_TABLE.PARENT_ID));
