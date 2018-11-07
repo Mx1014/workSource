@@ -916,6 +916,36 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     }
 
+    @Override
+    public List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsDaily(GetAllCommunityCustomerStatisticsDailyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerStatisticsDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerStatisticsDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<CustomerStatisticsDTO> getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void initCustomerStatusToDB(){
+
+    }
+
 }
 
 

@@ -74,4 +74,6 @@ public interface InvitedCustomerProvider {
     void deleteCustomerTrackersByCustomerId(Long customerId);
 
     void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
+
+    void getInitCustomerStatus
 }

@@ -46,4 +46,17 @@ public interface InvitedCustomerService {
 
     String signCustomerDataToThird(SignCustomerDataToThirdCommand cmd);
 
+    //========================统计相关代码========================
+    List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsDaily(GetAllCommunityCustomerStatisticsDailyCommand cmd);
+
+    List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
+
+    List<CustomerStatisticsDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
+
+    List<CustomerStatisticsDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
+
+    List<CustomerStatisticsDTO> getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
+
+    void initCustomerStatusToDB();
+
 }
