@@ -178,6 +178,10 @@ public class EnergyTaskScheduleJob extends QuartzJobBean {
         EnergyMeterTask task = taskProvider.findEnergyMeterTaskById(taskId);
         generateTaskPaymentExpectancies(task);
     }
+    
+    public void calculateTaskFee() {
+    	generatePaymentExpectancies();
+	}
 
     private void generatePaymentExpectancies() {
         List<EnergyMeterTask> tasks = taskProvider.listNotGeneratePaymentEnergyMeterTasks();

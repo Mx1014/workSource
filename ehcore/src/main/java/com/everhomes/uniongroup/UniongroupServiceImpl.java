@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -20,6 +21,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,10 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Autowired
     private PunchService punchService;
- 
+
+    @Autowired
+    private ArchivesService archivesService;
+    
 //    @Override
 //    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -331,15 +336,11 @@ public class UniongroupServiceImpl implements UniongroupService {
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
                 //:todo 寻找部门名
-                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailIdAndPath(r.getId(), org.getPath(), groupTypes);
-                if(departments != null && departments.size() > 0){
-                    for(OrganizationMember d: departments){
-                        Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());
-                        if(departOrg != null && departOrg.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
-                            dto.setDepartmentName(departOrg.getName());
-                        }
-                    }
 
+                Map<Long, String> dptMap = archivesService.getEmployeeDepartment(r.getId());
+                if (null != dptMap) {
+                    String depName = archivesService.convertToOrgNames(dptMap);
+                    dto.setDepartmentName(depName);
                 }
                 return dto;
             }).collect(Collectors.toList());

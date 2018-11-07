@@ -6391,18 +6391,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                         sendMessageForContactApproved(member);
-                        //记录添加log
-                        OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
-                        orgLog.setOrganizationId(member.getOrganizationId());
-                        orgLog.setContactName(member.getContactName());
-                        orgLog.setContactToken(member.getContactToken());
-                        orgLog.setUserId(member.getTargetId());
-                        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        orgLog.setOperationType(OperationType.JOIN.getCode());
-                        orgLog.setRequestType(RequestType.USER.getCode());
-                        orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                        orgLog.setContactDescription(member.getContactDescription());
-                        this.organizationProvider.createOrganizationMemberLog(orgLog);
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
@@ -7649,6 +7637,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return dto;
         }).collect(Collectors.toList()));
 
+        Collections.sort(response.getMembers(), new Comparator<OrganizationMemberDTO>() {
+            @Override
+            public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
+                if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                    return -1;
+                }
+                return o2.getApproveTime().compareTo(o1.getApproveTime());
+            }
+        });
         return response;
     }
 
@@ -9245,6 +9242,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                     communityAndBuildingRelationes.setCommunityId(createOfficeSite.getCommunityId());
                                                     communityAndBuildingRelationes.setAddressId(organizationSiteApartment.getApartmentId());
                                                     communityAndBuildingRelationes.setBuildingId(organizationSiteApartment.getBuildingId());
+                                                    communityAndBuildingRelationes.setWorkplaceId(organizationWorkPlaces.getId());
                                                     //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
                                                     organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
                                                 }

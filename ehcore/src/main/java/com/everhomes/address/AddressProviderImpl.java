@@ -10,6 +10,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.energy.EnergyMeter;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
@@ -17,10 +18,13 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.region.Region;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 import com.everhomes.sequence.SequenceProvider;
@@ -44,6 +48,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
@@ -1295,4 +1300,35 @@ public class AddressProviderImpl implements AddressProvider {
 			   });
 		return result;
 	}
+    
+    @Override
+    public List<Address> listAddressesOfInvalidCity(Integer namespaceId, Long pageAnchor, Integer pageSize) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        Condition c = Tables.EH_ADDRESSES.CITY_ID.notIn(context.select(Tables.EH_REGIONS.ID).from(Tables.EH_REGIONS));
+        if(namespaceId != null) {
+            c = c.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+        }
+        
+        if(pageAnchor != null) {
+            c = c.and(Tables.EH_ADDRESSES.ID.ge(pageAnchor));
+        }
+        
+        if(pageSize == null) {
+            pageSize = 1000;
+        }
+        
+        return context.selectFrom(Tables.EH_ADDRESSES).where(c)
+                .orderBy(Tables.EH_ADDRESSES.ID)
+                .limit(pageSize).fetchInto(Address.class);
+    }
+    
+    @Override
+    public void updateAddressOfCityId(Long addressId, Long cityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ADDRESSES)
+                .set(Tables.EH_ADDRESSES.CITY_ID, cityId)
+                .where(Tables.EH_ADDRESSES.ID.eq(addressId))
+                .execute();
+    }
 }

@@ -3,6 +3,7 @@ package com.everhomes.community_map;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.app.App;
 import com.everhomes.business.BusinessService;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
@@ -19,6 +20,7 @@ import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community_map.*;
 import com.everhomes.rest.community_map.SearchCommunityMapContentsCommand;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -67,8 +69,6 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-
         //先按域空间查，ownerid和ownertype暂时不用
         ListCommunityMapSearchTypesResponse response = new ListCommunityMapSearchTypesResponse();
 
@@ -89,7 +89,6 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
 
         if(StringUtils.isEmpty(cmd.getContentType())) {
             cmd.setContentType(CommunityMapSearchContentType.ALL.getCode());
@@ -173,8 +172,7 @@ public class CommunityMapServiceImpl implements CommunityMapService {
             //TODO:超过pageSize时，做一个截取，因为是从电商 和core server同时查询店铺数据
             Integer tempPageSize = pageSize - result.size();
 
-            SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-            Integer namespaceId = sceneTokenDto.getNamespaceId();
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
 
             List<CommunityMapShopDetail> shops = communityMapProvider.searchCommunityMapShops(namespaceId, null,
                     null, cmd.getBuildingId(), cmd.getKeyword(), cmd.getPageAnchor(), tempPageSize);
@@ -248,8 +246,9 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
 
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+//      标准版兼容
+        AppContext appContext = AppContextGenerator.fromWebToken(cmd.getSceneToken());
+        Long communityId = appContext.getCommunityId();
 
         List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize2 + 1, communityId,
                 namespaceId, cmd.getKeyword());
@@ -286,9 +285,9 @@ public class CommunityMapServiceImpl implements CommunityMapService {
 
         int namespaceId = UserContext.getCurrentNamespaceId();
         Long userId = UserContext.currentUserId();
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-
-        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+        //      标准版兼容
+        AppContext appContext = AppContextGenerator.fromWebToken(cmd.getSceneToken());
+        Long communityId = appContext.getCommunityId();
 
         SearchOrganizationCommand searchCmd = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
         searchCmd.setNamespaceId(namespaceId);
@@ -406,8 +405,11 @@ public class CommunityMapServiceImpl implements CommunityMapService {
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//        Long communityId = userService.getCommunityIdBySceneToken(sceneToken);
+//        标准版兼容
+        AppContext appContext = AppContextGenerator.fromWebToken(cmd.getSceneToken());
+        Long communityId = appContext.getCommunityId();
 
         CommunityMapInfo communityMapInfo = communityMapProvider.findCommunityMapInfo(namespaceId);
 
