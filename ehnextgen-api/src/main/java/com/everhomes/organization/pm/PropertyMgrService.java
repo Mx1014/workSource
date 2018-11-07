@@ -545,4 +545,6 @@ public interface PropertyMgrService {
 
 	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
 
+	ListApartmentsForAppResponse listApartmentsForApp(ListApartmentsForAppCommand cmd);
+
 }

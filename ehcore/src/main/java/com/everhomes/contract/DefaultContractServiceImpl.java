@@ -3895,4 +3895,25 @@ long assetCategoryId = 0l;
 			}
 		}
 	}
+
+	@Override
+	public List<ContractDTO> getApartmentRentalContract(ListApartmentContractsCommand cmd) {
+		List<ContractDTO> results = new ArrayList<>();
+		
+		List<Contract> contracts = contractProvider.listContractsByAddressId(cmd.getAddressId());
+		
+		for(Contract contract : contracts){
+			if (contract.getCategoryId() != null) {
+				ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+				if (contractCategory != null) {
+					if (ContractApplicationScene.RENTAL.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+						|| ContractApplicationScene.COMPREHENSIVE.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+						ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+						results.add(dto);
+					}
+				}
+			}
+		}
+		return results;
+	}
 }

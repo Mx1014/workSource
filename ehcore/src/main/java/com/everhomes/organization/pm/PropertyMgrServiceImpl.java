@@ -3345,45 +3345,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		setLivingStatus(dto, communityAddressMappingMap, apartmentDTO.getLivingStatus());
 		//设置公寓是否欠费
 		setOwedFlag(dto, billOwedMap);
-//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
+		//设置与该房源关联的有效合同中，结束日期最晚的合同的结束日期
 		Contract latestEndDateContract = findLatestEndDateContract(addressId);
 		if (latestEndDateContract!=null) {
 			dto.setRelatedContractEndDate(latestEndDateContract.getContractEndDate().getTime());
 		}
-		/*
-		* 因为通过addressService.listApartmentsByKeyword(cmd).second()方法获得的address，其IS_FUTURE_APARTMENT都为0，
-		* 所以如下代码可以注释掉，只留下else if分支的代码
-		*/
-		//设置该房源是否为未来房源，及与其关联的房源拆分合并计划的开始时间
-//		Address address = addressProvider.findAddressById(addressId);
-//		dto.setIsFutureApartment(address.getIsFutureApartment());
-//		if (address.getIsFutureApartment() == 1) {
-//			AddressArrangement addressArrangement = null;
-//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByTargetIdV2(addressId);
-//			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
-//    			if (targetIds.contains(addressId.toString())) {
-//    				addressArrangement = arrangement;
-//    				break;
-//				}
-//    		}
-//			if(addressArrangement!=null){
-//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
-//			}
-//		}else if (address.getIsFutureApartment() == 0) {
-//			AddressArrangement addressArrangement = null;
-//			List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
-//			for (AddressArrangement arrangement : arrangements) {
-//    			List<String> originalIds = (List<String>)StringHelper.fromJsonString(arrangement.getOriginalId(), ArrayList.class);
-//    			if (originalIds.contains(addressId.toString())) {
-//    				addressArrangement = arrangement;
-//    				break;
-//				}
-//    		}
-//			if(addressArrangement!=null){
-//				dto.setRelatedAddressArrangementBeginDate(addressArrangement.getDateBegin().getTime());
-//			}
-//		}
+		
 		dto.setIsFutureApartment((byte)0);
 		AddressArrangement addressArrangement = null;
 		List<AddressArrangement> arrangements = addressProvider.findActiveAddressArrangementByOriginalIdV2(addressId);
@@ -8583,5 +8550,40 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     }
 
+	@Override
+	public ListApartmentsForAppResponse listApartmentsForApp(ListApartmentsForAppCommand cmd) {
+		ListApartmentsForAppResponse response = new ListApartmentsForAppResponse();
+		
+		List<Address> addresses = addressProvider.findActiveApartmentsByBuildingId(cmd.getBuildingId());
+		List<Long> addressIdList = addresses.stream().map(a->a.getId()).collect(Collectors.toList());
+		Map<Long, CommunityAddressMapping> communityAddressMappingMap = propertyMgrProvider.mapAddressMappingByAddressIds(addressIdList);
+
+		List<ApartmentForAPPDTO> results = new ArrayList<>();
+		for(Address address : addresses){
+			ApartmentForAPPDTO dto = ConvertHelper.convert(address, ApartmentForAPPDTO.class);
+			CommunityAddressMapping communityAddressMapping = communityAddressMappingMap.get(address.getId());
+			if (communityAddressMapping != null) {
+				dto.setLivingStatus(communityAddressMapping.getLivingStatus());
+			}else {
+				dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
+			}
+			results.add(dto);
+		}
+		
+		if (cmd.getLivingStatus() != null) {
+			List<ApartmentForAPPDTO> filterResults = new ArrayList<>();
+			for (ApartmentForAPPDTO dto : results) {
+				filterResults.add(dto);
+				if (dto.getLivingStatus() != cmd.getLivingStatus()) {
+					filterResults.remove(dto);
+				}
+			}
+			response.setResults(filterResults);
+		}else {
+			response.setResults(results);
+		}
+		
+		return response;
+	}
 
 }
