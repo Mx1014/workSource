@@ -19,6 +19,7 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_SKIP_URL_FORMAT_ERROR = 10014;  //跳转链接格式错误
     static final int ERROR_INPUT_PARAM_NOT_VALID = 10015;  //接口参数异常
     static final int ERROR_QUERY_BIZ_MODULE_FAILED = 10016;  //获取电商模块失败
+    static final int ERROR_SERVICE_NOT_FOUND = 10017;  //服务不存在
     
     static final int ERROR_NEW_EVENT_APPLIER_NOT_EXIST = 11000;  //新事件申请用户不存在
     static final int ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST = 11001;  //未找到工作流信息

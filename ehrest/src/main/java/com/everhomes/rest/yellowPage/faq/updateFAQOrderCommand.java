@@ -1,5 +1,7 @@
 package com.everhomes.rest.yellowPage.faq;
 
+import java.util.List;
+
 import com.everhomes.rest.yellowPage.AllianceAdminCommand;
 /**
  * <ul>
@@ -10,25 +12,19 @@ import com.everhomes.rest.yellowPage.AllianceAdminCommand;
  * <li>currentPMId: 当前管理公司</li>
  * <li>currentProjectId: 当前项目id</li>
  * <li>appId: 当前应用originId</li>
- * <li>upFAQId: 更新到上方的问题id</li>
- * <li>lowFAQId: 更新到下方的问题id</li>
+ * <li>FAQIds: 排好序的问题id列表</li>
  * </ul>
  **/
 public class updateFAQOrderCommand extends AllianceAdminCommand{
-	private Long upFAQId;
-	private Long lowFAQId;
 	
-	public Long getUpFAQId() {
-		return upFAQId;
+	private List<Long> FAQIds;
+
+	public List<Long> getFAQIds() {
+		return FAQIds;
 	}
-	public void setUpFAQId(Long upFAQId) {
-		this.upFAQId = upFAQId;
-	}
-	public Long getLowFAQId() {
-		return lowFAQId;
-	}
-	public void setLowFAQId(Long lowFAQId) {
-		this.lowFAQId = lowFAQId;
+
+	public void setFAQIds(List<Long> fAQIds) {
+		FAQIds = fAQIds;
 	}
 }
 

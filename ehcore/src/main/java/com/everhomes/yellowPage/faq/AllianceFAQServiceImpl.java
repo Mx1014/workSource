@@ -178,19 +178,30 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		//校验权限
 		checkPrivilege(cmd);
 		
-		AllianceFAQType upFaqType = allianceFAQProvider.getFAQType(cmd.getUpFAQTypeId());
-		AllianceFAQType lowFaqType = allianceFAQProvider.getFAQType(cmd.getLowFAQTypeId());
-		if (null == upFaqType ||null == lowFaqType) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
-		}		
-		
-		if (upFaqType.getDefaultOrder() < lowFaqType.getDefaultOrder()) {
-			return;
+		if (null == cmd.getFAQTypeIds() || cmd.getFAQTypeIds().size() < 2) {
+			return ;
 		}
 		
+		AllianceFAQType faqType = null;
+		List<Long> finalOrders = new ArrayList<>(10);
+		for (Long faqTypeId : cmd.getFAQTypeIds()) {
+			faqType = allianceFAQProvider.getFAQType(faqTypeId);
+			if (null == faqType) {
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
+			}
+			
+			finalOrders.add(faqType.getDefaultOrder());
+		}
+		
+		//排序
+		Collections.sort(finalOrders); 
+		
+		//变更
 		dbProvider.execute(r->{
-			allianceFAQProvider.updateFAQTypeOrder(upFaqType.getId(), lowFaqType.getDefaultOrder());
-			allianceFAQProvider.updateFAQTypeOrder(lowFaqType.getId(), upFaqType.getDefaultOrder());
+			int i = 0;
+			for (Long faqTypeId : cmd.getFAQTypeIds()) {
+				allianceFAQProvider.updateFAQTypeOrder(faqTypeId, finalOrders.get(i++));
+			}
 			return null;
 		});
 		
@@ -518,19 +529,30 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		//校验权限
 		checkPrivilege(cmd);
 		
-		AllianceFAQ upFaq = allianceFAQProvider.getFAQ(cmd.getUpFAQId());
-		AllianceFAQ lowFaq = allianceFAQProvider.getFAQ(cmd.getLowFAQId());
-		if (null == upFaq ||null == lowFaq) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
-		}		
-		
-		if (upFaq.getDefaultOrder() < lowFaq.getDefaultOrder()) {
-			return;
+		if (null == cmd.getFAQIds() || cmd.getFAQIds().size() < 2) {
+			return ;
 		}
 		
+		AllianceFAQ faq = null;
+		List<Long> finalOrders = new ArrayList<>(10);
+		for (Long faqId : cmd.getFAQIds()) {
+			faq = allianceFAQProvider.getFAQ(faqId);
+			if (null == faq) {
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
+			}
+			
+			finalOrders.add(faq.getDefaultOrder());
+		}
+		
+		//排序
+		Collections.sort(finalOrders); 
+		
+		//变更
 		dbProvider.execute(r->{
-			allianceFAQProvider.updateFAQOrder(upFaq.getId(), lowFaq.getDefaultOrder());
-			allianceFAQProvider.updateFAQOrder(lowFaq.getId(), upFaq.getDefaultOrder());
+			int i = 0;
+			for (Long faqId : cmd.getFAQIds()) {
+				allianceFAQProvider.updateFAQOrder(faqId, finalOrders.get(i++));
+			}
 			return null;
 		});
 		
