@@ -7030,9 +7030,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            aclinkCard.setTitle("公共门禁");
 //            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
 
-            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
+//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
-            SmartCardHandlerItem item = new SmartCardHandlerItem();
+
 //            item.setTitle("楼层");
 //            item.setRouterUrl("zl://aclink/index");
 //            item.setName("aclink-floor");
@@ -7046,8 +7046,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            item.setDefaultValue("VIP3");
 //            items.add(item);
 
-            aclinkCard.setItems(items);
-            smartCardhandlers.add(aclinkCard);
+//            aclinkCard.setItems(items);
+//            smartCardhandlers.add(aclinkCard);
 
 //            aclinkCard = new SmartCardHandler();
 //            aclinkCard.setAppOriginId(41015L);
@@ -7068,7 +7068,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             List<SmartCardHandler> stand2 = new ArrayList<SmartCardHandler>();
             smartCardInfo.setStandaloneHandlers(stand2);
-            stand2.add(aclinkCard);
+//            stand2.add(aclinkCard);
 
             hs = smartCardModuleManager.generateStandaloneCards(ctx);
             if(hs != null) {
@@ -7084,6 +7084,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            stand2.add(aclinkCard);
 
             List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
+            SmartCardHandlerItem item = new SmartCardHandlerItem();
             item = new SmartCardHandlerItem();
             item.setTitle("个人钱包");
             item.setRouterUrl("zl://wallet/index");

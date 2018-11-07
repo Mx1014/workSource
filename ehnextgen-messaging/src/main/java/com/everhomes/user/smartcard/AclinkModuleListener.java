@@ -42,8 +42,10 @@ public class AclinkModuleListener implements SmartCardListener {
 		if(null != resp.getKeys() && !resp.getKeys().isEmpty()){
 			List<Long> longList = new ArrayList<Long>();
 			longList.add(41000L);
-			Long appOriginId = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).get(0).getOriginId();
-			aclinkCard.setAppOriginId(appOriginId);
+            if(null != serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList) && !serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).isEmpty()){
+                Long appOriginId = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).get(0).getOriginId();
+                aclinkCard.setAppOriginId(appOriginId);
+            }
 			aclinkCard.setData(resp.getKeys().get(0).toString());
 			aclinkCard.setTitle("门禁" + resp.getKeys().get(0).getDoorDisplayName());
 			aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
@@ -68,14 +70,33 @@ public class AclinkModuleListener implements SmartCardListener {
 				aclinkCard.setModuleId(41000L);
 				List<Long> longList = new ArrayList<Long>();
 				longList.add(41000L);
-				Long appOriginId = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).get(0).getOriginId();
-				aclinkCard.setAppOriginId(appOriginId);
+                if(null != serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList) && !serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).isEmpty()){
+                    Long appOriginId = serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).get(0).getOriginId();
+                    aclinkCard.setAppOriginId(appOriginId);
+                }
 				aclinkCard.setData(resp.getKeys().get(i).toString());
 				aclinkCard.setTitle("门禁" + resp.getKeys().get(i).getDoorDisplayName());
 				aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+                		List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
+		SmartCardHandlerItem item = new SmartCardHandlerItem();
+		item.setTitle("楼层");
+		item.setRouterUrl("zl://aclink/index");
+		item.setName("aclink-floor");
+		item.setDefaultValue("5");
+		items.add(item);
+
+		item = new SmartCardHandlerItem();
+		item.setTitle("VIP");
+		item.setRouterUrl("zl://aclink/index");
+		item.setName("aclink-vip");
+		item.setDefaultValue("VIP3");
+		items.add(item);
+		aclinkCard.setItems(items);
 				hs.add(aclinkCard);
 			}
 		}
+
+
 		return hs;
 	}
 
