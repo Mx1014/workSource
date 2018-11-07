@@ -142,8 +142,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     public Object createThirdTask(HttpServletRequest req) {
         FmWorkDataService service = getService();
         String json;
-
-        PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
+        String phone = req.getParameter("user_id");
+        PmTaskArchibusUserMapping user = getUser(phone);
         LOGGER.debug("用户Id：" + user.getArchibusUid());
         if(user == null){
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
@@ -157,11 +157,15 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         String record_type = req.getParameter("record_type");
         String remarks = req.getParameter("remarks");
         String contack = req.getParameter("contack");
-
         String telephone = req.getParameter("telephone");
         String location =req.getParameter("location");
         String order_date = req.getParameter("order_date");
         String order_time = req.getParameter("order_time");
+
+        if(StringUtils.isBlank(contack) && StringUtils.isBlank(telephone)){
+            contack = UserContext.current().getUser().getNickName();
+            telephone = phone;
+        }
 
         if("4".equals(record_type)){
             if(StringUtils.isBlank(order_date)){
