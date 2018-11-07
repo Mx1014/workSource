@@ -434,6 +434,3 @@ CREATE TABLE `eh_asset_dooraccess_logs` (
 -- REMARK: 删除 eh_recommendations 的外键, 因为他影响了这张表的数据操作
 ALTER TABLE eh_recommendations DROP FOREIGN KEY fk_eh_recommendations_user_idx;
 
--- AUTHOR: 黄良铭
--- REMARK: 用户当前场景表添加一个字段
-ALTER TABLE eh_user_current_scene ADD COLUMN  extra TEXT;
