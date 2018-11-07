@@ -27,6 +27,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.common.TagSearchItem;
@@ -186,6 +187,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	OrganizationService organizationService;
+
+	@Autowired
+	private FamilyProvider familyProvider;
 
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
@@ -1627,10 +1631,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		AppContext appContext = UserContext.current().getAppContext();
 		ListNewsCommand listCmd = new ListNewsCommand();
 		listCmd.setOwnerType(NewsOwnerType.COMMUNITY.getCode());
-		listCmd.setOwnerId(appContext.getCommunityId());
+		listCmd.setOwnerId(getCommunityIdByAppContext());
 		listCmd.setCategoryId(cmd.getCategoryId());
 		listCmd.setPageAnchor(cmd.getPageAnchor());
 		listCmd.setPageSize(cmd.getPageSize());
@@ -1941,9 +1944,8 @@ public class NewsServiceImpl implements NewsService {
 
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
-		AppContext appContext = UserContext.current().getAppContext();
 
-		String jsonString = getSearchJson(appContext.getCommunityId(), null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
+		String jsonString = getSearchJson(getCommunityIdByAppContext(), null, userId, namespaceId, null, cmd.getKeyword(), null, pageAnchor, pageSize,
 				NewsStatus.ACTIVE.getCode(), true);
 		// 需要查询的字段
 		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
@@ -2242,27 +2244,37 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 
-	private String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
+	@Override
+	public String getNewsRenderUrl(Integer namespaceId, Long categoryId, String title, String widget,
 			String timeWidgetStyle) {
 
 		String encodeTitile = null;
-		try {
-			// 标题为中文时需要转码
-			encodeTitile = URLEncoder.encode(title, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("news title name not can't be encoded :"+ title);
+		if (null != title) {
+			try {
+				// 标题为中文时需要转码
+				encodeTitile = URLEncoder.encode(title, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				LOGGER.error("news title name not can't be encoded :" + title);
+			}
 		}
-
+	
 		String homeUrl = configProvider.getValue(0, "home.url", "core.zuolin.com");
 		StringBuilder renderUrl = new StringBuilder(homeUrl);
 		renderUrl.append("/park-news-web/build/index.html?");
 		renderUrl.append("categoryId=" + categoryId);
-		renderUrl.append("&title=" + encodeTitile);
-		renderUrl.append("&widget=" + widget);
+		
+		if (null != title) {
+			renderUrl.append("&title=" + encodeTitile);
+		}
+		
+		if (null == widget) {
+			renderUrl.append("&widget=NewsFlash");
+		} else {
+			renderUrl.append("&widget=" + widget);
+		}
 		renderUrl.append("&timeWidgetStyle=" + timeWidgetStyle);
 		renderUrl.append("&ns=" + namespaceId);
 		renderUrl.append("#/newsList#sign_suffix");
-
 		return renderUrl.toString();
 	}
 
@@ -2617,6 +2629,32 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		return null;
+	}
+	
+	private Long getCommunityIdByAppContext() {
+		AppContext appContext = UserContext.current().getAppContext();
+		if (null != appContext.getCommunityId()) {
+			return appContext.getCommunityId();
+		}
+
+
+		//旧版本的公司场景没有communityId跪了
+		if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+			List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+			if(requests != null && requests.size() > 0){
+				appContext.setCommunityId(requests.get(0).getCommunityId());
+			}
+		}
+
+		//旧版本的家庭场景没有communityId，又跪了
+		if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+			FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+			if(family != null){
+				appContext.setCommunityId(family.getCommunityId());
+			}
+		}
+		 
+		return appContext.getCommunityId();
 	}
 
 

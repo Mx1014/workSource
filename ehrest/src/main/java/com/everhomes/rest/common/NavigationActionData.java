@@ -26,6 +26,8 @@ public class NavigationActionData implements Serializable{
     private String title;
     private Long appId;
     private String entityTag;
+
+    private Byte containerType;
     
     public String getItemLocation() {
         return itemLocation;
@@ -66,6 +68,15 @@ public class NavigationActionData implements Serializable{
     public void setEntityTag(String entityTag) {
         this.entityTag = entityTag;
     }
+
+    public Byte getContainerType() {
+        return containerType;
+    }
+
+    public void setContainerType(Byte containerType) {
+        this.containerType = containerType;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

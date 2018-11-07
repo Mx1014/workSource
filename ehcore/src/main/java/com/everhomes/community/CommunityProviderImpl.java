@@ -174,7 +174,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
-
+    	
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
             (DSLContext context, Object reducingContext) -> {
                 EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
@@ -2010,7 +2010,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
-        query.addLimit(pageSize);
+        query.addLimit(pageSize+1);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBuildingsByKeywords, sql=" + query.getSQL());
@@ -2115,6 +2115,15 @@ public class CommunityProviderImpl implements CommunityProvider {
 							        		.and(Tables.EH_BUILDINGS.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
 							        		.fetchInto(Building.class);
 		return buildings;
+	}
+
+	@Override
+	public List<Long> findCommunityIdsByOrgId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID)
+						.from(Tables.EH_ORGANIZATION_COMMUNITIES)
+						.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId))
+						.fetchInto(Long.class);
 	}
 
 }

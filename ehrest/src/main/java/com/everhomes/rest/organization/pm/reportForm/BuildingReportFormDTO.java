@@ -27,6 +27,8 @@ import com.everhomes.util.StringHelper;
  */
 public class BuildingReportFormDTO {
 	
+	private Long communityId;
+	private String communityName;
 	private Long buildingId;
 	private String buildingName;
 	private Integer totalApartmentCount;
@@ -46,6 +48,18 @@ public class BuildingReportFormDTO {
 	private BigDecimal dueDayCount;
 	private BigDecimal collectionRate;
 	
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+	public String getCommunityName() {
+		return communityName;
+	}
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
 	public Long getBuildingId() {
 		return buildingId;
 	}

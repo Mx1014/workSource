@@ -1,7 +1,5 @@
 package com.everhomes.pmtask;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -35,8 +33,8 @@ import java.util.stream.Collectors;
 abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPmTaskHandle.class);
-	@Autowired
-	CategoryProvider categoryProvider;
+//	@Autowired
+//	CategoryProvider categoryProvider;
 	@Autowired
 	DbProvider dbProvider;
 	@Autowired
@@ -68,8 +66,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 	
-	private Category checkCategory(Long id){
-		Category category = categoryProvider.findCategoryById(id);
+	private PmTaskCategory checkCategory(Long id){
+		PmTaskCategory category = pmTaskProvider.findCategoryById(id);
 		if(null == category) {
         	LOGGER.error("Category not found, categoryId={}", id);
     		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
@@ -188,10 +186,12 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
 		//多入口时，app始终会传taskCategoryId，根据时候传parentId来查询服务类型
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && cmd.getParentId() == null) {
+//		null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L &&
+		if(cmd.getParentId() == null) {
 			//app服务广场 物业报修配固定id  PmTaskAppType.REPAIR_ID
 			//投诉建议 配固定id PmTaskAppType.SUGGESTION_ID, 如果配置错误，则需要修改
-			parentId = cmd.getTaskCategoryId();
+//			parentId = cmd.getTaskCategoryId();
+			parentId = 0L;
 //			if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId()) {
 //
 //			}else if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId())
@@ -214,7 +214,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 //					return response;
 //				}
 //			}
-			Category parent = categoryProvider.findCategoryById(parentId);
+			PmTaskCategory parent = pmTaskProvider.findCategoryById(parentId);
 			if (null == parent) {
 				DockingMapping mapping = dockingMappingProvider.findDockingMappingById(parentId);
 				if(null != mapping){
@@ -229,15 +229,15 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 			}
 
 		}
-		List<Category> list = new ArrayList<>();
+		List<PmTaskCategory> list = new ArrayList<>();
 		List<Long> ownIds = this.getOwnerIds(cmd);
 		if (ownIds.size() > 1){
 			for (Long ownId : ownIds) {
-				list.addAll(categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),ownId,
+				list.addAll(pmTaskProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),ownId,cmd.getAppId(),
 						parentId, cmd.getKeyword(), null, null));
 			}
 		} else {
-			list.addAll(categoryProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),
+			list.addAll(pmTaskProvider.listTaskCategories(namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),
 					parentId, cmd.getKeyword(), cmd.getPageAnchor(), cmd.getPageSize()));
 		}
 
@@ -245,7 +245,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
-    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId,r.getOwnerType(),r.getOwnerId(),
+    			List<PmTaskCategory> tempList = pmTaskProvider.listTaskCategories(namespaceId,r.getOwnerType(),r.getOwnerId(),cmd.getAppId(),
 						null, r.getPath(), null, null);
     			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
     					.collect(Collectors.toList()), dto);
@@ -269,7 +269,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		checkNamespaceId(namespaceId);
 		Long defaultId = PmTaskAppType.REPAIR_ID;
 
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, cmd.getOwnerType(),cmd.getOwnerId(),
+		List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(namespaceId, cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),
 				null, null, null, null);
 		
 		List<CategoryDTO> dtos = categories.stream().map(r -> {
@@ -327,7 +327,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
     			PmTask task = pmTaskProvider.findTaskById(t.getId());
     			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
     			if(task != null) {
-					Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+					PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 //					Category taskCategory = checkCategory(task.getTaskCategoryId());
 					if(taskCategory != null) {
 						dto.setTaskCategoryId(taskCategory.getId());
@@ -374,6 +374,31 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 
 	@Override
 	public Object getThirdTaskDetail(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object getThirdCategories(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object getThirdProjects(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object createThirdEvaluation(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object getThirdEvaluation(HttpServletRequest req) {
+		return null;
+	}
+
+	@Override
+	public Object submitThirdAttachment(HttpServletRequest req) {
 		return null;
 	}
 

@@ -2,6 +2,8 @@ package com.everhomes.bus;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.user.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.function.Consumer;
@@ -10,6 +12,8 @@ import java.util.function.Consumer;
  * Created by xq.tian on 2017/12/5.
  */
 public class LocalEventBus {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalEventBus.class);
 
     private volatile static LocalEventBus localEventBus;
 
@@ -36,9 +40,12 @@ public class LocalEventBus {
     public static void publish(LocalEvent event) {
         getLocalEventBus().populateEvent(event);
         getLocalEventBus().localBus.publish(getLocalEventBus(), event.getEventName(), event);
-        if (getLocalEventBus().kafkaTemplate != null) {
+
+        if (event.getContext() != null && event.getContext().getUid() != null) {
             int partition = (int) (event.getContext().getUid()%100);
             getLocalEventBus().kafkaTemplate.send("system-event", partition, String.valueOf(partition), event.toString());
+        } else {
+            LOGGER.warn("Invalid event, can not send to kafka, event={}", event);
         }
     }
 

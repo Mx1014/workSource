@@ -49,6 +49,7 @@ public enum ParkingLotVendor {
 	BEE_SUBFIVE("BEE_SUBFIVE"),
 	JIESHUN_GQY2(VendorNameEnum.JIESHUN_GQY2),
 	JIESHUN_DSHCXMall(VendorNameEnum.JIESHUN_DSHCXMall),
+	KETUO_TEST("KETUO_TEST"),
 	NONE(""); //用于结束
 
     private String code;

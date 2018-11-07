@@ -114,9 +114,11 @@ public class PurchaseServiceImpl implements PurchaseService {
         order.setSupplierId(cmd.getSupplierId());
 
         BigDecimal totalAmount = new BigDecimal("0");
-        for(PurchaseMaterialDTO dto : cmd.getDtos()) {
-             totalAmount = new BigDecimal(dto.getUnitPrice()).multiply(new BigDecimal(dto.getPurchaseQuantity()));
-        }
+        if (cmd.getDtos() != null) {
+        	for(PurchaseMaterialDTO dto : cmd.getDtos()) {
+                totalAmount = new BigDecimal(dto.getUnitPrice()).multiply(new BigDecimal(dto.getPurchaseQuantity()));
+           }
+		}
         order.setTotalAmount(totalAmount);
 
         //关联已经通过的请示单，和请示单的状态不联动，采购单的状态走自己的工作流（purchase）
@@ -129,30 +131,32 @@ public class PurchaseServiceImpl implements PurchaseService {
         order.setWarehouseStatus(WarehouseOrderStatus.SUSPEND.getCode());
         //关联的物品的新增
         List<EhWarehousePurchaseItems> list = new ArrayList<>();
-        for(PurchaseMaterialDTO dto : cmd.getDtos()) {
-            PurchaseItem item = new PurchaseItem();
-            item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            item.setCreateUid(UserContext.currentUserId());
-            item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
-                    EhWarehousePurchaseItems.class
-            )));
-            item.setMaterialId(dto.getMaterialId());
-            //预录入入库的仓库
-            item.setWarehouseId(dto.getWarehouseId());
-            item.setNamespaceId(cmd.getNamespaceId());
-            item.setOwnerId(cmd.getOwnerId());
-            item.setOwnerType(cmd.getOwnerType());
-            item.setPurchaseQuantity(dto.getPurchaseQuantity());
-            item.setPurchaseRequestId(nextPurchaseOrderId);
-            try{
-                item.setUnitPrice(new BigDecimal(dto.getUnitPrice().trim()));
-            }catch (Exception e){
-                LOGGER.error("unit price input incorrect");
+        if (cmd.getDtos() != null) {
+        	for(PurchaseMaterialDTO dto : cmd.getDtos()) {
+                PurchaseItem item = new PurchaseItem();
+                item.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                item.setCreateUid(UserContext.currentUserId());
+                item.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(
+                        EhWarehousePurchaseItems.class
+                )));
+                item.setMaterialId(dto.getMaterialId());
+                //预录入入库的仓库
+                item.setWarehouseId(dto.getWarehouseId());
+                item.setNamespaceId(cmd.getNamespaceId());
+                item.setOwnerId(cmd.getOwnerId());
+                item.setOwnerType(cmd.getOwnerType());
+                item.setPurchaseQuantity(dto.getPurchaseQuantity());
+                item.setPurchaseRequestId(nextPurchaseOrderId);
+                try{
+                    item.setUnitPrice(new BigDecimal(dto.getUnitPrice().trim()));
+                }catch (Exception e){
+                    LOGGER.error("unit price input incorrect");
 
+                }
+                list.add(item);
             }
-            list.add(item);
-        }
-
+		}
+        
         this.dbProvider.execute((TransactionStatus status) -> {
             if(cmd.getStartFlow().byteValue() == (byte)1){
                 //工作流case

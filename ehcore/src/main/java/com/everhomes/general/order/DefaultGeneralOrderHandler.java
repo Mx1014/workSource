@@ -102,6 +102,7 @@ public abstract class DefaultGeneralOrderHandler implements GeneralOrderBizHandl
 		buildOtherPayInfo(orderCmd, info); // 个人支付参数
 		if (info.getReturnUrl() != null && info.getReturnUrl().length() >0)
 			orderCmd.setReturnUrl(info.getReturnUrl());
+		orderCmd.setReturnHost(configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", ""));
 		return orderCmd;
 	}
 	

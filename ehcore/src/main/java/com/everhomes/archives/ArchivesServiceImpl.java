@@ -32,6 +32,7 @@ import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.ExcelUtils;
@@ -49,6 +50,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -211,6 +213,20 @@ public class ArchivesServiceImpl implements ArchivesService {
         logCommand.setEmployeeType(EmployeeType.FULLTIME.getCode());
         logCommand.setEmployeeStatus(EmployeeStatus.ON_THE_JOB.getCode());
         addCheckInLogs(detailId, logCommand);
+
+        //记录添加log
+        OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
+        orgLog.setOrganizationId(memberDTO.getOrganizationId());
+        orgLog.setContactName(memberDTO.getContactName());
+        orgLog.setContactToken(memberDTO.getContactToken());
+        orgLog.setUserId(memberDTO.getTargetId());
+        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        orgLog.setOperationType(OperationType.JOIN.getCode());
+        orgLog.setRequestType(RequestType.USER.getCode());
+        orgLog.setOperatorUid(UserContext.current().getUser().getId());
+        orgLog.setContactDescription(memberDTO.getContactDescription());
+        this.organizationProvider.createOrganizationMemberLog(orgLog);
+
         return dto;
     }
 
@@ -373,8 +389,9 @@ public class ArchivesServiceImpl implements ArchivesService {
 
         //	设置隐私保护值
         OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndToken(dto.getContactToken(), dto.getOrganizationId());
-        dto.setVisibleFlag(member.getVisibleFlag());
-
+        if(member != null){
+        	dto.setVisibleFlag(member.getVisibleFlag());
+        }
         //  设置置顶
         dto.setStick("1");
 		return dto;

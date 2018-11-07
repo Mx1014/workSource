@@ -13,6 +13,7 @@ import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.NamespacesService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.message.MessageRecordDto;
 import com.everhomes.rest.message.MessageRecordSenderTag;
 import com.everhomes.rest.message.MessageRecordStatus;
@@ -42,6 +43,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
@@ -271,7 +274,10 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
     @Override
     public void routeMessage(MessageRoutingContext context, UserLogin senderLogin, long appId, String dstChannelType,
                              String dstChannelToken, MessageDTO message, int deliveryOption) {
-        if(namespacesService.isWechatNamespace(UserContext.getCurrentNamespaceId())){
+
+        Integer wxNamespaceFlag = configProvider.getIntValue(UserContext.getCurrentNamespaceId(), "wx.namespace.flag", 0);
+
+        if(wxNamespaceFlag != null && wxNamespaceFlag.intValue() == 1){
             routeMessageForWechat(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
         }else {
             routeMessageForApp(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
@@ -306,9 +312,13 @@ public class MessagingServiceImpl implements MessagingService, ApplicationListen
         if(message.getMeta() != null ){
             Map meta = message.getMeta();
 
-            if("message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
+            if(url != null && "message.router".equals(meta.get(MessageMetaConstant.META_OBJECT_TYPE)) &&  meta.get(MessageMetaConstant.META_OBJECT) != null){
 
-                url = url + "?routerMetaObject=" + meta.get(MessageMetaConstant.META_OBJECT);
+                try {
+                    url = url + "?routerMetaObject=" + URLEncoder.encode((String)meta.get(MessageMetaConstant.META_OBJECT), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
 //                RouterMetaObject routerMetaObject = (RouterMetaObject)StringHelper.fromJsonString(message.getMeta().get(MessageMetaConstant.META_OBJECT), RouterMetaObject.class);
 //                if(routerMetaObject != null){

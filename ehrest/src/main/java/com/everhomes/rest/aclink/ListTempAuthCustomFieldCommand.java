@@ -24,6 +24,7 @@ public class ListTempAuthCustomFieldCommand {
     private Byte ownerType;
     private Integer namespaceId;
 
+
     public Long getOwnerId() {
         return ownerId;
     }

@@ -481,7 +481,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 			.or(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.like("%" + keyWords + "%")));
 		}
 		if(payMode!=null){
-			if (payMode == GorderPayType.ENTERPRISE_PAID.getCode()){
+			if (payMode == GorderPayType.ENTERPRISE_PAY.getCode()){
 				List<Byte> modes = new ArrayList();
 				modes.add(GorderPayType.ENTERPRISE_PAY.getCode());
 				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());

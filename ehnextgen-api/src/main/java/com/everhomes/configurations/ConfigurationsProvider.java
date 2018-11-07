@@ -22,7 +22,7 @@ public interface ConfigurationsProvider {
 	 * @return Configurations
 	 */
 	List<Configurations> listConfigurations(Integer namespaceId,String name,
-								String value,Integer  pageSize,CrossShardListingLocator locator);
+								String value,Integer  pageSize,CrossShardListingLocator locator,Boolean likeSearch);
 	
 	/**
 	 * 通过主键查询配置项信息，主键不能为空 

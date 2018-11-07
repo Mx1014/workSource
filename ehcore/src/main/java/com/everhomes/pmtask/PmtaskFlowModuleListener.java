@@ -5,8 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
@@ -70,8 +68,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
 	private SmsProvider smsProvider;
-	@Autowired
-	private CategoryProvider categoryProvider;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -689,14 +685,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 										List<Tuple<String, Object>> variables) {
 		FlowCase flowCase = ctx.getFlowCase();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Category category = null;
+		PmTaskCategory category = null;
 		//Todo:为科兴与一碑对接
 		if (task.getNamespaceId()==999983 && null!= task.getTaskCategoryId() &&
 				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
-			category = new Category();
+			category = new PmTaskCategory();
 			category.setName("物业报修");
 		}else
-			category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+			category = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
 
@@ -793,7 +789,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		if ("taskCategoryId".equals(variable)) {
 			FlowCase flowcase = ctx.getFlowCase();
 			PmTask pmTask = pmTaskProvider.findTaskById(flowcase.getReferId());
-			Category category = categoryProvider.findCategoryById(pmTask.getTaskCategoryId());
+			PmTaskCategory category = pmTaskProvider.findCategoryById(pmTask.getTaskCategoryId());
 			FlowConditionStringVariable flowConditionStringVariable = new FlowConditionStringVariable(category.getName());
 			return flowConditionStringVariable;
 		}

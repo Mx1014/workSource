@@ -35,10 +35,8 @@ public interface CommunityServiceErrorCode {
 
 	static final int ERROR_BUILDING_NAME_EXIST = 10201;//楼宇名称已存在
 
-
-	//TODO 冲突了，先直接合并
-	static final int ERROR_BUILDING_NAME_OVER_FLOW = 10013;//楼栋名称不能超过20个汉字
-    static final int ERROR_BUILDING_NAME_REPEATED = 10014;//楼栋名称不能重复
+	static final int ERROR_BUILDING_NAME_OVER_FLOW = 10213;//楼栋名称不能超过20个汉字
+    static final int ERROR_BUILDING_NAME_REPEATED = 10214;//楼栋名称不能重复
 
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_ADDRESS_EMPTY = 20002;

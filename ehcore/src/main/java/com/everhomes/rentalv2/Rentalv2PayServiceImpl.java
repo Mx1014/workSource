@@ -370,7 +370,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         }
         //2、收款商户是否存在，无则报错
         cmd.setMerchantId(this.getRentalOrderMerchant(order.getId()));
-        PayUserDTO payUserDTO = new PayUserDTO();
+        PayUserDTO payUserDTO = null;
         if (cmd.getMerchantId() != null){
             GetPayAccountByMerchantIdCommand cmd2 = new GetPayAccountByMerchantIdCommand();
             cmd2.setId(cmd.getMerchantId());
@@ -468,7 +468,10 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
     @Override
     public void refundOrder(RentalOrder order,Long amount) {
         Rentalv2OrderRecord record = this.rentalv2AccountProvider.getOrderRecordByOrderNo(Long.valueOf(order.getOrderNo()));
-
+        if (record == null)
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+                    RentalServiceErrorCode.ERROR_REFUND_ERROR,
+                    "bill refund error");
         CreateRefundOrderCommand createRefundOrderCommand = new CreateRefundOrderCommand();
         String systemId = configurationProvider.getValue(0, PaymentConstants.KEY_SYSTEM_ID, "");
         createRefundOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
@@ -742,13 +745,14 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
         if (cmd.getPaymentStatus() != null) {
             Rentalv2OrderRecord record;
             BigDecimal couponAmount = new BigDecimal(0);
-            if (cmd.getMerchantOrderId() != null) {
-                record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
-                record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
-                rentalv2AccountProvider.updateOrderRecord(record);
-                couponAmount = changePayAmount(cmd.getCouponAmount());
-            } else
+
+            record = rentalv2AccountProvider.getOrderRecordByMerchantOrderId(cmd.getMerchantOrderId());
+            if (record == null)
                 record = rentalv2AccountProvider.getOrderRecordByBizOrderNo(cmd.getBizOrderNum());
+            record.setBizOrderNum(cmd.getBizOrderNum()); //存下来 开发票的时候使用
+            rentalv2AccountProvider.updateOrderRecord(record);
+            couponAmount = changePayAmount(cmd.getCouponAmount());
+
             RentalOrder order = rentalProvider.findRentalBillByOrderNo(record.getOrderNo().toString());
             order.setPaidMoney(order.getPaidMoney().add(changePayAmount(cmd.getAmount())));
             order.setAccountName(record.getAccountName()); //记录收款方账号
@@ -824,14 +828,7 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             order.setStatus(SiteBillStatus.SUCCESS.getCode());
             rentalProvider.updateRentalBill(order);
             rentalService.onOrderSuccess(order);
-            //发短信
-            RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
-
-            handler.sendRentalSuccessSms(order);
-
         } else {
-
-//		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
             rentalProvider.updateRentalBill(order);
             //改变订单状态
             rentalService.changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
@@ -847,29 +844,6 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             stepDTO.setFlowVersion(flowCase.getFlowVersion());
             stepDTO.setStepCount(flowCase.getStepCount());
             flowService.processAutoStep(stepDTO);
-            //发消息和短信
-            //发给发起人
-            Map<String, String> map = new HashMap<>();
-            map.put("useTime", order.getUseDetail());
-            map.put("resourceName", order.getResourceName());
-            rentalCommonService.sendMessageCode(order.getRentalUid(), map,
-                    RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
-
-            String templateScope = SmsTemplateCode.SCOPE;
-            String templateLocale = RentalNotificationTemplateCode.locale;
-            int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
-
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-            smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
-
-            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
-                    IdentifierType.MOBILE.getCode());
-            if (null == userIdentifier) {
-                LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-            } else {
-                smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
-                        templateId, templateLocale, variables);
-            }
         }
     }
 
@@ -886,7 +860,8 @@ public class Rentalv2PayServiceImpl implements Rentalv2PayService {
             bill.setStatus(SiteBillStatus.REFUNDED.getCode());
             rentalProvider.updateRentalBill(bill);
             rentalProvider.updateRentalRefundOrder(rentalRefundOrder);
-//			rentalService.cancelOrderSendMessage(bill);
+            RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+            messageHandler.refundOrderSuccessSendMessage(bill);
 
     }
 

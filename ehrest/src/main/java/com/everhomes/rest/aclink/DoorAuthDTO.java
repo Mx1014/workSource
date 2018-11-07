@@ -82,6 +82,17 @@ public class DoorAuthDTO {
     @ItemType(AclinkFormValuesDTO.class)
     private List<AclinkFormValuesDTO> values;
 
+    @ItemType(AclinkFormTitlesDTO.class)
+    private List<AclinkFormTitlesDTO> titles;
+
+    public List<AclinkFormTitlesDTO> getTitles() {
+        return titles;
+    }
+
+    public void setTitles(List<AclinkFormTitlesDTO> titles) {
+        this.titles = titles;
+    }
+
     public List<AclinkFormValuesDTO> getValues() {
         return values;
     }

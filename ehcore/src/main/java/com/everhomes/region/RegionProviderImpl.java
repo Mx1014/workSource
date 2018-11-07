@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.region;
 
+import static com.everhomes.server.schema.Tables.EH_ENERGY_METERS;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.energy.EnergyMeter;
+import com.everhomes.rest.energy.EnergyMeterStatus;
 import com.everhomes.rest.region.RegionActiveStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
