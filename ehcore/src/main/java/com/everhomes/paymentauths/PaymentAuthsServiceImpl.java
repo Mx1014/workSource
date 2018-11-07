@@ -103,6 +103,9 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	@Override
 	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
+		if(enterprisePaymentAuths.getEnterpriseAuth() == null && enterprisePaymentAuths.getEnterpriseAuth().size() == 0){
+			paymentAuthsProvider.deleteEnterprisePaymentAuths(enterprisePaymentAuths.getAppId(), cmd.getOrganizationId());
+		}
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths);
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){
