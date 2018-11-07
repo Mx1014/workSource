@@ -9,8 +9,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>id: 福利Id 有就填没有不填</li>
- * <li>ownerType: 所属类型,填organization 必填</li>
- * <li>ownerId: 公司id 必填</li>
+ * <li>organizationId: 公司id 必填</li>
  * <li>subject:  主题名称 必填</li>
  * <li>content: 祝福语 必填</li>
  * <li>senderName:发放者姓名 必填</li>
@@ -30,13 +29,13 @@ import com.everhomes.util.StringHelper;
  * <li>operatorUid: 操作者uId 只读项</li>
  * <li>updateTime: 操作时间 只读项</li>
  * <li>receivers: 接收人列表 参考{@link com.everhomes.rest.welfare.WelfareReceiverDTO}</li>
- * <li>items: 福利项列表 参考{@link com.everhomes.rest.welfare.WelfareItemDTO}</li>
+ * <li>coupons: 卡券列表 参考{@link com.everhomes.rest.welfare.WelfareCouponDTO}</li>
+ * <li>points: 积分列表 参考{@link com.everhomes.rest.welfare.WelfarePointDTO}</li>
  * </ul>
  */
 public class WelfaresDTO {
     private Long id;
-    private String ownerType;
-    private Long ownerId;
+    private Long organizationId;
     private String subject;
     private String content;
     private String senderName;
@@ -68,22 +67,6 @@ public class WelfaresDTO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 
 	public String getSubject() {
@@ -236,5 +219,13 @@ public class WelfaresDTO {
 
 	public void setImgSize(Integer imgSize) {
 		this.imgSize = imgSize;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

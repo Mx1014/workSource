@@ -76,7 +76,7 @@ public class WelfareServiceImpl implements WelfareService {
         }
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
 
-        List<Welfare> results = welfareProvider.listWelfare(cmd.getOwnerId(), locator, pageSize + 1);
+        List<Welfare> results = welfareProvider.listWelfare(cmd.getOrganizationId(), locator, pageSize + 1);
         if (null == results || results.size() == 0) {
             return response;
         }
@@ -134,9 +134,9 @@ public class WelfareServiceImpl implements WelfareService {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
         WelfaresDTO welfareDTO = cmd.getWelfare();
         if (welfareDTO.getId() != null) {
-            lockName = lockName + welfareDTO.getOwnerId() + welfareDTO.getId();
+            lockName = lockName + welfareDTO.getOrganizationId() + welfareDTO.getId();
         } else {
-            lockName = lockName + welfareDTO.getOwnerId();
+            lockName = lockName + welfareDTO.getOrganizationId();
         }
         this.coordinationProvider.getNamedLock(lockName).enter(() -> {
             if (welfareDTO.getId() != null) {
@@ -159,7 +159,7 @@ public class WelfareServiceImpl implements WelfareService {
 
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
-        String uName = salaryService.findNameByOwnerAndUser(welfare.getOwnerId(), UserContext.currentUserId());
+        String uName = salaryService.findNameByOwnerAndUser(welfare.getOrganizationId(), UserContext.currentUserId());
         welfare.setCreatorName(uName);
         welfare.setOperatorName(uName);
         if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
@@ -171,22 +171,12 @@ public class WelfareServiceImpl implements WelfareService {
         } else {
             welfareProvider.updateWelfare(welfare);
         }
-        welfareItemProvider.deleteWelfareItems(welfare.getId());
-        if (null != welfareDTO.getItems()) {
-            for (WelfareItemDTO dto : welfareDTO.getItems()) {
-                WelfareItem item = ConvertHelper.convert(dto, WelfareItem.class);
-                item.setOwnerId(welfare.getOwnerId());
-                item.setOwnerType(welfare.getOwnerType());
-                item.setWelfareId(welfare.getId());
-                welfareItemProvider.createWelfareItem(item);
-            }
-        }
+        
         welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
         if (null != welfareDTO.getReceivers()) {
             for (WelfareReceiverDTO dto : welfareDTO.getReceivers()) {
                 WelfareReceiver receiver = ConvertHelper.convert(dto, WelfareReceiver.class);
-                receiver.setOwnerId(welfare.getOwnerId());
-                receiver.setOwnerType(welfare.getOwnerType());
+                receiver.setOrganizationId(welfare.getOrganizationId());
                 receiver.setWelfareId(welfare.getId());
                 welfareReceiverProvider.createWelfareReceiver(receiver);
             }
@@ -202,9 +192,9 @@ public class WelfareServiceImpl implements WelfareService {
     public SendWelfaresResponse sendWelfare(SendWelfareCommand cmd) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
         if (cmd.getWelfare().getId() != null) {
-            lockName = lockName + cmd.getWelfare().getOwnerId() + cmd.getWelfare().getId();
+            lockName = lockName + cmd.getWelfare().getOrganizationId() + cmd.getWelfare().getId();
         } else {
-            lockName = lockName + cmd.getWelfare().getOwnerId();
+            lockName = lockName + cmd.getWelfare().getOrganizationId();
         }
         return this.coordinationProvider.getNamedLock(lockName).enter(() -> {
             SendWelfaresResponse response = new SendWelfaresResponse();
@@ -257,7 +247,6 @@ public class WelfareServiceImpl implements WelfareService {
                 PayUserDTO accountDTO = payService.createPersonalPayUserIfAbsent("EhUser" + r.getReceiverUid(), "NS" + UserContext.getCurrentNamespaceId().toString());
                 //todo 转账
                 sendPayslipMessage(welfare.getOperatorName(), welfare.getSubject(), welfare.getId(), r.getReceiverUid());
-                return r;
             });
             return response;
         }).first();
