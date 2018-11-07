@@ -45,6 +45,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
+import com.everhomes.rest.contract.ContractDetailDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -113,6 +115,7 @@ import java.util.Map;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.PmResourceReservation;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -149,6 +152,8 @@ public class ContractProviderImpl implements ContractProvider {
 	public void createContract(Contract contract) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContracts.class));
 		contract.setId(id);
+		contract.setCreateUid(UserContext.currentUserId());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		getReadWriteDao().insert(contract);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhContracts.class, null);
 	}
@@ -1662,5 +1667,40 @@ public class ContractProviderImpl implements ContractProvider {
 				       .fetchAnyInto(BigDecimal.class);
 	}
 
+	@Override
+	public Boolean possibleEnterContractFuture(ContractDetailDTO currentExistContract,ContractBuildingMapping contractBuildingMapping) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Contract> list = dslContext.select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.WAITING_FOR_APPROVAL.getCode()))
+						.or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.APPROVE_QUALITIED.getCode())).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.EXPIRING.getCode())))
+				.and((Tables.EH_CONTRACTS.CONTRACT_START_DATE.between(currentExistContract.getContractStartDate(), currentExistContract.getContractEndDate()))
+						.or(Tables.EH_CONTRACTS.CONTRACT_END_DATE.between(currentExistContract.getContractStartDate(), currentExistContract.getContractEndDate())))
+				
+				.and(Tables.EH_CONTRACTS.ID.eq(contractBuildingMapping.getContractId()))
+				
+				.fetchInto(Contract.class);
+
+		if (list!=null && list.size()>0) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Boolean resoucreReservationsFuture(ContractDetailDTO contractDetailDTO,BuildingApartmentDTO apartment) {
+		DSLContext dslContext = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<PmResourceReservation> list = dslContext.select().from(Tables.EH_PM_RESOUCRE_RESERVATIONS)
+				.where(Tables.EH_PM_RESOUCRE_RESERVATIONS.ADDRESS_ID.eq(apartment.getAddressId()))
+				.and((Tables.EH_PM_RESOUCRE_RESERVATIONS.START_TIME.between(contractDetailDTO.getContractStartDate(), contractDetailDTO.getContractEndDate()))
+						.or(Tables.EH_PM_RESOUCRE_RESERVATIONS.END_TIME.between(contractDetailDTO.getContractStartDate(), contractDetailDTO.getContractEndDate())))
+				
+				.and(Tables.EH_PM_RESOUCRE_RESERVATIONS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				.fetchInto(PmResourceReservation.class);
+
+		if (list!=null && list.size()>0) {
+			return true;
+		}
+		return false;
+	}
 
 }

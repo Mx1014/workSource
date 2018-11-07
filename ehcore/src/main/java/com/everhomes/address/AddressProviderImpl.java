@@ -764,6 +764,7 @@ public class AddressProviderImpl implements AddressProvider {
 		context.select()
 				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq((byte)2))
 				.fetch()
 				.map(r->{
 					ContractBuildingMapping convert = ConvertHelper.convert(r, ContractBuildingMapping.class);

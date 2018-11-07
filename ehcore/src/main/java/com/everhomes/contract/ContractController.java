@@ -610,4 +610,39 @@ public class ContractController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * <p>合同初始化/选择合同列表合同进行初始化</p>
+	 * <b>URL: /contract/initializationContract</b>
+	 */
+	@RequestMapping("initializationContract")
+	@RestReturn(String.class)
+	public RestResponse initializationContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.initializationContract(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>合同免批/选择合同列表合同进行合同免批</p>
+	 * <b>URL: /contract/exemptionContract</b>
+	 */
+	@RequestMapping("exemptionContract")
+	@RestReturn(String.class)
+	public RestResponse exemptionContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.exemptionContract(cmd);
+		return new RestResponse();
+	}
+	
+	/**
+	 * <p>合同复制/支持批量复制合同</p>
+	 * <b>URL: /contract/copyContract</b>
+	 */
+	@RequestMapping("copyContract")
+	@RestReturn(String.class)
+	public RestResponse copyContract(InitializationCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.copyContract(cmd);
+		return new RestResponse();
+	}
 }
