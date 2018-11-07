@@ -77,7 +77,7 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-			PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getCategoryId());
+			PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 
 			ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(task.getAppId());
 
