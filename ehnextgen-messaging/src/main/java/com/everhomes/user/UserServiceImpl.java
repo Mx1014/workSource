@@ -134,6 +134,7 @@ import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -172,6 +173,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -7023,6 +7025,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
+            
+            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
+            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
+            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+            displayConfigs.add(dispConf);
+            smartCardInfo.setDisplayConfigs(displayConfigs);
 
             smartCardInfo.setSmartCardId(obj.getId());
             smartCardInfo.setSmartCardKey(obj.getCardkey());
