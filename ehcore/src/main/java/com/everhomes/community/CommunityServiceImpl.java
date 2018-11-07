@@ -5334,8 +5334,9 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityGeoPoint> pointList;
 
 
-
-		for(int i = 12; i > 3; i--){
+		//TODO 5的范围太小，但是改成3的话，会把大量的数据查询出来。因为0域空间有大量的Community和CommunityGeoPoint数据。
+		//TODO findCommunityGeoPointByGeoHash接口应该带上namespaceId，内部和eh_communities连表查询。并且规定不能查询0域空间。
+		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){
