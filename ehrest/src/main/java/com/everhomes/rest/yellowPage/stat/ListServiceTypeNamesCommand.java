@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: ownerType</li>
  * <li>ownerId: ownerId</li>
  * <li>type: 服务联盟类型id</li>
+ * <li>parentId: parentId 兼容前端</li>
  * <li>currentPMId: 管理公司id</li>
  * <li>currentProjectId: 当前项目id</li>
  * <li>appId: 应用的originId</li>
@@ -19,6 +20,7 @@ public class ListServiceTypeNamesCommand {
 	private String ownerType;
 	private Long ownerId;
 	private Long type;
+	private Long parentId;
 	
 	@NotNull
 	private Long currentPMId;
@@ -33,6 +35,9 @@ public class ListServiceTypeNamesCommand {
 	}
 
 	public Long getType() {
+		if (null == type) {
+			return parentId;
+		}
 		return type;
 	}
 
@@ -78,6 +83,14 @@ public class ListServiceTypeNamesCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 }
 
