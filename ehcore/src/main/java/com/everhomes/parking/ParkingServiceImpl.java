@@ -1014,7 +1014,7 @@ public class ParkingServiceImpl implements ParkingService {
 			
 			e = new OrderDescriptionEntity();
 			e.setKey("停车时长");
-			e.setValue(order.getDelayTime().toString());
+			e.setValue(order.getParkingTime().toString());
 			goodsDetail.add(e);
 		}
 		
