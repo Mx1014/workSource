@@ -40,6 +40,8 @@ public class AclinkModuleListener implements SmartCardListener {
 		ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
 		resp = doorAccessService.listDoorAccessQRKey();
 		if(null != resp.getKeys() && !resp.getKeys().isEmpty()){
+            //未融合二维码，status等于10，融合后去掉
+		    resp.getKeys().get(0).setStatus((byte)10);
 			List<Long> longList = new ArrayList<Long>();
 			longList.add(41000L);
             if(null != serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList) && !serviceModuleAppService.listReleaseServiceModuleAppByModuleIds(UserContext.getCurrentNamespaceId(),longList).isEmpty()){
