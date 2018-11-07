@@ -216,18 +216,18 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                             name = org.getOrganizationMemberName();
                         }
 
-                        enterprises.append(organizations.get(k).getDisplayName() + ",");
+                        enterprises.append(organizations.get(k).getDisplayName() + ";");
 
                         //是否高管、职位
                         if(org.getCommunityUserOrgDetailDTO() != null){
                             if(org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == null || org.getCommunityUserOrgDetailDTO().getExecutiveFlag() == 0){
-                                executiveFlag.append("否,");
+                                executiveFlag.append("否;");
                             }else {
-                                executiveFlag.append("是,");
+                                executiveFlag.append("是;");
                             }
 
                             if (!StringUtils.isBlank(org.getCommunityUserOrgDetailDTO().getPositionTag())) {
-                                positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ",");
+                                positionFlag.append(org.getCommunityUserOrgDetailDTO().getPositionTag() + ";");
                             }
 
                         }else {
@@ -248,9 +248,9 @@ public class CommunityBatchUserApplyExportTaskHandler implements FileDownloadTas
                 exportCommunityUserDto.setGenderString(UserGender.fromCode(r.getGender()).getText());
                 exportCommunityUserDto.setAuthString(AuthFlag.fromCode(r.getIsAuth()) == AuthFlag.AUTHENTICATED ? "已认证" : "待认证");
                 exportCommunityUserDto.setUserSourceTypeString(UserSourceType.fromCode(r.getUserSourceType()) == UserSourceType.WEIXIN ? "微信": "无");
-                exportCommunityUserDto.setEnterpriseName(enterprises.toString());
+                exportCommunityUserDto.setEnterpriseName(StringUtils.isBlank(enterprises.toString())?"-":enterprises.toString().substring(0,enterprises.toString().length()-1));
                 exportCommunityUserDto.setPosition(StringUtils.isBlank(positionFlag.toString())?"-":positionFlag.toString().substring(0,positionFlag.toString().length()-1));
-                exportCommunityUserDto.setExecutiveString(executiveFlag.toString());
+                exportCommunityUserDto.setExecutiveString(StringUtils.isBlank(executiveFlag.toString())?"-":executiveFlag.toString().substring(0,executiveFlag.toString().length()-1));
                 exportCommunityUserDto.setEmail("-");
                 if (emailIdentifier != null) {
                     exportCommunityUserDto.setEmail(emailIdentifier.getIdentifierToken());

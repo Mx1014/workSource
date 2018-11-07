@@ -3,8 +3,6 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.constants.ErrorCodes;
@@ -56,8 +54,6 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 	@Autowired
 	private FlowButtonProvider flowButtonProvider;
 	@Autowired
-	private CategoryProvider categoryProvider;
-	@Autowired
 	private PortalService portalService;
 
 	@Override
@@ -69,7 +65,7 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 			Flow flow = null;
 
-			Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
+			Long parentTaskId = pmTaskProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
 			if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
 				flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
 						FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
@@ -84,7 +80,7 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+			PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 
 			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
 			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
@@ -160,8 +156,8 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 			response.setRequests(list.stream().map(r -> {
 				PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
 
-				Category category = categoryProvider.findCategoryById(r.getCategoryId());
-				Category taskCategory = checkCategory(r.getTaskCategoryId());
+				PmTaskCategory category = pmTaskProvider.findCategoryById(r.getCategoryId());
+				PmTaskCategory taskCategory = checkCategory(r.getTaskCategoryId());
 				if(null != category)
 					dto.setCategoryName(category.getName());
 				dto.setTaskCategoryName(taskCategory.getName());
@@ -178,8 +174,8 @@ class YueKongJianPmTaskHandle extends DefaultPmTaskHandle {
 		return response;
 	}
 
-	private Category checkCategory(Long id){
-		Category category = categoryProvider.findCategoryById(id);
+	private PmTaskCategory checkCategory(Long id){
+		PmTaskCategory category = pmTaskProvider.findCategoryById(id);
 		if(null == category) {
 			LOGGER.error("Category not found, categoryId={}", id);
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,

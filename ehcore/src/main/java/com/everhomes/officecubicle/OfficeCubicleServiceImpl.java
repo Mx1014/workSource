@@ -47,6 +47,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.tools.ant.taskdefs.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -547,14 +548,20 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 	public List<CityDTO> queryCities(QueryCitiesCommand cmd) {
 		checkOwnerTypeOwnerId(cmd.getOwnerType(),cmd.getOwnerId());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+//		查询自定义配置标识
+		GetCustomizeCommand newCmd = ConvertHelper.convert(cmd,GetCustomizeCommand.class);
+		Byte custmFlag = getProjectCustomize(newCmd);
+
 //		根据项目查询
 		int pageSize = PaginationConfigHelper.getMaxPageSize(configurationProvider,999999);
-		List<OfficeCubicleCity> cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),Long.MAX_VALUE,pageSize);
-		if(cities == null || cities.size() == 0){
+		List<OfficeCubicleCity> cities;
+		if(custmFlag.equals((byte)1)){
+			cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,cmd.getOwnerType(),cmd.getOwnerId(),Long.MAX_VALUE,pageSize);
+		}else{
 			cities = officeCubicleCityProvider.listOfficeCubicleCity(namespaceId,null,null,null,Long.MAX_VALUE,pageSize);
 		}
 		final OfficeCubicleSelectedCity selecetedCity = cubicleSelectedCityProvider.findOfficeCubicleSelectedCityByCreator(UserContext.current().getUser().getId());
-		
 		return cities.stream().map(r->{
 			CityDTO dto = ConvertHelper.convert(r, CityDTO.class);
 			//根据上次用户选中的城市，这里设置当前选中的城市。
@@ -1008,12 +1015,24 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 
 	@Override
 	public ListCitiesResponse listProvinceAndCites(ListCitiesCommand cmd) {
+//		查询自定义配置标识
+		GetCustomizeCommand newCmd = ConvertHelper.convert(cmd,GetCustomizeCommand.class);
+		Byte custmFlag = getProjectCustomize(newCmd);
 		List<OfficeCubicleCity> list=null;
-		if(cmd.getParentName()==null){
-			list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
+		if(custmFlag.equals((byte)1)){
+			if(cmd.getParentName()==null){
+				list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
+			}else{
+				list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
+			}
 		}else{
-			list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId(),cmd.getOwnerId());
+			if(cmd.getParentName()==null){
+				list = officeCubicleCityProvider.listOfficeCubicleProvince(UserContext.getCurrentNamespaceId(),null);
+			}else{
+				list = officeCubicleCityProvider.listOfficeCubicleCitiesByProvince(cmd.getParentName(),UserContext.getCurrentNamespaceId(),null);
+			}
 		}
+
 		return new ListCitiesResponse(list.stream().map(r->ConvertHelper.convert(r, CityDTO.class)).collect(Collectors.toList()));
 	}
 

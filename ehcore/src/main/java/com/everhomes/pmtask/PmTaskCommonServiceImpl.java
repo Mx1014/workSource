@@ -3,8 +3,6 @@ package com.everhomes.pmtask;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -66,8 +64,6 @@ class PmTaskCommonServiceImpl {
     private SmsProvider smsProvider;
     @Autowired
     private AddressProvider addressProvider;
-    @Autowired
-    private CategoryProvider categoryProvider;
     @Autowired
     private CommunityProvider communityProvider;
     @Autowired
@@ -199,7 +195,7 @@ class PmTaskCommonServiceImpl {
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
-        Category taskCategory = checkCategory(taskCategoryId);
+        PmTaskCategory taskCategory = checkCategory(taskCategoryId);
 
         final PmTask task = new PmTask();
 
@@ -254,8 +250,8 @@ class PmTaskCommonServiceImpl {
         return task;
     }
 
-    Category checkCategory(Long id){
-        Category category = categoryProvider.findCategoryById(id);
+    PmTaskCategory checkCategory(Long id){
+        PmTaskCategory category = pmTaskProvider.findCategoryById(id);
         if(null == category) {
             LOGGER.error("Category not found, categoryId={}", id);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -327,8 +323,8 @@ class PmTaskCommonServiceImpl {
         PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
 
         //查询服务类型
-            Category category = categoryProvider.findCategoryById(task.getCategoryId());
-        Category taskCategory = checkCategory(task.getTaskCategoryId());
+        PmTaskCategory category = pmTaskProvider.findCategoryById(task.getCategoryId());
+        PmTaskCategory taskCategory = checkCategory(task.getTaskCategoryId());
         if(null != category)
             dto.setCategoryName(category.getName());
         dto.setTaskCategoryName(taskCategory.getName());

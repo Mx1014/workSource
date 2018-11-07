@@ -343,4 +343,6 @@ public interface AssetService {
 	void meterAutoReading(Boolean createPlanFlag);
 	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
 	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
+	
+	void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId);
 }

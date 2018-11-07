@@ -685,6 +685,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 					GeneralApproval approval = generalApprovalProvider.getGeneralApprovalById(approvalId);
 					if (null != approval) {
 						sa.setFormId(approval.getFormOriginId());
+						sa.setStringTag5(""+approval.getId());
 						formCount++;
 						flow = getFlowByApprovalId(approval.getId());
 					}

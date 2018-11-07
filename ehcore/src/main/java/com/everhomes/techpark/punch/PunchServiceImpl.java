@@ -187,6 +187,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.RestClient.Response;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -8156,11 +8157,14 @@ public class PunchServiceImpl implements PunchService {
 //			versionCode = 1;
 //		}
         List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(), CONFIG_VERSION_CODE);
-        dto.setEmployeeCount(employees == null ? 0 : employees.size());
         List<Long> detailIds = new ArrayList<>();
+        int employeeCount = 0;
         if (null != employees) {
             dto.setEmployees(new ArrayList<>());
             for (UniongroupMemberDetail detail : employees) {
+            	if(detail.getContactName() == null)
+            		continue;
+            	employeeCount++;
                 UniongroupTarget target = new UniongroupTarget();
                 target.setName(detail.getContactName());
                 target.setId(detail.getDetailId());
@@ -8169,6 +8173,7 @@ public class PunchServiceImpl implements PunchService {
                 detailIds.add(detail.getDetailId());
             }
         }
+        dto.setEmployeeCount(employeeCount);
         // 关联 人员和机构
         GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
         cmd1.setGroupId(r.getId());
@@ -10696,7 +10701,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public String getAdjustRuleUrl(HttpServletRequest request){
         String homeUrl = request.getHeader("Host");
-        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
+        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html";
     }
 
     private Integer getPunchStatisticCountByItemType(PunchDayLog pdl, PunchStatusStatisticsItemType itemType) {

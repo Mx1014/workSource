@@ -3,8 +3,6 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.app.AppProvider;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -54,9 +52,6 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
     @Autowired
     private CommunityProvider communityProvider;
-
-    @Autowired
-    private CategoryProvider categoryProvider;
 
     @Autowired
     private PmTaskProvider pmTaskProvider;
@@ -110,7 +105,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
         params.put("taskSource",task.getSourceType());
         //查询服务类型
-        Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+        PmTaskCategory category = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
         if(category != null) {
             params.put("taskCategory", category.getName());
         } else {
