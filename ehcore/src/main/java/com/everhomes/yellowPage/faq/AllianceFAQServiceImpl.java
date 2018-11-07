@@ -2,6 +2,7 @@ package com.everhomes.yellowPage.faq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,12 +20,15 @@ import com.everhomes.flow.FlowLane;
 import com.everhomes.flow.FlowLaneProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.common.IdNameDTO;
+import com.everhomes.rest.common.PrivilegeType;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
+import com.everhomes.rest.yellowPage.AllianceAdminCommand;
 import com.everhomes.rest.yellowPage.AllianceCommonCommand;
 import com.everhomes.rest.yellowPage.AllianceDisplayType;
 import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.ListOperateServicesResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.rest.yellowPage.ServiceAllianceWorkFlowStatus;
 import com.everhomes.rest.yellowPage.UpdateOperateServiceOrdersCommand;
 import com.everhomes.rest.yellowPage.UpdateOperateServicesCommand;
@@ -62,6 +66,7 @@ import com.everhomes.rest.yellowPage.faq.UpdateTopFAQOrdersCommand;
 import com.everhomes.rest.yellowPage.faq.updateFAQOrderCommand;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.yellowPage.AllianceOperateService;
@@ -100,10 +105,15 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	private AllianceStandardService allianceStandardService;
 	@Autowired
 	private YellowPageService yellowPageService;
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 
 
 	@Override
 	public void createFAQType(CreateFAQTypeCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQType faqType = ConvertHelper.convert(cmd, AllianceFAQType.class);
 		faqType.setName(cmd.getFAQTypeName());
 		allianceFAQProvider.createFAQType(faqType);
@@ -111,6 +121,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQType(UpdateFAQTypeCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQType faqType = allianceFAQProvider.getFAQType(cmd.getFAQTypeId());
 		if (null == faqType) {
 			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
@@ -122,7 +135,20 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void deleteFAQType(DeleteFAQTypeCommand cmd) {
-		allianceFAQProvider.deleteFAQType(cmd.getFAQTypeId());
+		//校验权限
+		checkPrivilege(cmd);
+		
+		dbProvider.execute(r->{
+			
+			//删除类型
+			allianceFAQProvider.deleteFAQType(cmd.getFAQTypeId());
+			
+			//删除类型下的问题
+			allianceFAQProvider.deleteFAQs(cmd, cmd.getFAQTypeId());
+			
+			return null;
+		});
+
 	}
 
 	@Override
@@ -149,6 +175,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQType upFaqType = allianceFAQProvider.getFAQType(cmd.getUpFAQTypeId());
 		AllianceFAQType lowFaqType = allianceFAQProvider.getFAQType(cmd.getLowFAQTypeId());
 		if (null == upFaqType ||null == lowFaqType) {
@@ -170,6 +199,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void createFAQ(CreateFAQCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQ faq = ConvertHelper.convert(cmd, AllianceFAQ.class);
 		
 		AllianceFAQType faqType = allianceFAQProvider.getFAQType(cmd.getTypeId());
@@ -183,6 +215,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQ(UpdateFAQCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQ faq = allianceFAQProvider.getFAQ(cmd.getFAQId());
 		if (null == faq) {
 			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
@@ -196,6 +231,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateTopFAQFlag(UpdateTopFAQFlagCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQ faq = allianceFAQProvider.getFAQ(cmd.getFAQId());
 		if (null == faq) {
 			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
@@ -215,6 +253,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void deleteFAQ(DeleteFAQCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		allianceFAQProvider.deleteFAQ(cmd.getFAQId());
 	}
 
@@ -251,6 +292,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateTopFAQOrders(UpdateTopFAQOrdersCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQ upFaq = allianceFAQProvider.getFAQ(cmd.getUpFAQId());
 		AllianceFAQ lowFaq = allianceFAQProvider.getFAQ(cmd.getLowFAQId());
 		if (null == upFaq ||null == lowFaq) {
@@ -338,7 +382,7 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 				FlowCase flowCase = flowCaseProvider.getFlowCaseById(record.getFlowCaseId());
 				List<FlowLane> flowLanes = flowLaneProvider.listFlowLane(flowCase.getFlowMainId(),
 						flowCase.getFlowVersion());
-				List<String> channels = flowLanes.stream().map(FlowLane::getDisplayName).collect(Collectors.toList());
+				List<String> channels = flowLanes.stream().sorted((x,y)->x.getLaneLevel() - y.getLaneLevel()).map(FlowLane::getDisplayName).collect(Collectors.toList());
 				resp.setFlowCaseId(record.getFlowCaseId());
 				byte index = (byte)channels.indexOf(flowCase.getCurrentLane());
 				resp.setChannelPos(index < 0 ? 0 : index);
@@ -410,6 +454,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQOnlineService(UpdateFAQOnlineServiceCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQServiceCustomer newOne = ConvertHelper.convert(cmd, AllianceFAQServiceCustomer.class);
 		newOne.setNamespaceId(null == cmd.getNamespaceId() ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId());
 		
@@ -466,17 +513,11 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	}
 	
 	
-	private List<FlowLane> getLanesByFlowCase(Long flowCaseId) {
-		List<FlowLane> lanes = new ArrayList<>();
-		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-		if (null != flowCase) {
-			lanes = flowLaneProvider.listFlowLane(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-		}
-		return lanes;
-	}
-
 	@Override
 	public void updateFAQOrder(updateFAQOrderCommand cmd) {
+		//校验权限
+		checkPrivilege(cmd);
+		
 		AllianceFAQ upFaq = allianceFAQProvider.getFAQ(cmd.getUpFAQId());
 		AllianceFAQ lowFaq = allianceFAQProvider.getFAQ(cmd.getLowFAQId());
 		if (null == upFaq ||null == lowFaq) {
@@ -494,4 +535,21 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		});
 		
 	}
+	
+	/**
+	 * 校验当前请求是否符合权限
+	 */
+	public void checkPrivilege(AllianceAdminCommand cmd) {
+
+		Long communitiyId = null;
+		if (ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerType())) {
+			communitiyId = cmd.getOwnerId();
+		}
+
+		if (configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
+			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), null,
+					cmd.getAppId(), null, communitiyId);
+		}
+	}
+
 }

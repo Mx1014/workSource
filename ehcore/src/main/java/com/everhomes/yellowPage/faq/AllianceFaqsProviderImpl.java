@@ -314,7 +314,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public void deleteFAQs(AllianceCommonCommand cmd) {
+	public void deleteFAQs(AllianceCommonCommand cmd, Long faqTypeId) {
 
 		int deleteCnt = deleteTool(q -> {
 			q.addConditions(TABLE.NAMESPACE_ID
@@ -322,6 +322,9 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
 			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
 			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+			if (null != faqTypeId) {
+				q.addConditions(TABLE.TYPE_ID.eq(faqTypeId));
+			}
 		});
 
 		if (deleteCnt > 0) {

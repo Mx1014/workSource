@@ -213,7 +213,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		cmd.setType(type);
 		
 		allianceFAQProvider.deleteFAQTypes(cmd);
-		allianceFAQProvider.deleteFAQs(cmd);
+		allianceFAQProvider.deleteFAQs(cmd,null);
 		allianceOperateServiceProvider.deleteOperateServices(cmd);
 		allianceFAQProvider.deleteFAQOnlineService(cmd);
 	}

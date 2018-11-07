@@ -134,8 +134,8 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public void deleteFAQs(AllianceCommonCommand cmd) {
-		allianceFaqsProvider.deleteFAQs(cmd);
+	public void deleteFAQs(AllianceCommonCommand cmd, Long faqTypeId) {
+		allianceFaqsProvider.deleteFAQs(cmd, faqTypeId);
 		
 	}
 

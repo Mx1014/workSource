@@ -56,7 +56,7 @@ public interface AllianceFAQProvider {
 
 	void deleteFAQTypes(AllianceCommonCommand cmd);
 
-	void deleteFAQs(AllianceCommonCommand cmd);
+	void deleteFAQs(AllianceCommonCommand cmd, Long FAQTypeId);
 
 	void deleteFAQOnlineService(AllianceCommonCommand cmd);
 

@@ -1427,15 +1427,24 @@ public class YellowPageServiceImpl implements YellowPageService {
 			return;
 		}
 		
-		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(category.getOwnerType(), category.getOwnerId(),
-				category.getType(), serviceAlliance.getId());
+		ServiceAllianceCategories realCategory = category;
+		if (category.getOwnerId() < 0) {
+			ConfigCommand cmd = allianceStandardService.reNewConfigCommand(serviceAlliance.getOwnerType(), serviceAlliance.getOwnerId(),category.getType());
+			realCategory = allianceStandardService.queryHomePageCategoryByAdmin(cmd.getOwnerType(), cmd.getOwnerId(), category.getType());
+			if (null == realCategory) {
+				realCategory = allianceStandardService.createHomePageCategory(cmd.getOwnerType(), cmd.getOwnerId(), category.getType());
+			}
+		}
+		
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(realCategory.getOwnerType(), realCategory.getOwnerId(),
+				realCategory.getType(), serviceAlliance.getId());
 		if (null == match) {
-			createServiceCategoryMatch(serviceAlliance.getId(), category);
+			createServiceCategoryMatch(serviceAlliance.getId(), realCategory);
 			return;
 		}
 		
-		match.setCategoryId(categoryId);
-		match.setCategoryName(category.getName());
+		match.setCategoryId(realCategory.getId());
+		match.setCategoryName(realCategory.getName());
 		serviceCategoryMatchProvider.updateMatch(match);
 	}
 	
@@ -4182,16 +4191,20 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		
 		List<AllianceOperateService> list = allianceOperateServiceProvider.listOperateServices(cmd);
+		
+		ConfigCommand confCmd = allianceStandardService.reNewConfigCommand(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType());
 
 		List<OperateServiceDTO> dtos = list.stream().map(r -> {
 			OperateServiceDTO dto = new OperateServiceDTO();
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(r.getServiceId(), null, null);
 			if (null != sa) {
+				dto.setId(r.getId());
 				dto.setServiceId(sa.getId());
 				dto.setServiceName(sa.getName());
 			}
 			
-			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getType(), r.getServiceId());
+			
+			ServiceCategoryMatch match = allianceStandardService.findServiceCategory(confCmd.getOwnerType(), confCmd.getOwnerId(), cmd.getType(), r.getServiceId());
 			if (null != match) {
 				dto.setServiceTypeName(match.getCategoryName());
 			}

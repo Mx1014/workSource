@@ -78,7 +78,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 	
 	private final String ALLIANCE_TEMPLATE_TYPE = "flowCase";
 	private final String ALLIANCE_WORK_FLOW_STATUS_FIELD_NAME = "workflowStatus";
-	private final String FORM_VAL_SOURCE_TYPE_NAME = EhFlowCases.class.getSimpleName();
+	public static final String FORM_VAL_SOURCE_TYPE_NAME = EhFlowCases.class.getSimpleName();
 	private static List<String> DEFAULT_FIELDS = new ArrayList<>();
 
 	@Autowired
@@ -455,6 +455,15 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		if (null == yellowPage) {
 			LOGGER.error("flowCaseInfo:"+flowCase.toString());
 			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FLOW_CASE_SERVICE_NOT_FOUND, "service not found");
+		}
+		
+		ConfigCommand configCmd = allianceStandardService.reNewConfigCommand(yellowPage.getOwnerType(),
+				yellowPage.getOwnerId(), yellowPage.getParentId());
+		ServiceCategoryMatch match = allianceStandardService.findServiceCategory(configCmd.getOwnerType(),
+				configCmd.getOwnerId(), yellowPage.getParentId(), yellowPage.getId());
+		if (null != match) {
+			yellowPage.setCategoryId(match.getCategoryId());
+			yellowPage.setServiceType(match.getCategoryName());
 		}
 		
 		entities.add(new FlowCaseEntity("服务名称", yellowPage.getName(), FlowCaseEntityType.MULTI_LINE.getCode()));

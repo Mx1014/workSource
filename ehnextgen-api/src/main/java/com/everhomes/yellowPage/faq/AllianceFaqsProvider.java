@@ -28,7 +28,7 @@ public interface AllianceFaqsProvider {
 
 	void plusFAQSolveCounts(Long itemId, Byte solveTimesType);
 
-	void deleteFAQs(AllianceCommonCommand cmd);
+	void deleteFAQs(AllianceCommonCommand cmd, Long faqTypeId);
 
 	Long getTopFAQMaxOrder(AllianceCommonCommand cmd);
 

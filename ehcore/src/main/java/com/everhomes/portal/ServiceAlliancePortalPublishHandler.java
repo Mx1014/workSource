@@ -92,12 +92,7 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
             updateServiceAlliance(namespaceId, serviceAllianceInstanceConfig, itemLabel);
         }
         
-		String pageRealDisplayType = serviceAllianceInstanceConfig.getDisplayType();
-		if (AllianceDisplayType.HOUSE_KEEPER.getCode().equals(serviceAllianceInstanceConfig.getDisplayType())) {
-			pageRealDisplayType = AllianceDisplayType.HOUSE_KEEPER.getShowType();
-		}
-
-        serviceAllianceInstanceConfig.setUrl(yellowPageService.buildAllianceUrl(namespaceId, serviceAllianceInstanceConfig, pageRealDisplayType));
+        serviceAllianceInstanceConfig.setUrl(yellowPageService.buildAllianceUrl(namespaceId, serviceAllianceInstanceConfig, null));
         return StringHelper.toJsonString(serviceAllianceInstanceConfig);
     }
 
@@ -132,17 +127,11 @@ public class ServiceAlliancePortalPublishHandler implements PortalPublishHandler
 		}
 
 		JSONObject json = new JSONObject();
-		String pageRealDisplayType = config.getDisplayType();
-		if (AllianceDisplayType.HOUSE_KEEPER.getCode().equals(config.getDisplayType())) {
-			pageRealDisplayType = AllianceDisplayType.HOUSE_KEEPER.getShowType();
-		}
-
-		
 		if (namespaceId == 999953) { // 先在万智汇上做测试
 			json.put("realm", config.getRealm());
-			json.put("entryUrl", buildEntryUrl(namespaceId, config, pageRealDisplayType));
+			json.put("entryUrl", buildEntryUrl(namespaceId, config, null));
 		} else {
-			json.put("url", yellowPageService.buildAllianceUrl(namespaceId, config, pageRealDisplayType));
+			json.put("url", yellowPageService.buildAllianceUrl(namespaceId, config, null));
 		}
 
 		return json.toJSONString();
