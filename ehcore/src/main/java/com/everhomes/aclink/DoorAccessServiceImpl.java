@@ -3891,6 +3891,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return getVisitorByAuth(auth);
     }
     
+    /**
+     * 根据授权id获取二维码url
+     */
+	@Override
+	public String getVisitorUrlById(GetVisitorCommand cmd) {
+        DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.valueOf(cmd.getId()));
+        if(auth == null || (auth.getLinglingUuid() == null && auth.getAuthType() == 0)) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "tempAuth not found");
+        }else{
+        	//TODO driverType暂不处理;doorAccessType暂时只考虑zuolin by liuyilin 20181026
+            String uuid = UUID.randomUUID().toString();
+            uuid = uuid.replace("-", "");
+            uuid = uuid.substring(0, 5);
+        	auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        	doorAuthProvider.updateDoorAuth(auth);
+        }
+//        https://core.zuolin.com/evh/aclink/v?id=${id} homeUrl+"/evh"
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        return String.format("%s/evh/aclink/v?id=%s",homeUrl,auth.getLinglingUuid());
+	}
+    
     @Override
     public GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd) {
         GetVisitorResponse resp = new GetVisitorResponse();
