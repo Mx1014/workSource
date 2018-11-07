@@ -92,4 +92,15 @@ public class PaymentAuthsProviderImpl implements PaymentAuthsProvider {
 		    return null;
 	    });
 	}
+	
+	@Override
+	public void deleteEnterprisePaymentAuths(Long appId, Long orgId) {
+	    dbProvider.execute(r -> {
+	    	//删除原来的设置
+	    	getReadWriteContext().delete(Tables.EH_ENTERPRISE_PAYMENT_AUTHS)
+			.where(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.APP_ID.eq(appId))
+			.and(Tables.EH_ENTERPRISE_PAYMENT_AUTHS.ENTERPRISE_ID.eq(orgId)).execute();
+		    return null;
+	    });
+	}
 }

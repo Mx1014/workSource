@@ -24,3 +24,9 @@ CREATE TABLE `eh_rentalv2_structures` (
 `resource_type`  varchar(45) NULL ,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 用户当前场景表添加一个字段
+ALTER TABLE eh_user_current_scene ADD COLUMN  extra TEXT;
