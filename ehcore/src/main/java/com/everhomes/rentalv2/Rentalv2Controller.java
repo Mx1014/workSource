@@ -4,8 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.oauth2.RequireOAuth2Authentication;
-import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -403,6 +401,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/offlinePayOrder</b>
+	 * <p>
+	 * 线下支付确认
+	 * </p>
+	 */
+	@RequestMapping("offlinePayOrder")
+	@RestReturn(value = String.class)
+	public RestResponse offlinePayOrder(OfflinePayOrderCommand cmd) {
+		rentalService.offlinePayOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/changeRentalBillPayInfo</b>
 	 * <p>
 	 * 修改订单信息
@@ -483,6 +497,24 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/getUserClosestBill</b>
+	 * <p>
+	 * 查找用户最近的使用中 待使用订单
+	 * </p>
+	 */
+	@RequestMapping("getUserClosestBill")
+	@RestReturn(value = GetUserClosestBillResponse.class)
+	public RestResponse getUserClosestBill(@Valid GetUserClosestBillCommand cmd) {
+		GetUserClosestBillResponse getUserClosestBillResponse = rentalService.getUserClosestBill(cmd);
+		RestResponse response = new RestResponse(
+				getUserClosestBillResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/listRentalBills</b>
 	 * <p>

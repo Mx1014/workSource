@@ -10,6 +10,8 @@ public interface QRCodeService {
 
     QRCodeDTO createQRCode(NewQRCodeCommand cmd);
 
+    QRCodeDTO createQRCodeForActivity(NewQRCodeCommand cmd);
+
     QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd);
 
     QRCodeDTO getQRCodeInfoById(String qrid, String source);
