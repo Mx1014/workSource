@@ -7024,27 +7024,27 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             List<SmartCardHandler> smartCardhandlers = new ArrayList<SmartCardHandler>();
             SmartCardHandler aclinkCard = new SmartCardHandler();
-            aclinkCard.setAppOriginId(41010L);
-            aclinkCard.setModuleId(41010L);
-            aclinkCard.setData("test-aclink-only");
-            aclinkCard.setTitle("公共门禁");
-            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            aclinkCard.setAppOriginId(41010L);
+//            aclinkCard.setModuleId(41010L);
+//            aclinkCard.setData("test-aclink-only");
+//            aclinkCard.setTitle("公共门禁");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
 
             List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
             SmartCardHandlerItem item = new SmartCardHandlerItem();
-            item.setTitle("楼层");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-floor");
-            item.setDefaultValue("5");
-            items.add(item);
-
-            item = new SmartCardHandlerItem();
-            item.setTitle("VIP");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-vip");
-            item.setDefaultValue("VIP3");
-            items.add(item);
+//            item.setTitle("楼层");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-floor");
+//            item.setDefaultValue("5");
+//            items.add(item);
+//
+//            item = new SmartCardHandlerItem();
+//            item.setTitle("VIP");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-vip");
+//            item.setDefaultValue("VIP3");
+//            items.add(item);
 
             aclinkCard.setItems(items);
             smartCardhandlers.add(aclinkCard);
