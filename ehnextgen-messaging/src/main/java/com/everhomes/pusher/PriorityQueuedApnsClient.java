@@ -130,6 +130,9 @@ public class PriorityQueuedApnsClient implements ApnsClient {
 		}
 	}
 
-
+    @Override
+    public String toString() {
+        return client.toString();
+    }
 
 }
