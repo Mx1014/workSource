@@ -172,7 +172,7 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 	public List<OfficeCubicleCity> listOfficeCubicleProvince(Integer namespaceId,Long ownerId) {
 		List<OfficeCubicleCity> res = getReadOnlyContext().selectDistinct(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME).from(Tables.EH_OFFICE_CUBICLE_CITIES)
 		.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
-		.and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
+		.and(ownerId == null ? Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull() : Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
 		.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
 		.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())
 		.fetch().map(r->{
@@ -187,7 +187,7 @@ public class OfficeCubicleCityProviderImpl implements OfficeCubicleCityProvider 
 	public List<OfficeCubicleCity> listOfficeCubicleCitiesByProvince(String provinceName, Integer namespaceId,Long ownerId) {
 		return getReadOnlyContext().select().from(Tables.EH_OFFICE_CUBICLE_CITIES)
 				.where(Tables.EH_OFFICE_CUBICLE_CITIES.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
+				.and(ownerId == null ? Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.isNull() : Tables.EH_OFFICE_CUBICLE_CITIES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_OFFICE_CUBICLE_CITIES.PROVINCE_NAME.eq(provinceName))
 				.and(Tables.EH_OFFICE_CUBICLE_CITIES.STATUS.eq((byte)2))
 				.orderBy(Tables.EH_OFFICE_CUBICLE_CITIES.DEFAULT_ORDER.desc())

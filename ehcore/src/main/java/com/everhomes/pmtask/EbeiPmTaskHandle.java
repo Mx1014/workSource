@@ -489,8 +489,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 task.setOrganizationUid(user.getId());
             }
             task.setIfUseFeelist((byte)0);
-//      新增需求人企业Id用于物业线根据企业查询报修任务
+//          新增需求人企业Id用于物业线根据企业查询报修任务
             task.setEnterpriseId(cmd.getEnterpriseId());
+//          新增多应用标识
+            task.setAppId(cmd.getAppId());
 
             pmTaskProvider.createTask(task);
             createFlowCase(task);
@@ -517,23 +519,23 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         Integer namespaceId = UserContext.getCurrentNamespaceId(task.getNamespaceId());
 
         Flow flow = null;
-        Long parentTaskId = pmTaskProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
-
-        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
-            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
-        else
-             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+//        Long parentTaskId = pmTaskProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
+//
+//        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+//            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+//        else
+//             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                String.valueOf(task.getAppId()), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
                     "Enable pmtask flow not found.");
         }
 
-
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-        PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
         createFlowCaseCommand.setTitle("物业报修");
         createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());

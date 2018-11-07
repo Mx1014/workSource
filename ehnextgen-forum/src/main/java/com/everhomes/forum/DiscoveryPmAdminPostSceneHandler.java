@@ -32,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,8 +224,14 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 filterDto.setName(community.getName());
                 filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                 filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s&pageSize=8", serverContectPath,
-                        "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+                String excludeCategories = "";
+                try {
+                    excludeCategories = URLEncoder.encode("excludeCategories[0]", "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    LOGGER.error("encode excludeCategories error",e);
+                }
+                actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&%s=%s&pageSize=8", serverContectPath,
+                        "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(),excludeCategories, CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
                 filterDto.setActionUrl(actionUrl);
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                 filterDto.setAvatar(avatarUri);
