@@ -126,7 +126,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         }
 
         query.addLimit(pageSize + 1);
-        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc());
+        query.addOrderBy(Tables.EH_GROUP_MEMBER_LOGS.APPROVE_TIME.desc());
 
         List<GroupMemberLog> logList = query.fetch().map((r) -> RecordHelper.convert(r, GroupMemberLog.class));
 
