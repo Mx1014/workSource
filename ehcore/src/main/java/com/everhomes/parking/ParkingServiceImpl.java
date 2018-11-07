@@ -1013,9 +1013,8 @@ public class ParkingServiceImpl implements ParkingService {
 			goodsDetail.add(e);
 			
 			e = new OrderDescriptionEntity();
-			String delayDate = sdf.format(order.getDelayTime());
 			e.setKey("停车时长");
-			e.setValue(delayDate);
+			e.setValue(order.getDelayTime().toString());
 			goodsDetail.add(e);
 		}
 		
