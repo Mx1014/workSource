@@ -1,15 +1,13 @@
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 微信分享配置中增加主题色字段
-ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
-ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
 
-ALTER TABLE `eh_rentalv2_site_resources`
-MODIFY COLUMN `name`  varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `type`;
+
+
 
 -- AUTHOR: 吴寒
 -- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
-ALTER TABLE `eh_punch_logs` ADD COLUMN `create_type` TINYINT NOT NULL DEFAULT 0 COMMENT '创建类型 : 0-正常打卡创建 1-自动打卡创建 2-人脸识别打卡创建 4-其他第三方接口创建(通过第三方接口打卡没有带创建类型)' ;
+
 
 -- 外出打卡表
 CREATE TABLE `eh_punch_go_out_logs` (
@@ -33,17 +31,13 @@ CREATE TABLE `eh_punch_go_out_logs` (
   KEY `i_eh_user_id` (`user_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_punch_day_logs` ADD COLUMN `go_out_punch_flag` TINYINT DEFAULT 0 COMMENT '是否外出打卡，1：是 0：否' AFTER `normal_flag`;
-ALTER TABLE `eh_punch_statistics` ADD COLUMN `go_out_punch_day_count` INT DEFAULT 0 COMMENT '当月外出打卡天数' AFTER `rest_day_count`;
+
 
 -- AUTHOR: 李清岩
 -- REMARK: 20180930 issue-38336
-ALTER TABLE `eh_door_access` ADD COLUMN `firmware_id` bigint(20) DEFAULT NULL COMMENT '门禁设备固件版本id';
-ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件名';
-ALTER TABLE `eh_door_access` ADD COLUMN `device_id` bigint(20) DEFAULT NULL COMMENT '门禁设备类型id';
-ALTER TABLE `eh_door_access` ADD COLUMN `device_name` VARCHAR(128) DEFAULT NULL COMMENT '门禁设备固件名';
-ALTER TABLE `eh_door_access` ADD COLUMN `city_id` bigint(20) DEFAULT NULL COMMENT '城市id';
-ALTER TABLE `eh_door_access` ADD COLUMN `province` VARCHAR(64) DEFAULT NULL COMMENT '省份名';
+
+
+
 
 CREATE TABLE `eh_aclink_device` (
 	`id` bigint(20),
@@ -92,15 +86,11 @@ CREATE TABLE `eh_aclink_firmware_package` (
 -- AUTHOR: 刘一麟 2018年8月23日
 -- REMARK:issue-36233 门禁3.0.2
 
-ALTER TABLE `eh_aclink_cameras` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
-ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
-ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
-ALTER TABLE `eh_aclink_cameras` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
-ALTER TABLE `eh_aclink_ipads` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
-ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
-ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
-ALTER TABLE `eh_aclink_ipads` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
-ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR(64) NULL DEFAULT NULL COMMENT '门禁固件版本' AFTER `id`;
+
+
+
+
+
 
 CREATE TABLE `eh_aclink_form_titles` (
 `id`  bigint(20) NOT NULL ,
@@ -148,19 +138,16 @@ CREATE TABLE `eh_aclink_group` (
 PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁组';
 
-ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
-ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
 
-ALTER TABLE `eh_door_access` ADD COLUMN `adress_detail` varchar(64) NULL COMMENT '办公地点/楼栋_楼层' AFTER `address`;
+
+
 
 -- AUTHOR: 张智伟 20180914
 -- REMARK: ISSUE-37602 表单关联工作流节点
-ALTER TABLE eh_general_approval_vals ADD COLUMN flow_node_id BIGINT COMMENT '表单绑定的工作流节点ID' AFTER flow_case_id;
-ALTER TABLE eh_general_approval_vals ADD COLUMN creator_uid BIGINT COMMENT '创建人uid' AFTER create_time;
-ALTER TABLE eh_general_approval_vals ADD COLUMN operator_uid BIGINT COMMENT '操作人Uid' AFTER creator_uid;
-ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '编辑时间' AFTER operator_uid;
 
-ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
+
+
+
 
 -- AUTHOR: 杨崇鑫   20181017
 -- REMARK: 缴费管理V7.0（新增缴费相关统计报表）
@@ -287,17 +274,15 @@ PRIMARY KEY (`id`)
 
 -- AUTHOR: 杨崇鑫 20181101
 -- REMARK: issue-40954 【标准版全量】【物业缴费】【集成】计价条款设置，新增计价条款后，列表中“账单组”不显示
-ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
 
 -- AUTHOR: 缪洲
 -- REMARK: 增加用户自定义上传资料与默认车牌字段
-ALTER TABLE `eh_parking_lots` ADD COLUMN `default_data` TEXT NULL COMMENT '自定义上传资料';
-ALTER TABLE `eh_parking_lots` ADD COLUMN `default_plate` VARCHAR(16) NULL COMMENT '默认车牌';
+
 
 -- AUTHOR: 黄鹏宇 20181101
 -- REMARK: 修改请示单的创建时间为datetime类型
-ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;
-ALTER TABLE eh_general_form_val_requests MODIFY operator_time DATETIME;
+
 
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 广告管理单应用修改为多应用
@@ -327,7 +312,7 @@ CREATE TABLE eh_banner_categories
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '广告管理应用入口表';
 -- AUTHOR: 梁燕龙 20181026
 -- REMARK: 广告管理单应用修改为多应用
-ALTER TABLE eh_banners ADD COLUMN `category_id` BIGINT COMMENT '应用入口ID';
+
 -- AUTHOR: 马世亨
 -- REMARK: 物业报修3.8 对接国贸用户映射表 20181001
 DROP TABLE IF EXISTS `eh_pm_task_archibus_user_mapping`;
@@ -371,8 +356,7 @@ CREATE TABLE `eh_pm_task_categories`(
   KEY `i_eh_category_delete_time` (`delete_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
 
-ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
-ALTER TABLE `eh_pm_task_configs` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+
 -- 物业报修3.8 end
 
 -- AUTHOR: 梁燕龙
@@ -432,40 +416,36 @@ CREATE TABLE `eh_asset_dooraccess_logs` (
 
 -- AUTHOR: xq.tian
 -- REMARK: 删除 eh_recommendations 的外键, 因为他影响了这张表的数据操作
-ALTER TABLE eh_recommendations DROP FOREIGN KEY fk_eh_recommendations_user_idx;
+
 
 
 
 -- AUTHOR: 严军
 -- REMARK: 组件表增加标题栏信息  20181001
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title`  varchar(255) NULL ;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_uri`  varchar(1024) NULL ;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_style`  int(11) NULL COMMENT 'title style, reference TitleStyle.java' ;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `sub_title`  varchar(255) NULL ;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_size`  tinyint(4) NULL COMMENT '0-small, 1-medium, 2-large    TitleSize.java' ;
-ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_more_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes. reference trueOrFalseFlag.java' ;
+
+
+
+
 
 -- AUTHOR: 严军
 -- REMARK: 公司头像字段太短 128 -> 512
-ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFAULT NULL ;
+
 
 -- AUTHOR: djm
 -- REMARK: 合同添加押金状态字段
-ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 0-未缴, 2-已缴' AFTER deposit;
+
 
 -- AUTHOR: 荣楠
 -- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
-ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+
 
 -- AUTHOR: 梁燕龙
 -- REMARK: 用户增加会员等级信息。
-ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等级文本';
+
 
 -- AUTHOR: 马世亨
 -- REMARK: 访客办公地点表  20181001
-ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
-ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
+
 -- end
 
 -- AUTHOR: 黄明波
@@ -504,45 +484,40 @@ COMMENT='服务与服务类型的匹配表，生成/删除项目配置后需要�
 ENGINE=InnoDB
 ;
 
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
-ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
+
+
 
 
 -- AUTHOR: 黄良铭
 -- REMARK: 场景记录表添加字段
-ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
+
 
 
 -- AUTHOR: 严军
 -- REMARK: 授权表加索引
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
+
+
 
 -- 模块增加模块路由host
-ALTER TABLE `eh_service_modules` ADD COLUMN `host`  varchar(255) NULL;
+
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 瑞安CM对接 为每个域空间初始化一个默认账单组，因此加上一个标识是否是默认账单组的字段
-ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `is_default` TINYINT DEFAULT 0 COMMENT '标识是否是默认账单组的字段：1：默认；0：非默认';
+
 -- REMARK: 瑞安CM对接 账单、费项表增加是否是只读字段
-ALTER TABLE `eh_payment_bills` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
+
 -- AUTHOR: djm
-alter table eh_contracts modify column sponsor_uid varchar(50);
+
 
 -- AUTHOR: 荣楠
 -- REMARK：OA增加域账号
--- ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+--
 
 -- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 企业支付授权应用列表
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `general_bill_id` VARCHAR(64) NULL DEFAULT NULL COMMENT '统一账单id' ;
 
-ALTER TABLE `eh_service_modules` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
+
+
 
 -- AUTHOR: 缪洲 20180930
 -- REMARK: issue-34780 企业支付授权表
@@ -565,86 +540,65 @@ CREATE TABLE `eh_enterprise_payment_auths` (
 -- AUTHOR: 杨崇鑫 20180930
 -- REMARK: 物业缴费V7.1（企业记账流程打通）
 -- REMARK: 删除上个版本遗留的弃用字段
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
-ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
+
+
 
 -- REMARK：物业缴费V7.1（企业记账流程打通）：统一订单定义的唯一标识
-ALTER TABLE `eh_payment_bills` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+
 
 -- REMARK：  物业缴费V7.1（企业记账流程打通）:增加业务对应的相关信息
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
 
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
-ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
+
+
+
+
+
+
+
+
+
+
+
 
 -- REMARK： 物业缴费V7.1（企业记账流程打通）: 增加记账人名称
-ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
-ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+
 
 -- REMARK： 物业缴费V7.1（企业记账流程打通）: 修改consume_user_id注释为“记账人ID”
-ALTER TABLE `eh_payment_bills` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
-ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+
 
 
 -- AUTHOR: 黄明波 20181007
 -- REMARK： 云打印 添加发票标识
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
-ALTER TABLE `eh_siyin_print_printers` ADD COLUMN `printer_name` VARCHAR(128) NOT NULL COMMENT 'printer name' ;
-ALTER TABLE `eh_siyin_print_records` ADD COLUMN `serial_number` VARCHAR(128) NULL DEFAULT NULL COMMENT 'reader_name' ;
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `printer_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '打印机名称';
-ALTER TABLE `eh_siyin_print_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL  DEFAULT '0' COMMENT '商户ID';
+
+
+
 
 
 
 -- AUTHOR: 缪洲 20181010
 -- REMARK： 云打印 添加支付方式字段
-ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式';
+
 
 -- AUTHOR: 郑思挺 20181011
 -- REMARK： 资源预约3.7.1
-ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL  COMMENT '支付类型 ' ;
-ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(1024) NULL AFTER `pay_info`;
-ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `pay_url`;
-ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
-ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
+
+
+
 
 -- AUTHOR: 缪洲 20181011
 -- REMARK： 停车6.7.2 添加支付方式与支付类型字段
-ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '0:个人支付，1：已记账，2：已支付，支付类型';
-ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(64) COMMENT '统一订单ID';
-ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
+
+
 
 
 -- AUTHOR: 唐岑
 -- REMARK： 删除eh_organization_address_mappings表中的外键
-ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+
 
 -- AUTHOR: 刘一麟
 -- REMARK： 门禁临时授权有效期添加默认值
-ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
-ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
-ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
+
+
 
 
 -- 应用公司项目授权表 by lei.lv
@@ -676,8 +630,7 @@ CREATE TABLE `eh_organization_apps` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
-ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
+
 
 -- 园区应用配置表（不跟随管理公司时的自定义配置）
 CREATE TABLE `eh_app_community_configs` (
@@ -713,24 +666,21 @@ CREATE TABLE `eh_service_module_app_profile` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 增加应用类型字段 0-oa应用、1-园区应用、2-服务应用   add by yanjun 201804081501
-ALTER TABLE `eh_service_modules` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+
 
 -- 新增修改时间的字段 add by lei.lv 201804091401
-ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `create_time`  datetime NULL COMMENT 'create_time';
-ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  datetime NULL COMMENT 'update_time';
+
 
 -- 新增开发者字段
-ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) NULL COMMENT 'developer owner id';
+
 
 -- 增加 企业超级管理员id、是否开启工作台标志  add by yanjun 20180412
 
 -- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
--- ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
-ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
+--
 
 -- 默认园区标志
-ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NULL COMMENT 'is the default community in his namespace, 0-no, 1-yes';
+
 
 -- 主页签信息
 CREATE TABLE `eh_launch_pad_indexs` (
@@ -751,7 +701,7 @@ CREATE TABLE `eh_launch_pad_indexs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-alter table eh_launch_pad_indexs add index namespace_id_index(`namespace_id`);
+
 
 -- 一卡通实现
 CREATE TABLE `eh_smart_card_keys` (
@@ -766,16 +716,13 @@ CREATE TABLE `eh_smart_card_keys` (
 
 
 DELETE FROM eh_portal_navigation_bars;
-ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
-ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
-ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `version_id`  bigint(20) NULL ;
-ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `default_order`  int(11) NOT NULL DEFAULT '0' ;
+
+
 
 -- layout 类型、背景颜色
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  varchar(255) NULL ;
+
 -- layout 类型
-ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  varchar(255) NULL;
+
 
 -- 功能模块入口列表
 CREATE TABLE `eh_service_module_entries` (
@@ -800,20 +747,20 @@ CREATE TABLE `eh_second_app_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
+
 
 
 -- 增加字段member_range人员规模
 -- add by lei yuan
-alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
+
 -- 增加字段 pm_flag 是否是管理公司 1-是，0-否
-ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+
 -- 增加字段 service_support_flag 是否是服务商 1-是，0-否
-ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+
 -- 增加字段 pm_flag 是否是管理公司 1-是，0-否
-ALTER TABLE eh_organizations ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+
 -- 增加字段 service_support_flag 是否是服务商 1-是，0-否
-ALTER TABLE eh_organizations ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+
 
 
 -- 增加办公地点表
@@ -845,41 +792,36 @@ CREATE TABLE `eh_communityandbuilding_relationes` (
 
 
 -- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
-ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+
 -- by janson end
 
 -- 增加 应用icon信息  add by yanjun 20180426
-ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `icon_uri`  varchar(255) NULL;
+
 
 -- 标准版里app的配置是否跟随默认配置
-ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
+
 
 
 -- 标准版本的 key 增加用户 ID
-ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
-ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `namespace_id`;
+
 
 -- 客户端处理方式0-native, 1-outside url, 2-inside url, 3-offline package  add by yanjun 201805171140
-ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
+
 
 -- 标准版本的 add by yuanlei
-alter table eh_organization_workplaces add column province_id bigint(20) default null comment '省份id';
-alter table eh_organization_workplaces add column city_id bigint(20) default null comment '城市id';
-alter table eh_organization_workplaces add column area_id bigint(20) default null comment '区域id';
-alter table eh_organization_workplaces add column whole_address_name varchar(128) default null comment '地址详细名称';
+
+
 
 -- 增加省份字段  add by yanjun 201805251851
 -- 增加省份字段  add by yanjun 201805251851
-ALTER TABLE `eh_communities` ADD COLUMN `province_id`  bigint(20) NULL AFTER `uuid`;
-ALTER TABLE `eh_communities` ADD COLUMN `province_name`  varchar(64) NULL AFTER `province_id`;
+
 
 -- 系统应用标志、默认安装应用标志 add by yanjun 201805280955
-ALTER TABLE `eh_service_modules` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
-ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
+
+
 
 -- 修改appId名字，实际为应用originId
-ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL;
+
 
 -- 园区广场电商 add by yanjun 20180703
 CREATE TABLE `eh_community_bizs` (
@@ -925,25 +867,18 @@ CREATE TABLE `eh_community_bizs` (
 
 -- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
 -- -- 人事档案 2.7 (基线已经执行过) start by ryan
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
--- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
 --
--- ALTER TABLE `eh_organization_member_details` ADD COLUMN `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT'only month&day like 0304' AFTER `check_in_time`;
--- ALTER TABLE `eh_organization_member_details` ADD COLUMN `birthday_index` VARCHAR(64) COMMENT'only month like 0304' AFTER `birthday`;
 --
--- ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
--- ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
--- ALTER TABLE `eh_archives_notifications` ADD COLUMN `mail_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
--- ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `mail_flag`;
--- ALTER TABLE `eh_archives_notifications` ADD COLUMN `notify_target` TEXT COMMENT 'the target email address' AFTER `message_flag`;
 --
--- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
--- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
+--
+--
+--
+--
+--
+--
+--
+--
+--
 --
 -- -- DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
 -- CREATE TABLE `eh_archives_operational_configurations` (
@@ -987,15 +922,14 @@ CREATE TABLE `eh_community_bizs` (
 -- -- 注意：core已经上线过了，此处是搬迁代码过来的。以后合并分支的时候要注意
 --
 -- -- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
--- ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
--- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
--- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
+--
+--
 
 -- 下载中心 搬迁代码  by yanjun end
 
 -- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
 -- -- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
--- ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+--
 -- -- by janson end
 
 
@@ -1007,12 +941,11 @@ CREATE TABLE `eh_community_bizs` (
 
 
 -- 模块icon
-ALTER TABLE `eh_service_modules` ADD COLUMN `icon_uri`  varchar(255) NULL;
+
 
 -- 分类结构
-ALTER TABLE `eh_second_app_types` ADD COLUMN `parent_id`  bigint(22) NOT NULL DEFAULT 0 ;
-ALTER TABLE `eh_second_app_types` ADD COLUMN `location_type`  tinyint(4) NULL COMMENT '参考枚举ServiceModuleLocationType';
-ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DEFAULT 0;
+
+
 
 
 CREATE TABLE `eh_app_categories` (
@@ -1027,7 +960,7 @@ CREATE TABLE `eh_app_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-ALTER TABLE `eh_service_module_entries` CHANGE COLUMN `second_app_type` `app_category_id`  bigint(22) NOT NULL DEFAULT 0;
+
 
 -- 用户自定义的广场应用
 CREATE TABLE `eh_user_apps` (
@@ -1066,28 +999,25 @@ CREATE TABLE `eh_launch_pad_configs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 新接口使用group_id代替itemGroup和itemLocation  add by yanjun 20180828
-ALTER TABLE `eh_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `app_id`;
 
-ALTER TABLE `eh_item_service_categries` ADD COLUMN `group_id`  bigint(20) NULL;
 
-ALTER TABLE `eh_user_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `item_id`;
+
+
+
 
 -- 通用脚本
 -- 增加动态表单的ownerId
-ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0  AFTER `namespace_id`;
-ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
-ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
 
 
-ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL  AFTER `owner_id`;
-ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
-ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
+
+
+
+
 -- end
 
 -- 合同参数配置增加owner
-ALTER TABLE  eh_contract_params ADD COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
-ALTER TABLE  eh_contract_params ADD COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
-ALTER TABLE  eh_contract_templates add COLUMN  `org_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+
+
 
 
 -- 缴费收费项增加orgId
@@ -1151,30 +1081,25 @@ CREATE TABLE `eh_general_form_kv_configs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE eh_general_forms ADD COLUMN project_type VARCHAR(64) NOT NULL DEFAULT 'EhCommunities';
-ALTER TABLE eh_general_forms ADD COLUMN project_id BIGINT NOT NULL DEFAULT 0;
 
-ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1` BIGINT(20) NULL DEFAULT NULL COMMENT '跳转类型 0-不跳转 2-表单/表单+工作流 3-跳转应用' ;
-ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
-ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `skip_type` TINYINT NOT NULL DEFAULT '0' COMMENT '1-当该服务类型下只有一个服务时，点击服务类型直接进入服务。0-反之';
 
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `type` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '服务联盟类型' ;
 
-ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_type` VARCHAR(15) NOT NULL DEFAULT 'organization';
 
-ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` BIGINT(20) NOT NULL DEFAULT '0' ;
+
+
+
+
+
+
 
 
 -- by st.zheng 允许表单为空
-ALTER TABLE `eh_lease_form_requests`
-MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
+
 
 
 -- 工位预订 城市管理 通用修改 shiheng.ma 20180824
-ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `org_id` BIGINT(20) DEFAULT NULL COMMENT '所属管理公司Id';
-ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT '项目类型';
-ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT '项目Id';
+
+
 
 CREATE TABLE `eh_office_cubicle_configs` (
   `id` BIGINT NOT NULL,
@@ -1195,7 +1120,7 @@ CREATE TABLE `eh_office_cubicle_configs` (
 
 
 -- 菜单增加“管理端”、“用户端”分类
-ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 1 COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType';
+
 
 
 -- ------------------------------------------------- zuolin-base-2.1(5.8.2)新增的数据脚本   end ---------------------------------
@@ -1214,8 +1139,7 @@ ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 
 --
 -- -- AUTHOR: 张智伟 20180822
 -- -- REMARK: issue-36367 考勤规则新增打卡提醒设置
--- ALTER TABLE eh_punch_rules ADD COLUMN punch_remind_flag TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启上下班打卡提醒：1 开启 0 关闭' AFTER china_holiday_flag;
--- ALTER TABLE eh_punch_rules ADD COLUMN remind_minutes_on_duty INT NOT NULL DEFAULT 0 COMMENT '上班提前分钟数打卡提醒' AFTER punch_remind_flag;
+--
 --
 -- -- AUTHOR: 张智伟 20180822
 -- -- REMARK: issue-36367 考勤规则新增打卡提醒设置,该表保存生成的提醒记录
@@ -1242,34 +1166,28 @@ ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 
 --
 -- -- AUTHOR: 张智伟 20180822
 -- -- REMARK: issue-36367 打卡记录报表排序
--- ALTER TABLE eh_punch_logs ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
--- ALTER TABLE eh_punch_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
+--
 --
 --
 -- -- AUTHOR: 吴寒
 -- -- REMARK: issue-36405 公告1.8 修改表结构
--- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
--- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_time` DATETIME;
+--
 --
 -- -- AUTHOR: 吴寒
 -- -- REMARK: issue-33887: 增加操作人姓名到目录/文件表
--- ALTER TABLE `eh_file_management_contents` ADD COLUMN `operator_name`  VARCHAR(256) ;
--- ALTER TABLE `eh_file_management_catalogs` ADD COLUMN `operator_name`  VARCHAR(256) ;
+--
 -- -- REMARK: issue-33887: 给文件表增加索引
--- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_catalog_id` (`catalog_id`);
--- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`parent_id`);
+--
 --
 -- -- AUTHOR: 吴寒
 -- -- REMARK: issue-33943 日程提醒1.2
--- ALTER TABLE eh_remind_settings ADD COLUMN app_version VARCHAR(32) DEFAULT '5.8.0' COMMENT '对应app版本(历史数据5.8.0),根据APP版本选择性展示';
--- ALTER TABLE eh_remind_settings ADD COLUMN before_time BIGINT COMMENT '提前多少时间(毫秒数)不超过1天的部分在这里减';
+--
 --
 --
 -- -- AUTHOR: 吴寒
 -- -- REMARK: 会议管理V1.2
--- ALTER TABLE `eh_meeting_reservations`  CHANGE `content` `content` TEXT COMMENT '会议详细内容';
--- ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
--- ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+--
+--
 --
 -- -- 增加附件表 会议预定和会议纪要共用
 -- CREATE TABLE `eh_meeting_attachments` (
@@ -1289,19 +1207,15 @@ ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 
 --
 -- -- AUTHOR: 荣楠
 -- -- REMARK: issue-34029 工作汇报1.2
--- ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `organization_id` BIGINT DEFAULT 0 NOT NULL COMMENT 'the orgId for the user' AFTER `namespace_id`;
--- ALTER TABLE `eh_work_report_val_receiver_map` ADD INDEX `i_work_report_receiver_id` (`receiver_user_id`) ;
 --
--- ALTER TABLE `eh_work_reports` ADD COLUMN `validity_setting` VARCHAR(512) COMMENT 'the expiry date of the work report' AFTER `form_version`;
--- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the receiver message settings' AFTER `validity_setting`;
--- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_seeting` VARCHAR(512) COMMENT 'the time range of the receiver message' AFTER `receiver_msg_type`;
--- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the author message settings' AFTER `receiver_msg_seeting`;
--- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_seeting` VARCHAR(512) COMMENT 'the time range of the author message' AFTER `author_msg_type`;
 --
--- ALTER TABLE `eh_work_report_vals` ADD COLUMN `receiver_avatar` VARCHAR(1024) COMMENT 'the avatar of the fisrt receiver' AFTER `report_type`;
--- ALTER TABLE `eh_work_report_vals` ADD COLUMN `applier_avatar` VARCHAR(1024) COMMENT 'the avatar of the author' AFTER `receiver_avatar`;
 --
--- ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the target time of the report';
+--
+--
+--
+--
+--
+--
 --
 --
 -- CREATE TABLE `eh_work_report_val_receiver_msg` (
@@ -1390,7 +1304,246 @@ CREATE TABLE `eh_flow_scripts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flow scripts in dev mode';
 
 -- 合同字段名称修改 add by jiarui 20180925
-ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
+
 
 
 -- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
+
+
+-- 所有 ALTER 语句
+ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
+ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
+ALTER TABLE `eh_rentalv2_site_resources`
+MODIFY COLUMN `name`  varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `type`;
+ALTER TABLE `eh_punch_logs` ADD COLUMN `create_type` TINYINT NOT NULL DEFAULT 0 COMMENT '创建类型 : 0-正常打卡创建 1-自动打卡创建 2-人脸识别打卡创建 4-其他第三方接口创建(通过第三方接口打卡没有带创建类型)' ;
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `go_out_punch_flag` TINYINT DEFAULT 0 COMMENT '是否外出打卡，1：是 0：否' AFTER `normal_flag`;
+ALTER TABLE `eh_punch_statistics` ADD COLUMN `go_out_punch_day_count` INT DEFAULT 0 COMMENT '当月外出打卡天数' AFTER `rest_day_count`;
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_id` bigint(20) DEFAULT NULL COMMENT '门禁设备固件版本id';
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_id` bigint(20) DEFAULT NULL COMMENT '门禁设备类型id';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_name` VARCHAR(128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `city_id` bigint(20) DEFAULT NULL COMMENT '城市id';
+ALTER TABLE `eh_door_access` ADD COLUMN `province` VARCHAR(64) DEFAULT NULL COMMENT '省份名';
+ALTER TABLE `eh_aclink_cameras` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
+ALTER TABLE `eh_aclink_ipads` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR(64) NULL DEFAULT NULL COMMENT '门禁固件版本' AFTER `id`;
+ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
+ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
+ALTER TABLE `eh_door_access` ADD COLUMN `adress_detail` varchar(64) NULL COMMENT '办公地点/楼栋_楼层' AFTER `address`;
+ALTER TABLE eh_general_approval_vals ADD COLUMN flow_node_id BIGINT COMMENT '表单绑定的工作流节点ID' AFTER flow_case_id;
+ALTER TABLE eh_general_approval_vals ADD COLUMN creator_uid BIGINT COMMENT '创建人uid' AFTER create_time;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operator_uid BIGINT COMMENT '操作人Uid' AFTER creator_uid;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '编辑时间' AFTER operator_uid;
+ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
+ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_data` TEXT NULL COMMENT '自定义上传资料';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_plate` VARCHAR(16) NULL COMMENT '默认车牌';
+ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;
+ALTER TABLE eh_general_form_val_requests MODIFY operator_time DATETIME;
+ALTER TABLE eh_banners ADD COLUMN `category_id` BIGINT COMMENT '应用入口ID';
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+ALTER TABLE `eh_pm_task_configs` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+ALTER TABLE eh_recommendations DROP FOREIGN KEY fk_eh_recommendations_user_idx;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title`  varchar(255) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_uri`  varchar(1024) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_style`  int(11) NULL COMMENT 'title style, reference TitleStyle.java' ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `sub_title`  varchar(255) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_size`  tinyint(4) NULL COMMENT '0-small, 1-medium, 2-large    TitleSize.java' ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_more_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes. reference trueOrFalseFlag.java' ;
+ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFAULT NULL ;
+ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 0-未缴, 2-已缴' AFTER deposit;
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等级文本';
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
+ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
+ALTER TABLE `eh_service_modules` ADD COLUMN `host`  varchar(255) NULL;
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `is_default` TINYINT DEFAULT 0 COMMENT '标识是否是默认账单组的字段：1：默认；0：非默认';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
+alter table eh_contracts modify column sponsor_uid varchar(50);
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `general_bill_id` VARCHAR(64) NULL DEFAULT NULL COMMENT '统一账单id' ;
+ALTER TABLE `eh_service_modules` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
+ALTER TABLE `eh_payment_bills` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
+ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+ALTER TABLE `eh_payment_bills` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
+ALTER TABLE `eh_siyin_print_printers` ADD COLUMN `printer_name` VARCHAR(128) NOT NULL COMMENT 'printer name' ;
+ALTER TABLE `eh_siyin_print_records` ADD COLUMN `serial_number` VARCHAR(128) NULL DEFAULT NULL COMMENT 'reader_name' ;
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `printer_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '打印机名称';
+ALTER TABLE `eh_siyin_print_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL  DEFAULT '0' COMMENT '商户ID';
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式';
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL  COMMENT '支付类型 ' ;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(1024) NULL AFTER `pay_info`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `pay_url`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
+ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '0:个人支付，1：已记账，2：已支付，支付类型';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(64) COMMENT '统一订单ID';
+ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';
+ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
+ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
+ALTER TABLE `eh_service_modules` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `create_time`  datetime NULL COMMENT 'create_time';
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  datetime NULL COMMENT 'update_time';
+ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) NULL COMMENT 'developer owner id';
+-- ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
+ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NULL COMMENT 'is the default community in his namespace, 0-no, 1-yes';
+alter table eh_launch_pad_indexs add index namespace_id_index(`namespace_id`);
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `version_id`  bigint(20) NULL ;
+ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `default_order`  int(11) NOT NULL DEFAULT '0' ;
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  varchar(255) NULL ;
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  varchar(255) NULL;
+ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
+alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
+ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+ALTER TABLE eh_organizations ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+ALTER TABLE eh_organizations ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `icon_uri`  varchar(255) NULL;
+ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `namespace_id`;
+ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
+alter table eh_organization_workplaces add column province_id bigint(20) default null comment '省份id';
+alter table eh_organization_workplaces add column city_id bigint(20) default null comment '城市id';
+alter table eh_organization_workplaces add column area_id bigint(20) default null comment '区域id';
+alter table eh_organization_workplaces add column whole_address_name varchar(128) default null comment '地址详细名称';
+ALTER TABLE `eh_communities` ADD COLUMN `province_id`  bigint(20) NULL AFTER `uuid`;
+ALTER TABLE `eh_communities` ADD COLUMN `province_name`  varchar(64) NULL AFTER `province_id`;
+ALTER TABLE `eh_service_modules` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
+ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT'only month&day like 0304' AFTER `check_in_time`;
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `birthday_index` VARCHAR(64) COMMENT'only month like 0304' AFTER `birthday`;
+-- ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
+-- ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `mail_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `mail_flag`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `notify_target` TEXT COMMENT 'the target email address' AFTER `message_flag`;
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
+-- ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
+-- ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+ALTER TABLE `eh_service_modules` ADD COLUMN `icon_uri`  varchar(255) NULL;
+ALTER TABLE `eh_second_app_types` ADD COLUMN `parent_id`  bigint(22) NOT NULL DEFAULT 0 ;
+ALTER TABLE `eh_second_app_types` ADD COLUMN `location_type`  tinyint(4) NULL COMMENT '参考枚举ServiceModuleLocationType';
+ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DEFAULT 0;
+ALTER TABLE `eh_service_module_entries` CHANGE COLUMN `second_app_type` `app_category_id`  bigint(22) NOT NULL DEFAULT 0;
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `app_id`;
+ALTER TABLE `eh_item_service_categries` ADD COLUMN `group_id`  bigint(20) NULL;
+ALTER TABLE `eh_user_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `item_id`;
+ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0  AFTER `namespace_id`;
+ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
+ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
+ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL  AFTER `owner_id`;
+ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
+ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
+ALTER TABLE  eh_contract_params ADD COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_params ADD COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_templates add COLUMN  `org_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE eh_general_forms ADD COLUMN project_type VARCHAR(64) NOT NULL DEFAULT 'EhCommunities';
+ALTER TABLE eh_general_forms ADD COLUMN project_id BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1` BIGINT(20) NULL DEFAULT NULL COMMENT '跳转类型 0-不跳转 2-表单/表单+工作流 3-跳转应用' ;
+ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
+ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `skip_type` TINYINT NOT NULL DEFAULT '0' COMMENT '1-当该服务类型下只有一个服务时，点击服务类型直接进入服务。0-反之';
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `type` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '服务联盟类型' ;
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_type` VARCHAR(15) NOT NULL DEFAULT 'organization';
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` BIGINT(20) NOT NULL DEFAULT '0' ;
+ALTER TABLE `eh_lease_form_requests`
+MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `org_id` BIGINT(20) DEFAULT NULL COMMENT '所属管理公司Id';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT '项目类型';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT '项目Id';
+ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 1 COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType';
+-- ALTER TABLE eh_punch_rules ADD COLUMN punch_remind_flag TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启上下班打卡提醒：1 开启 0 关闭' AFTER china_holiday_flag;
+-- ALTER TABLE eh_punch_rules ADD COLUMN remind_minutes_on_duty INT NOT NULL DEFAULT 0 COMMENT '上班提前分钟数打卡提醒' AFTER punch_remind_flag;
+-- ALTER TABLE eh_punch_logs ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
+-- ALTER TABLE eh_punch_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
+-- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+-- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_time` DATETIME;
+-- ALTER TABLE `eh_file_management_contents` ADD COLUMN `operator_name`  VARCHAR(256) ;
+-- ALTER TABLE `eh_file_management_catalogs` ADD COLUMN `operator_name`  VARCHAR(256) ;
+-- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_catalog_id` (`catalog_id`);
+-- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`parent_id`);
+-- ALTER TABLE eh_remind_settings ADD COLUMN app_version VARCHAR(32) DEFAULT '5.8.0' COMMENT '对应app版本(历史数据5.8.0),根据APP版本选择性展示';
+-- ALTER TABLE eh_remind_settings ADD COLUMN before_time BIGINT COMMENT '提前多少时间(毫秒数)不超过1天的部分在这里减';
+-- ALTER TABLE `eh_meeting_reservations`  CHANGE `content` `content` TEXT COMMENT '会议详细内容';
+-- ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+-- ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+-- ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `organization_id` BIGINT DEFAULT 0 NOT NULL COMMENT 'the orgId for the user' AFTER `namespace_id`;
+-- ALTER TABLE `eh_work_report_val_receiver_map` ADD INDEX `i_work_report_receiver_id` (`receiver_user_id`) ;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `validity_setting` VARCHAR(512) COMMENT 'the expiry date of the work report' AFTER `form_version`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the receiver message settings' AFTER `validity_setting`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_seeting` VARCHAR(512) COMMENT 'the time range of the receiver message' AFTER `receiver_msg_type`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the author message settings' AFTER `receiver_msg_seeting`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_seeting` VARCHAR(512) COMMENT 'the time range of the author message' AFTER `author_msg_type`;
+-- ALTER TABLE `eh_work_report_vals` ADD COLUMN `receiver_avatar` VARCHAR(1024) COMMENT 'the avatar of the fisrt receiver' AFTER `report_type`;
+-- ALTER TABLE `eh_work_report_vals` ADD COLUMN `applier_avatar` VARCHAR(1024) COMMENT 'the avatar of the author' AFTER `receiver_avatar`;
+-- ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the target time of the report';
+-- ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
