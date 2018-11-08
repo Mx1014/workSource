@@ -9,6 +9,8 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.pmtask.PmTaskAppType;
 import com.everhomes.rest.portal.*;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +91,23 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
             configurationProvider.setIntValue(namespaceId.intValue(),"pmtask.hide.represent.bg" + cmd.getAppOriginId(),0);
         }
         configurationProvider.setValue(namespaceId.intValue(),"pmtask.feeModel." + cmd.getAppOriginId(),feeModel.toString());
+
+        String homeUrl = configurationProvider.getValue(namespaceId,"home.url","");
+        String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s&appId=%s#home#sign_suffix");
+        String Url = homeUrl + SEPARATOR + Uri;
+        String displayname;
+        if(StringUtils.isBlank(itemLabel)){
+            displayname = "物业报修";
+        } else {
+            displayname = itemLabel;
+        }
+        try {
+            displayname = URLEncoder.encode(displayname,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("url encode error.");
+        }
+        Url = String.format(Url,namespaceId,taskCategoryId,displayname,cmd.getAppOriginId());
+        pmTaskInstanceConfig.setUrl(Url);
         return StringHelper.toJsonString(pmTaskInstanceConfig);
     }
 
@@ -99,30 +118,7 @@ public class PmTaskPortalPublishHandler implements PortalPublishHandler{
 
     @Override
     public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
-        String homeUrl = configurationProvider.getValue(namespaceId,"home.url","");
-        String Uri = configurationProvider.getValue(namespaceId,"pmtask.uri","property-repair-web/build/index.html?ns=%s&type=user&taskCategoryId=%s&displayName=%s&appId=%s#home#sign_suffix");
-        String Url = homeUrl + SEPARATOR + Uri;
-        PmTaskInstanceConfig pmTaskInstanceConfig = (PmTaskInstanceConfig)StringHelper.fromJsonString(instanceConfig, PmTaskInstanceConfig.class);
-        Long taskCategoryId =  pmTaskInstanceConfig.getTaskCategoryId();
-        if(null == taskCategoryId){
-            if(999983 == namespaceId)
-                taskCategoryId = 1L;
-            else
-                taskCategoryId = 6L;
-        }
-        String displayname = "物业报修";
-        if(9L == taskCategoryId){
-            displayname = "投诉与建议";
-        }
-        try {
-            displayname = URLEncoder.encode(displayname,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("url encode error.");
-        }
-        Url = String.format(Url,namespaceId,taskCategoryId,displayname,cmd.getAppOriginId());
-        JSONObject actionData = new JSONObject();
-        actionData.put("url",Url);
-        return actionData.toJSONString();
+        return instanceConfig;
     }
 
 //    private RentalResourceType createPmTask(Integer namespaceId, String name, Byte type){

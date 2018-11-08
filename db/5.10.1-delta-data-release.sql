@@ -8,12 +8,14 @@
 -- REMARK:borderServer更新到5.10.0
 -- DESCRIPTION：borderServer更新到5.10.0,现网,基线,独立部署都需要更新
 
+-- AUTHOR: xq.tian
+-- REMARK: ehuser, 网关, 注册中心 更新, 见：http://s.a.com/docs/server_update_tips/baseline-171541650534
+
+
 -- --------------------- SECTION END OPERATION------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
--- AUTHOR:
--- REMARK:
 
 -- AUTHOR: 梁燕龙
 -- REMARK: issue-38802
