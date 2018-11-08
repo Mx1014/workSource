@@ -223,6 +223,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.file.FileUtils;
+import com.everhomes.yellowPage.faq.AllianceFAQ;
 import com.everhomes.yellowPage.faq.AllianceFAQType;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatchProvider;
@@ -3686,9 +3687,14 @@ public class YellowPageServiceImpl implements YellowPageService {
 	 * @param checkCommunityId
 	 */
 	public void checkPrivilege(PrivilegeType privilegeType, Long currentPMId, Long appId, Long checkCommunityId) {
+		Long privilegeCode = null;
+		if (null != privilegeType) {
+			privilegeCode = privilegeType.getCode();
+		}
+		
 		if (configProvider.getBooleanValue("privilege.community.checkflag", true)) {
 			userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), currentPMId,
-					privilegeType.getCode(), appId, null, checkCommunityId);
+					privilegeCode, appId, null, checkCommunityId);
 		}
 	}
 
@@ -4254,23 +4260,37 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
-
-		AllianceOperateService upItem = allianceOperateServiceProvider.getOperateService(cmd.getUpOperateServiceId());
-		AllianceOperateService lowItem = allianceOperateServiceProvider.getOperateService(cmd.getLowOperateServiceId());
-		if (null == upItem ||null == lowItem) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
-		}		
 		
-		if (upItem.getDefaultOrder() < lowItem.getDefaultOrder()) {
-			return;
+		//校验权限
+		Long communityId = ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerId()) ? cmd.getOwnerId() : null;
+		checkPrivilege(null, cmd.getCurrentPMId(), cmd.getAppId(), communityId);
+		
+		if (null == cmd.getOperateServiceIds() || cmd.getOperateServiceIds().size() < 2) {
+			return ;
 		}
 		
+		AllianceOperateService item = null;
+		List<Long> finalOrders = new ArrayList<>(10);
+		for (Long itemId : cmd.getOperateServiceIds()) {
+			item = allianceOperateServiceProvider.getOperateService(itemId);
+			if (null == item) {
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
+			}
+			
+			finalOrders.add(item.getDefaultOrder());
+		}
+		
+		//排序
+		Collections.sort(finalOrders); 
+		
+		//变更
 		dbProvider.execute(r->{
-			allianceOperateServiceProvider.updateOperateServiceOrder(upItem.getId(), lowItem.getDefaultOrder());
-			allianceOperateServiceProvider.updateOperateServiceOrder(lowItem.getId(), upItem.getDefaultOrder());
+			int i = 0;
+			for (Long itemId : cmd.getOperateServiceIds()) {
+				allianceOperateServiceProvider.updateOperateServiceOrder(itemId, finalOrders.get(i++));
+			}
 			return null;
 		});
-	
 	}
 
 	@Override

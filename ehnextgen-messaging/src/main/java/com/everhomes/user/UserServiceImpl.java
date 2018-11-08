@@ -7018,6 +7018,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
         SmartCardInfo smartCardInfo = new SmartCardInfo();
+
+        //一卡通是否展示两个选择项 add by yanlong.liang 20181024
+        String showCardOpenFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_OPEN_OPTION, "是");
+        String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
+        smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
+        smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
+
+
         resp.setSmartCardInfo(smartCardInfo);
         smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;
