@@ -47,6 +47,7 @@ import com.everhomes.asset.AssetPaymentConstants;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
 import com.everhomes.asset.PaymentBillGroup;
+import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
@@ -87,6 +88,12 @@ import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.asset.*;
 
 import com.everhomes.rest.asset.ChargingVariables;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
+import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
+import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
+import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.common.SyncDataResponse;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -276,6 +283,9 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 	@Autowired
 	private AssetGroupProvider assetGroupProvider;
+	
+	@Autowired
+	private AssetBillService assetBillService;
 
 	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -3922,74 +3932,84 @@ long assetCategoryId = 0l;
 	
 	@Override
 	public void initializationContract(InitializationCommand cmd) {
-		//1.查询合同列表
+		// 1.查询合同列表,没有数据不用初始化
 		if (cmd.getContractIds() == null) {
-			return ;
+			return;
 		}
-		
-		//2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
-		
-		
-		//3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
-		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
+		List<Long> contractAllIds = cmd.getContractIds();
+		// 2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
+		CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
+		checkContractIsProduceBillCmd.setContractIdList(cmd.getContractIds());
+		checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
+		checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
+		checkContractIsProduceBillCmd.setOwnerType("community");
+		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
+		List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
+		for (CheckContractIsProduceBillDTO entry : lists) {
+			// 合同存在已缴账单
+			if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
+				contractAllIds.remove(entry.getContractId());
+			}
+		}
+		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
+		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(contractAllIds);
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
-			Long contractId=entry.getKey();
-			Contract contract=entry.getValue();
-			
+			Contract contract = entry.getValue();
 			contract.setContractType(ContractType.NEW.getCode());
 			contract.setStatus(ContractStatus.DRAFT.getCode());
 			contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			
-			//查询合同适用场景，物业合同不修改资产状态。
-	        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
-			if ((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-            	//修改为资产状态待接房
-                dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
+			// 查询合同适用场景，物业合同不修改资产状态。
+			ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+			if ((contractCategory == null && contract.getPaymentFlag() == 1) || !ContractApplicationScene.PROPERTY
+					.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+				// 修改为资产状态待租
+				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			}
-
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
 		}
-		
-		//4.调用缴费接口删除初始化合同的账单，
-		
+
+		// 4.调用缴费接口删除初始化合同的账单，
+		BatchDeleteBillFromContractCmd batchDeleteBillFromContractCmd = new BatchDeleteBillFromContractCmd();
+		batchDeleteBillFromContractCmd.setContractIdList(contractAllIds);
+		batchDeleteBillFromContractCmd.setNamespaceId(cmd.getNamespaceId());
+		batchDeleteBillFromContractCmd.setOwnerId(cmd.getCommunityId());
+		batchDeleteBillFromContractCmd.setOwnerType("community");
+		ListBatchDeleteBillFromContractResponse listBatchDeleteBillFromContractResponse = assetBillService.batchDeleteBillFromContract(batchDeleteBillFromContractCmd);
+
+		List<BatchDeleteBillFromContractDTO> batchDeleteBilllists = listBatchDeleteBillFromContractResponse.getList();
+		StringBuffer deleteErrorContract = new StringBuffer();
+
+		for (BatchDeleteBillFromContractDTO entry : batchDeleteBilllists) {
+			// 合同存在已缴账单
+			if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
+				deleteErrorContract.append(entry.getContractId() + ",");
+			}
+		}
+		if (deleteErrorContract.length() > 1) {
+			deleteErrorContract.append("初始化失败！");
+		}
+
 	}
-	
+
 	@Override
 	public void exemptionContract(InitializationCommand cmd) {
-		//1.查询合同列表
+		// 1.查询合同列表，没有选择审批合同直接返回
 		if (cmd.getContractIds() == null) {
-			return ;
+			return;
 		}
-		
-		//3.把符合条件 的合同状态置为审批通过，修改资产状态，
+
+		// 3.把符合条件 的合同状态置为审批通过，修改资产状态，
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
-			Long contractId=entry.getKey();
-			Contract contract=entry.getValue();
-			
+			Long contractId = entry.getKey();
+			Contract contract = entry.getValue();
+
 			contract.setStatus(ContractStatus.APPROVE_QUALITIED.getCode());
 			contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			
-			//查询合同适用场景，物业合同不修改资产状态。
-	        /*ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
-            
-            if ((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
-            	
-            	//判断该房源这段时间的状态，是否可以审批通过
-            	if (condition) {
-					
-				}else {
-					
-				}
-            	
-            	//修改为资产状态待接房
-                dealAddressLivingStatus(contract, AddressMappingStatus.RENT.getCode());
-			}*/
-            
-            //判断是否可以入场
-			//1、绑定房源（同一时间段只能签订一个合同），只要存在一个不满足条件的就审批不通过，2、绑定计价条款
-			
+			// 判断是否可以入场
+			// 1、绑定房源（同一时间段只能签订一个合同），只要存在一个不满足条件的就审批不通过，2、绑定计价条款
+
 			FindContractCommand command = new FindContractCommand();
 			command.setId(contractId);
 			command.setPartyAId(contract.getPartyAId());
@@ -3997,52 +4017,41 @@ long assetCategoryId = 0l;
 			command.setNamespaceId(contract.getNamespaceId());
 			command.setCategoryId(contract.getCategoryId());
 			ContractDetailDTO contractDetailDTO = findContract(command);
-			
-			contractDetailDTO.getApartments();
-			contractDetailDTO.getChargingItems();
-			
+
 			if (contractDetailDTO.getChargingItems() == null) {
-				//合同没有绑定计价条款
+				// 合同没有绑定计价条款
 			}
-			
+
 			if (contractDetailDTO.getApartments() == null) {
-				//合同没有绑定房源
-			}else {
-				//校验房源是否可以入场
-				//for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
-					//buildingApartments.add(apartment);
-					Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
-					
-					if (!possibleEnterContractStatus) {
-						//房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
-						return ;
-					}
-					
-					 //合同入场
-		            EntryContractCommand entryContractCommand = new EntryContractCommand();
-		            entryContractCommand.setCategoryId(contract.getCategoryId());
-		            entryContractCommand.setCommunityId(contract.getCommunityId());
-		            entryContractCommand.setId(contract.getId());
-		            entryContractCommand.setNamespaceId(contract.getNamespaceId());
-		            entryContractCommand.setOrgId(contract.getPartyAId());
-		            entryContractCommand.setPartyAId(contract.getPartyAId());
-		            
-		            entryContract(entryContractCommand);
-					
-				//}
+				// 合同没有绑定房源
+			} else {
+				// 校验房源是否可以入场
+				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
+
+				if (!possibleEnterContractStatus) {
+					// 房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
+					return;
+				}
+
+				// 合同入场
+				EntryContractCommand entryContractCommand = new EntryContractCommand();
+				entryContractCommand.setCategoryId(contract.getCategoryId());
+				entryContractCommand.setCommunityId(contract.getCommunityId());
+				entryContractCommand.setId(contract.getId());
+				entryContractCommand.setNamespaceId(contract.getNamespaceId());
+				entryContractCommand.setOrgId(contract.getPartyAId());
+				entryContractCommand.setPartyAId(contract.getPartyAId());
+
+				entryContract(entryContractCommand);
 			}
-			
-			//contractProvider.updateContract(contract);
-			//contractSearcher.feedDoc(contract);
-			
-			continue ;
+			continue;
 		}
-		
+
 	}
-	
+
 	private Boolean possibleEnterContract(ContractDetailDTO contractDetailDTO) {
 		Boolean possibleEnterContractStatus = false;
-		//1、 循环签合同的房源，查看这些房源是否支持签合同
+		// 1、 循环签合同的房源，查看这些房源是否支持签合同
 		for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
 			// 查询当前房源状态
 			// 根据房源id查询该房源的状态信息
@@ -4059,53 +4068,52 @@ long assetCategoryId = 0l;
 					possibleEnterContractStatus = true;
 				}
 			}
-			
 			// 房源预定,房源已经被预定，预定时间在签署合同时间范围内
-			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO,apartment);
+			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO, apartment);
 			if (resoucreReservationsFuture) {
 				return false;
 			} else {
 				possibleEnterContractStatus = true;
 			}
-			//查询房源是否为待租状态
-			
-			
-			
+			// 查询房源是否为待租状态
+
 		}
 		return possibleEnterContractStatus;
 	}
 
 	private void dealAddressLivingStatus(Contract contract, byte livingStatus) {
-        List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
-        mappings.forEach(mapping -> {
-            CommunityAddressMapping addressMapping = propertyMgrProvider.findAddressMappingByAddressId(mapping.getAddressId());
-            if(!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
-                addressMapping.setLivingStatus(livingStatus);
-                propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
-            }
-            //#37329 企业客户管理-入驻信息tab里面关联的该楼栋门牌清理掉
-            List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listAddressEntryInfos(mapping.getAddressId());
-            entryInfos.forEach(entryInfo -> {
-            	CustomerEntryInfo customerEntryInfo = enterpriseCustomerProvider.findCustomerEntryInfoById(entryInfo.getId());
-            	customerEntryInfo.setStatus(CommonStatus.INACTIVE.getCode());
-            	enterpriseCustomerProvider.updateCustomerEntryInfo(customerEntryInfo);
-                
-            });
-        });
-    }
-    
-    @Override
+		List<ContractBuildingMapping> mappings = contractBuildingMappingProvider.listByContract(contract.getId());
+		mappings.forEach(mapping -> {
+			CommunityAddressMapping addressMapping = propertyMgrProvider
+					.findAddressMappingByAddressId(mapping.getAddressId());
+			if (!AddressMappingStatus.SALED.equals(AddressMappingStatus.fromCode(addressMapping.getLivingStatus()))) {
+				addressMapping.setLivingStatus(livingStatus);
+				propertyMgrProvider.updateOrganizationAddressMapping(addressMapping);
+			}
+			List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider
+					.listAddressEntryInfos(mapping.getAddressId());
+			entryInfos.forEach(entryInfo -> {
+				CustomerEntryInfo customerEntryInfo = enterpriseCustomerProvider
+						.findCustomerEntryInfoById(entryInfo.getId());
+				customerEntryInfo.setStatus(CommonStatus.INACTIVE.getCode());
+				enterpriseCustomerProvider.updateCustomerEntryInfo(customerEntryInfo);
+
+			});
+		});
+	}
+
+	@Override
 	public void copyContract(InitializationCommand cmd) {
-		//1.查询合同列表
+		// 1.查询合同列表,支持批量复制
 		if (cmd.getContractIds() == null) {
-			return ;
+			return;
 		}
-		//3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
+		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
-			Long contractId=entry.getKey();
-			Contract contract=entry.getValue();
-			
+			Long contractId = entry.getKey();
+			Contract contract = entry.getValue();
+
 			GenerateContractNumberCommand generateContractNumber = new GenerateContractNumberCommand();
 			generateContractNumber.setNamespaceId(contract.getNamespaceId());
 			generateContractNumber.setCommunityId(contract.getCommunityId());
@@ -4113,7 +4121,7 @@ long assetCategoryId = 0l;
 			generateContractNumber.setOrgId(contract.getPartyAId());
 			generateContractNumber.setPayorreceiveContractType(contract.getPaymentFlag());
 			String contractNumber = generateContractNumber(generateContractNumber);
-			
+
 			checkContractNumberUnique(contract.getNamespaceId(), contractNumber, contract.getCategoryId());
 			contract.setName("测试复制合同");
 			contract.setContractNumber(contractNumber);
@@ -4121,10 +4129,9 @@ long assetCategoryId = 0l;
 			contract.setStatus(ContractStatus.DRAFT.getCode());
 			contract.setRent(BigDecimal.ZERO);
 
-			contractProvider.createContract(contract);
-			contractSearcher.feedDoc(contract);
-			
-			
+			/*contractProvider.createContract(contract);
+			contractSearcher.feedDoc(contract);*/
+
 			FindContractCommand command = new FindContractCommand();
 			command.setId(contractId);
 			command.setPartyAId(contract.getPartyAId());
@@ -4132,14 +4139,12 @@ long assetCategoryId = 0l;
 			command.setNamespaceId(contract.getNamespaceId());
 			command.setCategoryId(contract.getCategoryId());
 			ContractDetailDTO contractDetailDTO = findContract(command);
-			
-			
+
 			List<BuildingApartmentDTO> buildingApartments = new ArrayList<BuildingApartmentDTO>();
 			List<ContractChargingItemDTO> contractChargingItems = new ArrayList<ContractChargingItemDTO>();
 			List<ContractAttachmentDTO> contractAttachments = new ArrayList<ContractAttachmentDTO>();
 			List<ContractChargingChangeDTO> contractChargingChanges = new ArrayList<ContractChargingChangeDTO>();
 			List<ContractChargingChangeDTO> frees = new ArrayList<ContractChargingChangeDTO>();
-
 			if (contractDetailDTO.getApartments() != null) {
 				for (BuildingApartmentDTO apartment : contractDetailDTO.getApartments()) {
 					apartment.setId(null);
@@ -4170,17 +4175,17 @@ long assetCategoryId = 0l;
 					frees.add(free);
 				}
 			}
-			
-			//合同拷贝，房源不应该修改状态
-			Double totalSize = dealContractApartments(contract, buildingApartments, ContractApplicationScene.PROPERTY.getCode());
+
+			// 合同拷贝，房源不应该修改状态
+			Double totalSize = dealContractApartments(contract, buildingApartments,ContractApplicationScene.PROPERTY.getCode());
 			dealContractChargingItems(contract, contractChargingItems);
 			dealContractAttachments(contract.getId(), contractAttachments);
 			dealContractChargingChanges(contract, contractChargingChanges, frees);
 			contract.setRentSize(totalSize);
 			contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
-			
 		}
 	}
 	
