@@ -53,10 +53,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.requisition.RequisitionService;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
@@ -4970,5 +4967,58 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
     }
+
+    @Override
+    public void transNewAdmin(TransNewAdminCommand cmd2){
+        Long nextPageAnchor = 0l;
+        boolean breakFlag = true;
+        int totalCount = 0;
+        long roundStartTime = System.currentTimeMillis();
+        while(breakFlag){
+
+            List<CreateOrganizationAdminCommand> list = new ArrayList<>();
+
+            if(cmd2.getNamespaceId() != null && cmd2.getNamespaceId() != 0){
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
+            }else{
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+            }
+            nextPageAnchor = list.get(list.size()-1).getOwnerId();
+            if(list.size() < 101){
+                breakFlag = false;
+            }else{
+                list.remove(list.size()-1);
+            }
+            long roundQueryEndTime = System.currentTimeMillis();
+
+            for(CreateOrganizationAdminCommand cmd : list){
+                cmd.setOwnerId(null);
+                dbProvider.execute((TransactionStatus status) -> {
+                    //根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
+                    /*try {
+                        rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                                PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, RoleConstants.PM_SUPER_ADMIN, false, false);
+                    }catch(Exception e){
+                        LOGGER.warn(e.getMessage());
+                    }*/
+                    cmd.setOwnerType("EhOrganizations");
+                    cmd.setOwnerId(cmd.getOrganizationId());
+                    rolePrivilegeService.deleteOrganizationAdministratorsForOnes(ConvertHelper.convert(cmd, DeleteOrganizationAdminCommand.class));
+                    rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                            PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN, true, false);
+                    return null;
+                });
+            }
+
+            totalCount += list.size();
+            if(LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Replace organization admin, namespaceId={}, totalCount={}, pageAnchor={}, queryElapse={}, elapse={}",
+                        cmd2.getNamespaceId(), totalCount, nextPageAnchor, (roundEndTime - roundQueryEndTime), (roundEndTime - roundStartTime));
+                roundStartTime  = roundEndTime;
+            }
+        }
+    }
+
 
 }
