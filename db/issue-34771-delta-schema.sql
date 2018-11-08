@@ -1594,6 +1594,7 @@ ALTER TABLE `eh_service_alliances` ADD COLUMN `update_time` DATETIME NULL DEFAUL
 ALTER TABLE `eh_service_alliances`	ADD COLUMN `update_uid` BIGINT NULL COMMENT '更新用户id' ;
 ALTER TABLE `eh_service_alliance_application_records` ADD COLUMN `update_time` DATETIME NULL DEFAULT NULL COMMENT '更新时间' ;
 -- end
+
 -- AUTHOR: 李清岩
 -- REMARK: 门禁v3.0.2 issue-34771
 -- REMARK: 增加门禁组门禁关系表
