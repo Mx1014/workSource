@@ -134,6 +134,7 @@ import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -172,6 +173,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -7023,36 +7025,44 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
+            
+            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
+            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
+            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+            displayConfigs.add(dispConf);
+            smartCardInfo.setDisplayConfigs(displayConfigs);
 
             smartCardInfo.setSmartCardId(obj.getId());
             smartCardInfo.setSmartCardKey(obj.getCardkey());
 
             List<SmartCardHandler> smartCardhandlers = new ArrayList<SmartCardHandler>();
             SmartCardHandler aclinkCard = new SmartCardHandler();
-            aclinkCard.setAppOriginId(41010L);
-            aclinkCard.setModuleId(41010L);
-            aclinkCard.setData("test-aclink-only");
-            aclinkCard.setTitle("公共门禁");
-            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            aclinkCard.setAppOriginId(41010L);
+//            aclinkCard.setModuleId(41010L);
+//            aclinkCard.setData("test-aclink-only");
+//            aclinkCard.setTitle("公共门禁");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
 
-            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
+//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
-            SmartCardHandlerItem item = new SmartCardHandlerItem();
-            item.setTitle("楼层");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-floor");
-            item.setDefaultValue("5");
-            items.add(item);
 
-            item = new SmartCardHandlerItem();
-            item.setTitle("VIP");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-vip");
-            item.setDefaultValue("VIP3");
-            items.add(item);
+//            item.setTitle("楼层");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-floor");
+//            item.setDefaultValue("5");
+//            items.add(item);
+//
+//            item = new SmartCardHandlerItem();
+//            item.setTitle("VIP");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-vip");
+//            item.setDefaultValue("VIP3");
+//            items.add(item);
 
-            aclinkCard.setItems(items);
-            smartCardhandlers.add(aclinkCard);
+//            aclinkCard.setItems(items);
+//            smartCardhandlers.add(aclinkCard);
 
 //            aclinkCard = new SmartCardHandler();
 //            aclinkCard.setAppOriginId(41015L);
@@ -7073,7 +7083,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             List<SmartCardHandler> stand2 = new ArrayList<SmartCardHandler>();
             smartCardInfo.setStandaloneHandlers(stand2);
-            stand2.add(aclinkCard);
+//            stand2.add(aclinkCard);
 
             hs = smartCardModuleManager.generateStandaloneCards(ctx);
             if(hs != null) {
@@ -7089,6 +7099,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            stand2.add(aclinkCard);
 
             List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
+            SmartCardHandlerItem item = new SmartCardHandlerItem();
             item = new SmartCardHandlerItem();
             item.setTitle("个人钱包");
             item.setRouterUrl("zl://wallet/index");
