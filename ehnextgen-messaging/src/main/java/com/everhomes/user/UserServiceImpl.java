@@ -7065,14 +7065,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             displayConfigs.add(dispConf);
             smartCardInfo.setDisplayConfigs(displayConfigs);
 
-            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
-            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
-            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
-            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
-            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
-            displayConfigs.add(dispConf);
-            smartCardInfo.setDisplayConfigs(displayConfigs);
-
             smartCardInfo.setSmartCardId(obj.getId());
             smartCardInfo.setSmartCardKey(obj.getCardkey());
 
