@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,12 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAllianceFaqTypesDao;
 import com.everhomes.server.schema.tables.records.EhAllianceFaqTypesRecord;
+import com.everhomes.server.schema.tables.records.EhAllianceFaqsRecord;
 import com.everhomes.server.schema.tables.records.EhAllianceTagRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.yellowPage.AllianceTag;
+import com.everhomes.yellowPage.DeleteQueryBuilderCallback;
 import com.everhomes.yellowPage.UpdateQueryBuilderCallback;
 
 @Component
@@ -216,8 +219,34 @@ public class AllianceFaqTypeProviderImpl implements AllianceFaqTypeProvider{
 
 	@Override
 	public void deleteFAQTypes(AllianceCommonCommand cmd) {
-		// TODO Auto-generated method stub
-		
+
+		int deleteCnt = deleteTool(q -> {
+			q.addConditions(TABLE.NAMESPACE_ID
+					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
+			q.addConditions(TABLE.OWNER_TYPE.eq(cmd.getOwnerType()));
+			q.addConditions(TABLE.OWNER_ID.eq(cmd.getOwnerId()));
+			q.addConditions(TABLE.TYPE.eq(cmd.getType()));
+		});
+
+		if (deleteCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
+	
+	
+	private int deleteTool(DeleteQueryBuilderCallback callback) {
+
+		DeleteQuery<EhAllianceFaqTypesRecord> query = deleteQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		return query.execute();
+	}
+	
+	private DeleteQuery<EhAllianceFaqTypesRecord> deleteQuery() {
+		return readWriteContext().deleteQuery(TABLE);
 	}
 	
 }
