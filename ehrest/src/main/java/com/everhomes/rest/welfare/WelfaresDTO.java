@@ -54,7 +54,7 @@ public class WelfaresDTO {
     private Long operatorUid;
     private Long updateTime;
     private List<WelfareReceiverDTO> receivers;
-    private List<WelfareItemDTO> items;
+    private List<WelfareCouponDTO> coupons;
 
 	@Override
 	public String toString() {
@@ -189,14 +189,6 @@ public class WelfaresDTO {
 		this.receivers = receivers;
 	}
 
-	public List<WelfareItemDTO> getItems() {
-		return items;
-	}
-
-	public void setItems(List<WelfareItemDTO> items) {
-		this.items = items;
-	}
-
 	public String getSenderName() {
 		return senderName;
 	}
@@ -227,5 +219,13 @@ public class WelfaresDTO {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public List<WelfareCouponDTO> getCoupons() {
+		return coupons;
+	}
+
+	public void setCoupons(List<WelfareCouponDTO> coupons) {
+		this.coupons = coupons;
 	}
 }

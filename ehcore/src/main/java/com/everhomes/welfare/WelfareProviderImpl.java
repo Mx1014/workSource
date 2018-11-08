@@ -62,14 +62,11 @@ public class WelfareProviderImpl implements WelfareProvider {
 	}
 	
 	@Override
-	public List<Welfare> listWelfare(Long ownerId, CrossShardListingLocator locator, Integer pageSize) {
+	public List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
 				.where(Tables.EH_WELFARES.OWNER_ID.eq(ownerId));
-		if (null != locator && locator.getAnchor() != null) {
-			step = step.and(Tables.EH_WELFARES.ID.lt(locator.getAnchor()));
-		}
-		if (null != pageSize) {
-			step.limit(pageSize);
+		if (null != pageSize && null != offset) {
+			step.limit(offset,pageSize);
 		}
 		Result<Record> records = step.orderBy(Tables.EH_WELFARES.ID.desc()).fetch();
 		if(null == records){

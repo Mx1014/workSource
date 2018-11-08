@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>welfares: 福利列表  参考{@link com.everhomes.rest.welfare.WelfaresDTO}</li>
- * <li>nextPageAnchor: 下页锚点</li>
+ * <li>nextPageOffset: 下页页码</li>
  * </ul>
  */
 public class ListWelfaresResponse {
@@ -18,7 +18,7 @@ public class ListWelfaresResponse {
 	@ItemType(WelfaresDTO.class)
 	private List<WelfaresDTO> welfares;
 
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 
 	public ListWelfaresResponse() {
 
@@ -42,11 +42,11 @@ public class ListWelfaresResponse {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
 }

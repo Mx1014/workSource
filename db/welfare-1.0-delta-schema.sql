@@ -35,15 +35,14 @@ CREATE TABLE `eh_welfare_coupons` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `welfare_id` BIGINT NOT NULL COMMENT '福利id',
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
-  `c_id` BIGINT COMMENT '卡券的id',
-  `coupon_id` BIGINT COMMENT '卡券的coupon_id',
+  `coupon_id` BIGINT COMMENT '卡券的id',
   `coupon_name` VARCHAR(128) COMMENT '卡券名称',
   `coupon_type` VARCHAR(128) COMMENT '卡券类型',
   `coupon_content` VARCHAR(128) COMMENT '卡券内容字段',
   `valid_date_type` TINYINT COMMENT '截止日期类型',
   `valid_date` DATE COMMENT '截止日期',
   `begin_date` DATE COMMENT '开始日期',
-  `amount` DATE COMMENT '发放数量(每人)',
+  `amount` INTEGER COMMENT '发放数量(每人)',
   `order_no` VARCHAR(128) COMMENT '卡券系统的交易id(暂定)',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利卡券表';

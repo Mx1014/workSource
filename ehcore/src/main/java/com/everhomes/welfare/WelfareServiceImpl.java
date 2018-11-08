@@ -31,6 +31,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
@@ -50,7 +51,7 @@ public class WelfareServiceImpl implements WelfareService {
     @Autowired
     private WelfareProvider welfareProvider;
     @Autowired
-    private WelfareItemProvider welfareItemProvider;
+    private WelfareCouponProvider welfareCouponProvider;
     @Autowired
     private CoordinationProvider coordinationProvider;
     @Autowired
@@ -70,22 +71,20 @@ public class WelfareServiceImpl implements WelfareService {
     public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd) {
         ListWelfaresResponse response = new ListWelfaresResponse();
 
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        if (null != cmd.getPageAnchor()) {
-            locator.setAnchor(cmd.getPageAnchor());
-        }
         int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        int pageOffset =(cmd.getPageOffset()==null || cmd.getPageOffset()<1) ? 1 : cmd.getPageOffset();
+        int	offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
 
-        List<Welfare> results = welfareProvider.listWelfare(cmd.getOrganizationId(), locator, pageSize + 1);
+        List<Welfare> results = welfareProvider.listWelfare(cmd.getOrganizationId(), offset, pageSize + 1);
         if (null == results || results.size() == 0) {
             return response;
         }
-        Long nextPageAnchor = null;
+        Integer nextPageOffSet = null;
         if (results.size() > pageSize) {
             results.remove(results.size() - 1);
-            nextPageAnchor = results.get(results.size() - 1).getId();
+            nextPageOffSet = pageOffset+1;
         }
-        response.setNextPageAnchor(nextPageAnchor);
+        response.setNextPageOffset(nextPageOffSet);
         response.setWelfares(results.stream().map(r -> processWelfaresDTO(r)).collect(Collectors.toList()));
         return response;
     }
@@ -110,13 +109,14 @@ public class WelfareServiceImpl implements WelfareService {
                 dto.setImgSize(resource.getResourceSize());
             }
         }
-        dto.setItems(new ArrayList<>());
+        dto.setCoupons(new ArrayList<>());
         dto.setReceivers(new ArrayList<>());
-        List<WelfareItem> items = welfareItemProvider.listWelfareItem(r.getId());
-        if (null != items) {
-            for (WelfareItem item : items) {
-                WelfareItemDTO itemDTO = ConvertHelper.convert(item, WelfareItemDTO.class);
-                dto.getItems().add(itemDTO);
+        List<WelfareCoupon> coupons = welfareCouponProvider.listWelfareCoupon(r.getId());
+        if (null != coupons) {
+            for (WelfareCoupon coupon : coupons) {
+                WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
+                couponDTO.setValidDate(coupon.getValidDate().getTime());
+                dto.getCoupons().add(couponDTO);
             }
         }
         List<WelfareReceiver> receivers = welfareReceiverProvider.listWelfareReceiver(r.getId());
@@ -313,12 +313,12 @@ public class WelfareServiceImpl implements WelfareService {
             response.setSendTime(welfare.getSendTime().getTime());
         }
 
-        response.setItems(new ArrayList<>());
-        List<WelfareItem> items = welfareItemProvider.listWelfareItem(welfare.getId());
-        if (null != items) {
-            for (WelfareItem item : items) {
-                WelfareItemDTO itemDTO = ConvertHelper.convert(item, WelfareItemDTO.class);
-                response.getItems().add(itemDTO);
+        response.setCoupons(new ArrayList<>());
+        List<WelfareCoupon> coupons = welfareCouponProvider.listWelfareCoupon(welfare.getId());
+        if (null != coupons) {
+            for (WelfareCoupon coupon : coupons) {
+                WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
+                response.getCoupons().add(couponDTO);
             }
         }
         return response;
@@ -332,7 +332,7 @@ public class WelfareServiceImpl implements WelfareService {
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");
         }
         welfareReceiverProvider.deleteWelfareReceivers(cmd.getWelfareId());
-        welfareItemProvider.deleteWelfareItems(cmd.getWelfareId());
+        welfareCouponProvider.deleteWelfareCoupons(cmd.getWelfareId());
         welfareProvider.deleteWelfare(cmd.getWelfareId());
     }
 

@@ -13,7 +13,7 @@ public interface WelfareProvider {
 
 	Welfare findWelfareById(Long id);
 
-	List<Welfare> listWelfare(Long ownerId, CrossShardListingLocator locator, Integer pageSize);
+	List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize);
 
 	void deleteWelfare(Long welfareId);
 }

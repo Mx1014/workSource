@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>organizationId: 公司id</li>
- * <li>pageAnchor: 分页锚点</li>
+ * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
  */
@@ -15,17 +15,9 @@ public class ListWelfaresCommand {
 
 	private Long organizationId;
 
-	private Long pageAnchor;
+	private Integer pageOffset;
 
 	private Integer pageSize;
-
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
 
 	public Integer getPageSize() {
 		return pageSize;
@@ -46,6 +38,14 @@ public class ListWelfaresCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public Integer getPageOffset() {
+		return pageOffset;
+	}
+
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
 	}
 
 }
