@@ -1091,8 +1091,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 					Row tempRow = sheet.createRow(i + 4);
 					PmTaskDTO task = list.get(i);
 					PmTaskCategory category = null;
-					if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
-							cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					//为科兴与一碑对接
+					ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+					if(UserContext.getCurrentNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 						category = createEbeiCategory();
 					} else {
 						category = checkCategory(task.getTaskCategoryId());
