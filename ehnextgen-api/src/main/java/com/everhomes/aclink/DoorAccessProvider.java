@@ -49,7 +49,7 @@ public interface DoorAccessProvider {
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlace(DoorStatisticEhCommand cmd);
 
     List<ActiveDoorByPlaceDTO> queryDoorAccessByPlaceNew (DoorStatisticEhCommand cmd);
-//add by liqingyan
+    //门禁v3.0.6 左邻后台 add by liqingyan
     List<DoorAccessNewDTO> listDoorAccessEh(ListingLocator locator, int count,ListingQueryBuilderCallback queryBuilderCallback);
 
     DoorAccess findDoorAccessById(Long id);
@@ -75,7 +75,9 @@ public interface DoorAccessProvider {
     //门禁v3.0.2 添加企业管理授权
     Long createDoorManagement (AclinkManagement obj);
 
-    List<AclinkManagementDTO> searchAclinkManagement (Long doorId);
+    List<AclinkManagementDTO> searchAclinkManagementByDoorId (Long doorId);
+
+    List<AclinkManagementDTO> searchAclinkManagementByManager(Long managerId, Byte managerType);
 
     AclinkManagement findAclinkManagementById (Long id);
 
@@ -86,12 +88,22 @@ public interface DoorAccessProvider {
     AclinkGroup findAclinkGroupById(Long id);
 
     AclinkGroup updateDoorGroup(AclinkGroup group);
+
+
     //删除所有门禁组关系 add by liqingyan
     void deleteAllDoorGroupRel(Long id);
 
     List<DoorAccess> listNewDoorAccessByGroupId(Long groupId, int count);
+//  旧方案不用
+//    void createDoorGroupRel(Long groupId, Long doorId);
 
-    void createDoorGroupRel(Long groupId, Long doorId);
+    AclinkGroupDoors createGroupDoors(AclinkGroupDoors door);
+
+    AclinkGroupDoors updateGroupDoors(AclinkGroupDoors door);
+
+    AclinkGroupDoors getGroupDoorsByDoorId(Long groupId, Long doorId);
+
+    List<AclinkGroupDoors> getGroupDoorsByGroupId(Long groupId);
 
     List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
                                                  ListDoorGroupCommand cmd);

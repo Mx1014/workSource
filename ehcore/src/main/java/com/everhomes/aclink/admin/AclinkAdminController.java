@@ -480,6 +480,36 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/updateDoorGroup</b>
+     * <p>更新门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("updateDoorGroup")
+    @RestReturn(value=String.class)
+    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
+        doorAccessService.updateDoorGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/createDoorGroup</b>
+     * <p>新增门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("createDoorGroup")
+    @RestReturn(value=String.class)
+    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
+        doorAccessService.createDoorGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/listDoorGroupNew</b>
      * <p>列出门禁组</p>
      * @return 门禁列表
@@ -556,37 +586,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /admin/aclink/updateDoorGroup</b>
-     * <p>更新门禁组</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("updateDoorGroup")
-    @RestReturn(value=String.class)
-    public RestResponse updateDoorGroup(@Valid UpdateDoorAccessGroupCommand cmd) {
-        doorAccessService.updateDoorGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /admin/aclink/createDoorGroup</b>
-     * <p>新增门禁组</p>
-     * @return 门禁列表
-     */
-    @RequestMapping("createDoorGroup")
-    @RestReturn(value=String.class)
-    public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
-        doorAccessService.createDoorGroup(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * 
      * <b>URL: /admin/aclink/updateAccessType</b>

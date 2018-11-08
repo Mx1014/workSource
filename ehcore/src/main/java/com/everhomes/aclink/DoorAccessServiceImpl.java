@@ -478,8 +478,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         locator.setAnchor(cmd.getPageAnchor());
 //        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
-        
         List<DoorAccessDTO> dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
+        //查找得到管理授权门禁 add by liqingyan
+        List<AclinkManagementDTO> managements = doorAccessProvider.searchAclinkManagementByManager(cmd.getOwnerId(),cmd.getOwnerType());
+        if(null != managements && !managements.isEmpty()){
+            for(AclinkManagementDTO management: managements){
+                DoorAccess manageDoor = doorAccessProvider.findDoorAccessById(management.getDoorId());
+                DoorAccessDTO dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
+                dtos.add(dto);
+            }
+        }
         if(dtos == null || dtos.size() == 0){
             resp.setDoors(dtos);
         	return resp;
@@ -5834,7 +5842,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListDoorManagementResponse listDoorManagement(ListDoorManagementCommand cmd){
         ListDoorManagementResponse resp = new ListDoorManagementResponse();
-	    List<AclinkManagementDTO> doors = doorAccessProvider.searchAclinkManagement(cmd.getDoorId());
+	    List<AclinkManagementDTO> doors = doorAccessProvider.searchAclinkManagementByDoorId(cmd.getDoorId());
 	    resp.setDoors(doors);
 	    return resp;
     }
@@ -6842,11 +6850,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd){
-	    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-	    if(null != door && door.getGroupid() == cmd.getGroupId()){
-	        door.setGroupid(0L);
-	        doorAccessProvider.updateDoorAccess(door);
+	    AclinkGroupDoors door = new AclinkGroupDoors();
+	    door = doorAccessProvider.getGroupDoorsByDoorId(cmd.getGroupId(), cmd.getDoorId());
+	    if(null != door && door.getGroupId() == cmd.getGroupId()){
+	        door.setStatus((byte)0);
+	        doorAccessProvider.updateGroupDoors(door);
         }
+//	    旧方案不用
+//	    DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+//	    if(null != door && door.getGroupid() == cmd.getGroupId()){
+//	        door.setGroupid(0L);
+//	        doorAccessProvider.updateDoorAccess(door);
+//        }
     }
 
     @Override
@@ -7054,17 +7069,42 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
 	        group.setName(cmd.getGroupName());
         }
-        if(cmd.getStatus() != null){
+        if(null != cmd.getStatus() && cmd.getStatus().equals((byte)0)){
             group.setStatus(cmd.getStatus());
-            doorAccessProvider.deleteAllDoorGroupRel(cmd.getGroupId());
+            //删除所有下属门禁
+            List<AclinkGroupDoors> doors = doorAccessProvider.getGroupDoorsByGroupId(group.getId());
+            if(null != doors && !doors.isEmpty()){
+                for(AclinkGroupDoors door: doors){
+                    door.setStatus((byte)0);
+                    doorAccessProvider.updateGroupDoors(door);
+                }
+            }
         }
         User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         group.setOperatorUid(user.getId());
         group.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        旧门禁-门禁组关系方案
+//        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
+//            for(Long id :cmd.getDoorIds()){
+//                if(null != id){
+//                    doorAccessProvider.createDoorGroupRel(cmd.getGroupId(),id);
+//                }
+//            }
+//        }
         if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
-            for(Long id :cmd.getDoorIds()){
-                if(null != id){
-                    doorAccessProvider.createDoorGroupRel(cmd.getGroupId(),id);
+            for(Long doorId :cmd.getDoorIds()){
+                if(null != doorId){
+                    AclinkGroupDoors door = new AclinkGroupDoors();
+                    door.setNamespaceId(namespaceId);
+                    door.setOwnerId(group.getOwnerId());
+                    door.setOwnerType(group.getOwnerType());
+                    door.setStatus((byte)1);
+                    door.setGroupId(group.getId());
+                    door.setDoorId(doorId);
+                    door.setCreatorUid(user.getId());
+                    door.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    doorAccessProvider.createGroupDoors(door);
                 }
             }
         }
