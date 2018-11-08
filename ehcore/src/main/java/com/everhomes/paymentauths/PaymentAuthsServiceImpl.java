@@ -105,6 +105,7 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
 		if(enterprisePaymentAuths.getEnterpriseAuth() == null && enterprisePaymentAuths.getEnterpriseAuth().size() == 0){
 			paymentAuthsProvider.deleteEnterprisePaymentAuths(enterprisePaymentAuths.getAppId(), cmd.getOrganizationId());
+			return;
 		}
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths);
