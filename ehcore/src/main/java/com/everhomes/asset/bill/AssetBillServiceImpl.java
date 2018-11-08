@@ -34,12 +34,12 @@ public class AssetBillServiceImpl implements AssetBillService {
 
 	//缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
 	public String batchDeleteBill(BatchDeleteBillCommand cmd) {
-		//assetService.checkAssetPriviledgeForPropertyOrg(cmd.getOwnerId(),PrivilegeConstants.ASSET_MANAGEMENT_DELETE,cmd.getOrganizationId());
 		String result = "OK";
         assetBillProvider.batchDeleteBill(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getBillIdList());
         return result;
 	}
 
+	//校验合同是否产生已缴账单接口（合同模块调用）
 	public ListCheckContractIsProduceBillResponse checkContractIsProduceBill(CheckContractIsProduceBillCmd cmd) {
 		ListCheckContractIsProduceBillResponse response = new ListCheckContractIsProduceBillResponse();
 		List<CheckContractIsProduceBillDTO> list = new ArrayList<CheckContractIsProduceBillDTO>();
