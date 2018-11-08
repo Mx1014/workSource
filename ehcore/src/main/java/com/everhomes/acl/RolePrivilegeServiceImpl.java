@@ -2370,17 +2370,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-
-	@Override
-	public void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd) {
-
-		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN,true,false);
-		//权限改版，要求同时清除掉超级管理员，有问题就找何智辉和徐诗诗
-		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
-
-	}
-
-
 	@Override
 	public void authorizationServiceModule(AuthorizationServiceModuleCommand cmd) {
 
