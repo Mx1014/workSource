@@ -207,6 +207,9 @@ public interface RolePrivilegeService {
 	 */
 	void deleteOrganizationAdministrators(DeleteOrganizationAdminCommand cmd);
 
+
+	void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd);
+
 	/**
 	 * 删除业务模块管理员
 	 * @param cmd

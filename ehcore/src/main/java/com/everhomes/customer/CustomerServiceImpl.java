@@ -4993,7 +4993,7 @@ public class CustomerServiceImpl implements CustomerService {
                     }*/
                     cmd.setOwnerType("EhOrganizations");
                     cmd.setOwnerId(cmd.getOrganizationId());
-                    rolePrivilegeService.deleteOrganizationAdministrators(ConvertHelper.convert(cmd, DeleteOrganizationAdminCommand.class));
+                    rolePrivilegeService.deleteOrganizationAdministratorsForOnes(ConvertHelper.convert(cmd, DeleteOrganizationAdminCommand.class));
                     rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
                             PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN, true, false);
                     return null;
