@@ -66,7 +66,7 @@ public class AppUrlServiceImpl implements AppUrlService {
 		    dto.setDescription("立即下载"+dto.getName());
         }
         String homrUrl = this.configurationProvider.getValue("home.url","");
-		dto.setLinkUrl(homrUrl + "/app-share/build/index.html?ns=" + UserContext.getCurrentNamespaceId() +"#/");
+		dto.setLinkUrl(homrUrl + "/app-share/build/index.html#/?ns=" + UserContext.getCurrentNamespaceId());
 		String logoUri = appUrls.getLogoUrl();
 		if(logoUri != null && logoUri.length() > 0) {
             try{
