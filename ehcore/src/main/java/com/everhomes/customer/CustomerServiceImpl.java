@@ -2,6 +2,7 @@ package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.RolePrivilegeServiceImpl;
 import com.everhomes.activity.ActivityCategories;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
@@ -53,10 +54,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.requisition.RequisitionService;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.acl.ServiceModuleAppsAuthorizationsDto;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
@@ -4969,6 +4967,39 @@ public class CustomerServiceImpl implements CustomerService {
                     "params targetId is null.");
         }
 
+    }
+
+    @Override
+    public void transNewAdmin(){
+        Long nextPageAnchor = 0l;
+        boolean breakFlag = true;
+        while(breakFlag){
+            List<CreateOrganizationAdminCommand> list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+            nextPageAnchor = list.get(list.size()-1).getOwnerId();
+            if(list.size() < 101){
+                breakFlag = false;
+            }else{
+                list.remove(list.size()-1);
+            }
+            for(CreateOrganizationAdminCommand cmd : list){
+                cmd.setOwnerId(null);
+                dbProvider.execute((TransactionStatus status) -> {
+                    //根据组织id、用户姓名、手机号、超级管理员权限代号、机构管理，超级管理员，拥有 所有权限、来创建超级管理员
+                    /*try {
+                        rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                                PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, RoleConstants.PM_SUPER_ADMIN, false, false);
+                    }catch(Exception e){
+                        LOGGER.warn(e.getMessage());
+                    }*/
+                    cmd.setOwnerType("EhOrganizations");
+                    cmd.setOwnerId(cmd.getOrganizationId());
+                    rolePrivilegeService.deleteOrganizationAdministrators(ConvertHelper.convert(cmd, DeleteOrganizationAdminCommand.class));
+                    rolePrivilegeService.createOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactName(), cmd.getContactToken(),
+                            PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,  RoleConstants.PM_SUPER_ADMIN, true, false);
+                    return null;
+                });
+            }
+        }
     }
 
 }
