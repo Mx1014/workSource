@@ -1,5 +1,7 @@
 package com.everhomes.rest.yellowPage;
 
+import java.util.List;
+
 /**
  * <ul>
  * <li>namespaceId: namespaceId</li>
@@ -9,24 +11,18 @@ package com.everhomes.rest.yellowPage;
  * <li>currentPMId: 当前管理公司</li>
  * <li>currentProjectId: 当前项目id</li>
  * <li>appId: 当前应用originId</li>
- * <li>upOperateServiceId: 更换到上方的id</li>
- * <li>lowOperateServiceId: 更换到下方的id</li>
+ * <li>operateServiceIds: 排好顺序的id列表</li>
  * </ul>
  **/
 public class UpdateOperateServiceOrdersCommand extends AllianceAdminCommand{
-	private Long upOperateServiceId;
-	private Long lowOperateServiceId;
 	
-	public Long getUpOperateServiceId() {
-		return upOperateServiceId;
+	private List<Long> operateServiceIds;
+
+	public List<Long> getOperateServiceIds() {
+		return operateServiceIds;
 	}
-	public void setUpOperateServiceId(Long upOperateServiceId) {
-		this.upOperateServiceId = upOperateServiceId;
-	}
-	public Long getLowOperateServiceId() {
-		return lowOperateServiceId;
-	}
-	public void setLowOperateServiceId(Long lowOperateServiceId) {
-		this.lowOperateServiceId = lowOperateServiceId;
+
+	public void setOperateServiceIds(List<Long> operateServiceIds) {
+		this.operateServiceIds = operateServiceIds;
 	}
 }
