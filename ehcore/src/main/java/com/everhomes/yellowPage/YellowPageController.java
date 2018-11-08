@@ -395,7 +395,7 @@ public class YellowPageController  extends ControllerBase {
     	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
-    	return response;
+    	return response; 
     }
     
     /**

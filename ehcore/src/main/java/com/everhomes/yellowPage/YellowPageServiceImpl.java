@@ -223,6 +223,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.file.FileUtils;
+import com.everhomes.yellowPage.faq.AllianceFAQType;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.yellowPage.standard.ServiceCategoryMatchProvider;
 import com.everhomes.yellowPage.stat.ClickStat;
@@ -2526,29 +2527,39 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(
 			UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
-		List<ServiceAllianceDTO> values = cmd.getValues();
-		if (values == null || values.size() < 2) {
-			YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "param not valid");
+		
+		ServiceAllianceListResponse resp = new ServiceAllianceListResponse();
+		resp.setDtos(new ArrayList<ServiceAllianceDTO>(1));
+		
+		if (null == cmd.getServiceIds() || cmd.getServiceIds().size() < 2) {
+			return resp;
 		}
-		// 检查数据,并且查询原来的defaultorder，并且按照defaultorder升序生成serviceAlliancesList by
-		// dengs,20170525
-		List<ServiceAlliances> serviceAlliancesList = checkServiceAllianceEnterpriseOrder(values);
-		List<ServiceAlliances> updateList = new ArrayList<ServiceAlliances>();
-
-		for (int i = 0; i < serviceAlliancesList.size(); i++) {
-			ServiceAlliances serviceAlliances = new ServiceAlliances();
-			serviceAlliances.setId(values.get(i).getId());// 原始id
-			serviceAlliances.setDefaultOrder(serviceAlliancesList.get(i).getDefaultOrder());// 排序后的顺序
-			updateList.add(serviceAlliances);
+		
+		ServiceAlliances sa = null;
+		List<Long> finalOrders = new ArrayList<>(10);
+		for (Long itemId : cmd.getServiceIds()) {
+			sa = yellowPageProvider.findServiceAllianceById(itemId, null, null);
+			if (null == sa) {
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_SERVICE_NOT_FOUND, "service not found");
+			}
+			
+			finalOrders.add(sa.getDefaultOrder());
 		}
-
-		yellowPageProvider.updateOrderServiceAllianceDefaultOrder(updateList);
-
-		// 返回更新后的结果
-		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
-		response.setDtos(updateList.stream().map(r -> ConvertHelper.convert(r, ServiceAllianceDTO.class))
-				.collect(Collectors.toList()));
-		return response;
+		
+		//排序
+		Collections.sort(finalOrders); 
+		
+		//变更
+		dbProvider.execute(r->{
+			int i = 0;
+			for (Long itemId : cmd.getServiceIds()) {
+				yellowPageProvider.updateServiceAllianceOrder(itemId, finalOrders.get(i++));
+			}
+			
+			return null;
+		});
+		
+		return resp;
 	}
 
 	/**

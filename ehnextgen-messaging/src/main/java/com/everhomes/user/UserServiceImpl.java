@@ -103,6 +103,7 @@ import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -3955,6 +3956,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
 
+        AppContext appContext = UserContext.current().getAppContext();
+        //工作台场景没有communityId跪了，先让它不跪吧，后面再让产品设计一下，工作台的搜索到底要搜索啥
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+            if(requests != null && requests.size() > 0){
+                appContext.setCommunityId(requests.get(0).getCommunityId());
+            }
+        }
+
+        //工作台场景没有communityId，跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
+
         if (StringUtils.isEmpty(cmd.getContentType())) {
             cmd.setContentType(SearchContentType.ALL.getCode());
         }
@@ -6999,6 +7018,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
         SmartCardInfo smartCardInfo = new SmartCardInfo();
+
+        //一卡通是否展示两个选择项 add by yanlong.liang 20181024
+        String showCardOpenFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_OPEN_OPTION, "是");
+        String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
+        smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
+        smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
+
+
         resp.setSmartCardInfo(smartCardInfo);
         smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;

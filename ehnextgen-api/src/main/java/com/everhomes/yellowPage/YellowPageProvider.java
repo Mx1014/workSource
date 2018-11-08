@@ -173,6 +173,9 @@ public interface YellowPageProvider {
 	List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
 
 
+	void updateServiceAllianceOrder(Long itemId, Long defaultOrderId);
+
+
 
 
 }
