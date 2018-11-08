@@ -45,6 +45,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.BuildingAdminStatus;
@@ -173,7 +174,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
-
+    	
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
             (DSLContext context, Object reducingContext) -> {
                 EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());
@@ -2009,7 +2010,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
-        query.addLimit(pageSize);
+        query.addLimit(pageSize+1);
 
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("listBuildingsByKeywords, sql=" + query.getSQL());
@@ -2090,6 +2091,39 @@ public class CommunityProviderImpl implements CommunityProvider {
 					  .from(Tables.EH_ORGANIZATION_COMMUNITIES)
 					  .where(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID.eq(communityId))
 					  .fetchAnyInto(Long.class);
+	}
+
+	@Override
+	public String findCommunityCategoryByCommunityId(Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		com.everhomes.server.schema.tables.EhResourceCategoryAssignments ehResourceCategoryAssignments = Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS;
+		com.everhomes.server.schema.tables.EhResourceCategories ehResourceCategories = Tables.EH_RESOURCE_CATEGORIES;
+		
+		return context.select(ehResourceCategories.NAME)
+					.from(ehResourceCategoryAssignments)
+					.leftOuterJoin(ehResourceCategories).on(ehResourceCategoryAssignments.RESOURCE_CATEGRY_ID.eq(ehResourceCategories.ID))
+					.where(ehResourceCategoryAssignments.RESOURCE_ID.eq(communityId))
+					.fetchAnyInto(String.class);
+	}
+
+	@Override
+	public List<Building> findBuildingsByIds(List<Long> buildingIds) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Building> buildings = context.select()
+							        		.from(Tables.EH_BUILDINGS)
+							        		.where(Tables.EH_BUILDINGS.ID.in(buildingIds))
+							        		.and(Tables.EH_BUILDINGS.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()))
+							        		.fetchInto(Building.class);
+		return buildings;
+	}
+
+	@Override
+	public List<Long> findCommunityIdsByOrgId(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID)
+						.from(Tables.EH_ORGANIZATION_COMMUNITIES)
+						.where(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(organizationId))
+						.fetchInto(Long.class);
 	}
 
 }

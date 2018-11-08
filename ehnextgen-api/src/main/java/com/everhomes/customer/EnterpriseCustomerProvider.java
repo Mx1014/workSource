@@ -5,6 +5,7 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
@@ -35,6 +36,7 @@ public interface EnterpriseCustomerProvider {
     void deleteEnterpriseCustomer(EnterpriseCustomer customer);
     EnterpriseCustomer findById(Long id);
     EnterpriseCustomer findByOrganizationId(Long organizationId);
+    EnterpriseCustomer findByOrganizationIdAndCommunityId(Long organizationId, Long communityId);
     EnterpriseCustomer findByNamespaceToken(String namespaceType, String namespaceCustomerToken);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceType(Integer namespaceId, String namespaceType, Long communityId);
     List<EnterpriseCustomer> listEnterpriseCustomerByNamespaceIdAndName(Integer namespaceId, Long communityId, String name);
@@ -255,4 +257,6 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerAptitudeFlag(Long id, Long approvalStatus);
 
     Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource);
+
+    List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor);
 }

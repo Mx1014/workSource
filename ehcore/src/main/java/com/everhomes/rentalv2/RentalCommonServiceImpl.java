@@ -133,7 +133,7 @@ public class RentalCommonServiceImpl {
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         LOGGER.debug("messageDTO : {}", messageDto);
-        // 发消息 +推送
+        // 推送
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -186,7 +186,7 @@ public class RentalCommonServiceImpl {
 
 
             List<RentalOrderRule> refundRules = rentalv2Provider.listRentalOrderRules(order.getResourceType(), rule.getSourceType(),
-                    rule.getId(), RentalOrderHandleType.REFUND.getCode());
+                    rule.getId(), RentalOrderHandleType.OVERTIME.getCode());
 
             List<RentalOrderRule> outerRules = refundRules.stream().filter(r -> r.getDurationType() == RentalDurationType.OUTER.getCode())
                     .collect(Collectors.toList());
@@ -228,8 +228,7 @@ public class RentalCommonServiceImpl {
                 }
             }
 
-            amount = amount.multiply(new BigDecimal(orderRule.getFactor()))
-                    .divide(new BigDecimal(100),2, RoundingMode.HALF_UP);
+            amount = amount.multiply(new BigDecimal(orderRule.getFactor()));
             BigDecimal totalAmount = order.getPayTotalMoney().add(amount);//计算价格
             order.setResourceTotalMoney(totalAmount);
             order.setPayTotalMoney(totalAmount);

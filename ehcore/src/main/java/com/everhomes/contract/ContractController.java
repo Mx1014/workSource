@@ -4,7 +4,6 @@ package com.everhomes.contract;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.contract.*;

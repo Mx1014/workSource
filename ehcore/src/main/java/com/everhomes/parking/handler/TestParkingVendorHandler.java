@@ -149,16 +149,16 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 		boolean notifyresult = configProvider.getBooleanValue("parking.test.notifyresult", true);
 		ParkingCardRequest request;
-		if (null != order.getCardRequestId()) {
-            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
-
-        }else {
-            request = getParkingCardRequestByOrder(order);
-            order.setCardRequestId(request.getId()); //补上id
+		if (order.getOrderType().equals(ParkingOrderType.OPEN_CARD.getCode())) {
+			if (null != order.getCardRequestId()) {
+	            request = parkingProvider.findParkingCardRequestById(order.getCardRequestId());
+	        }else {
+	            request = getParkingCardRequestByOrder(order);
+	            order.setCardRequestId(request.getId()); //补上id
+	        }
+		        updateFlowStatus(request);
         }
-        updateFlowStatus(request);
 		return notifyresult;
-
 	}
 
 	ParkingRechargeRateDTO getOpenCardRate(ParkingCardRequest parkingCardRequest) {
@@ -231,7 +231,7 @@ public class TestParkingVendorHandler extends DefaultParkingVendorHandler {
             dto.setEndPeriod(rechargeEndTimestamp.getTime());
             dto.setMonthCount(new BigDecimal(2));
             dto.setRateName(parkingLot.getExpiredRechargeMonthCount()+configProvider.getValue("parking.default.rateName","个月"));
-            dto.setPrice(new BigDecimal(0.01));
+    		dto.setPrice(new BigDecimal(configProvider.getValue("parking.test.prices.month","1")));
         }
         return dto;
     }

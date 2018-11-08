@@ -4,19 +4,12 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
-import com.everhomes.rest.yellowPage.GetFormListCommand;
-import com.everhomes.rest.yellowPage.GetFormListResponse;
-import com.everhomes.rest.yellowPage.GetWorkFlowListCommand;
-import com.everhomes.rest.yellowPage.GetWorkFlowListResponse;
-import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateCommand;
 import com.everhomes.rest.yellowPage.GetSelfDefinedStateResponse;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
+import com.everhomes.yellowPage.standard.ServiceCategoryMatch;
 
 public interface AllianceStandardService {
-
-	GetFormListResponse getFormList(GetFormListCommand cmd);
-
-	GetWorkFlowListResponse getWorkFlowList(GetWorkFlowListCommand cmd);
 
 	void enableSelfDefinedConfig(GetSelfDefinedStateCommand cmd);
 	
@@ -38,7 +31,7 @@ public interface AllianceStandardService {
 
 	void updateHomePageCategorysByPublish(ServiceAllianceInstanceConfig config, String name);
 
-	ServiceCategoryMatch findServiceCategoryMatch(String ownerType, Long ownerId, Long type, Long serviceId);
+	ServiceCategoryMatch findServiceCategory(String ownerType, Long ownerId, Long type, Long serviceId);
 
 	void updateMatchCategoryName(Long type, Long categoryId, String categoryName);
 
@@ -47,4 +40,16 @@ public interface AllianceStandardService {
 	boolean isEnableSelfConfig(AllianceConfigState state);
 
 	Long getOrgIdByTypeAndProjectId(Long type, Long projectId);
+
+	String transferApprovalToForm();
+
+	String transferPadItems();
+
+	ConfigCommand reNewConfigCommand(String ownerType, Long ownerId, Long type);
+
+	String transferAllianceModuleUrl();
+
+	String transferMainAllianceOwnerType();
+
+	String transferApprovalFlowCases();
 }

@@ -66,7 +66,9 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.asset.AssetProvider;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.PaymentBillGroup;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
+import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Building;
@@ -539,6 +541,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private AssetChargingItemService assetChargingItemService;
+   	
+   	@Autowired
+   	private AssetGroupProvider assetGroupProvider;
 
     private String queueName = "property-mgr-push";
 
@@ -2491,6 +2496,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
             address.setAreaId(community.getAreaId());
             address.setAreaName(community.getAreaName());
             address.setBuildingName(building.getName());
+            //TODO 这个BuildingId应该由前端传过来
             address.setBuildingId(building.getId());
             address.setApartmentName(cmd.getApartmentName());
             address.setAreaSize(cmd.getAreaSize());
@@ -2627,13 +2633,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         Building building = communityProvider.findBuildingByCommunityIdAndName(address.getCommunityId(), address.getBuildingName());
         if (cmd.getStatus() != null) {
             Long organizationId = findOrganizationByCommunity(community);
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
             if (communityAddressMapping != null) {
                 communityAddressMapping.setLivingStatus(cmd.getStatus());
                 organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
             } else {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -2747,8 +2756,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         }
         Community community = checkCommunity(address.getCommunityId());
         Long organizationId = findOrganizationByCommunity(community);
-        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
-
+        //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理，
+        //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的
+        //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+        CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         response = ConvertHelper.convert(address, GetApartmentDetailResponse.class);
         if (communityAddressMapping != null) {
             response.setStatus(communityAddressMapping.getLivingStatus());
@@ -3044,16 +3055,20 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
         communityProvider.updateBuilding(building);
         communityProvider.updateCommunity(community);
 		//删除门牌
-		//// TODO: 2018/5/11
-		addressProvider.deleteAddressById(cmd.getId());
+		//// TODO: 2018/5/11 
+        //删除门牌应该以置状态的方式，而不能直接去删除数据库里的记录，不然会对房源招商，租户管理，个人客户管理等模块的业务产生影响，by 唐岑
+		//addressProvider.deleteAddressById(cmd.getId());
     }
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
-            if (communityAddressMapping == null) {
+        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
+        	if (communityAddressMapping == null) {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -7763,7 +7778,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	public List<DefaultChargingItemDTO> listDefaultChargingItems(ListDefaultChargingItemsCommand cmd) {
 		List<DefaultChargingItem> items = defaultChargingItemProvider.listDefaultChargingItems(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(items != null && items.size() > 0) {
-			return items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			List<DefaultChargingItemDTO> list = items.stream().map(item -> toDefaultChargingItemDTO(item)).collect(Collectors.toList());
+			for(DefaultChargingItemDTO itemDto : list) {
+				if(itemDto.getBillGroupId() != null) {
+					PaymentBillGroup group = assetGroupProvider.getBillGroupById(itemDto.getBillGroupId());
+					if(group != null) {
+						itemDto.setBillGroupName(group.getName());
+					}
+				}
+			}
+			return list;
 		}
 		return null;
 	}
@@ -8185,7 +8209,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			excelUtils = excelUtils.setNeedSequenceColumn(false);
 			List<ExportApartmentsAuthorizePriceDTO> data = aptList.stream().map(r -> {
 				ExportApartmentsAuthorizePriceDTO dto = ConvertHelper.convert(r, ExportApartmentsAuthorizePriceDTO.class);
-				Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
+				// issue-41379 【资产管理-楼宇详情-房源授权价记录：点击批量导入授权价，选择下载模板，下载失败】
+				Byte livingStatus = (byte)-1;
+				Address address = addressProvider.findAddressById(r.getAddressId());
+				CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(r.getAddressId());
+				if (communityAddressMapping != null) {
+					livingStatus = communityAddressMapping.getLivingStatus();
+		        } else {
+		        	livingStatus = address.getLivingStatus();
+		        }
+				
+				//Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 				AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, cmd.getBuildingId(), r.getAddressId());
 				if (addressProperties != null && addressProperties.getApartmentAuthorizeType() != null && addressProperties.getAuthorizePrice() != null && addressProperties.getChargingItemsId() != null) {
@@ -8209,7 +8243,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			for (int i = 0; i < lists.size(); i++) {
 				chargingItemName.append(lists.get(i).getChargingItemName() + ",");
 			}
-			if (chargingItemName != null && !"".equals(chargingItemName)) {
+			if (chargingItemName.length()>1) {
 				chargingItemNames = (chargingItemName.toString()).substring(0, (chargingItemName.toString()).length() - 1);
 			} else {
 				chargingItemNames = "暂无可选费项，请设置后再试";

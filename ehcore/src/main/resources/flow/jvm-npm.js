@@ -84,6 +84,7 @@ module = (typeof module === 'undefined') ? {} : module;
 
     Module._load = function _load(file, parent, core, main) {
         var module = new Module(file, parent, core);
+        // print(file, parent)
         var body = readFile(module.filename, module.core);
         var args = ['exports', 'module', 'require', '__filename', '__dirname'];
         var params = ['module.exports', 'module', 'module.require', 'module.filename', 'module.dir'];
@@ -105,10 +106,12 @@ module = (typeof module === 'undefined') ? {} : module;
     };
 
     function Require(id, parent) {
+        // print(id)
         var core;
         var native_;
         var file = Require.resolve(id, parent);
-        //nashornObjs.log("filecore=" + file.core);
+        // print("filecore=" + file.core);
+        // print("filepath=" + file.path);
 
         if (!file) {
             if (typeof NativeRequire.require === 'function') {
@@ -125,12 +128,14 @@ module = (typeof module === 'undefined') ? {} : module;
         if (file.core) {
             file = file.path;
             core = true;
-            //nashornObjs.log(file);
         }
         try {
-            if (Require.cache[file]) {
-                return Require.cache[file];
-            } else if (file.endsWith('.js')) {
+            // print("file="+file)
+            // if (Require.cache[file]) {
+            //     print(typeof Require.cache[file].info)
+            //     return Require.cache[file];
+            // } else
+                if (file.endsWith('.js')) {
                 return Module._load(file, parent, core);
             } else if (file.endsWith('.json')) {
                 return loadJSON(file);
@@ -230,6 +235,7 @@ module = (typeof module === 'undefined') ? {} : module;
     }
 
     function resolveAsNodeModule(id, root) {
+        // print("resolveAsNodeModule="+id)
         var base = [root, 'node_modules'].join('/');
         return resolveAsFile(id, base) ||
             resolveAsDirectory(id, base) ||
@@ -237,6 +243,7 @@ module = (typeof module === 'undefined') ? {} : module;
     }
 
     function resolveAsDirectory(id, root) {
+        // print("resolveAsDirectory="+id)
         var base = [root, id].join('/');
         var file = new File([base, 'package.json'].join('/'));
         if (file.exists()) {
@@ -257,6 +264,7 @@ module = (typeof module === 'undefined') ? {} : module;
     }
 
     function resolveAsFile(id, root, ext) {
+        // print("resolveAsFile="+id)
         var file;
         if (id.length > 0 && id[0] === '/') {
             file = new File(normalizeName(id, ext));
@@ -273,6 +281,7 @@ module = (typeof module === 'undefined') ? {} : module;
 
     function resolveCoreModule(id, root) {
         var name = normalizeName(id);
+        // print("resolveCoreModule="+id+",name="+name)
         // var classloader = java.lang.Thread.currentThread().getContextClassLoader();
         var classloader = nashornObjs;
         if (classloader.getResource(name)) {
@@ -291,6 +300,8 @@ module = (typeof module === 'undefined') ? {} : module;
     function readFile(filename, core) {
         var input;
         try {
+            // print("======="+core)
+            // print(filename)
             if (core) {
                 // var classloader = java.lang.Thread.currentThread().getContextClassLoader();
                 var classloader = nashornObjs;

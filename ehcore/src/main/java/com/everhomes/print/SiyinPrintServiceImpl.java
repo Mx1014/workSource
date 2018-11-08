@@ -40,6 +40,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -651,7 +652,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(bizPayeeId));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
 		}
 		List<PayUserDTO> payUserDTOs = resp.getResponse();
@@ -698,19 +699,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
         //3、收款方是否有会员，无则报错
 		Long merchantId = getOrderPayeeMerchantId(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
-		cmd2.setIds(Arrays.asList(merchantId));
-		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
-			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
-		}
-		List<PayUserDTO> payUserDTOs = resp.getResponse();
-        if (payUserDTOs == null || payUserDTOs.size() == 0){
+		if (null == merchantId) {
             LOGGER.error("payeeUserId no find, cmd={}", cmd);
             throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
                     "暂未绑定收款账户");
-        }
-
+		}
+		
+		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
+		cmd2.setIds(Arrays.asList(merchantId));
+		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
+			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+            throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND,
+                    "merchant id not found");
+		}
+		
 		//准备创建订单的参数，包括一些支付参数以及商品
 		CreateOrderBaseInfo baseInfo = buildCreateOrderBaseInfo(cmd, order, merchantId);
 		CreateMerchantOrderResponse generalOrderResp = getSiyinPrintGeneralOrderHandler().createOrder(baseInfo);
@@ -1169,10 +1172,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
 		if(orderStatus == PrintOrderStatusType.PAID){
 			throwError(PrintErrorCode.ERROR_ORDER_IS_PAYED, "order have paid");
-		}
-
-		if(orderStatus == PrintOrderStatusType.WAIT_FOR_ENTERPRISE_PAY){
-			throwError(PrintErrorCode.ERROR_PRINT_ORDER_ALREADY_WAITING_PAID, "order is waiting for enterprise payments");
 		}
 
 		return order;
@@ -2037,14 +2036,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		cmd2.setUserId(key);
 		cmd2.setTag1(arrayList);
 		GetMerchantListByPayUserIdRestResponse resp = payServiceV2.getMerchantListByPayUserId(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+			return null;
 		}
 
 		List<GetPayUserListByMerchantDTO> payUserList = resp.getResponse();
-		if(payUserList==null || payUserList.size() == 0){
-			return null;
-		}
  		return payUserList.stream().map(r->{
 			ListBizPayeeAccountDTO dto = new ListBizPayeeAccountDTO();
 			dto.setAccountId(r.getId());
@@ -2065,27 +2062,23 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void createOrUpdateBusinessPayeeAccount(CreateOrUpdateBusinessPayeeAccountCommand cmd) {
-		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
-		if(cmd.getId()!=null){
-			SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider.findSiyinPrintBusinessPayeeAccountById(cmd.getId());
-			if(oldPayeeAccount == null){
-				LOGGER.error("unknown payaccountid = "+cmd.getId());
-				throwError(PrintErrorCode.ERROR_INPUT_PARAM_NOT_VALID, "Invalid parameters");
-			}
-			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
-			newPayeeAccount.setCreateTime(oldPayeeAccount.getCreateTime());
-			newPayeeAccount.setCreatorUid(oldPayeeAccount.getCreatorUid());
-			newPayeeAccount.setNamespaceId(oldPayeeAccount.getNamespaceId());
-			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
-			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		SiyinPrintBusinessPayeeAccount oldPayeeAccount = siyinBusinessPayeeAccountProvider
+				.getSiyinPrintBusinessPayeeAccountByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if (null == oldPayeeAccount) {
+			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,
+					SiyinPrintBusinessPayeeAccount.class);
+			newPayeeAccount.setStatus((byte) 2);
 			newPayeeAccount.setMerchantId(cmd.getPayeeId());
-			newPayeeAccount.setPayeeId(oldPayeeAccount.getPayeeId());
-			siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(newPayeeAccount);
-		}else{
-			SiyinPrintBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,SiyinPrintBusinessPayeeAccount.class);
-			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			siyinBusinessPayeeAccountProvider.createSiyinPrintBusinessPayeeAccount(newPayeeAccount);
+			return;
 		}
+
+		oldPayeeAccount.setPayeeId(cmd.getPayeeId());
+		oldPayeeAccount.setMerchantId(cmd.getPayeeId());
+		oldPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
+		siyinBusinessPayeeAccountProvider.updateSiyinPrintBusinessPayeeAccount(oldPayeeAccount);
 	}
 
 	@Override
@@ -2100,15 +2093,15 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		ListPayUsersByMerchantIdsCommand cmd2 = new ListPayUsersByMerchantIdsCommand();
 		cmd2.setIds(Arrays.asList(account.getMerchantId()));
 		ListPayUsersByMerchantIdsRestResponse resp = payServiceV2.listPayUsersByMerchantIds(cmd2);
-		if(null == resp || null == resp.getResponse()) {
+		if(null == resp || CollectionUtils.isEmpty(resp.getResponse())) {
 			LOGGER.error("resp:"+(null == resp ? null :StringHelper.toJsonString(resp)));
+			throwError(PrintErrorCode.ERROR_MERCHANT_ID_NOT_FOUND, "merchant id not found");
 		}
 
 		List<PayUserDTO> payUserDTOS = resp.getResponse();
-
 		Map<Long,PayUserDTO> map = payUserDTOS.stream().collect(Collectors.toMap(PayUserDTO::getId,r->r));
 		BusinessPayeeAccountDTO convert = ConvertHelper.convert(account, BusinessPayeeAccountDTO.class);
-		PayUserDTO payUserDTO = map.get(convert.getPayeeId());
+		PayUserDTO payUserDTO = map.get(convert.getMerchantId());
 		if(payUserDTO!=null){
 			convert.setPayeeUserType(payUserDTO.getUserType());
 			convert.setPayeeUserName(payUserDTO.getRemark());
@@ -2244,8 +2237,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 		//检查签名
 		if (!PayUtil.verifyCallbackSignature(cmd)) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sign verify faild");
+			LOGGER.error("sign error:"+(null == cmd ? "cmd is null" : StringHelper.toJsonString(cmd)));
+			
+			boolean signS = configurationProvider.getBooleanValue("print.notify.signswitch", true);
+			if (signS) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sign verify faild");
+			}
 		}
 
 		// * RAW(0)：
@@ -2281,10 +2279,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			//加一个开关，方便在beta环境测试
 			boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 			if (!flag) {
-				if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
-					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-					throwError(PrintErrorCode.ERROR_ORDER_ABNORMAL, "order abnormal");
-				}
 				BigDecimal couponAmount = new BigDecimal(cmd.getCouponAmount() == null ? 0L : cmd.getCouponAmount()).divide(new BigDecimal(100));
 				boolean isOk = checkNotifyPrintOrderAmount(order, payAmount, couponAmount);
 				if (!isOk) {

@@ -5,16 +5,17 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.paymentauths.EnterprisePaymentAuths;
 import com.everhomes.paymentauths.PaymentAuthsProvider;
 import com.everhomes.paymentauths.PaymentAuthsService;
-import com.everhomes.print.SiyinPrintOrderProviderImpl;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.paymentauths.CheckUserAuthsCommand;
 import com.everhomes.rest.paymentauths.CheckUserAuthsResponse;
 import com.everhomes.rest.paymentauths.EnterpriesAuthDTO;
 import com.everhomes.rest.paymentauths.EnterprisePaymentAuthsDTO;
 import com.everhomes.rest.paymentauths.ListEnterprisePaymentAuthsCommand;
-import com.everhomes.rest.paymentauths.PaymentAuthsAPPType;
 import com.everhomes.rest.paymentauths.UpdateEnterprisePaymentAuthsCommand;
-import com.everhomes.user.UserContext;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,13 +34,11 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	private PaymentAuthsProvider paymentAuthsProvider;
 	@Autowired
 	private OrganizationService organizationService;
-	Long rentalScreen = Long.parseLong(PaymentAuthsAPPType.RENTALSCREEN.getCode());
-	Long rentalVIP = Long.parseLong(PaymentAuthsAPPType.RENTALVIP.getCode());
-	Long rentalService = Long.parseLong(PaymentAuthsAPPType.RENTALSERVICE.getCode());
-	Long rentalRoom = Long.parseLong(PaymentAuthsAPPType.RENTALROOM.getCode());
-	Long print = Long.parseLong(PaymentAuthsAPPType.CLOUD_PRINT.getCode());
-	Long parking = Long.parseLong(PaymentAuthsAPPType.PARKING.getCode());
-	
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
+	@Autowired
+	private PortalVersionProvider portalVersionProvider;
+
 	@Override
 	public CheckUserAuthsResponse checkUserAuths(CheckUserAuthsCommand cmd){
 		CheckUserAuthsResponse response = new CheckUserAuthsResponse();
@@ -63,76 +62,39 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	
 	@Override
 	public List<EnterprisePaymentAuthsDTO> listEnterprisePaymentAuths (ListEnterprisePaymentAuthsCommand cmd) {
-
-		List<EnterprisePaymentAuths> authsList = paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrganizationId());
 		List<EnterprisePaymentAuthsDTO> results = new ArrayList<EnterprisePaymentAuthsDTO>();
-		List<EnterpriesAuthDTO> printAuth = new ArrayList<EnterpriesAuthDTO>();
-		List<EnterpriesAuthDTO> parkingAuth = new ArrayList<EnterpriesAuthDTO>();
-		List<EnterpriesAuthDTO> rentalRoomAuth = new ArrayList<EnterpriesAuthDTO>();
-		List<EnterpriesAuthDTO> rentalVIPAuth = new ArrayList<EnterpriesAuthDTO>();
-		List<EnterpriesAuthDTO> rentalScreenAuth = new ArrayList<EnterpriesAuthDTO>();
-		List<EnterpriesAuthDTO> rentalServiceAuth = new ArrayList<EnterpriesAuthDTO>();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(cmd.getNamespaceId());
 
-		for(EnterprisePaymentAuths enterprisePaymentAuth : authsList){
-			EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
-			if (enterprisePaymentAuth.getSourceType().equals("person")){
-				authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
-				authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
-			} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
-				authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
-				authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
+		if(releaseVersion == null){
+			return null;
+		}
+		List<ServiceModuleApp> apps = serviceModuleAppProvider.listServiceModuleAppsForEnterprisePay(releaseVersion.getId(), (byte)1);
+		List<EnterprisePaymentAuths> enterprisePaymentAuths =
+				paymentAuthsProvider.getPaymentAuths(cmd.getNamespaceId(), cmd.getOrganizationId());
+		if(enterprisePaymentAuths == null){
+			return null;
+		}
+		
+		for (ServiceModuleApp app : apps){
+			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
+			List<EnterpriesAuthDTO> auths = new ArrayList<EnterpriesAuthDTO>();
+			for (EnterprisePaymentAuths enterprisePaymentAuth :enterprisePaymentAuths){
+				EnterpriesAuthDTO authDTO = new EnterpriesAuthDTO();
+				if (app.getOriginId().equals(enterprisePaymentAuth.getAppId())){
+					if (enterprisePaymentAuth.getSourceType().equals("person")){
+						authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
+						authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+					} else if (enterprisePaymentAuth.getSourceType().equals("deparment")){
+						authDTO.setFlowUserSelectionType(enterprisePaymentAuth.getSourceType());
+						authDTO.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
+					}
+					authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
+					authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
+					auths.add(authDTO);
+				}
 			}
-			authDTO.setSelectionName(enterprisePaymentAuth.getSourceName());
-			authDTO.setSourceIdA(enterprisePaymentAuth.getSourceId());
-			if (enterprisePaymentAuth.getAppId().equals(print)){
-				printAuth.add(authDTO);
-			} else if (enterprisePaymentAuth.getAppId().equals(parking)){
-				parkingAuth.add(authDTO);
-			} else if (enterprisePaymentAuth.getAppId().equals(rentalVIP)){
-				rentalVIPAuth.add(authDTO);
-			} else if (enterprisePaymentAuth.getAppId().equals(rentalRoom)){
-				rentalRoomAuth.add(authDTO);
-			} else if (enterprisePaymentAuth.getAppId().equals(rentalService)){
-				rentalServiceAuth.add(authDTO);
-			} else if (enterprisePaymentAuth.getAppId().equals(rentalScreen)){
-				rentalScreenAuth.add(authDTO);
-			}
-					
-		}
-		if (printAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(printAuth);
-			e.setAppId(print);
-			results.add(e);
-		}
-		if (parkingAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(parkingAuth);
-			e.setAppId(parking);
-			results.add(e);
-		}
-		if (rentalVIPAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(rentalVIPAuth);
-			e.setAppId(rentalVIP);
-			results.add(e);
-		}
-		if (rentalRoomAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(rentalRoomAuth);
-			e.setAppId(rentalRoom);
-			results.add(e);
-		}
-		if (rentalServiceAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(rentalServiceAuth);
-			e.setAppId(rentalService);
-			results.add(e);
-		}
-		if (rentalScreenAuth != null) {
-			EnterprisePaymentAuthsDTO e = new EnterprisePaymentAuthsDTO();
-			e.setEnterpriseAuth(rentalScreenAuth);
-			e.setAppId(rentalScreen);
+			e.setEnterpriseAuth(auths);
+			e.setAppId(app.getOriginId());
 			results.add(e);
 		}
 		return results;
@@ -141,6 +103,10 @@ public class PaymentAuthsServiceImpl implements PaymentAuthsService {
 	@Override
 	public void updateEnterprisePaymentAuths (UpdateEnterprisePaymentAuthsCommand cmd){
 		EnterprisePaymentAuthsDTO enterprisePaymentAuths = cmd.getEnterprisePaymentAuthsDTO();
+		if(enterprisePaymentAuths.getEnterpriseAuth() == null){
+			paymentAuthsProvider.deleteEnterprisePaymentAuths(enterprisePaymentAuths.getAppId(), cmd.getOrganizationId());
+			return;
+		}
 		List<EnterprisePaymentAuths> auths = new ArrayList<>();
 		LOGGER.info("EnterpriseAuth : " + enterprisePaymentAuths);
 		for (EnterpriesAuthDTO enterpriesAuth : enterprisePaymentAuths.getEnterpriseAuth()){

@@ -2014,6 +2014,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
         return results;
     }
 
+    @Deprecated
     @Override
     public void importParkAddressData(ImportAddressCommand cmd,
                                       MultipartFile[] files) {
@@ -2707,10 +2708,13 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
-            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
+            //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+            //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+            CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
             if (communityAddressMapping == null) {
                 communityAddressMapping = new CommunityAddressMapping();
-                communityAddressMapping.setOrganizationId(organizationId);
+                //communityAddressMapping.setOrganizationId(organizationId);
                 communityAddressMapping.setCommunityId(community.getId());
                 communityAddressMapping.setAddressId(address.getId());
                 communityAddressMapping.setOrganizationAddress(address.getAddress());
@@ -3258,7 +3262,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
 	private void createOrganizationAddressMapping(Long addressId,String address,Long organizationId, Long communityId) {
 		CommunityAddressMapping communityAddressMapping = new CommunityAddressMapping();
-        communityAddressMapping.setOrganizationId(organizationId);
+        //communityAddressMapping.setOrganizationId(organizationId);
         communityAddressMapping.setCommunityId(communityId);
         communityAddressMapping.setAddressId(addressId);
         communityAddressMapping.setOrganizationAddress(address);
@@ -3794,6 +3798,48 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	private double doubleRoundHalfUp(double input,int scale){
 		BigDecimal digit = new BigDecimal(input);
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+	
+	public void fixInvalidCityInAddresses(Integer namespaceId) {
+	    long startTime = System.currentTimeMillis();
+	    Integer pageSize = 1000;
+	    Long pageAnchor = 0L;
+	    
+	    int count = 0;
+	    List<Address> list = null;
+	    while(pageAnchor != null) {
+	        list = addressProvider.listAddressesOfInvalidCity(namespaceId, pageAnchor, pageSize + 1);
+	        
+	        pageAnchor = null;
+	        if(list != null) {
+	            if(list.size() > pageSize) {
+                    pageAnchor = list.get(list.size() - 1).getId();
+                    list.remove(list.size() - 1);
+	            }
+                count += list.size();
+                
+                for(Address address : list) {
+                    // 使用小区来获取城市比地址里的城市名称来获取城市更准确
+                    // Region region = regionProvider.findRegionByName(address.getNamespaceId(), address.getCityName());
+                    Community community = communityProvider.findCommunityById(address.getCommunityId());
+                    if(community == null) {
+                        LOGGER.warn("Fix invalid city id in addresses, community not found, namespaceId={}, addressId={}, communityId={}", 
+                                address.getNamespaceId(), address.getId(), address.getCommunityId());
+                    } else {
+                        addressProvider.updateAddressOfCityId(address.getId(), community.getCityId());
+                    }
+                }
+            }
+            
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("Fix invalid city id in addresses, namespaceId={}, count={}, pageAnchor={}", namespaceId, count, pageAnchor);
+            }
+	    }
+	    
+	    long endTime = System.currentTimeMillis();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Fix invalid city id in addresses end, namespaceId={}, count={}, elapse={}", namespaceId, count, (endTime - startTime));
+        }
 	}
 
 }

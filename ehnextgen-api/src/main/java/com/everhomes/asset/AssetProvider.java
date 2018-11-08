@@ -23,6 +23,7 @@ import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.CreateChargingItemCommand;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
@@ -42,11 +43,14 @@ import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
 import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
@@ -457,4 +461,54 @@ public interface AssetProvider {
 	void updateCMBillItem(PaymentBillItems items);
 
 	void createOrUpdateAssetModuleAppMapping(AssetModuleAppMapping mapping);
+	
+	/**
+	 * 取出eh_payment_bills表中dateStr（年月）
+	 */
+	List<CommunityStatisticParam> getPaymentBillsDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_community表中dateStr（年月）
+	 */
+	List<CommunityStatisticParam> getStatisticCommunityDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_items表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getPaymentBillItemsDateStr();
+	
+	/**
+	 * 取出eh_payment_bill_statistic_building表中dateStr（年月）
+	 */
+	List<BuildingStatisticParam> getStatisticBuildingDateStr();
+	
+	/**
+	 * 获取费项的备注名称
+	 * @param namespaceId
+	 * @param ownerId
+	 * @param ownerType
+	 * @param chargingItemId
+	 * @param categoryId
+	 * @return
+	 */
+	String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId,
+			Long categoryId);
+	
+	//缴费对接门禁
+	void createDoorAccessParam(AssetDooraccessParam asseDooraccessParam);
+	List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd);
+	AssetDooraccessParam findDoorAccessParamById(Long id);
+	void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam);
+	Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog);
+	PaymentBillOrder getPaymentBillOrderByBillId(String billId);
+	AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd);
+	List<AssetDooraccessParam> listDooraccessParamsList(byte status);
+	SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
+	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
+	List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus);
+
+	
 }

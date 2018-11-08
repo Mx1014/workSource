@@ -155,6 +155,9 @@ public class ServerWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        if(session.isOpen()){  
+            session.close();  
+        }
         this.sessionStatsMap.remove(session);
     }
 

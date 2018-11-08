@@ -394,6 +394,7 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 		}
 
 		Set<Long> authCommunities = new HashSet<>();
+		//标准版兼容，对于web端后台的兼容
 		if(cmd.getCurrentPMId()!=null && cmd.getAppId()!=null && configProvider.getBooleanValue("privilege.community.checkflag", true)){
 			if (cmd.getCurrentProjectId()!=null) {
 				userPrivilegeMgr.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getCurrentPMId(), 4010040110L, cmd.getAppId(), null, cmd.getCurrentProjectId());//项目介绍权限
@@ -408,6 +409,12 @@ public class EnterpriseApplyBuildingServiceImpl implements EnterpriseApplyBuildi
 				if (dtos!=null && dtos.size()>0)
 					authCommunities = dtos.stream().map(ProjectDTO::getProjectId).collect(Collectors.toSet());
 			}
+		}else if(cmd.getCommunityId()!=null){
+			//标准版兼容，对于APP端的兼容
+//			Long orgId = communityProvider.getOrganizationIdByCommunityId(cmd.getCommunityId());
+//			List<Long> communityIdsManagedByOrg = communityProvider.findCommunityIdsByOrgId(orgId);
+//			authCommunities.addAll(communityIdsManagedByOrg);
+			authCommunities.add(cmd.getCommunityId());
 		}
 
 

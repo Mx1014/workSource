@@ -38,8 +38,8 @@ public class SdkCommonService extends NsDispatcher {
         });
     }
 
-    public ListBorderAndContentResponse listAllBorderAccessPoints(Integer namespaceId) {
-        return dispatcher(namespaceId, sdkClient -> {
+    public ListBorderAndContentResponse listAllBorderAccessPoints(String host, Integer namespaceId) {
+        return dispatcher(host, namespaceId, sdkClient -> {
             ListBorderAndContentRestResponse response =
                     sdkClient.restCall("post", "/evh/user/listBorderAndContent", null, ListBorderAndContentRestResponse.class);
             return response.getResponse();

@@ -4,8 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.oauth2.RequireOAuth2Authentication;
-import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -55,7 +53,9 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("findRentalSites")
 	@RestReturn(value = FindRentalSitesCommandResponse.class)
-	public RestResponse findRentalSites(@Valid FindRentalSitesCommand cmd) { 
+	public RestResponse findRentalSites(@Valid FindRentalSitesCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindRentalSitesCommandResponse findRentalSitesCommandResponse = rentalService
 				.findRentalSites(cmd);
 		RestResponse response = new RestResponse(
@@ -75,6 +75,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(value = RentalSiteDTO.class)
 	@RequireAuthentication()
 	public RestResponse findRentalSiteById(@Valid FindRentalSiteByIdCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -91,6 +93,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findRentalSiteWeekStatus")
 	@RestReturn(value = FindRentalSiteWeekStatusCommandResponse.class)
 	public RestResponse findRentalSiteWeekStatus(@Valid FindRentalSiteWeekStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindRentalSiteWeekStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteWeekStatus(cmd);
 		RestResponse response = new RestResponse(
@@ -109,6 +113,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findRentalSiteMonthStatus")
 	@RestReturn(value = FindRentalSiteMonthStatusCommandResponse.class)	
 	public RestResponse findRentalSiteMonthStatus(@Valid FindRentalSiteMonthStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindRentalSiteMonthStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteMonthStatus(cmd);
 		RestResponse response = new RestResponse(
@@ -128,6 +134,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findRentalSiteMonthStatusByWeek")
 	@RestReturn(value = FindRentalSiteMonthStatusByWeekCommandResponse.class)
 	public RestResponse findRentalSiteMonthStatusByWeek(@Valid FindRentalSiteMonthStatusByWeekCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindRentalSiteMonthStatusByWeekCommandResponse findRentalSiteMonthStatusByWeekCommandResponse = rentalService
 				.findRentalSiteMonthStatusByWeek(cmd);
 		RestResponse response = new RestResponse(
@@ -147,6 +155,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findRentalSiteYearStatus")
 	@RestReturn(value = FindRentalSiteYearStatusCommandResponse.class)	
 	public RestResponse findRentalSiteYearStatus(@Valid FindRentalSiteYearStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindRentalSiteYearStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findRentalSiteYearStatus(cmd);
 		RestResponse response = new RestResponse(
@@ -166,6 +176,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findAutoAssignRentalSiteMonthStatus")
 	@RestReturn(value = FindAutoAssignRentalSiteMonthStatusResponse.class)
 	public RestResponse findAutoAssignRentalSiteMonthStatus(@Valid FindAutoAssignRentalSiteMonthStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
 				.findAutoAssignRentalSiteMonthStatus(cmd);
 		RestResponse response = new RestResponse(resp);
@@ -184,6 +196,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findAutoAssignRentalSiteMonthStatusByWeek")
 	@RestReturn(value = FindAutoAssignRentalSiteMonthStatusByWeekResponse.class)
 	public RestResponse findAutoAssignRentalSiteMonthStatusByWeek(@Valid FindAutoAssignRentalSiteMonthStatusByWeekCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindAutoAssignRentalSiteMonthStatusByWeekResponse resp = rentalService
 				.findAutoAssignRentalSiteMonthStatusByWeek(cmd);
 		RestResponse response = new RestResponse(resp);
@@ -202,6 +216,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findAutoAssignRentalSiteYearStatus")
 	@RestReturn(value = FindAutoAssignRentalSiteYearStatusResponse.class)
 	public RestResponse findAutoAssignRentalSiteYearStatus(@Valid FindAutoAssignRentalSiteYearStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindAutoAssignRentalSiteYearStatusResponse resp = rentalService
 				.findAutoAssignRentalSiteYearStatus(cmd);
 		RestResponse response = new RestResponse(resp);
@@ -238,6 +254,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findAutoAssignRentalSiteDayStatus")
 	@RestReturn(value = FindAutoAssignRentalSiteDayStatusResponse.class)
 	public RestResponse findAutoAssignRentalSiteDayStatus(@Valid FindAutoAssignRentalSiteDayStatusCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		FindAutoAssignRentalSiteDayStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
 				.findAutoAssignRentalSiteDayStatus(cmd);
 		RestResponse response = new RestResponse(
@@ -258,6 +276,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("addRentalBill")
 	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		RentalBillDTO res = rentalService.addRentalBill(cmd); 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -381,6 +401,22 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /rental/offlinePayOrder</b>
+	 * <p>
+	 * 线下支付确认
+	 * </p>
+	 */
+	@RequestMapping("offlinePayOrder")
+	@RestReturn(value = String.class)
+	public RestResponse offlinePayOrder(OfflinePayOrderCommand cmd) {
+		rentalService.offlinePayOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /rental/changeRentalBillPayInfo</b>
 	 * <p>
 	 * 修改订单信息
@@ -461,6 +497,24 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/getUserClosestBill</b>
+	 * <p>
+	 * 查找用户最近的使用中 待使用订单
+	 * </p>
+	 */
+	@RequestMapping("getUserClosestBill")
+	@RestReturn(value = GetUserClosestBillResponse.class)
+	public RestResponse getUserClosestBill(@Valid GetUserClosestBillCommand cmd) {
+		GetUserClosestBillResponse getUserClosestBillResponse = rentalService.getUserClosestBill(cmd);
+		RestResponse response = new RestResponse(
+				getUserClosestBillResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/listRentalBills</b>
 	 * <p>
@@ -640,6 +694,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(GetResourceRuleV2Response.class)
 	@RequireAuthentication(false)
 	public RestResponse getResourceRuleV2(GetResourceRuleV2Command cmd) {
+		if (cmd.getSceneType() == null || cmd.getSceneType().length() == 0)
+			cmd.setSceneType(rentalService.parseSceneToken(cmd.getSceneToken()));
 		RestResponse response = new RestResponse(rentalService.getResourceRuleV2(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

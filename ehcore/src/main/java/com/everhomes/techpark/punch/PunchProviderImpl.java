@@ -3849,7 +3849,8 @@ public class PunchProviderImpl implements PunchProvider {
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0));
         			break;
         		case NORMAL:
-        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
+        			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()))
+        					.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.ne(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
         			break;
         		case REST:
         			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode()));
@@ -4021,7 +4022,7 @@ public class PunchProviderImpl implements PunchProvider {
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.eq(0)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime()))), 1).otherwise(0).sum().as("absenceMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ASK_FOR_LEAVE_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("askForLeaveRequestMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_REQUEST_COUNT.gt(0), 1).otherwise(0).sum().as("goOutRequestMemberCount"),
@@ -4049,11 +4050,11 @@ public class PunchProviderImpl implements PunchProvider {
     public DailyPunchStatusStatisticsTodayRecordMapper dailyPunchStatusMemberCountsTodayByDepartment(Long organizationId, Date statisticsDate, List<Long> deptIds) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.TIME_RULE_ID.gt(0L).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_COUNT.eq(0)), 1).otherwise(0).sum().as("unArrivedMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.ne(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode())), 1).otherwise(0).sum().as("normalMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_PUNCH_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("goOutPunchDayCount")).from(Tables.EH_PUNCH_DAY_LOGS);
         Condition condition = Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(organizationId).and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(statisticsDate)).and(Tables.EH_PUNCH_DAY_LOGS.DEPT_ID.in(deptIds));
         Record6<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal> record = query.where(condition).fetchOne();
@@ -4068,10 +4069,10 @@ public class PunchProviderImpl implements PunchProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record8<BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal, BigDecimal>> query = context.select(
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("restMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("normalMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.NORMAL_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.REST_FLAG.ne(com.everhomes.rest.techpark.punch.NormalFlag.YES.getCode())), 1).otherwise(0).sum().as("normalMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.BELATE_COUNT.gt(0), 1).otherwise(0).sum().as("belateMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.LEAVE_EARLY_COUNT.gt(0), 1).otherwise(0).sum().as("leaveEarlyMemberCount"),
-                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("absenceMemberCount"),
+                DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime()))), 1).otherwise(0).sum().as("absenceMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.ABSENT_FLAG.eq((byte) 1).and(Tables.EH_PUNCH_DAY_LOGS.SPLIT_DATE_TIME.gt(new Timestamp(System.currentTimeMillis()))), 1).otherwise(0).sum().as("checkingMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_ON_DUTY.gt(0).or(Tables.EH_PUNCH_DAY_LOGS.FORGOT_PUNCH_COUNT_OFF_DUTY.gt(0)), 1).otherwise(0).sum().as("forgotPunchMemberCount"),
                 DSL.decode().when(Tables.EH_PUNCH_DAY_LOGS.GO_OUT_PUNCH_FLAG.eq((byte) 1), 1).otherwise(0).sum().as("goOutPunchDayCount")).from(Tables.EH_PUNCH_DAY_LOGS);

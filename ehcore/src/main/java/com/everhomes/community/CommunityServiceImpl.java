@@ -229,6 +229,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
 import com.everhomes.rest.organization.ImportFileResultLog;
@@ -247,6 +248,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.Status;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.rest.organization.pm.AddressMappingStatus;
 import com.everhomes.rest.organization.pm.PropertyErrorCode;
@@ -293,6 +295,7 @@ import com.everhomes.version.VersionUpgradeRule;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -322,6 +325,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1942,6 +1946,15 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             memberDTOList = listCommunityWaitingApproveUserAddress(cmd, groupIds, locator, pageSize);
         }
+		Collections.sort(memberDTOList, new Comparator<GroupMemberDTO>() {
+			@Override
+			public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
@@ -2332,6 +2345,16 @@ public class CommunityServiceImpl implements CommunityService {
                 groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                 memberLogs.add(groupMemberDTO);
             });
+            //按照时间倒叙排列
+            Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                @Override
+                public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                    if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                        return -1;
+                    }
+                    return o2.getApproveTime().compareTo(o1.getApproveTime());
+                }
+            });
         }
         dto.setGroupmemberLogDTOs(memberLogs);
 //		if(null != usreGroups){
@@ -2385,7 +2408,7 @@ public class CommunityServiceImpl implements CommunityService {
         }
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 
-		dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+		dto.setIsAuth(AuthFlag.UNAUTHORIZED.getCode());
 
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
@@ -2395,7 +2418,10 @@ public class CommunityServiceImpl implements CommunityService {
 				if (OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
 					dto.setIsAuth(AuthFlag.AUTHENTICATED.getCode());
 					break;
-				}
+                }else if (OrganizationMemberStatus.WAITING_FOR_APPROVAL == OrganizationMemberStatus.fromCode(member.getStatus()) && OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+                    dto.setIsAuth(AuthFlag.PENDING_AUTHENTICATION.getCode());
+                    break;
+                }
 			}
 		}
 
@@ -2419,7 +2445,7 @@ public class CommunityServiceImpl implements CommunityService {
             dto.setVipLevel(user.getVipLevel());
         }
 		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
-		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+		List<OrganizationMemberLogDTO> memberLog = new ArrayList<>();
 		if(null != memberLogs){
 			for(OrganizationMemberLog log : memberLogs){
 				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
@@ -2430,10 +2456,22 @@ public class CommunityServiceImpl implements CommunityService {
 				User operator = this.userProvider.findUserById(log.getOperatorUid());
 				if(null != operator)
 					logDTO.setOperatorNickName(operator.getNickName());
-				dto.getMemberLogDTOs().add(logDTO);
+                memberLog.add(logDTO);
 			}
+			if (!CollectionUtils.isEmpty(memberLog)) {
+                //按照时间倒叙排列
+                Collections.sort(memberLog, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
+            }
 		}
-
+        dto.setMemberLogDTOs(memberLog);
 		//最新活跃时间 add by sfyan 20170620
 		List<UserActivity> userActivities = userActivityProvider.listUserActivetys(cmd.getUserId(), 1);
 		if(userActivities.size() > 0){
@@ -2500,6 +2538,16 @@ public class CommunityServiceImpl implements CommunityService {
                         pending = true;
                     }
                 }
+                //按照时间倒叙排列
+                Collections.sort(memberLogDTOs, new Comparator<OrganizationMemberLogDTO>() {
+                    @Override
+                    public int compare(OrganizationMemberLogDTO o1, OrganizationMemberLogDTO o2) {
+                        if (o1.getOperateTime() == null || o2.getOperateTime() == null) {
+                            return -1;
+                        }
+                        return o2.getOperateTime().compareTo(o1.getOperateTime());
+                    }
+                });
                 communityUserAddressDTO.setOrgDtos(orgDtos);
                 communityUserAddressDTO.setAddressDtos(addressDtos);
                 communityUserAddressDTO.setMemberLogDTOs(memberLogDTOs);
@@ -2533,6 +2581,17 @@ public class CommunityServiceImpl implements CommunityService {
                     }
                     groupMemberDTO.setOperateType(OperateType.MANUAL.getCode());
                     memberLogs.add(groupMemberDTO);
+                });
+
+                //按照时间倒叙排列
+                Collections.sort(memberLogs, new Comparator<GroupMemberDTO>() {
+                    @Override
+                    public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+                        if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                            return -1;
+                        }
+                        return o2.getApproveTime().compareTo(o1.getApproveTime());
+                    }
                 });
             }
             communityUserAddressDTO.setGroupmemberLogDTOs(memberLogs);
@@ -3479,6 +3538,11 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 
+			if(namespacesService.isStdNamespace(namespaceId) && cmd.getPmOrgId() != null){
+				//新增所有已安装应用的授权
+				serviceModuleAppAuthorizationService.updateAllAuthToNewOrganization(namespaceId, cmd.getPmOrgId(), community.getId());
+			}
+
 			points.add(ConvertHelper.convert(point, CommunityGeoPointDTO.class));
 			CommunityDTO cd = ConvertHelper.convert(community, CommunityDTO.class);
 			cd.setGeoPointList(points);
@@ -4047,6 +4111,20 @@ public class CommunityServiceImpl implements CommunityService {
 		for(OrganizationCommunityRequest org : orgs) {
 			orgIds.add(org.getMemberId());
 		}
+        List<Long> noAuthOrganizationIds = this.organizationProvider.listOrganizationIdFromUserAuthenticationOrganization(orgIds,
+                UserContext.getCurrentNamespaceId(), com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+        if (OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode() == cmd.getStatus() && !AuditAuth.ALL.getCode().equals(cmd.getAuditAuth())
+                && !CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+            if (AuditAuth.BOTH.getCode().equals(cmd.getAuditAuth())) {
+                for (Long orgId : noAuthOrganizationIds) {
+                    if (orgIds.contains(orgId)) {
+                        orgIds.remove(orgId);
+                    }
+                }
+            }else if (AuditAuth.ONLY_COMPANY.getCode().equals(cmd.getAuditAuth())) {
+                orgIds = noAuthOrganizationIds;
+            }
+        }
 		LOGGER.debug("orgIds is：" + orgIds);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
@@ -4076,7 +4154,6 @@ public class CommunityServiceImpl implements CommunityService {
                                           //由于一个人可能重复认证（认证了某公司通过后，退出了再重新认证，这时，会有两条认证信息，最极限的情况是除了主键与创建时间，其他信息全相同）
                                             //所以这种情况没法准备对应信息，但为了ID唯一，不能取没法把握的信息的ID（搞不好他就弄同一个ID了） update by huanglm 20180706
                                             member.setId(r.getId());
-                                            LOGGER.debug("orgmemberlogId is：{}" , orgIds);
                                             return member;
                                         }).collect(Collectors.toList());
                                 if (list.size() > 0) {
@@ -4087,6 +4164,7 @@ public class CommunityServiceImpl implements CommunityService {
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                LOGGER.debug("orgmemberlogId is：{}" , orgIds);
             }
         } else {
             organizationMembers = this.organizationProvider.listOrganizationPersonnels(
@@ -4124,6 +4202,19 @@ public class CommunityServiceImpl implements CommunityService {
                         dto.setOrganizationName(organization.getName());
                     }
                 }
+                dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+                if (!CollectionUtils.isEmpty(noAuthOrganizationIds)) {
+					List<OrganizationMember> manage = this.organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(dto.getOrganizationId(), OrganizationMemberGroupType.MANAGER.getCode());
+					List<Long> manageUserIds = new ArrayList<>();
+					if (!CollectionUtils.isEmpty(manage)) {
+						for (OrganizationMember member : manage) {
+							manageUserIds.add(member.getTargetId());
+						}
+					}
+				    if (noAuthOrganizationIds.contains(dto.getOrganizationId()) && !manageUserIds.contains(UserContext.currentUserId())) {
+				        dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.FALSE.getCode());
+                    }
+                }
                 if (dto.getNickName() == null || dto.getNickName().isEmpty()) {
                     User user = userProvider.findUserById(dto.getTargetId());
                     if (user != null && user.getId() != 0) {
@@ -4134,7 +4225,28 @@ public class CommunityServiceImpl implements CommunityService {
             }).collect(Collectors.toList());
 
         response.setMembers(dtoList);
-
+        //已认证或已拒绝的排序
+		Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+			@Override
+			public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
+		//未认证的排序
+		if(OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.WAITING_FOR_APPROVAL){
+			Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+				@Override
+				public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+					if (o1.getCreateTime() == null || o2.getCreateTime() == null) {
+						return -1;
+					}
+					return o2.getCreateTime().compareTo(o1.getCreateTime());
+				}
+			});
+		}
 		return response;
 	}
 
@@ -5202,12 +5314,24 @@ public class CommunityServiceImpl implements CommunityService {
 			for (OrganizationMember member: members) {
 				if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
 
-					List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
-					if(workPlaces != null && workPlaces.size() > 0){
-						for (OrganizationWorkPlaces workPlace: workPlaces){
-							orgCommunityIdSet.add(workPlace.getCommunityId());
+
+					//定制版要直接使用OrganizationCommunityRequest表的数据
+					if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+						List<OrganizationWorkPlaces> workPlaces = organizationProvider.findOrganizationWorkPlacesByOrgId(member.getOrganizationId());
+						if(workPlaces != null && workPlaces.size() > 0){
+							for (OrganizationWorkPlaces workPlace: workPlaces){
+								orgCommunityIdSet.add(workPlace.getCommunityId());
+							}
 						}
+					}else {
+
+						OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(member.getOrganizationId());
+						if(organizationCommunityRequest != null){
+							orgCommunityIdSet.add(organizationCommunityRequest.getCommunityId());
+						}
+
 					}
+
 				}
 			}
 		}
@@ -5223,7 +5347,8 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityGeoPoint> pointList;
 
 
-
+//TODO 5的范围太小，但是改成3的话，会把大量的数据查询出来。因为0域空间有大量的Community和CommunityGeoPoint数据。
+		//TODO findCommunityGeoPointByGeoHash接口应该带上namespaceId，内部和eh_communities连表查询。并且规定不能查询0域空间。
 		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
@@ -5752,7 +5877,8 @@ public class CommunityServiceImpl implements CommunityService {
         if (buildings != null && buildings.size() > 0) {
 			String fileName = String.format("楼栋信息导出_%s", community.getName());
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "楼栋信息");
-
+			excelUtils = excelUtils.setNeedSequenceColumn(false);
+			
 			List<BuildingExportDataDTO> data = buildings.stream().map(r->{
 					BuildingExportDataDTO dto = ConvertHelper.convert(r, BuildingExportDataDTO.class);
 					dto.setLatitudeLongitude(r.getLatitude() + "," + r.getLongitude());
@@ -5774,16 +5900,18 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 			).collect(Collectors.toList());
 			//设置excel提示
-//			excelUtils.setNeedTitleRemark(true).setTitleRemark("填写注意事项：（未按照如下要求填写，会导致数据不能正常导入）\n" +
-//                    "1、请不要修改此表格的格式，包括插入删除行和列、合并拆分单元格等。需要填写的单元格有字段规则校验，请按照要求输入。\n" +
-//                    "2、请在表格里面逐行录入数据，建议一次最多导入400条信息。\n" +
-//                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
-//                    "4、带有星号（*）的红色字段为必填项。\n" +
-//                    "5、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
-//                    "\n", (short) 13, (short) 2500).setNeedSequenceColumn(false).setIsCellStylePureString(true);
-			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "areaSize", "rentArea", "freeArea", "chargeArea", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription"};
-			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明"};
-			int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+			excelUtils.setNeedTitleRemark(true).setTitleRemark("导出注意事项：\n" +
+                    "1、该导出结果可直接应用于系统的楼宇导入操作，但进行楼宇导入操作时，建筑面积、在租面积、可招租面积、收费面积这四个字段的值将不会记录到系统当中。\n" +
+                    "2、带有星号（*）的字段为导入时的必填项。\n" +
+                    "3、请不要随意复制单元格，这样会破坏字段规则校验。\n" +
+                    "4、导入已存在的楼栋（楼栋名称相同认为是已存在的楼栋），将按照导入的楼栋信息更新系统已存在的楼栋信息。\n" +
+                    "\n", (short) 13, (short) 2500)
+			.setNeedSequenceColumn(false)
+			.setIsCellStylePureString(true)
+			.setTitleRemarkColorIndex(HSSFColor.YELLOW.index);
+			String[] propertyNames = {"name", "buildingNumber", "aliasName", "floorNumber", "address","latitudeLongitude", "managerName", "contact", "description", "trafficDescription", "areaSize", "rentArea", "freeArea", "chargeArea"};
+			String[] titleNames = {"*楼宇名称", "楼宇编号", "简称", "楼层数", "*地址", "经纬度", "*联系人", "*联系电话", "楼宇介绍", "交通说明", "建筑面积(㎡)", "在租面积(㎡)", "可招租面积(㎡)", "收费面积(㎡)"};
+			int[] titleSizes = {20, 20, 20, 20, 40, 25, 20, 20, 20, 20, 20, 20, 20, 20};
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
 		} else {
 			throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,

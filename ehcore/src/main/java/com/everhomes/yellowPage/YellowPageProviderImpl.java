@@ -12,6 +12,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.module.GetServiceModuleCommand;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.rest.yellowPage.standard.ConfigCommand;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -251,14 +253,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public List<ServiceAlliances> queryServiceAllianceAdmin(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag) {
-		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, null, parentId, categoryId, childTagIds, keywords, displayFlag, false);
+			Long ownerId, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, ConfigCommand cmd) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, null, parentId, categoryId, childTagIds, keywords, displayFlag, false, cmd);
 	}
 	
 	
 	private List<ServiceAlliances> queryServiceAlliance(
 			CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, boolean isByScene) {
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, Byte displayFlag, boolean isByScene, ConfigCommand configCmd) {
 		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
@@ -289,8 +291,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				
 				if (null != categoryId) {
 					tmpFrom = tmpFrom.leftOuterJoin(MATCH).on(
-							MATCH.OWNER_TYPE.eq(ownerType)
-							.and(MATCH.OWNER_ID.eq(ownerId))
+							MATCH.OWNER_TYPE.eq(configCmd.getOwnerType())
+							.and(MATCH.OWNER_ID.eq(configCmd.getOwnerId()))
 							.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
 							.and(MATCH.CATEGORY_ID.eq(categoryId))
 							);
@@ -299,8 +301,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			
 			if (null != categoryId) {
 				tmpFrom = ALLIANCES.leftOuterJoin(MATCH).on(
-						MATCH.OWNER_TYPE.eq(ownerType)
-						.and(MATCH.OWNER_ID.eq(ownerId))
+						MATCH.OWNER_TYPE.eq(configCmd.getOwnerType())
+						.and(MATCH.OWNER_ID.eq(configCmd.getOwnerId()))
 						.and(MATCH.SERVICE_ID.eq(ALLIANCES.ID))
 						.and(MATCH.CATEGORY_ID.eq(categoryId))
 						);
@@ -360,10 +362,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
         }
         
-        if(categoryId != null) {
-        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
-        }
-        
         // 必须传对应parentId，如旧版本有数据问题需通过sql解决
     	query.addConditions(ALLIANCES.PARENT_ID.eq(parentId).and(ALLIANCES.PARENT_ID.ne(0L)));
 
@@ -398,8 +396,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	*/
 	@Override
 	public List<ServiceAlliances> queryServiceAllianceByScene(CrossShardListingLocator locator, int pageSize, String ownerType,
-			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords) {
-		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, authProjectIds, parentId, categoryId, childTagIds, keywords, DisplayFlagType.SHOW.getCode(), true);
+			Long ownerId, List<Long> authProjectIds, Long parentId, Long categoryId, List<Long> childTagIds, String keywords, ConfigCommand cmd) {
+		return queryServiceAlliance(locator, pageSize, ownerType, ownerId, authProjectIds, parentId, categoryId, childTagIds, keywords, DisplayFlagType.SHOW.getCode(), true, cmd);
 	}
 
 	@Override
@@ -499,7 +497,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if (null != sa.getEndTime()) {
 			sa.setDefaultOrder(getDateDefaultOrder(sa));
 		}
-		
+		sa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		sa.setUpdateUid(UserContext.currentUserId());
         dao.update(sa);
 	}
 
@@ -520,10 +519,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void deleteServiceAllianceAttachmentsByOwnerId(Long ownerId) {
+	public void deleteServiceAllianceAttachmentsByOwnerId(String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 
         SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.eq(ownerId));
         
         
@@ -551,9 +551,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public void populateServiceAlliancesAttachment(ServiceAlliances sa) {
+	public void populateServiceAlliancesAttachment(ServiceAlliances sa, String ownerType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+        query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.in(sa.getId()));
         query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.DEFAULT_ORDER.asc()); //获取图片按defaultOrder  服务联盟v3.4需求
         query.fetch().map((EhServiceAllianceAttachmentsRecord record) -> {
@@ -609,9 +610,14 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         
-        condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        if (null != ownerId) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        }
+        
+        if (!StringUtils.isBlank(ownerType)) {
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        }
 
-    	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
 
 		if(displayDestination != null && displayDestination.size() > 0) {
 			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
@@ -1147,7 +1153,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceAttachment> listAttachments(
-			CrossShardListingLocator locator, int count, Long ownerId) {
+			CrossShardListingLocator locator, int count, String ownerType, Long ownerId) {
 		List<ServiceAllianceAttachment> attachments = new ArrayList<ServiceAllianceAttachment>();
 
         if (locator.getShardIterator() == null) {
@@ -1326,7 +1332,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(Long type) {
 
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME)
@@ -1337,7 +1343,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			return dto;
@@ -1361,11 +1367,15 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<ServiceAllianceAttachment> listAttachments(Long ownerId, Byte attachmentType) {
+	public List<ServiceAllianceAttachment> listAttachments(String ownerType, Long ownerId, Byte attachmentType) {
 		com.everhomes.server.schema.tables.EhServiceAllianceAttachments ATTACH = Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS;
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 SelectQuery<EhServiceAllianceAttachmentsRecord> query  = context.selectQuery(ATTACH);
-
+		 
+		 if (!StringUtils.isEmpty(ownerType)) {
+			 query.addConditions(ATTACH.OWNER_TYPE.eq(ownerType));
+		 }
+		 
 		 if (null != ownerId) {
 			 query.addConditions(ATTACH.OWNER_ID.eq(ownerId));
 		 }
@@ -1453,7 +1463,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME, SA_TYPE_TABLE.PARENT_ID)
 		.from(SA_TYPE_TABLE)
@@ -1464,12 +1474,55 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			dto.setParentId(r.getValue(SA_TYPE_TABLE.PARENT_ID));
 			return dto;
 		});
 	}
+	
+	
+	com.everhomes.server.schema.tables.EhServiceAlliances TABLE = Tables.EH_SERVICE_ALLIANCES;
+	
+	Class<ServiceAlliances> CLASS = ServiceAlliances.class;	
 
+
+	private int updateSingle(Long id, UpdateQueryBuilderCallback callback) {
+		return updateTool(Arrays.asList(id), callback);
+	}
+
+	
+	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
+
+		if (CollectionUtils.isEmpty(updateIds)) {
+			return 0;
+		}
+
+		UpdateQuery<EhServiceAlliancesRecord> query = updateQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		// 必须是未被删除且非固定的才可以更新
+		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+		query.addConditions(TABLE.ID.in(updateIds));
+		return query.execute();
+	}
+
+	private UpdateQuery<EhServiceAlliancesRecord> updateQuery() {
+		return readWriteContext().updateQuery(TABLE);
+	}
+
+	@Override
+	public void updateServiceAllianceOrder(Long itemId, Long defaultOrderId) {
+		int updateCnt = updateSingle(itemId, query -> {
+			query.addValue(TABLE.DEFAULT_ORDER, defaultOrderId);
+		});
+
+		if (updateCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
 }

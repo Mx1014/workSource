@@ -20,9 +20,8 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
-import com.everhomes.tool.BlutoAccessor;
+import com.everhomes.tachikoma.commons.sdk.SdkSettings;
 import com.everhomes.user.*;
-import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +60,16 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
 
+    private static final Set<String> clientAppKeyApi = new HashSet<>();
+    static {
+        clientAppKeyApi.add("/stat/event/postDevice");
+        clientAppKeyApi.add("/pusher/registDevice");
+        clientAppKeyApi.add("/user/syncActivity");
+        clientAppKeyApi.add("/user/signupByAppKey");
+        clientAppKeyApi.add("/user/signup");
+        clientAppKeyApi.add("/user/logoff");
+    }
+
     @Autowired
     private UserService userService;
 
@@ -88,13 +97,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
-    @Autowired
-    private SdkUserService sdkUserService;
-
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-
-    public WebRequestInterceptor() {
+    public WebRequestInterceptor() throws ClassNotFoundException {
+        Class.forName("com.everhomes.tool.BlutoAccessor");
     }
 
     @Override
@@ -218,7 +224,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
                     String appKey = request.getParameter(APP_KEY_NAME);
-                    if (null != appKey && (!appKey.isEmpty())) {
+                    if (null != appKey && (!appKey.isEmpty()) && !requireLogonToken(request)) {
                         LOGGER.info("appKey=" + appKey + " is Forbidden");
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
@@ -458,6 +464,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (paramMap.get("signature") == null)
             return false;
 
+        if (requireLogonToken(request)) {
+            return false;
+        }
+
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
         App app = getAppByKey(appKey);
         if (app == null) {
@@ -481,10 +491,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private App getAppByKey(String appKey) {
         // 给 SDK 调用提供的便捷方式
-        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+        if (SdkSettings.APP_KEY_SDK.equalsIgnoreCase(appKey)) {
             App app = new App();
             app.setAppKey(appKey);
-            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setSecretKey(SdkSettings.SECRET_KEY_SDK);
             app.setName("SDK");
             app.setId(0L);
             return app;
@@ -555,22 +565,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         context.setLogin(login);
 
         User user = this.userProvider.findUserById(login.getUserId());
-        if (user == null) {
-            //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
-            //如果core server和统一用户都没有用户，说明真的没有该用户
-            // add by yanlong.liang 20180928
-            user = ConvertHelper.convert(this.sdkUserService.getUser(login.getUserId()), User.class);
-            this.userProvider.createUserFromUnite(user);
-            UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(login.getUserId()), UserIdentifier.class);
-            if (userIdentifier != null) {
-                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                if (existsIdentifier != null) {
-                    this.userProvider.updateIdentifier(userIdentifier);
-                }else {
-                    this.userProvider.createIdentifierFromUnite(userIdentifier);
-                }
-            }
-        }
         context.setUser(user);
 
         PortalVersionUser portalVersionUserByUser = this.portalVersionUserProvider.findPortalVersionUserByUserId(login.getUserId());
@@ -634,7 +628,21 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         Map<String, String[]> paramMap = request.getParameterMap();
         String signAppKey = getParamValue(paramMap, "appKey");
         String osignAppKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
-        return signAppKey == null ? false : signAppKey.equals(osignAppKey);
+        return signAppKey != null && signAppKey.equals(osignAppKey) && !requireLogonToken(request);
+    }
+
+    private boolean requireLogonToken(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        String requestURI = request.getRequestURI();
+        String uri = requestURI.replaceFirst(contextPath, "");
+
+        String appKey = getParamValue(request.getParameterMap(), "appKey");
+        if (appKey != null) {
+            // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
+            return AppConstants.APPKEY_APP.equals(appKey) && !clientAppKeyApi.contains(uri);
+        }
+        // 受保护的 API 里，没有 appKey 的请求都是需要 logon token 的
+        return true;
     }
 
     private LoginToken innerSignLogon(HttpServletRequest request, HttpServletResponse response) {

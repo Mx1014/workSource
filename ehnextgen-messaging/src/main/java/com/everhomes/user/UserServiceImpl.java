@@ -103,6 +103,7 @@ import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -134,6 +135,7 @@ import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -172,6 +174,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -1760,6 +1763,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     LOGGER.info("User service check success, loginToken={}", loginToken);
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
+                }else {
+                    //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+                    //如果core server和统一用户都没有用户，说明真的没有该用户
+                    // add by yanlong.liang 20180928
+                    user = ConvertHelper.convert(this.sdkUserService.getUser(userInfo.getId()), User.class);
+                    if (user != null) {
+                        this.userProvider.createUserFromUnite(user);
+                        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userInfo.getId()), UserIdentifier.class);
+                        if (userIdentifier != null) {
+                            UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                            if (existsIdentifier != null) {
+                                this.userProvider.updateIdentifier(userIdentifier);
+                            }else {
+                                this.userProvider.createIdentifierFromUnite(userIdentifier);
+                            }
+                        }
+                        return true;
+                    }
                 }
             } else {
                 LOGGER.info("User service check failure, loginToken={}", loginToken);
@@ -2039,6 +2060,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (!containPartnerCommunity(namespaceId, entityList)) {
                 List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
                 if (resources != null && resources.size() > 1) {
+                    if (resources.get(0) == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("namespaceResource is null, namespaceId = {}", namespaceId);
+                        }
+                        return communityId;
+                    }
                     communityId = resources.get(0).getResourceId();
                     updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
                     if (LOGGER.isInfoEnabled()) {
@@ -3928,6 +3955,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+
+        AppContext appContext = UserContext.current().getAppContext();
+        //工作台场景没有communityId跪了，先让它不跪吧，后面再让产品设计一下，工作台的搜索到底要搜索啥
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+            if(requests != null && requests.size() > 0){
+                appContext.setCommunityId(requests.get(0).getCommunityId());
+            }
+        }
+
+        //工作台场景没有communityId，跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
 
         if (StringUtils.isEmpty(cmd.getContentType())) {
             cmd.setContentType(SearchContentType.ALL.getCode());
@@ -6773,6 +6818,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
 
+
+                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+                        continue;
+                    }
+
 					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
@@ -6877,7 +6927,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 			if(familyDtos != null && familyDtos.size() > 0){
 				for(FamilyDTO family : familyDtos){
-					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())){
+					if((cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())) || (family.getCommunityId() == null)){ //防止null值，这里对CommunityId进行判断
 						continue;
 					}
 
@@ -6968,6 +7018,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
         SmartCardInfo smartCardInfo = new SmartCardInfo();
+
+        //一卡通是否展示两个选择项 add by yanlong.liang 20181024
+        String showCardOpenFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_OPEN_OPTION, "是");
+        String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
+        smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
+        smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
+
+
         resp.setSmartCardInfo(smartCardInfo);
         smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
         TimeBasedOneTimePasswordGenerator totp;
@@ -6994,36 +7052,44 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
+            
+            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
+            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
+            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+            displayConfigs.add(dispConf);
+            smartCardInfo.setDisplayConfigs(displayConfigs);
 
             smartCardInfo.setSmartCardId(obj.getId());
             smartCardInfo.setSmartCardKey(obj.getCardkey());
 
             List<SmartCardHandler> smartCardhandlers = new ArrayList<SmartCardHandler>();
             SmartCardHandler aclinkCard = new SmartCardHandler();
-            aclinkCard.setAppOriginId(41010L);
-            aclinkCard.setModuleId(41010L);
-            aclinkCard.setData("test-aclink-only");
-            aclinkCard.setTitle("公共门禁");
-            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            aclinkCard.setAppOriginId(41010L);
+//            aclinkCard.setModuleId(41010L);
+//            aclinkCard.setData("test-aclink-only");
+//            aclinkCard.setTitle("公共门禁");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
 
-            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
+//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
-            SmartCardHandlerItem item = new SmartCardHandlerItem();
-            item.setTitle("楼层");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-floor");
-            item.setDefaultValue("5");
-            items.add(item);
 
-            item = new SmartCardHandlerItem();
-            item.setTitle("VIP");
-            item.setRouterUrl("zl://aclink/index");
-            item.setName("aclink-vip");
-            item.setDefaultValue("VIP3");
-            items.add(item);
+//            item.setTitle("楼层");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-floor");
+//            item.setDefaultValue("5");
+//            items.add(item);
+//
+//            item = new SmartCardHandlerItem();
+//            item.setTitle("VIP");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-vip");
+//            item.setDefaultValue("VIP3");
+//            items.add(item);
 
-            aclinkCard.setItems(items);
-            smartCardhandlers.add(aclinkCard);
+//            aclinkCard.setItems(items);
+//            smartCardhandlers.add(aclinkCard);
 
 //            aclinkCard = new SmartCardHandler();
 //            aclinkCard.setAppOriginId(41015L);
@@ -7044,7 +7110,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             List<SmartCardHandler> stand2 = new ArrayList<SmartCardHandler>();
             smartCardInfo.setStandaloneHandlers(stand2);
-            stand2.add(aclinkCard);
+//            stand2.add(aclinkCard);
 
             hs = smartCardModuleManager.generateStandaloneCards(ctx);
             if(hs != null) {
@@ -7060,6 +7126,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            stand2.add(aclinkCard);
 
             List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
+            SmartCardHandlerItem item = new SmartCardHandlerItem();
             item = new SmartCardHandlerItem();
             item.setTitle("个人钱包");
             item.setRouterUrl("zl://wallet/index");
@@ -7068,7 +7135,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             item = new SmartCardHandlerItem();
             item.setTitle("我的钥匙");
-            item.setRouterUrl("zl://aclink/key/index");
+            item.setRouterUrl("zl://access-control/mykeys");
             item.setName("key");
             payItems.add(item);
 

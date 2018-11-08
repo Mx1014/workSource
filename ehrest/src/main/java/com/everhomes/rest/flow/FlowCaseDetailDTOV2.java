@@ -51,6 +51,7 @@ public class FlowCaseDetailDTOV2 {
     private Long id;
     private Long applyUserId;
     private String applyUserName;
+    private String contactAvatar;
     private Long flowMainId;
     private String ownerType;
     private Long ownerId;
@@ -124,6 +125,14 @@ public class FlowCaseDetailDTOV2 {
 
     public void setApplyUserName(String applyUserName) {
         this.applyUserName = applyUserName;
+    }
+
+    public String getContactAvatar() {
+        return contactAvatar;
+    }
+
+    public void setContactAvatar(String contactAvatar) {
+        this.contactAvatar = contactAvatar;
     }
 
     public Long getFlowMainId() {

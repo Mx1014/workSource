@@ -22,6 +22,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.rest.portal.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
@@ -34,12 +35,6 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.MultipleFlag;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
@@ -68,6 +63,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.*;
@@ -604,7 +600,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
@@ -612,6 +607,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(moduleIds.size() == 0){
             return response;
         }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(namespaceId, cmd.getOwnerId()).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        //判断是否是仅仅有 OA 应用的普通公司
+        boolean isOaOnly = false;
+        if(authCommunityIds == null || authCommunityIds.size() == 0) {
+        	isOaOnly = true;
+        }
+        final boolean oaOnly = isOaOnly; 
+        
         List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
@@ -622,13 +627,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         tempList.stream().filter(r->!"".equals(r.getModuleControlType()) && r.getModuleControlType() != null && r.getLevel() == 3).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
-                    communityControlList.add(r);
+                	if(!oaOnly) {
+                		communityControlList.add(r);	
+                	}
                     break;
                 case ORG_CONTROL:
                     orgControlList.add(r);
                     break;
                 case UNLIMIT_CONTROL:
+                	if(!oaOnly) {
                     unlimitControlList.add(r);
+                	}
                     break;
             }
             return null;
@@ -1142,7 +1151,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
+                    HandlerGetCustomTagCommand gtCustomTagCommand = new HandlerGetCustomTagCommand();
+
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig, gtCustomTagCommand);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
                     webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);

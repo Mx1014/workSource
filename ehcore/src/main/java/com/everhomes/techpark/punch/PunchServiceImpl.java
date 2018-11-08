@@ -187,6 +187,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.Version;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.RestClient.Response;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -1418,12 +1419,9 @@ public class PunchServiceImpl implements PunchService {
         // 计算加班时间
         calculateOvertimeWorkCount(pdl, ptr != null ? ptr.getPunchDayType() : null, pr, punchLogs, exceptionRequests);
 
-        if (pr != null && PunchRuleType.GUDING == PunchRuleType.fromCode(pr.getRuleType())) {
-            return pdl;
-        }
         // ptr.getId()==0  包含休息和未安排班次
         if (ptr != null && ptr.getId() == 0) {
-            if (NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
+            if (pr != null && PunchRuleType.PAIBAN == PunchRuleType.fromCode(pr.getRuleType()) && NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                 pdl.setStatusList(PunchStatus.NO_ASSIGN_PUNCH_SCHEDULED.getCode() + "");
                 punchDayLog.setRestFlag(NormalFlag.NO.getCode());
             } else {
@@ -1887,6 +1885,7 @@ public class PunchServiceImpl implements PunchService {
                 if (isTimeIntervalFullCovered(new Date(onDutyLog.getPunchDate().getTime() + ptr.getAfternoonArriveTimeLong()), new Date(Math.min(onDutyLog.getPunchTime().getTime(), earliestOffDutyTimeLong)), approvalTimeIntervalsThisInterval)) {
                     onDutyLog.setApprovalStatus(PunchStatus.NORMAL.getCode());
                     updateSmartAlignment(onDutyLog);
+                    return;
                 }
                 onDutyLog.setApprovalStatus(PunchStatus.BELATE.getCode());
                 updateSmartAlignment(onDutyLog);
@@ -5764,7 +5763,7 @@ public class PunchServiceImpl implements PunchService {
 
         return requestedPageSize.intValue();
     }
-
+   
     /**
      * 打卡2.0 的考勤详情
      */
@@ -5779,7 +5778,7 @@ public class PunchServiceImpl implements PunchService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "resource not found");
         }
         cmd.setStartDay(socialSecurityService.getTheFirstDate(report.getPunchMonth()).getTime());
-        cmd.setEndDay(socialSecurityService.getTheLastDate(report.getPunchMonth()).getTime());
+        cmd.setEndDay(getDateMaxTime(socialSecurityService.getTheLastDate(report.getPunchMonth())).getTime());
         String startDay = dateSF.get().format(new Date(cmd.getStartDay()));
         String endDay = dateSF.get().format(new Date(cmd.getEndDay()));
 
@@ -5867,7 +5866,17 @@ public class PunchServiceImpl implements PunchService {
         return response;
     }
 
-    private Map<Long, OrganizationMemberDetails> findOrganizationMemberDetailsToMap(List<PunchDayLog> logs) {
+    private Date getDateMaxTime(java.sql.Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(Calendar.HOUR_OF_DAY, calendar.getMaximum(Calendar.HOUR_OF_DAY));
+		calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
+		calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
+		calendar.set(Calendar.MILLISECOND, calendar.getMaximum(Calendar.MILLISECOND));
+		return calendar.getTime();
+	}
+
+	private Map<Long, OrganizationMemberDetails> findOrganizationMemberDetailsToMap(List<PunchDayLog> logs) {
         if (CollectionUtils.isEmpty(logs)) {
             return new HashMap<>();
         }
@@ -8148,11 +8157,14 @@ public class PunchServiceImpl implements PunchService {
 //			versionCode = 1;
 //		}
         List<UniongroupMemberDetail> employees = uniongroupConfigureProvider.listUniongroupMemberDetail(r.getId(), CONFIG_VERSION_CODE);
-        dto.setEmployeeCount(employees == null ? 0 : employees.size());
         List<Long> detailIds = new ArrayList<>();
+        int employeeCount = 0;
         if (null != employees) {
             dto.setEmployees(new ArrayList<>());
             for (UniongroupMemberDetail detail : employees) {
+            	if(detail.getContactName() == null)
+            		continue;
+            	employeeCount++;
                 UniongroupTarget target = new UniongroupTarget();
                 target.setName(detail.getContactName());
                 target.setId(detail.getDetailId());
@@ -8161,6 +8173,7 @@ public class PunchServiceImpl implements PunchService {
                 detailIds.add(detail.getDetailId());
             }
         }
+        dto.setEmployeeCount(employeeCount);
         // 关联 人员和机构
         GetUniongroupConfiguresCommand cmd1 = new GetUniongroupConfiguresCommand();
         cmd1.setGroupId(r.getId());
@@ -8920,7 +8933,7 @@ public class PunchServiceImpl implements PunchService {
     		result.setPunchType(PunchType.NOT_WORKDAY.getCode());
             if (pr.getRuleType().equals(PunchRuleType.PAIBAN.getCode())){
                 //ptr的id 是空 就是 没排班
-            	if(ptr.getId() == null){
+            	if(NormalFlag.YES == NormalFlag.fromCode(ptr.getUnscheduledFlag()) || ptr.getId() == null){
             		result.setPunchType(PunchType.MEIPAIBAN.getCode());
                 }
             }
@@ -9663,7 +9676,8 @@ public class PunchServiceImpl implements PunchService {
                 dto.setRuleType(pr.getRuleType());
                 //获取当天的排班
                 PunchTimeRule ptr = getPunchTimeRuleWithPunchDayTypeByRuleIdAndDate(pr, startCalendar.getTime(), userId);
-                if (ptr != null) {
+                //2018-11-1 对未排班的判断增加用unscheduledFlag
+                if (ptr != null && NormalFlag.YES != NormalFlag.fromCode(ptr.getUnscheduledFlag())) {
                     dto.setTimeRuleId(ptr.getId());
                     if (ptr.getId() == null || ptr.getId() == 0) {
                         dto.setTimeRuleName("休息");
@@ -10687,7 +10701,7 @@ public class PunchServiceImpl implements PunchService {
     @Override
     public String getAdjustRuleUrl(HttpServletRequest request){
         String homeUrl = request.getHeader("Host");
-        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html#sign_suffix";
+        return "http://" + homeUrl + "/mobile/static/oa_punch/adjust_rule.html";
     }
 
     private Integer getPunchStatisticCountByItemType(PunchDayLog pdl, PunchStatusStatisticsItemType itemType) {
@@ -10730,7 +10744,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(pdl.getDetailId());
         if(null != pdl.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(pdl.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(pdl.getUserId());
         if(null != pdl.getUserId() && pdl.getUserId() > 0L){
@@ -10907,7 +10923,9 @@ public class PunchServiceImpl implements PunchService {
         dto.setDetailId(statistic.getDetailId());
         if(null != statistic.getDetailId()){
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(statistic.getDetailId());
-            dto.setContractName(detail.getContactName());
+            if(detail != null){
+            	dto.setContractName(detail.getContactName());
+            }
         }
         dto.setUserId(statistic.getUserId());
         if(null != statistic.getUserId() && statistic.getUserId() > 0L){

@@ -413,6 +413,7 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
 
     @Override
     public List<ListBillsDTO> listBills(Integer currentNamespaceId,ListBillsResponse response, ListBillsCommand cmd) {
+    	LOGGER.info("ZuolinAssetVendorHandler listBills currentNamespaceId={}, cmd={}", currentNamespaceId, cmd.toString());
         //修改传递参数为一个对象，卸货
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();

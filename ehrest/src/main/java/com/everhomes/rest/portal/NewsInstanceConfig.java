@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 新闻分类id</li>
  * <li>timeWidgetStyle: 时间样式</li>
  * <li>showType: 0-可以在多项目显示 1-仅当前项目下显示</li>
+ * <li>widget: NewsFlash-非时间轴 News-时间轴</li>
+ * <li>url: 跳转列表</li>
  * </ul>
  */
 public class NewsInstanceConfig {
@@ -18,6 +20,10 @@ public class NewsInstanceConfig {
 	private String timeWidgetStyle;
 	
 	private Byte showType;
+	
+	private String widget;
+	
+	private String url;
 
 	public Long getCategoryId() {
 		return categoryId;
@@ -46,6 +52,22 @@ public class NewsInstanceConfig {
 
 	public void setShowType(Byte showType) {
 		this.showType = showType;
+	}
+
+	public String getWidget() {
+		return widget;
+	}
+
+	public void setWidget(String widget) {
+		this.widget = widget;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 }

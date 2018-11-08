@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.SiteItemDTO;
+import com.everhomes.rest.rentalv2.SiteStructureDTO;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -52,6 +53,7 @@ import javax.validation.constraints.NotNull;
  * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * <li>refundStrategies: 退款规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
  * <li>overtimeStrategies: 超时规则{@link com.everhomes.rest.rentalv2.admin.RentalOrderRuleDTO}</li>
+ * <li>structures: 基础设施</li>
  * <li>siteItems: 付费物资</li>
  * <li>remarkFlag: 备注字段是否必填 0否 1是</li>
  * <li>remark: 备注显示文案</li>
@@ -128,6 +130,7 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 	private List<RentalRefundTipDTO> refundTips;
+	private List<SiteStructureDTO> structures;
 
 	private Byte remarkFlag;
 	private String remark;
@@ -416,5 +419,13 @@ public class QueryDefaultRuleAdminResponse {
 
 	public void setRefundTips(List<RentalRefundTipDTO> refundTips) {
 		this.refundTips = refundTips;
+	}
+
+	public List<SiteStructureDTO> getStructures() {
+		return structures;
+	}
+
+	public void setStructures(List<SiteStructureDTO> structures) {
+		this.structures = structures;
 	}
 }

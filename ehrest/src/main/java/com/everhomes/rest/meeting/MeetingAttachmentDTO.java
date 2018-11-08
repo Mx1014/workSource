@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id : id创建时不用传</li>
  * <li>contentName :  附件名称</li>
- * <li>contentType :  附件类型 contentserver 的type</li>
+ * <li>contentType :  附件类型 后缀名</li>
  * <li>contentUri : 附件uri contentserver的uri</li>
  * <li>contentUrl : 附件url 直接下载访问的链接</li>
  * <li>contentSize :  附件大小</li>

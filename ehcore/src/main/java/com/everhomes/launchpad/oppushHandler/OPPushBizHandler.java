@@ -52,7 +52,7 @@ public class OPPushBizHandler implements OPPushHandler {
 
         ListBusinessPromotionEntitiesCommand cmd = new ListBusinessPromotionEntitiesCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        cmd.setPageSize(config.getEntityCount());
+        cmd.setPageSize(config.getNewsSize());
         ListBusinessPromotionEntitiesReponse listBisz = businessService.listBusinessPromotionEntities(cmd);
 
         List<OPPushCard> listCards = new ArrayList<>();

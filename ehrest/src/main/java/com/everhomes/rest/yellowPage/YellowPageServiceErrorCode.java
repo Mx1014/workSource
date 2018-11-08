@@ -19,6 +19,7 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_SKIP_URL_FORMAT_ERROR = 10014;  //跳转链接格式错误
     static final int ERROR_INPUT_PARAM_NOT_VALID = 10015;  //接口参数异常
     static final int ERROR_QUERY_BIZ_MODULE_FAILED = 10016;  //获取电商模块失败
+    static final int ERROR_SERVICE_NOT_FOUND = 10017;  //服务不存在
     
     static final int ERROR_NEW_EVENT_APPLIER_NOT_EXIST = 11000;  //新事件申请用户不存在
     static final int ERROR_NEW_EVENT_FLOW_CASE_NOT_EXIST = 11001;  //未找到工作流信息
@@ -41,4 +42,15 @@ public interface YellowPageServiceErrorCode {
     static final int ERROR_ALLIANCE_MAIN_CATEGORY_NOT_EXIST = 11203;  //基础样式不存在
     static final int ERROR_SELF_CONFIG_NOT_ENABLE = 11204;  //请先打开自定义配置开关
     static final int ERROR_CATEGORY_NOT_EXIST = 11205;  //样式不存在
+    static final int ERROR_FLOW_CASE_SERVICE_NOT_FOUND= 11206;  //未获取到服务
+    
+    //FAQ
+    static final int ERROR_FAQ_TYPE_NOT_FOUND = 11400;  //
+    static final int ERROR_FAQ_NOT_FOUND = 11401;  //
+    static final int ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND = 11402;  //
+    static final int ERROR_FAQ_TYPE_NOT_VALID2 = 11402;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID3 = 11403;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID4 = 11404;  //问题
+    static final int ERROR_FAQ_TYPE_NOT_VALID5 = 11405;  //问题
+    
 }

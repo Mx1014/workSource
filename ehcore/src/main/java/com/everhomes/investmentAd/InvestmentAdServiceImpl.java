@@ -212,7 +212,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		
 		//管理公司全部项目范围
 		if (cmd.getAllScope() != null && cmd.getAllScope() == 1) {
-			List<Long> communityIds = organizationService.getOrganizationProjectIdsByAppId(cmd.getOrganizationId(), cmd.getAppId());
+			List<Long> communityIds = communityProvider.findCommunityIdsByOrgId(cmd.getOrganizationId());
 			cmd.setCommunityIds(communityIds);
 		}
 		
@@ -506,7 +506,8 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 			if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
 				return false;
 			}
-			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			//CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
 			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
 				return false;
 			}

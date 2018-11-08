@@ -23,13 +23,17 @@ import org.apache.commons.collections.CollectionUtils;
 //import scala.languageFeature.reflectiveCalls;
 
 import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
+import org.jooq.UpdateQuery;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +58,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.AssetBillDateDTO;
 import com.everhomes.rest.asset.AssetBillStatus;
+import com.everhomes.rest.asset.AssetBillStatusType;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.rest.asset.AssetEnergyType;
 import com.everhomes.rest.asset.AssetGeneralBillMappingCmd;
@@ -78,6 +83,7 @@ import com.everhomes.rest.asset.CreateBillCommand;
 import com.everhomes.rest.asset.ExemptionItemDTO;
 import com.everhomes.rest.asset.GetChargingStandardCommand;
 import com.everhomes.rest.asset.GetChargingStandardDTO;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.ListAllBillsForClientDTO;
 import com.everhomes.rest.asset.ListAvailableVariablesCommand;
@@ -99,6 +105,7 @@ import com.everhomes.rest.asset.PaymentExpectancyDTO;
 import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PaymentVariable;
 import com.everhomes.rest.asset.ReSortCmd;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowBillDetailForClientDTO;
 import com.everhomes.rest.asset.ShowBillDetailForClientResponse;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
@@ -106,10 +113,15 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.SubItemDTO;
 import com.everhomes.rest.asset.VariableIdAndValue;
+import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
+import com.everhomes.rest.asset.statistic.CommunityStatisticParam;
+import com.everhomes.rest.contract.ContractTemplateStatus;
 import com.everhomes.rest.promotion.order.PurchaseOrderPaymentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
+import com.everhomes.server.schema.tables.EhAssetDooraccessLogs;
+import com.everhomes.server.schema.tables.EhAssetDooraccessParams;
 import com.everhomes.server.schema.tables.EhAssetModuleAppMappings;
 import com.everhomes.server.schema.tables.EhAssetPaymentOrder;
 import com.everhomes.server.schema.tables.EhCommunities;
@@ -121,6 +133,8 @@ import com.everhomes.server.schema.tables.EhPaymentBillCertificate;
 import com.everhomes.server.schema.tables.EhPaymentBillGroups;
 import com.everhomes.server.schema.tables.EhPaymentBillGroupsRules;
 import com.everhomes.server.schema.tables.EhPaymentBillItems;
+import com.everhomes.server.schema.tables.EhPaymentBillStatisticBuilding;
+import com.everhomes.server.schema.tables.EhPaymentBillStatisticCommunity;
 import com.everhomes.server.schema.tables.EhPaymentBills;
 import com.everhomes.server.schema.tables.EhPaymentChargingItemScopes;
 import com.everhomes.server.schema.tables.EhPaymentChargingItems;
@@ -134,6 +148,8 @@ import com.everhomes.server.schema.tables.EhPaymentUsers;
 import com.everhomes.server.schema.tables.EhPaymentVariables;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.daos.EhAssetAppCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhAssetDooraccessLogsDao;
+import com.everhomes.server.schema.tables.daos.EhAssetDooraccessParamsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetModuleAppMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentBillCertificateDao;
@@ -153,6 +169,7 @@ import com.everhomes.server.schema.tables.pojos.EhPaymentBillOrders;
 import com.everhomes.server.schema.tables.pojos.EhPaymentSubtractionItems;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetDooraccessLogsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetModuleAppMappingsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillGroupsRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentBillOrdersRecord;
@@ -587,6 +604,7 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<ListBillsDTO> listBills(Integer currentNamespaceId, Integer pageOffSet, Integer pageSize, ListBillsCommand cmd) {
+    	LOGGER.info("AssetProviderImpl listBills currentNamespaceId={}, cmd={}", currentNamespaceId, cmd.toString());
         //卸货
         String contractNum = cmd.getContractNum();
         Long ownerId = cmd.getOwnerId();
@@ -2133,7 +2151,7 @@ public class AssetProviderImpl implements AssetProvider {
         return null;
     }
 
-    private String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
+    public String getProjectChargingItemName(Integer namespaceId, Long ownerId, String ownerType, Long chargingItemId, Long categoryId) {
         List<String> names = getReadOnlyContext().select(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.PROJECT_LEVEL_NAME)
                 .from(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES)
                 .where(Tables.EH_PAYMENT_CHARGING_ITEM_SCOPES.OWNER_TYPE.eq(ownerType))
@@ -5848,6 +5866,325 @@ public class AssetProviderImpl implements AssetProvider {
 			LOGGER.info("insert eh_asset_module_app_mappings success!");
 		}
 	}
+	
+	public List<CommunityStatisticParam> getPaymentBillsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
 
+	public List<CommunityStatisticParam> getStatisticCommunityDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticCommunity t = Tables.EH_PAYMENT_BILL_STATISTIC_COMMUNITY.as("t");
+        List<CommunityStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.DATE_STR)
+				.fetchInto(CommunityStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getPaymentBillItemsDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillItems t = Tables.EH_PAYMENT_BILL_ITEMS.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+
+	public List<BuildingStatisticParam> getStatisticBuildingDateStr() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhPaymentBillStatisticBuilding t = Tables.EH_PAYMENT_BILL_STATISTIC_BUILDING.as("t");
+        List<BuildingStatisticParam> list = context.selectDistinct(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.from(t)
+				.orderBy(t.NAMESPACE_ID, t.OWNER_ID, t.OWNER_TYPE, t.BUILDING_NAME, t.DATE_STR)
+				.fetchInto(BuildingStatisticParam.class);
+		return list;
+	}
+	
+    //缴费对接门禁
+	@Override
+	public AssetDooraccessParam findDoorAccessParamById(Long id) {
+		assert (id != null);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.pojos.EhAssetDooraccessParams.class, id));
+		EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), AssetDooraccessParam.class);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public AssetDooraccessParam findDoorAccessParamByParams(SetDoorAccessParamCommand cmd) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
+		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		//cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
+		cond = cond.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
+		cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
+
+		if (assetDooraccessParams.size() > 0 && assetDooraccessParams != null) {
+			return assetDooraccessParams.get(0);
+		}
+
+		return null;
+	}
+
+	@Override
+	public void createDoorAccessParam(AssetDooraccessParam assetDooraccessParam) {
+		long id = this.dbProvider.allocPojoRecordId(EhAssetDooraccessParams.class);
+		assetDooraccessParam.setId(id);
+		assetDooraccessParam.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessParam.setStatus(ContractTemplateStatus.ACTIVE.getCode()); // 有效的状态
+		assetDooraccessParam.setCreatorUid(UserContext.currentUserId());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class, id));
+		EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
+		dao.insert(assetDooraccessParam);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetDooraccessParams.class, null);
+	}
+
+	@Override
+	public void updateDoorAccessParam(AssetDooraccessParam assetDooraccessParam) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class, assetDooraccessParam.getId()));
+		EhAssetDooraccessParamsDao dao = new EhAssetDooraccessParamsDao(context.configuration());
+		assetDooraccessParam.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessParam.setOperatorUid(UserContext.currentUserId());
+		dao.update(assetDooraccessParam);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetDooraccessParams.class, assetDooraccessParam.getId());
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<AssetDooraccessParam> listDooraccessParams(GetDoorAccessParamCommand cmd) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
+		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.NAMESPACE_ID.eq(cmd.getNamespaceId());
+		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.CATEGORY_ID.eq(cmd.getCategoryId()));
+		if (cmd.getOwnerId() != null) {
+			cond = cond.and(t1.OWNER_ID.eq(cmd.getOwnerId()));
+		}
+		if (cmd.getOwnerId() == null) {
+			cond = cond.and(t1.ORG_ID.eq(cmd.getOrgId()));
+		}
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
+		return assetDooraccessParams;
+	}
+
+	// 获取eh_asset_dooraccess_params 整表数据
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<AssetDooraccessParam> listDooraccessParamsList(byte status) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessParams.class));
+		EhAssetDooraccessParams t1 = Tables.EH_ASSET_DOORACCESS_PARAMS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.STATUS.eq(status);
+		query.orderBy(t1.CREATE_TIME.desc());
+		List<AssetDooraccessParam> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessParam.class));
+		return assetDooraccessParams;
+	}
+
+	// 根据eh_asset_dooraccess_params 遍历账单,需要在NamespaceId，due_day_count，owner_id建立索引
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public SettledBillRes getAssetDoorAccessBills(int pageSize, long pageAnchor, byte status,
+			AssetDooraccessParam doorAccessParam) {
+		Long pageOffset = (pageAnchor - 1) * pageSize;
+		SettledBillRes res = new SettledBillRes();
+		/*
+		 * List<PaymentBills> paymentBills =
+		 * getReadOnlyContext().selectFrom(Tables.EH_PAYMENT_BILLS)
+		 * .where(Tables.EH_PAYMENT_BILLS.SWITCH.eq((byte) 1))
+		 * .and(Tables.EH_PAYMENT_BILLS.NAMESPACE_ID.eq(doorAccessParam.
+		 * getNamespaceId()))
+		 * .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(doorAccessParam.getOwnerId()
+		 * )) .and(Tables.EH_PAYMENT_BILLS.STATUS.eq(status))
+		 * .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(
+		 * AssetPaymentBillDeleteFlag.VALID.getCode()))
+		 * .and(Tables.EH_PAYMENT_BILLS.DUE_DAY_COUNT.greaterOrEqual(
+		 * doorAccessParam.getFreezeDays()))//欠费天数大于等于设置的欠费天数关闭门禁
+		 * .and(Tables.EH_PAYMENT_BILLS.TARGET_ID.isNotNull())
+		 * .limit(pageOffset.intValue(), pageSize+1)
+		 * .fetchInto(PaymentBills.class);
+		 */
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class));
+		EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.NAMESPACE_ID.eq(doorAccessParam.getNamespaceId());
+		cond = cond.and(t1.SWITCH.eq((byte) 1));
+		cond = cond.and(t1.OWNER_ID.eq(doorAccessParam.getOwnerId()));
+		cond = cond.and(t1.STATUS.eq(status));
+		cond = cond.and(t1.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
+		cond = cond.and(t1.DUE_DAY_COUNT.greaterOrEqual((doorAccessParam.getFreezeDays())));// 欠费天数大于等于设置的欠费天数关闭门禁
+		cond = cond.and(t1.TARGET_ID.isNotNull());
+		query.limit(pageOffset.intValue(), pageSize + 1);
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listAssetBill, sql=" + query.getSQL());
+			LOGGER.debug("listAssetBill, bindValues=" + query.getBindValues());
+		}
+
+		List<PaymentBills> paymentBills = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), PaymentBills.class));
+
+		if (paymentBills.size() > pageSize) {
+			res.setNextPageAnchor(pageAnchor + 1);
+			paymentBills.remove(paymentBills.size() - 1);
+		} else {
+			res.setNextPageAnchor(null);
+		}
+		res.setBills(paymentBills);
+		return res;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam) {
+		Long pageOffset = (pageAnchor - 1) * pageSize;
+		SettledBillRes res = new SettledBillRes();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhPaymentBills.class));
+		EhPaymentBills t1 = Tables.EH_PAYMENT_BILLS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.NAMESPACE_ID.eq(doorAccessParam.getNamespaceId());
+		cond = cond.and(t1.SWITCH.eq((byte) 1));
+		cond = cond.and(t1.OWNER_ID.eq(doorAccessParam.getOwnerId()));
+		cond = cond.and(t1.STATUS.eq(status));
+		cond = cond.and(t1.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()));
+		cond = cond.and(t1.DUE_DAY_COUNT.lt((doorAccessParam.getFreezeDays())));// 欠费天数小于设置的欠费天数开启门禁（门禁已经关闭过）
+		cond = cond.and(t1.TARGET_ID.isNotNull());
+		query.limit(pageOffset.intValue(), pageSize + 1);
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listAssetBill, sql=" + query.getSQL());
+			LOGGER.debug("listAssetBill, bindValues=" + query.getBindValues());
+		}
+
+		List<PaymentBills> paymentBills = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), PaymentBills.class));
+
+		if (paymentBills.size() > pageSize) {
+			res.setNextPageAnchor(pageAnchor + 1);
+			paymentBills.remove(paymentBills.size() - 1);
+		} else {
+			res.setNextPageAnchor(null);
+		}
+		res.setBills(paymentBills);
+		return res;
+	}
+
+	@Override
+	public Long createDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
+		long id = this.dbProvider.allocPojoRecordId(EhAssetDooraccessLogs.class);
+		assetDooraccessLog.setId(id);
+		assetDooraccessLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessLog.setStatus(ContractTemplateStatus.ACTIVE.getCode()); // 有效的状态
+		assetDooraccessLog.setCreatorUid(UserContext.currentUserId());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class, id));
+		EhAssetDooraccessLogsDao dao = new EhAssetDooraccessLogsDao(context.configuration());
+		dao.insert(assetDooraccessLog);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetDooraccessLogs.class, null);
+		return id;
+	}
+
+	@Override
+	public void updateDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class, assetDooraccessLog.getId()));
+		EhAssetDooraccessLogsDao dao = new EhAssetDooraccessLogsDao(context.configuration());
+		assetDooraccessLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		assetDooraccessLog.setOperatorUid(UserContext.currentUserId());
+		dao.update(assetDooraccessLog);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetDooraccessLogs.class, assetDooraccessLog.getId());
+	}
+
+	// 删除门禁相关记录
+	@Override
+	public void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
+		UpdateQuery<EhAssetDooraccessLogsRecord> query = context.updateQuery(t1);
+		query.addValue(t1.STATUS, assetDooraccessLog.getStatus());
+		query.execute();
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public AssetDooraccessLog getDooraccessLog(AssetDooraccessLog assetDooraccessLog) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class));
+		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.NAMESPACE_ID.eq(assetDooraccessLog.getNamespaceId());
+		cond = cond.and(t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode()));
+		cond = cond.and(t1.OWNER_ID.eq(assetDooraccessLog.getOwnerId()));
+		if (assetDooraccessLog.getCategoryId() != null) {
+			cond = cond.and(t1.CATEGORY_ID.eq(assetDooraccessLog.getCategoryId()));
+		}
+		if (assetDooraccessLog.getDooraccessStatus() != null) {
+			cond = cond.and(t1.DOORACCESS_STATUS.eq(assetDooraccessLog.getDooraccessStatus()));
+		}
+		if (assetDooraccessLog.getOwnerType() != null) {
+			cond = cond.and(t1.OWNER_TYPE.eq(assetDooraccessLog.getOwnerType()));
+		}
+		if (assetDooraccessLog.getProjectId() != null) {
+			cond = cond.and(t1.PROJECT_ID.eq(assetDooraccessLog.getProjectId()));
+		}
+
+		query.orderBy(t1.CREATE_TIME.desc());
+
+		List<AssetDooraccessLog> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessLog.class));
+
+		if (assetDooraccessParams != null && assetDooraccessParams.size() > 0) {
+			return assetDooraccessParams.get(0);
+		}
+
+		return null;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public PaymentBillOrder getPaymentBillOrderByBillId(String billId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPaymentBillOrders.class));
+		com.everhomes.server.schema.tables.EhPaymentBillOrders t1 = Tables.EH_PAYMENT_BILL_ORDERS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.BILL_ID.eq(billId);
+		cond = cond.and(t1.PAYMENT_STATUS.eq((int) AssetBillStatusType.PAID.getCode()));
+		query.orderBy(t1.CREATE_TIME.desc());
+		List<PaymentBillOrder> assetDooraccessParams = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), PaymentBillOrder.class));
+
+		if (assetDooraccessParams != null && assetDooraccessParams.size() > 0) {
+			return assetDooraccessParams.get(0);
+		}
+		return null;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetDooraccessLogs.class));
+		EhAssetDooraccessLogs t1 = Tables.EH_ASSET_DOORACCESS_LOGS.as("t1");
+		SelectJoinStep<Record> query = context.select(t1.fields()).from(t1);
+		Condition cond = t1.STATUS.eq(ContractTemplateStatus.ACTIVE.getCode());
+		cond = cond.and(t1.PROJECT_ID.eq(doorAccessParamInStatus.getOwnerId()));
+		//query.orderBy(t1.CREATE_TIME.desc());
+		List<AssetDooraccessLog> assetDooraccessLogs = query.where(cond).fetch()
+				.map(new DefaultRecordMapper(t1.recordType(), AssetDooraccessLog.class));
+		return assetDooraccessLogs;
+	}
 
 }

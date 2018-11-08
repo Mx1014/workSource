@@ -17,6 +17,7 @@ import com.everhomes.asset.app.AssetAppService;
 import com.everhomes.asset.chargingitem.AssetChargingItemService;
 import com.everhomes.asset.group.AssetGroupService;
 import com.everhomes.asset.standard.AssetStandardService;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -25,6 +26,18 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -52,6 +65,9 @@ public class AssetController extends ControllerBase {
 	
 	@Autowired
 	private AssetAppService assetAppService;
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 
 //	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
 //	/**
@@ -1553,4 +1569,175 @@ public class AssetController extends ControllerBase {
 	    return response;
 	}
 	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunity")
+	@RestReturn(value = ListBillStatisticByCommunityResponse.class)
+	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityResponse res = assetStatisticService.listBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("listBillStatisticByBuilding")
+	@RestReturn(value = ListBillStatisticByBuildingResponse.class)
+	public RestResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse res = assetStatisticService.listBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-合计</p>
+	 * <b>URL: /asset/listBillStatisticByCommunityTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotal")
+	@RestReturn(value = ListBillStatisticByCommunityDTO.class)
+	public RestResponse listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-合计</p>
+	 * <b>URL: /asset/listBillStatisticByBuildingTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByBuildingTotal")
+	@RestReturn(value = ListBillStatisticByBuildingDTO.class)
+	public RestResponse listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticService.listBillStatisticByBuildingTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByAddress</b>
+	 */
+	@RequestMapping("listBillStatisticByAddress")
+	@RestReturn(value = ListBillStatisticByAddressResponse.class)
+	public RestResponse listBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		ListBillStatisticByAddressResponse res = assetStatisticService.listBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-合计</p>
+	 * <b>URL: /asset/listBillStatisticByAddressTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByAddressTotal")
+	@RestReturn(value = ListBillStatisticByAddressDTO.class)
+	public RestResponse listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd) {
+		ListBillStatisticByAddressDTO dto = assetStatisticService.listBillStatisticByAddressTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("exportBillStatisticByCommunity")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		assetStatisticService.exportBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("exportBillStatisticByBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		assetStatisticService.exportBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByAddress</b>
+	 */
+	@RequestMapping("exportBillStatisticByAddress")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		assetStatisticService.exportBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <p>对接门禁：设置缴费门禁基础参数</p>
+     * <b>URL: /asset/setDoorAccessParam</b>
+     */
+    @RequestMapping("setDoorAccessParam")
+    @RestReturn(value = String.class)
+    public RestResponse setDoorAccessParam(@Valid SetDoorAccessParamCommand cmd) {
+		assetService.setDoorAccessParam(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    
+    /**
+     * <p>对接门禁：获取缴费门禁基础参数</p>
+     * <b>URL: /asset/getDoorAccessParam</b>
+     */
+    @RequestMapping("getDoorAccessParam")
+    @RestReturn(value=ListDoorAccessParamResponse.class)
+    public RestResponse createAuthBatch(@Valid GetDoorAccessParamCommand cmd) {
+        return new RestResponse(assetService.getDoorAccessParam(cmd));
+    }
+    /**
+     * <p>对接门禁：定时任务手动</p>
+     * <b>URL: /asset/excuteDoorAccessSchedule</b>
+     */
+    @RequestMapping("excuteDoorAccessSchedule")
+    @RestReturn(value=String.class)
+    public RestResponse excuteDoorAccessSchedule() {
+    	assetService.meterAutoReading(true);
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    /**
+     * <p>对接门禁：查询公司门禁状态</p>
+     * <b>URL: /asset/getDoorAccessInfo</b>
+     */
+    @RequestMapping("getDoorAccessInfo")
+    @RestReturn(value=String.class)
+    public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
+    	return new RestResponse(assetService.getDoorAccessInfo(cmd));
+    }
 }

@@ -11,6 +11,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
@@ -114,6 +115,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -366,6 +368,28 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
 
     @Override
+    public EnterpriseCustomer findByOrganizationIdAndCommunityId(Long organizationId, Long communityId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+        List<EnterpriseCustomer> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, EnterpriseCustomer.class));
+            return null;
+        });
+
+        if(result.size() == 0) {
+            return null;
+        }
+        return result.get(0);
+    }
+
+
+    @Override
     public List<EnterpriseCustomer> listEnterpriseCustomers(CrossShardListingLocator locator, Integer pageSize) {
         List<EnterpriseCustomer> customers = new ArrayList<>();
 
@@ -406,6 +430,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
         query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.ID.in(ids));
+        query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
         Map<Long, EnterpriseCustomer> result = new HashMap<>();
         query.fetch().map((r) -> {
@@ -2602,5 +2627,40 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .where(Tables.EH_CUSTOMER_TRACKINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
                 .and(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_SOURCE.eq(customerSource))
                 .fetchAnyInto(Timestamp.class);
+    }
+
+    @Override
+    public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){
+        List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
+        if(nextPageAnchor == null){
+            nextPageAnchor = 0l;
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.select(
+                Tables.EH_ORGANIZATION_MEMBERS.ID,
+                Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
+                Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID,
+                Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS,Tables.EH_ORGANIZATIONS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq("manager"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq((byte)3))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq((byte)2))
+                .and(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ID.ge(nextPageAnchor))
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID)
+                .limit(101)
+                .fetch().map(r->{
+                    CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
+                    dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
+                    dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+                    dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+                    dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
+                    dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
+                    dtoList.add(dto);
+                    return null;
+                });
+        return dtoList;
     }
 }

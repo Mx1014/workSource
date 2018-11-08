@@ -17,17 +17,17 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
+import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.*;
@@ -111,6 +111,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
     private PortalService portalService;
@@ -251,11 +254,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 if (k == 10L) {
                     //产品要求 企业管理员和楼栋门牌放在excel的前面
                     if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
-                        DynamicField df = new DynamicField();
+                        /*DynamicField df = new DynamicField();
                         df.setFieldName("enterpriseAdmins");
                         df.setDisplayName("企业管理员");
                         df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                        fields.add(df);
+                        fields.add(df);*/
                         DynamicField df1 = new DynamicField();
                         df1.setFieldName("entryInfos");
                         df1.setDisplayName("楼栋门牌");
@@ -626,6 +629,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
                         if(flag) {
+                            tracking.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
                             customerProvider.createCustomerTracking(tracking);
                             EnterpriseCustomer customer = customerProvider.findById(customerId);
                             if(customer != null) {
@@ -763,7 +767,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         enterpriseCustomer.setOwnerType(customerInfo.getOwnerType());
         enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        String customerAdminString = "";
         String customerAddressString = "";
         Class<?> clz = EnterpriseCustomer.class.getSuperclass();//校验数字日期格式
         Boolean flag = true;
@@ -801,7 +804,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
                 //校验数字格式及日期格式
                 try {
-                    if(!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())){
+                    if(!"entryInfos".equals(column.getFieldName())){
                         String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
                         switch (type) {
                             case "Integer":
@@ -855,18 +858,18 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
                 try {
-                    if (!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())) {
+                    if (!"entryInfos".equals(column.getFieldName())) {
                         // 非企业管理员和楼栋门牌字段 直接invoke
                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
-                    } else {
+                    } else {/*
                         if ("enterpriseAdmins".equals(column.getFieldName())) {
                             customerAdminString = column.getValue();
-                        }
+                        }*/
                         if ("entryInfos".equals(column.getFieldName())) {
                             customerAddressString = column.getValue();
                         }
                         // 校验 admin address  异常日志在校验中
-                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
+                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
                         if (dealResult) {
                             flag = false;
                             break;
@@ -897,7 +900,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
-                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerAddressString);
                     }
                  return failedNumber ;
                 }
@@ -905,7 +908,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
             dynamicCustomer.setCustomer(enterpriseCustomer);
             dynamicCustomer.setCustomerAddressString(customerAddressString);
-            dynamicCustomer.setCustomerAdminString(customerAdminString);
+            //dynamicCustomer.setCustomerAdminString(customerAdminString);
 
             /*long startCreateEnterpriseCustomerTime = System.currentTimeMillis();
             LOGGER.debug("the function : createEnterpriseCustomer is start : {} " , startCreateEnterpriseCustomerTime);
@@ -981,7 +984,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
             updateCustomers.add(r.getCustomer());
             customerSearcher.feedDoc(r.getCustomer());
 
-            createEnterpriseCustomerAdmin(r.getCustomer(), r.getCustomerAdminString());
+            //createEnterpriseCustomerAdmin(r.getCustomer(), r.getCustomerAdminString());
             createEnterpriseCustomerEntryInfo(r.getCustomer(), r.getCustomerAddressString());
         });
         long endUpdateSyncCustomerTime = System.currentTimeMillis();
@@ -1001,7 +1004,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         LOGGER.debug("function batchInsertCustomerData is end {},amount cost : {} ms" , endExtraCustomerInfoTime, endExtraCustomerInfoTime - startExtraCustomerInfoTime);
     }
 
-    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
+    private boolean dealCustomerAdminsAndAddress(String customerAddressString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
         if (StringUtils.isNotBlank(customerAddressString)) {
             //todo:校验格式
             String[] buildingNames = null;
@@ -1040,24 +1043,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setData(dataMap);
                 importLogs.setErrorDescription("wrong building and address format");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
-                importLogs.setFieldName(column.getHeaderDisplay());
-                importLogs.setSheetName(sheetName);
-                return true;
-            }
-        }
-        if (StringUtils.isNotBlank(customerAdminString)) {
-            try {
-                String  regex  = "^((?:(?!([,|()])).)*\\(\\d+\\),)*(?:(?!([,|()])).)*\\(\\d+\\)";
-                if(!Pattern.matches(regex,customerAdminString)){
-                    throw  new Exception("customer enterprise admins format error");
-                }
-            } catch (Exception e) {
-                Map<String, String> dataMap = new LinkedHashMap<>();
-                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
-                importLogs.setData(dataMap);
-                importLogs.setErrorDescription("customer enterprise admins format error");
-                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
                 importLogs.setFieldName(column.getHeaderDisplay());
                 importLogs.setSheetName(sheetName);
                 return true;
@@ -1163,16 +1148,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         return false;
     }
 
-    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
+    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
-            try {
-                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
-            } catch (Exception e) {
-                //todo:接口过时 没有批量删除 需要基线提供
-                LOGGER.error("create enterprise admin error :{}", e);
-            }
+
 
             //对比 如果被更新有数据则补上exist
             compareCustomerFieldValues(exist, enterpriseCustomer);
@@ -1303,6 +1283,29 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
                 this.organizationProvider.createOrganizationAddress(organizationAddress);
+
+                UpdateWorkPlaceCommand cmd = new UpdateWorkPlaceCommand();
+                cmd.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                CreateOfficeSiteCommand cmd2 = new CreateOfficeSiteCommand();
+                cmd2.setCommunityId(address.getCommunityId());
+                cmd2.setSiteName(address.getAddress());
+                cmd2.setWholeAddressName(address.getAddress());
+                OrganizationSiteApartmentDTO siteDto = new OrganizationSiteApartmentDTO();
+                siteDto.setBuildingId(building.getId());
+                siteDto.setApartmentId(address.getId());
+                List<OrganizationSiteApartmentDTO> siteDtos = new ArrayList<>();
+                siteDtos.add(siteDto);
+                cmd2.setSiteDtos(siteDtos);
+                List<CreateOfficeSiteCommand> cmd2s = new ArrayList<>();
+                cmd2s.add(cmd2);
+                cmd.setOfficeSites(cmd2s);
+
+                try{
+                    organizationService.insertWorkPlacesAndBuildings(cmd);
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                }
+
                 Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
                 if (organization != null)
                     organizationSearcher.feedDoc(organization);
@@ -1315,6 +1318,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         if (StringUtils.isNotEmpty(customerAdminString)) {
             customerAdminString = customerAdminString.replaceAll("\n", "");
             customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
+
+
 
             List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
             if(records!=null && records.size()>0){

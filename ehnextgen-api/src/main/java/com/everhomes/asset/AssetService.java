@@ -45,6 +45,8 @@ import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
 import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
 import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
 import com.everhomes.rest.asset.GetAssetBillStatCommand;
+import com.everhomes.rest.asset.GetDoorAccessInfoCommand;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
 import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
 import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
@@ -70,6 +72,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
 import com.everhomes.rest.asset.ListChargingStandardsCommand;
 import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListDoorAccessParamResponse;
 import com.everhomes.rest.asset.ListGeneralBillsDTO;
 import com.everhomes.rest.asset.ListLateFineStandardsCommand;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
@@ -90,16 +93,14 @@ import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
 import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
 import com.everhomes.rest.asset.ReCalBillCommand;
 import com.everhomes.rest.asset.SelectedNoticeCommand;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
 import com.everhomes.rest.asset.ShowCreateBillDTO;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
-import com.everhomes.rest.asset.TestLateFineCommand;
 import com.everhomes.rest.asset.UploadCertificateCommand;
 import com.everhomes.rest.asset.UploadCertificateInfoDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
-import com.everhomes.rest.asset.modulemapping.CreateContractMappingCommand;
-import com.everhomes.rest.asset.modulemapping.CreateEnergyMappingCommand;
 import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
@@ -335,4 +336,11 @@ public interface AssetService {
 	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
 
 	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	
+	//缴费对接门禁
+	void setDoorAccessParam(SetDoorAccessParamCommand cmd);
+	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
+	void meterAutoReading(Boolean createPlanFlag);
+	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
+	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
 }

@@ -18,6 +18,9 @@ public class CreateTaskCategoryCommand {
 	private String ownerType;
 
 	private  Long currentOrgId;
+
+	private Long appId;
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -60,6 +63,14 @@ public class CreateTaskCategoryCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 
 	@Override

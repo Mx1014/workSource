@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -50,8 +48,6 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
     @Autowired
 	private PmTaskProvider pmTaskProvider;
     @Autowired
-    private CategoryProvider categoryProvider;
-    @Autowired
     private ServiceModuleService serviceModuleService;
 
 	@Override
@@ -80,8 +76,10 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
             b.field("star",task.getStar());
             b.field("amount",task.getAmount());
+//          多应用标识
+            b.field("appId",task.getAppId());
 
-            Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
+            PmTaskCategory appType = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
             if (null != appType && Arrays.asList(PmTaskAppType.TYPES).contains(appType.getParentId())) {
                 b.field("appType", appType.getParentId());
@@ -329,6 +327,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             qb = qb.must(sb);
         }
 
+        if(null != cmd.getAppId()){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getAppId().toString()).field("appId");
+            qb = qb.must(sb);
+        }
+
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         if(null != pageSize)
             builder.setSize(pageSize);
@@ -373,6 +376,8 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
             doc.setStar( null != source.get("star") ? (String)source.get("star"):"");
             doc.setAmount(SearchUtils.getLongField(source.get("amount")));
+//          多应用标识
+            doc.setAppId(SearchUtils.getLongField(source.get("appId")));
             
             return doc;
         }catch (Exception ex) {

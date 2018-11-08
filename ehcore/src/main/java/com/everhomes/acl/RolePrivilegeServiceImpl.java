@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.customer.createSuperAdminCommand;
+import com.everhomes.rest.enterprise.UpdateSuperAdminCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.search.EnterpriseCustomerSearcher;
+import com.everhomes.user.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -121,10 +127,6 @@ import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.CopyUtils;
@@ -235,6 +237,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private EnterpriseCustomerProvider customerProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private EnterpriseCustomerSearcher customerSearcher;
 
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1641,7 +1649,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toTargetTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toOtherTemplateCode,
+                toTargetTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -1669,7 +1677,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
         String toOtherTemplate = localeTemplateService.getLocaleTemplateString(
                 Namespace.DEFAULT_NAMESPACE,
                 OrganizationNotificationTemplateCode.SCOPE,
-				toTargetTemplateCode,
+                toOtherTemplateCode,
                 locale,
                 model,
                 "Template Not Found"
@@ -2361,6 +2369,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 	}
+
+
+	@Override
+	public void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd) {
+
+		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
+		if(null == entityType){
+			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params ownerType error.");
+		}
+		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN,true,false);
+		//权限改版，要求同时清除掉超级管理员，有问题就找何智辉和徐诗诗
+		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
+
+		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+		List<Long> roleIds = Collections.singletonList(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		if(detail != null) {
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+			if (roleAssignments != null && roleAssignments.size() > 0) {
+				for (RoleAssignment roleAssignment : roleAssignments) {
+					if (roleIds.contains(roleAssignment.getRoleId())) {
+						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
+				}
+			}
+		}
+
+	}
+
 
 	@Override
 	public void authorizationServiceModule(AuthorizationServiceModuleCommand cmd) {
@@ -4540,5 +4578,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long topId = this.getOrUpdateTopAdministratorByOrganizationId(cmd.getOrgId(), members);
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(topId, IdentifierType.MOBILE.getCode());
 		return identifier.getIdentifierToken();
+	}
+
+
+	@Override
+	public void updateSuperAdmin(createSuperAdminCommand cmd){
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.ORG_ADMIN_CREATE, ServiceModuleConstants.ORGANIZATION_MODULE, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
+        UpdateSuperAdminCommand cmd2 = ConvertHelper.convert(cmd, UpdateSuperAdminCommand.class);
+        organizationService.updateSuperAdmin(cmd2);
+
+
+        //adminflag表示该用户有管理员,设置管理员后更新该用户有管理员
+		EnterpriseCustomer customer = customerProvider.findByOrganizationIdAndCommunityId(cmd.getOrganizationId(), cmd.getCommunityId());
+		if(customer != null){
+			customer.setAdminFlag((byte)1);
+			customerProvider.updateEnterpriseCustomer(customer);
+			customerSearcher.feedDoc(customer);
+		}else{
+			LOGGER.error("params targetId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetId is null.");
+		}
+
 	}
 }
