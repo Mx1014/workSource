@@ -737,6 +737,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         if(null != locator && null != locator.getAnchor()){
             con = con.and(t.ID.ge(locator.getAnchor()));
         }
+        //列出门禁组及组内门禁数量 by liqingyan
         SelectOffsetStep groupBy = context.select(t2.ID.count(),
                 (t.ID),
                 (t.NAME),
@@ -773,7 +774,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         } else {
             locator.setAnchor(null);
         }
-
+        //列出组内门禁
         if(null != groups && groups.size() > 0 ){
             for(AclinkGroupDTO group:groups){
                 List<DoorAccessLiteDTO> doors = context.select().from(t2)
@@ -782,6 +783,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
                         .and(t1.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode()))
                         .and(t1.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
                         .where(t2.GROUP_ID.eq(group.getGroupId()))
+                        .and(t2.STATUS.eq((byte)1))
                         .fetch().map((r) ->{
                             DoorAccessLiteDTO door = new DoorAccessLiteDTO();
                             door.setId(r.getValue(t1.ID));
@@ -1024,7 +1026,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         query.addFrom(Tables.EH_ACLINK_GROUP_DOORS);
         query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.GROUP_ID.eq(groupId));
         query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.DOOR_ID.eq(doorId));
-        query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.STATUS.eq((byte)1));
+//        query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.STATUS.eq((byte)1));
         query.addLimit(1);
         AclinkGroupDoors door = query.fetchOneInto(AclinkGroupDoors.class);
         return door;

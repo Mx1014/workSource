@@ -6878,10 +6878,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
     @Override
     public void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd){
+        User user = UserContext.current().getUser();
 	    AclinkGroupDoors door = new AclinkGroupDoors();
 	    door = doorAccessProvider.getGroupDoorsByDoorId(cmd.getGroupId(), cmd.getDoorId());
 	    if(null != door && door.getGroupId() == cmd.getGroupId()){
 	        door.setStatus((byte)0);
+	        door.setOperatorUid(user.getId());
+	        door.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        doorAccessProvider.updateGroupDoors(door);
         }
 //	    旧方案不用
@@ -7094,22 +7097,26 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public void updateDoorGroup(UpdateDoorAccessGroupCommand cmd){
 	    AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getGroupId());
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    if(cmd.getGroupName() != null && cmd.getGroupName().length() > 0){
 	        group.setName(cmd.getGroupName());
         }
-        if(null != cmd.getStatus() && cmd.getStatus().equals((byte)0)){
+        if(null != cmd.getStatus()){
             group.setStatus(cmd.getStatus());
             //删除所有下属门禁
-            List<AclinkGroupDoors> doors = doorAccessProvider.getGroupDoorsByGroupId(group.getId());
-            if(null != doors && !doors.isEmpty()){
-                for(AclinkGroupDoors door: doors){
-                    door.setStatus((byte)0);
-                    doorAccessProvider.updateGroupDoors(door);
+             if(cmd.getStatus().equals((byte)0)){
+                List<AclinkGroupDoors> doors = doorAccessProvider.getGroupDoorsByGroupId(group.getId());
+                if(null != doors && !doors.isEmpty()){
+                    for(AclinkGroupDoors door: doors){
+                        door.setStatus((byte)0);
+                        door.setOperatorUid(user.getId());
+                        door.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.updateGroupDoors(door);
+                    }
                 }
             }
         }
-        User user = UserContext.current().getUser();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
         group.setOperatorUid(user.getId());
         group.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //        旧门禁-门禁组关系方案
@@ -7120,19 +7127,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //                }
 //            }
 //        }
+        //将门禁加入门禁组
         if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
             for(Long doorId :cmd.getDoorIds()){
                 if(null != doorId){
-                    AclinkGroupDoors door = new AclinkGroupDoors();
-                    door.setNamespaceId(namespaceId);
-                    door.setOwnerId(group.getOwnerId());
-                    door.setOwnerType(group.getOwnerType());
-                    door.setStatus((byte)1);
-                    door.setGroupId(group.getId());
-                    door.setDoorId(doorId);
-                    door.setCreatorUid(user.getId());
-                    door.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                    doorAccessProvider.createGroupDoors(door);
+                    AclinkGroupDoors formerDoor = doorAccessProvider.getGroupDoorsByDoorId(cmd.getGroupId(),doorId);
+                    if(null == formerDoor || null == formerDoor.getDoorId()){
+                        //新建门禁关系
+                        AclinkGroupDoors door = new AclinkGroupDoors();
+                        door.setNamespaceId(namespaceId);
+                        door.setOwnerId(group.getOwnerId());
+                        door.setOwnerType(group.getOwnerType());
+                        door.setStatus((byte)1);
+                        door.setGroupId(group.getId());
+                        door.setDoorId(doorId);
+                        door.setCreatorUid(user.getId());
+                        door.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.createGroupDoors(door);
+                    }else {
+                        //更新门禁关系
+                        formerDoor.setStatus((byte)1);
+                        formerDoor.setOperatorUid(user.getId());
+                        formerDoor.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        doorAccessProvider.updateGroupDoors(formerDoor);
+                    }
+
                 }
             }
         }
