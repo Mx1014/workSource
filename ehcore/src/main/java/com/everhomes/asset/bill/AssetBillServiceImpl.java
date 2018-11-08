@@ -4,12 +4,19 @@ package com.everhomes.asset.bill;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetProviderImpl;
 import com.everhomes.asset.AssetService;
+import com.everhomes.asset.AssetVendor;
+import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
@@ -18,6 +25,9 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.bill.ListOpenBillsCommand;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.user.UserContext;
 
 /**
  * @author created by ycx
@@ -25,6 +35,8 @@ import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
  */
 @Component
 public class AssetBillServiceImpl implements AssetBillService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AssetBillServiceImpl.class);
 	
 	@Autowired
 	private AssetService assetService;
@@ -84,7 +96,23 @@ public class AssetBillServiceImpl implements AssetBillService {
 		response.setList(list);
 		return response;
 	}
-	
 
+	/**
+	 * 物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单） 
+	 */
+	public ListBillsResponse listOpenBills(ListOpenBillsCommand cmd) {
+    	LOGGER.info("AssetBillServiceImpl listOpenBills cmd={}", cmd.toString());
+        ListBillsResponse response = new ListBillsResponse();
+        AssetVendor assetVendor = assetService.checkAssetVendor(cmd.getNamespaceId(), 0);
+        String vender = assetVendor.getVendorName();
+        AssetVendorHandler handler = assetService.getAssetVendorHandler(vender);
+        List<ListBillsDTO> list = handler.listOpenBills(cmd);
+        response.setListBillsDTOS(list);
+        return response;
+	}
+	
+	
+	
+	
 	
 }
