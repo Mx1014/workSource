@@ -7098,7 +7098,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             item = new SmartCardHandlerItem();
             item.setTitle("我的钥匙");
-            item.setRouterUrl("zl://aclink/key/index");
+            item.setRouterUrl("zl://access-control/mykeys");
             item.setName("key");
             payItems.add(item);
 
