@@ -3556,6 +3556,7 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setOwnerType(oldPayeeAccount.getOwnerType());
 			newPayeeAccount.setOwnerId(oldPayeeAccount.getOwnerId());
 			newPayeeAccount.setMerchantId(oldPayeeAccount.getMerchantId());
+			newPayeeAccount.setPayeeId(oldPayeeAccount.getMerchantId());
 			parkingBusinessPayeeAccountProvider.updateParkingBusinessPayeeAccount(newPayeeAccount);
 		}else{
 			//ParkingBusinessPayeeAccount newPayeeAccount = ConvertHelper.convert(cmd,ParkingBusinessPayeeAccount.class);
@@ -3569,6 +3570,7 @@ public class ParkingServiceImpl implements ParkingService {
 			newPayeeAccount.setParkingLotName(cmd.getParkingLotName());
 			newPayeeAccount.setPayeeUserType(cmd.getPayeeUserType());
 			newPayeeAccount.setStatus((byte)2);
+			newPayeeAccount.setPayeeId(cmd.getPayeeId());
 			
 			parkingBusinessPayeeAccountProvider.createParkingBusinessPayeeAccount(newPayeeAccount);
 		}
