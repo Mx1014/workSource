@@ -1341,7 +1341,9 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
-
+//		标准版仓库管理领用管理只与具体项目有关，去掉管理公司
+//      query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+//      query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
         query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());
         List<WarehouseRequestMaterials> result = new ArrayList<>();
         query.fetch().map((r) -> {
