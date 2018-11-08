@@ -50,6 +50,7 @@ import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -57,21 +58,19 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.*;
-import com.everhomes.rest.organization.ListEnterprisesCommand;
-import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentParamsDTO;
 import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingSpaceDTO;
 import com.everhomes.rest.parking.ParkingSpaceLockStatus;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.*;
+import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -98,6 +97,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
 
+import com.google.gson.Gson;
 import net.greghaines.jesque.Job;
 
 import org.apache.commons.lang.StringUtils;
@@ -126,6 +126,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -8987,6 +8988,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public String parseSceneToken(String sceneToken) {
+		try { //兼容5.9.6瑞安的bug 以后这个方法不存在
+			String s = base64SafeUrlDecode(sceneToken);
+			Gson gson = new Gson();
+			AppContext context = gson.fromJson(s, AppContext.class);
+			if (context.getOrganizationId() == null)
+				return SceneType.PARK_TOURIST.getCode();
+			GetAuthOrgByProjectIdAndAppIdCommand cmd = new GetAuthOrgByProjectIdAndAppIdCommand();
+			cmd.setProjectId(context.getCommunityId());
+			OrganizationDTO dto = organizationService.getAuthOrgByProjectIdAndAppId(cmd);
+			if (dto != null && context.getOrganizationId().equals(dto.getId()))
+				return SceneType.PM_ADMIN.getCode();
+			return SceneType.ENTERPRISE.getCode();
+		}catch (Exception ex){
+			//try WebTokenGenerator
+		}
+
 		if (null != sceneToken) {
 			User user = UserContext.current().getUser();
 			SceneTokenDTO sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
@@ -8996,5 +9013,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		return null;
+	}
+
+	private static String base64SafeUrlDecode(String path) {
+		String result = path.replace("_", "/").replace("-", "+");
+		int length = result.length();
+		if (length % 4 == 2) {
+			result += "==";
+		} else if (length % 4 == 3) {
+			result += "=";
+		}
+		return new String(Base64.getDecoder().decode(result.getBytes(Charset.forName("utf-8"))));
 	}
 }
