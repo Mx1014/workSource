@@ -5,6 +5,7 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.Organization;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.customer.CustomerAnnualStatisticDTO;
 import com.everhomes.rest.customer.CustomerProjectStatisticsDTO;
 import com.everhomes.rest.customer.EasySearchEnterpriseCustomersDTO;
@@ -256,4 +257,6 @@ public interface EnterpriseCustomerProvider {
     void updateCustomerAptitudeFlag(Long id, Long approvalStatus);
 
     Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource);
+
+    List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor);
 }
