@@ -219,6 +219,10 @@ public interface ConfigConstants {
     //支付双向安全校验
     public static final String SECURITY_PAY_SERVER = "security.pay.server";
 
+    //万智汇一卡通
+    public static final String SHOW_CARD_OPEN_OPTION = "card.show.open.option";
+    public static final String SHOW_CARD_SORT_OPTION = "card.show.sort.option";
+
     //瑞安
     public static final String RUIAN_POINT_URL = "ruian.point.url";
     public static final String RUIAN_VIP_URL = "ruian.vip.url";
