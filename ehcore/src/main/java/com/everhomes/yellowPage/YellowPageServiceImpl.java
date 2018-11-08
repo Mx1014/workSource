@@ -2137,10 +2137,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private List<JumpModuleDTO> CheckApartmentServiceAppMatch(List<ServiceModuleApp> apps, JumpModuleDTO dto) {
 
 		// 获取taskCategoryId
-		final String TASK_CATEGORY_ID_KEY = "taskCategoryId";
+//		final String TASK_CATEGORY_ID_KEY = "taskCategoryId";
+//		物业报修改为多应用，使用appId来区分应用
+		final String APP_ID = "appId";
 		String jumpConfig = dto.getInstanceConfig();
 		JSONObject json = JSONObject.parseObject(jumpConfig);
-		Long jumpCheckId = json.getLong(TASK_CATEGORY_ID_KEY);
+		Long jumpCheckId = json.getLong(APP_ID);
 		if (null == jumpCheckId) {
 			return null;
 		}
@@ -2158,9 +2160,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 
 			JSONObject appJson = JSONObject.parseObject(appConfig);
-			Long taskCategoryId = appJson.getLong(TASK_CATEGORY_ID_KEY);
+			Long appId = appJson.getLong(APP_ID);
 			String url = appJson.getString("url");
-			if (null == taskCategoryId) {
+			if (null == appId) {
 				if (StringUtils.isEmpty(url)) {
 					continue;
 				}
@@ -2174,26 +2176,26 @@ public class YellowPageServiceImpl implements YellowPageService {
 				// 获取特定参数
 				url = url.substring(index + 1);
 				String[] items = url.split("&");
-				String findStr = TASK_CATEGORY_ID_KEY + "=";
+				String findStr = APP_ID + "=";
 				for (String item : items) {
 					if (item.startsWith(findStr)) {
-						taskCategoryId = Long.parseLong(item.substring(findStr.length()));
+						appId = Long.parseLong(item.substring(findStr.length()));
 					}
 				}
 
 				// 如果未找到，继续
-				if (null == taskCategoryId) {
+				if (null == appId) {
 					continue;
 				}
 			}
 
 			// 比较两者是否相同
-			if (!jumpCheckId.equals(taskCategoryId)) {
+			if (!jumpCheckId.equals(appId)) {
 				continue;
 			}
 
 			Map<String, String> normalParams = new HashMap<>(10);
-			normalParams.put("taskCategoryId", taskCategoryId + "");
+			normalParams.put("appId", appId + "");
 			normalParams.put("type", "user");
 			normalParams.put("ns", app.getNamespaceId() + "");
 
