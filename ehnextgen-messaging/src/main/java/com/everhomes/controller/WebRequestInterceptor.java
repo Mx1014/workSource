@@ -61,6 +61,16 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
 
+    private static final Set<String> clientAppKeyApi = new HashSet<>();
+    static {
+        clientAppKeyApi.add("/stat/event/postDevice");
+        clientAppKeyApi.add("/pusher/registDevice");
+        clientAppKeyApi.add("/user/syncActivity");
+        clientAppKeyApi.add("/user/signupByAppKey");
+        clientAppKeyApi.add("/user/signup");
+        clientAppKeyApi.add("/user/logoff");
+    }
+
     @Autowired
     private UserService userService;
 
@@ -218,7 +228,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
                     String appKey = request.getParameter(APP_KEY_NAME);
-                    if (null != appKey && (!appKey.isEmpty())) {
+                    if (null != appKey && (!appKey.isEmpty()) && !requireLogonToken(request)) {
                         LOGGER.info("appKey=" + appKey + " is Forbidden");
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
@@ -458,6 +468,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (paramMap.get("signature") == null)
             return false;
 
+        if (requireLogonToken(request)) {
+            return false;
+        }
+
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
         App app = getAppByKey(appKey);
         if (app == null) {
@@ -618,7 +632,21 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         Map<String, String[]> paramMap = request.getParameterMap();
         String signAppKey = getParamValue(paramMap, "appKey");
         String osignAppKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
-        return signAppKey == null ? false : signAppKey.equals(osignAppKey);
+        return signAppKey != null && signAppKey.equals(osignAppKey) && !requireLogonToken(request);
+    }
+
+    private boolean requireLogonToken(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        String requestURI = request.getRequestURI();
+        String uri = requestURI.replaceFirst(contextPath, "");
+
+        String appKey = getParamValue(request.getParameterMap(), "appKey");
+        if (appKey != null) {
+            // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
+            return AppConstants.APPKEY_APP.equals(appKey) && !clientAppKeyApi.contains(uri);
+        }
+        // 受保护的 API 里，没有 appKey 的请求都是需要 logon token 的
+        return true;
     }
 
     private LoginToken innerSignLogon(HttpServletRequest request, HttpServletResponse response) {
