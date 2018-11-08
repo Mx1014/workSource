@@ -477,7 +477,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private App getAppByKey(String appKey) {
         // 给 SDK 调用提供的便捷方式
-        if (SdkSettings.SECRET_KEY_SDK.equalsIgnoreCase(appKey)) {
+        if (SdkSettings.APP_KEY_SDK.equalsIgnoreCase(appKey)) {
             App app = new App();
             app.setAppKey(appKey);
             app.setSecretKey(SdkSettings.SECRET_KEY_SDK);

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>standaloneHandlers: 所有此用户相关的独立的二维码处理回调 {@link com.everhomes.rest.user.SmartCardHandler}</li>
  * <li>smartCardDescLink: 描述链接文档</li>
  * <li>baseItems: 基础拓展项，我的钱包，我的钥匙的信息</li>
+ * <li>displayConfigs: 设置里面的显示配置 {@link com.everhomes.rest.user.SmartCardDisplayConfig}</li>
  * </ul>
  * @author janson
  *
@@ -30,6 +31,9 @@ public class SmartCardInfo {
     
     @ItemType(SmartCardHandlerItem.class)
     private List<SmartCardHandlerItem> baseItems;
+    
+    @ItemType(SmartCardDisplayConfig.class)
+    private List<SmartCardDisplayConfig> displayConfigs;
     
     public Long getSmartCardId() {
         return smartCardId;
@@ -77,6 +81,14 @@ public class SmartCardInfo {
 
 	public void setStandaloneHandlers(List<SmartCardHandler> standaloneHandlers) {
 		this.standaloneHandlers = standaloneHandlers;
+	}
+
+	public List<SmartCardDisplayConfig> getDisplayConfigs() {
+		return displayConfigs;
+	}
+
+	public void setDisplayConfigs(List<SmartCardDisplayConfig> displayConfigs) {
+		this.displayConfigs = displayConfigs;
 	}
 
 	@Override

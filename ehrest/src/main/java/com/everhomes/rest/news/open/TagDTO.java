@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>id:父id</li>
  * <li>name: 名称</li>
- * <li>childs: 子节点list {@link com.everhomes.rest.news.open.IdNameDTO}</li> 
+ * <li>childs: 子节点list {@link com.everhomes.rest.news.open.IdNameInfoDTO}</li> 
  * </ul>
  */
 public class TagDTO {

@@ -4,15 +4,17 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>parentId: parentId</li>
  * <li>id: id</li>
  * <li>name: 名称</li>
  * </ul>
  */
-public class IdNameDTO {
+public class IdNameInfoDTO {
 	
 	private Long parentId;
 	private Long id;
 	private String name;
+	private String content;
 
 	@Override
 	public String toString() {
@@ -41,6 +43,14 @@ public class IdNameDTO {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 }
