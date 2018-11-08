@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -20,7 +21,7 @@ import java.sql.Timestamp;
  * <li>departmentName: 部门名字</li>
  * </ul>
  */
-public class OrganizationContactDTO {
+public class OrganizationContactDTO implements Comparable<OrganizationContactDTO>{
     private Long id;
     private Long organizationId;
     private String contactName;
@@ -214,5 +215,9 @@ public class OrganizationContactDTO {
 
     public void setEmployeeNo(String employeeNo) {
         this.employeeNo = employeeNo;
+    }
+
+    public int compareTo(OrganizationContactDTO organizationMember) {
+        return this.initial.compareTo(organizationMember.getInitial());
     }
 }
