@@ -3,6 +3,7 @@ package com.everhomes.banner.targethandler;
 import com.everhomes.banner.BannerTargetHandleResult;
 import com.everhomes.banner.BannerTargetHandler;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.module.*;
 import com.everhomes.rest.banner.targetdata.BannerAppTargetData;
 import com.everhomes.rest.module.RouterInfo;
@@ -33,6 +34,10 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
 
     @Autowired
     ServiceModuleProvider serviceModuleProvider;
+    
+    
+    @Autowired
+    private LaunchPadService launchPadService;
 
     @Override
     public BannerTargetHandleResult evaluate(String targetData) {
@@ -70,7 +75,10 @@ public class BannerTargetAppHandler implements BannerTargetHandler {
 
         ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(tData.getOriginId());
         if(serviceModuleApp != null){
-            routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), serviceModuleApp.getOriginId(), serviceModuleApp.getName(), serviceModuleApp.getInstanceConfig(), null, null, null, null);
+        	
+        	String instanceConfig = launchPadService.refreshActionData(serviceModuleApp.getInstanceConfig());
+        	
+            routerInfo = serviceModuleAppService.convertRouterInfo(serviceModuleApp.getModuleId(), serviceModuleApp.getOriginId(), serviceModuleApp.getName(), instanceConfig, null, null, null, null);
             //routerInfo = routerInfoService.getRouterInfo(serviceModuleApp.getModuleId(), "/index", tData.getActionData());
 
             if(routerInfo != null){

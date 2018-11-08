@@ -560,7 +560,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
-    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
     public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
         //添加权限 add by liqingyan
 //        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
@@ -610,7 +611,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
 
+		HashSet h = new HashSet();   
         for (User user: users) {
+        	//userProvider.listUserByNamespace,根据关键字同一用户会查出来多次,简单去重,暂不考虑分页  by liuyilin 20181107
+        	if(h.contains(user.getId())){
+        		continue;
+        	}
+        	h.add(user.getId());
             List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
             AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
             dto.setRegisterTime(user.getCreateTime().getTime());

@@ -4,21 +4,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: namespaceId</li>
+ * <li>ownerType: ownerType</li>
+ * <li>ownerId: ownerId</li>
+ * <li>type: 服务联盟类型</li>
  * <li>currentPMId: 当前管理公司</li>
  * <li>currentProjectId: 当前项目id</li>
  * <li>appId: 当前应用originId</li>
  * </ul>
  **/
-public class AllianceAdminCommand {
-
+public class AllianceAdminCommand extends AllianceCommonCommand{
 	private Long currentPMId;
 	private Long currentProjectId;
 	private Long appId;
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public Long getCurrentPMId() {
 		return currentPMId;
