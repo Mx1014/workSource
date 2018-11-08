@@ -12,7 +12,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListOpenBillsCommand;
 
 /**
@@ -35,6 +35,8 @@ public class AssetOpenController extends ControllerBase {
     @RequestMapping("listBills")
     @RestReturn(value = ListBillsResponse.class)
 	public RestResponse listBills(ListOpenBillsCommand cmd) {
+    	//写死中天的域空间ID，主要是为了后面搞成可兼容的Handler类
+    	cmd.setNamespaceId(999944);
 		ListBillsResponse listBillsResponse = assetBillService.listOpenBills(cmd);
 		RestResponse response = new RestResponse(listBillsResponse);
 		response.setErrorDescription("OK");

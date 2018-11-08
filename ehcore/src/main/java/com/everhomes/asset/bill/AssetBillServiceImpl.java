@@ -15,8 +15,6 @@ import com.everhomes.asset.AssetVendor;
 import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
-import com.everhomes.rest.asset.ListBillsDTO;
-import com.everhomes.rest.asset.ListBillsResponse;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
@@ -24,6 +22,8 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.bill.ListOpenBillsCommand;
 import com.everhomes.rest.common.ServiceModuleConstants;
@@ -110,8 +110,6 @@ public class AssetBillServiceImpl implements AssetBillService {
         response.setListBillsDTOS(list);
         return response;
 	}
-	
-	
 	
 	
 	

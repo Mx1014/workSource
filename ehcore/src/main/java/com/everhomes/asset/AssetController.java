@@ -31,6 +31,8 @@ import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
+import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;

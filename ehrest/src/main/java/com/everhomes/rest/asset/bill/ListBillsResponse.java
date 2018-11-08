@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.rest.asset;
+package com.everhomes.rest.asset.bill;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
