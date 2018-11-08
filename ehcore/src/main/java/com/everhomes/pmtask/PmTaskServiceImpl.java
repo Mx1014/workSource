@@ -303,7 +303,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 //		用appId实现多应用,去除taskcategoryId
-		cmd.setTaskCategoryId(null);
+//		cmd.setTaskCategoryId(null);
 
 		//检查多入口应用权限
 		if (!handle.equals(PmTaskHandle.EBEI)) {
@@ -3190,8 +3190,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				bean.setOwnerId(elem.getKey());
 				bean.setOwnerName(null != community ? community.getName() : "");
 				//为科兴与一碑对接
-				if(cmd.getNamespaceId() == 999983 && null != cmd.getAppId() &&
-						cmd.getAppId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+				if(cmd.getNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 					bean.setType("物业报修");
 				}else{
 					PmTaskCategory category = pmTaskProvider.findCategoryById(elem1.getKey());
@@ -4419,8 +4419,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setOwnerId(cmd.getOwnerId());
 		cmd1.setStartDate(cmd.getDateStart());
 		cmd1.setEndDate(cmd.getDateEnd());
-		cmd1.setTaskCategoryId(cmd.getAppId());
-		cmd1.setAppId(cmd.getOriginId());
+//		cmd1.setTaskCategoryId(cmd.getAppId());
+		cmd1.setAppId(cmd.getAppId());
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
 		cmd1.setPageSize(99999);
