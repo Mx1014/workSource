@@ -7,8 +7,8 @@ import java.util.Map;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.yellowPage.JumpModuleDTO;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.standard.ConfigCommand;
-import com.everhomes.rest.yellowPage.IdNameDTO;
 import com.everhomes.rest.yellowPage.stat.ServiceAndTypeNameDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
@@ -150,7 +150,7 @@ public interface YellowPageProvider {
 
 	List<ServiceAndTypeNameDTO> listServiceNames(Long type, Long ownerId, Long categoryId);
 
-	List<IdNameDTO> listServiceTypeNames(Long type);
+	List<IdNameInfoDTO> listServiceTypeNames(Long type);
 
 
 	Map<Long, Long> getServiceTypeOrders(List<Long> idList);
@@ -170,5 +170,12 @@ public interface YellowPageProvider {
 	void updateMainCategorysByType(Long type, Byte enableComment, Byte enableProvider, String name);
 
 
-	List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
+	List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type);
+
+
+	void updateServiceAllianceOrder(Long itemId, Long defaultOrderId);
+
+
+
+
 }

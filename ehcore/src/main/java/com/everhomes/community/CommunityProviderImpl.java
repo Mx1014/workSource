@@ -174,7 +174,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public Community findCommunityById(Long id) {
         final Community[] result = new Community[1];
-
+    	
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result,
             (DSLContext context, Object reducingContext) -> {
                 EhCommunitiesDao dao = new EhCommunitiesDao(context.configuration());

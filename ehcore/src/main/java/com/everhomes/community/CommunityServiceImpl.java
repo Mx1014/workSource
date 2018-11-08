@@ -1946,6 +1946,15 @@ public class CommunityServiceImpl implements CommunityService {
         } else {
             memberDTOList = listCommunityWaitingApproveUserAddress(cmd, groupIds, locator, pageSize);
         }
+		Collections.sort(memberDTOList, new Comparator<GroupMemberDTO>() {
+			@Override
+			public int compare(GroupMemberDTO o1, GroupMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
 		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
 		res.setDtos(memberDTOList);
 		res.setNextPageAnchor(locator.getAnchor());
@@ -4216,7 +4225,28 @@ public class CommunityServiceImpl implements CommunityService {
             }).collect(Collectors.toList());
 
         response.setMembers(dtoList);
-
+        //已认证或已拒绝的排序
+		Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+			@Override
+			public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+				if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+					return -1;
+				}
+				return o2.getApproveTime().compareTo(o1.getApproveTime());
+			}
+		});
+		//未认证的排序
+		if(OrganizationMemberStatus.fromCode(cmd.getStatus()) == OrganizationMemberStatus.WAITING_FOR_APPROVAL){
+			Collections.sort(response.getMembers(), new Comparator<ComOrganizationMemberDTO>() {
+				@Override
+				public int compare(ComOrganizationMemberDTO o1, ComOrganizationMemberDTO o2) {
+					if (o1.getCreateTime() == null || o2.getCreateTime() == null) {
+						return -1;
+					}
+					return o2.getCreateTime().compareTo(o1.getCreateTime());
+				}
+			});
+		}
 		return response;
 	}
 
@@ -5318,7 +5348,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 
-		for(int i = 12; i > 3; i--){
+		//TODO 5的范围太小，但是改成3的话，会把大量的数据查询出来。因为0域空间有大量的Community和CommunityGeoPoint数据。
+		//TODO findCommunityGeoPointByGeoHash接口应该带上namespaceId，内部和eh_communities连表查询。并且规定不能查询0域空间。
+		for(int i = 12; i > 5; i--){
 			pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatitude(), cmd.getLongitude(), i);
 			if(pointList != null && pointList.size() > 0){
 				for(CommunityGeoPoint point: pointList){

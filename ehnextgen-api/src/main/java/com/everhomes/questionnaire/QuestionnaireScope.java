@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 public class QuestionnaireScope {
     private String userId;
     private String orgId;
+    private String namespaceId;
 
     public QuestionnaireScope() {
         this.userId = "";
@@ -25,6 +26,14 @@ public class QuestionnaireScope {
 
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+    }
+
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override
