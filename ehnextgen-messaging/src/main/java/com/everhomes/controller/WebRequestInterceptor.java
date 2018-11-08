@@ -637,7 +637,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             String uri = requestURI.replaceFirst(contextPath, "");
 
             String clientAppKeyApi = configurationProvider.getValue("client.appKeyApi", DEFAULT_CLIENT_APP_KEY_API_STR);
-            Set<String> apiSet = Stream.of(clientAppKeyApi.split(",")).collect(Collectors.toSet());
+            Set<String> apiSet = Stream
+                    .of(clientAppKeyApi.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
 
             // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
             boolean needLogonToken = AppConstants.APPKEY_APP.equals(appKey) && !apiSet.contains(uri);
