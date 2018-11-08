@@ -1013,9 +1013,8 @@ public class ParkingServiceImpl implements ParkingService {
 			goodsDetail.add(e);
 			
 			e = new OrderDescriptionEntity();
-			String delayDate = sdf.format(order.getDelayTime());
-			e.setKey("查询时间");
-			e.setValue(delayDate);
+			e.setKey("停车时长");
+			e.setValue(String.valueOf(order.getParkingTime()));
 			goodsDetail.add(e);
 		}
 		
@@ -4048,33 +4047,41 @@ public class ParkingServiceImpl implements ParkingService {
 		//微信通知开关
 		if (!configProvider.getBooleanValue(UserContext.getCurrentNamespaceId(),"parking.wechatNotify",false))
 			return;
-		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
-			return;
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + order.getBizOrderNo()).enter(()-> {
-			ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
-			String vendorName = lot.getVendorName();
-			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
-			if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode())
-				order.setPaidType(VendorType.WEI_XIN.getCode());
-			 else if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.ALI_JS_PAY.getCode())
-				order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
-			if (handler.notifyParkingRechargeOrderPayment(order)) {
-				order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
-				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-				parkingProvider.updateParkingRechargeOrder(order);
-				LOGGER.info("Notify parking recharge by wechat success, cmd={}, order={}", cmd, order);
-			}else{
-				//充值失败
-				order.setStatus(ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode());
-				//充值失败时，将返回的错误信息记录下来
-				if (StringUtils.isBlank(order.getErrorDescription())) {
-					String locale = Locale.SIMPLIFIED_CHINESE.toString();
-					String scope = ParkingErrorCode.SCOPE;
-					String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
-					String defaultText = localeService.getLocalizedString(scope, code, locale, "");
-					order.setErrorDescription(defaultText);
+//		if (!(ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()))
+//			return;
+		String lockId = null;
+		if (order.getGeneralOrderId() != null){
+			lockId = String.valueOf(order.getGeneralOrderId());
+		}else{
+			lockId = order.getBizOrderNo();
+		}
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode() + lockId).enter(()-> {
+			if (ParkingRechargeOrderStatus.UNPAID.getCode() == order.getStatus()){
+				ParkingLot lot = parkingProvider.findParkingLotById(order.getParkingLotId());
+				String vendorName = lot.getVendorName();
+				ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+				if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.WECHAT_JS_PAY.getCode())
+					order.setPaidType(VendorType.WEI_XIN.getCode());
+				 else if (cmd.getPaymentType() != null && cmd.getPaymentType() == PaymentType.ALI_JS_PAY.getCode())
+					order.setPaidType(VendorType.ZHI_FU_BAO.getCode());
+				if (handler.notifyParkingRechargeOrderPayment(order)) {
+					order.setStatus(ParkingRechargeOrderStatus.RECHARGED_NOTCALL.getCode());
+					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+					parkingProvider.updateParkingRechargeOrder(order);
+					LOGGER.info("Notify parking recharge by wechat success, cmd={}, order={}", cmd, order);
+				}else{
+					//充值失败
+					order.setStatus(ParkingRechargeOrderStatus.FAILED_NOTCALL.getCode());
+					//充值失败时，将返回的错误信息记录下来
+					if (StringUtils.isBlank(order.getErrorDescription())) {
+						String locale = Locale.SIMPLIFIED_CHINESE.toString();
+						String scope = ParkingErrorCode.SCOPE;
+						String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
+						String defaultText = localeService.getLocalizedString(scope, code, locale, "");
+						order.setErrorDescription(defaultText);
+					}
+					parkingProvider.updateParkingRechargeOrder(order);
 				}
-				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			return null;
 		});

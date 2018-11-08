@@ -1385,9 +1385,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (resources == null || resources.size()==0)
 			return null;
 		if (cmd.getPeopleSpecLeast() != null)
-			resources = resources.stream().filter(r->r.getPeopleSpec() == null || r.getPeopleSpec()>=cmd.getPeopleSpecLeast()).collect(Collectors.toList());
+			resources = resources.stream().filter(r->r.getPeopleSpec() != null && r.getPeopleSpec()>=cmd.getPeopleSpecLeast()).collect(Collectors.toList());
 		if (cmd.getPeopleSpecMost() != null)
-			resources = resources.stream().filter(r->r.getPeopleSpec() == null || r.getPeopleSpec()<=cmd.getPeopleSpecMost()).collect(Collectors.toList());
+			resources = resources.stream().filter(r->r.getPeopleSpec() != null && r.getPeopleSpec()<=cmd.getPeopleSpecMost()).collect(Collectors.toList());
 		if (cmd.getStructureList() != null && cmd.getStructureList().size() > 0)
 			resources = resources.stream().filter(r->{
 				List<RentalStructure> rentalStructures = rentalv2Provider
