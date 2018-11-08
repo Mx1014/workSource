@@ -43,6 +43,8 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Interceptor that checks REST API signatures
@@ -61,15 +63,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
 
-    private static final Set<String> clientAppKeyApi = new HashSet<>();
-    static {
-        clientAppKeyApi.add("/stat/event/postDevice");
-        clientAppKeyApi.add("/pusher/registDevice");
-        clientAppKeyApi.add("/user/syncActivity");
-        clientAppKeyApi.add("/user/signupByAppKey");
-        clientAppKeyApi.add("/user/signup");
-        clientAppKeyApi.add("/user/logoff");
-    }
+    private static final String DEFAULT_CLIENT_APP_KEY_API_STR =
+            "/stat/event/postDevice,/pusher/registDevice,/user/syncActivity,/user/signupByAppKey,/user/signup,/user/logoff";
 
     @Autowired
     private UserService userService;
@@ -102,7 +97,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private SdkUserService sdkUserService;
 
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
 
     public WebRequestInterceptor() {
     }
@@ -636,14 +630,36 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     }
 
     private boolean requireLogonToken(HttpServletRequest request) {
-        String contextPath = request.getContextPath();
-        String requestURI = request.getRequestURI();
-        String uri = requestURI.replaceFirst(contextPath, "");
-
         String appKey = getParamValue(request.getParameterMap(), "appKey");
         if (appKey != null) {
+            String contextPath = request.getContextPath();
+            String requestURI = request.getRequestURI();
+            String uri = requestURI.replaceFirst(contextPath, "");
+
+            String clientAppKeyApi = configurationProvider.getValue("client.appKeyApi", DEFAULT_CLIENT_APP_KEY_API_STR);
+            Set<String> apiSet = Stream.of(clientAppKeyApi.split(",")).collect(Collectors.toSet());
+
             // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
-            return AppConstants.APPKEY_APP.equals(appKey) && !clientAppKeyApi.contains(uri);
+            boolean needLogonToken = AppConstants.APPKEY_APP.equals(appKey) && !apiSet.contains(uri);
+
+            // log start
+            try {
+                if (needLogonToken) {
+                    String token = getParamValue(request.getParameterMap(), "token");
+                    if (token == null) {
+                        Cookie cookie = findCookieInRequest("token", request);
+                        if (cookie != null) {
+                            token = cookie.getValue();
+                        }
+                    }
+                    LOGGER.debug("Need logon token, but they are invalid, requestURI={}, token={}", uri, token);
+                }
+            } catch (Exception e) {
+                //
+            }
+            // log end
+
+            return needLogonToken;
         }
         // 受保护的 API 里，没有 appKey 的请求都是需要 logon token 的
         return true;
