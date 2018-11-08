@@ -4970,11 +4970,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void transNewAdmin(){
+    public void transNewAdmin(TransNewAdminCommand cmd2){
         Long nextPageAnchor = 0l;
         boolean breakFlag = true;
         while(breakFlag){
-            List<CreateOrganizationAdminCommand> list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+
+            List<CreateOrganizationAdminCommand> list = new ArrayList<>();
+
+            if(cmd2.getNamespaceId() != null || cmd2.getNamespaceId() != 0){
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
+            }else{
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+            }
             nextPageAnchor = list.get(list.size()-1).getOwnerId();
             if(list.size() < 101){
                 breakFlag = false;
