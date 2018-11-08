@@ -103,6 +103,7 @@ import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -3954,6 +3955,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
+
+        AppContext appContext = UserContext.current().getAppContext();
+        //工作台场景没有communityId跪了，先让它不跪吧，后面再让产品设计一下，工作台的搜索到底要搜索啥
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+            if(requests != null && requests.size() > 0){
+                appContext.setCommunityId(requests.get(0).getCommunityId());
+            }
+        }
+
+        //工作台场景没有communityId，跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
 
         if (StringUtils.isEmpty(cmd.getContentType())) {
             cmd.setContentType(SearchContentType.ALL.getCode());
