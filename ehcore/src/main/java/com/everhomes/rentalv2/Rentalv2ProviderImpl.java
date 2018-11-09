@@ -2522,7 +2522,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
     @Override
-    public MaxMinPrice findMaxMinPriceByClassifycation(String resourceType, String ownerType, Long ownerId,
+    public MaxMinPrice findMaxMinPriceByClassifycation(String resourceType, String ownerType, List<Long> ownerIds,
                                                        String sourceType, Long sourceId, Byte userPriceType,String classification) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record2<BigDecimal, BigDecimal>> step = context.select(DSL.max(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE), DSL.min(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.WORKDAY_PRICE))
@@ -2533,8 +2533,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		);
         if (StringHelper.hasContent(ownerType))
         	condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_TYPE.eq(ownerType));
-        if (ownerId != null)
-        	condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.eq(ownerId));
+        if (ownerIds != null && ownerIds.size() > 0)
+        	condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.in(ownerIds));
 		if (StringHelper.hasContent(sourceType))
 			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_TYPE.eq(sourceType));
 		if (sourceId != null)
