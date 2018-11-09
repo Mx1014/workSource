@@ -254,7 +254,7 @@ public interface Rentalv2Provider {
 
 	List<RentalRefundTip> listRefundTips(String resourceType, String sourceType, Long sourceId,Byte refundStrategy);
 
-	List<RentalStructure> listRentalStructures(String sourceType,Long sourceId,String resourceType,ListingLocator locator, Integer pageSize);
+	List<RentalStructure> listRentalStructures(String sourceType,Long sourceId,String resourceType,Byte isSurport,ListingLocator locator, Integer pageSize);
 
 	List<RentalStructureTemplate> listRentalStructureTemplates();
 

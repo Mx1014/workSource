@@ -2725,7 +2725,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	@Override
-	public List<RentalStructure> listRentalStructures(String sourceType, Long sourceId, String resourceType,
+	public List<RentalStructure> listRentalStructures(String sourceType, Long sourceId, String resourceType,Byte isSurport,
 													  ListingLocator locator, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURES);
@@ -2734,6 +2734,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.SOURCE_TYPE.eq(sourceType));
 		if (sourceId != null)
 			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.SOURCE_ID.eq(sourceId));
+		if (isSurport != null)
+			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.IS_SURPORT.eq(isSurport));
 		if (locator !=null && locator.getAnchor() != null)
 			condition.and(Tables.EH_RENTALV2_STRUCTURES.DEFAULT_ORDER.gt(locator.getAnchor()));
 		step.where(condition).orderBy(Tables.EH_RENTALV2_STRUCTURES.DEFAULT_ORDER);
