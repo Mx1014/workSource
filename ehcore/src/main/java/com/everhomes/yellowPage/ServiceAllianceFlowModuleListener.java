@@ -728,7 +728,7 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 
     protected List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         List<FlowCaseEntity> entities = new ArrayList<>();
-        if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
+        if (flowCase.getReferType().equals(FlowReferType.SERVICE_ALLIANCE.getCode())) {
             List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(FORM_VAL_SOURCE_TYPE_NAME, flowCase.getId());
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
                     vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
