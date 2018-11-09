@@ -207,6 +207,8 @@ public interface RolePrivilegeService {
 	 */
 	void deleteOrganizationAdministrators(DeleteOrganizationAdminCommand cmd);
 
+	void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd);
+
 	/**
 	 * 删除业务模块管理员
 	 * @param cmd
@@ -448,5 +450,11 @@ public interface RolePrivilegeService {
 	boolean checkIsSystemOrAppAdmin(Long orgId, Long userId);
 
 	void updateSuperAdmin(createSuperAdminCommand cmd);
+
+	OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
+												   String contactToken,
+												   Long adminPrivilegeId,
+												   Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin);
+
 
 }

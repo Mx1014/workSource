@@ -7273,7 +7273,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //自动加入公司
-        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+        try {
+            this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+        }catch(Exception e){
+            e.getMessage();
+        }
     }
 
     /**

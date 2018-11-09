@@ -29,6 +29,9 @@ public enum CoordinationLocks {
 
     UPDATE_ACTIVITY("activity.update"),
     UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
+
+    POLL_VOTE("poll.vote"),
+
     CREATE_NEW_ORG("org.create"),
     UPDATE_APPROVAL_CATEGORY("update_approval_category"),
     INIT_APPROVAL_CATEGORY("init_approval_category"),

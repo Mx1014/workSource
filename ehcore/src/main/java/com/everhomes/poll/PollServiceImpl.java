@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.rest.poll.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -72,6 +74,9 @@ public class PollServiceImpl implements PollService {
     
     @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public void createPoll(PollPostCommand cmd,Long postId) {
@@ -162,89 +167,106 @@ public class PollServiceImpl implements PollService {
             throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
         }
 
-        List<PollVote> votes=new ArrayList<PollVote>();
-        //do transaction
-        if(Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)){
-            dbProvider.execute(status->{ matchResult.forEach(item->{
-                PollVote pollVote = new PollVote();
-                pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                pollVote.setItemId(item.getId());
-                pollVote.setPollId(poll.getId());
-                pollVote.setVoterUid(user.getId());
-                votes.add(pollVote);
-                //if addresses is not empty
-                if(user.getAddressId()!=null) {
-                	//ensure all address is ok
-                	Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
-                
-                	//family要存在
-                	if(family != null) {
-                		pollVote.setVoterFamilyId(family.getId());
-                	}
-                    
-                }
-                        
-                pollProvider.createPollVote(pollVote);
-                item.setVoteCount(item.getVoteCount()+1);
-                //update poll item
-                pollProvider.updatePollItem(item);
 
-            });
+        Tuple<PollDTO, Boolean> enter = this.coordinationProvider.getNamedLock(CoordinationLocks.POLL_VOTE.getCode() + user.getId()).enter(() -> {
 
-            //将pollCount放在forEach外面，因为一个人投票多个选项，仍然算是一个人投票   edit by yanjun 20170728
-            //update poll
-            poll.setPollCount(poll.getPollCount()+1);
-            pollProvider.updatePoll(poll);
-            return true;
-            });
-            if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-                autoComment(poll,post,votes,result);
-            PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
-            dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
-            dto.setProcessStatus(getStatus(poll).getCode());
-            dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
-            dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
-            dto.setStartTime(poll.getStartTime().toString());
-            dto.setStopTime(poll.getEndTime().toString());
-            return dto;
-        }
-        
-        //do transaction
-        dbProvider.execute(status->{
 
-            PollItem item = matchResult.get(0);
-            PollVote pollVote = new PollVote();
-            pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            pollVote.setItemId(item.getId());
-            pollVote.setPollId(poll.getId());
-            pollVote.setVoterUid(user.getId());
-            votes.add(pollVote);
-            //if addresses is not empty
-            if(user.getAddressId()!=null){
-                Family  family=familyProvider.findFamilyByAddressId(user.getAddressId());
-                if(family!=null)
-                pollVote.setVoterFamilyId(family.getId());
+            //检查是否重复投票，1、不支持重复投票，2、支持重复投票，时间间隔未过
+            //锁内部再检查一遍
+            boolean repeat1 = checkValidPoll(poll, user.getId());
+            if(repeat1){
+                LOGGER.error("can not vote again.pollId={}", poll.getId());
+                throw RuntimeErrorException.errorWith(PollServiceErrorCode.SCOPE, PollServiceErrorCode.ERROR_DUPLICATE_VOTE, "cannot vote again");
             }
-            pollProvider.createPollVote(pollVote);
-            item.setVoteCount(item.getVoteCount()+1);
-            //update poll item
-            pollProvider.updatePollItem(item);
-            
-        poll.setPollCount(poll.getPollCount()+1);
-        pollProvider.updatePoll(poll);
-        return status;
-        });
-        if(poll.getAnonymousFlag()==null||poll.getAnonymousFlag().longValue()!=1L)
-            autoComment(poll,post,votes,result);
-        PollDTO dto=ConvertHelper.convert(poll, PollDTO.class);
-        dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
-        dto.setProcessStatus(getStatus(poll).getCode());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
 
-        //投票 add by yanjun 20171211
-        voteEvents(post);
-        return dto;
+            List<PollVote> votes = new ArrayList<PollVote>();
+            //do transaction
+            if (Selector.fromCode(poll.getMultiSelectFlag()).equals(Selector.MUTIL_SELECT)) {
+                dbProvider.execute(status -> {
+                    matchResult.forEach(item -> {
+                        PollVote pollVote = new PollVote();
+                        pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        pollVote.setItemId(item.getId());
+                        pollVote.setPollId(poll.getId());
+                        pollVote.setVoterUid(user.getId());
+                        votes.add(pollVote);
+                        //if addresses is not empty
+                        if (user.getAddressId() != null) {
+                            //ensure all address is ok
+                            Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+
+                            //family要存在
+                            if (family != null) {
+                                pollVote.setVoterFamilyId(family.getId());
+                            }
+
+                        }
+
+                        pollProvider.createPollVote(pollVote);
+                        item.setVoteCount(item.getVoteCount() + 1);
+                        //update poll item
+                        pollProvider.updatePollItem(item);
+
+                    });
+
+                    //将pollCount放在forEach外面，因为一个人投票多个选项，仍然算是一个人投票   edit by yanjun 20170728
+                    //update poll
+                    poll.setPollCount(poll.getPollCount() + 1);
+                    pollProvider.updatePoll(poll);
+                    return true;
+                });
+                if (poll.getAnonymousFlag() == null || poll.getAnonymousFlag().longValue() != 1L)
+                    autoComment(poll, post, votes, result);
+                PollDTO dto = ConvertHelper.convert(poll, PollDTO.class);
+                dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+                dto.setProcessStatus(getStatus(poll).getCode());
+                dto.setAnonymousFlag(poll.getAnonymousFlag() == null ? 0 : poll.getAnonymousFlag().intValue());
+                dto.setMultiChoiceFlag(poll.getMultiSelectFlag() == null ? 0 : poll.getMultiSelectFlag().intValue());
+                dto.setStartTime(poll.getStartTime().toString());
+                dto.setStopTime(poll.getEndTime().toString());
+                return dto;
+            } else {
+                //do transaction
+                dbProvider.execute(status -> {
+
+                    PollItem item = matchResult.get(0);
+                    PollVote pollVote = new PollVote();
+                    pollVote.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    pollVote.setItemId(item.getId());
+                    pollVote.setPollId(poll.getId());
+                    pollVote.setVoterUid(user.getId());
+                    votes.add(pollVote);
+                    //if addresses is not empty
+                    if (user.getAddressId() != null) {
+                        Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+                        if (family != null)
+                            pollVote.setVoterFamilyId(family.getId());
+                    }
+                    pollProvider.createPollVote(pollVote);
+                    item.setVoteCount(item.getVoteCount() + 1);
+                    //update poll item
+                    pollProvider.updatePollItem(item);
+
+                    poll.setPollCount(poll.getPollCount() + 1);
+                    pollProvider.updatePoll(poll);
+                    return status;
+                });
+                if (poll.getAnonymousFlag() == null || poll.getAnonymousFlag().longValue() != 1L)
+                    autoComment(poll, post, votes, result);
+                PollDTO dto = ConvertHelper.convert(poll, PollDTO.class);
+                dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
+                dto.setProcessStatus(getStatus(poll).getCode());
+                dto.setAnonymousFlag(poll.getAnonymousFlag() == null ? 0 : poll.getAnonymousFlag().intValue());
+                dto.setMultiChoiceFlag(poll.getMultiSelectFlag() == null ? 0 : poll.getMultiSelectFlag().intValue());
+
+                //投票 add by yanjun 20171211
+                voteEvents(post);
+                return dto;
+            }
+        });
+
+
+        return enter.first();
     }
 
     private void voteEvents(Post post) {
