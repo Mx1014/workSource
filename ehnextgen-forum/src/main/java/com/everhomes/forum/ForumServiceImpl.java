@@ -5693,9 +5693,9 @@ public class ForumServiceImpl implements ForumService {
         List<Long> communityIds = new ArrayList<>();
         communityIds.add(communityId);
         List<Long> organizationIds = new ArrayList<>();
-
-        organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
-        if (communityId == null) {
+        if (communityId != null) {
+            organizationIds.addAll(organizationService.getOrganizationIdsTreeUpToRoot(communityId));
+        }else {
             parseData(communityIds, organizationIds, cmd.getSceneToken());
         }
         return this.listNoticeTopic(organizationIds, communityIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
