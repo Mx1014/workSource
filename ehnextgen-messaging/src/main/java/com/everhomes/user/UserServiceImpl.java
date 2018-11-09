@@ -5207,7 +5207,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             dto.setParentId(dep.getParentId());
             dto.setPath(dep.getPath());
             dto.setName(dep.getName());
-            dto.setParentName(parentDep.getName());
+            dto.setParentName(parentDep == null ? dto.getName : parentDep.getName());
         }
         return Collections.singletonList(dto);
     }
