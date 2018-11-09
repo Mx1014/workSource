@@ -1,4 +1,4 @@
-CREATE TABLE `NewTable` (
+CREATE TABLE `eh_rentalv2_price_classification` (
 `id`  bigint(20) NOT NULL ,
 `namespace_id`  int NULL ,
 `source_id`  bigint(20) NULL ,
