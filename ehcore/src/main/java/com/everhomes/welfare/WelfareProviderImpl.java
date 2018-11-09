@@ -64,7 +64,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 	@Override
 	public List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize) {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
-				.where(Tables.EH_WELFARES.OWNER_ID.eq(ownerId));
+				.where(Tables.EH_WELFARES.ORGANIZATION_ID.eq(ownerId));
 		if (null != pageSize && null != offset) {
 			step.limit(offset,pageSize);
 		}

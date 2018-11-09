@@ -34,7 +34,6 @@ public class WelfarePointProviderImpl implements WelfarePointProvider {
 	public void createWelfarePoint(WelfarePoint welfarePoint) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWelfarePoints.class));
 		welfarePoint.setId(id);
-		welfarePoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		getReadWriteDao().insert(welfarePoint);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhWelfarePoints.class, null);
 	}
