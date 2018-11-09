@@ -6903,7 +6903,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd){
         ListSelectDoorsResponse resp = new ListSelectDoorsResponse();
-	    List<DoorAccessNewDTO> doors = new ArrayList<DoorAccessNewDTO>();
+	    List<DoorAccessDTO> doors = new ArrayList<DoorAccessNewDTO>();
 	    doors = doorAccessProvider.listSelectDoors(cmd);
 	    resp.setDoors(doors);
 	    return resp;

@@ -811,7 +811,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
 
     @Override
-    public List<DoorAccessNewDTO> listSelectDoors(ListSelectDoorsCommand cmd){
+    public List<DoorAccessDTO> listSelectDoors(ListSelectDoorsCommand cmd){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS;
         com.everhomes.server.schema.tables.EhAclinkGroupDoors t1 = Tables.EH_ACLINK_GROUP_DOORS;
