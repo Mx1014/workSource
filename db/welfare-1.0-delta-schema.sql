@@ -11,6 +11,8 @@ CREATE TABLE `eh_welfares` (
   `status` TINYINT COMMENT '0-草稿 1-发送',
   `welfare_type` TINYINT COMMENT '1.0暂时只支持发放一种福利,福利主表加入福利类型 0-卡券 1-积分',
   `send_time` DATETIME DEFAULT NULL, 
+  `coupon_orders` TEXT COMMENT '卡券系统的交易id 列表',
+  `point_orders` TEXT COMMENT '卡券系统的交易id 列表',
   `creator_name` VARCHAR(128)  DEFAULT NULL, 
   `creator_uid` BIGINT DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL, 
@@ -43,7 +45,6 @@ CREATE TABLE `eh_welfare_coupons` (
   `valid_date` DATE COMMENT '截止日期',
   `begin_date` DATE COMMENT '开始日期',
   `amount` VARCHAR(128) COMMENT '发放数量(每人)',
-  `order_no` VARCHAR(128) COMMENT '卡券系统的交易id(暂定)',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利卡券表';
 
@@ -58,6 +59,5 @@ CREATE TABLE `eh_welfare_points` (
   `valid_date` DATE COMMENT '截止日期',
   `begin_date` DATE COMMENT '开始日期',
   `amount` VARCHAR(128) COMMENT '发放数量(每人)',
-  `order_no` VARCHAR(128) COMMENT '积分系统的交易id(暂定)',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利积分表';
