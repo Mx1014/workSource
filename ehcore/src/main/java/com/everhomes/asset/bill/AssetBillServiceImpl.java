@@ -9,12 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetProviderImpl;
-import com.everhomes.asset.AssetService;
-import com.everhomes.asset.AssetVendor;
-import com.everhomes.asset.AssetVendorHandler;
-import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.asset.AssetProvider;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
@@ -25,9 +22,6 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
-import com.everhomes.rest.asset.bill.ListOpenBillsCommand;
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.user.UserContext;
 
 /**
  * @author created by ycx
@@ -39,10 +33,10 @@ public class AssetBillServiceImpl implements AssetBillService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AssetBillServiceImpl.class);
 	
 	@Autowired
-	private AssetService assetService;
+	private AssetBillProvider assetBillProvider;
 	
 	@Autowired
-	private AssetBillProvider assetBillProvider;
+    private AssetProvider assetProvider;
 
 	//缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
 	public String batchDeleteBill(BatchDeleteBillCommand cmd) {
@@ -100,13 +94,30 @@ public class AssetBillServiceImpl implements AssetBillService {
 	/**
 	 * 物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单） 
 	 */
-	public ListBillsResponse listOpenBills(ListOpenBillsCommand cmd) {
+	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetBillServiceImpl listOpenBills cmd={}", cmd.toString());
         ListBillsResponse response = new ListBillsResponse();
-        AssetVendor assetVendor = assetService.checkAssetVendor(cmd.getNamespaceId(), 0);
-        String vender = assetVendor.getVendorName();
-        AssetVendorHandler handler = assetService.getAssetVendorHandler(vender);
-        List<ListBillsDTO> list = handler.listOpenBills(cmd);
+        Long pageAnchor = cmd.getPageAnchor();
+        Integer pageSize = cmd.getPageSize();
+        //卸货完毕
+        if (pageAnchor == null || pageAnchor < 1l) {
+            pageAnchor = 0l;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        //每页大小(最大值为1000)，每次请求获取的数据条数
+        if(pageSize > 1000) {
+        	pageSize = 1000;
+        }
+        Integer pageOffSet = pageAnchor.intValue();
+        List<ListBillsDTO> list = assetProvider.listBills(cmd.getNamespaceId(), pageOffSet, pageSize, cmd);
+        if(list.size() <= pageSize){
+            response.setNextPageAnchor(null);
+        }else {
+            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
+            list.remove(list.size()-1);
+        }
         response.setListBillsDTOS(list);
         return response;
 	}
