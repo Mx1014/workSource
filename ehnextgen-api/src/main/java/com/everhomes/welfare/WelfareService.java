@@ -20,4 +20,7 @@ public interface WelfareService {
 	GetUserWelfareResponse getUserWelfare(GetUserWelfareCommand cmd);
 
 	void deleteWelfare(DeleteWelfareCommand cmd);
+
+
+	ListUserWelfaresResponse listUserWelfares(ListUserWelfaresCommand cmd);
 }

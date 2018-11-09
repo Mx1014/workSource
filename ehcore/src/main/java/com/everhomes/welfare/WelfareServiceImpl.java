@@ -343,4 +343,10 @@ public class WelfareServiceImpl implements WelfareService {
         return false;
     }
 
+	@Override
+	public ListUserWelfaresResponse listUserWelfares(ListUserWelfaresCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
