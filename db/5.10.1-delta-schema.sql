@@ -122,3 +122,7 @@ ALTER TABLE `eh_service_alliances` ADD COLUMN `update_time` DATETIME NULL DEFAUL
 ALTER TABLE `eh_service_alliances`	ADD COLUMN `update_uid` BIGINT NULL COMMENT '更新用户id' ;
 ALTER TABLE `eh_service_alliance_application_records` ADD COLUMN `update_time` DATETIME NULL DEFAULT NULL COMMENT '更新时间' ;
 -- end
+
+-- AUTHOR: 黄明波
+-- REMARK: issue-41586
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `user_notify_flag` TINYINT(4) NULL DEFAULT '0' COMMENT '0-未起定时器通知用户 1-已起定时器通知用户';

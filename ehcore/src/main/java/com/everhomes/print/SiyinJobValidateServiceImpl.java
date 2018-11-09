@@ -16,6 +16,7 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.point.constants.TrueOrFalseFlag;
 import com.everhomes.print.job.SiyinPrintMessageJob;
 import com.everhomes.print.job.SiyinPrintNotifyJob;
 import com.everhomes.rest.approval.CommonStatus;
@@ -187,22 +188,28 @@ public class SiyinJobValidateServiceImpl {
            //将记录合并到订单上,并更新到数据库
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
+        	   
         	   //订单金额为0，那么设置成支付状态。
-//        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
-//        	   		//如果详情为空，并且价格为0，那么不做记录。
-//        	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
-//        	   			return null;
-//        	   		}
-//        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-//        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-//        	   	}
-	   			if(order.getId() == null){
-	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
+				if (order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0) {
+					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+				} else {
+					order.setOrderStatus(PrintOrderStatusType.UNPAID.getCode());
+				}
+				
+				//如果是未支付状态，而且之前未通知过，则发送消息通知
+				if (PrintOrderStatusType.UNPAID.getCode().equals(order.getOrderStatus())
+						&& TrueOrFalseFlag.FALSE.getCode().equals(order.getUserNotifyFlag())) {
 	   		        //创建订单成功后建立两个定时任务
 	   		        createOrderOverTimeTask(order);
+					order.setUserNotifyFlag(TrueOrFalseFlag.TRUE.getCode());
+				}
+				
+	   			if(order.getId() == null){
+	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
 	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	   			}
+	   			
 	   			record.setOrderId(order.getId());
 	   			siyinPrintRecordProvider.createSiyinPrintRecord(record);
 	   			return null;
@@ -372,7 +379,7 @@ public class SiyinJobValidateServiceImpl {
 		return null;
 	}
 	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
+		SiyinPrintOrder order = siyinPrintOrderProvider.findUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
         if(order == null){
         	order = new SiyinPrintOrder();
         	order.setNamespaceId(record.getNamespaceId());
@@ -394,6 +401,7 @@ public class SiyinJobValidateServiceImpl {
         	order.setPrinterName(record.getPrinterName());
         	User user = userProvider.findUserById(record.getCreatorUid());
     		order.setNickName(user == null?"":user.getNickName());
+    		order.setUserNotifyFlag(TrueOrFalseFlag.FALSE.getCode());
     		
     		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
     		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, user);
