@@ -15,6 +15,7 @@ CREATE TABLE `eh_rentalv2_price_classification` (
 `cut_price`  decimal(10,2) NULL ,
 `discount_ratio`  double NULL ,
 `resource_type`  varchar(255) NULL,
+`resource_rental_date`  date NULL COMMENT '为了方便获得价格区间 加上单元格的时间',
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
