@@ -14,8 +14,8 @@ import com.everhomes.contract.ContractCategory;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
-import com.everhomes.rest.asset.IsContractChangeFlagDTO;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
@@ -28,7 +28,6 @@ import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
-import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
@@ -116,7 +115,14 @@ public class AssetBillServiceImpl implements AssetBillService {
     	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd.toString());
     	//写死中天的域空间ID
     	cmd.setNamespaceId(999944);
+    	cmd.setOwnerType("community");
     	cmd.setOwnerId(cmd.getCommunityId());
+    	cmd.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
+    	//物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单），因为是同步账单，所以已出、未出都要同步
+    	List<Byte> switchList = new ArrayList<Byte>();
+    	switchList.add(new Byte("0"));
+    	switchList.add(new Byte("1"));
+    	cmd.setSwitchList(switchList);
     	//只传租赁账单
     	Long assetCategoryId = getRentalAssetCategoryId(cmd.getNamespaceId());
     	cmd.setCategoryId(assetCategoryId);
