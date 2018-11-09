@@ -924,7 +924,7 @@ public class NewsServiceImpl implements NewsService {
 			}
 		}
 
-		if (CollectionUtils.isEmpty(authProjectIds)) {
+		if (!CollectionUtils.isEmpty(authProjectIds)) {
 			String authIdList = Joiner.on(",").join(authProjectIds);
 			must.add(JSONObject.parse("{\"terms\":{\"ownerId\":[" + authIdList + "]}}"));
 		}
