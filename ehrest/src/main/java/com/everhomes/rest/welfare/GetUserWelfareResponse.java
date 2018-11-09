@@ -20,7 +20,8 @@ import java.util.List;
  * <li>imgUri: 图片uri</li>
  * <li>imgUrl: 图片url</li>
  * <li>sendTime: 发送时间</li>
- * <li>items: 福利项列表 参考{@link com.everhomes.rest.welfare.WelfareItemDTO}</li>
+ * <li>coupons: 卡券列表 参考{@link com.everhomes.rest.welfare.WelfareCouponDTO}</li>
+ * <li>points: 积分列表( 5.11.0暂时不上等积分系统搞好了这里要修改 )参考{@link com.everhomes.rest.welfare.WelfarePointDTO}</li>
  * </ul>
  */
 public class GetUserWelfareResponse {
@@ -36,7 +37,7 @@ public class GetUserWelfareResponse {
     private String imgUri;
     private String imgUrl;
     private Long sendTime;
-	private List<WelfareItemDTO> items;
+    private List<WelfareCouponDTO> coupons;
 
 
 	public GetUserWelfareResponse() {
@@ -154,11 +155,12 @@ public class GetUserWelfareResponse {
 		this.sendTime = sendTime;
 	}
 
-	public List<WelfareItemDTO> getItems() {
-		return items;
+	public List<WelfareCouponDTO> getCoupons() {
+		return coupons;
 	}
 
-	public void setItems(List<WelfareItemDTO> items) {
-		this.items = items;
+
+	public void setCoupons(List<WelfareCouponDTO> coupons) {
+		this.coupons = coupons;
 	}
 }

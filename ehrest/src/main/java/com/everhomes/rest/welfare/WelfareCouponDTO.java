@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>id: 发放卡券记录的id</li>
- * <li>couponId:  卡券的id</li>
+ * <li>couponId:  卡券系统提供的id </li>
  * <li>couponName: 卡券名称 可不填</li>
  * <li>couponType: 卡券类型 (页面展示的头部) eq: 购物券;洗车券</li>
  * <li>couponContent: 卡券内容(页面展示的中间部分)eq:500.00元 ; 30次</li>

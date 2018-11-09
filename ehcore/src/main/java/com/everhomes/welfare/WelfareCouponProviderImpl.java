@@ -34,7 +34,6 @@ public class WelfareCouponProviderImpl implements WelfareCouponProvider {
 	public void createWelfareCoupon(WelfareCoupon welfareCoupon) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWelfareCoupons.class));
 		welfareCoupon.setId(id);
-		welfareCoupon.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		getReadWriteDao().insert(welfareCoupon);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhWelfareCoupons.class, null);
 	}
@@ -81,5 +80,17 @@ public class WelfareCouponProviderImpl implements WelfareCouponProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<WelfareCoupon> listWelfareCoupon(Long welfareId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteWelfareCoupons(Long welfareId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

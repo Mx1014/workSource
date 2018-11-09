@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>updateTime: 操作时间 只读项</li>
  * <li>receivers: 接收人列表 参考{@link com.everhomes.rest.welfare.WelfareReceiverDTO}</li>
  * <li>coupons: 卡券列表 参考{@link com.everhomes.rest.welfare.WelfareCouponDTO}</li>
- * <li>points: 积分列表 参考{@link com.everhomes.rest.welfare.WelfarePointDTO}</li>
+ * <li>points: 积分列表( 5.11.0暂时不上等积分系统搞好了这里要修改 )参考{@link com.everhomes.rest.welfare.WelfarePointDTO}</li>
  * </ul>
  */
 public class WelfaresDTO {

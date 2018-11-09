@@ -15,4 +15,6 @@ public interface WelfareCouponProvider {
 
 	List<WelfareCoupon> listWelfareCoupon(Long welfareId);
 
+	void deleteWelfareCoupons(Long welfareId);
+
 }
