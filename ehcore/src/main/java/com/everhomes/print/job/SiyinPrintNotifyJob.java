@@ -75,7 +75,6 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
         PrintOrderActionData actionData = new PrintOrderActionData();
-        actionData.setOrderId(order.getOrderNo());
         String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
         String url = String.format(CLOUD_PRINT_DETAIL,homeurl,order.getOrderNo());
         actionData.setUrl(url);
