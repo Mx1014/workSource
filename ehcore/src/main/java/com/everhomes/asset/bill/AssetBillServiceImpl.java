@@ -10,8 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.contract.ContractCategory;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.IsContractChangeFlagDTO;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
@@ -23,9 +27,13 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.contract.ContractApplicationScene;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
+import com.everhomes.util.StringHelper;
 
 /**
  * @author created by ycx
@@ -44,6 +52,9 @@ public class AssetBillServiceImpl implements AssetBillService {
 	
 	@Autowired
 	private PortalService portalService;
+	
+	@Autowired
+	private ContractProvider contractProvider;
 
 	//缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
 	public String batchDeleteBill(BatchDeleteBillCommand cmd) {
@@ -107,7 +118,8 @@ public class AssetBillServiceImpl implements AssetBillService {
     	cmd.setNamespaceId(999944);
     	cmd.setOwnerId(cmd.getCommunityId());
     	//只传租赁账单
-    	
+    	Long assetCategoryId = getRentalAssetCategoryId(cmd.getNamespaceId());
+    	cmd.setCategoryId(assetCategoryId);
     	
     	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd.toString());
         ListBillsResponse response = new ListBillsResponse();
@@ -144,19 +156,30 @@ public class AssetBillServiceImpl implements AssetBillService {
 	*/
 	public Long getRentalAssetCategoryId(Integer namespaceId) {
 		Long categoryId = null;
-    	ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-    	listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-    	//listServiceModuleAppsCommand.setModuleId(Service);
-    	ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(listServiceModuleAppsCommand);
-    	if(response != null) {
-    		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
-    		if(serviceModuleApps != null) {
-    			for(ServiceModuleAppDTO dto : serviceModuleApps) {
-    				//dto.getInstanceConfig()
-    				//ContractCategory contractCategory = contractProvider.findContractCategoryById();
-    			}
-    		}
-    	}
+		ListServiceModuleAppsCommand cmd = new ListServiceModuleAppsCommand();
+  		cmd.setNamespaceId(namespaceId);
+  		cmd.setModuleId(PrivilegeConstants.ASSET_MODULE_ID);
+  		//1、获取所有缴费的categoryId
+  		ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(cmd);
+  		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+  		for(ServiceModuleAppDTO serviceModuleAppDTO : serviceModuleApps) {
+  			String instanceConfig = serviceModuleAppDTO.getInstanceConfig();
+  			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
+  			if(assetInstanceConfigDTO != null && assetInstanceConfigDTO.getCategoryId() != null) {
+  				//2、根据缴费的categoryId找出对应合同的categoryId
+  				Long moduleId = PrivilegeConstants.ASSET_MODULE_ID;
+  				Long targetModuleId = PrivilegeConstants.CONTRACT_MODULE;
+  				Long originId = assetInstanceConfigDTO.getCategoryId();
+  				Long contractCategoryId = assetProvider.getOriginIdFromMappingApp(moduleId, originId, targetModuleId, namespaceId);
+  				//3、根据合同的categoryId调用接口判断是否是租赁合同
+  				ContractCategory contractCategory = contractProvider.findContractCategoryById(contractCategoryId);
+  				if(contractCategory != null && contractCategory.getContractApplicationScene() != null) {
+  					if(contractCategory.getContractApplicationScene() != ContractApplicationScene.PROPERTY.getCode()) {
+  						return assetInstanceConfigDTO.getCategoryId();
+  					}
+  				}
+  			}
+  		}
     	return categoryId;
 	}
 	
