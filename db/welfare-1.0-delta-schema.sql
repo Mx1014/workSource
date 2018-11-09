@@ -30,7 +30,10 @@ CREATE TABLE `eh_welfare_receivers` (
   `receiver_name` VARCHAR(128) COMMENT '接收者姓名',
   `receiver_detail_id` BIGINT COMMENT '接收者detailId', 
   `status` TINYINT COMMENT '0-未接收 1-已接受',
-  PRIMARY KEY (`id`)
+  `update_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY i_receiver_welfare_id (`welfare_id`),
+  KEY i_receiver_user_id (`organization_id`,`receiver_uid`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利接收人表';
 
 CREATE TABLE `eh_welfare_coupons` (
@@ -45,7 +48,8 @@ CREATE TABLE `eh_welfare_coupons` (
   `valid_date` DATE COMMENT '截止日期',
   `begin_date` DATE COMMENT '开始日期',
   `amount` VARCHAR(128) COMMENT '发放数量(每人)',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY i_coupon_welfare_id (`welfare_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利卡券表';
 
 CREATE TABLE `eh_welfare_points` (
@@ -59,5 +63,6 @@ CREATE TABLE `eh_welfare_points` (
   `valid_date` DATE COMMENT '截止日期',
   `begin_date` DATE COMMENT '开始日期',
   `amount` VARCHAR(128) COMMENT '发放数量(每人)',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY i_point_welfare_id (`welfare_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '企业福利积分表';
