@@ -5468,8 +5468,7 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
 	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
 		Long userId = UserContext.current().getUser().getId();
 		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
-		//SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
-		//processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
+
 
         AppContext appContext = UserContext.current().getAppContext();
 
@@ -5489,6 +5488,9 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                 cmd.setCommunityId(org.getCommunityId());
             }
 
+        }else {
+            SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
+            processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
         }
 
 
