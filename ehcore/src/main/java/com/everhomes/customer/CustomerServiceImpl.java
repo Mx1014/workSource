@@ -4965,7 +4965,6 @@ public class CustomerServiceImpl implements CustomerService {
             throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
                     "params targetId is null.");
         }
-
     }
 
     @Override

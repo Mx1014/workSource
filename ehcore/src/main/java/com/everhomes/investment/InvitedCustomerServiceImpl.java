@@ -8,11 +8,13 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.customer.CustomerExportHandler;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
 import com.everhomes.dynamicExcel.DynamicExcelService;
 import com.everhomes.dynamicExcel.DynamicExcelStrings;
+import com.everhomes.filedownload.TaskService;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.module.ServiceModuleService;
@@ -26,6 +28,8 @@ import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.module.CheckModuleManageCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
@@ -121,6 +125,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
     @Autowired
     private ServiceModuleService serviceModuleService;
 
+    @Autowired
+    private TaskService taskService;
 
 
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
@@ -943,6 +949,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void initCustomerStatusToDB(){
+        //taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), InitCustomerStatisticsHandle.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 
     }
 

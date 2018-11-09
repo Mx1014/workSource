@@ -562,4 +562,9 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
                 .where(customer.ID.eq(customerId))
                 .execute();
     }
+
+    @Override
+    public void getInitCustomerStatus() {
+
+    }
 }
