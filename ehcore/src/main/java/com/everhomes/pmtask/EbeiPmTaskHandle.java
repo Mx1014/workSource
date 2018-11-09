@@ -135,10 +135,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         if(entity.isSuccess()) {
             EbeiServiceType type = entity.getData();
 //			List<EbeiServiceType> types = type.getItems();
-            type.setServiceId(String.valueOf(0));
+            type.setServiceId(String.valueOf(1));
             List<EbeiServiceType> types;
 
-            if (null == parentId || 0 == parentId) {
+            if (null == parentId || 1L == parentId) {
                 types = type.getItems();
             }else {
                 String mappingId = getMappingIdByCategoryId(parentId);
@@ -178,7 +178,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         CategoryDTO dto = new CategoryDTO();
         dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
         String parentId = ebeiServiceType.getParentId();
-        dto.setParentId("".equals(parentId)?0:getCategoryIdByMapping(parentId));
+        dto.setParentId("".equals(parentId)?1L:getCategoryIdByMapping(parentId));
         dto.setName(ebeiServiceType.getServiceName());
         dto.setIsSupportDelete((byte)0);
 
@@ -740,20 +740,25 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-        List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+        if(cmd.getParentId() != null && cmd.getParentId() == 0){
+            List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),cmd.getParentId(),null,null,Integer.MAX_VALUE);
+            response.setRequests(categories.stream().map(r->ConvertHelper.convert(r,CategoryDTO.class)).collect(Collectors.toList()));
+        } else {
+            List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 //      V3.6 过滤正中会办事的中间类型
 //        if(childrens.size() == 1){
 //            childrens = childrens.get(0).getChildrens();
 //        }
 
-        if(null == cmd.getParentId()) {
-            CategoryDTO dto = createCategoryDTO();
-            dto.setChildrens(childrens);
+            if(null == cmd.getParentId()) {
+                CategoryDTO dto = createCategoryDTO();
+                dto.setChildrens(childrens);
 
-            response.setRequests(Collections.singletonList(dto));
-        }else {
-            response.setRequests(childrens);
+                response.setRequests(Collections.singletonList(dto));
+            }else {
+                response.setRequests(childrens);
 
+            }
         }
 
         return response;
