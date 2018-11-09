@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.portal.PortalService;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
@@ -22,6 +23,9 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
+import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
+import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.rest.portal.ServiceModuleAppDTO;
 
 /**
  * @author created by ycx
@@ -37,6 +41,9 @@ public class AssetBillServiceImpl implements AssetBillService {
 	
 	@Autowired
     private AssetProvider assetProvider;
+	
+	@Autowired
+	private PortalService portalService;
 
 	//缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
 	public String batchDeleteBill(BatchDeleteBillCommand cmd) {
@@ -95,7 +102,14 @@ public class AssetBillServiceImpl implements AssetBillService {
 	 * 物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单） 
 	 */
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
-    	LOGGER.info("AssetBillServiceImpl listOpenBills cmd={}", cmd.toString());
+    	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd.toString());
+    	//写死中天的域空间ID
+    	cmd.setNamespaceId(999944);
+    	cmd.setOwnerId(cmd.getCommunityId());
+    	//只传租赁账单
+    	
+    	
+    	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd.toString());
         ListBillsResponse response = new ListBillsResponse();
         Long pageAnchor = cmd.getPageAnchor();
         Integer pageSize = cmd.getPageSize();
@@ -115,13 +129,36 @@ public class AssetBillServiceImpl implements AssetBillService {
         if(list.size() <= pageSize){
             response.setNextPageAnchor(null);
         }else {
-            response.setNextPageAnchor(pageAnchor+pageSize.longValue());
-            list.remove(list.size()-1);
+            response.setNextPageAnchor(pageAnchor + pageSize.longValue());
+            list.remove(list.size() - 1);
         }
         response.setListBillsDTOS(list);
         return response;
 	}
 	
+	/**
+	 * 获取租赁缴费的categoryId
+	 * 1、获取所有缴费的categoryId
+	 * 2、根据缴费的categoryId找出对应合同的categoryId
+	 * 3、根据合同的categoryId调用接口判断是否是租赁合同
+	*/
+	public Long getRentalAssetCategoryId(Integer namespaceId) {
+		Long categoryId = null;
+    	ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
+    	listServiceModuleAppsCommand.setNamespaceId(namespaceId);
+    	//listServiceModuleAppsCommand.setModuleId(Service);
+    	ListServiceModuleAppsResponse response = portalService.listServiceModuleApps(listServiceModuleAppsCommand);
+    	if(response != null) {
+    		List<ServiceModuleAppDTO> serviceModuleApps = response.getServiceModuleApps();
+    		if(serviceModuleApps != null) {
+    			for(ServiceModuleAppDTO dto : serviceModuleApps) {
+    				//dto.getInstanceConfig()
+    				//ContractCategory contractCategory = contractProvider.findContractCategoryById();
+    			}
+    		}
+    	}
+    	return categoryId;
+	}
 	
 	
 }
