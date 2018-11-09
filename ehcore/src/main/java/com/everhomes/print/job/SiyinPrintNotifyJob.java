@@ -1,5 +1,6 @@
 package com.everhomes.print.job;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.print.SiyinPrintOrderProvider;
@@ -17,6 +18,7 @@ import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.StringHelper;
 
@@ -43,6 +45,10 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
     private MessagingService messagingService;
     @Autowired
 	private SiyinPrintOrderProvider siyinPrintOrderProvider;
+	@Autowired
+	private ConfigurationProvider configProvider;
+    private final static String CLOUD_PRINT_DETAIL = "%s/cloud-print/build/index.html#/print-detail?orderNo=%s";
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
@@ -70,6 +76,9 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
 
         PrintOrderActionData actionData = new PrintOrderActionData();
         actionData.setOrderId(order.getOrderNo());
+        String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String url = String.format(CLOUD_PRINT_DETAIL,homeurl,order.getOrderNo());
+        actionData.setUrl(url);
 
         String routerUri = RouterBuilder.build(Router.CLOUD_PRINT_DETAIL, actionData);
 

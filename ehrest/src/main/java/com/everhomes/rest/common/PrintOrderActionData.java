@@ -8,6 +8,7 @@ public class PrintOrderActionData implements Serializable{
 
 	private static final long serialVersionUID = -7134989050392679006L;
 	private Long orderId;
+	private String url;
     public Long getOrderId() {
         return orderId;
     }
@@ -16,7 +17,15 @@ public class PrintOrderActionData implements Serializable{
         this.orderId = orderId;
     }
 
-    @Override
+    public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
