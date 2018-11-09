@@ -105,8 +105,9 @@ public interface DoorAccessProvider {
 
     List<AclinkGroupDoors> getGroupDoorsByGroupId(Long groupId);
 
+    List<AclinkGroupDoors> getGroupDoorsByOwnerId(Long ownerId,Byte ownerType);
+
     List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
                                                  ListDoorGroupCommand cmd);
-    List<DoorAccessDTO> listSelectDoors(ListSelectDoorsCommand cmd);
 
 }

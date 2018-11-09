@@ -811,38 +811,6 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
 
     @Override
-    public List<DoorAccessDTO> listSelectDoors(ListSelectDoorsCommand cmd){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        com.everhomes.server.schema.tables.EhDoorAccess t = Tables.EH_DOOR_ACCESS;
-        com.everhomes.server.schema.tables.EhAclinkGroupDoors t1 = Tables.EH_ACLINK_GROUP_DOORS;
-        SelectQuery<Record> query = context.selectQuery();
-        query.addFrom(t);
-        if(null != cmd.getOwnerType() && null != cmd.getOwnerId()){
-            query.addJoin(t1,JoinType.LEFT_OUTER_JOIN, t1.DOOR_ID.eq(t.ID).and(t1.OWNER_ID.eq(cmd.getOwnerId())).and(t1.OWNER_TYPE.eq(cmd.getOwnerType())).and(t1.STATUS.eq((byte)1)));
-        }
-        query.addConditions(t1.ID.isNull());
-        query.addConditions(t.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
-        if(null != cmd.getOwnerId() && null != cmd.getOwnerType()){
-            query.addConditions(t.OWNER_ID.eq(cmd.getOwnerId()));
-            query.addConditions(t.OWNER_TYPE.eq(cmd.getOwnerType()));
-        }
-        List<DoorAccessNewDTO> doors = query.fetch().map((r) -> {
-            DoorAccessNewDTO door = new DoorAccessNewDTO();
-            door.setId(r.getValue(t.ID));
-            door.setName(r.getValue(t.NAME));
-            door.setDoorType(r.getValue(t.DOOR_TYPE));
-            door.setGroupid(r.getValue(t.GROUPID));
-            if(door.getDoorType() >= DoorAccessType.ZLACLINK_WIFI_2.getCode() && door.getGroupid() == 0){
-                door.setStatus((byte)1);
-            }else{
-                door.setStatus((byte)0);
-            }
-            return door;
-        });
-        return doors;
-    }
-
-    @Override
     public Long createAclinkFormTitles(AclinkFormTitles form){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFormTitles.class));
@@ -1038,6 +1006,23 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_GROUP_DOORS);
         query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.GROUP_ID.eq(groupId));
+        query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.STATUS.eq((byte)1));
+        List<AclinkGroupDoors> doors = new ArrayList<AclinkGroupDoors>();
+        doors = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, AclinkGroupDoors.class);
+        });
+        return doors;
+    }
+
+    @Override
+    public List<AclinkGroupDoors> getGroupDoorsByOwnerId(Long ownerId,Byte ownerType){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_GROUP_DOORS);
+        query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.OWNER_ID.eq(ownerId));
+        if(null != ownerType){
+            query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.OWNER_TYPE.eq(ownerType));
+        }
         query.addConditions(Tables.EH_ACLINK_GROUP_DOORS.STATUS.eq((byte)1));
         List<AclinkGroupDoors> doors = new ArrayList<AclinkGroupDoors>();
         doors = query.fetch().map((r) -> {
