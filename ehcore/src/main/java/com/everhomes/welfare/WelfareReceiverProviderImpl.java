@@ -1,11 +1,14 @@
 // @formatter:off
 package com.everhomes.welfare;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +22,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWelfareReceiversDao;
 import com.everhomes.server.schema.tables.pojos.EhWelfareReceivers;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
@@ -35,7 +39,7 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 		welfareReceiver.setId(id);
 //		welfareReceiver.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		welfareReceiver.setCreatorUid(UserContext.currentUserId());
-//		welfareReceiver.setUpdateTime(welfareReceiver.getCreateTime());
+		welfareReceiver.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		welfareReceiver.setOperatorUid(welfareReceiver.getCreatorUid());
 		getReadWriteDao().insert(welfareReceiver);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhWelfareReceivers.class, null);
@@ -44,7 +48,7 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 	@Override
 	public void updateWelfareReceiver(WelfareReceiver welfareReceiver) {
 		assert (welfareReceiver.getId() != null);
-//		welfareReceiver.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		welfareReceiver.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		welfareReceiver.setOperatorUid(UserContext.currentUserId());
 		getReadWriteDao().update(welfareReceiver);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWelfareReceivers.class, welfareReceiver.getId());
@@ -116,5 +120,22 @@ public class WelfareReceiverProviderImpl implements WelfareReceiverProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<Long> listWelfareIdsByUser(Long organizationId, Long currentUserId, Integer offset,
+			Integer pageSize) {
+		SelectConditionStep<Record1<Long>> step = getReadOnlyContext().selectDistinct(Tables.EH_WELFARE_RECEIVERS.WELFARE_ID).from(Tables.EH_WELFARE_RECEIVERS)
+				.where(Tables.EH_WELFARE_RECEIVERS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_WELFARE_RECEIVERS.RECEIVER_UID.eq(currentUserId));
+		if(offset != null &&pageSize != null){
+			step.limit(offset, pageSize);
+		}
+		Result<Record1<Long>> records = step.orderBy(Tables.EH_WELFARE_RECEIVERS.UPDATE_TIME.desc())
+				.fetch();
+		if (null == records || records.size() == 0) {
+			return null;
+		}
+		return records.map(r -> r.value1());
 	}
 }

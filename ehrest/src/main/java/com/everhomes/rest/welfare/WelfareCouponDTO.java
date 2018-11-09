@@ -25,7 +25,7 @@ public class WelfareCouponDTO {
     private Byte validDateType;
     private Long validDate;
     private Long beginDate;
-    private Integer amount;
+    private String amount;
 
 	@Override
 	public String toString() {
@@ -96,11 +96,11 @@ public class WelfareCouponDTO {
 		this.beginDate = beginDate;
 	}
 
-	public Integer getAmount() {
+	public String getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Integer amount) {
+	public void setAmount(String amount) {
 		this.amount = amount;
 	}
 	

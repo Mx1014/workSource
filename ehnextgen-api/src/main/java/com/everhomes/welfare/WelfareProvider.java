@@ -16,4 +16,6 @@ public interface WelfareProvider {
 	List<Welfare> listWelfare(Long ownerId, Integer offset, Integer pageSize);
 
 	void deleteWelfare(Long welfareId);
+
+	List<Welfare> listWelfareByIds(List<Long> wefareIds);
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.welfare;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -23,6 +25,7 @@ import com.everhomes.paySDK.PaySDKController;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.coupon.CouponDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.rest.welfare.*;
@@ -34,11 +37,14 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 @Component
 public class WelfareServiceImpl implements WelfareService {
@@ -64,6 +70,8 @@ public class WelfareServiceImpl implements WelfareService {
     private MessagingService messagingService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
+    @Autowired
+    private DbProvider dbProvider;
 
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -95,6 +103,11 @@ public class WelfareServiceImpl implements WelfareService {
         return new GetWelfareResponse(processWelfaresDTO(welfare));
     }
     private WelfaresDTO processWelfaresDTO(Welfare r) {
+    	return processWelfaresDTO(r, true);
+    }
+
+	private WelfaresDTO processWelfaresDTO(Welfare r, boolean receviersFlag) {
+	
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         dto.setUpdateTime(r.getUpdateTime().getTime());
         if (null != r.getSendTime()) {
@@ -119,12 +132,14 @@ public class WelfareServiceImpl implements WelfareService {
                 dto.getCoupons().add(couponDTO);
             }
         }
-        List<WelfareReceiver> receivers = welfareReceiverProvider.listWelfareReceiver(r.getId());
-        if (null != receivers) {
-            for (WelfareReceiver receiver : receivers) {
-                WelfareReceiverDTO reDTO = ConvertHelper.convert(receiver, WelfareReceiverDTO.class);
-                dto.getReceivers().add(reDTO);
-            }
+        if(receviersFlag){
+	        List<WelfareReceiver> receivers = welfareReceiverProvider.listWelfareReceiver(r.getId());
+	        if (null != receivers) {
+	            for (WelfareReceiver receiver : receivers) {
+	                WelfareReceiverDTO reDTO = ConvertHelper.convert(receiver, WelfareReceiverDTO.class);
+	                dto.getReceivers().add(reDTO);
+	            }
+	        }
         }
         return dto;
     }
@@ -158,33 +173,53 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {
+
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
-        String uName = salaryService.findNameByOwnerAndUser(welfare.getOrganizationId(), UserContext.currentUserId());
-        welfare.setCreatorName(uName);
-        welfare.setOperatorName(uName);
-        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
-            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//            welfare.setSenderUid(UserContext.currentUserId());
-        }
-        if (null == welfare.getId()) {
-            welfareProvider.createWelfare(welfare);
-        } else {
-            welfareProvider.updateWelfare(welfare);
-        }
-        
-        welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
-        if (null != welfareDTO.getReceivers()) {
-            for (WelfareReceiverDTO dto : welfareDTO.getReceivers()) {
-                WelfareReceiver receiver = ConvertHelper.convert(dto, WelfareReceiver.class);
-                receiver.setOrganizationId(welfare.getOrganizationId());
-                receiver.setWelfareId(welfare.getId());
-                welfareReceiverProvider.createWelfareReceiver(receiver);
-            }
-        }
+        this.dbProvider.execute((TransactionStatus status) -> {
+	        String uName = salaryService.findNameByOwnerAndUser(welfare.getOrganizationId(), UserContext.currentUserId());
+	        welfare.setCreatorName(uName);
+	        welfare.setOperatorName(uName);
+	        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
+	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	//            welfare.setSenderUid(UserContext.currentUserId());
+	        }
+	        if (null == welfare.getId()) {
+	            welfareProvider.createWelfare(welfare);
+	        } else {
+	            welfareProvider.updateWelfare(welfare);
+	        }
+	        welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
+	        if(welfareDTO.getCoupons() != null){
+	        	for(WelfareCouponDTO couponDto : welfareDTO.getCoupons()){
+	        		WelfareCoupon coupon = ConvertDTO2WelfareCoupon(couponDto,welfare.getOrganizationId(),welfare.getId());
+	        		welfareCouponProvider.createWelfareCoupon(coupon);
+	        	}
+	        }
+	        welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
+	        if (null != welfareDTO.getReceivers()) {
+	            for (WelfareReceiverDTO dto : welfareDTO.getReceivers()) {
+	                WelfareReceiver receiver = ConvertHelper.convert(dto, WelfareReceiver.class);
+	                receiver.setOrganizationId(welfare.getOrganizationId());
+	                receiver.setWelfareId(welfare.getId());
+	                welfareReceiverProvider.createWelfareReceiver(receiver);
+	            }
+	        }
+	        return null;
+        });
         return welfare;
     }
 
-    String getWelfareZLUrl(Long welfareId) {
+    private WelfareCoupon ConvertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId) {
+    	WelfareCoupon coupon = ConvertHelper.convert(couponDto, WelfareCoupon.class);
+    	coupon.setValidDate(new Date(couponDto.getValidDate()));
+    	coupon.setBeginDate(new Date(couponDto.getBeginDate()));
+    	coupon.setOrganizationId(organizationId);
+    	coupon.setWelfareId(welfareId);
+    	
+		return coupon;
+	}
+
+	String getWelfareZLUrl(Long welfareId) {
         return "zl:" + welfareId;
     }
 
@@ -211,54 +246,58 @@ public class WelfareServiceImpl implements WelfareService {
             }
             cmd.getWelfare().setStatus(WelfareStatus.SENDED.getCode());
             Welfare welfare = saveWelfare(cmd.getWelfare());
-            response.setCheckStatus(NormalFlag.NO.getCode());
+            //校验在职离职
+            response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
             response.setDismissReceivers(new ArrayList<>());
             OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getWelfare().getSenderDetailId());
             if (null != member) {
                 cmd.getWelfare().setSenderUid(member.getTargetId());
             }
             if (archivesService.checkDismiss(member)) {
-                response.setCheckStatus(NormalFlag.YES.getCode());
+                response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
                 response.setDismissSenderDetailId(cmd.getWelfare().getSenderDetailId());
                 response.setDismissSenderUid(cmd.getWelfare().getSenderUid());
             }
                 //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :cmd.getWelfare().getReceivers()){
-
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
                 receiverDTO.setReceiverUid(member.getTargetId());
                 if (archivesService.checkDismiss(receiverDetail)) {
-                    response.setCheckStatus(NormalFlag.YES.getCode());
+                    response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
                     response.getDismissReceivers().add(receiverDTO);
                 }
-
             }
-            if (NormalFlag.YES == NormalFlag.fromCode(response.getCheckStatus())) {
+            if (WelfareCheckStatus.SUCESS != WelfareCheckStatus.fromCode(response.getCheckStatus())) {
                 return response;
             }
-          
+            try{
+	            //调用发送接口
+	            //卡券
+	            
+	            //积分 TODO 
+            }catch(Exception e){
+            	//转账异常处理 删除接受人和卡券记录
+            	if(WelfareCheckStatus.SUCESS == WelfareCheckStatus.fromCode(response.getCheckStatus())){
+            		response.setCheckStatus(WelfareCheckStatus.OTHER.getCode());
+            	}
+                welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
+                welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
+            	return response;
+            }
             //发消息
             cmd.getWelfare().getReceivers().forEach(r -> {
-
-                
-                //查企业账户有没有足够的钱
-                //拿用户的账户(没有就创建)
-                //转账
-                PayUserDTO accountDTO = payService.createPersonalPayUserIfAbsent("EhUser" + r.getReceiverUid(), "NS" + UserContext.getCurrentNamespaceId().toString());
-                //todo 转账
-                sendPayslipMessage(welfare.getOperatorName(), welfare.getSubject(), welfare.getId(), r.getReceiverUid());
+                sendPayslipMessage(welfare.getSubject(), welfare.getId(), r.getReceiverUid());
             });
             return response;
         }).first();
 
     }
 
-    private void sendPayslipMessage(String senderName, String subject, Long welfareId, Long receiverId) {
+    private void sendPayslipMessage(String subject, Long welfareId, Long receiverId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("senderName", senderName);
         map.put("subject", subject);
         String content = localeTemplateService.getLocaleTemplateString(0, WelfareConstants.SEND_NOTIFICATION_SCOPE, WelfareConstants.SEND_NOTIFICATION_CODE,
-                "zh_CN", map, senderName + "给你发放了" + subject + ",快去查看吧!");
+                "zh_CN", map, "你收到了" + subject + ",快去查看吧!");
         sendMessage(content, subject, receiverId, welfareId);
     }
 
@@ -307,7 +346,6 @@ public class WelfareServiceImpl implements WelfareService {
         if (null != welfare.getImgUri()) {
             response.setImgUrl(contentServerService.parserUri(welfare.getImgUri(),
                     EntityType.USER.getCode(), UserContext.currentUserId()));
-            ContentServerResource resource = contentServerService.findResourceByUri(welfare.getImgUri());
         }
         if (welfare.getSendTime() != null) {
             response.setSendTime(welfare.getSendTime().getTime());
@@ -345,8 +383,26 @@ public class WelfareServiceImpl implements WelfareService {
 
 	@Override
 	public ListUserWelfaresResponse listUserWelfares(ListUserWelfaresCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListUserWelfaresResponse response = new ListUserWelfaresResponse();
+        int pageSize = cmd.getPageSize() == null ? 20 : cmd.getPageSize();
+        int pageOffset =(cmd.getPageOffset()==null || cmd.getPageOffset()<1) ? 1 : cmd.getPageOffset();
+        int	offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
+
+		List<Long> welfareIds = welfareReceiverProvider.listWelfareIdsByUser(cmd.getOrganizationId(),UserContext.currentUserId(), offset, pageSize +1);
+		if(CollectionUtils.isEmpty(welfareIds))
+			return response;
+        List<Welfare> results = welfareProvider.listWelfareByIds(welfareIds);
+        if (null == results || results.size() == 0) {
+            return response;
+        }
+        Integer nextPageOffSet = null;
+        if (results.size() > pageSize) {
+            results.remove(results.size() - 1);
+            nextPageOffSet = pageOffset+1;
+        }
+        response.setNextPageOffset(nextPageOffSet);
+        response.setWelfares(results.stream().map(r -> processWelfaresDTO(r, false)).collect(Collectors.toList()));
+        return response;
 	}
 
 }

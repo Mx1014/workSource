@@ -4,7 +4,10 @@ package com.everhomes.welfare;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWelfareCouponsDao;
@@ -20,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhWelfareCoupons;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Component
 public class WelfareCouponProviderImpl implements WelfareCouponProvider {
@@ -84,13 +89,15 @@ public class WelfareCouponProviderImpl implements WelfareCouponProvider {
 
 	@Override
 	public List<WelfareCoupon> listWelfareCoupon(Long welfareId) {
-		// TODO Auto-generated method stub
-		return null;
+		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARE_COUPONS)
+				.orderBy(Tables.EH_WELFARE_COUPONS.ID.asc()).fetch();
+		if(CollectionUtils.isEmpty(records))
+			return null;
+		return records.map(r -> ConvertHelper.convert(r, WelfareCoupon.class));
 	}
 
 	@Override
 	public void deleteWelfareCoupons(Long welfareId) {
-		// TODO Auto-generated method stub
-		
+		getReadWriteContext().delete(Tables.EH_WELFARE_COUPONS).where(Tables.EH_WELFARE_COUPONS.WELFARE_ID.eq(welfareId)).execute();
 	}
 }

@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -104,5 +105,16 @@ public class WelfareProviderImpl implements WelfareProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<Welfare> listWelfareByIds(List<Long> welfaeIds) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_WELFARES)
+				.where(Tables.EH_WELFARES.ID.in(welfaeIds));
+		Result<Record> records = step.orderBy(Tables.EH_WELFARES.SEND_TIME.desc()).fetch();
+		if(null == records){
+			return null;
+		}
+		return records.map(r -> ConvertHelper.convert(r, Welfare.class));
 	}
 }
