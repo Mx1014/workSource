@@ -7027,10 +7027,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
         smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
         smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
-
+        String homeUrl = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
 
         resp.setSmartCardInfo(smartCardInfo);
-        smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
+        String descLink = homeUrl + "/content-operation-system/mobile/static/smart-card/instructions.html?ns=" + UserContext.getCurrentNamespaceId();
+        smartCardInfo.setSmartCardDescLink(descLink);
         TimeBasedOneTimePasswordGenerator totp;
 
         try {
