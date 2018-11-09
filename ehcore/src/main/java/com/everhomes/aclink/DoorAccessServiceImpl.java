@@ -478,14 +478,19 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         locator.setAnchor(cmd.getPageAnchor());
 //        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
-        List<DoorAccessDTO> dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
+        List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
+        dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
         //查找得到管理授权门禁 add by liqingyan
         List<AclinkManagementDTO> managements = doorAccessProvider.searchAclinkManagementByManager(cmd.getOwnerId(),cmd.getOwnerType());
         if(null != managements && !managements.isEmpty()){
             for(AclinkManagementDTO management: managements){
-                DoorAccess manageDoor = doorAccessProvider.findDoorAccessById(management.getDoorId());
-                DoorAccessDTO dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
-                dtos.add(dto);
+                DoorAccess manageDoor = doorAccessProvider.getDoorAccessById(management.getDoorId());
+                DoorAccessDTO dto = new DoorAccessDTO();
+                dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
+                dto.setGroupId(manageDoor.getGroupid());
+                if(null != dto.getStatus() && dto.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())){
+                    dtos.add(dto);
+                }
             }
         }
         if(dtos == null || dtos.size() == 0){
