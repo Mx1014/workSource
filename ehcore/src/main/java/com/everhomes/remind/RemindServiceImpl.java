@@ -784,7 +784,6 @@ public class RemindServiceImpl implements RemindService  {
         });
 
         sendTrackMessageOnBackGround(originPlanDescription, trackReminds, RemindModifyType.SETTING_UPDATE);
-        sendTrackMessageOnBackGround(originPlanDescription, unSubscribeReminds, RemindModifyType.UN_SUBSCRIBE);
 
         return existRemind.getId();
     }
@@ -850,7 +849,6 @@ public class RemindServiceImpl implements RemindService  {
             return null;
         });
 
-        sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.DELETE);
     }
 
     @Override
@@ -1553,7 +1551,8 @@ public class RemindServiceImpl implements RemindService  {
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_DELETE, RemindContants.LOCALE, map, "");
                 isDeleted = true;
-                break;
+                //删除消息不发了  日程提醒1.4
+                return;
             case STATUS_UNDO:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_STATUS_UNDO, RemindContants.LOCALE, map, "");
@@ -1566,7 +1565,8 @@ public class RemindServiceImpl implements RemindService  {
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_UN_SUBSCRIBE, RemindContants.LOCALE, map, "");
                 isDeleted = true;
-                break;
+                //取消共享的消息不发了 日程提醒1.4
+                return;
             case CREATE_SUBSCRIBE:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_CREATE_SUBSCRIBE, RemindContants.LOCALE, map, "");
