@@ -127,7 +127,7 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
             BigDecimal minApprovingUserPrice = maxApprovingUserPrice;
             return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
         }
-        return null;
+        return new MaxMinPrice();
     }
 
     private DSLContext getReadOnlyContext() {
