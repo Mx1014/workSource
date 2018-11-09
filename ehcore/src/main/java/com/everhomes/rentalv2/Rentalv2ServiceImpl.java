@@ -626,7 +626,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		//基础设施
         response.setStructures(new ArrayList<>());
 		List<RentalStructure> structures = rentalv2Provider.listRentalStructures(rule.getSourceType(),id,
-                rule.getResourceType(),null,null);
+                rule.getResourceType(),null,null,null);
 		for (RentalStructure structure : structures){
             SiteStructureDTO dto = convertStructure2DTO(structure);
 		    response.getStructures().add(dto);
@@ -1390,7 +1390,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (cmd.getStructureList() != null && cmd.getStructureList().size() > 0)
 			resources = resources.stream().filter(r->{
 				List<RentalStructure> rentalStructures = rentalv2Provider
-							.listRentalStructures(RuleSourceType.RESOURCE.getCode(), r.getId(), cmd.getResourceType(), null, null);
+							.listRentalStructures(RuleSourceType.RESOURCE.getCode(), r.getId(), cmd.getResourceType(), (byte)1,null, null);
 				if (rentalStructures == null)
 					return false;
 				List<Long> templateIds = rentalStructures.stream().map(RentalStructure::getTemplateId).collect(Collectors.toList());
@@ -1578,7 +1578,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 		//基础设施
 		List<RentalStructure> rentalStructures = rentalv2Provider
-				.listRentalStructures(RuleSourceType.RESOURCE.getCode(), rentalSite.getId(), rentalSite.getResourceType(), null, null);
+				.listRentalStructures(RuleSourceType.RESOURCE.getCode(), rentalSite.getId(), rentalSite.getResourceType(),(byte)1, null, null);
 		if (rentalStructures != null && rentalStructures.size() > 0){
 			rSiteDTO.setStructures(new ArrayList<>());
 			for (RentalStructure rst : rentalStructures) {
@@ -9173,7 +9173,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		GetStructureListResponse response = new GetStructureListResponse();
 		response.setSiteStructures(new ArrayList<>());
 		List<RentalStructure> rentalStructures = rentalv2Provider
-				.listRentalStructures(cmd.getSourceType(), cmd.getSourceId(), cmd.getResourceType(), null, null);
+				.listRentalStructures(cmd.getSourceType(), cmd.getSourceId(), cmd.getResourceType(), null,null, null);
 		for (RentalStructure rst : rentalStructures) {
 			SiteStructureDTO dto = convertStructure2DTO(rst);
 			response.getSiteStructures().add(dto);
