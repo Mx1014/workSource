@@ -14773,6 +14773,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<OrganizationDTO> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
+
+            if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+                continue;
+            }
+
             // 如果机构不存在，则丢弃该成员对应的机构
             Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
             if (org == null) {
