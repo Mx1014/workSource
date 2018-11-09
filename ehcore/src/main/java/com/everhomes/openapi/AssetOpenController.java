@@ -33,8 +33,9 @@ public class AssetOpenController extends ControllerBase {
     @RequestMapping("listBills")
     @RestReturn(value = ListBillsResponse.class)
 	public RestResponse listBills(ListBillsCommand cmd) {
-    	//写死中天的域空间ID，主要是为了后面搞成可兼容的Handler类
+    	//写死中天的域空间ID
     	cmd.setNamespaceId(999944);
+    	cmd.setOwnerId(cmd.getCommunityId());
 		ListBillsResponse listBillsResponse = assetBillService.listOpenBills(cmd);
 		RestResponse response = new RestResponse(listBillsResponse);
 		response.setErrorDescription("OK");

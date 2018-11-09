@@ -643,14 +643,17 @@ public class AssetProviderImpl implements AssetProvider {
         		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-
+        if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
+        	query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
+        	query.addConditions(t.OWNER_ID.eq(ownerId));
+        }
+        
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
         //增加欠费天数查询条件 : 0＜天数≤30,30＜天数≤60
         if(!org.springframework.util.StringUtils.isEmpty(dueDayCountStart)) {
         	query.addConditions(t.DUE_DAY_COUNT.greaterThan(dueDayCountStart));
