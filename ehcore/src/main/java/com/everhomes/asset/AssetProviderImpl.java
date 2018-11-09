@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.asset.group.AssetGroupProvider;
+import com.everhomes.asset.util.TimeUtils;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -670,6 +671,18 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(cmd.getSwitchList())){
             query.addConditions(t.SWITCH.in(cmd.getSwitchList()));
         }
+        //物业缴费V7.5（中天-资管与财务EAS系统对接）：更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息），使用1970-01-01 00:00:00开始到现在的毫秒数（时间戳）；
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getUpdateTime())) {
+        	try {
+        		String updateTime = TimeUtils.timestampToDate(cmd.getUpdateTime());
+        		query.addConditions(DSL.cast(t.UPDATE_TIME, String.class).greaterOrEqual(updateTime)
+                		.or(DSL.cast(t.CREAT_TIME, String.class).greaterOrEqual(updateTime)));
+        	}catch (Exception e) {
+        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
+			}
+        }
+        
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }

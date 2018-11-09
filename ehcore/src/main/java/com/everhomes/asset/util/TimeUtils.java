@@ -33,7 +33,7 @@ public class TimeUtils {
     
     public static void main(String[] args) {
 		try {
-			System.out.println(dateToTimestamp("2018-11-09 19:30:00"));
+			System.out.println(dateToTimestamp("2018-11-09 00:00:06"));
 			System.out.println(timestampToDate(1541763000000L));
 		} catch (ParseException e) {
 			e.printStackTrace();
