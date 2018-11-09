@@ -7030,7 +7030,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String homeUrl = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
 
         resp.setSmartCardInfo(smartCardInfo);
-        String descLink = homeUrl + "/content-operation-system/mobile/static/smart-card/instructions.html?ns=" + UserContext.getCurrentNamespaceId();
+        String descLink = homeUrl + "/mobile/static/smart-card/instructions.html?ns=" + UserContext.getCurrentNamespaceId();
         smartCardInfo.setSmartCardDescLink(descLink);
         TimeBasedOneTimePasswordGenerator totp;
 
