@@ -1636,7 +1636,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				maxMinPrice2 = rentalv2PricePackageProvider.findMaxMinPrice(packageIds, pricePackages.get(0).getRentalType(), r.getName());
 				maxPrice2 = max(maxMinPrice2.getMaxPrice(),r.getPrice());
 				minPrice2 = min(maxMinPrice2.getMinPrice(),r.getPrice());
+                if (r.getPriceType().equals(RentalPriceType.LINEARITY.getCode()))
+                    dto.setPriceStr(getPriceStr(maxPrice2, minPrice2, r.getRentalType(),r.getPriceType(), PRICE_TIME_STEP));
+                else
+                    dto.setPriceStr(getInitiatePriceStr(r.getOrgMemberPrice(),r.getOrgMemberInitiatePrice(),r.getRentalType(), PRICE_TIME_STEP));
 			}else{
+				maxMinPrice2 =  rentalv2Provider.findMaxMinPriceByClassifycation(rentalSite.getResourceType(), EhRentalv2PricePackages.class.getSimpleName(), Collections.singletonList(r.getId()),
+						PriceRuleType.RESOURCE.getCode(), rentalSite.getId(), pricePackages.get(0).getUserPriceType(), scene);
+				maxPrice2 = maxMinPrice2.getMaxPrice();
+				minPrice2 = maxMinPrice2.getMinPrice();
 
 			}
 			maxMinPrice2 = rentalv2PricePackageProvider.findMaxMinPrice(packageIds, pricePackages.get(0).getRentalType(), r.getName());
