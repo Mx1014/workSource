@@ -72,6 +72,8 @@ public interface DoorAccessProvider {
     Long createAclinkFormValues(AclinkFormValues value);
 
     List<AclinkFormValuesDTO> findAclinkFormValuesByAuthId (Long id);
+
+    List<DoorsAndGroupsDTO> searchTempAuthPriority(ListTempAuthPriorityCommand cmd);
     //门禁v3.0.2 添加企业管理授权
     Long createDoorManagement (AclinkManagement obj);
 

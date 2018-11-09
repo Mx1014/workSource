@@ -431,19 +431,19 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
 
-//    /**
-//     * <b>URL: /admin/aclink/listTempAuthPriority</b>
-//     * <p>列出临时授权优先门禁</p>
-//     * @return OK 成功
-//     */
-//    @RequestMapping("listTempAuthPriority")
-//    @RestReturn(value=String.class)
-//    public RestResponse listTempAuthPriority (@Valid ListSelectDoorsAndGroupsCommand cmd){
-//        RestResponse response = new RestResponse(doorAccessService.listTempAuthPriority(cmd));
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+    /**
+     * <b>URL: /admin/aclink/listTempAuthPriority</b>
+     * <p>列出临时授权优先门禁</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listTempAuthPriority")
+    @RestReturn(value=ListTempAuthPriorityResponse.class)
+    public RestResponse listTempAuthPriority (@Valid ListTempAuthPriorityCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listTempAuthPriority(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /admin/aclink/listTempAuthCustomField</b>

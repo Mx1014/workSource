@@ -540,11 +540,32 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         SelectQuery<Record> query = context.selectQuery();
         query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
         query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(id));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
         query.addOrderBy(Tables.EH_ACLINK_FORM_VALUES.ID.desc());
         List<AclinkFormValuesDTO> values = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AclinkFormValuesDTO.class);
         });
         return values;
+    }
+
+    @Override
+    public List<DoorsAndGroupsDTO> searchTempAuthPriority(ListTempAuthPriorityCommand cmd){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(cmd.getOwnerId()));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_TYPE.eq(cmd.getOwnerType()));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode()).or(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode())));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
+        query.addOrderBy(Tables.EH_ACLINK_FORM_VALUES.ID);
+        List<DoorsAndGroupsDTO> values = query.fetch().map((r) -> {
+            DoorsAndGroupsDTO door = new DoorsAndGroupsDTO();
+            door.setId(Long.parseLong(r.getValue(Tables.EH_ACLINK_FORM_VALUES.VALUE)));
+
+            return door;
+        });
+        return values;
+
     }
 
     @Override

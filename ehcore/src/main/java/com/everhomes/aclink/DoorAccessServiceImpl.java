@@ -6990,6 +6990,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
 
+    @Override
+    public ListTempAuthPriorityResponse listTempAuthPriority (ListTempAuthPriorityCommand cmd){
+	    List<DoorsAndGroupsDTO> doors = new ArrayList<DoorsAndGroupsDTO>();
+	    doors = doorAccessProvider.searchTempAuthPriority(cmd);
+
+    }
+
 	@Override
     public void createTempAuthCustomField (CreateTempAuthCustomFieldCommand cmd){
 	    AclinkFormTitles form = new AclinkFormTitles();
