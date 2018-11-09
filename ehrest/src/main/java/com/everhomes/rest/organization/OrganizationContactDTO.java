@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
