@@ -1,5 +1,5 @@
 CREATE TABLE `eh_rentalv2_price_classification` (
-`id`  bigint(20) NOT NULL ,
+`id` bigint(20) NOT NULL ,
 `namespace_id`  int NULL ,
 `source_id`  bigint(20) NULL ,
 `source_type`  varchar(255) NULL ,
@@ -14,7 +14,7 @@ CREATE TABLE `eh_rentalv2_price_classification` (
 `full_price`  decimal(10,2) NULL ,
 `cut_price`  decimal(10,2) NULL ,
 `discount_ratio`  double NULL ,
-`resource_type`  varchar(255) NULL
+`resource_type`  varchar(255) NULL,
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
