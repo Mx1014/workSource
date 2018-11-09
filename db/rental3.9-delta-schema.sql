@@ -16,3 +16,11 @@ CREATE TABLE `eh_rentalv2_price_classification` (
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_vip_priority` (
+  `id`  bigint(20) NOT NULL ,
+  `namespace_id`  int NULL ,
+  `vip_level` INT COMMENT '会员等级',
+  `vip_level_text` VARCHAR(64)  COMMENT '会员等级文本',
+  `priority` INT COMMENT '优先级,数字越大，优先级越高',
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '会员等级优先级表';
