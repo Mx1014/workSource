@@ -6275,6 +6275,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 1);
         resp.setAddressDialogStyle(addressDialogStyle);
 
+        //查询场景的显示方式：公司1，园区0
+        Integer sceneShowType = configurationProvider.getIntValue(namespaceId, "scene.show.type", 0);
+        resp.setSceneShowType(sceneShowType);
 		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
 		// 客户端资源缓存配置

@@ -33,6 +33,9 @@ public class SystemInfoResponse {
 
     private Byte myPublishFlag;
 
+
+    private Integer sceneShowType;
+
     //default: https://secpay.zuolin.com
     private String securityPayServer;
 
@@ -116,4 +119,21 @@ public class SystemInfoResponse {
     public void setScanForLogonServer(String scanForLogonServer) {
         this.scanForLogonServer = scanForLogonServer;
     }
+
+    public Byte getMyPublishFlag() {
+        return myPublishFlag;
+    }
+
+    public void setMyPublishFlag(Byte myPublishFlag) {
+        this.myPublishFlag = myPublishFlag;
+    }
+
+    public Integer getSceneShowType() {
+        return sceneShowType;
+    }
+
+    public void setSceneShowType(Integer sceneShowType) {
+        this.sceneShowType = sceneShowType;
+    }
+
 }
