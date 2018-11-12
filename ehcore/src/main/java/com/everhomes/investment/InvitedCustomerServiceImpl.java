@@ -949,7 +949,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void initCustomerStatusToDB(){
-        //taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), InitCustomerStatisticsHandle.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), InitCustomerStatisticsHandle.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 
     }
 

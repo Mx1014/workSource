@@ -25,20 +25,14 @@ import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
 import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirementAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
-import com.everhomes.server.schema.tables.records.EhCustomerContactsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerRequirementAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerRequirementsRecord;
-import com.everhomes.server.schema.tables.records.EhCustomerTrackersRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -564,7 +558,36 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public void getInitCustomerStatus() {
+    public List<EnterpriseCustomer> getInitCustomerStatus(Integer namespaceId, Integer pageSize, Long nextAnchor) {
+
+
+        List<EnterpriseCustomer> customers = new ArrayList<>();
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(customer);
+        query.addSelect(customer.ID,customer.LEVEL_ITEM_ID,customer.CREATE_TIME);
+        query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+
+
+        if(namespaceId != null){
+            query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
+        }
+
+        if(nextAnchor != null && nextAnchor != 0){
+            query.addConditions(customer.ID.ge(nextAnchor));
+        }
+
+        if(pageSize != null && pageSize != 0){
+            query.addLimit(pageSize + 1);
+        }
+
+        query.addGroupBy(customer.ID);
+
+        customers = query.fetchInto(EnterpriseCustomer.class);
+
+
+        return customers;
 
     }
 }

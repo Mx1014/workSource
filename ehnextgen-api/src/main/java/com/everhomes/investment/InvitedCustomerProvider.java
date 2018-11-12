@@ -75,5 +75,5 @@ public interface InvitedCustomerProvider {
 
     void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
 
-    void getInitCustomerStatus();
+    List<EnterpriseCustomer> getInitCustomerStatus(Integer namespaceId, Integer pageSize, Long nextAnchor);
 }
