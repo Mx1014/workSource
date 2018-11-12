@@ -135,10 +135,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         if(entity.isSuccess()) {
             EbeiServiceType type = entity.getData();
 //			List<EbeiServiceType> types = type.getItems();
-            type.setServiceId(String.valueOf(0));
+            type.setServiceId(String.valueOf(1));
             List<EbeiServiceType> types;
 
-            if (null == parentId || 0 == parentId) {
+            if (null == parentId || 1L == parentId) {
                 types = type.getItems();
             }else {
                 String mappingId = getMappingIdByCategoryId(parentId);
@@ -178,7 +178,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         CategoryDTO dto = new CategoryDTO();
         dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
         String parentId = ebeiServiceType.getParentId();
-        dto.setParentId("".equals(parentId)?0:getCategoryIdByMapping(parentId));
+        dto.setParentId("".equals(parentId)?1:getCategoryIdByMapping(parentId));
         dto.setName(ebeiServiceType.getServiceName());
         dto.setIsSupportDelete((byte)0);
 
