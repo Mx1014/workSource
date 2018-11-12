@@ -65,7 +65,6 @@ import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationWorkPlaces;
-import com.everhomes.organization.pm.ApartmentForAPPDTO;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
