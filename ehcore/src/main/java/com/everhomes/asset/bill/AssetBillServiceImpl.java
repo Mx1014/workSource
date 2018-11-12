@@ -129,7 +129,6 @@ public class AssetBillServiceImpl implements AssetBillService {
     	//只传租赁账单
     	Long assetCategoryId = getRentalAssetCategoryId(cmd.getNamespaceId());
     	cmd.setCategoryId(assetCategoryId);
-    	
     	LOGGER.info("AssetBillServiceImpl listOpenBills convertCmd={}", cmd.toString());
         ListBillsResponse response = new ListBillsResponse();
         Long pageAnchor = cmd.getPageAnchor();
@@ -153,6 +152,20 @@ public class AssetBillServiceImpl implements AssetBillService {
             response.setNextPageAnchor(pageAnchor + pageSize.longValue());
             list.remove(list.size() - 1);
         }
+        //每次同步都要打印下billId，方便对接过程中出现问题好进行定位
+        StringBuilder billIdStringBuilder = new StringBuilder();
+        billIdStringBuilder.append("(");
+        for(ListBillsDTO dto : list) {
+        	billIdStringBuilder.append(dto.getBillId());
+        	billIdStringBuilder.append(", ");
+        }
+        //去掉最后一个逗号
+        if(billIdStringBuilder.length() >= 2) {
+        	billIdStringBuilder = billIdStringBuilder.deleteCharAt(billIdStringBuilder.length() - 2);
+        }
+        billIdStringBuilder.append(")");
+        LOGGER.info("AssetBillServiceImpl listOpenBills billIds={}", billIdStringBuilder);
+        
         response.setListBillsDTOS(list);
         return response;
 	}
