@@ -351,8 +351,8 @@ public class AllianceClickStatServiceImpl implements AllianceClickStatService{
 	@Override
 	public List<IdNameDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd) {
 		// 校验权限
-		checkPrivilege(PrivilegeType.USER_BEHAVIOUR_STAT, cmd.getCurrentPMId(), cmd.getAppId(),
-				cmd.getCurrentProjectId());
+//		checkPrivilege(PrivilegeType.USER_BEHAVIOUR_STAT, cmd.getCurrentPMId(), cmd.getAppId(),
+//				cmd.getCurrentProjectId());
 		
 		String ownerType = cmd.getOwnerType();
 		Long ownerId = cmd.getOwnerId();

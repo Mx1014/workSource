@@ -22,6 +22,10 @@
 -- ENV: zuolin-base
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 
+-- AUTHOR: 马世亨 2018年11月9日
+-- REMARK: 正中会类型添加
+INSERT INTO `eh_pm_task_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `app_id`, `namespace_id`, `owner_type`, `owner_id`) VALUES ('1', '0', '0', '物业报修', '物业报修/物业报修', '0', '2', '2018-11-05 14:32:56', NULL, NULL, NULL, '159', '999983', 'community', '240111044331055940');
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 
 -- --------------------- SECTION BEGIN -------------------------------------------------------
