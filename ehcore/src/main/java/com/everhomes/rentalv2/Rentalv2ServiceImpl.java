@@ -83,10 +83,7 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.EhRentalv2Orders;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2PricePackages;
-import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
@@ -3412,19 +3409,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 
 		//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
-		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
-
-		if (!ids.isEmpty()) {
-		    Long minId = ids.stream().min(Long::compareTo).get();
-            Long maxId = ids.stream().max(Long::compareTo).get();
-			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByRange(resourceType,minId,maxId,rentalSiteId,rentalType);
-			for (int i = 0;i<result.size();i++)
-				for (RentalCell c2 : dbCells) {
-					if (c2.getId().equals(result.get(i).getId())) {
-						result.set(i,c2);
-					}
-				}
-		}
+        //现在每个单元格的价格单独计算
+//		List<Long> ids = result.stream().map(r->r.getId()).collect(Collectors.toList());
+//
+//		if (!ids.isEmpty()) {
+//		    Long minId = ids.stream().min(Long::compareTo).get();
+//            Long maxId = ids.stream().max(Long::compareTo).get();
+//			List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByRange(resourceType,minId,maxId,rentalSiteId,rentalType);
+//			for (int i = 0;i<result.size();i++)
+//				for (RentalCell c2 : dbCells) {
+//					if (c2.getId().equals(result.get(i).getId())) {
+//						result.set(i,c2);
+//					}
+//				}
+//		}
 		return result;
 	}
 
@@ -4722,12 +4720,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setSiteDays(new ArrayList<>());
 
 
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, null,
-				cmd.getRentalType(), cmd.getPackageName());
+		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, cmd.getRentalType(), cmd.getPackageName());
 		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
 		response.setFullPrice(dto.getFullPrice());
 		response.setCutPrice(dto.getCutPrice());
@@ -4876,7 +4871,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		response.setSiteDays(new ArrayList<>());
 
 		timeStamp = System.currentTimeMillis();
-		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule, null, cmd.getRentalType(),
+		processDayRuleDTOs(start, end, response.getSiteDays(), rs, rule,  cmd.getRentalType(),
 				cmd.getPackageName());
 		response.setResourceCounts(rs.getResourceCounts());
 		LOGGER.info("processDayRuleDTO costs time :"+(System.currentTimeMillis()-timeStamp)/1000);
@@ -5234,25 +5229,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	private void processDayRuleDTOs(Calendar start, Calendar end, List<RentalSiteDayRulesDTO> rulesDTOS,
-									RentalResource rs, RentalDefaultRule rule, String sceneToken, byte rentalType, String packageName) {
+									RentalResource rs, RentalDefaultRule rule,  byte rentalType, String packageName) {
 
 		java.util.Date reserveTime = new java.util.Date();
 		//当前时间 加上最多提前时间，得出开始时间
 		Timestamp beginTime = new Timestamp(reserveTime.getTime() + rule.getRentalStartTime());
 
-		//解析场景信息
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
-//		SceneTokenDTO sceneTokenDTO = null;
-//		if (null != sceneToken) {
-//			User user = UserContext.current().getUser();
-//			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
-//		}
-		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(rs.getResourceType(),
-				PriceRuleType.RESOURCE.getCode(), rs.getId());
+		Rentalv2PriceRule priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(rs.getResourceType(),
+				PriceRuleType.RESOURCE.getCode(), rs.getId(),rentalType);
+		priceRule.setPriceClassification(rentalv2Provider.listClassification(rs.getResourceType(),EhRentalv2PriceRules.class.getSimpleName(),
+				priceRule.getId(),null,null,null,null));
 		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rs.getResourceType(),
 				PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType, packageName);
-		List<RentalSitePackagesDTO> resourcePackageDTOs = new ArrayList<>();
-		processPricePackage(resourcePackageDTOs, pricePackages);
+		if (pricePackages != null && pricePackages.size() > 0)
+			pricePackages.forEach(r->r.setPriceClassification(rentalv2Provider.listClassification(rs.getResourceType(),EhRentalv2PricePackages.class.getSimpleName(),
+				r.getId(),null,null,null,null)));
 
 		List<RentalResourceOrder> rentalResourceOrders = this.rentalv2Provider.findAllRentalSiteBillByTime(rs, start.getTimeInMillis(),
 				end.getTimeInMillis());
@@ -5280,16 +5271,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			for (RentalCell rsr : rentalSiteRules) {
 				RentalSiteRulesDTO dto = ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
 				//根据场景来设置价格
-				setRentalsiteRulePrice( dto);
-				if (rsr.getPricePackageId() == null) { //使用资源本身的套餐
-					setRentalSitePackagePrice(dto,rsr,resourcePackageDTOs,packageName!=null);
-				} else {
-					List<Rentalv2PricePackage> pricePackages2 = rentalv2PricePackageProvider.listPricePackageByOwner(
-							rs.getResourceType(), PriceRuleType.CELL.getCode(), rsr.getPricePackageId(), null, packageName);
-					List<RentalSitePackagesDTO> dtos2 = new ArrayList<>();
-					processPricePackage(dtos2,pricePackages2);
-					setRentalSitePackagePrice(dto,rsr,dtos2,packageName!=null);
-				}
+				setRentalsiteRulePrice(dto,rsr,packageName,priceRule,pricePackages);
 //				dto.setId(rsr.getId());
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 					dto.setTimeStep(rsr.getTimeStep());
@@ -5309,10 +5291,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					dto.setAmorpm(rsr.getAmorpm());
 				}
 				dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-				//dto.setStatus(SiteRuleStatus.OPEN.getCode());
 
 				// 支持复选，要换一种方式计算剩余数量
-				//calculateAvailableCount(dto, rs, rsr, priceRules);
 				Double rentedCount = rsr.getCounts() - usedSegment.getMaxCover(rsr.getBeginTime().getTime(), rsr.getEndTime().getTime());
 				dto.setCounts(rentedCount < 0 ?0.0:rentedCount);
 				dto.setResourceCounts(rsr.getCounts());
@@ -5324,10 +5304,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 
 				//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
-				if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+				if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN ) {
 					if (closedSegment.getMaxCover(rsr.getBeginTime().getTime(),rsr.getEndTime().getTime()) > 0)
 						dto.setStatus(SiteRuleStatus.MANUAL_CLOSE.getCode());
-					//calculateCurrentStatus(dto, rs, rsr, priceRules);
 				}
 
 				setRentalSiteRulesDTOExtraInfo(dto);
@@ -5375,7 +5354,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 										    boolean ifCover) {
 
 		List<RentalSitePackagesDTO> t = dtos2;
-		//TODO 标准版要求没有场景，sceneTokenDTO固定为null，业务可能需要修改。有需要的话可以用 UserContext.current().getAppContext()的数据
 		//目前非认证用户，不能预订，后续功能让非认证用户可以使用预订之后
 		if (!StringUtils.isBlank(currentSceneType.get())) {
 			String scene = currentSceneType.get();
@@ -5431,8 +5409,40 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		}
 	}
 
-	private void setRentalsiteRulePrice(RentalSiteRulesDTO dto) {
-		//目前非认证用户，不能预订，后续功能让非认证用户可以使用预订之后
+	private void setRentalsiteRulePrice(RentalSiteRulesDTO dto,RentalCell rsr,String packageName,Rentalv2PriceRule priceRule,
+											List<Rentalv2PricePackage> pricePackages) {
+	    //取得单元格默认的价格
+		if (priceRule.getPriceClassification() != null)
+			dto.setPriceRules(priceRule.getPriceClassification().stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class))
+				.collect(Collectors.toList()));
+		List<RentalSitePackagesDTO> sitePackages = new ArrayList<>();
+		if (pricePackages != null) {
+			for (Rentalv2PricePackage pricePackage : pricePackages) {
+				RentalSitePackagesDTO packagesDTO = ConvertHelper.convert(pricePackage, RentalSitePackagesDTO.class);
+				if (pricePackage.getPriceClassification() != null)
+					packagesDTO.setPriceRules(pricePackage.getPriceClassification().stream().map(r -> ConvertHelper.convert(r, RentalPriceClassificationDTO.class))
+							.collect(Collectors.toList()));
+				sitePackages.add(packagesDTO);
+			}
+		}
+		dto.setSitePackages(sitePackages);
+
+		//如果单元格单独设置价格
+		RentalCell dbCell = rentalv2Provider.getRentalCellById(rsr.getId(),rsr.getRentalResourceId(),priceRule.getRentalType(),rsr.getResourceType());
+		if (dbCell != null){
+			dto.setUserPriceType(dbCell.getUserPriceType());
+			dto.setPrice(dbCell.getPrice());
+			dto.setOriginalPrice(dbCell.getOriginalPrice());
+			//因为交换过 cellId才是真正的主键id
+			List<RentalPriceClassification> classification = rentalv2Provider.listClassification(rsr.getResourceType(), EhRentalv2Cells.class.getSimpleName(),
+					rsr.getCellId(), null, null, null, null);
+			dto.setPriceRules(classification.stream().map(r->ConvertHelper.convert(r,RentalPriceClassificationDTO.class))
+					.collect(Collectors.toList()));
+			if (dbCell.getPricePackageId() != null){ //设置单独套餐价格
+
+			}
+		}
+
 		if (!StringUtils.isBlank(currentSceneType.get())) {
 			String scene = currentSceneType.get();
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
