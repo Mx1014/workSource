@@ -1342,6 +1342,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
 //        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+        //		标准版仓库管理领用管理只与具体项目有关，去掉管理公司
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());

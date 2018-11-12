@@ -1745,6 +1745,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param realSuperAdmin  true 表示消息模板用超级管理员的 ,即为false 用系统管理员的
 	 * @return
 	 */
+	@Override
     public OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
 														   String contactToken,
     		                                        Long adminPrivilegeId,
@@ -2368,6 +2369,35 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
 		}
+	}
+
+
+	@Override
+	public void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd) {
+
+		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
+		if(null == entityType){
+			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params ownerType error.");
+		}
+		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_ADMIN,true,false);
+		//权限改版，要求同时清除掉超级管理员，有问题就找何智辉和徐诗诗
+		deleteOrganizationAdmin(cmd.getOrganizationId(), cmd.getContactToken(), PrivilegeConstants.ORGANIZATION_SUPER_ADMIN,true,false);
+
+		OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(cmd.getOrganizationId(), cmd.getContactToken());
+		List<Long> roleIds = Collections.singletonList(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		if(detail != null) {
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), detail.getTargetType(), detail.getTargetId());
+			if (roleAssignments != null && roleAssignments.size() > 0) {
+				for (RoleAssignment roleAssignment : roleAssignments) {
+					if (roleIds.contains(roleAssignment.getRoleId())) {
+						aclProvider.deleteRoleAssignment(roleAssignment.getId());
+					}
+				}
+			}
+		}
+
 	}
 
 

@@ -259,4 +259,7 @@ public interface EnterpriseCustomerProvider {
     Timestamp getCustomerMaxTrackingTime(Long customerId, Byte customerSource);
 
     List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor);
+
+    List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId);
+
 }
