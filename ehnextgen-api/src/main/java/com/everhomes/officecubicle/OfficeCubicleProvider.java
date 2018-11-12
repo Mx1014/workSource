@@ -59,4 +59,8 @@ public interface OfficeCubicleProvider {
 	void updateConfig(OfficeCubicleConfig bean);
 
 	OfficeCubicleConfig findConfigByOwnerId(String ownerType,Long ownerId);
+
+	OfficeCubicleSpace getSpaces(String ownerType, Long ownerId, String province, String city,
+			Integer currentNamespaceId);
+
 }
