@@ -14,10 +14,8 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2PricePackages;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
+import com.everhomes.util.StringHelper;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -128,6 +126,18 @@ public class Rentalv2PricePackageProviderImpl implements  Rentalv2PricePackagePr
             return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
         }
         return new MaxMinPrice();
+    }
+
+    @Override
+    public List<Long> listPricePackageIdsByCellPackages(List<Long> packageIds, String packageName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record> record = context.select().from(Tables.EH_RENTALV2_PRICE_PACKAGES);
+        Condition condition = Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_TYPE.eq("cell")
+                .and(Tables.EH_RENTALV2_PRICE_PACKAGES.OWNER_ID.in(packageIds));
+        if (StringHelper.hasContent(packageName))
+            condition = condition.and(Tables.EH_RENTALV2_PRICE_PACKAGES.NAME.eq(packageName));
+
+        return record.fetch().map(r->r.getValue(Tables.EH_RENTALV2_PRICE_PACKAGES.ID));
     }
 
     private DSLContext getReadOnlyContext() {

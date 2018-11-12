@@ -203,7 +203,11 @@ public interface Rentalv2Provider {
 
 	MaxMinPrice findMaxMinPrice(String resourceType,Long ownerId, Byte rentalType);
 
-	MaxMinPrice findMaxMinPriceByClassifycation(String resourceType,String ownerType,List<Long> ownerIds,String sourceType,Long sourceId,Byte userPriceType,String classification);
+	MaxMinPrice findMaxMinPriceByClassifycation(String resourceType,String ownerType,List<Long> ownerIds,
+												String sourceType,Long sourceId,Byte userPriceType,String classification);
+
+	List<RentalPriceClassification> listClassification(String resourceType,String ownerType,Long ownerId,
+													   String sourceType,Long sourceId,Byte userPriceType,String classification);
 
 	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
 			List<Rentalv2PriceRule> priceRules);

@@ -2552,7 +2552,29 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return new MaxMinPrice();
     }
 
-    @Override
+	@Override
+	public List<RentalPriceClassification> listClassification(String resourceType, String ownerType, Long ownerId, String sourceType,
+															  Long sourceId, Byte userPriceType, String classification) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_PRICE_CLASSIFICATION);
+		Condition condition= Tables.EH_RENTALV2_PRICE_CLASSIFICATION.RESOURCE_TYPE.eq(resourceType);
+		if (StringHelper.hasContent(ownerType))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_TYPE.eq(ownerType));
+		if (ownerId != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.OWNER_ID.eq(ownerId));
+		if (StringHelper.hasContent(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.SOURCE_ID.eq(sourceId));
+		if (userPriceType != null)
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.USER_PRICE_TYPE.eq(userPriceType));
+		if (StringHelper.hasContent(classification))
+			condition = condition.and(Tables.EH_RENTALV2_PRICE_CLASSIFICATION.CLASSIFICATION.eq(classification));
+
+		return step.where(condition).fetch().map(r->ConvertHelper.convert(r,RentalPriceClassification.class));
+	}
+
+	@Override
 	public List<Long> listCellPackageId(String resourceType, Long resourceId, Byte rentalType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.select(Tables.EH_RENTALV2_CELLS.PRICE_PACKAGE_ID).from(Tables.EH_RENTALV2_CELLS)
