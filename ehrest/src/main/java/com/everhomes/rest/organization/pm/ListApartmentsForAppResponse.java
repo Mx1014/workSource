@@ -1,4 +1,4 @@
-package com.everhomes.organization.pm;
+package com.everhomes.rest.organization.pm;
 
 import java.util.List;
 
