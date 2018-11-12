@@ -92,6 +92,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -1292,7 +1293,14 @@ public class AssetServiceImpl implements AssetService {
                     //issue-40616 缴费管理V7.2（修正自然季的计算规则）
                     int monthOffset;
                     if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                    	monthOffset = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+                    	try {
+							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+						} catch (ParseException e) {
+							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+						}
                     }else {
                     	monthOffset = cycle.getMonthOffset();
                     }
@@ -1641,7 +1649,14 @@ public class AssetServiceImpl implements AssetService {
                 	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
                     int monthOffset;
                     if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
-                    	monthOffset = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+//                    	try {
+//							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+//						} catch (ParseException e) {
+//							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+//						}
                     }else {
                     	monthOffset = cycle.getMonthOffset();
                     }
@@ -2357,7 +2372,7 @@ public class AssetServiceImpl implements AssetService {
                 if(variable.length() > 0){
                     if(AssetVariable.UNIT_PRICE.getIdentifier().equals(variable.toString())){
                         variable.append("*");
-                        variable.append(String.valueOf(days));
+variable.append(String.valueOf(days));																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			
                         sb.append(variable);
                     }else{
                         sb.append(variable.toString());
