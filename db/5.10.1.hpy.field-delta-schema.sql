@@ -1,11 +1,13 @@
 CREATE TABLE `eh_var_field_scope_filters` (
-  `id` bigint(20) NOT NULL,
-  `namespace_id` int(11) DEFAULT NULL,
-  `field_id` bigint(20) DEFAULT NULL COMMENT '被筛选的表单id',
-  `community_id` bigint(20) DEFAULT NULL COMMENT '被筛选的表单所在的园区id',
-  `user_id` bigint(20) DEFAULT NULL COMMENT '被筛选的表单所属的用户id',
-  `create_time` datetime DEFAULT NULL,
-  `create_uid` bigint(20) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `namespace_id` int,
+  `community_id` bigint COMMENT '被筛选的表单所在的园区id',
+  `module_name` varchar(32) COMMENT '被筛选的表单的moduleName',
+  `group_path` varchar(32) COMMENT '被筛选的表单的group',
+  `field_id` bigint COMMENT '被筛选的表单id',
+  `user_id` bigint COMMENT '被筛选的表单所属的用户id',
+  `create_time` datetime,
+  `create_uid` bigint,
+  `status` tinyint,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '筛选显示的表单';

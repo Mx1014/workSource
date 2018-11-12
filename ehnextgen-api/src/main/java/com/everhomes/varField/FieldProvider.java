@@ -64,4 +64,6 @@ public interface FieldProvider {
     Field findFieldById(Long fieldId);
 
     FieldItem findFieldItemByItemId(Long itemId);
+
+    void createFieldScopeFilter(VarFieldScopeFilter filter);
 }

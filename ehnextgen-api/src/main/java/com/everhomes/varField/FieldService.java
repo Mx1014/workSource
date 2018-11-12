@@ -4,23 +4,7 @@ package com.everhomes.varField;
 import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListScopeFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
+import com.everhomes.rest.varField.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -77,4 +61,7 @@ public interface FieldService {
 
     void createDynamicScopeItems(Integer namespaceId, String instanceConfig, String appName);
     ScopeFieldItem findScopeFieldItemByDisplayNameAndFieldId(Integer namespaceId,Long ownerId, Long communityId, String moduleName, String displayName, Long fieldId);
+
+
+    void saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd);
 }

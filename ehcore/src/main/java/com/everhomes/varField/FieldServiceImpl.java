@@ -45,28 +45,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
-import com.everhomes.rest.varField.ListFieldItemCommand;
-import com.everhomes.rest.varField.ListScopeFieldItemCommand;
-import com.everhomes.rest.varField.ListSystemFieldCommand;
-import com.everhomes.rest.varField.ListSystemFieldGroupCommand;
-import com.everhomes.rest.varField.ListSystemFieldItemCommand;
-import com.everhomes.rest.varField.ModuleName;
-import com.everhomes.rest.varField.ScopeFieldGroupInfo;
-import com.everhomes.rest.varField.ScopeFieldInfo;
-import com.everhomes.rest.varField.ScopeFieldItemInfo;
-import com.everhomes.rest.varField.SystemFieldDTO;
-import com.everhomes.rest.varField.SystemFieldGroupDTO;
-import com.everhomes.rest.varField.SystemFieldItemDTO;
-import com.everhomes.rest.varField.UpdateFieldGroupsCommand;
-import com.everhomes.rest.varField.UpdateFieldItemsCommand;
-import com.everhomes.rest.varField.UpdateFieldsCommand;
-import com.everhomes.rest.varField.VarFieldStatus;
+import com.everhomes.rest.varField.*;
 import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
@@ -2465,6 +2444,23 @@ public class FieldServiceImpl implements FieldService {
         }
         dto.setChildrenGroup(trees);
         return dto;
+    }
+
+
+    @Override
+    public void saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd){
+        List<Long> fields = cmd.getFieldId();
+        if(fields != null && fields.size() > 0){
+            fields.forEach(r ->{
+                VarFieldScopeFilter filter = new VarFieldScopeFilter();
+                filter.setCommunityId(cmd.getCommunityId());
+                filter.setFieldId(r);
+                filter.setNamespaceId(cmd.getNamespaceId());
+                filter.setStatus(VarFieldStatus.ACTIVE.getCode());
+                filter.setUserId(UserContext.currentUserId());
+                fieldProvider.createFieldScopeFilter(filter);
+            });
+        }
     }
 
 }
