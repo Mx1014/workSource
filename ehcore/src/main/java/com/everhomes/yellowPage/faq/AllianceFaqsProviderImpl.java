@@ -130,8 +130,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType) {
+	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType) {
 		return listTool(pageSize, locator, (l, q) -> {
 			q.addConditions(TABLE.NAMESPACE_ID
 					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));
@@ -287,8 +286,7 @@ public class AllianceFaqsProviderImpl implements AllianceFaqsProvider {
 	}
 
 	@Override
-	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor) {
+	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize) {
 		return listTool(pageSize, locator, (l, q) -> {
 			q.addConditions(TABLE.NAMESPACE_ID
 					.eq(cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId()));

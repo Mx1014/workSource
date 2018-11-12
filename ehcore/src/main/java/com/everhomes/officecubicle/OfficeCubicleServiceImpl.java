@@ -923,6 +923,10 @@ public class OfficeCubicleServiceImpl implements OfficeCubicleService {
 			if(city!=null){
 				officeCubicleCityProvider.deleteOfficeCubicleCity(cmd.getCityId());
 				officeCubicleProvider.updateSpaceByProvinceAndCity(UserContext.getCurrentNamespaceId(),city.getProvinceName(),city.getCityName());
+				OfficeCubicleSpace oldSpace = 
+						officeCubicleProvider.getSpaces(city.getOwnerType(), city.getOwnerId(), city.getProvinceName(), city.getCityName(), UserContext.getCurrentNamespaceId());
+				oldSpace.setStatus(OfficeStatus.DELETED.getCode());
+				this.officeCubicleProvider.updateSpace(oldSpace);
 			}
 			return true;
 		});

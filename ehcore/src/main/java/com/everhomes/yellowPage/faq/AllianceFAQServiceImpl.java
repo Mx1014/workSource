@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
@@ -107,6 +109,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	private YellowPageService yellowPageService;
 	@Autowired
 	private UserPrivilegeMgr userPrivilegeMgr;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 
 	@Override
@@ -154,8 +158,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public ListFAQTypesResponse listFAQTypes(ListFAQTypesCommand cmd) {
 		ListingLocator locator = new ListingLocator();
-		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, locator, cmd.getPageSize(),
-				cmd.getPageAnchor());
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, locator, cmd.getPageSize());
 
 		// 组织
 		List<IdNameDTO> dtos = faqTypes.stream().map(r -> {
@@ -175,13 +179,13 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public void updateFAQTypeOrders(UpdateFAQTypeOrdersCommand cmd) {
-		//校验权限
+		// 校验权限
 		checkPrivilege(cmd);
-		
+
 		if (null == cmd.getFAQTypeIds() || cmd.getFAQTypeIds().size() < 2) {
-			return ;
+			return;
 		}
-		
+
 		AllianceFAQType faqType = null;
 		List<Long> finalOrders = new ArrayList<>(10);
 		for (Long faqTypeId : cmd.getFAQTypeIds()) {
@@ -189,22 +193,28 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			if (null == faqType) {
 				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_TYPE_NOT_FOUND, "faq type not found");
 			}
-			
+
 			finalOrders.add(faqType.getDefaultOrder());
 		}
-		
-		//排序
-		Collections.sort(finalOrders); 
-		
-		//变更
-		dbProvider.execute(r->{
-			int i = 0;
-			for (Long faqTypeId : cmd.getFAQTypeIds()) {
-				allianceFAQProvider.updateFAQTypeOrder(faqTypeId, finalOrders.get(i++));
-			}
+
+		// 排序
+		Collections.sort(finalOrders);
+
+		// 上锁，因为序号可能被多线程变更
+		coordinationProvider.getNamedLock(CoordinationLocks.SERVICE_ALLIANCE_FAQ_TYPES.getCode()).enter(() -> {
+
+			// 变更
+			dbProvider.execute(r -> {
+				int i = 0;
+				for (Long faqTypeId : cmd.getFAQTypeIds()) {
+					allianceFAQProvider.updateFAQTypeOrder(faqTypeId, finalOrders.get(i++));
+				}
+				return null;
+			});
+
 			return null;
 		});
-		
+
 	}
 
 
@@ -273,7 +283,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public ListFAQsResponse listFAQs(ListFAQsCommand cmd) {
 		ListingLocator locator = new ListingLocator();
-		List<AllianceFAQ> faqs = allianceFAQProvider.listFAQs(cmd, locator, cmd.getPageSize(), cmd.getPageAnchor(), cmd.getFAQType(), cmd.getTopFlag(), cmd.getKeyword(), cmd.getOrderType(), cmd.getSortType());
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AllianceFAQ> faqs = allianceFAQProvider.listFAQs(cmd, locator, cmd.getPageSize(), cmd.getFAQType(), cmd.getTopFlag(), cmd.getKeyword(), cmd.getOrderType(), cmd.getSortType());
 
 		// 组织
 		List<FAQDTO> dtos = faqs.stream().map(r -> {
@@ -289,7 +300,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 
 	@Override
 	public ListTopFAQsResponse listTopFAQs(ListTopFAQsCommand cmd) {
-		List<AllianceFAQ> faqs = allianceFAQProvider.listTopFAQs(cmd, null, null, null);
+		ListingLocator locator = new ListingLocator(); 
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AllianceFAQ> faqs = allianceFAQProvider.listTopFAQs(cmd, locator, cmd.getPageSize());
 		List<IdNameInfoDTO> dtos = faqs.stream().map(r -> {
 			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getId());
@@ -344,7 +357,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		}
 
 		if (null != cmd.getFAQTypeId()) {
-			List<AllianceFAQ> faqs = listFAQByType(cmd, cmd.getFAQTypeId());
+			ListingLocator locator = new ListingLocator();
+			locator.setAnchor(cmd.getPageAnchor());
+			List<AllianceFAQ> faqs = listFAQByType(cmd, locator, cmd.getPageSize(),cmd.getFAQTypeId());
 			dtos = faqs.stream().map(r -> {
 				IdNameInfoDTO dto = new IdNameInfoDTO();
 				dto.setId(r.getId());
@@ -355,7 +370,9 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			return resp;
 		}
 
-		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, null, null, null);
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, locator, cmd.getPageSize());
 		dtos = faqTypes.stream().map(r -> {
 			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getId());
@@ -366,8 +383,8 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 		return resp;
 	}
 	
-	private List<AllianceFAQ> listFAQByType(AllianceCommonCommand cmd, Long faqTypeId) {
-		return allianceFAQProvider.listFAQs(cmd, null, null, null,  faqTypeId, null, null, null, null);
+	private List<AllianceFAQ> listFAQByType(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long faqTypeId) {
+		return allianceFAQProvider.listFAQs(cmd, locator, pageSize,  faqTypeId, null, null, null, null);
 	}
 
 	@Override
@@ -493,6 +510,7 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public ListUiServiceRecordsResponse listUiServiceRecords(ListUiServiceRecordsCommand cmd) {
 		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
 		List<Byte> workFlowStatusList = null;
 		if (null != cmd.getStatus() && ServiceAllianceWorkFlowStatus.PROCESSING.getCode() == cmd.getStatus()) {
 			workFlowStatusList = buildWorkingStatusList();
@@ -527,13 +545,13 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	
 	@Override
 	public void updateFAQOrder(updateFAQOrderCommand cmd) {
-		//校验权限
+		// 校验权限
 		checkPrivilege(cmd);
-		
+
 		if (null == cmd.getFAQIds() || cmd.getFAQIds().size() < 2) {
-			return ;
+			return;
 		}
-		
+
 		AllianceFAQ faq = null;
 		List<Long> finalOrders = new ArrayList<>(10);
 		for (Long faqId : cmd.getFAQIds()) {
@@ -541,22 +559,28 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 			if (null == faq) {
 				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_NOT_FOUND, "faq not found");
 			}
-			
+
 			finalOrders.add(faq.getDefaultOrder());
 		}
-		
-		//排序
-		Collections.sort(finalOrders); 
-		
-		//变更
-		dbProvider.execute(r->{
-			int i = 0;
-			for (Long faqId : cmd.getFAQIds()) {
-				allianceFAQProvider.updateFAQOrder(faqId, finalOrders.get(i++));
-			}
+
+		// 排序
+		Collections.sort(finalOrders);
+
+		// 上锁，因为序号可能被多线程变更
+		coordinationProvider.getNamedLock(CoordinationLocks.SERVICE_ALLIANCE_FAQ_ORDERS.getCode()).enter(() -> {
+
+			// 变更
+			dbProvider.execute(r -> {
+				int i = 0;
+				for (Long faqId : cmd.getFAQIds()) {
+					allianceFAQProvider.updateFAQOrder(faqId, finalOrders.get(i++));
+				}
+				return null;
+			});
+
 			return null;
 		});
-		
+
 	}
 	
 	/**

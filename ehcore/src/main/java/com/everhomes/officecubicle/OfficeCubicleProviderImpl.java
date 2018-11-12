@@ -196,6 +196,24 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		return null;
 	}
 
+	
+	@Override
+	public OfficeCubicleSpace getSpaces(String ownerType,Long ownerId,String province, String city, 
+			Integer currentNamespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OfficeCubicleSpace> result = context.select().from(Tables.EH_OFFICE_CUBICLE_SPACES)
+				.where(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.OWNER_TYPE.eq(ownerType)
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.STATUS.eq((byte)2)))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.PROVINCE_NAME.eq(province))
+				.and(Tables.EH_OFFICE_CUBICLE_SPACES.CITY_NAME.eq(city))
+				.fetch().map(r -> ConvertHelper.convert(r, OfficeCubicleSpace.class));
+		if(null != result && result.size() > 0){
+			return result.get(0);
+		}
+		return null;
+	}
+	
 	@Override
 	public void createOrder(OfficeCubicleOrder order) {
 
