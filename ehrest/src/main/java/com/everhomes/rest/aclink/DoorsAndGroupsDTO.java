@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>formId: 表单id</li>
  * <li>id: 门禁或门禁组ID </li>
  * <li>type: 类型：1门禁 2门禁组</li>
  * <li>name: 门禁（组）名称</li>
@@ -17,10 +18,19 @@ import java.util.List;
  *
  */
 public class DoorsAndGroupsDTO {
+	private Long formId;
 	private Long id;
 	private Byte type;
 	private String name;
 	private Byte Status;
+
+	public Long getFormId() {
+		return formId;
+	}
+
+	public void setFormId(Long formId) {
+		this.formId = formId;
+	}
 
 	public Long getId() {
 		return id;

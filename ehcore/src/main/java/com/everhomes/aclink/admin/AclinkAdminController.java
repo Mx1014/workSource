@@ -432,6 +432,20 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/deleteTempAuthPriority</b>
+     * <p>删除临时授权优先门禁</p>
+     * @return OK 成功
+     */
+    @RequestMapping("deleteTempAuthPriority")
+    @RestReturn(value=AclinkFormValuesDTO.class)
+    public RestResponse deleteTempAuthPriority (@Valid DeleteTempAuthPriorityCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.deleteTempAuthPriority(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/listTempAuthPriority</b>
      * <p>列出临时授权优先门禁</p>
      * @return OK 成功

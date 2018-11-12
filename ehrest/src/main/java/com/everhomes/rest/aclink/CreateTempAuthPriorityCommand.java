@@ -19,7 +19,7 @@ public class CreateTempAuthPriorityCommand {
 
     private Long ownerId;
     private Byte ownerType;
-    private List<Long> doorIds;
+//    private List<Long> doorIds;
     @ItemType(DoorsAndGroupsDTO.class)
     private List<DoorsAndGroupsDTO> doors;
 
@@ -31,13 +31,13 @@ public class CreateTempAuthPriorityCommand {
         this.doors = doors;
     }
 
-    public List<Long> getDoorIds() {
-        return doorIds;
-    }
-
-    public void setDoorIds(List<Long> doorIds) {
-        this.doorIds = doorIds;
-    }
+//    public List<Long> getDoorIds() {
+//        return doorIds;
+//    }
+//
+//    public void setDoorIds(List<Long> doorIds) {
+//        this.doorIds = doorIds;
+//    }
 
     public Long getOwnerId() {
         return ownerId;

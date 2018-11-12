@@ -6994,7 +6994,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     public ListTempAuthPriorityResponse listTempAuthPriority (ListTempAuthPriorityCommand cmd){
 	    List<DoorsAndGroupsDTO> doors = new ArrayList<DoorsAndGroupsDTO>();
 	    doors = doorAccessProvider.searchTempAuthPriority(cmd);
+        ListTempAuthPriorityResponse resp = new ListTempAuthPriorityResponse();
+        resp.setDoors(doors);
+	    return resp;
+    }
 
+    @Override
+    public AclinkFormValuesDTO deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd){
+	    User user = UserContext.current().getUser();
+	    AclinkFormValues value = doorAccessProvider.findAclinkFormValuesById(cmd.getId());
+	    if (null != value && value.getId() != null){
+	        value.setStatus((byte)0);
+            value.setOperatorUid(user.getId());
+            value.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    }
+	    return doorAccessProvider.updateAclinkFormValues(value);
     }
 
 	@Override
@@ -7266,8 +7280,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     if(dto.getType() == 1){ //门禁
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode());
                     }
-                    if(dto.getType() == 2){ //门禁组
+                    else if(dto.getType() == 2) { //门禁组
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode());
+                    }else continue;
                     value.setStatus((byte)1);
                     value.setTitleId(0L);
                     value.setValue(String.valueOf(dto.getId()));
@@ -7277,7 +7292,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 }else continue;
                 }
             }
-        }
+
 //        旧方案不用
 //        if(null != cmd.getDoorIds() && !cmd.getDoorIds().isEmpty()){
 //            for(Long doorId:cmd.getDoorIds()) {
