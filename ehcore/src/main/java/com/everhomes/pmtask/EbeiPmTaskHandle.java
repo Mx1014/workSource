@@ -123,7 +123,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             init();
         }
     }
-    
+
     private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
         JSONObject param = new JSONObject();
         param.put("projectId", projectId);
@@ -506,7 +506,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
             task.setStatus(FlowCaseStatus.PROCESS.getCode());
-           pmTaskProvider.updateTask(task);
+            pmTaskProvider.updateTask(task);
             return null;
         });
 
@@ -740,20 +740,25 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-        List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+        if(cmd.getParentId() != null && cmd.getParentId() == 0){
+            List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),cmd.getParentId(),null,null,Integer.MAX_VALUE);
+            response.setRequests(categories.stream().map(r->ConvertHelper.convert(r,CategoryDTO.class)).collect(Collectors.toList()));
+        } else {
+            List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 //      V3.6 过滤正中会办事的中间类型
 //        if(childrens.size() == 1){
 //            childrens = childrens.get(0).getChildrens();
 //        }
 
-        if(null == cmd.getParentId()) {
-            CategoryDTO dto = createCategoryDTO();
-            dto.setChildrens(childrens);
+            if(null == cmd.getParentId()) {
+                CategoryDTO dto = createCategoryDTO();
+                dto.setChildrens(childrens);
 
-            response.setRequests(Collections.singletonList(dto));
-        }else {
-            response.setRequests(childrens);
+                response.setRequests(Collections.singletonList(dto));
+            }else {
+                response.setRequests(childrens);
 
+            }
         }
 
         return response;

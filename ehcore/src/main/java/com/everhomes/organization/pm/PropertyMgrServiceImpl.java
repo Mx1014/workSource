@@ -8210,15 +8210,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			List<ExportApartmentsAuthorizePriceDTO> data = aptList.stream().map(r -> {
 				ExportApartmentsAuthorizePriceDTO dto = ConvertHelper.convert(r, ExportApartmentsAuthorizePriceDTO.class);
 				// issue-41379 【资产管理-楼宇详情-房源授权价记录：点击批量导入授权价，选择下载模板，下载失败】
-				Byte livingStatus = (byte)-1;
+				Byte livingStatus = null;
 				Address address = addressProvider.findAddressById(r.getAddressId());
 				CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(r.getAddressId());
 				if (communityAddressMapping != null) {
 					livingStatus = communityAddressMapping.getLivingStatus();
 		        } else {
-		        	livingStatus = address.getLivingStatus();
+		        	livingStatus = AddressMappingStatus.LIVING.getCode();
 		        }
-				
+				//此方法会返回多个房源状态，由于历史遗留数据的问题，导致此方法会返回多个房源状态，一个房源对应对各状态，导致报错
 				//Byte livingStatus = addressProvider.getAddressLivingStatusByAddressId(r.getAddressId());
 				dto.setLivingStatus(AddressMappingStatus.fromCode(livingStatus).getDesc());
 				AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesByApartmentId(community, cmd.getBuildingId(), r.getAddressId());

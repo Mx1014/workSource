@@ -287,6 +287,6 @@ public interface CustomerService {
 
     void updateSuperAdmin(createSuperAdminCommand cmd);
 
-    void transNewAdmin();
+    void transNewAdmin(TransNewAdminCommand cmd);
 
 }

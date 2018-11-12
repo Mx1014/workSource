@@ -2630,6 +2630,43 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
     }
 
     @Override
+    public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+        List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
+        if(nextPageAnchor == null){
+            nextPageAnchor = 0l;
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        context.select(
+                Tables.EH_ORGANIZATION_MEMBERS.ID,
+                Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
+                Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
+                Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID,
+                Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID)
+                .from(Tables.EH_ORGANIZATION_MEMBERS,Tables.EH_ORGANIZATIONS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq("manager"))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq((byte)3))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq("ENTERPRISE"))
+                .and(Tables.EH_ORGANIZATIONS.STATUS.eq((byte)2))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.ID.ge(nextPageAnchor))
+                .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID)
+                .limit(101)
+                .fetch().map(r->{
+            CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
+            dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
+            dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+            dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+            dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
+            dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
+            dtoList.add(dto);
+            return null;
+        });
+        return dtoList;
+    }
+
+
+    @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
@@ -2652,15 +2689,16 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID)
                 .limit(101)
                 .fetch().map(r->{
-                    CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
-                    dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
-                    dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
-                    dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
-                    dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
-                    dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
-                    dtoList.add(dto);
-                    return null;
-                });
+            CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
+            dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
+            dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+            dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+            dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
+            dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
+            dtoList.add(dto);
+            return null;
+        });
         return dtoList;
     }
+
 }
