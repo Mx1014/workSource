@@ -3,13 +3,18 @@ package com.everhomes.flow_statistics;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.FlowNodeType;
 import com.everhomes.rest.flow_statistics.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.collections.CollectionUtils;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +83,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
 
     /**
      * 工作流版本时间跨度查询
+     * 该版本的时间跨度为该版本的创建时间到下一版本的创建时间.
      * @param cmd
      * @return
      */
@@ -94,10 +100,77 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "flowVersion is null  .");
         }
-        dto = flowStatisticsProvider.getFlowVersionCycle(cmd.getFlowMainId() ,cmd.getFlowVersion());
+       // dto = flowStatisticsProvider.getFlowVersionCycle(cmd.getFlowMainId() ,cmd.getFlowVersion());
+        Flow currentFlow =  this.findFlowVersionByVersion(cmd.getFlowMainId() , cmd.getNamespaceId() ,cmd.getFlowVersion());
+        if(currentFlow == null ){
+            return dto ;
+        }
+        Timestamp minTime = currentFlow.getCreateTime() ;
+        if(minTime != null){
+            dto.setStartDate(new Date(minTime.getTime()));
+        }
+        Flow nextFlow = this.findNextFlowVersionByVersion(cmd.getFlowMainId() , cmd.getNamespaceId() ,currentFlow.getId());
+        if(currentFlow == null ){
+            return dto ;
+        }
+        Timestamp maxTime = currentFlow.getCreateTime() ;
+        if(minTime != null){
+            dto.setEndDate(new Date(maxTime.getTime()));
+        }
         return dto ;
     }
 
+    /**
+     * 查询某版本的工作流信息
+     * @param flowMainId
+     * @param namespaceId
+     * @param flowVersion
+     * @return
+     */
+    private Flow findFlowVersionByVersion(Long flowMainId , Integer namespaceId , Integer flowVersion){
+        ListingLocator locator = new ListingLocator();
+        List<Flow> flows = flowProvider.queryFlows(locator, 0, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(
+                    ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowMainId));
+                query.addConditions(Tables.EH_FLOWS.FLOW_VERSION.eq(flowVersion));
+                return query;
+            }
+
+        });
+        if (flows != null && flows.size() > 0) {
+            return flows.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * 查询某版本的下一个版本的工作流信息
+     * @param flowMainId
+     * @param namespaceId
+     * @param currentId
+     * @return
+     */
+    private Flow findNextFlowVersionByVersion(Long flowMainId , Integer namespaceId , Long currentId){
+        ListingLocator locator = new ListingLocator();
+        List<Flow> flows = flowProvider.queryFlows(locator, 0, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(
+                    ListingLocator locator, SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+                query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowMainId));
+                query.addConditions(Tables.EH_FLOWS.ID.gt(currentId));
+                return query;
+            }
+
+        });
+        if (flows != null && flows.size() > 0) {
+            return flows.get(0);
+        }
+        return null;
+    }
     /**
      * 按泳道统计处理效率
      * @param cmd

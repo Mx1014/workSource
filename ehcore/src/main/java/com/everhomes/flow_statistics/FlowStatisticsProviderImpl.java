@@ -37,6 +37,12 @@ public class FlowStatisticsProviderImpl implements FlowStatisticsProvider {
     @Autowired
     private DbProvider dbProvider;
 
+    /**
+     * 该版本的时间跨度为该版本的创建时间到下一版本的创建时间.(该方法目前废弃)
+     * @param flowMainId
+     * @param version
+     * @return
+     */
     @Override
     public FlowVersionCycleDTO getFlowVersionCycle(Long flowMainId ,Integer version) {
         FlowVersionCycleDTO result = new FlowVersionCycleDTO();
