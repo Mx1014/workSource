@@ -190,8 +190,8 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 		if(cmd.getParentId() == null) {
 			//app服务广场 物业报修配固定id  PmTaskAppType.REPAIR_ID
 			//投诉建议 配固定id PmTaskAppType.SUGGESTION_ID, 如果配置错误，则需要修改
-//			parentId = cmd.getTaskCategoryId();
-			parentId = 0L;
+			parentId = cmd.getTaskCategoryId();
+//			parentId = 0L;
 //			if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId()) {
 //
 //			}else if (PmTaskAppType.REPAIR_ID == cmd.getTaskCategoryId())
@@ -267,7 +267,7 @@ abstract class DefaultPmTaskHandle implements PmTaskHandle {
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
-		Long defaultId = PmTaskAppType.REPAIR_ID;
+		Long defaultId = 0L;
 
 		List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(namespaceId, cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),
 				null, null, null, null);
