@@ -6821,9 +6821,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
 
-					if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+
+                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
                         continue;
-                    }Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+                    }
+
+					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
 					}
@@ -7053,6 +7056,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
+            
+            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
+            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
+            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+            displayConfigs.add(dispConf);
+            smartCardInfo.setDisplayConfigs(displayConfigs);
 
             List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
             SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
@@ -7073,8 +7084,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 //            aclinkCard.setTitle("公共门禁");
 //            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
 
-//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
+//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
 
 //            item.setTitle("楼层");
 //            item.setRouterUrl("zl://aclink/index");
