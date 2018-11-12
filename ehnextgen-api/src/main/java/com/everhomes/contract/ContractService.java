@@ -75,7 +75,7 @@ public interface ContractService {
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
 	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
    
-	default void initializationContract(InitializationCommand cmd){};
+	default ContractTaskOperateLog initializationContract(InitializationCommand cmd){return null;};
 	default void exemptionContract(InitializationCommand cmd){};
 	default void copyContract(InitializationCommand cmd){};
 }

@@ -14,6 +14,8 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractTaskOperateLog;
+import com.everhomes.filedownload.Task;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDetailDTO;
@@ -150,5 +152,11 @@ public interface ContractProvider {
 	Boolean possibleEnterContractFuture(ContractDetailDTO contractDetailDTO,ContractBuildingMapping contractBuildingMapping);
 
 	Boolean resoucreReservationsFuture(ContractDetailDTO contractDetailDTO,BuildingApartmentDTO apartment);
+
+	void createContractOperateTask(ContractTaskOperateLog job);
+
+	void updateContractOperateTask(ContractTaskOperateLog job);
+
+	ContractTaskOperateLog findContractOperateTaskById(Long id);
 
 }

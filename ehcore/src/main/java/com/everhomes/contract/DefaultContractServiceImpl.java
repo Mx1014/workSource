@@ -61,6 +61,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.*;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.filedownload.Task;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowService;
@@ -101,7 +102,9 @@ import com.everhomes.rest.contract.*;
 import com.everhomes.rest.customer.CustomerType;
 import com.everhomes.rest.customer.SyncCustomersCommand;
 import com.everhomes.rest.customer.SyncDataTaskType;
+import com.everhomes.rest.filedownload.AllReadStatus;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
+import com.everhomes.rest.filedownload.TaskStatus;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseEntity;
@@ -3931,21 +3934,37 @@ long assetCategoryId = 0l;
 	}
 	
 	@Override
-	public void initializationContract(InitializationCommand cmd) {
+	public ContractTaskOperateLog initializationContract(InitializationCommand cmd) {
 		// 1.查询合同列表,没有数据不用初始化
-		if (cmd.getContractIds() == null) {
-			return;
+		if (cmd.getContractIds() == null || cmd.getCommunityId() == null) {
+			return null;
 		}
+		//返回创建的tasakId
+		ContractTaskOperateLog task = new ContractTaskOperateLog();
+        task.setNamespaceId(cmd.getNamespaceId());
+        task.setOwnerId(cmd.getCommunityId());
+        task.setOwnerType("community");
+        task.setName("合同初始化");
+        task.setProcess(0);
+        task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
+		contractProvider.createContractOperateTask(task);
+		
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyInitializationContract(cmd);
+				oneKeyInitializationContract(cmd,task);
 			}
 		});
+		
+		return task;
 	}
 
-	private void oneKeyInitializationContract(InitializationCommand cmd) {
+	private void oneKeyInitializationContract(InitializationCommand cmd,ContractTaskOperateLog task) {
+		Date StartTime = new Date();
+		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(task.getId());
+		contractTaskOperateLog.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
 		List<Long> contractAllIds = cmd.getContractIds();
 		// 2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
 		CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
@@ -3955,6 +3974,7 @@ long assetCategoryId = 0l;
 		checkContractIsProduceBillCmd.setOwnerType("community");
 		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
 		List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
+		contractTaskOperateLog.setProcess(5);
 		for (CheckContractIsProduceBillDTO entry : lists) {
 			// 合同存在已缴账单
 			if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
@@ -3966,6 +3986,11 @@ long assetCategoryId = 0l;
 		if (contractsMap.size()<1) {
 			return;
 		}
+		contractTaskOperateLog.setParams(contractsMap.toString());
+		contractTaskOperateLog.setTotalNumber(contractsMap.size());
+		contractTaskOperateLog.setProcess(35);
+		
+		int processedNumber = 0;
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Contract contract = entry.getValue();
 			contract.setContractType(ContractType.NEW.getCode());
@@ -3980,6 +4005,11 @@ long assetCategoryId = 0l;
 			}
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
+			processedNumber =processedNumber + 1;
+			
+			contractTaskOperateLog.setProcessedNumber(processedNumber);
+			contractTaskOperateLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			contractProvider.updateContractOperateTask(contractTaskOperateLog);
 		}
 
 		// 4.调用缴费接口删除初始化合同的账单，
@@ -4002,6 +4032,10 @@ long assetCategoryId = 0l;
 		if (deleteErrorContract.length() > 1) {
 			deleteErrorContract.append("初始化失败！");
 		}
+		Date FinishTime = new Date();
+		contractTaskOperateLog.setExecuteTime((FinishTime.getTime()-StartTime.getTime())/1000);
+		contractTaskOperateLog.setProcess(100);
+		contractTaskOperateLog.setFinishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	}
 
 	@Override

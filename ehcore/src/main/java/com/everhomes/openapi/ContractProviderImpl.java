@@ -44,6 +44,7 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractTaskOperateLog;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -72,6 +73,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.pojos.EhContractTaskOperateLogs;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
@@ -1707,34 +1709,37 @@ public class ContractProviderImpl implements ContractProvider {
 	}
 	
 	@Override
-    public void createContractOperateTask(Task job) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTasks.class));
+    public void createContractOperateTask(ContractTaskOperateLog job) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractTaskOperateLogs.class));
         job.setId(id);
+        job.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        job.setStatus(ContractTemplateStatus.ACTIVE.getCode()); //有效的状态
+        job.setCreatorUid(UserContext.currentUserId());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhTasksDao dao = new EhTasksDao(context.configuration());
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
         dao.insert(job);
     }
 
     @Override
-    public void updateContractOperateTask(Task job) {
+    public void updateContractOperateTask(ContractTaskOperateLog job) {
         assert(job.getId() != null);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        EhTasksDao dao = new EhTasksDao(context.configuration());
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
         dao.update(job);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTasks.class, job.getId());
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractTaskOperateLogs.class, job.getId());
     }
 
 
     @Override
-    public Task findContractOperateTaskById(Long id) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhTasks.class, id));
-        EhTasksDao dao = new EhTasksDao(context.configuration());
-        EhTasks result = dao.findById(id);
+    public ContractTaskOperateLog findContractOperateTaskById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhContractTaskOperateLogs.class, id));
+        EhContractTaskOperateLogsDao dao = new EhContractTaskOperateLogsDao(context.configuration());
+        EhContractTaskOperateLogs result = dao.findById(id);
         if (result == null) {
             return null;
         }
-        return ConvertHelper.convert(result, Task.class);
+        return ConvertHelper.convert(result, ContractTaskOperateLog.class);
     }
 
 }
