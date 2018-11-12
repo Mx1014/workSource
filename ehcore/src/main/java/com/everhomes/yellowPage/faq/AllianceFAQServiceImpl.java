@@ -290,10 +290,11 @@ public class AllianceFAQServiceImpl implements AllianceFAQService{
 	@Override
 	public ListTopFAQsResponse listTopFAQs(ListTopFAQsCommand cmd) {
 		List<AllianceFAQ> faqs = allianceFAQProvider.listTopFAQs(cmd, null, null, null);
-		List<IdNameDTO> dtos = faqs.stream().map(r -> {
-			IdNameDTO dto = new IdNameDTO();
+		List<IdNameInfoDTO> dtos = faqs.stream().map(r -> {
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getId());
 			dto.setName(r.getTitle());
+			dto.setContent(r.getContent());
 			return dto;
 		}).collect(Collectors.toList());
 		ListTopFAQsResponse resp = new ListTopFAQsResponse();

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.launchpad.oppushHandler;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.launchpad.OPPushHandler;
@@ -9,6 +11,7 @@ import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.OPPushCard;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.portal.ClientHandlerType;
+import com.everhomes.rest.portal.ServiceAllianceInstanceConfig;
 import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
 import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
 import com.everhomes.rest.widget.OPPushInstanceConfig;
@@ -26,6 +29,7 @@ import com.everhomes.yellowPage.YellowPageProvider;
 import com.everhomes.yellowPage.YellowPageService;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +58,9 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 	YellowPageProvider yellowPageProvider;
 	@Autowired
 	private ContentServerService contentServerService;
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+	
 	
     @Override
 	public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
@@ -72,6 +79,8 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 		List<AllianceOperateService> dtos = allianceOperateServiceProvider.listOperateServices(cmd);
 		List<OPPushCard> listCards = new ArrayList<>();
 		String host = "service-alliance";
+		
+		String pageRealDisplayType = getDisplayType(app);
 		for (AllianceOperateService dto : dtos) {
 			OPPushCard card = new OPPushCard();
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getServiceId(), null, null);
@@ -80,9 +89,7 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 			}
 			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			card.setRouterPath("/detail");
-			String url = yellowPageService.processDetailUrl(sa.getId(), sa.getName(), sa.getOwnerType(),
-					sa.getOwnerId());
-			
+			String url = processDetailUrl(sa.getId(), sa.getOwnerId(), context.getCommunityId(), pageRealDisplayType);
 			try {
 				card.setRouterQuery("url=" + URLEncoder.encode(url, "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
@@ -125,4 +132,35 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 		
 		return null;
     }
+    
+	private String processDetailUrl(Long serviceId, Long communityId, Long type, String pageRealDisplayType) {
+
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+
+		StringBuilder detailUrl = new StringBuilder("/service-alliance-web/build/detail.html?id=" + serviceId);
+		detailUrl.append("&ns=" + UserContext.getCurrentNamespaceId());
+		detailUrl.append("&communityId=" + communityId);
+		detailUrl.append("&type=" + type);
+		Long userId = UserContext.currentUserId();
+		if (null != userId) {
+			detailUrl.append("&userId=" + userId);
+		}
+		detailUrl.append("&supportZoom=1");
+		detailUrl.append("#/home/" + pageRealDisplayType);
+		detailUrl.append("#sign_suffix");
+
+		return homeUrl + detailUrl.toString();
+	}
+	
+	
+	private String getDisplayType(ServiceModuleApp app) {
+		
+		ServiceAllianceInstanceConfig serviceAllianceInstanceConfig = (ServiceAllianceInstanceConfig) StringHelper
+				.fromJsonString(app.getInstanceConfig(), ServiceAllianceInstanceConfig.class);
+		if (null == serviceAllianceInstanceConfig) {
+			return null;
+		}
+		
+		return serviceAllianceInstanceConfig.getDisplayType();
+	}
 }

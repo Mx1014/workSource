@@ -261,4 +261,5 @@ public interface EnterpriseCustomerProvider {
     List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor);
 
     List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId);
+
 }

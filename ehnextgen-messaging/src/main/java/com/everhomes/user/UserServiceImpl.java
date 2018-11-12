@@ -5207,7 +5207,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             dto.setParentId(dep.getParentId());
             dto.setPath(dep.getPath());
             dto.setName(dep.getName());
-            dto.setParentName(parentDep.getName());
+            dto.setParentName(parentDep == null ? dto.getName() : parentDep.getName());
         }
         return Collections.singletonList(dto);
     }
@@ -6275,6 +6275,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 1);
         resp.setAddressDialogStyle(addressDialogStyle);
 
+        //查询场景的显示方式：公司1，园区0
+        Integer sceneShowType = configurationProvider.getIntValue(namespaceId, "scene.show.type", 0);
+        resp.setSceneShowType(sceneShowType);
 		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
 		// 客户端资源缓存配置
@@ -6818,12 +6821,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
 
-
-                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+					if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
                         continue;
-                    }
-
-					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+                    }Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
 					}
@@ -7024,10 +7024,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
         smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
         smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
-
+        String homeUrl = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
 
         resp.setSmartCardInfo(smartCardInfo);
-        smartCardInfo.setSmartCardDescLink("https://www.zuolin.com");
+        String descLink = homeUrl + "/mobile/static/smart-card/instructions.html?ns=" + UserContext.getCurrentNamespaceId();
+        smartCardInfo.setSmartCardDescLink(descLink);
         TimeBasedOneTimePasswordGenerator totp;
 
         try {
@@ -7052,7 +7053,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
-            
+
             List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
             SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
             dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());

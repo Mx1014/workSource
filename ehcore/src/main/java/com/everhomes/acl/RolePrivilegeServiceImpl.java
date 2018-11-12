@@ -1745,6 +1745,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param realSuperAdmin  true 表示消息模板用超级管理员的 ,即为false 用系统管理员的
 	 * @return
 	 */
+	@Override
     public OrganizationContactDTO createOrganizationAdmin(Long organizationId, String contactName,
 														   String contactToken,
     		                                        Long adminPrivilegeId,

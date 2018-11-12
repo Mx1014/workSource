@@ -2631,6 +2631,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
             nextPageAnchor = 0l;
@@ -2653,18 +2654,17 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
                 .orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID)
                 .limit(101)
                 .fetch().map(r->{
-                    CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
-                    dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
-                    dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
-                    dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
-                    dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
-                    dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
-                    dtoList.add(dto);
-                    return null;
-                });
+            CreateOrganizationAdminCommand dto = new CreateOrganizationAdminCommand();
+            dto.setContactName(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME));
+            dto.setOrganizationId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
+            dto.setContactToken(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN));
+            dto.setNamespaceId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID));
+            dto.setOwnerId(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ID));
+            dtoList.add(dto);
+            return null;
+        });
         return dtoList;
     }
-
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){
@@ -2700,4 +2700,5 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
+
 }

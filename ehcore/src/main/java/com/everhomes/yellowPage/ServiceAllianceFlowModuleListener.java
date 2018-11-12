@@ -236,7 +236,12 @@ public class ServiceAllianceFlowModuleListener implements FlowModuleListener {
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		request.setCreatorName(user.getNickName());
-		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
+		try {
+			request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
+		} catch (Exception e) {
+			LOGGER.error("err: org:"+organizationVal.getFieldValue());
+		}
+		
 		request.setCreatorMobile(identifier.getIdentifierToken());
 		request.setOwnerType(sa.getOwnerType());
 		request.setOwnerId(sa.getOwnerId());

@@ -4973,6 +4973,8 @@ public class CustomerServiceImpl implements CustomerService {
     public void transNewAdmin(TransNewAdminCommand cmd2){
         Long nextPageAnchor = 0l;
         boolean breakFlag = true;
+        int totalCount = 0;
+        long roundStartTime = System.currentTimeMillis();
         while(breakFlag){
 
             List<CreateOrganizationAdminCommand> list = new ArrayList<>();
@@ -4988,6 +4990,8 @@ public class CustomerServiceImpl implements CustomerService {
             }else{
                 list.remove(list.size()-1);
             }
+            long roundQueryEndTime = System.currentTimeMillis();
+
             for(CreateOrganizationAdminCommand cmd : list){
                 cmd.setOwnerId(null);
                 dbProvider.execute((TransactionStatus status) -> {
@@ -5006,7 +5010,16 @@ public class CustomerServiceImpl implements CustomerService {
                     return null;
                 });
             }
+
+            totalCount += list.size();
+            if(LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Replace organization admin, namespaceId={}, totalCount={}, pageAnchor={}, queryElapse={}, elapse={}",
+                        cmd2.getNamespaceId(), totalCount, nextPageAnchor, (roundEndTime - roundQueryEndTime), (roundEndTime - roundStartTime));
+                roundStartTime  = roundEndTime;
+            }
         }
     }
+
 
 }
