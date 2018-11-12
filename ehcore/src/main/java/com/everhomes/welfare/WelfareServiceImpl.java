@@ -16,6 +16,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.gorder.sdk.order.GeneralOrderService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -27,6 +28,9 @@ import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.coupon.CouponDTO;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
+import com.everhomes.rest.promotion.coupon.couponmanagement.ObtainDetailsExtendDTO;
+import com.everhomes.rest.promotion.coupon.couponmanagement.TransferToPersonalCommand;
 import com.everhomes.rest.socialSecurity.NormalFlag;
 import com.everhomes.rest.welfare.*;
 import com.everhomes.salary.SalaryService;
@@ -72,7 +76,8 @@ public class WelfareServiceImpl implements WelfareService {
     private LocaleTemplateService localeTemplateService;
     @Autowired
     private DbProvider dbProvider;
-
+    @Autowired
+    private GeneralOrderService generalOrderService;
     @Autowired
     private OrganizationProvider organizationProvider;
     @Override
@@ -245,7 +250,6 @@ public class WelfareServiceImpl implements WelfareService {
                 }
             }
             cmd.getWelfare().setStatus(WelfareStatus.SENDED.getCode());
-            Welfare welfare = saveWelfare(cmd.getWelfare());
             //校验在职离职
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
             response.setDismissReceivers(new ArrayList<>());
@@ -258,10 +262,12 @@ public class WelfareServiceImpl implements WelfareService {
                 response.setDismissSenderDetailId(cmd.getWelfare().getSenderDetailId());
                 response.setDismissSenderUid(cmd.getWelfare().getSenderUid());
             }
-                //校验所有人是否离职
+            List<Long> targetUserIds = new ArrayList<>();
+            //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :cmd.getWelfare().getReceivers()){
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
                 receiverDTO.setReceiverUid(member.getTargetId());
+                targetUserIds.add(receiverDetail.getTargetId());
                 if (archivesService.checkDismiss(receiverDetail)) {
                     response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
                     response.getDismissReceivers().add(receiverDTO);
@@ -270,15 +276,20 @@ public class WelfareServiceImpl implements WelfareService {
             if (WelfareCheckStatus.SUCESS != WelfareCheckStatus.fromCode(response.getCheckStatus())) {
                 return response;
             }
+            //校验没问题保存福利
+            Welfare welfare = saveWelfare(cmd.getWelfare());
+
             try{
-	            //调用发送接口
-	            //卡券
-	            
-	            //积分 TODO 
+                //调用发送接口
+                if (CollectionUtils.isNotEmpty(cmd.getWelfare().getCoupons())) {
+                    sendCouponsToUsers(cmd, response, targetUserIds, welfare.getOrganizationId());
+                }
+                //积分 TODO
             }catch(Exception e){
             	//转账异常处理 删除接受人和卡券记录
             	if(WelfareCheckStatus.SUCESS == WelfareCheckStatus.fromCode(response.getCheckStatus())){
-            		response.setCheckStatus(WelfareCheckStatus.OTHER.getCode());
+                    LOGGER.error("意外的错误:", e);
+                    response.setCheckStatus(WelfareCheckStatus.OTHER.getCode());
             	}
                 welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
                 welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
@@ -291,6 +302,35 @@ public class WelfareServiceImpl implements WelfareService {
             return response;
         }).first();
 
+    }
+
+    private void sendCouponsToUsers(SendWelfareCommand cmd, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
+        //卡券
+        TransferToPersonalCommand cmd1 = new TransferToPersonalCommand();
+        cmd1.setNamespaceId((long) UserContext.getCurrentNamespaceId());
+        cmd1.setOrganizationId(organizationId);
+        cmd1.setTargetUserList(targetUserIds);
+        List<ObtainDetailsExtendDTO> obtainsList = cmd.getWelfare().getCoupons().stream()
+                .map(r->{
+                    ObtainDetailsExtendDTO dto = new ObtainDetailsExtendDTO();
+                    dto.setId(r.getCouponId());
+                    dto.setEnterpriseAmount(r.getAmount());
+                    return dto;
+                }).collect(Collectors.toList());
+
+        cmd1.setObtainsList(obtainsList);
+        EnterpriseDistributionToPersonRestResponse resp = generalOrderService.distributionToPerson(cmd1);
+        if (resp.getErrorCode().equals("200")) {
+            response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
+        } else if (resp.getErrorCode().equals("104")) {
+            response.setCheckStatus(WelfareCheckStatus.NO_ENOUGH_BALANCE.getCode());
+            LOGGER.error("发送卡券出错 resp:" + resp);
+            throw new Exception();
+        } else{
+            response.setCheckStatus(WelfareCheckStatus.OTHER.getCode());
+            LOGGER.error("发送卡券出错 resp:" + resp);
+            throw new Exception();
+        }
     }
 
     private void sendPayslipMessage(String subject, Long welfareId, Long receiverId) {

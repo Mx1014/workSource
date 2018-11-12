@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>couponName: 卡券名称 可不填</li>
  * <li>couponType: 卡券类型 (页面展示的头部) eq: 购物券;洗车券</li>
  * <li>couponContent: 卡券内容(页面展示的中间部分)eq:500.00元 ; 30次</li>
- * <li>amount: 数量 多少张/人 必填</li>
+ * <li>amount: Integer 数量 多少张/人 必填</li>
  * <li>validDateType: 有效期计算类型 1-开始与截止时间、2-领券当天起N天、3-领券隔天起N天</li>
  * <li>validDate: 到期日期 必填</li>
  * <li>beginDate: 开始日期</li>
@@ -25,7 +25,7 @@ public class WelfareCouponDTO {
     private Byte validDateType;
     private Long validDate;
     private Long beginDate;
-    private String amount;
+    private Integer amount;
 
 	@Override
 	public String toString() {
@@ -96,11 +96,11 @@ public class WelfareCouponDTO {
 		this.beginDate = beginDate;
 	}
 
-	public String getAmount() {
+	public Integer getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(Integer amount) {
 		this.amount = amount;
 	}
 	
