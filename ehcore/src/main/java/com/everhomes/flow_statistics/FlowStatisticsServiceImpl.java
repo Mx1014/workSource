@@ -110,10 +110,10 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             dto.setStartDate(new Date(minTime.getTime()));
         }
         Flow nextFlow = this.findNextFlowVersionByVersion(cmd.getFlowMainId() , cmd.getNamespaceId() ,currentFlow.getId());
-        if(currentFlow == null ){
+        if(nextFlow == null ){
             return dto ;
         }
-        Timestamp maxTime = currentFlow.getCreateTime() ;
+        Timestamp maxTime = nextFlow.getCreateTime() ;
         if(minTime != null){
             dto.setEndDate(new Date(maxTime.getTime()));
         }
