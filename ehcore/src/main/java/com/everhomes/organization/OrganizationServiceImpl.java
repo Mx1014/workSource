@@ -12655,6 +12655,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         ListArchivesContactsCommand cmd1 = new ListArchivesContactsCommand();
         cmd1.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
+        cmd1.setKeywords(cmd.getKeywords());
         cmd1.setNamespaceId(cmd.getNamespaceId());
         cmd1.setOrganizationId(cmd.getOrganizationId());
         cmd1.setPageSize(pageSize);

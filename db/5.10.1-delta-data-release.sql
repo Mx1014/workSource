@@ -123,6 +123,19 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR:黄明波 20181112
+-- REMARK: #41990【光大we谷】独立部署，停车对接调整。A区停车场前期对接百世，现替换成捷顺，请调整正式环境参数。B区停车场暂时不变
+update eh_parking_lots set vendor_name = 'JIESHUN_GQY1' where vendor_name = 'GUANG_DA_WE_GU';
+
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.cid', '000000008002520', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.usr', '000000008002520', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.psw', '000000008002520', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.signKey', '24e7f28eb0b6044beb3a3ac8afd6402c', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.parkCode', 'p180905025', '小区编号', 0, NULL, 1);
+
+
 -- --------------------- SECTION END guangda -------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay

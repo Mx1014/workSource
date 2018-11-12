@@ -165,7 +165,12 @@ public enum CoordinationLocks {
 
     ANNOUNCEMENT_CREATE_NOTICE_USER("announcement_create_notice_user"),
 	
+    SERVICE_ALLIANCE_FAQ_TYPES("service_alliance_faq_types"),
+    SERVICE_ALLIANCE_FAQ_ORDERS("service_alliance_faq_orders"),
+    SERVICE_ALLIANCE_OPERATE_ORDERS("service_alliance_operate_orders"),
+    
 	STATISTIC_BILL_BY_COMMUNITY("statistic_bill_by_community");//issue-38508 根据项目+月份统计缴费报表
+	
 
     private String code;
 
