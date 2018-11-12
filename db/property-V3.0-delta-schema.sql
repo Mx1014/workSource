@@ -515,12 +515,6 @@ ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50
 ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
 
 
--- AUTHOR: 严军
--- REMARK: 授权表加索引
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
-ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
-
 -- 模块增加模块路由host
 ALTER TABLE `eh_service_modules` ADD COLUMN `host`  varchar(255) NULL;
 
@@ -735,6 +729,11 @@ ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' C
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- AUTHOR: 严军
+-- REMARK: 授权表加索引
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
 
 -- 公司安装应用表
 CREATE TABLE `eh_organization_apps` (
