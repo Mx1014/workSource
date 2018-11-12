@@ -3936,6 +3936,16 @@ long assetCategoryId = 0l;
 		if (cmd.getContractIds() == null) {
 			return;
 		}
+		// 调用初始化，启动线程
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				oneKeyInitializationContract(cmd);
+			}
+		});
+	}
+
+	private void oneKeyInitializationContract(InitializationCommand cmd) {
 		List<Long> contractAllIds = cmd.getContractIds();
 		// 2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
 		CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
@@ -3953,6 +3963,9 @@ long assetCategoryId = 0l;
 		}
 		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(contractAllIds);
+		if (contractsMap.size()<1) {
+			return;
+		}
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Contract contract = entry.getValue();
 			contract.setContractType(ContractType.NEW.getCode());
@@ -3989,7 +4002,6 @@ long assetCategoryId = 0l;
 		if (deleteErrorContract.length() > 1) {
 			deleteErrorContract.append("初始化失败！");
 		}
-
 	}
 
 	@Override
@@ -3999,8 +4011,28 @@ long assetCategoryId = 0l;
 			return;
 		}
 
+		// 调用初始化，启动线程
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				oneKeyExemptionContract(cmd);
+			}
+		});
+
+	}
+
+	private void oneKeyExemptionContract(InitializationCommand cmd) {
 		// 3.把符合条件 的合同状态置为审批通过，修改资产状态，
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
+		if (contractsMap.size()<1) {
+			return;
+		}
+		// 用于记录审批失败的合同
+		StringBuffer noChargingItemsContract = new StringBuffer();
+		StringBuffer noApartmentsContract = new StringBuffer();
+		String noChargingItemsContracts = "";
+		String noApartmentsContracts = "";
+		
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Long contractId = entry.getKey();
 			Contract contract = entry.getValue();
@@ -4020,10 +4052,12 @@ long assetCategoryId = 0l;
 
 			if (contractDetailDTO.getChargingItems() == null) {
 				// 合同没有绑定计价条款
+				noChargingItemsContract.append(contractDetailDTO.getContractNumber()+",");
 			}
 
 			if (contractDetailDTO.getApartments() == null) {
 				// 合同没有绑定房源
+				noApartmentsContract.append(contractDetailDTO.getContractNumber()+",");
 			} else {
 				// 校验房源是否可以入场
 				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
@@ -4046,7 +4080,14 @@ long assetCategoryId = 0l;
 			}
 			continue;
 		}
-
+		//最后的提示信息
+		if(noApartmentsContract.length()>0){
+			noApartmentsContracts = (noApartmentsContract.toString()).substring(0, (noApartmentsContract.toString()).length() - 1);
+		}
+		if(noApartmentsContract.length()>0){
+			noChargingItemsContracts = (noChargingItemsContract.toString()).substring(0, (noChargingItemsContract.toString()).length() - 1);
+		}
+		
 	}
 
 	private Boolean possibleEnterContract(ContractDetailDTO contractDetailDTO) {
@@ -4108,8 +4149,21 @@ long assetCategoryId = 0l;
 		if (cmd.getContractIds() == null) {
 			return;
 		}
+		// 调用初始化，启动线程
+		ExecutorUtil.submit(new Runnable() {
+			@Override
+			public void run() {
+				oneKeyCopyContract(cmd);
+			}
+		});
+	}
+
+	private void oneKeyCopyContract(InitializationCommand cmd) {
 		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
+		if (contractsMap.size()<1) {
+			return;
+		}
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Long contractId = entry.getKey();
 			Contract contract = entry.getValue();

@@ -13,8 +13,11 @@ import java.util.Map;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.*;
+import com.everhomes.filedownload.Task;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomerAptitudeFlag;
+import com.everhomes.server.schema.tables.pojos.EhTasks;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -1702,5 +1705,36 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 		return false;
 	}
+	
+	@Override
+    public void createContractOperateTask(Task job) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTasks.class));
+        job.setId(id);
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhTasksDao dao = new EhTasksDao(context.configuration());
+        dao.insert(job);
+    }
+
+    @Override
+    public void updateContractOperateTask(Task job) {
+        assert(job.getId() != null);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhTasksDao dao = new EhTasksDao(context.configuration());
+        dao.update(job);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTasks.class, job.getId());
+    }
+
+
+    @Override
+    public Task findContractOperateTaskById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhTasks.class, id));
+        EhTasksDao dao = new EhTasksDao(context.configuration());
+        EhTasks result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, Task.class);
+    }
 
 }
