@@ -14,6 +14,8 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
@@ -401,6 +403,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private ServiceCategoryMatchProvider serviceCategoryMatchProvider;
 	@Autowired
 	private FlowProvider flowProvider;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	private void populateYellowPage(YellowPage yellowPage) {
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -1049,8 +1053,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	private String buildFormModuleUrl(Long serviceId) {
 		//为了先兼容之前版本IOS不支持的表单的bug,仍然使用approval
-		return "zl://approval/create?approvalId="+-serviceId;
-//		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
+//		return "zl://approval/create?approvalId="+-serviceId;
+		return "zl://form/create?sourceType=service_alliance&sourceId="+serviceId;
 		
 	}
 
@@ -4260,35 +4264,43 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd) {
-		
-		//校验权限
-		Long communityId = ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerId()) ? cmd.getOwnerId() : null;
+
+		// 校验权限
+		Long communityId = ServiceAllianceBelongType.COMMUNITY.getCode().equals(cmd.getOwnerId()) ? cmd.getOwnerId()
+				: null;
 		checkPrivilege(null, cmd.getCurrentPMId(), cmd.getAppId(), communityId);
-		
+
 		if (null == cmd.getOperateServiceIds() || cmd.getOperateServiceIds().size() < 2) {
-			return ;
+			return;
 		}
-		
+
 		AllianceOperateService item = null;
 		List<Long> finalOrders = new ArrayList<>(10);
 		for (Long itemId : cmd.getOperateServiceIds()) {
 			item = allianceOperateServiceProvider.getOperateService(itemId);
 			if (null == item) {
-				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND, "faq operate service not found");
+				YellowPageUtils.throwError(YellowPageServiceErrorCode.ERROR_FAQ_OPERATE_SERVICE_NOT_FOUND,
+						"faq operate service not found");
 			}
-			
+
 			finalOrders.add(item.getDefaultOrder());
 		}
-		
-		//排序
-		Collections.sort(finalOrders); 
-		
-		//变更
-		dbProvider.execute(r->{
-			int i = 0;
-			for (Long itemId : cmd.getOperateServiceIds()) {
-				allianceOperateServiceProvider.updateOperateServiceOrder(itemId, finalOrders.get(i++));
-			}
+
+		// 排序
+		Collections.sort(finalOrders);
+
+		// 上锁，因为序号可能被多线程变更
+		coordinationProvider.getNamedLock(CoordinationLocks.SERVICE_ALLIANCE_OPERATE_ORDERS.getCode()).enter(() -> {
+
+			// 变更
+			dbProvider.execute(r -> {
+				int i = 0;
+				for (Long itemId : cmd.getOperateServiceIds()) {
+					allianceOperateServiceProvider.updateOperateServiceOrder(itemId, finalOrders.get(i++));
+				}
+				return null;
+			});
+
 			return null;
 		});
 	}

@@ -20,7 +20,7 @@ public interface AllianceFAQProvider {
 	
 	void updateFAQTypeOrder(Long upFAQTypeId, Long lowFAQTypeId);
 	
-	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize);
 
 	/*************问题******************/
 	void createFAQ(AllianceFAQ faq);
@@ -33,11 +33,11 @@ public interface AllianceFAQProvider {
 	
 	AllianceFAQ getFAQ(Long faqId);
 	
-	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor,
+	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
 			Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
 
 	//热门问题
-	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize);
 	
 	void updateTopFAQOrder(Long upFAQId, Long lowFAQId);
 	

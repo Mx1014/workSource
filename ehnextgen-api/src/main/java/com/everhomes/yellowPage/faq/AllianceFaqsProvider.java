@@ -17,12 +17,11 @@ public interface AllianceFaqsProvider {
 
 	void updateFAQOrder(Long itemId, Long defaultOrderId);
 
-	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,
-			Long pageAnchor, Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
+	List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize,  Long faqType, Byte topFlag, String keyword, Byte orderType, Byte sortType);
 
 	void updateTopFAQFlag(Long faqId, byte topFlag, Long maxTopOrder);
 
-	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor);
+	List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize);
 
 	void updateTopFAQOrder(Long faqId, Long newTopOrder);
 

@@ -3057,6 +3057,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					case UNPROCESSED: break;
 					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
 					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case CLOSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;

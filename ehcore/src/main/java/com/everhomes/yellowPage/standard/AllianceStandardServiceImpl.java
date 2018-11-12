@@ -250,7 +250,7 @@ public class AllianceStandardServiceImpl implements AllianceStandardService {
 		Map<Long, AllianceFAQType> map = new HashMap<>();
 		
 		//faq type
-		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, null, null, null);
+		List<AllianceFAQType> faqTypes = allianceFAQProvider.listFAQTypes(cmd, null, null);
 		for(AllianceFAQType faqType : faqTypes) {
 			faqType.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
 			faqType.setOwnerId(projectId);

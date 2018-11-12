@@ -143,13 +143,8 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
         FmWorkDataService service = getService();
         String json;
         String phone = req.getParameter("user_id");
-        PmTaskArchibusUserMapping user = getUser(phone);
-        LOGGER.debug("用户Id：" + user.getArchibusUid());
-        if(user == null){
-            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE,PmTaskErrorCode.ERROR_USER_NOT_FOUND,"archibus user not found");
-        }
 
-        String user_id = user.getArchibusUid();
+        String user_id = String.valueOf(UserContext.currentUserId());
 
         String request_source = req.getParameter("request_source");
         String project_id = req.getParameter("project_id");
@@ -195,11 +190,11 @@ public class ArchibusPmTaskHandle extends DefaultPmTaskHandle implements Applica
     @Override
     public Object listThirdTasks(HttpServletRequest req) {
         FmWorkDataService service = getService();
+        String userId;
         String json;
         try {
-            PmTaskArchibusUserMapping user = getUser(req.getParameter("user_id"));
-//            req.getParameter("order_type") Integer.valueOf(req.getParameter("page_num"))
-            json = service.eventList(user.getArchibusUid(), req.getParameter("project_id"), "",
+            userId = String.valueOf(UserContext.currentUserId());
+            json = service.eventList(userId, req.getParameter("project_id"), "",
                     req.getParameter("record_type"), 0, perg_size);
             LOGGER.debug(json);
         } catch (RemoteException e) {

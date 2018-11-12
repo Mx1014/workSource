@@ -80,13 +80,16 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 		List<OPPushCard> listCards = new ArrayList<>();
 		String host = "service-alliance";
 		
+		
 		String pageRealDisplayType = getDisplayType(app);
+		int count = 0;
 		for (AllianceOperateService dto : dtos) {
 			OPPushCard card = new OPPushCard();
 			ServiceAlliances sa = yellowPageProvider.findServiceAllianceById(dto.getServiceId(), null, null);
 			if (null == sa) {
 				continue;
 			}
+			
 			card.setClientHandlerType(ClientHandlerType.INSIDE_URL.getCode());
 			card.setRouterPath("/detail");
 			String url = processDetailUrl(sa.getId(), sa.getOwnerId(), context.getCommunityId(), pageRealDisplayType);
@@ -112,6 +115,13 @@ public class OPPushServiceAllianceHandler implements OPPushHandler{
 			}
 			card.setProperties(properties);
 			listCards.add(card);
+			count++;
+			
+			//运营那边有展示条数限制
+			if (null != config.getNewsSize() && config.getNewsSize() == count) {
+				break;
+			}
+			
 		}
 		
 		return listCards;
