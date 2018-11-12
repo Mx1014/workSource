@@ -165,6 +165,7 @@ public class ServiceAllianceFormHandler implements GeneralFormModuleHandler {
 		item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
 		JSONObject json = new JSONObject();
 		json.put("flowCaseId", fc.getId());
+		json.put("url", "zl://workflow/detail?flowCaseId="+fc.getId()+"&flowUserType=node_applier&moduleId=40500");
 		item.setFieldValue(json.toJSONString());
 		items.add(item);
 		dto.setValues(items);
