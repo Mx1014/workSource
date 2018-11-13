@@ -9,16 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetProvider;
-import com.everhomes.asset.GeneralBillHandler;
+import com.everhomes.asset.AssetVendorHandler;
 import com.everhomes.asset.third.ThirdOpenBillHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contract.ContractCategory;
-import com.everhomes.openapi.ContractProvider;
-import com.everhomes.portal.PortalService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
@@ -28,17 +22,10 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
-import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
-import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
-import com.everhomes.rest.contract.ContractApplicationScene;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 
 /**
  * @author created by ycx
@@ -107,10 +94,6 @@ public class AssetBillServiceImpl implements AssetBillService {
 
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
 		ThirdOpenBillHandler handler = getThirdOpenBillHandler(UserContext.getCurrentNamespaceId());
-		if(handler == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"ThirdOpenBillHandler not exist for namespaceId={" + UserContext.getCurrentNamespaceId() + "}");
-		}
 		ListBillsResponse response = handler.listOpenBills(cmd);
 		return response;
 	}
@@ -120,14 +103,15 @@ public class AssetBillServiceImpl implements AssetBillService {
 	 */
 	public ThirdOpenBillHandler getThirdOpenBillHandler(Integer namespaceId){
 		ThirdOpenBillHandler handler = null;
-        if(namespaceId != null) {
-        	String handlerPrefix = ThirdOpenBillHandler.THIRDOPENBILL_PREFIX;
-            try {
-            	handler = PlatformContext.getComponent(handlerPrefix + namespaceId);
-			}catch (Exception ex){
-				LOGGER.info("ThirdOpenBillHandler not exist for namespaceId={}", namespaceId);
-			}
-        }
+		String handlerPrefix = ThirdOpenBillHandler.THIRDOPENBILL_PREFIX;
+        try {
+        	handler = PlatformContext.getComponent(handlerPrefix + namespaceId);
+		}catch (Exception ex){
+			LOGGER.info("ThirdOpenBillHandler not exist for namespaceId={}", namespaceId);
+		}finally {
+			//如果找不到，那么使用默认的Handler
+			handler = PlatformContext.getComponent(handlerPrefix + "DEFAULT");
+		}
         return handler;
     }
 	
