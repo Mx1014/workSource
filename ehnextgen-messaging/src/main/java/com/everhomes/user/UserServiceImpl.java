@@ -5196,7 +5196,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         Organization parentDep = organizationProvider.findOrganizationById(dep.getParentId());
         OrganizationDTO dto = new OrganizationDTO();
-        if(OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.DIRECT_UNDER_ENTERPRISE){
+        //2018年11月13日 修改,by吴寒 因为添加管理员的时候有人搞了明明organizationId是总公司,groupType却是直属部门的数据,这里要判断有没有parentDep
+        if(parentDep != null && OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.DIRECT_UNDER_ENTERPRISE){
             dto.setId(parentDep.getId());
             dto.setParentId(parentDep.getId());
             dto.setName(parentDep.getName());
