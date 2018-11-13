@@ -754,35 +754,34 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
         }).collect(Collectors.toList());
     }
 
-    @Override
-    public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
-        List<FlowConditionVariableDTO> list = new ArrayList<>();
-        FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
-        dto.setDisplayName("报修类型");
-        dto.setValue("taskCategoryId");
-        dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        dto.setOperators(new ArrayList<>());
-        dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
-        Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
-        ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
-        cmd.setNamespaceId(namespaceId);
-        cmd.setOrganizationId(flow.getOrganizationId());
+	@Override
+	public List<FlowConditionVariableDTO> listFlowConditionVariables(Flow flow, FlowEntityType flowEntityType, String ownerType, Long ownerId) {
+		List<FlowConditionVariableDTO> list = new ArrayList<>();
+		FlowConditionVariableDTO dto = new FlowConditionVariableDTO();
+		dto.setDisplayName("报修类型");
+		dto.setValue("taskCategoryId");
+		dto.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		dto.setOperators(new ArrayList<>());
+		dto.getOperators().add(FlowConditionRelationalOperatorType.EQUAL.getCode());
+		Integer namespaceId = UserContext.getCurrentNamespaceId(flow.getNamespaceId());
+		ListTaskCategoriesCommand cmd = new ListTaskCategoriesCommand();
+		cmd.setNamespaceId(namespaceId);
+		cmd.setOrganizationId(flow.getOrganizationId());
 //		if (flow.getModuleType().equals(FlowModuleType.NO_MODULE.getCode()))
 //			cmd.setTaskCategoryId(PmTaskAppType.REPAIR_ID);
 //		else
 //			cmd.setTaskCategoryId(PmTaskAppType.SUGGESTION_ID);
-        cmd.setAppId(Long.valueOf(flow.getModuleType()));
-        ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
-        dto.setOptions(new ArrayList<>());
-        if(null == response.getRequests()){
-            LOGGER.error("Categories is null.");
-            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
-                    "Categories is null.");
-        }
-        response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
-        list.add(dto);
-        return list;
-    }
+		cmd.setAppId(Long.valueOf(flow.getModuleType()));ListTaskCategoriesResponse response = pmTaskService.listTaskCategories(cmd);
+		dto.setOptions(new ArrayList<>());
+		if(null == response.getRequests()){
+			LOGGER.error("Categories is null.");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+					"Categories is null.");
+		}
+		response.getRequests().forEach(p-> dto.getOptions().add(p.getName()));
+		list.add(dto);
+		return list;
+	}
 
     @Override
     public FlowConditionVariable onFlowConditionVariableRender(FlowCaseState ctx, String variable, String entityType, Long entityId, String extra) {

@@ -560,7 +560,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
-    @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
     public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
         //添加权限 add by liqingyan
 //        if (cmd.getOwnerType() != null && cmd.getOwnerType() == 1 && cmd.getCurrentPMId() != null && cmd.getAppId() != null && configurationProvider.getBooleanValue("privilege.community.checkflag", true)) {
@@ -610,7 +611,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
 
+		HashSet h = new HashSet();   
         for (User user: users) {
+        	//userProvider.listUserByNamespace,根据关键字同一用户会查出来多次,简单去重,暂不考虑分页  by liuyilin 20181107
+        	if(h.contains(user.getId())){
+        		continue;
+        	}
+        	h.add(user.getId());
             List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
             AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
             dto.setRegisterTime(user.getCreateTime().getTime());
@@ -3890,6 +3897,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         return getVisitorByAuth(auth);
     }
+    
+    /**
+     * 根据授权id获取二维码url
+     */
+	@Override
+	public String getVisitorUrlById(GetVisitorCommand cmd) {
+        DoorAuth auth = doorAuthProvider.getDoorAuthById(Long.valueOf(cmd.getId()));
+        if(auth == null || (auth.getLinglingUuid() == null && auth.getAuthType() == 0)) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "tempAuth not found");
+        }else{
+        	//TODO driverType暂不处理;doorAccessType暂时只考虑zuolin by liuyilin 20181026
+            String uuid = UUID.randomUUID().toString();
+            uuid = uuid.replace("-", "");
+            uuid = uuid.substring(0, 5);
+        	auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        	doorAuthProvider.updateDoorAuth(auth);
+        }
+//        https://core.zuolin.com/evh/aclink/v?id=${id} homeUrl+"/evh"
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        return String.format("%s/evh/aclink/v?id=%s",homeUrl,auth.getLinglingUuid());
+	}
     
     @Override
     public GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd) {

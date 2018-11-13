@@ -2,6 +2,7 @@ package com.everhomes.customer;
 
 import com.everhomes.acl.AuthorizationRelation;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.RolePrivilegeServiceImpl;
 import com.everhomes.activity.ActivityCategories;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityService;
@@ -4977,7 +4978,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             List<CreateOrganizationAdminCommand> list = new ArrayList<>();
 
-            if(cmd2.getNamespaceId() != null && cmd2.getNamespaceId() != 0){
+            if(cmd2.getNamespaceId() != null || cmd2.getNamespaceId() != 0){
                 list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
 
             }else{

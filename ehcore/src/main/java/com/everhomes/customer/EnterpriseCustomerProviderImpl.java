@@ -115,6 +115,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/8/11.
@@ -2630,6 +2631,7 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor, Integer namespaceId){
+
         List<CreateOrganizationAdminCommand> dtoList = new ArrayList<>();
         if(nextPageAnchor == null){
             nextPageAnchor = 0l;
@@ -2663,7 +2665,6 @@ public class EnterpriseCustomerProviderImpl implements EnterpriseCustomerProvide
         });
         return dtoList;
     }
-
 
     @Override
     public  List<CreateOrganizationAdminCommand> getOrganizationAdmin(Long nextPageAnchor){

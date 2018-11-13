@@ -137,6 +137,13 @@ public class PollServiceImpl implements PollService {
 
     @Override
     public PollDTO createVote(PollVoteCommand cmd) {
+
+        //TODO 这个接口完全没考虑并发的问题。
+        //TODO 1、查询重复投票的校验方法，如果同一个用户快速点击两次是两次都可以通过校验的。这个方法是从以前的改编的，改编之前就有问题。现在已经加了锁，在锁内部再次校验。
+        //TODO 2、多用户并发操作，使用+1的方式updatePollItem和updatePoll会出现被覆盖问题。因为poll和pollItem都是提前查询出来的。
+        //TODO 加一把大的锁，在锁内部查询和校验？？使用消息队列，updatePollItem和updatePoll都异步使用乐观锁操作？？
+        //TODO @liangyanlong 找时间改一下吧，多测试下。
+
         User user = UserContext.current().getUser();
         Poll poll = pollProvider.findPollById(cmd.getPollId());
         if (poll == null) {

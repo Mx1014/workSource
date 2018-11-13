@@ -1,16 +1,30 @@
 package com.everhomes.print.job;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.print.SiyinPrintOrder;
 import com.everhomes.print.SiyinPrintOrderProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.PrintOrderActionData;
+import com.everhomes.rest.common.RentalOrderActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.StringHelper;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -31,6 +45,10 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
     private MessagingService messagingService;
     @Autowired
 	private SiyinPrintOrderProvider siyinPrintOrderProvider;
+	@Autowired
+	private ConfigurationProvider configProvider;
+    private final static String CLOUD_PRINT_DETAIL = "%s/cloud-print/build/index.html#/print-detail?orderNo=%s";
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
@@ -39,14 +57,14 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
             SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderByOrderNo(jobMap.getLong("orderNo"));
             if (order.getOrderStatus()==PrintOrderStatusType.UNPAID.getCode()){
             	Long userId = order.getCreatorUid();
-            	sendMessageToUser(userId,content);
+            	sendMessageToUser(userId, content, order);
             }
         }catch (Exception e) {
             LOGGER.error("SiyinPrintMessageJob error", e);
         }
 
     }
-    private void sendMessageToUser(Long userId, String content) {
+    private void sendMessageToUser(Long userId, String content, SiyinPrintOrder order) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
@@ -56,6 +74,20 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
+        PrintOrderActionData actionData = new PrintOrderActionData();
+        String homeurl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"home.url", "");
+        String url = String.format(CLOUD_PRINT_DETAIL,homeurl,order.getOrderNo());
+        actionData.setUrl(url);
+
+        String routerUri = RouterBuilder.build(Router.CLOUD_PRINT_DETAIL, actionData);
+
+        RouterMetaObject mo = new RouterMetaObject();
+        mo.setUrl(routerUri);
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+        messageDto.setMeta(meta);
+        
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }

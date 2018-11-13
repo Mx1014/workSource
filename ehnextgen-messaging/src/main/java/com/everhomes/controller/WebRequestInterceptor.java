@@ -20,9 +20,8 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
-import com.everhomes.tool.BlutoAccessor;
+import com.everhomes.tachikoma.commons.sdk.SdkSettings;
 import com.everhomes.user.*;
-import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -93,12 +92,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
 
-    @Autowired
-    private SdkUserService sdkUserService;
-
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-    public WebRequestInterceptor() {
+    public WebRequestInterceptor() throws ClassNotFoundException {
+        Class.forName("com.everhomes.tool.BlutoAccessor");
     }
 
     @Override
@@ -489,10 +486,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private App getAppByKey(String appKey) {
         // 给 SDK 调用提供的便捷方式
-        if (AppConstants.APPKEY_SDK.equalsIgnoreCase(appKey)) {
+        if (SdkSettings.APP_KEY_SDK.equalsIgnoreCase(appKey)) {
             App app = new App();
             app.setAppKey(appKey);
-            app.setSecretKey(Base64.getEncoder().encodeToString((new BlutoAccessor()).get(new TokenServiceSecretKey())));
+            app.setSecretKey(SdkSettings.SECRET_KEY_SDK);
             app.setName("SDK");
             app.setId(0L);
             return app;

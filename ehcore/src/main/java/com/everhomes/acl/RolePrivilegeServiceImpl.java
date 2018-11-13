@@ -2371,6 +2371,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
+
 	@Override
 	public void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd) {
 

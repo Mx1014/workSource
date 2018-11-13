@@ -208,17 +208,18 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or manage path, homeUrl=" + homeurl + ", manageShopPath=" + manageShopPath);
             return null;
         } else {
-            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
-            if (mallId != null) {
-                manageShopPath = manageShopPath.replace("?","&");
-                if (homeurl.contains("?")) {
-                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
-                }else {
-                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
-                }
-            }else {
-                return homeurl + manageShopPath;
-            }
+            //不需要拼接mallId  update by yanlong.liang 20181017
+//            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+//            if (mallId != null) {
+//                manageShopPath = manageShopPath.replace("?","&");
+//                if (homeurl.contains("?")) {
+//                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
+//                }else {
+//                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+//                }
+//            }else {
+//            }
+            return homeurl + manageShopPath;
         }
     }
 
