@@ -2465,15 +2465,26 @@ public class FieldServiceImpl implements FieldService {
         List<FieldDTO> fields = listFields(cmd2);
         List<FieldDTO> result = new ArrayList<>();
 
-        List<VarFieldScopeFilter> filters = fieldProvider.listFieldScopeFilter(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
-        for(VarFieldScopeFilter filter : filters){
-            fields.forEach(r->{
-                if(r.getFieldId().equals(filter.getFieldId())){
-                    result.add(r);
+        if(fields != null && fields.size() > 0) {
+            List<VarFieldScopeFilter> filters = fieldProvider.listFieldScopeFilter(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
+            for (VarFieldScopeFilter filter : filters) {
+                fields.forEach(r -> {
+                    if (r.getFieldId().equals(filter.getFieldId())) {
+                        result.add(r);
+                    }
+                });
+            }
+            if (result.size() == 0) {
+                List<String> defaultField = new ArrayList<>(Arrays.asList("name", "entryStatusItemId", "corpIndustryItemId", "contactName", "contactPhone", "trackingUid"));
+                for (String str : defaultField) {
+                    fields.forEach(r -> {
+                        if (r.getFieldName().equals(str)) {
+                            result.add(r);
+                        }
+                    });
                 }
-            });
+            }
         }
-        //List<String> defaultField = new ArrayList<>(Arrays.asList("name","entryStatusItemId",));
 
         return result;
     }
