@@ -22,7 +22,6 @@ import com.everhomes.rest.promotion.order.GoodDTO;
 import com.everhomes.rest.promotion.order.PayerInfoDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
-import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;

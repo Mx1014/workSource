@@ -1,6 +1,7 @@
 package com.everhomes.rest.rentalv2.admin;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.RentalPriceClassificationDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
@@ -67,6 +68,7 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	private Byte userPriceType;
 	@ItemType(PricePackageDTO.class)
 	private List<PricePackageDTO> sitePackages;
+	private List<RentalPriceClassificationDTO> classifications;
 	private Long sitePackageId;
 
 	public String getResourceType() {
@@ -249,5 +251,13 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	public void setWholeDayFlag(Byte wholeDayFlag) {
 		this.wholeDayFlag = wholeDayFlag;
+	}
+
+	public List<RentalPriceClassificationDTO> getClassifications() {
+		return classifications;
+	}
+
+	public void setClassifications(List<RentalPriceClassificationDTO> classifications) {
+		this.classifications = classifications;
 	}
 }

@@ -15,9 +15,18 @@ CREATE TABLE `eh_rentalv2_price_classification` (
 `cut_price`  decimal(10,2) NULL ,
 `discount_ratio`  double NULL ,
 `resource_type`  varchar(255) NULL,
-`resource_rental_date`  date NULL COMMENT '为了方便获得价格区间 加上单元格的时间',
 PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_rentalv2_orders`
+MODIFY COLUMN `rental_uid`  varchar(256) NULL DEFAULT NULL COMMENT 'rental user id' AFTER `rental_resource_id`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `vip_level`  varchar(255) NULL COMMENT '会员等级 白金卡 金卡 银卡' AFTER `pay_channel`;
+ALTER TABLE `eh_rentalv2_orders`
+ADD COLUMN `source`  tinyint(4) NULL COMMENT '0 用户发起 1后台录入' AFTER `vip_level`;
+
+ALTER TABLE `eh_rentalv2_resources`
+MODIFY COLUMN `charge_uid`  varchar(256) NULL DEFAULT NULL COMMENT '负责人id' AFTER `notice`;
 
 CREATE TABLE `eh_vip_priority` (
   `id`  bigint(20) NOT NULL ,
