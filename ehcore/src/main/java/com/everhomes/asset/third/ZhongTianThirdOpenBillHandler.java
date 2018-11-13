@@ -14,6 +14,7 @@ import com.everhomes.contract.ContractCategory;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
@@ -91,7 +92,11 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
         	setBillInvalidParamNull(dto);//屏蔽账单无效参数
         	ListBillDetailResponse res = assetBillProvider.listOpenBillDetail(Long.valueOf(dto.getBillId()));
         	if(res != null && res.getBillGroupDTO() != null) {
-        		dto.setBillItemDTOList(res.getBillGroupDTO().getBillItemDTOList());
+        		List<BillItemDTO> billItemDTOList = res.getBillGroupDTO().getBillItemDTOList();
+        		for(BillItemDTO billItemDTO : billItemDTOList) {
+        			setItemInvalidParamNull(billItemDTO);//屏蔽费项无效参数
+        		}
+        		dto.setBillItemDTOList(billItemDTOList);
         	}
         }
         //每次同步都要打印下billId，方便对接过程中出现问题好进行定位
@@ -172,6 +177,22 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		dto.setCanModify(null);
 		dto.setIsReadOnly(null);
 		dto.setNoticeTelList(null);
+	}
+	
+	/**
+	 * 屏蔽费项无效参数
+	 */
+	private void setItemInvalidParamNull(BillItemDTO dto) {
+		dto.setDateStr(null);
+		dto.setSourceId(null);
+		dto.setSourceType(null);
+		dto.setSourceName(null);
+		dto.setCanDelete(null);
+		dto.setCanModify(null);
+		dto.setBillId(null);
+		dto.setChargingItemsId(null);
+		dto.setItemFineType(null);
+		dto.setItemType(null);
 	}
 
 }
