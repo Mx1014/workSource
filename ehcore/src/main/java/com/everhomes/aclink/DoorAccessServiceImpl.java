@@ -479,20 +479,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAccessResponse resp = new ListDoorAccessResponse();
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
-        dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd);
         //查找得到管理授权门禁 add by liqingyan
         List<AclinkManagementDTO> managements = doorAccessProvider.searchAclinkManagementByManager(cmd.getOwnerId(),cmd.getOwnerType());
+        List<Long> doorIds = new ArrayList<>();
         if(null != managements && !managements.isEmpty()){
             for(AclinkManagementDTO management: managements){
-                DoorAccess manageDoor = doorAccessProvider.getDoorAccessById(management.getDoorId());
-                DoorAccessDTO dto = new DoorAccessDTO();
-                dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
-                dto.setGroupId(manageDoor.getGroupid());
-                if(null != dto.getStatus() && dto.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())){
-                    dtos.add(dto);
+//                DoorAccess manageDoor = doorAccessProvider.getDoorAccessById(management.getDoorId());
+//                DoorAccessDTO dto = new DoorAccessDTO();
+//                dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
+//                dto.setGroupId(manageDoor.getGroupid());
+                if(null != management && management.getDoorId() != null){
+                    doorIds.add(management.getDoorId());
                 }
             }
         }
+        dtos = doorAccessProvider.searchDoorAccessDTO(locator, cmd, doorIds);
         if(dtos == null || dtos.size() == 0){
             resp.setDoors(dtos);
         	return resp;
@@ -1581,9 +1582,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAcc.setDisplayName(cmd.getDisplayName());
                 doorAcc.setNamespaceId(UserContext.getCurrentNamespaceId());
                 //激活时设置默认值 by liuyilin 20181101
-                //TODO 门禁3.0实现默认配置后,拿默认配置
+                //拿默认配置 by liqingyan 20181112
+
                 doorAcc.setEnableDuration(DoorAuthStatus.VALID.getCode());
-                doorAcc.setMaxDuration(60);
+                AclinkFormValues maxDuration = new AclinkFormValues();
+                maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+                AclinkFormValues maxCount = new AclinkFormValues();
+                maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+                if(null != maxDuration && !maxDuration.getValue().isEmpty()){
+                    doorAcc.setMaxDuration(Integer.parseInt(maxDuration.getValue()));
+                }else {
+                    doorAcc.setMaxDuration(60);
+                }
+                if(null != maxCount && !maxCount.getValue().isEmpty()){
+                    doorAcc.setMaxCount(Integer.parseInt(maxCount.getValue()));
+                }else {
+                    doorAcc.setMaxCount(4);
+                }
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
@@ -3396,6 +3411,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
         auth.setDescription(cmd.getDescription());
         auth.setDoorId(cmd.getDoorId());
+        auth.setGroupType(cmd.getGroupType());
         auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
@@ -7311,6 +7327,70 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 //                }else continue;
 //            }
 //        }
+    }
+
+    @Override
+    public void createTempAuthDefaultRule(CreateTempAuthDefaultRuleCommand cmd){
+	    User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        AclinkFormValues maxDuration = new AclinkFormValues();
+        maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+        AclinkFormValues maxCount = new AclinkFormValues();
+        maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+        if(null != cmd.getMaxDuration() && cmd.getMaxDuration().length()>0){
+            if(null != maxDuration && maxDuration.getValue().length()>0){
+                maxDuration.setValue(cmd.getMaxDuration());
+                maxDuration.setOperatorUid(user.getId());
+                maxDuration.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(maxDuration);
+            }
+            else{
+                AclinkFormValues newMaxDuration = new AclinkFormValues();
+                newMaxDuration.setNamespaceId(namespaceId);
+                newMaxDuration.setOwnerId(cmd.getOwnerId());
+                newMaxDuration.setOwnerType(cmd.getOwnerType());
+                newMaxDuration.setType(AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+                newMaxDuration.setValue(cmd.getMaxDuration());
+                newMaxDuration.setStatus((byte)1);
+                newMaxDuration.setTitleId(0L);
+                newMaxDuration.setCreatorUid(user.getId());
+                newMaxDuration.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newMaxDuration);
+            }
+        }
+        if(null != cmd.getMaxCount() && cmd.getMaxCount().length()>0){
+            if(null != maxCount && maxCount.getValue().length()>0){
+                maxCount.setValue(cmd.getMaxCount());
+                maxCount.setOperatorUid(user.getId());
+                maxCount.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(maxCount);
+            }
+            else{
+                AclinkFormValues newMaxCount = new AclinkFormValues();
+                newMaxCount.setNamespaceId(namespaceId);
+                newMaxCount.setOwnerId(cmd.getOwnerId());
+                newMaxCount.setOwnerType(cmd.getOwnerType());
+                newMaxCount.setType(AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+                newMaxCount.setValue(cmd.getMaxCount());
+                newMaxCount.setStatus((byte)1);
+                newMaxCount.setTitleId(0L);
+                newMaxCount.setCreatorUid(user.getId());
+                newMaxCount.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newMaxCount);
+            }
+        }
+    }
+
+    @Override
+    public ListTempAuthDefaultRuleResponse listTempAuthDefaultRule (ListTempAuthDefaultRuleCommand cmd){
+        AclinkFormValues maxDuration = new AclinkFormValues();
+        maxDuration = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_DURATION.getCode());
+        AclinkFormValues maxCount = new AclinkFormValues();
+        maxCount = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.DEFAULT_MAX_COUNT.getCode());
+        ListTempAuthDefaultRuleResponse resp = new ListTempAuthDefaultRuleResponse();
+        resp.setMaxDuration(ConvertHelper.convert(maxDuration,AclinkFormValuesDTO.class));
+        resp.setMaxCount(ConvertHelper.convert(maxCount,AclinkFormValuesDTO.class));
+        return resp;
     }
 
     @Override

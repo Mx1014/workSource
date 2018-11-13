@@ -56,7 +56,7 @@ public interface DoorAccessProvider {
 
     Long updateDoorAccessNew (DoorAccess obj);
 	
-	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd);
+	List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd, List<Long> doorIds);
 
 	List<DoorAccessGroupRelDTO> listDoorGroupRel(CrossShardListingLocator locator, Integer count,
 			ListDoorAccessGroupCommand cmd);
@@ -76,6 +76,8 @@ public interface DoorAccessProvider {
     List<DoorsAndGroupsDTO> searchTempAuthPriority(ListTempAuthPriorityCommand cmd);
 
     AclinkFormValues findAclinkFormValuesById(Long id);
+
+    AclinkFormValues findAclinkFormValues (Long ownerId, Byte ownerType, Byte type);
 
     AclinkFormValuesDTO updateAclinkFormValues(AclinkFormValues value);
     //门禁v3.0.2 添加企业管理授权

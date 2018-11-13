@@ -620,7 +620,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
 
 	@Override
-	public List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd) {
+	public List<DoorAccessDTO> searchDoorAccessDTO(CrossShardListingLocator locator, QueryDoorAccessAdminCommand cmd, List<Long> doorIds) {
 		final List<DoorAccessDTO> objs = new ArrayList<DoorAccessDTO>();
         if(locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
@@ -631,9 +631,9 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhDoorAccessRecord> query = context.selectQuery(Tables.EH_DOOR_ACCESS);
-
-            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
-            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+            //增加管理授权门禁
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()).or(Tables.EH_DOOR_ACCESS.ID.in(doorIds)));
+            query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()).or(Tables.EH_DOOR_ACCESS.ID.in(doorIds)));
             if(cmd.getName() != null) {
                 query.addConditions(Tables.EH_DOOR_ACCESS.NAME.like("%" + cmd.getName() + "%"));
             }
@@ -1077,5 +1077,20 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhAclinkFormValuesDao dao = new EhAclinkFormValuesDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), AclinkFormValues.class);
+    }
+
+    @Override
+    public AclinkFormValues findAclinkFormValues (Long ownerId, Byte ownerType, Byte type){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<Record> query = context.selectQuery();
+        query.addFrom(Tables.EH_ACLINK_FORM_VALUES);
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.TYPE.eq(type));
+        query.addConditions(Tables.EH_ACLINK_FORM_VALUES.STATUS.eq((byte)1));
+        query.addLimit(1);
+        AclinkFormValues value = new AclinkFormValues();
+        value = query.fetchOneInto(AclinkFormValues.class);
+        return value;
     }
 }

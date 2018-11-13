@@ -12,11 +12,12 @@ import javax.validation.constraints.NotNull;
  * <ul> 添加访客授权。
  * <li>phone: 电话</li>
  * <li>doorId: 门禁ID</li>
+ * <li>groupType: 1门禁 2门禁组</li>
  * <li>namespaceId: 域空间ID</li>
  * <li>userName: 访客姓名</li>
  * <li>organization: 公司名称</li>
  * <li>description: 来访说明</li>
- * <li>authMethod: 授权方式{@link com.everhomes.aclink.DoorAuthMethodType}</li>
+ * <li>authMethod: 授权方式{}</li>
  * <li>authRuleType: 授权规则种类，0 时间，1 次数</li>
  * <li>validFromMs: 有效期开始时间</li>
  * <li>validEndMs: 有效期终止时间</li>
@@ -29,6 +30,7 @@ public class CreateTempAuthCommand {
 
     private String phone;
     private Long     doorId;
+    private Byte groupType;
     private Integer namespaceId;
     private String userName;
     private String visitorEvent;
@@ -51,6 +53,14 @@ public class CreateTempAuthCommand {
 
     public void setList(List<CreateCustomFieldCommand> list) {
         this.list = list;
+    }
+
+    public Byte getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(Byte groupType) {
+        this.groupType = groupType;
     }
 
     public String getPhone() {

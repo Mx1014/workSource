@@ -460,6 +460,35 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/listTempAuthDefaultRule</b>
+     * <p>列出临时授权默认规则</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listTempAuthDefaultRule")
+    @RestReturn(value=ListTempAuthDefaultRuleResponse.class)
+    public RestResponse listTempAuthDefaultRule (@Valid ListTempAuthDefaultRuleCommand cmd){
+        RestResponse response = new RestResponse(doorAccessService.listTempAuthDefaultRule(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/createTempAuthDefaultRule</b>
+     * <p>创建临时授权默认规则</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createTempAuthDefaultRule")
+    @RestReturn(value=String.class)
+    public RestResponse createTempAuthDefaultRule (@Valid CreateTempAuthDefaultRuleCommand cmd){
+        RestResponse response = new RestResponse();
+        doorAccessService.createTempAuthDefaultRule(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/listTempAuthCustomField</b>
      * <p>查询临时授权自定义字段</p>
      * @return OK 成功

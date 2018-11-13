@@ -587,6 +587,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 if(cmd.getDoorId() != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(cmd.getDoorId()));
                 }
+                if(cmd.getGroupType() != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.GROUP_TYPE.eq(cmd.getGroupType()));
+                }
 
                 if(cmd.getKeyword() != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(cmd.getKeyword()+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(cmd.getKeyword()+"%")));
