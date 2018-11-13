@@ -88,14 +88,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -2450,6 +2443,7 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd){
         List<Long> fields = cmd.getFieldId();
+        fieldProvider.changeFilterStatus(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
         if(fields != null && fields.size() > 0){
             fields.forEach(r ->{
                 VarFieldScopeFilter filter = new VarFieldScopeFilter();
@@ -2458,9 +2452,29 @@ public class FieldServiceImpl implements FieldService {
                 filter.setNamespaceId(cmd.getNamespaceId());
                 filter.setStatus(VarFieldStatus.ACTIVE.getCode());
                 filter.setUserId(UserContext.currentUserId());
+                filter.setGroupPath(cmd.getGroupPath());
+                filter.setModuleName(cmd.getModuleName());
                 fieldProvider.createFieldScopeFilter(filter);
             });
         }
     }
 
+    @Override
+    public List<FieldDTO> listFieldScopeFilter(ListFieldScopeFilterCommand cmd) {
+        ListFieldCommand cmd2 = ConvertHelper.convert(cmd, ListFieldCommand.class);
+        List<FieldDTO> fields = listFields(cmd2);
+        List<FieldDTO> result = new ArrayList<>();
+
+        List<VarFieldScopeFilter> filters = fieldProvider.listFieldScopeFilter(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleName(), UserContext.currentUserId(), cmd.getGroupPath());
+        for(VarFieldScopeFilter filter : filters){
+            fields.forEach(r->{
+                if(r.getFieldId().equals(filter.getFieldId())){
+                    result.add(r);
+                }
+            });
+        }
+        List<String> defaultField = new ArrayList<>(Arrays.asList("name","entryStatusItemId",));
+
+        return result;
+    }
 }

@@ -1,0 +1,86 @@
+package com.everhomes.rest.varField;
+
+public class ListFieldScopeFilterCommand {
+
+    private Integer namespaceId;
+
+    private Long communityId;
+
+    private String moduleName;
+
+//    private Long groupId;
+
+    private String groupPath;
+
+    private Long categoryId;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
+
+    private Long orgId;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(Long orgId) {
+        this.orgId = orgId;
+    }
+}

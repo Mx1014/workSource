@@ -993,6 +993,19 @@ public class FieldProviderImpl implements FieldProvider {
                 .fetchOneInto(FieldItem.class);
     }
 
+    @Override
+    public void changeFilterStatus(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_VAR_FIELD_SCOPE_FILTERS)
+                .set(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS, VarFieldStatus.INACTIVE.getCode())
+                .where(Tables.EH_VAR_FIELD_SCOPE_FILTERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.MODULE_NAME.eq(moduleName))
+                .and((Tables.EH_VAR_FIELD_SCOPE_FILTERS.USER_ID.eq(userId)))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.GROUP_PATH.eq(groupPath))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS.eq(VarFieldStatus.ACTIVE.getCode())).execute();
+    }
+
 
     @Override
     public void createFieldScopeFilter(VarFieldScopeFilter filter){
@@ -1006,5 +1019,24 @@ public class FieldProviderImpl implements FieldProvider {
         dao.insert(filter);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldScopeFilters.class, filter.getId());
     }
+
+    @Override
+    public List<VarFieldScopeFilter> listFieldScopeFilter(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<VarFieldScopeFilter> fieldFilters = context.select().from(Tables.EH_VAR_FIELD_SCOPE_FILTERS)
+                .where(Tables.EH_VAR_FIELD_SCOPE_FILTERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.MODULE_NAME.eq(moduleName))
+                .and((Tables.EH_VAR_FIELD_SCOPE_FILTERS.USER_ID.eq(userId)))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.GROUP_PATH.eq(groupPath))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, VarFieldScopeFilter.class);
+                });
+
+        return fieldFilters;
+    }
+
 
 }

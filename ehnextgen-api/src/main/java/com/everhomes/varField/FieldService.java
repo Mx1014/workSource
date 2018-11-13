@@ -64,4 +64,6 @@ public interface FieldService {
 
 
     void saveFieldScopeFilter(SaveFieldScopeFilterCommand cmd);
+
+    List<FieldDTO> listFieldScopeFilter(ListFieldScopeFilterCommand cmd);
 }

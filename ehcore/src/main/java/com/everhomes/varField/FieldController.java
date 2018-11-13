@@ -243,14 +243,14 @@ public class FieldController extends ControllerBase {
 
 
     /**
-     * <p>fieldFilter的保存</p>
-     * <b>URL: /varField/getFieldScopeFilter</b>
+     * <p>fieldFilter的查询</p>
+     * <b>URL: /varField/listFieldScopeFilter</b>
      */
-    @RequestMapping("saveFieldScopeFilter")
-    @RestReturn(String.class)
-    public RestResponse getFieldScopeFilter(SaveFieldScopeFilterCommand cmd){
-        fieldService.saveFieldScopeFilter(cmd);
-        RestResponse restResponse = new RestResponse();
+    @RequestMapping("listFieldScopeFilter")
+    @RestReturn(value = FieldDTO.class, collection = true)
+    public RestResponse listFieldScopeFilter(ListFieldScopeFilterCommand cmd){
+        List<FieldDTO> list = fieldService.listFieldScopeFilter(cmd);
+        RestResponse restResponse = new RestResponse(list);
         restResponse.setErrorCode(200);
         restResponse.setErrorDescription("OK");
         return restResponse;
