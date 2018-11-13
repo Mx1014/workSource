@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>senderName:发放者姓名 必填</li>
  * <li>senderUid:发放者userId 可不填</li>
  * <li>senderDetailId: 发放者detailId 必填</li>
+ * <li>senderAvatarUrl: 发放者头像 </li>
  * <li>senderName: 发放者姓名 必填</li>
  * <li>imgUri: 图片uri 必填</li>
  * <li>imgUrl: 图片url 只读项展示用</li>
@@ -40,7 +41,8 @@ public class WelfaresDTO {
     private String content;
     private String senderName;
     private Long senderUid;
-    private Long senderDetailId;
+	private Long senderDetailId;
+	private String senderAvatarUrl;
     private String imgUri;
 	private String imgUrl;
 	private String imgName;
@@ -227,5 +229,13 @@ public class WelfaresDTO {
 
 	public void setCoupons(List<WelfareCouponDTO> coupons) {
 		this.coupons = coupons;
+	}
+
+	public String getSenderAvatarUrl() {
+		return senderAvatarUrl;
+	}
+
+	public void setSenderAvatarUrl(String senderAvatarUrl) {
+		this.senderAvatarUrl = senderAvatarUrl;
 	}
 }

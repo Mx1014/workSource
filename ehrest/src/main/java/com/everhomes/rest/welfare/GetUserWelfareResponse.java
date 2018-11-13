@@ -17,6 +17,7 @@ import java.util.List;
  * <li>senderUid:发放者userId</li>
  * <li>senderDetailId: 发放者detailId</li>
  * <li>senderName: 发放者姓名</li>
+ * <li>senderAvatarUrl: 发放者头像</li>
  * <li>imgUri: 图片uri</li>
  * <li>imgUrl: 图片url</li>
  * <li>sendTime: 发送时间</li>
@@ -34,6 +35,7 @@ public class GetUserWelfareResponse {
     private String senderName;
     private Long senderUid;
     private Long senderDetailId;
+	private String senderAvatarUrl;
     private String imgUri;
     private String imgUrl;
     private Long sendTime;
@@ -162,5 +164,13 @@ public class GetUserWelfareResponse {
 
 	public void setCoupons(List<WelfareCouponDTO> coupons) {
 		this.coupons = coupons;
+	}
+
+	public String getSenderAvatarUrl() {
+		return senderAvatarUrl;
+	}
+
+	public void setSenderAvatarUrl(String senderAvatarUrl) {
+		this.senderAvatarUrl = senderAvatarUrl;
 	}
 }

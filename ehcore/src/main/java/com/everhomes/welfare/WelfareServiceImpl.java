@@ -32,10 +32,12 @@ import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPe
 import com.everhomes.rest.promotion.coupon.couponmanagement.ObtainDetailsExtendDTO;
 import com.everhomes.rest.promotion.coupon.couponmanagement.TransferToPersonalCommand;
 import com.everhomes.rest.socialSecurity.NormalFlag;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.welfare.*;
 import com.everhomes.salary.SalaryService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -80,6 +82,8 @@ public class WelfareServiceImpl implements WelfareService {
     private GeneralOrderService generalOrderService;
     @Autowired
     private OrganizationProvider organizationProvider;
+    @Autowired
+    private UserService userService;
     @Override
     public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd) {
         ListWelfaresResponse response = new ListWelfaresResponse();
@@ -114,6 +118,11 @@ public class WelfareServiceImpl implements WelfareService {
 	private WelfaresDTO processWelfaresDTO(Welfare r, boolean receviersFlag) {
 	
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
+        //用户头像
+        UserInfo senderInfo = userService.getUserInfo(r.getSenderUid());
+        if (senderInfo != null) {
+            dto.setSenderAvatarUrl(senderInfo.getAvatarUrl());
+        }
         dto.setUpdateTime(r.getUpdateTime().getTime());
         if (null != r.getSendTime()) {
             dto.setSendTime(r.getSendTime().getTime());
@@ -380,6 +389,11 @@ public class WelfareServiceImpl implements WelfareService {
             return null;
         }
         GetUserWelfareResponse response = ConvertHelper.convert(welfare, GetUserWelfareResponse.class);
+
+        UserInfo senderInfo = userService.getUserInfo(welfare.getSenderUid());
+        if (senderInfo != null) {
+            response.setSenderAvatarUrl(senderInfo.getAvatarUrl());
+        }
         if (null != welfare.getSendTime()) {
             response.setSendTime(welfare.getSendTime().getTime());
         }
