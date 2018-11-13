@@ -118,6 +118,23 @@ public class ContractController extends ControllerBase {
 		cmd.setPaymentFlag((byte)0);
 		return new RestResponse(contractSearcher.queryContracts(cmd));
 	}
+	
+	/**
+	 * <p>搜索合同没有OrgId</p>
+	 * <b>URL: /contract/searchNoOrgIdContracts</b>
+	 */
+	@RequestMapping("searchNoOrgIdContracts")
+	@RestReturn(ListContractsResponse.class)
+	public RestResponse searchNoOrgIdContracts(SearchContractCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		if (namespaceId == 999971) {
+			ContractService contractService = getContractService(namespaceId);
+			ListContractsCommand command = ConvertHelper.convert(cmd, ListContractsCommand.class);
+			return new RestResponse(contractService.listContracts(command));
+		}
+		cmd.setPaymentFlag((byte)0);
+		return new RestResponse(contractSearcher.searchNoOrgIdContracts(cmd));
+	}
 
 	/**
 	 * <p>同步合同</p>
