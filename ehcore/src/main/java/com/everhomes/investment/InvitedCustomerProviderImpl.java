@@ -16,15 +16,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhCustomerTrackers;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.daos.EhCustomerContactsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCurrentRentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerRequirementAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerRequirementsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrackersDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerContacts;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCurrentRents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerRequirementAddresses;
-import com.everhomes.server.schema.tables.pojos.EhCustomerRequirements;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -590,4 +583,35 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         return customers;
 
     }
+
+    @Override
+    public void createCustomerLevelChangeRecord(CustomerLevelChangeRecord record) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhCustomerLevelChangeRecords.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerLevelChangeRecords.class));
+        record.setId(id);
+
+
+        if(record.getChangeDate() == null) {
+            Long l2 = DateHelper.currentGMTTime().getTime();
+            record.setChangeDate(new Timestamp(l2));
+        }
+
+        EhCustomerLevelChangeRecordsDao dao = new EhCustomerLevelChangeRecordsDao(context.configuration());
+        dao.insert(record);
+        //return id;
+    }
+
+    public List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId,Timestamp queryStartDate, Timestamp queryEndDate){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<CustomerLevelChangeRecord> result = new ArrayList<>();
+
+        Condition c1 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.NAMESPACE_ID.eq(namespaceId));
+        Condition c1 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.C.eq(namespaceId));
+
+        if()
+
+    }
+
 }
