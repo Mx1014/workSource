@@ -3,6 +3,8 @@ package com.everhomes.rentalv2;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.acl.ServiceModuleAppAuthorization;
+import com.everhomes.acl.ServiceModuleAppAuthorizationService;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
@@ -45,6 +47,9 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
+import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
+import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -54,6 +59,7 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.rentalv2.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.VendorType;
@@ -232,6 +238,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private Rentalv2PayService  rentalv2PayService;
 	@Autowired
 	private Rentalv2AccountProvider rentalv2AccountProvider;
+	@Autowired
+	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
 
 	private ExecutorService executorPool = Executors.newFixedThreadPool(5);
 
@@ -8781,5 +8789,64 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public GetSceneTypeResponse getSceneType(GetSceneTypeCommand cmd) {
+		GetSceneTypeResponse response = new GetSceneTypeResponse();
+		String sceneType = SceneType.PARK_TOURIST.getCode();
+		RentalResourceType resourceType = rentalv2Provider.findRentalResourceTypeById(cmd.getResourceTypeId());
+		GetAuthOrgByProjectIdAndAppIdCommand cmd2 = new GetAuthOrgByProjectIdAndAppIdCommand();
+		cmd2.setProjectId(cmd.getCommunityId());
+		cmd2.setAppId(cmd.getAppid());
+		OrganizationDTO manageOrganization = organizationService.getAuthOrgByProjectIdAndAppId(cmd2);//管理公司
+		if (resourceType != null && resourceType.getCrossCommuFlag().equals(TrueOrFalseFlag.TRUE.getCode())){
+			List<Long> communityIds = new ArrayList<>();
+			if (UserContext.getCurrentNamespaceId().equals(2)) { //标准版
+				List<ServiceModuleAppAuthorization> appAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(),
+						manageOrganization.getId(), cmd.getAppid());
+				communityIds = appAuthorizations.stream().map(r->r.getProjectId()).collect(Collectors.toList());
+			}else{
+				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+				communityIds = communities.stream().map(Community::getId).collect(Collectors.toList());
+			}
+			for (Long communityId : communityIds){
+				ListUserOrganizationsCommand cmd3 = new ListUserOrganizationsCommand();
+				cmd3.setAppId(cmd.getAppid());
+				cmd3.setProjectId(communityId);
+				cmd3.setUserId(UserContext.currentUserId());
+				ListUserOrganizationsResponse response1 = organizationService.listUserOrganizations(cmd3);
+				if (response1 != null && response1.getDtos() != null){
+					for (OrganizationDTO dto : response1.getDtos()) {
+						if (dto.getId().equals(cmd.getOrganizationId())){
+							if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getManagerFlag()))
+								sceneType = SceneType.PM_ADMIN.getCode();
+							else if (sceneType.equals(SceneType.PARK_TOURIST.getCode()))
+										sceneType = SceneType.ENTERPRISE.getCode();
+							break;
+						}
+					}
+				}
+			}
+		}else{
+			ListUserOrganizationsCommand cmd3 = new ListUserOrganizationsCommand();
+			cmd3.setAppId(cmd.getAppid());
+			cmd3.setProjectId(cmd.getCommunityId());
+			cmd3.setUserId(UserContext.currentUserId());
+			ListUserOrganizationsResponse response1 = organizationService.listUserOrganizations(cmd3);
+			if (response1 != null && response1.getDtos() != null){
+				for (OrganizationDTO dto : response1.getDtos()) {
+					if (dto.getId().equals(cmd.getOrganizationId())){
+						if (TrueOrFalseFlag.TRUE.getCode().equals(dto.getManagerFlag()))
+							sceneType = SceneType.PM_ADMIN.getCode();
+						else
+							sceneType = SceneType.ENTERPRISE.getCode();
+						break;
+					}
+				}
+			}
+		}
+		response.setSceneType(sceneType);
+		return response;
 	}
 }

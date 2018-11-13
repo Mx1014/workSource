@@ -220,6 +220,8 @@ public interface Rentalv2Service {
 
 	String parseSceneToken(String sceneToken);
 
+	GetSceneTypeResponse getSceneType(GetSceneTypeCommand cmd);
+
 	void test();
 
 }
