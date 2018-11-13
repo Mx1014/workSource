@@ -1745,7 +1745,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
 
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
-            LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
+            try {
+                // 这个代码只是为了修复错误的数据，后期删除
+                LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
+            } catch (Exception e) {
+                LOGGER.error("Fetch user error", e);
+            }
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -1767,10 +1772,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     return true;
                 }
 
-                if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
-                    user = userProvider.findUserById(userInfo.getId());
-                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
-                    return true;
+                try {
+                    if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
+                        user = userProvider.findUserById(userInfo.getId());
+                        createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                        return true;
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Fetch user error", e);
                 }
             } else {
                 LOGGER.error("Never be here, userInfo should contains phones, userInfo={}", userInfo);
