@@ -26,6 +26,4 @@ public interface AssetBillService {
 	 */
 	ListBillsResponse listOpenBills(ListBillsCommand cmd);
 	
-	
-	
 }

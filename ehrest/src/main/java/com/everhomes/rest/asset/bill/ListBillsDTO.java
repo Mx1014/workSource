@@ -392,4 +392,12 @@ public class ListBillsDTO {
 		this.isReadOnly = isReadOnly;
 	}
 
+	public List<BillItemDTO> getBillItemDTOList() {
+		return billItemDTOList;
+	}
+
+	public void setBillItemDTOList(List<BillItemDTO> billItemDTOList) {
+		this.billItemDTOList = billItemDTOList;
+	}
+
 }

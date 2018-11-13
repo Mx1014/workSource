@@ -107,8 +107,6 @@ public class AssetBillServiceImpl implements AssetBillService {
         try {
         	handler = PlatformContext.getComponent(handlerPrefix + namespaceId);
 		}catch (Exception ex){
-			LOGGER.info("ThirdOpenBillHandler not exist for namespaceId={}", namespaceId);
-		}finally {
 			//如果找不到，那么使用默认的Handler
 			handler = PlatformContext.getComponent(handlerPrefix + "DEFAULT");
 		}

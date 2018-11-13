@@ -9,11 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.bill.AssetBillProvider;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
+import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
@@ -43,16 +44,17 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	@Autowired
 	private ContractProvider contractProvider;
 	
+	@Autowired
+	private AssetBillProvider assetBillProvider;
+	
 	/**
 	 * 物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单） 
 	 */
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd.toString());
-    	//写死中天的域空间ID
     	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
     	cmd.setOwnerType("community");
     	cmd.setOwnerId(cmd.getCommunityId());
-    	cmd.setDeleteFlag(AssetPaymentBillDeleteFlag.VALID.getCode());
     	//物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单），因为是同步账单，所以已出、未出都要同步
     	List<Byte> switchList = new ArrayList<Byte>();
     	switchList.add(new Byte("0"));
@@ -72,9 +74,9 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
         if(pageSize == null){
             pageSize = 20;
         }
-        //每页大小(最大值为1000)，每次请求获取的数据条数
-        if(pageSize > 1000) {
-        	pageSize = 1000;
+        //每页大小(最大值为50)，每次请求获取的数据条数
+        if(pageSize > 50) {
+        	pageSize = 50;
         }
         Integer pageOffSet = pageAnchor.intValue();
         List<ListBillsDTO> list = assetProvider.listBills(cmd.getNamespaceId(), pageOffSet, pageSize, cmd);
@@ -87,14 +89,26 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
         //组装账单费项明细
         for(ListBillsDTO dto : list) {
         	setBillInvalidParamNull(dto);//屏蔽账单无效参数
+        	ListBillDetailResponse res = assetBillProvider.listOpenBillDetail(Long.valueOf(dto.getBillId()));
+        	if(res != null && res.getBillGroupDTO() != null) {
+        		dto.setBillItemDTOList(res.getBillGroupDTO().getBillItemDTOList());
+        	}
         }
         //每次同步都要打印下billId，方便对接过程中出现问题好进行定位
-        StringBuilder billIdStringBuilder = new StringBuilder();
+        printBillId(list);
+        response.setListBillsDTOS(list);
+        return response;
+	}
+	
+	/**
+	 * 每次同步都要打印下billId，方便对接过程中出现问题好进行定位
+	 */
+	public void printBillId(List<ListBillsDTO> list) {
+		StringBuilder billIdStringBuilder = new StringBuilder();
         billIdStringBuilder.append("(");
         for(ListBillsDTO dto : list) {
         	billIdStringBuilder.append(dto.getBillId());
         	billIdStringBuilder.append(", ");
-        	
         }
         //去掉最后一个逗号
         if(billIdStringBuilder.length() >= 2) {
@@ -102,8 +116,6 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
         }
         billIdStringBuilder.append(")");
         LOGGER.info("AssetBillServiceImpl listOpenBills billIds={}", billIdStringBuilder);
-        response.setListBillsDTOS(list);
-        return response;
 	}
 	
 	/**
@@ -160,7 +172,6 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		dto.setCanModify(null);
 		dto.setIsReadOnly(null);
 		dto.setNoticeTelList(null);
-		dto.setDeleteFlag(null);
 	}
 
 }

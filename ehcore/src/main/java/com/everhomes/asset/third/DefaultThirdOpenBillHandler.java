@@ -45,12 +45,8 @@ public class DefaultThirdOpenBillHandler implements ThirdOpenBillHandler{
 	@Autowired
 	private ContractProvider contractProvider;
 	
-	/**
-	 * 物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单） 
-	 */
 	public ListBillsResponse listOpenBills(ListBillsCommand cmd) {
     	LOGGER.info("AssetBillServiceImpl listOpenBills sourceCmd={}", cmd.toString());
-    	//写死中天的域空间ID
     	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
     	cmd.setOwnerType("community");
     	cmd.setOwnerId(cmd.getCommunityId());
@@ -96,7 +92,6 @@ public class DefaultThirdOpenBillHandler implements ThirdOpenBillHandler{
         for(ListBillsDTO dto : list) {
         	billIdStringBuilder.append(dto.getBillId());
         	billIdStringBuilder.append(", ");
-        	
         }
         //去掉最后一个逗号
         if(billIdStringBuilder.length() >= 2) {
