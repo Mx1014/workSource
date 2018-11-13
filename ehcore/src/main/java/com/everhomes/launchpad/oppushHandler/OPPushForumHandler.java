@@ -122,7 +122,7 @@ public class OPPushForumHandler implements OPPushHandler{
                     if (!CollectionUtils.isEmpty(postDTO.getAttachments())) {
                         for (int i=0;i<postDTO.getAttachments().size();i++) {
                             AttachmentDTO attachmentDTO = ConvertHelper.convert(postDTO.getAttachments().get(i), AttachmentDTO.class);
-                            if (PostContentType.IMAGE.getCode().toUpperCase().equals(attachmentDTO.getContentType())) {
+                            if (!StringUtils.isBlank(attachmentDTO.getContentType()) && PostContentType.IMAGE.getCode().toUpperCase().equals(attachmentDTO.getContentType().toUpperCase())) {
                                 imageUrl = contentServerService.parserUri(attachmentDTO.getContentUri(), EntityType.TOPIC.getCode(), postDTO.getId());
                                 break;
                             }
@@ -142,9 +142,15 @@ public class OPPushForumHandler implements OPPushHandler{
                     tag = "活动";
                 }else if (postDTO.getCategoryId() != null && postDTO.getCategoryId().equals(CategoryConstants.CATEGORY_ID_TOPIC_POLLING)){
                     title = postDTO.getContent();
+                    if (StringUtils.isBlank(title)) {
+                        title = postDTO.getSubject();
+                    }
                     tag = "投票";
                 }else {
                     title = postDTO.getContent();
+                    if (StringUtils.isBlank(title)) {
+                        title = postDTO.getSubject();
+                    }
                     tag = "话题";
                 }
                 properties.add(title);
