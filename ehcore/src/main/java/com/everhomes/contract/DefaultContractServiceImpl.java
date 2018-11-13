@@ -3939,32 +3939,31 @@ long assetCategoryId = 0l;
 		if (cmd.getContractIds() == null || cmd.getCommunityId() == null) {
 			return null;
 		}
-		//返回创建的tasakId
+		// 返回创建的tasakId
 		ContractTaskOperateLog task = new ContractTaskOperateLog();
-        task.setNamespaceId(cmd.getNamespaceId());
-        task.setOwnerId(cmd.getCommunityId());
-        task.setOwnerType("community");
-        task.setName("合同初始化");
-        task.setProcess(0);
-        task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
+		task.setNamespaceId(cmd.getNamespaceId());
+		task.setOwnerId(cmd.getCommunityId());
+		task.setOwnerType("community");
+		task.setName("合同初始化");
+		task.setProcess(0);
+		task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
 		contractProvider.createContractOperateTask(task);
-		
+
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyInitializationContract(cmd,task);
+				oneKeyInitializationContract(cmd, task);
 			}
 		});
-		
 		return task;
 	}
 
-	private void oneKeyInitializationContract(InitializationCommand cmd,ContractTaskOperateLog task) {
+	private void oneKeyInitializationContract(InitializationCommand cmd, ContractTaskOperateLog task) {
 		Date StartTime = new Date();
 		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(task.getId());
 		contractTaskOperateLog.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		
+
 		List<Long> contractAllIds = cmd.getContractIds();
 		// 2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
 		CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
@@ -3972,7 +3971,8 @@ long assetCategoryId = 0l;
 		checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
 		checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
 		checkContractIsProduceBillCmd.setOwnerType("community");
-		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
+		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService
+				.checkContractIsProduceBill(checkContractIsProduceBillCmd);
 		List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
 		contractTaskOperateLog.setProcess(5);
 		for (CheckContractIsProduceBillDTO entry : lists) {
@@ -3983,13 +3983,13 @@ long assetCategoryId = 0l;
 		}
 		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(contractAllIds);
-		if (contractsMap.size()<1) {
+		if (contractsMap.size() < 1) {
 			return;
 		}
 		contractTaskOperateLog.setParams(contractsMap.toString());
 		contractTaskOperateLog.setTotalNumber(contractsMap.size());
 		contractTaskOperateLog.setProcess(35);
-		
+
 		int processedNumber = 0;
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Contract contract = entry.getValue();
@@ -3998,15 +3998,14 @@ long assetCategoryId = 0l;
 			contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			// 查询合同适用场景，物业合同不修改资产状态。
 			ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
-			if ((contractCategory == null && contract.getPaymentFlag() == 1) || !ContractApplicationScene.PROPERTY
-					.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+			if ((contractCategory == null && contract.getPaymentFlag() == 1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 				// 修改为资产状态待租
 				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			}
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
-			processedNumber =processedNumber + 1;
-			
+			processedNumber = processedNumber + 1;
+
 			contractTaskOperateLog.setProcessedNumber(processedNumber);
 			contractTaskOperateLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			contractProvider.updateContractOperateTask(contractTaskOperateLog);
@@ -4031,42 +4030,63 @@ long assetCategoryId = 0l;
 		}
 		if (deleteErrorContract.length() > 1) {
 			deleteErrorContract.append("初始化失败！");
+		} else {
+			deleteErrorContract.append("初始化完成！");
 		}
 		Date FinishTime = new Date();
-		contractTaskOperateLog.setExecuteTime((FinishTime.getTime()-StartTime.getTime())/1000);
+		contractTaskOperateLog.setExecuteTime((FinishTime.getTime() - StartTime.getTime()) / 1000);
 		contractTaskOperateLog.setProcess(100);
 		contractTaskOperateLog.setFinishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if (deleteErrorContract != null) {
+			contractTaskOperateLog.setErrorDescription(deleteErrorContract.toString());
+		}
+		contractProvider.updateContractOperateTask(contractTaskOperateLog);
 	}
 
 	@Override
-	public void exemptionContract(InitializationCommand cmd) {
+	public ContractTaskOperateLog exemptionContract(InitializationCommand cmd) {
 		// 1.查询合同列表，没有选择审批合同直接返回
 		if (cmd.getContractIds() == null) {
-			return;
+			return null;
 		}
-
+		// 返回创建的tasakId
+		ContractTaskOperateLog task = new ContractTaskOperateLog();
+		task.setNamespaceId(cmd.getNamespaceId());
+		task.setOwnerId(cmd.getCommunityId());
+		task.setOwnerType("community");
+		task.setName("合同免批");
+		task.setProcess(0);
+		task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
+		contractProvider.createContractOperateTask(task);
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyExemptionContract(cmd);
+				oneKeyExemptionContract(cmd, task);
 			}
 		});
-
+		return task;
 	}
 
-	private void oneKeyExemptionContract(InitializationCommand cmd) {
+	private void oneKeyExemptionContract(InitializationCommand cmd, ContractTaskOperateLog task) {
+		Date StartTime = new Date();
+		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(task.getId());
+		contractTaskOperateLog.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 		// 3.把符合条件 的合同状态置为审批通过，修改资产状态，
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
-		if (contractsMap.size()<1) {
+		if (contractsMap.size() < 1) {
 			return;
 		}
+		contractTaskOperateLog.setParams(contractsMap.toString());
+		contractTaskOperateLog.setTotalNumber(contractsMap.size());
+		contractTaskOperateLog.setProcess(35);
 		// 用于记录审批失败的合同
 		StringBuffer noChargingItemsContract = new StringBuffer();
 		StringBuffer noApartmentsContract = new StringBuffer();
 		String noChargingItemsContracts = "";
 		String noApartmentsContracts = "";
-		
+		int processedNumber = 0;
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Long contractId = entry.getKey();
 			Contract contract = entry.getValue();
@@ -4084,15 +4104,20 @@ long assetCategoryId = 0l;
 			command.setCategoryId(contract.getCategoryId());
 			ContractDetailDTO contractDetailDTO = findContract(command);
 
-			if (contractDetailDTO.getChargingItems() == null) {
-				// 合同没有绑定计价条款
-				noChargingItemsContract.append(contractDetailDTO.getContractNumber()+",");
-			}
-
 			if (contractDetailDTO.getApartments() == null) {
 				// 合同没有绑定房源
-				noApartmentsContract.append(contractDetailDTO.getContractNumber()+",");
+				noApartmentsContract.append(contractDetailDTO.getContractNumber() + ",");
+
+				continue;
 			} else {
+
+				if (contractDetailDTO.getChargingItems() == null) {
+					// 合同没有绑定计价条款
+					noChargingItemsContract.append(contractDetailDTO.getContractNumber() + ",");
+
+					continue;
+				}
+
 				// 校验房源是否可以入场
 				Boolean possibleEnterContractStatus = possibleEnterContract(contractDetailDTO);
 
@@ -4111,17 +4136,39 @@ long assetCategoryId = 0l;
 				entryContractCommand.setPartyAId(contract.getPartyAId());
 
 				entryContract(entryContractCommand);
+
+				processedNumber = processedNumber + 1;
+				contractTaskOperateLog.setProcessedNumber(processedNumber);
+				contractTaskOperateLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				contractProvider.updateContractOperateTask(contractTaskOperateLog);
 			}
 			continue;
 		}
-		//最后的提示信息
-		if(noApartmentsContract.length()>0){
-			noApartmentsContracts = (noApartmentsContract.toString()).substring(0, (noApartmentsContract.toString()).length() - 1);
+		// 最后的提示信息
+		if (noApartmentsContract.length() > 0) {
+			noApartmentsContracts = (noApartmentsContract.toString()).substring(0,
+					(noApartmentsContract.toString()).length() - 1) + "合同没有绑定房源";
 		}
-		if(noApartmentsContract.length()>0){
-			noChargingItemsContracts = (noChargingItemsContract.toString()).substring(0, (noChargingItemsContract.toString()).length() - 1);
+		if (noChargingItemsContract.length() > 0) {
+			noChargingItemsContracts = (noChargingItemsContract.toString()).substring(0,
+					(noChargingItemsContract.toString()).length() - 1) + "合同没有绑定计价条款";
 		}
-		
+
+		Date FinishTime = new Date();
+		contractTaskOperateLog.setExecuteTime((FinishTime.getTime() - StartTime.getTime()) / 1000);
+		contractTaskOperateLog.setProcess(100);
+		contractTaskOperateLog.setFinishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		if (!"".equals(noApartmentsContracts) && !"".equals(noChargingItemsContracts)) {
+			contractTaskOperateLog.setErrorDescription(noApartmentsContracts + "," + noChargingItemsContracts);
+		} else if (!"".equals(noApartmentsContracts)) {
+			contractTaskOperateLog.setErrorDescription(noApartmentsContracts);
+		} else if (!"".equals(noChargingItemsContracts)) {
+			contractTaskOperateLog.setErrorDescription(noChargingItemsContracts);
+		} else {
+			contractTaskOperateLog.setErrorDescription("一键审批完成！");
+		}
+		contractProvider.updateContractOperateTask(contractTaskOperateLog);
 	}
 
 	private Boolean possibleEnterContract(ContractDetailDTO contractDetailDTO) {
@@ -4132,10 +4179,12 @@ long assetCategoryId = 0l;
 			// 根据房源id查询该房源的状态信息
 			// 1、查询该房源是否签过合同，获取合同的签署有效期，如果不再本合同的范围内可以签署合同
 			// 查房源签署过的合同
-			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider.findContractBuildingMappingByAddressId(apartment.getAddressId());
+			List<ContractBuildingMapping> contractBuildingMappingList = addressProvider
+					.findContractBuildingMappingByAddressId(apartment.getAddressId());
 			for (ContractBuildingMapping contractBuildingMapping : contractBuildingMappingList) {
 				// 根据合同id,查询合同的有效时间
-				Boolean possibleEnterContractFuture = contractProvider.possibleEnterContractFuture(contractDetailDTO, contractBuildingMapping);
+				Boolean possibleEnterContractFuture = contractProvider.possibleEnterContractFuture(contractDetailDTO,
+						contractBuildingMapping);
 				// 存在了，不能审批通过，
 				if (possibleEnterContractFuture) {
 					return false;
@@ -4144,7 +4193,8 @@ long assetCategoryId = 0l;
 				}
 			}
 			// 房源预定,房源已经被预定，预定时间在签署合同时间范围内
-			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO, apartment);
+			Boolean resoucreReservationsFuture = contractProvider.resoucreReservationsFuture(contractDetailDTO,
+					apartment);
 			if (resoucreReservationsFuture) {
 				return false;
 			} else {
@@ -4195,7 +4245,7 @@ long assetCategoryId = 0l;
 	private void oneKeyCopyContract(InitializationCommand cmd) {
 		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
-		if (contractsMap.size()<1) {
+		if (contractsMap.size() < 1) {
 			return;
 		}
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
@@ -4216,9 +4266,6 @@ long assetCategoryId = 0l;
 			contract.setContractType(ContractType.NEW.getCode());
 			contract.setStatus(ContractStatus.DRAFT.getCode());
 			contract.setRent(BigDecimal.ZERO);
-
-			/*contractProvider.createContract(contract);
-			contractSearcher.feedDoc(contract);*/
 
 			FindContractCommand command = new FindContractCommand();
 			command.setId(contractId);
@@ -4265,16 +4312,27 @@ long assetCategoryId = 0l;
 			}
 
 			// 合同拷贝，房源不应该修改状态
-			Double totalSize = dealContractApartments(contract, buildingApartments,ContractApplicationScene.PROPERTY.getCode());
+			Double totalSize = dealContractApartments(contract, buildingApartments, ContractApplicationScene.PROPERTY.getCode());
 			dealContractChargingItems(contract, contractChargingItems);
 			dealContractAttachments(contract.getId(), contractAttachments);
 			dealContractChargingChanges(contract, contractChargingChanges, frees);
 			contract.setRentSize(totalSize);
 			contract.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			
+
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
 		}
+	}
+
+	@Override
+	public SearchProgressDTO findContractOperateTaskById(SearchProgressCommand cmd) {
+		if (cmd.getTaskId() == null) {
+			return null;
+		}
+		SearchProgressDTO dto = new SearchProgressDTO();
+		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(cmd.getTaskId());
+		dto = ConvertHelper.convert(contractTaskOperateLog, SearchProgressDTO.class);
+		return dto;
 	}
 	
 }

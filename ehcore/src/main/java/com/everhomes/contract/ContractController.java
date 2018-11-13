@@ -17,6 +17,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.customer.SyncDataTaskService;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.contract.AddContractTemplateCommand;
 import com.everhomes.rest.contract.CheckAdminCommand;
@@ -73,6 +74,9 @@ public class ContractController extends ControllerBase {
 
 	@Autowired
 	private SyncDataTaskService syncDataTaskService;
+	
+	@Autowired
+	protected ContractProvider contractProvider;
 	
 	/**
 	 * <p>1.合同列表</p>
@@ -618,8 +622,11 @@ public class ContractController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse initializationContract(InitializationCommand cmd){
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		contractService.initializationContract(cmd);
-		return new RestResponse();
+		ContractTaskOperateLog contractTaskOperateLog = contractService.initializationContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	/**
@@ -630,8 +637,11 @@ public class ContractController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse exemptionContract(InitializationCommand cmd){
 		ContractService contractService = getContractService(cmd.getNamespaceId());
-		contractService.exemptionContract(cmd);
-		return new RestResponse();
+		ContractTaskOperateLog contractTaskOperateLog = contractService.exemptionContract(cmd);
+		RestResponse response = new RestResponse(contractTaskOperateLog);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	/**
@@ -644,5 +654,21 @@ public class ContractController extends ControllerBase {
 		ContractService contractService = getContractService(cmd.getNamespaceId());
 		contractService.copyContract(cmd);
 		return new RestResponse();
+	}
+	
+	/**
+	 * <p>合同初始化进度条/进度条查询</p>
+	 * <b>URL: /contract/searchProgressContract</b>
+	 */
+	@RequestMapping("searchProgressContract")
+	@RestReturn(SearchProgressDTO.class)
+	public RestResponse searcIinitializationContract(SearchProgressCommand cmd){
+		Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		SearchProgressDTO result = contractService.findContractOperateTaskById(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 }
