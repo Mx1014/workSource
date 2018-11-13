@@ -105,6 +105,15 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR:黄明波
+-- REMARK:删除现网有误数据
+DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212660 and namespace_id = 999961;
+DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217590 and namespace_id = 999961;
+DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212984 and namespace_id = 999961;
+DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217589 and namespace_id = 999961;
+
+
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
