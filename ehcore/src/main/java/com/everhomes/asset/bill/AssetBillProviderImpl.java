@@ -127,14 +127,14 @@ public class AssetBillProviderImpl implements AssetBillProvider {
         context.select(o.CHARGING_ITEM_NAME,o.ID,o.AMOUNT_RECEIVABLE,t1.APARTMENT_NAME,t1.BUILDING_NAME, o.APARTMENT_NAME, o.BUILDING_NAME, o.CHARGING_ITEMS_ID
         		, o.ENERGY_CONSUME,o.AMOUNT_RECEIVABLE_WITHOUT_TAX,o.TAX_AMOUNT,o.TAX_RATE
         		, o.SOURCE_ID, o.SOURCE_TYPE, o.SOURCE_NAME, o.CONSUME_USER_ID, o.CAN_DELETE, o.CAN_MODIFY
-        		, o.GOODS_SERVE_APPLY_NAME)
+        		, o.GOODS_SERVE_APPLY_NAME, o.DELETE_FLAG)
                 .from(o)
                 .leftOuterJoin(k)
                 .on(o.CHARGING_ITEMS_ID.eq(k.ID))
                 .leftOuterJoin(t1)
                 .on(o.ADDRESS_ID.eq(t1.ID))
                 .where(o.BILL_ID.eq(billId))
-                .and(o.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                //.and(o.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
                 .orderBy(k.DEFAULT_ORDER)
                 .fetch()
                 .map(f -> {
@@ -169,6 +169,7 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                     itemDTO.setCanModify(f.getValue(o.CAN_MODIFY));
                     //物业缴费V7.1（企业记账流程打通）: 增加商品信息字段
                     itemDTO.setGoodsServeApplyName(f.getValue(o.GOODS_SERVE_APPLY_NAME));
+                    itemDTO.setDeleteFlag(f.getValue(o.DELETE_FLAG));
                     list1.add(itemDTO);
                     return null;
                 });
