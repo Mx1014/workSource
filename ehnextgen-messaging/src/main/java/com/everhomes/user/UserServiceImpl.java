@@ -78,7 +78,6 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.PushUsersCommand;
@@ -131,11 +130,10 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
-import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -174,7 +172,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -1755,40 +1752,51 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             try {
                 userInfo = sdkUserService.validateToken(tokenString);
             } catch (Exception e) {
-                // e.printStackTrace();
+                //
             }
+
             if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
                 User user = userProvider.findUserById(userInfo.getId());
-                if (user != null) {
+                UserIdentifier userIdentifier = this.userProvider.getUserByToken(userInfo.getPhones().iterator().next(), userInfo.getNamespaceId());
+
+                if (user != null && userIdentifier != null) {
                     LOGGER.info("User service check success, loginToken={}", loginToken);
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
-                }else {
-                    //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
-                    //如果core server和统一用户都没有用户，说明真的没有该用户
-                    // add by yanlong.liang 20180928
-                    user = ConvertHelper.convert(this.sdkUserService.getUser(userInfo.getId()), User.class);
-                    if (user != null) {
-                        this.userProvider.createUserFromUnite(user);
-                        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userInfo.getId()), UserIdentifier.class);
-                        if (userIdentifier != null) {
-                            UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                            if (existsIdentifier != null) {
-                                this.userProvider.updateIdentifier(userIdentifier);
-                            }else {
-                                this.userProvider.createIdentifierFromUnite(userIdentifier);
-                            }
-                        }
-                        return true;
-                    }
+                }
+
+                if (fetchUserSuccess(userInfo)) {
+                    user = userProvider.findUserById(userInfo.getId());
+                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                    return true;
                 }
             } else {
-                LOGGER.info("User service check failure, loginToken={}", loginToken);
+                LOGGER.error("Never be here, userInfo should contains phones, userInfo={}", userInfo);
             }
 
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }
+    }
+
+    private boolean fetchUserSuccess(com.everhomes.rest.user.user.UserInfo userInfo) {
+        //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+        //如果core server和统一用户都没有用户，说明真的没有该用户
+        // add by yanlong.liang 20180928
+        User user = ConvertHelper.convert(this.sdkUserService.getUser(userInfo.getId()), User.class);
+        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userInfo.getId()), UserIdentifier.class);
+
+        if (user != null) {
+            this.userProvider.createUserFromUnite(user);
+        } else {
+            LOGGER.warn("Sdk user service getUser return null, userInfo={}", userInfo);
+        }
+        if (userIdentifier != null) {
+            this.userProvider.createIdentifierFromUnite(userIdentifier);
+        } else {
+            LOGGER.warn("Sdk user service getUserIdentifier return null, userInfo={}", userInfo);
+        }
+        return user != null && userIdentifier != null;
     }
 
     private static boolean isVerificationExpired(Timestamp ts) {
