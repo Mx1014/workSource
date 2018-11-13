@@ -33,6 +33,7 @@ import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import org.apache.commons.collections.CollectionUtils;
@@ -105,6 +106,9 @@ public class UserProviderImpl implements UserProvider {
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
+
+    @Autowired
+    private SdkUserService sdkUserService;
     
     public UserProviderImpl() {
     }
@@ -112,11 +116,11 @@ public class UserProviderImpl implements UserProvider {
     @Override
     public void createUser(User user) {
         // 平台1.0.0版本更新主表ID获取方式 by lqs 20180516
-        long id = this.dbProvider.allocPojoRecordId(EhUsers.class);
+        long id = sdkUserService.getSequence(Tables.EH_USERS.getName(), 1L);
         //long id = this.shardingProvider.allocShardableContentId(EhUsers.class).second();
         user.setId(id);
         if(user.getAccountName() == null) {
-            long accountSeq = this.sequenceProvider.getNextSequence("usr");
+            long accountSeq = sdkUserService.getSequence("usr-account", 1L);
             user.setAccountName(String.valueOf(accountSeq));
         }
         if(user.getUuid() == null)
@@ -375,7 +379,7 @@ public class UserProviderImpl implements UserProvider {
         
         // identifier record will be saved in the same shard as its owner users
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, userIdentifier.getOwnerUid().longValue()));
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserIdentifiers.class));
+        long id = sdkUserService.getSequence(Tables.EH_USER_IDENTIFIERS.getName(), 1L);
         
         userIdentifier.setId(id);
         Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());

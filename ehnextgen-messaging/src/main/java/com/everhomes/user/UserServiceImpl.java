@@ -1745,12 +1745,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
 
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
-            // 从用户那边同步数据有点问题
-            User user = userProvider.findUserById(login.getUserId());
-            UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(login.getUserId(), login.getNamespaceId());
-            if (user == null || userIdentifier == null) {
-                fetchUserSuccess(login.getUserId());
-            }
+            LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -1772,7 +1767,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     return true;
                 }
 
-                if (fetchUserSuccess(userInfo.getId())) {
+                if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
                     user = userProvider.findUserById(userInfo.getId());
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
@@ -1786,22 +1781,28 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         }
     }
 
-    private boolean fetchUserSuccess(Long userId) {
+    private boolean fetchUserSuccess(Long userId, Integer namespaceId) {
         //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
         //如果core server和统一用户都没有用户，说明真的没有该用户
         // add by yanlong.liang 20180928
-        User user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
-        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
-
-        if (user != null) {
-            this.userProvider.createUserFromUnite(user);
-        } else {
-            LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+        User user = userProvider.findUserById(userId);
+        if (user == null) {
+            user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
+            if (user != null) {
+                this.userProvider.createUserFromUnite(user);
+            } else {
+                LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+            }
         }
-        if (userIdentifier != null) {
-            this.userProvider.createIdentifierFromUnite(userIdentifier);
-        } else {
-            LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+
+        UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
+        if (userIdentifier == null) {
+            userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
+            if (userIdentifier != null) {
+                this.userProvider.createIdentifierFromUnite(userIdentifier);
+            } else {
+                LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+            }
         }
         return user != null && userIdentifier != null;
     }

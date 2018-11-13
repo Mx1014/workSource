@@ -93,7 +93,7 @@ sensitive-word.version=1.2.0
 
 spring-kafka.version=1.2.2.RELEASE
 
-ehuser-sdk.version=5.10.0-SNAPSHOT
+ehuser-sdk.version=5.10.1-SNAPSHOT
 
 ehpromotion-sdk.version=1.1.0-SNAPSHOT
 
