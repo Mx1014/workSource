@@ -197,17 +197,22 @@ public class SiyinJobValidateServiceImpl {
 				}
 				
 				//如果是未支付状态，而且之前未通知过，则发送消息通知
+				boolean isNeedAlert = false;
 				if (PrintOrderStatusType.UNPAID.getCode().equals(order.getOrderStatus())
 						&& TrueOrFalseFlag.FALSE.getCode().equals(order.getUserNotifyFlag())) {
-	   		        //创建订单成功后建立两个定时任务
-	   		        createOrderOverTimeTask(order);
 					order.setUserNotifyFlag(TrueOrFalseFlag.TRUE.getCode());
+					isNeedAlert = true;
 				}
 				
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
 	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+	   			}
+	   			
+	   			if (isNeedAlert) {
+	   		        //创建订单成功后建立两个定时任务
+	   		        createOrderOverTimeTask(order);
 	   			}
 	   			
 	   			record.setOrderId(order.getId());
