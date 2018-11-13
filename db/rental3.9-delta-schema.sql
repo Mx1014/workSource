@@ -19,8 +19,6 @@ PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_rentalv2_orders`
-MODIFY COLUMN `rental_uid`  varchar(256) NULL DEFAULT NULL COMMENT 'rental user id' AFTER `rental_resource_id`;
-ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `vip_level`  varchar(255) NULL COMMENT '会员等级 白金卡 金卡 银卡' AFTER `pay_channel`;
 ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `source`  tinyint(4) NULL COMMENT '0 用户发起 1后台录入' AFTER `vip_level`;
