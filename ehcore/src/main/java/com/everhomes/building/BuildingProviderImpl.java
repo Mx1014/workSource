@@ -14,6 +14,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.community.BuildingAdminStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingsDao;
@@ -148,6 +149,7 @@ public class BuildingProviderImpl implements BuildingProvider {
 				.where(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
 				.and(Tables.EH_BUILDINGS.NAME.eq(buildingName))
 				.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()))
 				.fetchInto(Building.class);
 		return buildingList;
 	}

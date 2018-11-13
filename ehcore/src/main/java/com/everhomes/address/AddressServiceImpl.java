@@ -112,6 +112,7 @@ import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.address.UpdateAddressArrangementCommand;
 import com.everhomes.rest.address.UploadApartmentAttachmentCommand;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressArrangementDTO;
 import com.everhomes.rest.address.AddressArrangementStatus;
@@ -221,6 +222,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroupHistory;
 import com.everhomes.user.UserGroupHistoryProvider;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
@@ -380,8 +382,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber, A
 
     @Autowired
     private ScheduleProvider scheduleProvider;
-@Autowired
+    
+    @Autowired
     private CustomerService customerService;
+    
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
 
     // 升级平台包到1.0.1，把@PostConstruct换成ApplicationListener，
     // 因为PostConstruct存在着平台PlatformContext.getComponent()会有空指针问题 by lqs 20180516
@@ -2965,7 +2971,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     @Override
     public void deleteApartmentAttachment(DeleteApartmentAttachmentCommand cmd) {
-        addressProvider.deleteApartmentAttachment(cmd.getId());
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_APARTMENT_ATTACHMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	addressProvider.deleteApartmentAttachment(cmd.getId());
     }
 
     @Override
@@ -2981,7 +2988,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 
     @Override
     public ApartmentAttachmentDTO uploadApartmentAttachment(UploadApartmentAttachmentCommand cmd) {
-        AddressAttachment attachment = new AddressAttachment();
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPLOAD_APARTMENT_ATTACHMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	
+    	AddressAttachment attachment = new AddressAttachment();
         attachment.setAddressId(cmd.getAddressId());
         attachment.setContentUri(cmd.getContentUri());
         attachment.setName(cmd.getAttachmentName());
@@ -3149,8 +3158,10 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	@Override
 	public void createAddressArrangement(CreateAddressArrangementCommand cmd) {
 		if (cmd.getOperationType() == AddressArrangementType.SPLIT.getCode()) {
+			assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_SPLIT_ARRANGEMENT, cmd.getOrganizationId(), cmd.getCommunityId());
 			createSplitArrangement(cmd);
 		}else if (cmd.getOperationType() == AddressArrangementType.MERGE.getCode()) {
+			assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_MERGE_ARRANGEMENT, cmd.getOrganizationId(), cmd.getCommunityId());
 			createMergeArrangement(cmd);
 		}
 	}
@@ -3794,7 +3805,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			}
 		}
 		return filterData;
-	}//四舍五入截断double类型数据
+	}
+	
+	//四舍五入截断double类型数据
 	private double doubleRoundHalfUp(double input,int scale){
 		BigDecimal digit = new BigDecimal(input);
 		return digit.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -3842,4 +3855,9 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
         }
 	}
 
+	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
+	}
+	
+	
 }

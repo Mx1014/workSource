@@ -146,6 +146,7 @@ import com.everhomes.pushmessagelog.PushMessageLogService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
 import com.everhomes.rest.address.AddressAdminStatus;
@@ -184,6 +185,7 @@ import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.FindReservationsCommand;
@@ -283,6 +285,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.userOrganization.UserOrganizations;
@@ -544,6 +547,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
    	
    	@Autowired
    	private AssetGroupProvider assetGroupProvider;
+   	
+   	@Autowired
+   	private UserPrivilegeMgr userPrivilegeMgr;
 
     private String queueName = "property-mgr-push";
 
@@ -2471,7 +2477,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public void createApartment(CreateApartmentCommand cmd) {
-        if (cmd.getCommunityId() == null || cmd.getStatus() == null || StringUtils.isEmpty(cmd.getBuildingName())) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_APARTMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+
+    	if (cmd.getCommunityId() == null || cmd.getStatus() == null || StringUtils.isEmpty(cmd.getBuildingName())) {
             throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameters");
         }
         if (StringUtils.isEmpty(cmd.getApartmentName())) {
@@ -2625,7 +2633,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public void updateApartment(UpdateApartmentCommand cmd) {
-        Address address = addressProvider.findAddressById(cmd.getId());
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_APARTMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	
+    	Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
             throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER, "Invalid parameters");
         }
@@ -2749,7 +2759,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public GetApartmentDetailResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
-        GetApartmentDetailResponse response = new GetApartmentDetailResponse();
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_GET_APARTMENT_DETAIL, cmd.getOrganizationId(), cmd.getCommunityId());
+    	
+    	GetApartmentDetailResponse response = new GetApartmentDetailResponse();
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
             throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST, "address not exist");
@@ -2943,6 +2955,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     @Override
     public void deleteApartment(DeleteApartmentCommand cmd) {
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_APARTMENT, cmd.getOrganizationId(), cmd.getCommunityId());
+    	
         Address address = addressProvider.findAddressById(cmd.getId());
         if (address == null || AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
         	throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST, "address not exist");
@@ -7794,6 +7808,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void createReservation(CreateReservationCommand cmd) {
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CREATE_RESERVATION, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		PmResourceReservation resourceReservation = new PmResourceReservation();
 		List<PmResourceReservation> existReservations = propertyMgrProvider.findReservationByAddress(cmd.getAddressId(), ReservationStatus.ACTIVE);
 		Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
@@ -7846,7 +7862,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public List<ListReservationsDTO> listReservations(ListReservationsCommand cmd) {
-        List<ListReservationsDTO> ret = new ArrayList<>();
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_LIST_RESERVATIONS, cmd.getOrganizationId(), cmd.getCommunityId());
+		
+		List<ListReservationsDTO> ret = new ArrayList<>();
         List<Long> ids = new ArrayList<>();
         if(cmd.getAddressId() != null){
         	//find a specific reservation
@@ -7884,7 +7902,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void updateReservation(UpdateReservationCommand cmd) {
-    	Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_RESERVATION, cmd.getOrganizationId(), cmd.getCommunityId());
+		
+		Timestamp start = new Timestamp(Long.valueOf(cmd.getStartTime()));
 		Timestamp end = new Timestamp(Long.valueOf(cmd.getEndTime()));
 		PmResourceReservation oldReservation = propertyMgrProvider.findReservationById(cmd.getReservationId());
 		
@@ -7917,6 +7937,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	 */
 	@Override
 	public void deleteReservation(DeleteReservationCommand cmd) {
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_RESERVATION, cmd.getOrganizationId(), cmd.getCommunityId());
+
 		this.dbProvider.execute((status) -> {
 			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED.getCode());
 //			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
@@ -7927,7 +7949,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void cancelReservation(CancelReservationCommand cmd) {
-	    Byte previousStatus = propertyMgrProvider.getReservationPreviousLivingStatusById(cmd.getReservationId());
+    	assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_CANCEL_RESERVATION, cmd.getOrganizationId(), cmd.getCommunityId());
+		
+		Byte previousStatus = propertyMgrProvider.getReservationPreviousLivingStatusById(cmd.getReservationId());
 		this.dbProvider.execute((status) -> {
 			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE.getCode());
 			addressProvider.changeAddressLivingStatus(addressId, previousStatus);
@@ -8066,6 +8090,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	//一房一价
 	@Override
 	public void setAuthorizePrice(AuthorizePriceCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_SET_AUTHORIZE_PRICE, cmd.getOrganizationId(), cmd.getCommunityId());
+
 		if (cmd.getNamespaceId() == null || cmd.getCommunityId() == null) {
 			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
@@ -8089,6 +8115,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_LIST_AUTHORIZE_PRICES, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
 		ListAuthorizePricesResponse response = new ListAuthorizePricesResponse();
@@ -8137,6 +8165,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void updateAuthorizePrice(AuthorizePriceCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_UPDATE_AUTHORIZE_PRICES, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		if (null == cmd.getId()) {
 			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
@@ -8160,6 +8190,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 	@Override
 	public void deleteAuthorizePrice(AuthorizePriceCommand cmd) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_DELETE_AUTHORIZE_PRICES, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		if (null == cmd.getId()) {
 			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_NULL_PARAMETER,
 					"Invalid id parameter in the command");
@@ -8298,6 +8330,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object importAddressAuthorizePriceData(ImportAddressCommand cmd, MultipartFile file) {
+		assetManagementPrivilegeCheck(cmd.getNamespaceId(), PrivilegeConstants.PM_PROPERTY_MANAGEMENT_IMPORT_AUTHORIZE_PRICES, cmd.getOrganizationId(), cmd.getCommunityId());
+		
 		Long userId = UserContext.current().getUser().getId();
 		ImportFileTask task = new ImportFileTask();
 		try {
@@ -8583,5 +8617,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
     }
 
+	private void assetManagementPrivilegeCheck(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
+		userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), orgId, privilegeId, ServiceModuleConstants.ASSET_MANAGEMENT, null, null, null, communityId);
+	}
 
 }

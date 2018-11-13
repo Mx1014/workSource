@@ -57,7 +57,7 @@ public interface CommunityService {
 	
 	ListBuildingsByStatusCommandResponse listBuildingsByStatus(listBuildingsByStatusCommand cmd);
 	
-	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
+	ImportFileTaskDTO importBuildingData(ImportBuildingDataCommand cmd, MultipartFile files);
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
 
@@ -203,5 +203,7 @@ public interface CommunityService {
 	void caculateAllBuildingArea();
 
 	OrgDTO getOrgIdByCommunityId(GetOrgIdByCommunityIdCommand cmd);
+
+	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
 
 }

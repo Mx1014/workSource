@@ -2447,7 +2447,7 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("listApartmentsInBuilding")
 	@RestReturn(value=ApartmentBriefInfoDTO.class,collection=true)
-	public RestResponse listPropApartments(ListApartmentsInBuildingCommand cmd) {
+	public RestResponse listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd) {
 		List<ApartmentBriefInfoDTO> results =  propertyMgrService.listApartmentsInBuilding(cmd);
 		RestResponse response = new RestResponse(results);
 		response.setErrorCode(ErrorCodes.SUCCESS);

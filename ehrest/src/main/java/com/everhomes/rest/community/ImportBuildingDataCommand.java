@@ -1,18 +1,16 @@
-package com.everhomes.rest.community.admin;
+package com.everhomes.rest.community;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>buildingId:楼栋id</li>
  * <li>namespaceId: 域空间id，用于权限校验</li>
  * <li>organizationId: 管理公司id，用于权限校验</li>
  * <li>communityId: 园区id，用于权限校验</li>
  * </ul>
  */
-public class DeleteBuildingAdminCommand {
+public class ImportBuildingDataCommand {
 	
-	private Long buildingId;
 	private Long communityId;
     private Integer namespaceId;
     private Long organizationId;
@@ -40,17 +38,10 @@ public class DeleteBuildingAdminCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
-
-	public Long getBuildingId() {
-		return buildingId;
-	}
-
-	public void setBuildingId(Long buildingId) {
-		this.buildingId = buildingId;
-	}
-	
-	@Override
+    
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
+
 }
