@@ -7373,44 +7373,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	@Override
 	public void updateResourceOrder(UpdateResourceOrderAdminCommand cmd) {
-		if (null == cmd.getId()) {
+		if (null == cmd.getDefaultOrder()) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_LOST_PARAMETER,
 					"Invalid id parameter in the command");
-		}
-		if (null == cmd.getDefaultOrderId()) {
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_LOST_PARAMETER,
-					"Invalid defaultOrderId parameter in the command");
 		}
 
 		if (StringUtils.isBlank(cmd.getResourceType())) {
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
-
-		RentalResource resource = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getId());
-		RentalResource exchangeResource = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getDefaultOrderId());
-
-		if (null == resource) {
-			LOGGER.error("RentalResource not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERRPR_LOST_RESOURCE_RULE,
-					"RentalResource not found");
-		}
-		if (null == exchangeResource) {
-			LOGGER.error("RentalResource not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERRPR_LOST_RESOURCE_RULE,
-					"RentalResource not found");
-		}
-
-		Long order = resource.getDefaultOrder();
-		Long exchangeOrder = exchangeResource.getDefaultOrder();
-
-		dbProvider.execute((TransactionStatus status) -> {
-			resource.setDefaultOrder(exchangeOrder);
-			exchangeResource.setDefaultOrder(order);
+		for (DefaultOrderDTO dto : cmd.getDefaultOrder()){
+			RentalResource resource = rentalCommonService.getRentalResource(cmd.getResourceType(), dto.getId());
+			if (null == resource) {
+				LOGGER.error("RentalResource not found, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERRPR_LOST_RESOURCE_RULE,
+						"RentalResource not found");
+			}
+			resource.setDefaultOrder(dto.getDefaultOrderId());
 			rentalv2Provider.updateRentalSite(resource);
-			rentalv2Provider.updateRentalSite(exchangeResource);
-			return null;
-		});
 
+		}
 	}
 
 	@Override
