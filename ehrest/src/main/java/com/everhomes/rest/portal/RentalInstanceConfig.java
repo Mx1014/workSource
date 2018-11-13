@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * <li>invoiceEntryFlag: 发票入口开关</li>
  * <li>limitCommunityFlag:是否仅本项目可见 </li>
+ * <li>crossCommuFlag:是否支持跨项目 </li>
  * </ul>
  */
 public class RentalInstanceConfig {
@@ -30,6 +31,8 @@ public class RentalInstanceConfig {
 	private Byte invoiceEntryFlag;
 
     private Byte limitCommunityFlag;
+
+    private Byte crossCommuFlag;
 
     public Long getResourceTypeId() {
 		return resourceTypeId;
@@ -85,6 +88,14 @@ public class RentalInstanceConfig {
 
 	public void setLimitCommunityFlag(Byte limitCommunityFlag) {
 		this.limitCommunityFlag = limitCommunityFlag;
+	}
+
+	public Byte getCrossCommuFlag() {
+		return crossCommuFlag;
+	}
+
+	public void setCrossCommuFlag(Byte crossCommuFlag) {
+		this.crossCommuFlag = crossCommuFlag;
 	}
 
 	@Override

@@ -76,6 +76,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
         rentalResourceType.setIdentify(rentalInstanceConfig.getIdentify());
         rentalResourceType.setStatus(ResourceTypeStatus.NORMAL.getCode());
         rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
+        rentalResourceType.setCrossCommuFlag(rentalInstanceConfig.getCrossCommuFlag());
         rentalv2Provider.createRentalResourceType(rentalResourceType);
         rentalInstanceConfig.setResourceTypeId(rentalResourceType.getId());
         return rentalResourceType;
@@ -94,6 +95,7 @@ public class RentalPortalPublishHandler implements PortalPublishHandler{
             if (null != rentalInstanceConfig.getUnauthVisible())
                 rentalResourceType.setUnauthVisible(rentalInstanceConfig.getUnauthVisible());
             rentalResourceType.setName(name);
+            rentalResourceType.setCrossCommuFlag(rentalInstanceConfig.getCrossCommuFlag());
             rentalv2Provider.updateRentalResourceType(rentalResourceType);
         }else{
             LOGGER.error("rental resource type is null. resourceTypeId = {}", rentalInstanceConfig.getResourceTypeId());
