@@ -785,6 +785,26 @@ http://www.w3.org/TR/html401/struct/global.html
 
         </tag>
 
+        <tag name="a" action="validate">
+
+            <!--  onInvalid="filterTag" has been removed as per suggestion at OWASP SJ 2007 - just "name" is valid -->
+            <attribute name="href"/>
+            <attribute name="onFocus"/>
+            <attribute name="onBlur"/>
+            <attribute name="nohref">
+                <regexp-list>
+                    <regexp name="anything"/>
+                </regexp-list>
+            </attribute>
+            <attribute name="rel">
+                <literal-list>
+                    <literal value="nofollow"/>
+                </literal-list>
+            </attribute>
+            <attribute name="name"/>
+
+        </tag>
+
         <tag name="map" action="validate"/>
 
         <!-- base tag removed per demo - this could be enabled with literal-list values you allow -->
@@ -1014,6 +1034,7 @@ http://www.w3.org/TR/html401/struct/global.html
 
         <tag name="fieldset" action="validate"/>
         <tag name="legend" action="validate"/>
+        <tag name="section" action="validate"/>
 
     </tag-rules>
 
