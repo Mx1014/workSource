@@ -78,7 +78,6 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.PushUsersCommand;
@@ -131,11 +130,10 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
-import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
@@ -174,7 +172,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -1746,7 +1743,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
+
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
+            try {
+                // 这个代码只是为了修复错误的数据，后期删除
+                LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
+            } catch (Exception e) {
+                LOGGER.error("Fetch user error", e);
+            }
             return true;
         } else {
             // 去统一用户那边检查登录状态
@@ -1755,40 +1759,61 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             try {
                 userInfo = sdkUserService.validateToken(tokenString);
             } catch (Exception e) {
-                // e.printStackTrace();
+                //
             }
+
             if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
                 User user = userProvider.findUserById(userInfo.getId());
-                if (user != null) {
+                UserIdentifier userIdentifier = this.userProvider.getUserByToken(userInfo.getPhones().iterator().next(), userInfo.getNamespaceId());
+
+                if (user != null && userIdentifier != null) {
                     LOGGER.info("User service check success, loginToken={}", loginToken);
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
-                }else {
-                    //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
-                    //如果core server和统一用户都没有用户，说明真的没有该用户
-                    // add by yanlong.liang 20180928
-                    user = ConvertHelper.convert(this.sdkUserService.getUser(userInfo.getId()), User.class);
-                    if (user != null) {
-                        this.userProvider.createUserFromUnite(user);
-                        UserIdentifier userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userInfo.getId()), UserIdentifier.class);
-                        if (userIdentifier != null) {
-                            UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
-                            if (existsIdentifier != null) {
-                                this.userProvider.updateIdentifier(userIdentifier);
-                            }else {
-                                this.userProvider.createIdentifierFromUnite(userIdentifier);
-                            }
-                        }
+                }
+
+                try {
+                    if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
+                        user = userProvider.findUserById(userInfo.getId());
+                        createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                         return true;
                     }
+                } catch (Exception e) {
+                    LOGGER.error("Fetch user error", e);
                 }
             } else {
-                LOGGER.info("User service check failure, loginToken={}", loginToken);
+                LOGGER.error("Never be here, userInfo should contains phones, userInfo={}", userInfo);
             }
 
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }
+    }
+
+    private boolean fetchUserSuccess(Long userId, Integer namespaceId) {
+        //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+        //如果core server和统一用户都没有用户，说明真的没有该用户
+        // add by yanlong.liang 20180928
+        User user = userProvider.findUserById(userId);
+        if (user == null) {
+            user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
+            if (user != null) {
+                this.userProvider.createUserFromUnite(user);
+            } else {
+                LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+            }
+        }
+
+        UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
+        if (userIdentifier == null) {
+            userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
+            if (userIdentifier != null) {
+                this.userProvider.createIdentifierFromUnite(userIdentifier);
+            } else {
+                LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+            }
+        }
+        return user != null && userIdentifier != null;
     }
 
     private static boolean isVerificationExpired(Timestamp ts) {

@@ -43,7 +43,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,9 +228,18 @@ public class SiyinJobValidateServiceImpl {
 	
 	private void createOrderOverTimeTask(SiyinPrintOrder order) {
 		Long unpaidNotifyTime  = configurationProvider.getLongValue("print.unpaid.notify.time", 120 * 60 * 1000L);
-		Long currentTime = System.currentTimeMillis();
-		Long messageTime = 39 * 60 * 60 * 1000L;
-		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", messageTime - currentTime);
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowStr = dateFormat.format(new Date());
+        String endStr = nowStr.substring(0,nowStr.indexOf(" ")) + " 23:59:59";
+        Long overTime = null;
+		try {
+			overTime = (dateFormat.parse(endStr).getTime() - dateFormat.parse(nowStr).getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Long messageTime = 15 * 60 * 60 * 1000L;
+		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", overTime + messageTime);
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
 				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
 		Map<String, Object> notifyMap = new HashMap<>();

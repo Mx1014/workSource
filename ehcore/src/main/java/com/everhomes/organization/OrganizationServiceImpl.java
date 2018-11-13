@@ -13848,49 +13848,31 @@ public class OrganizationServiceImpl implements OrganizationService {
     	//获取登录App的用户信息
         User user = UserContext.current().getUser();
         //深拷贝
-        OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
-//        //获取当前App所在的域空间
-//        Integer namespaceId = UserContext.getCurrentNamespaceId(organizationMember.getNamespaceId());
-//        //根据组织id来查询eh_organizations表信息
-//        Organization org = checkOrganization(organizationId);
+        OrganizationMember member = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
+        //获取当前App所在的域空间
+        Integer namespaceId = UserContext.getCurrentNamespaceId(member.getNamespaceId());
         
-        //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），非null则更新，null则插入
-        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(organizationMember.getTargetId(),"DIRECT_UNDER_ENTERPRISE",organizationMember.getOrganizationId(),organizationMember.getContactToken());
+        //从organizations表查部门数据
+        List<String> types = new ArrayList<>();
+        types.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        Organization organization = organizationProvider.listOrganizationsByPathAndToken(member.getOrganizationId(), types,namespaceId);
         
-        if(selectMember == null){
-        	OrganizationMember member = new OrganizationMember();
-        	member.setOrganizationId(organizationId);
-        	member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-        	member.setTargetId(organizationMember.getTargetId());
-        	member.setContactName(StringUtils.isEmpty(organizationMember.getContactName()) ? user.getNickName() : organizationMember.getContactName());
-        	member.setContactType(IdentifierType.MOBILE.getCode());
-        	member.setContactToken(organizationMember.getContactToken());
-        	member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-        	member.setEmployeeNo(organizationMember.getEmployeeNo());
-        	member.setAvatar(user.getAvatar());
-        	member.setGroupPath(organizationMember.getGroupPath());
-        	member.setGender(organizationMember.getGender());
-        	member.setStringTag3(organizationMember.getEmail());
-        	member.setNamespaceId(organizationMember.getNamespaceId());
-        	member.setGroupType("DIRECT_UNDER_ENTERPRISE");  //必须是DIRECT_UNDER_ENTERPRISE
-        	member.setOperatorUid(user.getId());
-        	member.setCreatorUid(user.getId());
-        	member.setContactDescription(organizationMember.getContactDescription());
-        	member.setMemberGroup(organizationMember.getMemberGroup());
-        	member.setGroupId(organizationMember.getGroupId());
-        	member.setDetailId(organizationMember.getDetailId());
-        	//创建 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
-        	organizationProvider.createOrganizationMember(member);
-        	LOGGER.debug("插入新的【OrganizationMember】数据： "+member.toString());
-        }else{
-        	LOGGER.debug("更新前：selectMember: "+selectMember.toString());
-        	//重复创建管理人 groupType = DIRECT_UNDER_ENTERPRISE 的 OrganizationMember记录
-        	organizationProvider.updateOrganizationMember(selectMember);;
-        	LOGGER.debug("更新【OrganizationMember】数据： "+selectMember.toString());
-        	
+        if(organization == null){
+        	return;
         }
         
+        //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），null则插入
+        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByGroupTypeAndContactToken("DIRECT_UNDER_ENTERPRISE",member.getContactToken(),organization.getPath());
         
+        if(selectMember == null){
+        	// organizationId要从organizations表找到主属部门记录，然后添加；
+        	member.setGroupPath(organization.getPath());
+            member.setMemberGroup(null);
+            member.setOrganizationId(organization.getId());
+        	member.setGroupType("DIRECT_UNDER_ENTERPRISE");  //必须是DIRECT_UNDER_ENTERPRISE
+        	organizationProvider.createOrganizationMember(member);
+        	LOGGER.debug("插入新的【OrganizationMember】数据： "+member.toString());
+        }
     }
     
     private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {

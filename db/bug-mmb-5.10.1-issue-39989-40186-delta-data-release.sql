@@ -97,9 +97,7 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '27', 'zh_CN', '取消订单 需要退款', '尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '86', 'zh_CN', '取消订单 需要退款','尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。', '0');
 
--- AUTHOR: 缪洲
--- REMARK: 停车缴费收款账号迁移
-update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
+
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
@@ -107,15 +105,6 @@ update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 -- DESCRIPTION: 此SECTION只在左邻基线（非独立署部）执行的脚本
 -- AUTHOR:
 -- REMARK:
-
--- AUTHOR:黄明波
--- REMARK:删除现网有误数据
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212660 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217590 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212984 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217589 and namespace_id = 999961;
-
-
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: dev
