@@ -161,7 +161,7 @@ public class WelfareServiceImpl implements WelfareService {
     @Override
     public DraftWelfareResponse draftWelfare(DraftWelfareCommand cmd) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
-        WelfaresDTO welfareDTO = cmd.getWelfare();
+        WelfaresDTO welfareDTO = ConvertHelper.convert(cmd, WelfaresDTO.class);
         if (welfareDTO.getId() != null) {
             lockName = lockName + welfareDTO.getOrganizationId() + welfareDTO.getId();
         } else {
@@ -180,7 +180,7 @@ public class WelfareServiceImpl implements WelfareService {
                 }
             }
             welfareDTO.setStatus(WelfareStatus.DRAFT.getCode());
-            welfareDTO.setId(saveWelfare(cmd.getWelfare()).getId());
+            welfareDTO.setId(saveWelfare(welfareDTO).getId());
             return null;
         });
         return new DraftWelfareResponse(welfareDTO);
