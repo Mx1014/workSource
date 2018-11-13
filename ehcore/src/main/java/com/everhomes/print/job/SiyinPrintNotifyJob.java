@@ -95,11 +95,6 @@ public class SiyinPrintNotifyJob extends QuartzJobBean {
         actionData.setClientHandlerType((byte)2);
         actionData.setAppId(apps.get(0).getOriginId());
         actionData.setCommunityId(order.getOwnerId());
-		try {
-			url =URLEncoder.encode(url, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
         actionData.setUrl(url);
 
         String routerUri = RouterBuilder.build(Router.CLOUD_PRINT_DETAIL, actionData);
