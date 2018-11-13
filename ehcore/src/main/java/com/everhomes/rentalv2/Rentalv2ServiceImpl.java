@@ -1360,16 +1360,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 //		}
 		rSiteDTO.setRentalSiteId(rentalSite.getId());
 		rSiteDTO.setSiteName(rentalSite.getResourceName());
-		//fix bug : charge uid null point 2016-10-9
 		if (null != rentalSite.getChargeUid()) {
-			User charger = this.userProvider.findUserById(rentalSite.getChargeUid());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rentalSite.getChargeUid(), rentalSite.getOrganizationId());
-			if (member != null) {
-				rSiteDTO.setChargeName(member.getContactName());
-			} else if (null != charger) {
-				rSiteDTO.setChargeName(charger.getNickName());
-			}
+		    String [] chargers = rentalSite.getChargeUid().split(",");
+		    StringBuilder chargeName = new StringBuilder();
+		    for (String uid : chargers){
+                User charger = this.userProvider.findUserById(Long.valueOf(uid));
+                OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(Long.valueOf(uid), rentalSite.getOrganizationId());
+                if (member != null) {
+                    chargeName.append(member.getContactName()).append(",");
+                } else if (null != charger) {
+                    chargeName.append(charger.getNickName()).append(",");
+                }
+            }
+            rSiteDTO.setChargeName(chargeName.deleteCharAt(chargeName.length() - 1).toString());
 		}
+
 		if (null != rentalSite.getOfflinePayeeUid()) {
 			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(rSiteDTO.getOfflinePayeeUid(), rentalSite.getOrganizationId());
 			if (null != member) {
@@ -1842,6 +1847,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		rentalBill.setPackageName(cmd.getPackageName());
 		rentalBill.setScene(cmd.getSceneType());
+		User user = userProvider.findUserById(userId);
+		if (user.getVipLevelText() != null)
+			rentalBill.setVipLevel(user.getVipLevelText());
+		rentalBill.setSource(cmd.getSource() == null ? (byte)1 : cmd.getSource());
 		rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId());
 		//设置订单模式
 		rentalBill.setPayMode(rsType.getPayMode());
@@ -2642,7 +2651,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			return;
 
 		try {
-
 			map = new HashMap<>();
 			map.put("userName", user.getNickName());
 			map.put("resourceName", rentalBill.getResourceName());
@@ -2655,31 +2663,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 
-	@Override
-	public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+
+	public void sendMessageCode(String uids, String locale, Map<String, String> map, int code) {
 		String scope = RentalNotificationTemplateCode.SCOPE;
-
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-		sendMessageToUser(uid, notifyTextForOther);
+		rentalCommonService.sendMessageToUser(uids,notifyTextForOther);
 	}
 
-	private void sendMessageToUser(Long userId, String content) {
-		if (null == userId)
-			return;
-		MessageDTO messageDto = new MessageDTO();
-		messageDto.setAppId(AppConstants.APPID_MESSAGING);
-		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-		messageDto
-				.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-		messageDto.setBody(content);
-		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-		LOGGER.debug("messageDTO : ++++ \n " + messageDto);
-		// 发消息 +推送
-		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
-				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-	}
 
 	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {
 		List<RentalCell> result = new ArrayList<>();
@@ -2822,7 +2812,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 						}
 
 						RentalResource resource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
-						Long chargeUid = resource.getChargeUid();
+						String chargeUid = resource.getChargeUid();
 						String notifyTextForOther;
 						if (orderReminderEndTimeLong % 3600000 != 0)//检测是否在15分或45分结束
 							notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
@@ -2832,7 +2822,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 									RentalNotificationTemplateCode.RENTAL_END_NOTIFY_DAY, RentalNotificationTemplateCode.locale, map, "");
 
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("userId",chargeUid);
+						messageMap.put("userIds",chargeUid);
 						messageMap.put("content",notifyTextForOther);
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
@@ -6695,9 +6685,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rentalSite.setOfflinePayeeUid(cmd.getOfflinePayeeUid());
 			rentalSite.setConfirmationPrompt(cmd.getConfirmationPrompt());
 			rentalSite.setAclinkId(cmd.getAclinkId());
-//			rentalSite.setMultiUnit(cmd.getMultiUnit());
-//			rentalSite.setAutoAssign(cmd.getAutoAssign());
-			//rentalSite.setResourceCounts(cmd.getSiteCounts());
 			rentalv2Provider.updateRentalSite(rentalSite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(rentalSite.getResourceType(), cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteFilesBySiteId(rentalSite.getResourceType(), cmd.getId());
@@ -7586,9 +7573,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					RentalServiceErrorCode.ERROR_DEFAULT_RULE_NOT_FOUND, "RentalDefaultRule not found");
 		}
 
-		buildPriceRules(cmd.getPriceRules());
-
-		buildPricePackages(cmd.getPricePackages());
 
 		BeanUtils.copyProperties(cmd, rule,"ownerType","ownerId");
 

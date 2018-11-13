@@ -138,6 +138,17 @@ public class RentalCommonServiceImpl {
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
+    public void sendMessageToUser(String uids, String content) {
+        try {
+            String[] userIds = uids.split(",");
+            for (String uid : userIds) {
+                sendMessageToUser(Long.valueOf(uid), content);
+            }
+        }catch (Exception e){
+            LOGGER.error("send messages error uids = {} exception = {}", uids,e);
+        }
+    }
+
     public void sendRouterMessageToUser(Long userId, String content, Long orderId, String resourceType) {
         if(null == userId)
             return;
@@ -176,6 +187,17 @@ public class RentalCommonServiceImpl {
 
         String notifyText = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         sendMessageToUser(uid, notifyText);
+    }
+
+    public void sendMessageCode(String uids, Map<String, String> map, int code) {
+        try {
+            String[] userIds = uids.split(",");
+            for (String uid : userIds) {
+                sendMessageCode(Long.valueOf(uid), map, code);
+            }
+        }catch (Exception e){
+            LOGGER.error("send messages error uids = {} exception = {}", uids,e);
+        }
     }
 
     public BigDecimal calculateOverTimeFee(RentalOrder order,BigDecimal amount, long now) {

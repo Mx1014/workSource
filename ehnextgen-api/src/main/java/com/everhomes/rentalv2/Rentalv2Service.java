@@ -143,9 +143,6 @@ public interface Rentalv2Service {
 
 	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
 
-
-	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
-
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 
 	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);

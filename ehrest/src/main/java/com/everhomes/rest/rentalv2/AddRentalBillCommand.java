@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>endTime：结束时间</li>
  * <li>rules：预定单元格列表{@link com.everhomes.rest.rentalv2.RentalBillRuleDTO}</li>
  * <li>packageName：套餐名称</li>
+ * <li>source：0 或 空 用户发起 1 后台录入</li>
  * </ul>
  */
 public class AddRentalBillCommand {
@@ -30,6 +31,7 @@ public class AddRentalBillCommand {
 	private List<RentalBillRuleDTO> rules;
 	private String sceneType;
 	private String sceneToken;
+	private Byte source;
 	private String packageName;
 
 	public String getResourceType() {
@@ -85,23 +87,13 @@ public class AddRentalBillCommand {
 		this.packageName = packageName;
 	}
 
+	public Byte getSource() {
+		return source;
+	}
 
-
-	//	public Long getStartTime() {
-//		return startTime;
-//	}
-//
-//	public void setStartTime(Long startTime) {
-//		this.startTime = startTime;
-//	}
-//
-//	public Long getEndTime() {
-//		return endTime;
-//	}
-//
-//	public void setEndTime(Long endTime) {
-//		this.endTime = endTime;
-//	}
+	public void setSource(Byte source) {
+		this.source = source;
+	}
 
 	public List<RentalBillRuleDTO> getRules() {
 		return rules;

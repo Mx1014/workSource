@@ -105,6 +105,7 @@ public class RentalBillDTO {
 	private String offlinePayName;
 	private String offlinePayPhone;
 	private String payChannel;
+	private String vipLevel;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -627,5 +628,13 @@ public class RentalBillDTO {
 
 	public void setPayChannel(String payChannel) {
 		this.payChannel = payChannel;
+	}
+
+	public String getVipLevel() {
+		return vipLevel;
+	}
+
+	public void setVipLevel(String vipLevel) {
+		this.vipLevel = vipLevel;
 	}
 }

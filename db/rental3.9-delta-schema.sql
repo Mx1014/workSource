@@ -22,6 +22,9 @@ ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `vip_level`  varchar(255) NULL COMMENT '会员等级 白金卡 金卡 银卡' AFTER `pay_channel`;
 ALTER TABLE `eh_rentalv2_orders`
 ADD COLUMN `source`  tinyint(4) NULL COMMENT '0 用户发起 1后台录入' AFTER `vip_level`;
+ALTER TABLE `eh_rentalv2_resource_types`
+ADD COLUMN `cross_commu_flag`  tinyint(4) NULL COMMENT '是否支持跨项目' AFTER `identify`;
+
 
 ALTER TABLE `eh_rentalv2_resources`
 MODIFY COLUMN `charge_uid`  varchar(256) NULL DEFAULT NULL COMMENT '负责人id' AFTER `notice`;
