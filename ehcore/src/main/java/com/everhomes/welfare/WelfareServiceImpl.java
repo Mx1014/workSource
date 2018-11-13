@@ -240,15 +240,16 @@ public class WelfareServiceImpl implements WelfareService {
     @Override
     public SendWelfaresResponse sendWelfare(SendWelfareCommand cmd) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
-        if (cmd.getWelfare().getId() != null) {
-            lockName = lockName + cmd.getWelfare().getOrganizationId() + cmd.getWelfare().getId();
+        WelfaresDTO welfaresDTO = ConvertHelper.convert(cmd, WelfaresDTO.class);
+        if (welfaresDTO.getId() != null) {
+            lockName = lockName + welfaresDTO.getOrganizationId() + welfaresDTO.getId();
         } else {
-            lockName = lockName + cmd.getWelfare().getOrganizationId();
+            lockName = lockName + welfaresDTO.getOrganizationId();
         }
         return this.coordinationProvider.getNamedLock(lockName).enter(() -> {
             SendWelfaresResponse response = new SendWelfaresResponse();
-            if (cmd.getWelfare().getId() != null) {
-                Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfare().getId());
+            if (welfaresDTO.getId() != null) {
+                Welfare welfare = welfareProvider.findWelfareById(welfaresDTO.getId());
                 if(null == welfare){
                 	throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利被删除");
@@ -258,22 +259,22 @@ public class WelfareServiceImpl implements WelfareService {
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能发送");
                 }
             }
-            cmd.getWelfare().setStatus(WelfareStatus.SENDED.getCode());
+            welfaresDTO.setStatus(WelfareStatus.SENDED.getCode());
             //校验在职离职
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
             response.setDismissReceivers(new ArrayList<>());
-            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getWelfare().getSenderDetailId());
+            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(welfaresDTO.getSenderDetailId());
             if (null != member) {
-                cmd.getWelfare().setSenderUid(member.getTargetId());
+                welfaresDTO.setSenderUid(member.getTargetId());
             }
             if (archivesService.checkDismiss(member)) {
                 response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
-                response.setDismissSenderDetailId(cmd.getWelfare().getSenderDetailId());
-                response.setDismissSenderUid(cmd.getWelfare().getSenderUid());
+                response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
+                response.setDismissSenderUid(welfaresDTO.getSenderUid());
             }
             List<Long> targetUserIds = new ArrayList<>();
             //校验所有人是否离职
-            for(WelfareReceiverDTO receiverDTO :cmd.getWelfare().getReceivers()){
+            for(WelfareReceiverDTO receiverDTO :welfaresDTO.getReceivers()){
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
                 receiverDTO.setReceiverUid(member.getTargetId());
                 targetUserIds.add(receiverDetail.getTargetId());
@@ -286,12 +287,12 @@ public class WelfareServiceImpl implements WelfareService {
                 return response;
             }
             //校验没问题保存福利
-            Welfare welfare = saveWelfare(cmd.getWelfare());
+            Welfare welfare = saveWelfare(welfaresDTO);
 
             try{
                 //调用发送接口
-                if (CollectionUtils.isNotEmpty(cmd.getWelfare().getCoupons())) {
-                    sendCouponsToUsers(cmd, response, targetUserIds, welfare.getOrganizationId());
+                if (CollectionUtils.isNotEmpty(welfaresDTO.getCoupons())) {
+                    sendCouponsToUsers(welfaresDTO, response, targetUserIds, welfare.getOrganizationId());
                 }
                 //积分 TODO
             }catch(Exception e){
@@ -305,7 +306,7 @@ public class WelfareServiceImpl implements WelfareService {
             	return response;
             }
             //发消息
-            cmd.getWelfare().getReceivers().forEach(r -> {
+            welfaresDTO.getReceivers().forEach(r -> {
                 sendPayslipMessage(welfare.getSubject(), welfare.getId(), r.getReceiverUid());
             });
             return response;
@@ -313,13 +314,13 @@ public class WelfareServiceImpl implements WelfareService {
 
     }
 
-    private void sendCouponsToUsers(SendWelfareCommand cmd, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
+    private void sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
         //卡券
         TransferToPersonalCommand cmd1 = new TransferToPersonalCommand();
         cmd1.setNamespaceId((long) UserContext.getCurrentNamespaceId());
         cmd1.setOrganizationId(organizationId);
         cmd1.setTargetUserList(targetUserIds);
-        List<ObtainDetailsExtendDTO> obtainsList = cmd.getWelfare().getCoupons().stream()
+        List<ObtainDetailsExtendDTO> obtainsList = welfaresDTO.getCoupons().stream()
                 .map(r->{
                     ObtainDetailsExtendDTO dto = new ObtainDetailsExtendDTO();
                     dto.setId(r.getCouponId());
