@@ -2473,7 +2473,7 @@ public class FieldServiceImpl implements FieldService {
                 }
             });
         }
-        List<String> defaultField = new ArrayList<>(Arrays.asList("name","entryStatusItemId",));
+        //List<String> defaultField = new ArrayList<>(Arrays.asList("name","entryStatusItemId",));
 
         return result;
     }
