@@ -3398,11 +3398,26 @@ public class ActivityServiceImpl implements ActivityService, ApplicationListener
                         .collect(Collectors.toList());
                 d.setPhone(phones);
             }else {
-				d.setUserName(r.getRealName());
-				d.setPhone(Arrays.asList(r.getPhone()));
+                GetGeneralFormValuesCommand getGeneralFormValuesCommand = new GetGeneralFormValuesCommand();
+                getGeneralFormValuesCommand.setSourceId(r.getId());
+                getGeneralFormValuesCommand.setSourceType(ActivitySignupFormHandler.GENERAL_FORM_MODULE_HANDLER_ACTIVITY_SIGNUP);
+                getGeneralFormValuesCommand.setOriginFieldFlag(NormalFlag.NEED.getCode());
+                List<PostApprovalFormItem> values = this.generalFormService.getGeneralFormValues(getGeneralFormValuesCommand);
+                if (values != null) {
+                    for (PostApprovalFormItem postApprovalFormItem : values) {
+                        if (postApprovalFormItem.getFieldName().equals("USER_PHONE")) {
+                            d.setPhone(Arrays.asList(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue()));
+                        }
+                        if (postApprovalFormItem.getFieldName().equals("USER_NAME")) {
+                            d.setUserName(processCommonTextField(postApprovalFormItem, postApprovalFormItem.getFieldValue()).getFieldValue());
+                        }
+                    }
+                }else {
+                    d.setUserName(r.getRealName());
+                    d.setPhone(Arrays.asList(r.getPhone()));
+                }
 			}
 
-            
             return d;
         }).collect(Collectors.toList());
         if(rosterList.size()<cmd.getPageSize()){
