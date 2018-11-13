@@ -456,7 +456,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         });
         return result;
     }
-
+    
+    @Override
+    public Organization listOrganizationsByPathAndToken(Long organizationId, List<String> types, Integer namespaceId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like("/" + organizationId + "%"));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(types));
+        query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(com.everhomes.rest.organization.Status.ACTIVE.getCode()));
+       
+        return query.fetchAnyInto(Organization.class);
+    }
 
     @Override
     public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, CrossShardListingLocator locator, Integer pageSize) {
@@ -7107,19 +7118,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public OrganizationMember listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(
-			Long memberUid, String groupType, Long organizationId, String contactToken) {
+	public OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType, String contactToken,String grouPath) {
         //1.获取上下文
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         //2.查询eh_organization_members表
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
-        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
-
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(grouPath+"%"));
+        
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, OrganizationMember.class));
             return null;
