@@ -268,6 +268,8 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		
 		LOGGER.info("listSiyinPrintOrderByOwners sql = {},param = {}",query.getSQL(),query.getBindValues());
 		
+		query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.desc());
+		
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
