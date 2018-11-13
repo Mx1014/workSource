@@ -220,7 +220,9 @@ public class SiyinJobValidateServiceImpl {
 	
 	private void createOrderOverTimeTask(SiyinPrintOrder order) {
 		Long unpaidNotifyTime  = configurationProvider.getLongValue("print.unpaid.notify.time", 120 * 60 * 1000L);
-		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", (24 * 60 * 60 * 1000L) - System.currentTimeMillis() + (15 * 60 * 60 * 1000L));
+		Long currentTime = System.currentTimeMillis();
+		Long messageTime = 39 * 60 * 60 * 1000L;
+		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", messageTime - currentTime);
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
 				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
 		Map<String, Object> notifyMap = new HashMap<>();
