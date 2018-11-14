@@ -2471,6 +2471,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return findOrganizationMemberByOrgIdAndToken(contactPhone, organizationId, null);
     }
 
+    //这个接口优先返回部门/直属部门,找不到再返回总公司
     @Override
     public OrganizationMember findMemberDepartmentByDetailId(Long detailId) {
 
@@ -2478,10 +2479,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)
                 .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode() 
-                		, OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode() , OrganizationGroupType.ENTERPRISE.getCode())));
-
+                		, OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode() )));
         Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
-
+        if (r != null)
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        r =  context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+            		.where(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(detailId)
+                    .and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                    .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))).fetchAny();
         if (r != null)
             return ConvertHelper.convert(r, OrganizationMember.class);
         return null;
