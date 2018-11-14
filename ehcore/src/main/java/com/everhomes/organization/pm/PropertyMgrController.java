@@ -2317,20 +2317,20 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-//	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
-//	/**
-//	 * <p>展示房源日志</p>
-//	 * <b>URL: /pm/listApartmentEvents</b>
-//	 */
-//	@RequestMapping("listApartmentEvents")
-//	@RestReturn(value = ApartmentEventDTO.class, collection = true)
-//	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
-//	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
-//		RestResponse response = new RestResponse(result);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
+	/**
+	 * <p>展示房源日志</p>
+	 * <b>URL: /pm/listApartmentEvents</b>
+	 */
+	@RequestMapping("listApartmentEvents")
+	@RestReturn(value = ApartmentEventDTO.class, collection = true)
+	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
+	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /pm/setAuthorizePrice</b>
