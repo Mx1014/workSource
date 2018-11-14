@@ -4191,19 +4191,36 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Override
 	public String buildAllianceUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType) {
+		return buildInstanceConfigUrl(namespaceId, config, pageRealDisplayType, false);
+	}
+	
+	@Override
+	public String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config,
+			String pageRealDisplayType) {
+		return buildInstanceConfigUrl(namespaceId, config, pageRealDisplayType, true);
+	}
+	
+	private String buildInstanceConfigUrl(Integer namespaceId, ServiceAllianceInstanceConfig config,
+			String pageRealDisplayType, boolean isOffLine) {
 
 		// 服务联盟v3.4 web化之后，直接设置为跳转链接即可
-		// http://dev15.zuolin.com/service-alliance-web/build/index.html#/home/filterlist?displayType=filterlist&parentId=213729&enableComment=1#sign_suffix
+		// http://dev15.zuolin.com/service-alliance-web/build/index.html?displayType=filterlist&parentId=213729&enableComment=1#/home/filterlist#sign_suffix
 		StringBuilder url = new StringBuilder();
-		url.append("${home.url}/service-alliance-web/build/index.html");
+		String homeUrl = configProvider.getValue(namespaceId, "home.url", "");
+		if (isOffLine) {
+			url.append(homeUrl + "/nar/serviceAlliance/build/index.html");
+		} else {
+			url.append("${home.url}/service-alliance-web/build/index.html");
+		}
+		
 		url.append("?displayType=" + config.getDisplayType());
 		url.append("&parentId=" + config.getType());
 		url.append("&enableComment=" + config.getEnableComment());
 		url.append("&ns=" + namespaceId);
 		if (null == pageRealDisplayType) {
-			url.append("#/home/"+ config.getDisplayType());
+			url.append("#/home/" + config.getDisplayType());
 		} else {
-			url.append("#/home/"+ pageRealDisplayType);
+			url.append("#/home/" + pageRealDisplayType);
 		}
 		url.append("#sign_suffix");
 		return url.toString();
@@ -4324,5 +4341,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		return null;
 	}
+	
+	
+	/**
+	 * 判断当前域是否开启服务联盟离线包模式
+	 */
+	@Override
+	public boolean isAllianceOffLine(Integer namespaceId) {
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+
+		return configurationProvider.getBooleanValue(namespaceId, "serviceAlliance.offline.flag", false);
+	} 
 
 }

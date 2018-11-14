@@ -18,6 +18,7 @@ import java.util.List;
  * <li>appType: web-跳转web链接  native-原生 这个参数用于生成web化的actionData还是原生的actionData</li>
  * <li>realm: 用于离线应用识别</li>
  * <li>enableOnly: 0-可以在多项目显示 1-仅当前项目下显示</li>
+ * <li>entryUrl: 离线包，使用该url</li> 
  * <li>url: 用于广场显示</li>
  * </ul>
  */
@@ -42,6 +43,8 @@ public class ServiceAllianceInstanceConfig {
 	private String realm;
 
 	private Byte enableOnly;
+	
+	private String entryUrl;
 	
 	private String url;
 
@@ -175,6 +178,14 @@ public class ServiceAllianceInstanceConfig {
 
 	public void setEnableOnly(Byte enableOnly) {
 		this.enableOnly = enableOnly;
+	}
+
+	public String getEntryUrl() {
+		return entryUrl;
+	}
+
+	public void setEntryUrl(String entryUrl) {
+		this.entryUrl = entryUrl;
 	}
 
 }
