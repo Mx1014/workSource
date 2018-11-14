@@ -553,6 +553,9 @@ public class FieldServiceImpl implements FieldService {
         }
         if (namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            if(scopeFields == null || scopeFields.size() == 0){
+                scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
+            }
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
