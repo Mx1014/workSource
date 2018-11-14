@@ -953,6 +953,40 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     }
 
+    @Override
+    public void recordCustomerLevelChange(Long oldLevelItemId, Long newLevelItemId, Integer namespaceId, Long communityId, Long customerId, Timestamp changeDate) {
+        if (!newLevelItemId.equals(oldLevelItemId)) {
+            CustomerLevelChangeRecord record = new CustomerLevelChangeRecord();
+            record.setCustomerId(customerId);
+            record.setCommunityId(communityId);
+            record.setOldStatus(oldLevelItemId);
+            record.setNewStatus(newLevelItemId);
+            record.setChangeDate(changeDate);
+            record.setNamespaceId(namespaceId);
+            invitedCustomerProvider.createCustomerLevelChangeRecord(record);
+        }
+    }
+    @Override
+    public void changeCustomerLevel(EnterpriseCustomer customer, Long newLevelItemId){
+        recordCustomerLevelChange(customer.getLevelItemId(), newLevelItemId, customer.getNamespaceId(), customer.getCommunityId(), customer.getId(), null);
+        //customer.setLevelItemId(levelItemId);
+        //还未确定是否改变客户状态就会改变客户类型
+
+        /*if(levelItemId.equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())){
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+        }else{
+            customer.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
+        }*/
+
+
+    }
+
+    @Override
+    public void changeCustomerLevelByCustomerId(Long customerId, Long newLevelItemId){
+        EnterpriseCustomer customer = customerProvider.findById(customerId);
+        changeCustomerLevel(customer, newLevelItemId);
+    }
+
 }
 
 

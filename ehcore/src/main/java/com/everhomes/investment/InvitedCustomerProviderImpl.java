@@ -605,12 +605,24 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 
     public List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId,Timestamp queryStartDate, Timestamp queryEndDate){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        List<CustomerLevelChangeRecord> result = new ArrayList<>();
+
+        SelectQuery<EhCustomerLevelChangeRecordsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS);
 
         Condition c1 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.NAMESPACE_ID.eq(namespaceId));
-        Condition c1 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.C.eq(namespaceId));
+        Condition c2 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.COMMUNITY_ID.eq(communityId));
 
-        if()
+        query.addConditions(c1);
+        query.addConditions(c2);
+
+        if(queryEndDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.CHANGE_DATE.le(queryEndDate));
+        }
+
+        if(queryStartDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.CHANGE_DATE.ge(queryStartDate));
+        }
+
+        return query.fetchInto(CustomerLevelChangeRecord.class);
 
     }
 

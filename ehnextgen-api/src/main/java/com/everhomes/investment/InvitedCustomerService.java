@@ -1,5 +1,6 @@
 package com.everhomes.investment;
 
+import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
 import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
@@ -11,6 +12,7 @@ import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface InvitedCustomerService {
@@ -58,5 +60,11 @@ public interface InvitedCustomerService {
     List<CustomerStatisticsDTO> getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 
     void initCustomerStatusToDB();
+
+    void recordCustomerLevelChange(Long oldLevelItemId, Long newLevelItemId, Integer namespaceId, Long communityId, Long customerId, Timestamp changeDate);
+
+    void changeCustomerLevel(EnterpriseCustomer customer, Long levelItemId);
+
+    void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
 
 }

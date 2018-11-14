@@ -7,6 +7,7 @@ import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,4 +79,6 @@ public interface InvitedCustomerProvider {
     List<EnterpriseCustomer> getInitCustomerStatus(Integer namespaceId, Integer pageSize, Long nextAnchor);
 
     void createCustomerLevelChangeRecord(CustomerLevelChangeRecord record);
+
+    List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 }

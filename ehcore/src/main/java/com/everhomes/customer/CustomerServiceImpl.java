@@ -27,6 +27,7 @@ import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.entity.EntityType;
 import com.everhomes.equipment.EquipmentService;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -190,6 +191,10 @@ public class CustomerServiceImpl implements CustomerService {
     final String downloadDir = "\\download\\";
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+    @Autowired
+    private InvitedCustomerService invitedCustomerService;
 
     @Autowired
     private EnterpriseCustomerProvider enterpriseCustomerProvider;
@@ -1070,6 +1075,8 @@ public class CustomerServiceImpl implements CustomerService {
         if (updateCustomer.getTrackingUid() == null) {
             updateCustomer.setTrackingName(null);
         }
+        invitedCustomerService.changeCustomerLevelByCustomerId(updateCustomer.getId(), updateCustomer.getLevelItemId());
+
         enterpriseCustomerProvider.updateEnterpriseCustomer(updateCustomer);
         enterpriseCustomerSearcher.feedDoc(updateCustomer);
 
