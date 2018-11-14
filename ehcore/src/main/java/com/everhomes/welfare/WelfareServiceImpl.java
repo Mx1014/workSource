@@ -332,15 +332,15 @@ public class WelfareServiceImpl implements WelfareService {
 
         cmd1.setObtainsList(obtainsList);
         EnterpriseDistributionToPersonRestResponse resp = generalOrderService.distributionToPerson(cmd1);
-        if (resp.getErrorCode().equals("200")) {
+        if (resp.getErrorCode().equals(200)) {
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
-        } else if (resp.getErrorCode().equals("104")) {
+        } else if (resp.getErrorCode().equals(104)) {
             response.setCheckStatus(WelfareCheckStatus.NO_ENOUGH_BALANCE.getCode());
-            LOGGER.error("发送卡券出错 resp:" + resp);
+            LOGGER.error("发送卡券出错 resp:" + StringHelper.toJsonString(resp));
             throw new Exception();
         } else{
             response.setCheckStatus(WelfareCheckStatus.OTHER.getCode());
-            LOGGER.error("发送卡券出错 resp:" + resp);
+            LOGGER.error("发送卡券出错 resp:" + StringHelper.toJsonString(resp));
             throw new Exception();
         }
     }
