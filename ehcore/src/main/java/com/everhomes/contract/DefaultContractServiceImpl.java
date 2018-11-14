@@ -3906,7 +3906,9 @@ long assetCategoryId = 0l;
 
         for (Long contractId : contractIdlist) {
         	Contract contract = contractProvider.findContractById(contractId);
-        	
+        	if (contract == null) {
+				continue ;
+			}
         	FindContractCommand command = new FindContractCommand();
 			command.setId(contractId);
 			command.setPartyAId(contract.getPartyAId());
