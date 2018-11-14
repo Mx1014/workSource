@@ -35,6 +35,8 @@ public class AssetBillProviderImpl implements AssetBillProvider {
     private SequenceProvider sequenceProvider;
 
 	public void batchDeleteBill(Integer namespaceId, String ownerType, Long ownerId, List<Long> billIdList) {
+		
+		
 		this.dbProvider.execute((TransactionStatus status) -> {
             DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
             //删除账单（置状态）
