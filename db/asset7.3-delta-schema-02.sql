@@ -1,0 +1,1468 @@
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 微信分享配置中增加主题色字段
+ALTER TABLE `eh_app_urls` ADD COLUMN `theme_color` VARCHAR(64) COMMENT '主题色';
+ALTER TABLE `eh_app_urls` ADD COLUMN `package_name` VARCHAR(64) COMMENT '包名';
+
+ALTER TABLE `eh_rentalv2_site_resources`
+MODIFY COLUMN `name`  varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL AFTER `type`;
+
+-- AUTHOR: 吴寒
+-- REMARK: 打卡考勤V8.2 - 支持人脸识别关联考勤；支持自动打卡
+ALTER TABLE `eh_punch_logs` ADD COLUMN `create_type` TINYINT NOT NULL DEFAULT 0 COMMENT '创建类型 : 0-正常打卡创建 1-自动打卡创建 2-人脸识别打卡创建 4-其他第三方接口创建(通过第三方接口打卡没有带创建类型)' ;
+
+-- 外出打卡表
+CREATE TABLE `eh_punch_go_out_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `user_id` BIGINT DEFAULT NULL COMMENT 'user''s id',
+  `detail_id` BIGINT DEFAULT NULL COMMENT 'eh_organization_member_details id',
+  `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
+  `namespace_id` INT DEFAULT NULL COMMENT 'NAMESPACE id',
+  `longitude` DOUBLE DEFAULT NULL,
+  `latitude` DOUBLE DEFAULT NULL,
+  `location_info` VARCHAR(1024) DEFAULT NULL COMMENT '打卡用到的地址定位',
+  `wifi_info` VARCHAR(1024) DEFAULT NULL COMMENT '打卡用到的WiFi信息(暂时无用)',
+  `img_uri` VARCHAR(2048) DEFAULT NULL COMMENT '打卡上传图片uri地址',
+  `description` VARCHAR(1024) DEFAULT NULL COMMENT '备注',
+  `punch_date` DATE DEFAULT NULL COMMENT 'user punch date',
+  `punch_time` DATETIME DEFAULT NULL COMMENT '打卡时间',
+  `identification` VARCHAR(255) DEFAULT NULL COMMENT 'unique identification for a phone',
+  `status` TINYINT(4) DEFAULT NULL COMMENT '打卡状态 0-正常 1-迟到 2-早退 3-缺勤 14-缺卡',
+  `update_date` DATE DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_user_id` (`user_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_punch_day_logs` ADD COLUMN `go_out_punch_flag` TINYINT DEFAULT 0 COMMENT '是否外出打卡，1：是 0：否' AFTER `normal_flag`;
+ALTER TABLE `eh_punch_statistics` ADD COLUMN `go_out_punch_day_count` INT DEFAULT 0 COMMENT '当月外出打卡天数' AFTER `rest_day_count`;
+
+-- AUTHOR: 李清岩
+-- REMARK: 20180930 issue-38336
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_id` bigint(20) DEFAULT NULL COMMENT '门禁设备固件版本id';
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_name` VARCHAR (128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_id` bigint(20) DEFAULT NULL COMMENT '门禁设备类型id';
+ALTER TABLE `eh_door_access` ADD COLUMN `device_name` VARCHAR(128) DEFAULT NULL COMMENT '门禁设备固件名';
+ALTER TABLE `eh_door_access` ADD COLUMN `city_id` bigint(20) DEFAULT NULL COMMENT '城市id';
+ALTER TABLE `eh_door_access` ADD COLUMN `province` VARCHAR(64) DEFAULT NULL COMMENT '省份名';
+
+CREATE TABLE `eh_aclink_device` (
+	`id` bigint(20),
+	`name` VARCHAR(128) COMMENT '设备类型名称',
+	`type` TINYINT(4) DEFAULT NULL COMMENT '设备类型 0：自有设备 1：第三方设备',
+	`description` VARCHAR(1024) DEFAULT NULL COMMENT '设备特性',
+	`support_bt` TINYINT(4) DEFAULT NULL COMMENT '蓝牙开门 0：不支持 1：支持',
+	`support_qr` TINYINT(4) DEFAULT NULL COMMENT '二维码开门 0：不支持 1：支持',
+	`support_face` TINYINT(4) DEFAULT NULL COMMENT '人脸识别开门 0：不支持 1：支持',
+	`support_tempauth` TINYINT(4) DEFAULT NULL COMMENT '临时授权 0：不支持 1：支持',
+	`firmware` VARCHAR(128) DEFAULT NULL COMMENT '固件名称',
+	`firmware_id` bigint(20),
+	`update` TINYINT(4) DEFAULT NULL COMMENT '默认升级 0：不支持 1：支持',
+	`create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`status` tinyint(4) DEFAULT 1 COMMENT '状态 0：失效 1：有效',
+  	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁设备类型';
+
+CREATE TABLE `eh_aclink_firmware_new` (
+  `id` bigint(20),
+	`name` VARCHAR(128) COMMENT '固件名称',
+	`version` VARCHAR(128) COMMENT '版本号，例如1.0.0',
+	`number` int(11) DEFAULT NULL COMMENT '固件编号',
+	`description` VARCHAR(1024) DEFAULT NULL,
+  `bluetooth_name` VARCHAR(128) DEFAULT NULL COMMENT '蓝牙名称' ,
+	`bluetooth_id` bigint(20),
+  `wifi_name` VARCHAR(128) DEFAULT NULL COMMENT 'wifi名称' ,
+	`wifi_id` bigint(20),
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
+  	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件新表';
+
+CREATE TABLE `eh_aclink_firmware_package` (
+  `id` bigint(20),
+	`name` VARCHAR(128) COMMENT '程序名称',
+  `type` TINYINT(4) DEFAULT NULL COMMENT '程序类型 0：蓝牙 1：wifi',
+	`size` int(11),
+  `download_url` varchar(1024) DEFAULT NULL COMMENT '存储地址' ,
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+	`status` tinyint(4) DEFAULT NULL COMMENT '状态 0：失效 1：有效',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='门禁固件程序表';
+
+
+-- AUTHOR: 刘一麟 2018年8月23日
+-- REMARK:issue-36233 门禁3.0.2
+
+ALTER TABLE `eh_aclink_cameras` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
+ALTER TABLE `eh_aclink_cameras` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
+ALTER TABLE `eh_aclink_ipads` MODIFY COLUMN `door_access_id` BIGINT NULL DEFAULT NULL;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所属组织id' AFTER `server_id`;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `owner_type` TINYINT NOT NULL DEFAULT '0' COMMENT '所属组织类型' AFTER `server_id`;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `namespace_id` BIGINT NOT NULL DEFAULT '0' COMMENT '域空间id' AFTER `id`;
+ALTER TABLE `eh_door_access` ADD COLUMN `firmware_version` VARCHAR(64) NULL DEFAULT NULL COMMENT '门禁固件版本' AFTER `id`;
+
+CREATE TABLE `eh_aclink_form_titles` (
+`id`  bigint(20) NOT NULL ,
+`namespace_id`  int(11) NOT NULL ,
+`owner_id`  bigint(20) NULL COMMENT '所属对象id',
+`owner_type`  tinyint(4) NULL COMMENT '所属对象类型 0园区 1公司 2家庭 3门禁',
+`path` varchar(1024) DEFAULT NULL COMMENT '记录更新人userId',
+`name` varchar(64) NULL COMMENT '表单项名称',
+`item_type` tinyint(4) NULL COMMENT '表单项类型, 0 表单中间结点 1 文本 2 单选 3 多选',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 标题';
+
+CREATE TABLE `eh_aclink_form_values` (
+`id` bigint(20) NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`title_id` bigint(20) NOT NULL COMMENT '对应表单标题的id',
+`value` varchar(1024) NULL COMMENT '表单项的值',
+`type` tinyint(4) NULL COMMENT '值类型, 0 初始值(select,checkbox等) 1 默认值 2 输入值',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`owner_id` bigint(20) NOT NULL COMMENT '记录所属对象Id',
+`owner_type` tinyint(4) NOT NULL COMMENT '记录所属对象类型 0园区 1公司 2家庭 3门禁 4用户 5授权记录',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁表单 输入值';
+
+CREATE TABLE `eh_aclink_group` (
+`id` bigint(20) NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`name` varchar(1024) NULL COMMENT '门禁组名称',
+`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+`owner_id` bigint(20) NOT NULL COMMENT '记录所属对象Id',
+`owner_type` tinyint(4) NOT NULL COMMENT '记录所属对象类型 0园区 1公司',
+`creator_uid` bigint(20) NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`operator_uid` bigint(20) DEFAULT NULL COMMENT '记录更新人userId',
+`operate_time` datetime DEFAULT NULL COMMENT '记录更新时间',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁组';
+
+ALTER TABLE `eh_door_auth` ADD COLUMN `licensee_type` TINYINT NULL DEFAULT 0 COMMENT '被授权对象的类型 0用户 1组织架构节点 2项目(公司) 3楼栋(公司) 4楼层(公司) 5项目(家庭) 6楼栋(家庭) 7楼层(家庭)' AFTER `user_id`;
+ALTER TABLE `eh_door_auth` ADD COLUMN `group_type` TINYINT NULL DEFAULT 0 COMMENT '门禁集合的类型 0 单个门禁 1 新门禁组(门禁3.0) ' AFTER `user_id`;
+
+ALTER TABLE `eh_door_access` ADD COLUMN `adress_detail` varchar(64) NULL COMMENT '办公地点/楼栋_楼层' AFTER `address`;
+
+-- AUTHOR: 张智伟 20180914
+-- REMARK: ISSUE-37602 表单关联工作流节点
+ALTER TABLE eh_general_approval_vals ADD COLUMN flow_node_id BIGINT COMMENT '表单绑定的工作流节点ID' AFTER flow_case_id;
+ALTER TABLE eh_general_approval_vals ADD COLUMN creator_uid BIGINT COMMENT '创建人uid' AFTER create_time;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operator_uid BIGINT COMMENT '操作人Uid' AFTER creator_uid;
+ALTER TABLE eh_general_approval_vals ADD COLUMN operate_time DATETIME COMMENT '编辑时间' AFTER operator_uid;
+
+ALTER TABLE eh_general_approval_vals ADD INDEX i_eh_flow_case_id(`flow_case_id`);
+
+-- AUTHOR: 杨崇鑫   20181017
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 增加项目-时间段（月份）统计结果集表
+CREATE TABLE `eh_payment_bill_statistic_community` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64),  
+  `date_str` VARCHAR(10),  
+  `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
+  `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
+  `tax_amount` DECIMAL(10,2) COMMENT '税额',
+  `amount_received` DECIMAL(10,2) COMMENT '已收（含税）',
+  `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
+  `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
+  `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
+  `amount_exemption` DECIMAL(10,2) COMMENT 'amount reduced',
+  `amount_supplement` DECIMAL(10,2) COMMENT 'amount increased',  
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
+  `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='项目-时间段（月份）统计结果集表';
+
+-- AUTHOR: 杨崇鑫   20181022
+-- REMARK: 缴费管理V7.0（新增缴费相关统计报表） 
+-- REMARK: 增加楼宇-时间段（月份）统计结果集表
+CREATE TABLE `eh_payment_bill_statistic_building` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(64), 
+  `building_id` BIGINT(20),
+  `building_name` VARCHAR(256),
+  `date_str` VARCHAR(10), 
+  `amount_receivable` DECIMAL(10,2) COMMENT '应收（含税)',
+  `amount_receivable_without_tax` DECIMAL(10,2) COMMENT '应收（不含税）',
+  `tax_amount` DECIMAL(10,2) COMMENT '税额',
+  `amount_received` DECIMAL(10,2) COMMENT '已收（含税）',
+  `amount_received_without_tax` DECIMAL(10,2) COMMENT '已收（不含税）',
+  `amount_owed` DECIMAL(10,2) COMMENT '待收（含税）',
+  `amount_owed_without_tax` DECIMAL(10,2)  COMMENT '待收（不含税）',
+  `due_day_count` DECIMAL(10,2) COMMENT '总欠费天数', 
+  `notice_times` DECIMAL(10,2) COMMENT '总催缴次数',
+  `collection_rate` DECIMAL(10,2) COMMENT '收缴率=已收金额/应收含税金额*100%',
+  `create_time` DATETIME ON UPDATE CURRENT_TIMESTAMP,
+  `update_time` DATETIME ON UPDATE CURRENT_TIMESTAMP, 
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇-时间段（月份）统计结果集表';
+
+-- AUTHOR: 唐岑   20181021
+-- REMARK: 资产管理V3.4（资产统计报表） 
+-- REMARK: 项目信息报表结果集（项目-月份） 
+CREATE TABLE `eh_property_statistic_community` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11),
+  `community_id` bigint(20),
+  `community_name` varchar(64),
+  `date_str` varchar(10) COMMENT '统计月份（格式为xxxx-xx）',
+  `building_count` int(11) DEFAULT '0' COMMENT '园区下的楼宇总数',
+  `total_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的房源总数',
+  `free_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的待租房源数',
+  `rent_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已出租房源数',
+  `occupied_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已占用房源数',
+  `living_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的自用房源数',
+  `saled_apartment_count` int(11) DEFAULT '0' COMMENT '园区下的已售房源数',
+  `area_size` decimal(10,2) DEFAULT '0.00' COMMENT '园区的建筑面积',
+  `rent_area` decimal(10,2) DEFAULT '0.00' COMMENT '园区的在租面积',
+  `free_area` decimal(10,2) DEFAULT '0.00' COMMENT '园区的可招租面积',
+  `rent_rate` decimal(10,2) COMMENT '出租率=在租面积/总的建筑面积*100%',
+  `free_rate` decimal(10,2) COMMENT '空置率=可招租面积/总的建筑面积*100% ',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0-inactive, 1-confirming, 2-active',
+  `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目信息报表结果集（项目-月份）';
+
+-- AUTHOR: 唐岑   20181021
+-- REMARK: 资产管理V3.4（资产统计报表） 
+-- REMARK: 楼宇信息报表结果集（楼宇-月份） 
+CREATE TABLE `eh_property_statistic_building` (
+  `id` bigint(20) NOT NULL,
+  `namespace_id` int(11),
+  `community_id` bigint(20),
+  `building_id` bigint(20),
+  `building_name` varchar(64),
+  `date_str` varchar(10) COMMENT '统计月份（格式为xxxx-xx）',
+  `total_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的房源总数',
+  `free_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的待租房源数',
+  `rent_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已出租房源数',
+  `occupied_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已占用房源数',
+  `living_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的自用房源数',
+  `saled_apartment_count` int(11) DEFAULT '0' COMMENT '楼宇内的已售房源数',
+  `area_size` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的建筑面积',
+  `rent_area` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的在租面积',
+  `free_area` decimal(10,2) DEFAULT '0.00' COMMENT '楼宇的可招租面积',
+  `rent_rate` decimal(10,2) COMMENT '出租率=在租面积/总的建筑面积*100%',
+  `free_rate` decimal(10,2) COMMENT '空置率=可招租面积/总的建筑面积*100% ',
+  `status` tinyint(4) DEFAULT '2' COMMENT '该条的记录状态：0-inactive, 1-confirming, 2-active',
+  `create_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼宇信息报表结果集（楼宇-月份）'; 
+
+
+-- AUTHOR: 李清岩 20181029
+-- REMARK:issue-38336 门禁3.0.2 门禁管理授权
+CREATE TABLE `eh_aclink_management` (
+`id` bigint NOT NULL ,
+`namespace_id` int(11) NOT NULL ,
+`door_id` bigint NOT NULL COMMENT '门禁Id',
+`owner_id` bigint NOT NULL COMMENT '门禁归属对象Id',
+`owner_type` tinyint NOT NULL COMMENT '门禁归属对象类型 0园区 1公司',
+`manager_id` bigint NOT NULL COMMENT '授权对象Id',
+`manager_type` tinyint NOT NULL COMMENT '授权对象类型 0园区 1公司',
+`creator_uid` bigint NOT NULL COMMENT '记录创建人userId',
+`create_time` datetime NOT NULL COMMENT '记录创建时间',
+`status` tinyint NOT NULL DEFAULT '1' COMMENT '0已删除1有效',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '门禁管理授权';
+
+-- AUTHOR: 杨崇鑫 20181101
+-- REMARK: issue-40954 【标准版全量】【物业缴费】【集成】计价条款设置，新增计价条款后，列表中“账单组”不显示
+ALTER TABLE `eh_default_charging_items` ADD COLUMN `bill_group_id` BIGINT COMMENT '账单组ID';
+
+-- AUTHOR: 缪洲
+-- REMARK: 增加用户自定义上传资料与默认车牌字段
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_data` TEXT NULL COMMENT '自定义上传资料';
+ALTER TABLE `eh_parking_lots` ADD COLUMN `default_plate` VARCHAR(16) NULL COMMENT '默认车牌';
+
+-- AUTHOR: 黄鹏宇 20181101
+-- REMARK: 修改请示单的创建时间为datetime类型
+ALTER TABLE eh_general_form_val_requests MODIFY created_time DATETIME;
+ALTER TABLE eh_general_form_val_requests MODIFY operator_time DATETIME;
+
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理单应用修改为多应用
+CREATE TABLE eh_banner_categories
+(
+  id            BIGINT                 NOT NULL
+    PRIMARY KEY,
+  owner_type    VARCHAR(32) DEFAULT '' NOT NULL
+  COMMENT 'the type of who own the category, community, etc',
+  owner_id      BIGINT DEFAULT '0'     NOT NULL,
+  parent_id     BIGINT DEFAULT '0'     NOT NULL,
+  name          VARCHAR(64)            NOT NULL,
+  path          VARCHAR(128)           NULL,
+  default_order INT                    NULL,
+  status        TINYINT DEFAULT '0'    NOT NULL
+  COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  creator_uid   BIGINT DEFAULT '0'     NOT NULL
+  COMMENT 'record creator user id',
+  create_time   DATETIME               NULL,
+  delete_uid    BIGINT DEFAULT '0'     NOT NULL
+  COMMENT 'record deleter user id',
+  delete_time   DATETIME               NULL,
+  namespace_id  INT DEFAULT '0'        NOT NULL,
+  logo_uri      VARCHAR(1024)          NULL
+  COMMENT 'default cover uri',
+  entry_id      INT                    NULL
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '广告管理应用入口表';
+-- AUTHOR: 梁燕龙 20181026
+-- REMARK: 广告管理单应用修改为多应用
+ALTER TABLE eh_banners ADD COLUMN `category_id` BIGINT COMMENT '应用入口ID';
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 对接国贸用户映射表 20181001
+DROP TABLE IF EXISTS `eh_pm_task_archibus_user_mapping`;
+CREATE TABLE `eh_pm_task_archibus_user_mapping` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `archibus_uid` VARCHAR(64) DEFAULT NULL COMMENT '国贸用户Id',
+  `user_id` bigint DEFAULT 0 COMMENT '用户Id',
+  `identifier_token` varchar(128) DEFAULT NULL COMMENT '用户手机号',
+  `create_time` datetime DEFAULT NOW(),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME DEFAULT NOW(),
+  `update_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修国贸对接用户映射表';
+
+-- AUTHOR: 马世亨
+-- REMARK: 物业报修3.8 支持多应用服务类型 20181001
+CREATE TABLE `eh_pm_task_categories`(
+  `id` BIGINT NOT NULL,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `link_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'point to the linked category (similar to soft link in file system)',
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128),
+  `default_order` INTEGER,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `create_time` DATETIME,
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used',
+  `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
+  `description` TEXT,
+  `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32),
+  `owner_id` BIGINT DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_category_path` (`path`),
+  KEY `i_eh_category_order` (`default_order`),
+  KEY `i_eh_category_delete_time` (`delete_time`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='物业报修服务类型表';
+
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+ALTER TABLE `eh_pm_task_configs` ADD COLUMN `app_id`  bigint(20) NULL DEFAULT NULL COMMENT '多应用标识';
+-- 物业报修3.8 end
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户认证审核权限配置表
+CREATE TABLE `eh_user_authentication_organizations`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL  COMMENT '域空间ID',
+  `community_id` BIGINT COMMENT '项目ID',
+  `organization_id` BIGINT NOT NULL COMMENT '企业ID',
+  `auth_flag` TINYINT NOT NULL COMMENT '是否授权，0不授权，1授权',
+  `status` TINYINT NOT NULL COMMENT '状态, 1无效，2生效',
+  `creator_uid` BIGINT COMMENT 'creator uid',
+  `create_time` DATETIME COMMENT 'record create time',
+
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '用户认证审核权限配置表';
+
+-- AUTHOR: djm
+-- REMARK: 缴费账单对接门禁
+CREATE TABLE `eh_asset_dooraccess_params` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT (11) DEFAULT NULL,
+	`owner_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
+	`owner_type` VARCHAR (64) NOT NULL,
+	`org_id` BIGINT (20) DEFAULT NULL,
+	`status` TINYINT (4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+	`freeze_days` BIGINT (5) NOT NULL DEFAULT '0' COMMENT '欠费多少天冻结',
+	`unfreeze_days` BIGINT (5) NOT NULL DEFAULT '0' COMMENT '缴费多少天解冻门禁',
+	`category_id` BIGINT COMMENT 'asset category id',
+	`creator_uid` BIGINT (20) DEFAULT NULL,
+	`create_time` datetime DEFAULT NULL,
+	`operator_uid` BIGINT (20) DEFAULT NULL,
+	`operator_time` datetime DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表';
+
+-- AUTHOR: djm
+-- REMARK: 对接门禁
+CREATE TABLE `eh_asset_dooraccess_logs` (
+	`id` BIGINT (20) NOT NULL,
+	`namespace_id` INT (11) DEFAULT NULL,
+	`project_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT '项目id',
+	`project_type` VARCHAR (64) NOT NULL,
+	`owner_id` BIGINT (20) NOT NULL DEFAULT '0' COMMENT '普通公司,企业的id,用户id',
+	`owner_type` VARCHAR (64) NOT NULL,
+	`org_id` BIGINT (20) DEFAULT NULL,
+	`status` TINYINT (4) DEFAULT NULL COMMENT '0:无效状态，2：激活状态',
+	`dooraccess_status` TINYINT (4) DEFAULT NULL COMMENT '该项目下门禁的状态 0:关闭门禁，1是开启门禁 ',
+	`result_msg` VARCHAR (256) DEFAULT NULL,
+	`category_id` BIGINT COMMENT 'asset category id',
+	`creator_uid` BIGINT (20) DEFAULT NULL,
+	`create_time` datetime DEFAULT NULL,
+	`operator_uid` BIGINT (20) DEFAULT NULL,
+	`operator_time` datetime DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '缴费对接门禁表门禁记录表';
+
+-- AUTHOR: xq.tian
+-- REMARK: 删除 eh_recommendations 的外键, 因为他影响了这张表的数据操作
+ALTER TABLE eh_recommendations DROP FOREIGN KEY fk_eh_recommendations_user_idx;
+-- 标注版zuolin-base-2.1之前的脚本
+
+
+-- -- 广告管理 v1.4 加字段    add by xq.tian  2018/03/07
+-- ALTER TABLE eh_banners ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE';
+-- ALTER TABLE eh_banners ADD COLUMN target_data VARCHAR(1024) DEFAULT NULL COMMENT 'It is different by different target_type';
+--
+-- ALTER TABLE eh_banners MODIFY COLUMN scene_type VARCHAR(32) DEFAULT NULL;
+-- ALTER TABLE eh_banners MODIFY COLUMN apply_policy TINYINT DEFAULT NULL;
+--
+-- -- 启动广告 v1.1          add by xq.tian  2018/03/07
+-- ALTER TABLE eh_launch_advertisements ADD COLUMN target_type VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE';
+-- ALTER TABLE eh_launch_advertisements ADD COLUMN target_data VARCHAR(1024) DEFAULT NULL COMMENT 'It is different by different target_type';
+-- ALTER TABLE eh_launch_advertisements ADD COLUMN content_uri_origin VARCHAR(1024) DEFAULT NULL COMMENT 'Content uri for origin file.';
+--
+-- -- 用户认证 V2.3 #13692
+-- ALTER TABLE `eh_users` ADD COLUMN `third_data` varchar(2048) DEFAULT NULL COMMENT 'third_data for AnBang';
+--
+--
+--
+-- -- 标准item 顺序 by jiarui
+-- ALTER TABLE `eh_equipment_inspection_items` ADD COLUMN `default_order`  int(11) NOT NULL DEFAULT 0 AFTER `value_jason`;
+--
+-- /**
+--  * Designer:yilin Liu
+--  * Description:ISSUE#26184 门禁人脸识别
+--  * Created：2018-4-9
+--  */
+--
+-- -- 门禁多公司管理
+-- ALTER TABLE `eh_door_access`
+-- ADD `mac_copy` VARCHAR(128) COMMENT '原mac地址';
+--
+-- /**
+-- * End by: yilin Liu
+-- */
+--
+-- -- Already delete in 5.5.1
+--
+-- -- TODO 这里本来是注释的，因为后面报错了，现在先放开  201807131646
+-- -- ALTER TABLE `eh_organization_member_details` ADD COLUMN `profile_integrity` INTEGER NOT NULL DEFAULT '0';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN department VARCHAR(256) COMMENT '部门';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN department_ids VARCHAR(256) COMMENT '部门Id';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN job_position VARCHAR(256) COMMENT '岗位';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN job_position_ids VARCHAR(256) COMMENT '岗位Id';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN job_level VARCHAR(256) COMMENT '职级';
+-- -- ALTER TABLE eh_organization_member_details ADD COLUMN job_level_ids VARCHAR(256) COMMENT '职级Id';
+-- -- end Janson
+--
+-- -- 园区表增加namespace_id索引 add by yanjun 20180615
+-- alter table eh_communities add index namespace_id_index(`namespace_id`);
+--
+-- -- fix for zuolinbase only, remove this after 5.5.2
+-- -- ALTER TABLE `eh_organization_member_details` CHANGE COLUMN `profile_integrity` `profile_integrity` INT(11) NULL DEFAULT '0' ;
+-- -- end Janson
+--
+-- -- 通用脚本
+-- -- ADD BY 梁燕龙
+-- -- issue-30013 初始化短信白名单配置项
+-- -- 短信白名单 #30013
+-- CREATE TABLE `eh_phone_white_list` (
+-- 	`id` BIGINT NOT NULL COMMENT '主键',
+-- 	`namespace_id` INT NOT NULL DEFAULT 0 COMMENT '域空间',
+-- 	`phone_number` VARCHAR(128) NOT NULL COMMENT '白名单手机号码',
+-- 	`creator_uid` BIGINT COMMENT '记录创建人userID',
+-- 	`create_time` DATETIME COMMENT '记录创建时间',
+-- 	PRIMARY KEY(`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '短信白名单';
+-- -- END BY 梁燕龙
+--
+--
+
+
+-- -----------------------------------------------------  以上为 5.6.1-02 的脚本 ----------------------------------------
+
+-- -----------------------------------------------------  以下为 5.6.1 新增的脚本 ----------------------------------------
+
+ -- 应用公司项目授权表 by lei.lv
+ CREATE TABLE `eh_service_module_app_authorizations` (
+  `id` BIGINT(20) NOT NULL,
+  `namespace_id` INT(11) DEFAULT NULL,
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'owner_id',
+  `organization_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'organization_id',
+  `project_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'community_id',
+  `app_id` BIGINT(20)  NOT NULL DEFAULT '0' COMMENT 'app_id',
+  `control_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'control type',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 公司安装应用表
+CREATE TABLE `eh_organization_apps` (
+  `id` bigint(20) NOT NULL,
+  `app_origin_id` bigint(20) DEFAULT NULL,
+  `org_id` bigint(20) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `operator_time` datetime DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_orgid` (`org_id`) ;
+ALTER TABLE `eh_organization_apps` ADD INDEX `org_app_appid` (`app_origin_id`) ;
+
+-- 园区应用配置表（不跟随管理公司时的自定义配置）
+CREATE TABLE `eh_app_community_configs` (
+  `id` bigint(20) NOT NULL,
+  `app_origin_id` bigint(20) DEFAULT NULL COMMENT 'app_origin_id',
+  `community_id` bigint(20) DEFAULT NULL,
+  `visibility_flag` tinyint(4) DEFAULT NULL,
+  `display_name` varchar(255) DEFAULT NULL,
+  `creator_uid` bigint(20) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  `operator_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `community_id` (`community_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 应用档案表
+CREATE TABLE `eh_service_module_app_profile` (
+  `id` bigint(20) NOT NULL,
+  `origin_id` bigint(20) NOT NULL,
+  `app_no` varchar(255) DEFAULT NULL,
+  `display_version` varchar(128) DEFAULT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  `mobile_flag` tinyint(4) DEFAULT 0,
+  `mobile_uris` varchar(1024) DEFAULT NULL,
+  `pc_flag` tinyint(4) DEFAULT 0,
+  `pc_uris` varchar(1024) DEFAULT NULL,
+  `app_entry_infos` varchar(2048) DEFAULT NULL,
+  `independent_config_flag` tinyint(4) DEFAULT 0,
+  `dependent_app_ids` varchar(128) DEFAULT NULL,
+  `support_third_flag` tinyint(4) DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 增加应用类型字段 0-oa应用、1-园区应用、2-服务应用   add by yanjun 201804081501
+ALTER TABLE `eh_service_modules` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `app_type`  tinyint(4) NULL COMMENT 'app type, 0-oaapp,1-communityapp,2-serviceapp';
+
+-- 新增修改时间的字段 add by lei.lv 201804091401
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `create_time`  datetime NULL COMMENT 'create_time';
+ALTER TABLE `eh_service_module_app_authorizations` ADD COLUMN `update_time`  datetime NULL COMMENT 'update_time';
+
+-- 新增开发者字段
+ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `develop_id`  bigint(20) NULL COMMENT 'developer owner id';
+
+-- 增加 企业超级管理员id、是否开启工作台标志  add by yanjun 20180412
+
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- ALTER TABLE `eh_organizations` ADD COLUMN `admin_target_id`  bigint(20) NULL ;
+ALTER TABLE `eh_organizations` ADD COLUMN `work_platform_flag`  tinyint(4) NULL COMMENT 'open work platform flag, 0-no, 1-yes' ;
+
+-- 默认园区标志
+ALTER TABLE `eh_communities` ADD COLUMN `default_community_flag`  tinyint(4) NULL COMMENT 'is the default community in his namespace, 0-no, 1-yes';
+
+-- 主页签信息
+CREATE TABLE `eh_launch_pad_indexs` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `type` tinyint(4) NOT NULL,
+  `name` varchar(64) DEFAULT NULL,
+  `config_json` text,
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  `icon_uri` varchar(1024) DEFAULT NULL,
+  `selected_icon_uri` varchar(1024) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
+  `description` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+alter table eh_launch_pad_indexs add index namespace_id_index(`namespace_id`);
+
+-- 一卡通实现
+CREATE TABLE `eh_smart_card_keys` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(256) DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0 无效, 1 有效',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DELETE FROM eh_portal_navigation_bars;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_type` `type`  tinyint(4) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` CHANGE COLUMN `target_id` `config_json`  varchar(1024) NOT NULL;
+ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `version_id`  bigint(20) NULL ;
+ALTER TABLE `eh_portal_navigation_bars` ADD COLUMN `default_order`  int(11) NOT NULL DEFAULT '0' ;
+
+-- layout 类型、背景颜色
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `type`  tinyint(4) NULL;
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `bg_color`  varchar(255) NULL ;
+-- layout 类型
+ALTER TABLE `eh_portal_layouts` ADD COLUMN `bg_color`  varchar(255) NULL;
+
+-- 功能模块入口列表
+CREATE TABLE `eh_service_module_entries` (
+  `id` bigint(20) NOT NULL,
+  `module_id` bigint(20) NOT NULL,
+  `module_name` varchar(256) DEFAULT NULL,
+  `entry_name` varchar(256) DEFAULT NULL,
+  `terminal_type` tinyint(4) NOT NULL COMMENT '终端列表，1-mobile,2-pc',
+  `location_type` tinyint(4) NOT NULL COMMENT '位置，参考枚举ServiceModuleLocationType',
+  `scene_type` tinyint(4) NOT NULL COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType',
+  `second_app_type` int(11) NOT NULL DEFAULT '0',
+  `default_order` int(11) NOT NULL DEFAULT '0',
+  `icon_uri` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 应用二级分类
+CREATE TABLE `eh_second_app_types` (
+  `id` bigint(22) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_service_module_entries` ADD INDEX `module_entry_module_id` (`module_id`);
+
+
+-- 增加字段member_range人员规模
+-- add by lei yuan
+alter table eh_organization_details add member_range varchar(25) default null comment '人员规模';
+-- 增加字段 pm_flag 是否是管理公司 1-是，0-否
+ALTER TABLE eh_organization_details ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+-- 增加字段 service_support_flag 是否是服务商 1-是，0-否
+ALTER TABLE eh_organization_details ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+-- 增加字段 pm_flag 是否是管理公司 1-是，0-否
+ALTER TABLE eh_organizations ADD COLUMN `pm_flag` tinyint(4) DEFAULT NULL COMMENT '是否是管理公司 1-是，0-否';
+-- 增加字段 service_support_flag 是否是服务商 1-是，0-否
+ALTER TABLE eh_organizations ADD COLUMN `service_support_flag` tinyint(4) DEFAULT NULL COMMENT '是否是服务商 1-是，0-否';
+
+
+-- 增加办公地点表
+-- add by leiyuan
+CREATE TABLE `eh_organization_workplaces` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `organization_id` bigint(20) DEFAULT NULL COMMENT '组织id',
+  `workplace_name` varchar(50) DEFAULT NULL COMMENT '办公点名称',
+  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
+  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 增加办公地点与楼栋门牌的关系表
+-- DROP TABLE IF EXISTS `eh_communityandbuilding_relationes`;
+-- DROP TABLE IF EXISTS `eh_communityAndbuilding_relationes`;
+
+CREATE TABLE `eh_communityandbuilding_relationes` (
+  `id` bigint(20) NOT NULL COMMENT '主键id',
+  `building_id` bigint(20) DEFAULT NULL COMMENT '楼栋id',
+  `community_id` bigint(20) DEFAULT NULL COMMENT '所在项目id' ,
+  `address_id` bigint(20) DEFAULT NULL COMMENT '地址id' ,
+  `create_time` datetime NOT NULL DEFAULT now() COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
+ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+-- by janson end
+
+-- 增加 应用icon信息  add by yanjun 20180426
+ALTER TABLE `eh_service_module_app_profile` ADD COLUMN `icon_uri`  varchar(255) NULL;
+
+-- 标准版里app的配置是否跟随默认配置
+ALTER TABLE `eh_communities` ADD COLUMN `app_self_config_flag`  tinyint(4) NULL ;
+
+
+-- 标准版本的 key 增加用户 ID
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `user_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `namespace_id`;
+ALTER TABLE `eh_smart_card_keys` ADD COLUMN `cardkey` VARCHAR(1024) AFTER `namespace_id`;
+
+-- 客户端处理方式0-native, 1-outside url, 2-inside url, 3-offline package  add by yanjun 201805171140
+ALTER TABLE `eh_service_modules` ADD COLUMN `client_handler_type`  tinyint(4) NULL DEFAULT 0 COMMENT '0-native, 1-outside url, 2-inside url, 3-offline package' AFTER `app_type`;
+
+-- 标准版本的 add by yuanlei
+alter table eh_organization_workplaces add column province_id bigint(20) default null comment '省份id';
+alter table eh_organization_workplaces add column city_id bigint(20) default null comment '城市id';
+alter table eh_organization_workplaces add column area_id bigint(20) default null comment '区域id';
+alter table eh_organization_workplaces add column whole_address_name varchar(128) default null comment '地址详细名称';
+
+-- 增加省份字段  add by yanjun 201805251851
+-- 增加省份字段  add by yanjun 201805251851
+ALTER TABLE `eh_communities` ADD COLUMN `province_id`  bigint(20) NULL AFTER `uuid`;
+ALTER TABLE `eh_communities` ADD COLUMN `province_name`  varchar(64) NULL AFTER `province_id`;
+
+-- 系统应用标志、默认安装应用标志 add by yanjun 201805280955
+ALTER TABLE `eh_service_modules` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `system_app_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `default_app_flag`  tinyint(4) NULL COMMENT 'installed when organiation was created, 0-no, 1-yes';
+
+-- 修改appId名字，实际为应用originId
+ALTER TABLE `eh_banners` CHANGE COLUMN `appId` `app_id`  bigint(20) NULL DEFAULT NULL;
+
+-- 园区广场电商 add by yanjun 20180703
+CREATE TABLE `eh_community_bizs` (
+  `id` bigint(20) NOT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `community_id` bigint(20) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `biz_url` varchar(255) DEFAULT NULL,
+  `logo_uri` varchar(255) DEFAULT NULL,
+  `status` tinyint(4) DEFAULT '2' COMMENT '0-delete，1-disable，2-enable',
+  PRIMARY KEY (`id`),
+  KEY `community_id` (`community_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 通用脚本
+-- -- ADD BY 黄良铭
+-- -- 20180522-huangliangming-配置项管理-#30016
+-- -- 创建配置项信息变更记录表
+-- CREATE TABLE `eh_configurations_record_change` (
+--   `id` INT(11)  NOT NULL COMMENT '主键',
+--   `namespace_id` INT(11) NOT NULL COMMENT '域空间ID',
+--   `conf_pre_json` VARCHAR(1024)  COMMENT '变动前信息JSON字符串',
+--   `conf_aft_json` VARCHAR(1024)  COMMENT '变动后信息JSON字符串',
+--   `record_change_type` INT(3) COMMENT '变动类型。0，新增；1，修改；3，删除',
+--   `operator_uid` BIGINT(20)   COMMENT '操作人userId',
+--   `operate_time` DATETIME    COMMENT '操作时间',
+--   `operator_ip` VARCHAR(50)   COMMENT '操作者的IP地址',
+--
+--   PRIMARY KEY(`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '配置项信息变更记录表';
+--
+-- -- 配置项信息表新增一列（字段 ） is_readyonly
+-- ALTER  TABLE eh_configurations  ADD  is_readonly  INT(3)  COMMENT '是否只读：1，是 ；null 或其他值为 否';
+-- -- END BY 黄良铭
+
+
+-- -----------------------------------------------------  以上为 5.6.3 以前的脚本 ----------------------------------------
+
+-- -----------------------------------------------------  以下为 5.6.3 新增的脚本 ----------------------------------------
+
+
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 人事档案 2.7 (基线已经执行过) start by ryan
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `profile_integrity`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `department_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_position_ids`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level`;
+-- ALTER TABLE `eh_organization_member_details` DROP COLUMN `job_level_ids`;
+--
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `check_in_time_index` VARCHAR(64) NOT NULL DEFAULT '0000' COMMENT'only month&day like 0304' AFTER `check_in_time`;
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `birthday_index` VARCHAR(64) COMMENT'only month like 0304' AFTER `birthday`;
+--
+-- ALTER TABLE `eh_archives_notifications` DROP COLUMN `notify_emails`;
+-- ALTER TABLE `eh_archives_notifications` CHANGE COLUMN `notify_hour` `notify_time` INTEGER COMMENT 'the hour of sending notifications';
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `mail_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'email sending, 0-no 1-yes' AFTER `notify_time`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `message_flag` TINYINT DEFAULT 0 NOT NULL COMMENT 'message sending, 0-no 1-yes' AFTER `mail_flag`;
+-- ALTER TABLE `eh_archives_notifications` ADD COLUMN `notify_target` TEXT COMMENT 'the target email address' AFTER `message_flag`;
+--
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time` DATE COMMENT '入职日期';
+-- ALTER TABLE `eh_organization_member_details` MODIFY `check_in_time_index` VARCHAR(64) COMMENT '入职日期索引字段';
+--
+-- -- DROP TABLE IF EXISTS `eh_archives_operational_configurations`;
+-- CREATE TABLE `eh_archives_operational_configurations` (
+-- 	`id` BIGINT NOT NULL,
+-- 	`namespace_id` INT NOT NULL DEFAULT '0',
+-- 	`organization_id` BIGINT NOT NULL DEFAULT '0',
+--   `detail_id` BIGINT NOT NULL COMMENT 'the detail id that belongs to the employee which is the change target',
+--   `operation_type` TINYINT NOT NULL COMMENT 'the type of operation',
+--   `operation_date` DATE COMMENT 'the date of executing the operation',
+--   `additional_info` TEXT COMMENT 'the addition information for the operation',
+--   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0-cancel, 1-pending, 2-complete',
+--   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+--   `operator_uid` BIGINT DEFAULT NULL COMMENT 'the id of the operator',
+-- 	PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- -- DROP TABLE IF EXISTS `eh_archives_operational_logs`;
+-- CREATE TABLE `eh_archives_operational_logs` (
+--   `id` BIGINT NOT NULL COMMENT 'id of the log',
+--   `namespace_id` INT NOT NULL DEFAULT '0',
+--   `organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the organization',
+--   `detail_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the detail id that belongs to the employee',
+--   `operation_type` TINYINT NOT NULL COMMENT 'the type of the operate',
+--   `operation_time` DATE NOT NULL COMMENT 'the time of the operate',
+--   `string_tag1` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag2` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag3` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag4` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag5` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `string_tag6` VARCHAR(2048) COMMENT 'redundant information for the operate',
+--   `operator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+--   `operator_name` VARCHAR(64) NOT NULL DEFAULT '0' COMMENT 'the id of the operator',
+--   `create_time` DATETIME DEFAULT NULL COMMENT 'create time',
+-- 	PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+--
+-- -- end
+
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 下载中心 搬迁代码  by yanjun start
+-- -- 注意：core已经上线过了，此处是搬迁代码过来的。以后合并分支的时候要注意
+--
+-- -- 任务中心添加执行开始时间和上传开始时间  add by yanjun 201805241345
+-- ALTER TABLE `eh_tasks` ADD COLUMN `execute_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_start_time`  datetime NULL;
+-- ALTER TABLE `eh_tasks` ADD COLUMN `upload_file_finish_time`  datetime NULL;
+
+-- 下载中心 搬迁代码  by yanjun end
+
+-- 定制版已经执行过，在ehcore-server-schema.sql中有了。 edit by jun.yan
+-- -- 修复 workplace 的问题 janson TODO 这里需要弄新的分支
+-- ALTER TABLE `eh_communityandbuilding_relationes` ADD COLUMN `workplace_id` BIGINT(20) NOT NULL DEFAULT 0 AFTER `update_time`;
+-- -- by janson end
+
+
+
+
+
+
+-- ------------------------------------------------- 以下为zuolin-base-2.1(5.8.2)新增的schema脚本   start ---------------------------------
+
+
+-- 模块icon
+ALTER TABLE `eh_service_modules` ADD COLUMN `icon_uri`  varchar(255) NULL;
+
+-- 分类结构
+ALTER TABLE `eh_second_app_types` ADD COLUMN `parent_id`  bigint(22) NOT NULL DEFAULT 0 ;
+ALTER TABLE `eh_second_app_types` ADD COLUMN `location_type`  tinyint(4) NULL COMMENT '参考枚举ServiceModuleLocationType';
+ALTER TABLE `eh_second_app_types` ADD COLUMN `default_order`  bigint(22) NULL DEFAULT 0;
+
+
+CREATE TABLE `eh_app_categories` (
+  `id` bigint(22) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `parent_id` bigint(22) NOT NULL DEFAULT '0',
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '参考枚举ServiceModuleLocationType',
+  `app_type` tinyint(4) DEFAULT NULL COMMENT '一级分类，0-oa，1-community，2-service。参考ServiceModuleAppType',
+  `default_order` bigint(22) DEFAULT '0',
+  `leaf_flag` tinyint(4) DEFAULT NULL COMMENT 'is leaf category, 0-no, 1-yes',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `eh_service_module_entries` CHANGE COLUMN `second_app_type` `app_category_id`  bigint(22) NOT NULL DEFAULT 0;
+
+-- 用户自定义的广场应用
+CREATE TABLE `eh_user_apps` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `app_id` bigint(20) NOT NULL,
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '位置信息，参考枚举ServiceModuleLocationType',
+  `location_target_id` bigint(20) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `u_eh_user_app_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
+
+
+-- 用户自定义的广场应用
+CREATE TABLE `eh_recommend_apps` (
+  `id` bigint(20) NOT NULL,
+  `app_id` bigint(20) NOT NULL,
+  `scope_type` tinyint(4) DEFAULT NULL COMMENT '范围，1-园区，4-公司',
+  `scope_id` bigint(20) DEFAULT NULL COMMENT '范围对象id',
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `u_eh_recommend_app_scope_id` (`scope_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义显示的应用';
+
+-- 服务广场通用配置表
+CREATE TABLE `eh_launch_pad_configs` (
+  `id` bigint(20) NOT NULL,
+  `owner_type` tinyint(4) NOT NULL,
+  `owner_id` bigint(20) NOT NULL,
+  `navigator_all_icon_uri` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_owner_id` (`owner_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 新接口使用group_id代替itemGroup和itemLocation  add by yanjun 20180828
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `app_id`;
+
+ALTER TABLE `eh_item_service_categries` ADD COLUMN `group_id`  bigint(20) NULL;
+
+ALTER TABLE `eh_user_launch_pad_items` ADD COLUMN `group_id`  bigint(20) NULL AFTER `item_id`;
+
+-- 通用脚本
+-- 增加动态表单的ownerId
+ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0  AFTER `namespace_id`;
+ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
+ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_id`  bigint(20) NOT NULL  DEFAULT  0 AFTER `namespace_id`;
+
+
+ALTER TABLE `eh_var_field_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL  AFTER `owner_id`;
+ALTER TABLE `eh_var_field_item_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
+ALTER TABLE `eh_var_field_group_scopes` ADD COLUMN `owner_type`  VARCHAR(1024)  NULL AFTER `owner_id`;
+-- end
+
+-- 合同参数配置增加owner
+ALTER TABLE  eh_contract_params ADD COLUMN  `owner_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_params ADD COLUMN  `ownerType` VARCHAR(1024) NULL AFTER  `namespace_id`;
+ALTER TABLE  eh_contract_templates add COLUMN  `org_id`  BIGINT(20) NOT NULL  DEFAULT  0 AFTER  `namespace_id`;
+
+
+-- 缴费收费项增加orgId
+ALTER  TABLE  eh_payment_charging_item_scopes ADD  COLUMN  `org_id` BIGINT(20) NOT NULL   DEFAULT 0;
+ALTER  TABLE  eh_payment_charging_standards_scopes ADD  COLUMN  `org_id` BIGINT(20) NOT NULL  NULL  DEFAULT 0;
+ALTER  TABLE  eh_payment_bill_groups ADD  COLUMN  `org_id` BIGINT(20) NOT NULL  NULL  DEFAULT 0;
+
+
+-- 通用脚本
+-- AUHOR:jiarui 20180730
+-- REMARK:物业巡检通知参数设置增加targetId,targetType
+ALTER  TABLE  `eh_pm_notify_configurations` ADD  COLUMN `target_id` BIGINT(20) NOT NULL COMMENT 'organization id' DEFAULT  0 AFTER  `owner_type`;
+ALTER  TABLE  `eh_pm_notify_configurations` ADD  COLUMN `target_type` VARCHAR(1024) NULL AFTER  `target_id`;
+ALTER  TABLE  `eh_equipment_inspection_review_date` ADD  COLUMN `target_id` BIGINT(20) NOT NULL COMMENT 'organization id' DEFAULT  0 AFTER  `owner_type`;
+ALTER  TABLE  `eh_equipment_inspection_review_date` ADD  COLUMN `target_type` VARCHAR(1024) NULL AFTER  `target_id`;
+-- end
+
+--
+-- 工作流 key-value 表  add by xq.tian  20180814
+--
+DROP TABLE IF EXISTS `eh_flow_kv_configs`;
+CREATE TABLE `eh_flow_kv_configs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64) NOT NULL DEFAULT '',
+  `project_id` BIGINT NOT NULL DEFAULT 0,
+  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT NOT NULL COMMENT 'the module id',
+  `owner_type` VARCHAR(64) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `key` VARCHAR(64) NOT NULL,
+  `value` VARCHAR(64) NOT NULL,
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: invalid, 1:waiting_for_approval, 2: valid',
+  `create_time` DATETIME(3) NOT NULL COMMENT 'record create time',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `update_time` DATETIME(3) COMMENT 'record update time',
+  `updater_uid` BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 表单 key-value 表  add by xq.tian  20180814
+--
+DROP TABLE IF EXISTS `eh_general_form_kv_configs`;
+CREATE TABLE `eh_general_form_kv_configs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64) NOT NULL DEFAULT '',
+  `project_id` BIGINT NOT NULL DEFAULT 0,
+  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT NOT NULL COMMENT 'the module id',
+  `owner_type` VARCHAR(64) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `key` VARCHAR(64) NOT NULL,
+  `value` VARCHAR(64) NOT NULL,
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: invalid, 1:waiting_for_approval, 2: valid',
+  `create_time` DATETIME(3) NOT NULL COMMENT 'record create time',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `update_time` DATETIME(3) COMMENT 'record update time',
+  `updater_uid` BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_general_forms ADD COLUMN project_type VARCHAR(64) NOT NULL DEFAULT 'EhCommunities';
+ALTER TABLE eh_general_forms ADD COLUMN project_id BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `integral_tag1` `integral_tag1` BIGINT(20) NULL DEFAULT NULL COMMENT '跳转类型 0-不跳转 2-表单/表单+工作流 3-跳转应用' ;
+ALTER TABLE `eh_service_alliances` 	ADD COLUMN `form_id` BIGINT NULL DEFAULT NULL COMMENT '表单id' ;
+ALTER TABLE `eh_service_alliances` 	ADD COLUMN `flow_id` BIGINT NULL DEFAULT NULL COMMENT '工作流id' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `skip_type` TINYINT NOT NULL DEFAULT '0' COMMENT '1-当该服务类型下只有一个服务时，点击服务类型直接进入服务。0-反之';
+
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `type` BIGINT(20) NOT NULL DEFAULT '0' COMMENT '服务联盟类型' ;
+
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_type` VARCHAR(15) NOT NULL DEFAULT 'organization';
+
+ALTER TABLE `eh_alliance_tag` ADD COLUMN `owner_id` BIGINT(20) NOT NULL DEFAULT '0' ;
+
+
+-- by st.zheng 允许表单为空
+ALTER TABLE `eh_lease_form_requests`
+MODIFY COLUMN `source_id`  bigint(20) NULL AFTER `owner_type`;
+
+
+-- 工位预订 城市管理 通用修改 shiheng.ma 20180824
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `org_id` BIGINT(20) DEFAULT NULL COMMENT '所属管理公司Id';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_type` VARCHAR(128) DEFAULT NULL COMMENT '项目类型';
+ALTER TABLE `eh_office_cubicle_cities` ADD COLUMN `owner_id` BIGINT(20) DEFAULT NULL COMMENT '项目Id';
+
+CREATE TABLE `eh_office_cubicle_configs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `org_id` BIGINT NOT NULL DEFAULT 0 COMMENT '管理公司Id',
+  `owner_type` VARCHAR(64) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `customize_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: general configure, 1:customize configure',
+  `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: invalid, 1:waiting_for_approval, 2: valid',
+  `create_time` DATETIME(3) NOT NULL COMMENT 'record create time',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `update_time` DATETIME(3) COMMENT 'record update time',
+  `updater_uid` BIGINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- END 工位预订
+
+
+
+-- 菜单增加“管理端”、“用户端”分类
+ALTER TABLE `eh_web_menus` ADD COLUMN `scene_type`  tinyint(4) NOT NULL DEFAULT 1 COMMENT '形态，1-管理端，2-客户端，参考枚举ServiceModuleSceneType';
+
+
+-- ------------------------------------------------- zuolin-base-2.1(5.8.2)新增的数据脚本   end ---------------------------------
+
+
+
+
+
+
+-- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   start ---------------------------------
+
+
+-- 如下所说，和5.9.0后面加上的重复了。
+
+-- -- --------------企业OA相关功能提前融合到标准版，在5.9.0全量合并到标准版发布时需要跳过这部分脚本的执行-----------
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 考勤规则新增打卡提醒设置
+-- ALTER TABLE eh_punch_rules ADD COLUMN punch_remind_flag TINYINT NOT NULL DEFAULT 0 COMMENT '是否开启上下班打卡提醒：1 开启 0 关闭' AFTER china_holiday_flag;
+-- ALTER TABLE eh_punch_rules ADD COLUMN remind_minutes_on_duty INT NOT NULL DEFAULT 0 COMMENT '上班提前分钟数打卡提醒' AFTER punch_remind_flag;
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 考勤规则新增打卡提醒设置,该表保存生成的提醒记录
+-- CREATE TABLE `eh_punch_notifications` (
+--   `id` BIGINT NOT NULL COMMENT '主键',
+--   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
+--   `enterprise_id` BIGINT NOT NULL COMMENT '总公司id',
+--   `user_id` BIGINT NOT NULL COMMENT '被提醒人的uid',
+--   `detail_id` BIGINT NOT NULL COMMENT '被提醒人的detailId',
+--   `punch_rule_id` BIGINT NOT NULL COMMENT '所属考勤规则',
+--   `punch_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0- 上班打卡 ; 1- 下班打卡',
+--   `punch_interval_no` INT(11) DEFAULT '1' COMMENT '第几次排班的打卡',
+--   `punch_date` DATE NOT NULL COMMENT '打卡日期',
+--   `rule_time` DATETIME NOT NULL COMMENT '规则设置的该次打卡时间',
+--   `except_remind_time` DATETIME NOT NULL COMMENT '规则设置的打卡提醒时间',
+--   `act_remind_time` DATETIME NULL COMMENT '实际提醒时间',
+--   `invalid_reason` VARCHAR(512) COMMENT '提醒记录失效的原因',
+--   `invalid_flag` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0- 有效 ; 1- 无效',
+--   `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+--   `update_time` DATETIME NULL COMMENT '记录创建时间',
+--   PRIMARY KEY (`id`),
+--   KEY i_eh_enterprise_detail_id(`namespace_id`,`enterprise_id`,`detail_id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='打卡提醒队列，该数据只保留一天';
+--
+-- -- AUTHOR: 张智伟 20180822
+-- -- REMARK: issue-36367 打卡记录报表排序
+-- ALTER TABLE eh_punch_logs ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
+-- ALTER TABLE eh_punch_log_files ADD COLUMN detail_id BIGINT COMMENT '员工 的detail Id' AFTER user_id;
+--
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: issue-36405 公告1.8 修改表结构
+-- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '是否置顶，0-否，1-是';
+-- ALTER TABLE `eh_enterprise_notices` ADD COLUMN `stick_time` DATETIME;
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: issue-33887: 增加操作人姓名到目录/文件表
+-- ALTER TABLE `eh_file_management_contents` ADD COLUMN `operator_name`  VARCHAR(256) ;
+-- ALTER TABLE `eh_file_management_catalogs` ADD COLUMN `operator_name`  VARCHAR(256) ;
+-- -- REMARK: issue-33887: 给文件表增加索引
+-- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_catalog_id` (`catalog_id`);
+-- ALTER TABLE `eh_file_management_contents` ADD INDEX  `i_eh_content_parent_id` (`parent_id`);
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: issue-33943 日程提醒1.2
+-- ALTER TABLE eh_remind_settings ADD COLUMN app_version VARCHAR(32) DEFAULT '5.8.0' COMMENT '对应app版本(历史数据5.8.0),根据APP版本选择性展示';
+-- ALTER TABLE eh_remind_settings ADD COLUMN before_time BIGINT COMMENT '提前多少时间(毫秒数)不超过1天的部分在这里减';
+--
+--
+-- -- AUTHOR: 吴寒
+-- -- REMARK: 会议管理V1.2
+-- ALTER TABLE `eh_meeting_reservations`  CHANGE `content` `content` TEXT COMMENT '会议详细内容';
+-- ALTER TABLE `eh_meeting_reservations`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+-- ALTER TABLE `eh_meeting_records`  ADD COLUMN `attachment_flag` TINYINT DEFAULT 0 COMMENT '是否有附件 1-是 0-否';
+--
+-- -- 增加附件表 会议预定和会议纪要共用
+-- CREATE TABLE `eh_meeting_attachments` (
+--   `id` BIGINT NOT NULL COMMENT 'id of the record',
+--   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+--   `owner_type` VARCHAR(32) NOT NULL COMMENT 'owner type EhMeetingRecords/EhMeetingReservations',
+--   `owner_id` BIGINT NOT NULL COMMENT 'key of the owner',
+--   `content_name` VARCHAR(1024) COMMENT 'attachment object content name like: abc.jpg',
+--   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+--   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+--   `content_size` INT(11)  COMMENT 'attachment object size',
+--   `content_icon_uri` VARCHAR(1024) COMMENT 'attachment object link of content icon',
+--   `creator_uid` BIGINT NOT NULL,
+--   `create_time` DATETIME NOT NULL,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+--
+-- -- AUTHOR: 荣楠
+-- -- REMARK: issue-34029 工作汇报1.2
+-- ALTER TABLE `eh_work_report_val_receiver_map` ADD COLUMN `organization_id` BIGINT DEFAULT 0 NOT NULL COMMENT 'the orgId for the user' AFTER `namespace_id`;
+-- ALTER TABLE `eh_work_report_val_receiver_map` ADD INDEX `i_work_report_receiver_id` (`receiver_user_id`) ;
+--
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `validity_setting` VARCHAR(512) COMMENT 'the expiry date of the work report' AFTER `form_version`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the receiver message settings' AFTER `validity_setting`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `receiver_msg_seeting` VARCHAR(512) COMMENT 'the time range of the receiver message' AFTER `receiver_msg_type`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of the author message settings' AFTER `receiver_msg_seeting`;
+-- ALTER TABLE `eh_work_reports` ADD COLUMN `author_msg_seeting` VARCHAR(512) COMMENT 'the time range of the author message' AFTER `author_msg_type`;
+--
+-- ALTER TABLE `eh_work_report_vals` ADD COLUMN `receiver_avatar` VARCHAR(1024) COMMENT 'the avatar of the fisrt receiver' AFTER `report_type`;
+-- ALTER TABLE `eh_work_report_vals` ADD COLUMN `applier_avatar` VARCHAR(1024) COMMENT 'the avatar of the author' AFTER `receiver_avatar`;
+--
+-- ALTER TABLE `eh_work_report_vals` MODIFY COLUMN `report_time` DATE COMMENT 'the target time of the report';
+--
+--
+-- CREATE TABLE `eh_work_report_val_receiver_msg` (
+--   `id` BIGINT NOT NULL,
+--   `namespace_id` INTEGER,
+--   `organization_id` BIGINT NOT NULL DEFAULT 0,
+--   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
+--   `report_val_id` BIGINT NOT NULL COMMENT 'id of the report val',
+--   `report_name` VARCHAR(128) NOT NULL,
+--   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
+--   `report_time` DATE NOT NULL COMMENT 'the target time of the report',
+--   `reminder_time` DATETIME COMMENT 'the reminder time of the record',
+--   `receiver_user_id` BIGINT NOT NULL COMMENT 'the id of the receiver',
+--   `create_time` DATETIME COMMENT 'record create time',
+--
+--   KEY `i_eh_work_report_val_receiver_msg_report_id`(`report_id`),
+--   KEY `i_eh_work_report_val_receiver_msg_report_val_id`(`report_val_id`),
+--   KEY `i_eh_work_report_val_receiver_msg_report_time`(`report_time`),
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+--
+-- CREATE TABLE `eh_work_report_scope_msg` (
+--   `id` BIGINT NOT NULL,
+--   `namespace_id` INTEGER,
+--   `organization_id` BIGINT NOT NULL DEFAULT 0,
+--   `report_id` BIGINT NOT NULL COMMENT 'the id of the report',
+--   `report_name` VARCHAR(128) NOT NULL,
+--   `report_type` TINYINT COMMENT '0-Day, 1-Week, 2-Month',
+--   `report_time` DATE NOT NULL COMMENT 'the target time of the report',
+--   `reminder_time` DATETIME COMMENT 'the reminder time of the record',
+--   `end_time` DATETIME COMMENT 'the deadline of the report',
+--   `scope_ids` TEXT COMMENT 'the id list of the receiver',
+--   `create_time` DATETIME COMMENT 'record create time',
+--
+--   KEY `i_eh_work_report_scope_msg_report_id`(`report_id`),
+--   KEY `i_eh_work_report_scope_msg_report_time`(`report_time`),
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+-- -- END issue-34029
+-- -- --------------企业OA相关功能提前融合到标准版，END 张智伟 -----------
+
+-- 用户启用自定义配置的标记 add by yanjun 20180920
+CREATE TABLE `eh_user_app_flags` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `location_type` tinyint(4) DEFAULT NULL COMMENT '位置信息，参考枚举ServiceModuleLocationType',
+  `location_target_id` bigint(20) DEFAULT NULL COMMENT '位置对应的对象Id，eg：广场是communityId，工作台企业办公是organizationId',
+  PRIMARY KEY (`id`),
+  KEY `u_eh_user_app_flag_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户启用自定义配置的标记';
+
+-- AUTHOR: xq.tian
+-- REMARK: 漏掉的工作流表, 需要删除原来的表重建
+DROP TABLE IF EXISTS `eh_flow_scripts`;
+CREATE TABLE `eh_flow_scripts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the module id',
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `script_category` VARCHAR(64) NOT NULL COMMENT 'system_script, user_script',
+  `script_type` VARCHAR(64) NOT NULL COMMENT 'javascript, groovy, java and other',
+  `script_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'ref eh_flow_scripts',
+  `script_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'script version',
+  `name` VARCHAR(128) COMMENT 'script name',
+  `description` TEXT COMMENT 'script description',
+  `script` LONGTEXT COMMENT 'script content',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: invalid, 1: valid',
+  `create_time` datetime(3),
+  `creator_uid` BIGINT,
+  `update_time` DATETIME(3),
+  `update_uid` BIGINT,
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag5` BIGINT NOT NULL DEFAULT 0,
+  `last_commit` VARCHAR(40) COMMENT 'repository last commit id',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='flow scripts in dev mode';
+
+-- 合同字段名称修改 add by jiarui 20180925
+ALTER TABLE  eh_contract_params CHANGE  ownerType owner_type VARCHAR(1024);
+
+
+-- ------------------------------------------------- 5.8.4.20180925 新增的数据脚本   end ---------------------------------
+-- AUTHOR: 严军
+-- REMARK: 组件表增加标题栏信息  20181001
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_flag`  tinyint(4) NULL COMMENT '0-none,1-left,2-center，reference  TitleFlag.java';
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title`  varchar(255) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_uri`  varchar(1024) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_style`  int(11) NULL COMMENT 'title style, reference TitleStyle.java' ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `sub_title`  varchar(255) NULL ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_size`  tinyint(4) NULL COMMENT '0-small, 1-medium, 2-large    TitleSize.java' ;
+ALTER TABLE `eh_portal_item_groups` ADD COLUMN `title_more_flag`  tinyint(4) NULL COMMENT '0-no, 1-yes. reference trueOrFalseFlag.java' ;
+
+-- AUTHOR: 严军
+-- REMARK: 公司头像字段太短 128 -> 512
+ALTER TABLE `eh_organization_details` MODIFY COLUMN `avatar`  varchar(512)  DEFAULT NULL ;
+
+-- AUTHOR: djm
+-- REMARK: 合同添加押金状态字段
+ALTER TABLE eh_contracts ADD COLUMN `deposit_status`  tinyint(4) NULL COMMENT '押金状态, 0-未缴, 2-已缴' AFTER deposit;
+
+-- AUTHOR: 荣楠
+-- REMARK: 组织架构4.6 增加了唯一标识账号给通讯录表
+ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+
+-- AUTHOR: 梁燕龙
+-- REMARK: 用户增加会员等级信息。
+ALTER TABLE eh_users ADD COLUMN `vip_level_text` VARCHAR(128) COMMENT '会员等级文本';
+
+-- AUTHOR: 马世亨
+-- REMARK: 访客办公地点表  20181001
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_type` varchar(64) NULL COMMENT '关联数据类型';
+ALTER TABLE `eh_visitor_sys_office_locations` ADD COLUMN `refer_id` bigint(20) NULL COMMENT '关联数据id';
+-- end
+
+-- AUTHOR: 黄明波
+-- REMARK: 服务联盟通用配置修复
+CREATE TABLE `eh_alliance_config_state` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL,
+	`type` BIGINT(20) NOT NULL,
+	`project_id` BIGINT(20) NOT NULL COMMENT 'community为项目id， organaization为公司id',
+	`status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0-取默认配置 1-取自定义配置。当owner_type为organization时，该值必定为1。',
+	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `u_eh_prefix` (`type`, `project_id`)
+)
+COMMENT='储存应用不同项目下的配置情况。'
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+CREATE TABLE `eh_alliance_service_category_match` (
+	`id` BIGINT(20) NOT NULL,
+	`namespace_id` INT(11) NOT NULL,
+        `type` BIGINT(20) NOT NULL,
+	`owner_type` VARCHAR(20) NOT NULL,
+	`owner_id` BIGINT(20) NOT NULL,
+	`service_id` BIGINT(20) NOT NULL COMMENT '服务id',
+	`category_id` BIGINT(20) NOT NULL COMMENT '服务类型id',
+	`category_name` VARCHAR(64) NOT NULL COMMENT '服务类型名称',
+	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+	`create_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'user_id of creater' ,
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `u_eh_service_category` (`service_id`, `category_id`)
+)
+COMMENT='服务与服务类型的匹配表，生成/删除项目配置后需要新增/删除服务与服务类型的匹配关系。这样客户端才能获取到以前对应的服务。'
+ENGINE=InnoDB
+;
+
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_provider` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭服务商功能 1-开启' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `enable_comment` TINYINT NOT NULL DEFAULT '0' COMMENT '0-关闭评论功能 1-开启评论功能' ;
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `description` MEDIUMTEXT NULL COMMENT '首页样式描述文字';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `owner_type` VARCHAR(50) NOT NULL DEFAULT 'EhServiceAlliances' ;
+
+
+-- AUTHOR: 黄良铭
+-- REMARK: 场景记录表添加字段
+ALTER TABLE eh_user_current_scene ADD COLUMN  sign_token VARCHAR(2048);
+
+
+-- AUTHOR: 严军
+-- REMARK: 授权表加索引
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `organization_id_index` (`organization_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `project_id_index` (`project_id`) ;
+ALTER TABLE `eh_service_module_app_authorizations` ADD INDEX `owner_id_imdex` (`owner_id`) ;
+
+-- 模块增加模块路由host
+ALTER TABLE `eh_service_modules` ADD COLUMN `host`  varchar(255) NULL;
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 瑞安CM对接 为每个域空间初始化一个默认账单组，因此加上一个标识是否是默认账单组的字段
+ALTER TABLE `eh_payment_bill_groups` ADD COLUMN `is_default` TINYINT DEFAULT 0 COMMENT '标识是否是默认账单组的字段：1：默认；0：非默认';
+-- REMARK: 瑞安CM对接 账单、费项表增加是否是只读字段
+ALTER TABLE `eh_payment_bills` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `is_readonly` TINYINT DEFAULT 0 COMMENT '只读状态：0：非只读；1：只读';
+-- AUTHOR: djm
+alter table eh_contracts modify column sponsor_uid varchar(50);
+
+-- AUTHOR: 荣楠
+-- REMARK：OA增加域账号
+-- ALTER TABLE `eh_organization_member_details` ADD COLUMN `account` VARCHAR(32) COMMENT 'the unique symbol of the member' AFTER `target_id`;
+
+-- AUTHOR: 缪洲 20180930
+-- REMARK: issue-34780 企业支付授权应用列表
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `general_bill_id` VARCHAR(64) NULL DEFAULT NULL COMMENT '统一账单id' ;
+
+ALTER TABLE `eh_service_modules` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
+ALTER TABLE `eh_service_module_apps` ADD COLUMN `enable_enterprise_pay_flag`  tinyint(4) NULL COMMENT '企业支付标志，0-否，1-是';
+
+-- AUTHOR: 缪洲 20180930
+-- REMARK: issue-34780 企业支付授权表
+CREATE TABLE `eh_enterprise_payment_auths` (
+  `id` BIGINT NOT NULL COMMENT '主键',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT '域空间',
+  `enterprise_id` BIGINT NOT NULL COMMENT '公司id',
+  `app_id` BIGINT NOT NULL COMMENT '授权应用id',
+  `app_name` VARCHAR(32) COMMENT '授权应用名称',
+  `source_id` BIGINT NOT NULL COMMENT '授权用户id',
+  `source_name` VARCHAR(32) COMMENT '授权用户名称',
+  `source_type` VARCHAR(32) NOT NULL COMMENT '用户类型',
+  `create_time` DATETIME NOT NULL COMMENT '记录创建时间',
+  `update_time` DATETIME NULL COMMENT '记录创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8MB4 COMMENT='企业支付授权表';
+
+
+
+-- AUTHOR: 杨崇鑫 20180930
+-- REMARK: 物业缴费V7.1（企业记账流程打通）
+-- REMARK: 删除上个版本遗留的弃用字段
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `energy_flag`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_originId`;
+ALTER TABLE `eh_asset_module_app_mappings` DROP COLUMN `contract_changeFlag`;
+
+-- REMARK：物业缴费V7.1（企业记账流程打通）：统一订单定义的唯一标识
+ALTER TABLE `eh_payment_bills` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `merchant_order_id` VARCHAR(128) COMMENT '统一账单加入的：统一订单定义的唯一标识';
+
+-- REMARK：  物业缴费V7.1（企业记账流程打通）:增加业务对应的相关信息
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_tag` VARCHAR(1024) COMMENT '商品标识，如：活动ID、商品ID';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_name` VARCHAR(1024) COMMENT '商品名称';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_description` VARCHAR(1024) COMMENT '商品说明';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_counts` INTEGER COMMENT '商品数量';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_price` DECIMAL(10,2) COMMENT '商品单价';
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `goods_totalPrice` DECIMAL(10,2) COMMENT '商品总金额';
+
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_type` VARCHAR(1024) COMMENT '商品-服务类别';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_namespace` VARCHAR(1024) COMMENT '商品-域空间';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag1` VARCHAR(1024) COMMENT '商品-服务提供方标识1';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag2` VARCHAR(1024) COMMENT '商品-服务提供方标识2';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag3` VARCHAR(1024) COMMENT '商品-服务提供方标识3';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag4` VARCHAR(1024) COMMENT '商品-服务提供方标识4';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_tag5` VARCHAR(1024) COMMENT '商品-服务提供方标识5';
+ALTER TABLE `eh_asset_module_app_mappings` ADD COLUMN `goods_serve_apply_name` VARCHAR(1024) COMMENT '商品-服务提供方名称';
+
+-- REMARK： 物业缴费V7.1（企业记账流程打通）: 增加记账人名称
+ALTER TABLE `eh_payment_bills` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+ALTER TABLE `eh_payment_bill_items` ADD COLUMN `consume_user_name` VARCHAR(128) COMMENT '记账人名称' after `consume_user_id`;
+
+-- REMARK： 物业缴费V7.1（企业记账流程打通）: 修改consume_user_id注释为“记账人ID”
+ALTER TABLE `eh_payment_bills` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+ALTER TABLE `eh_payment_bill_items` modify COLUMN `consume_user_id` BIGINT COMMENT '记账人ID';
+
+
+-- AUTHOR: 黄明波 20181007
+-- REMARK： 云打印 添加发票标识
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `is_invoiced` TINYINT(4) NULL DEFAULT '0' COMMENT '是否开具发票 0-未开发票 1-已发票';
+ALTER TABLE `eh_siyin_print_printers` ADD COLUMN `printer_name` VARCHAR(128) NOT NULL COMMENT 'printer name' ;
+ALTER TABLE `eh_siyin_print_records` ADD COLUMN `serial_number` VARCHAR(128) NULL DEFAULT NULL COMMENT 'reader_name' ;
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `printer_name` VARCHAR(128) NULL DEFAULT NULL COMMENT '打印机名称';
+ALTER TABLE `eh_siyin_print_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL  DEFAULT '0' COMMENT '商户ID';
+
+
+
+-- AUTHOR: 缪洲 20181010
+-- REMARK： 云打印 添加支付方式字段
+ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '支付方式';
+
+-- AUTHOR: 郑思挺 20181011
+-- REMARK： 资源预约3.7.1
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `pay_channel`  VARCHAR(128) NULL  COMMENT '支付类型 ' ;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `pay_url`  varchar(1024) NULL AFTER `pay_info`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `pay_url`;
+ALTER TABLE `eh_rentalv2_order_records` ADD COLUMN `merchant_order_id`  bigint(20) NULL AFTER `merchant_id`;
+ALTER TABLE `eh_rentalv2_pay_accounts` ADD COLUMN `merchant_id`  bigint(20) NULL AFTER `account_id`;
+
+-- AUTHOR: 缪洲 20181011
+-- REMARK： 停车6.7.2 添加支付方式与支付类型字段
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `pay_mode` TINYINT(4) COMMENT '0:个人支付，1：已记账，2：已支付，支付类型';
+ALTER TABLE `eh_parking_recharge_orders` ADD COLUMN `general_order_id` varchar(64) COMMENT '统一订单ID';
+ALTER TABLE `eh_parking_business_payee_accounts` ADD COLUMN `merchant_id` bigint(20) NULL COMMENT '商户ID';
+
+
+-- AUTHOR: 唐岑
+-- REMARK： 删除eh_organization_address_mappings表中的外键
+ALTER TABLE eh_organization_address_mappings DROP FOREIGN KEY eh_organization_address_mappings_ibfk_1;
+
+-- AUTHOR: 刘一麟
+-- REMARK： 门禁临时授权有效期添加默认值
+ALTER TABLE `eh_door_access` MODIFY COLUMN `max_duration` int(11) DEFAULT '7' COMMENT '有效时间最大值(天)';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_duration` TINYINT DEFAULT '1' COMMENT '门禁是否支持授权按有效期开门，1是0否';
+ALTER TABLE `eh_door_access` MODIFY COLUMN `enable_amount` TINYINT DEFAULT '0' COMMENT '门禁是否支持授权按次开门，1是0否';

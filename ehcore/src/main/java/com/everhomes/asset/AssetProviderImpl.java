@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.asset.group.AssetGroupProvider;
+import com.everhomes.asset.util.TimeUtils;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -66,7 +67,9 @@ import com.everhomes.rest.asset.AssetItemFineType;
 import com.everhomes.rest.asset.AssetPaymentBillAttachment;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillSourceId;
+import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
@@ -92,7 +95,6 @@ import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillExemptionItemsDTO;
 import com.everhomes.rest.asset.ListBillsCommand;
-import com.everhomes.rest.asset.ListBillsDTO;
 import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
 import com.everhomes.rest.asset.ListChargingItemsDTO;
 import com.everhomes.rest.asset.ListChargingItemsForBillGroupDTO;
@@ -643,14 +645,17 @@ public class AssetProviderImpl implements AssetProvider {
         		t.DUE_DAY_COUNT,t.SOURCE_TYPE,t.SOURCE_ID,t.SOURCE_NAME,t.CONSUME_USER_ID,t.DELETE_FLAG,t.CAN_DELETE,t.CAN_MODIFY,t.IS_READONLY);
         query.addFrom(t, t2);
         query.addConditions(t.ID.eq(t2.BILL_ID));
-        query.addConditions(t.OWNER_ID.eq(ownerId));
-        query.addConditions(t.OWNER_TYPE.eq(ownerType));
         query.addConditions(t.NAMESPACE_ID.eq(currentNamespaceId));
-
+        if(!org.springframework.util.StringUtils.isEmpty(ownerType)) {
+        	query.addConditions(t.OWNER_TYPE.eq(ownerType));
+        }
+        if(!org.springframework.util.StringUtils.isEmpty(ownerId)) {
+        	query.addConditions(t.OWNER_ID.eq(ownerId));
+        }
+        
         if(categoryId != null){
             query.addConditions(t.CATEGORY_ID.eq(categoryId));
         }
-
         //增加欠费天数查询条件 : 0＜天数≤30,30＜天数≤60
         if(!org.springframework.util.StringUtils.isEmpty(dueDayCountStart)) {
         	query.addConditions(t.DUE_DAY_COUNT.greaterThan(dueDayCountStart));
@@ -663,6 +668,22 @@ public class AssetProviderImpl implements AssetProvider {
         if(!org.springframework.util.StringUtils.isEmpty(status)){
             query.addConditions(t.SWITCH.eq(status));
         }
+        //物业缴费V7.5（中天-资管与财务EAS系统对接）：查看账单列表（只传租赁账单），因为是同步账单，所以已出、未出都要同步
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getSwitchList())){
+            query.addConditions(t.SWITCH.in(cmd.getSwitchList()));
+        }
+        //物业缴费V7.5（中天-资管与财务EAS系统对接）：更新时间，为空全量同步数据，不为空是增量同步（该时间点以后的数据信息），使用1970-01-01 00:00:00开始到现在的毫秒数（时间戳）；
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getUpdateTime())) {
+        	try {
+        		String updateTime = TimeUtils.timestampToDate(cmd.getUpdateTime());
+        		query.addConditions(DSL.cast(t.UPDATE_TIME, String.class).greaterOrEqual(updateTime)
+                		.or(DSL.cast(t.CREAT_TIME, String.class).greaterOrEqual(updateTime)));
+        	}catch (Exception e) {
+        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
+			}
+        }
+        
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
         }
@@ -4199,6 +4220,9 @@ public class AssetProviderImpl implements AssetProvider {
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILLS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))//物业缴费V6.0 账单、费项表增加是否删除状态字段
+                //物业缴费V7.5（中天-资管与财务EAS系统对接） ： 不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付)
+                .and(Tables.EH_PAYMENT_BILLS.THIRD_PAID.isNull()
+                		.or(Tables.EH_PAYMENT_BILLS.THIRD_PAID.ne(AssetPaymentBillStatus.PAID.getCode())))
                 .fetchInto(PaymentBills.class);
     }
 
