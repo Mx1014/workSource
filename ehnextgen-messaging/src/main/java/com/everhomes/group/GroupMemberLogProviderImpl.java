@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhGroupMemberLogsDao;
@@ -97,7 +98,7 @@ public class GroupMemberLogProviderImpl implements GroupMemberLogProvider {
         query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_GROUP_MEMBER_LOGS.MEMBER_ID.eq(Tables.EH_USERS.ID));
         
         //联表EH_USER_IDENTIFIERS，由于用户认证分邮箱与手机号两种匹配方式，因为客户端暂只开放手机号，所以这里指定 IDENTIFIER_TYPE 为 0（手机号） ;add by moubinmo,18/10/25
-        query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID).and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq((byte)0)));        	
+        query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID).and(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode())));        	
         //下面不指定认证方式，会导致重复数据
 //      query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 
