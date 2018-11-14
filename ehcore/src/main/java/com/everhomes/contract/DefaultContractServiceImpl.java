@@ -4148,19 +4148,19 @@ long assetCategoryId = 0l;
 					@Override
 					public void run() {
 						generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
+						// 合同入场
+						EntryContractCommand entryContractCommand = new EntryContractCommand();
+						entryContractCommand.setCategoryId(contract.getCategoryId());
+						entryContractCommand.setCommunityId(contract.getCommunityId());
+						entryContractCommand.setId(contract.getId());
+						entryContractCommand.setNamespaceId(contract.getNamespaceId());
+						entryContractCommand.setOrgId(contract.getPartyAId());
+						entryContractCommand.setPartyAId(contract.getPartyAId());
+
+						entryContract(entryContractCommand);
 					}
 				});
 
-				// 合同入场
-				EntryContractCommand entryContractCommand = new EntryContractCommand();
-				entryContractCommand.setCategoryId(contract.getCategoryId());
-				entryContractCommand.setCommunityId(contract.getCommunityId());
-				entryContractCommand.setId(contract.getId());
-				entryContractCommand.setNamespaceId(contract.getNamespaceId());
-				entryContractCommand.setOrgId(contract.getPartyAId());
-				entryContractCommand.setPartyAId(contract.getPartyAId());
-
-				entryContract(entryContractCommand);
 				contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_EXEMPTION,contract,null);
 
 				processedNumber = processedNumber + 1;
