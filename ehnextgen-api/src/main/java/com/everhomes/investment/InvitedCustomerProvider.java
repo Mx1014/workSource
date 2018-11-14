@@ -76,7 +76,7 @@ public interface InvitedCustomerProvider {
 
     void updateToEnterpriseCustomerByCustomerId(Long customerId, Long phoneNumber, String contactName);
 
-    List<EnterpriseCustomer> getInitCustomerStatus(Integer namespaceId, Integer pageSize, Long nextAnchor);
+    List<EnterpriseCustomer> getInitCustomerStatus(Integer pageSize, Long nextAnchor);
 
     void createCustomerLevelChangeRecord(CustomerLevelChangeRecord record);
 

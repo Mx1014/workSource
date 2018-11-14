@@ -317,7 +317,7 @@ public class InvitedCustomerController extends ControllerBase {
     @RequestMapping("initCustomerStatusToDB")
     @RestReturn(value = String.class)
     public RestResponse initCustomerStatusToDB() {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
+        invitedCustomerService.initCustomerStatusToDB();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

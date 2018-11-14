@@ -15,6 +15,9 @@ public class InitCustomerStatisticsHandle implements TaskHandler {
     @Autowired
     private InvitedCustomerProvider customerProvider;
 
+    @Autowired
+    private InvitedCustomerService customerService;
+
     @Override
     public void beforeExecute(Map<String, Object> params) {
 
@@ -24,20 +27,14 @@ public class InitCustomerStatisticsHandle implements TaskHandler {
     public void execute(Map<String, Object> params) {
 
         Long nextAnchor = 0L;
-        if(params.get("nextAnchor") != null)
-            nextAnchor = (Long) params.get("nextAnchor");
 
         Integer pageSize = 100;
         if(params.get("pageSize") != null)
             pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
 
-        Integer namespaceId = null;
-        if(params.get("namespaceId") != null){
-            namespaceId = Integer.valueOf(String.valueOf(params.get("namespaceId")));
-        }
 
         while(nextAnchor != -1L){
-            List<EnterpriseCustomer> customers = customerProvider.getInitCustomerStatus(namespaceId, pageSize, nextAnchor);
+            List<EnterpriseCustomer> customers = customerProvider.getInitCustomerStatus(pageSize, nextAnchor);
             if(customers != null && customers.size() > 0){
                 if(customers.size() >= pageSize + 1){
                     nextAnchor = customers.get(customers.size() - 1).getId();
@@ -46,8 +43,9 @@ public class InitCustomerStatisticsHandle implements TaskHandler {
                     nextAnchor = -1L;
                 }
             }
-
-
+            if(customers != null && customers.size() > 0) {
+                customers.forEach(r -> customerService.recordCustomerLevelChange(null, r.getLevelItemId(), r.getNamespaceId(), r.getCommunityId(), r.getId(), null));
+            }
         }
     }
 

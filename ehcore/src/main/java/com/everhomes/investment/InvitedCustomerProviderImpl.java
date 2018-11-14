@@ -551,7 +551,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<EnterpriseCustomer> getInitCustomerStatus(Integer namespaceId, Integer pageSize, Long nextAnchor) {
+    public List<EnterpriseCustomer> getInitCustomerStatus(Integer pageSize, Long nextAnchor) {
 
 
         List<EnterpriseCustomer> customers = new ArrayList<>();
@@ -562,10 +562,6 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         query.addSelect(customer.ID,customer.LEVEL_ITEM_ID,customer.CREATE_TIME);
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 
-
-        if(namespaceId != null){
-            query.addConditions(customer.NAMESPACE_ID.eq(namespaceId));
-        }
 
         if(nextAnchor != null && nextAnchor != 0){
             query.addConditions(customer.ID.ge(nextAnchor));
