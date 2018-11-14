@@ -74,19 +74,19 @@ public class UclbrtHttpClient {
 				areaCode, mobile, begTime, endTime);
 	}
 
-	public String getQrCode(UclbrtParamsDTO paramsDTO, String mobile) {
+	public String getQrCode(UclbrtParamsDTO paramsDTO, String mobile, Long validEndMs) {
 		//默认有效期到四个月后
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MONTH, 4);
-		String endTimeString = new SimpleDateFormat("yyMMddHHmm").format(calendar.getTime());
+		String endTimeString = new SimpleDateFormat("yyMMddHHmm").format(validEndMs > 0 ? new Date(validEndMs) : calendar.getTime());
 		return getQrCode(paramsDTO, mobile, "", endTimeString);
 	}
 	
 	@SuppressWarnings("deprecation")
 	public String TestFuncXML(String protocol,String  ip,String  port,String  communityNo,String  buildNo, String floorNo, String roomNo, String accSid,String  token,String areaCode,String mobile,String begTime,String endTime){
 		//所有跟ucl的请求共用一套手机号
-		mobile = "13480251015";
-		String key = getRoomIdByRedisKey(communityNo, buildNo, floorNo, roomNo);
+//		mobile = "13480251015";
+		String key = getRoomIdByRedisKey(communityNo, buildNo, floorNo, roomNo, endTime);
 		ValueOperations<String, String> valueOperations = getValueOperations(key);
 		String roomID = valueOperations.get(key);
 
@@ -115,8 +115,8 @@ public class UclbrtHttpClient {
 		return valueOperations;
 	}
 
-	private String getRoomIdByRedisKey(String communityNo, String buildNo, String floorNo, String roomNo) {
-		return communityNo + buildNo + floorNo + roomNo;
+	private String getRoomIdByRedisKey(String communityNo, String buildNo, String floorNo, String roomNo, String endTime) {
+		return communityNo + buildNo + floorNo + roomNo + endTime;
 	}
 
 	private String getQrCodeRequest(String protocol, String ip, String port, String communityNo, String buildNo, String floorNo, String roomNo, String accSid, String token, String areaCode, String mobile, String roomID) {
@@ -164,7 +164,7 @@ public class UclbrtHttpClient {
 				Element ele = (Element) iter.next();
 				roomID = ele.getText();
 			}
-			String key = getRoomIdByRedisKey(communityNo, buildNo, floorNo, roomNo);
+			String key = getRoomIdByRedisKey(communityNo, buildNo, floorNo, roomNo, endTime);
 			ValueOperations<String, String> valueOperations = getValueOperations(key);
 			int timeout = 120;
 			TimeUnit unit = TimeUnit.DAYS;
