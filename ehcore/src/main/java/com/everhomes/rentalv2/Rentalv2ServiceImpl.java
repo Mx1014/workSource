@@ -7531,7 +7531,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					Optional<Rentalv2PriceRule> optional = prices.stream().filter(p -> p.getRentalType().equals(r)).findFirst();
 					if (optional.isPresent()) {
 						Rentalv2PriceRule temp = optional.get();
-						priceRules.add(ConvertHelper.convert(temp, PriceRuleDTO.class));
+						priceRules.add(convert(temp));
 					} else {
 						priceRules.add(createInitPriceRuleDTO(r));
 					}
