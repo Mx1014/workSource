@@ -101,6 +101,12 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 -- REMARK: 停车缴费收款账号迁移
 update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 
+-- AUTHOR: xq.tian
+-- REMARK: clientAppKeyApi,需要特殊放过的API列表
+INSERT INTO eh_configurations (name, value, description, namespace_id, display_name, is_readonly)
+  VALUES ('client.appKeyApi', '/stat/event/postDevice,/pusher/registDevice,/user/syncActivity,/user/signupByAppKey,/user/signup,/user/logoff,/community/findDefaultCommunity,/user/systemInfo,/user/resendVerificationCodeByAppKey,/user/resendVerificationCodeByIdentifierAndAppKey', 'clientAppKeyApi', 0, null, 0);
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
