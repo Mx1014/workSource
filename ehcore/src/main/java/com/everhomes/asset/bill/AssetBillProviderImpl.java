@@ -66,7 +66,7 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.STATUS.notEqual(AssetPaymentBillStatus.PAID.getCode())) //已支付的不允许删除
-                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.in(billIdList))
 	            .execute();
             return null;
