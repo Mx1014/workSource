@@ -212,7 +212,9 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .set(t.PAYMENT_TYPE, paymentType)
                 .set(t.AMOUNT_RECEIVED, amountReceived)
                 .set(t.AMOUNT_OWED, amountOwed)
+                .set(t.THIRD_PAID, AssetPaymentBillStatus.PAID.getCode()) //总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
                 .where(t.ID.eq(billId))
+                .and(t.NAMESPACE_ID.eq(currentNamespaceId))
                 .execute();
 	}
 
