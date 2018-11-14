@@ -71,8 +71,6 @@ public class WelfareServiceImpl implements WelfareService {
     @Autowired
     private ContentServerService contentServerService;
     @Autowired
-    private SalaryService salaryService;
-    @Autowired
     private MessagingService messagingService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
@@ -190,8 +188,12 @@ public class WelfareServiceImpl implements WelfareService {
 
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
         this.dbProvider.execute((TransactionStatus status) -> {
-	        String uName = salaryService.findNameByOwnerAndUser(welfare.getOrganizationId(), UserContext.currentUserId());
-	        welfare.setCreatorName(uName);
+            String uName = "-";
+            OrganizationMemberDetails operator = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId(), welfareDTO.getOrganizationId());
+            if (operator != null) {
+                uName = operator.getContactName();
+            }
+            welfare.setCreatorName(uName);
 	        welfare.setOperatorName(uName);
 	        if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
 	            welfare.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
