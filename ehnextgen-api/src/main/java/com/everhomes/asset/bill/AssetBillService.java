@@ -1,13 +1,13 @@
 
 package com.everhomes.asset.bill;
 
-import com.everhomes.asset.PaymentBills;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 
@@ -28,6 +28,6 @@ public interface AssetBillService {
 	 */
 	ListBillsResponse listOpenBills(ListBillsCommand cmd);
 
-	PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd);
+	ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd);
 	
 }

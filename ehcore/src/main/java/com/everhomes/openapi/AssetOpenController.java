@@ -13,6 +13,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 
 /**
@@ -47,10 +48,10 @@ public class AssetOpenController extends ControllerBase {
      * <p>物业缴费V7.5（中天-资管与财务EAS系统对接）：EAS系统收到款项录入凭证，将收款状态回传至左邻</p>
      */
     @RequestMapping("changeChargeStatus")
-    @RestReturn(value = PaymentBills.class)
+    @RestReturn(value = ListBillsDTO.class)
 	public RestResponse changeChargeStatus(ChangeChargeStatusCommand cmd) {
-    	PaymentBills bill = assetBillService.changeChargeStatus(cmd);
-		RestResponse response = new RestResponse(bill);
+    	ListBillsDTO dto = assetBillService.changeChargeStatus(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;

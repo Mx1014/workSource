@@ -206,8 +206,8 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	 * EAS系统收到款项录入凭证，将收款状态回传至左邻
 	 * 总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
 	 */
-	public PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
-		PaymentBills response = new PaymentBills();
+	public ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd) {
+		ListBillsDTO dto = new ListBillsDTO();
 		if(cmd.getBillId() != null) {
 			//如果账单已经在左邻支付，那么EAS调用左邻的收款回传接口是无效调用，已支付的数据以左邻为准
 			PaymentBills bill = assetProvider.findBillById(cmd.getBillId());
@@ -221,15 +221,15 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 	        BigDecimal amountOwed = bill.getAmountReceivable().subtract(cmd.getAmountReceived());
 	        amountOwed = amountOwed.setScale(2, BigDecimal.ROUND_HALF_UP);
 			assetBillProvider.changeChargeStatus(UserContext.getCurrentNamespaceId(), cmd.getBillId(), cmd.getAmountReceived(), amountOwed, cmd.getPaymentType());
-			response.setAmountReceivable(bill.getAmountReceivable());
-			response.setAmountReceived(cmd.getAmountReceived());
-			response.setAmountOwed(bill.getAmountOwed());
+			dto.setAmountReceivable(bill.getAmountReceivable());
+			dto.setAmountReceived(cmd.getAmountReceived());
+			dto.setAmountOwed(bill.getAmountOwed());
 		}else {
 			LOGGER.info("/openapi/asset/changeChargeStatus billId can not be null!");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "/openapi/asset/changeChargeStatus billId can not be null!");
 		}
-		return response;
+		return dto;
 	}
 
 }

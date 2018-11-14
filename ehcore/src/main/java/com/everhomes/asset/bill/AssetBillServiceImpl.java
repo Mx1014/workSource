@@ -22,6 +22,7 @@ import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
 import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.user.UserContext;
@@ -112,7 +113,7 @@ public class AssetBillServiceImpl implements AssetBillService {
         return handler;
     }
 
-	public PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
+	public ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd) {
 		ThirdOpenBillHandler handler = getThirdOpenBillHandler(UserContext.getCurrentNamespaceId());
 		return handler.changeChargeStatus(cmd);
 	}

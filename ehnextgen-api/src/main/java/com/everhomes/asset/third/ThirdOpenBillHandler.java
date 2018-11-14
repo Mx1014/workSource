@@ -3,6 +3,7 @@ package com.everhomes.asset.third;
 import com.everhomes.asset.PaymentBills;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
+import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 
 /**
@@ -22,7 +23,7 @@ public interface ThirdOpenBillHandler {
     /**
      * EAS系统收到款项录入凭证，将收款状态回传至左邻
      */
-    default PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
+    default ListBillsDTO changeChargeStatus(ChangeChargeStatusCommand cmd) {
     	return null;
     }
     
