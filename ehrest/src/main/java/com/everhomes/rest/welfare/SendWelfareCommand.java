@@ -11,6 +11,7 @@ import java.util.List;
  * <ul>参数:
  * <li>id: 福利Id 有就填没有不填</li>
  * <li>organizationId: 公司id 必填</li>
+ * <li>appId: 福利appId 必填</li>
  * <li>subject:  主题名称 必填</li>
  * <li>content: 祝福语 必填</li>
  * <li>senderName:发放者姓名 必填</li>
@@ -39,6 +40,7 @@ public class SendWelfareCommand {
 
 	private Long id;
 	private Long organizationId;
+	private Long appId;
 	private String subject;
 	private String content;
 	private String senderName;
@@ -241,4 +243,11 @@ public class SendWelfareCommand {
 		this.senderAvatarUrl = senderAvatarUrl;
 	}
 
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }

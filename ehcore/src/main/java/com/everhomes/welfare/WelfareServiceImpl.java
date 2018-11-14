@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -39,6 +40,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -441,9 +443,24 @@ public class WelfareServiceImpl implements WelfareService {
         return response;
     }
 
+    private void checkOperatorPrivilege(Long orgId, Long appId) {
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if (resolver.checkSuperAdmin(UserContext.currentUserId(), orgId)
+                || resolver.checkModuleAppAdmin(UserContext.getCurrentNamespaceId(), orgId, UserContext.currentUserId(), appId)) {
+        }else{
+            throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                    WelfareConstants.ERROR_PRIVILEGE, "权限不足");
+        }
+    }
     @Override
     public void deleteWelfare(DeleteWelfareCommand cmd) {
         Welfare welfare = welfareProvider.findWelfareById(cmd.getWelfareId());
+        if (welfare == null) {
+            throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
+                    WelfareConstants.ERROR_WELFARE_NOT_FOUND, "福利不存在");
+        }
+        checkOperatorPrivilege(welfare.getOrganizationId(), cmd.getAppId());
         if (WelfareStatus.SENDED == WelfareStatus.fromCode(welfare.getStatus())) {
             throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                     WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能删除");

@@ -7,11 +7,14 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>welfareId: 福利Id</li>
+ * <li>appId: 福利appId</li>
  * </ul>
  */
 public class DeleteWelfareCommand {
 
 	private Long welfareId;
+
+	private Long appId;
 
 	public DeleteWelfareCommand() {
 
@@ -35,4 +38,11 @@ public class DeleteWelfareCommand {
 		return StringHelper.toJsonString(this);
 	}
 
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
 }
