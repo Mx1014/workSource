@@ -198,6 +198,7 @@ import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
@@ -440,6 +441,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private NamespacesService namespacesService;
+
+    @Autowired
+    private SdkUserService sdkUserService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -8442,6 +8446,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
         UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
         LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+        if (identifier == null) {
+            identifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifierByIdentifierToken(namespaceId,identifierToken), UserIdentifier.class);
+            LOGGER.info("get userIdentifier from unite user namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+            if (identifier != null) {
+                this.userProvider.createIdentifierFromUnite(identifier);
+            } else {
+                LOGGER.warn("Sdk user service getUserIdentifier return null, namespaceId={}, identifierToken= {}", namespaceId,identifierToken);
+                return null;
+            }
+        }
         this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
