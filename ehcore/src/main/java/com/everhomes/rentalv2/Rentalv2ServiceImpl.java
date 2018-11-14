@@ -6405,6 +6405,42 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
+	public GetResourceListAdminResponse listResourceAbstract(GetResourceListAdminCommand cmd) {
+
+		GetResourceListAdminResponse response = new GetResourceListAdminResponse();
+		List<Long> siteIds = null;
+		if (cmd.getOwnerType() != null && cmd.getOwnerId() != null) {
+			siteIds = new ArrayList<>();
+			List<RentalSiteRange> siteOwners = this.rentalv2Provider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getResourceType(),
+					cmd.getOwnerType(), cmd.getOwnerId());
+			if (siteOwners != null)
+				for (RentalSiteRange siteOwner : siteOwners) {
+					siteIds.add(siteOwner.getRentalResourceId());
+				}
+		}
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), null,
+				locator, pageSize+1,null, siteIds, cmd.getCommunityId());
+		if(null == rentalSites)
+			return response;
+		Long nextPageAnchor = null;
+		if (rentalSites.size() > pageSize) {
+			rentalSites.remove(rentalSites.size() - 1);
+			nextPageAnchor = rentalSites.get(rentalSites.size() - 1).getDefaultOrder();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setRentalSites(rentalSites.stream().map(r -> {
+			RentalSiteDTO dto = new RentalSiteDTO();
+			dto.setSiteName(r.getResourceName());
+			dto.setRentalSiteId(r.getId());
+			return dto;
+		}).collect(Collectors.toList()));
+		return response;
+	}
+
+	@Override
 	public RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd) {
 		if (null == cmd.getId())
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, RentalServiceErrorCode.ERROR_LOST_PARAMETER,

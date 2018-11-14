@@ -64,6 +64,7 @@ public interface Rentalv2Service {
 	void addRule(AddDefaultRuleAdminCommand cmd);
 	QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd);
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
+	GetResourceListAdminResponse listResourceAbstract(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
 	void updateResource(UpdateResourceAdminCommand cmd);
 	void updateResourceStatus(UpdateResourceAdminCommand cmd);
