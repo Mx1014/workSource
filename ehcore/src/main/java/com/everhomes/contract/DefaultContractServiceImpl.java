@@ -3949,20 +3949,28 @@ long assetCategoryId = 0l;
 		task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
 		contractProvider.createContractOperateTask(task);
 
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("UserContext", UserContext.current().getUser());
+		
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyInitializationContract(cmd, task);
+				oneKeyInitializationContract(cmd, task, params);
 			}
 		});
 		return task;
 	}
 
-	private void oneKeyInitializationContract(InitializationCommand cmd, ContractTaskOperateLog task) {
+	private void oneKeyInitializationContract(InitializationCommand cmd, ContractTaskOperateLog task, Map<String, Object> params) {
 		Date StartTime = new Date();
 		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(task.getId());
 		contractTaskOperateLog.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		String userStr = String.valueOf(params.get("UserContext"));
+		User user = (User) StringHelper.fromJsonString(userStr, User.class);
+		user.setNamespaceId(cmd.getNamespaceId());
+		UserContext.setCurrentUser(user);
 
 		List<Long> contractAllIds = cmd.getContractIds();
 		// 2.调用缴费接口查询该合同是否出现已缴账单，如果存在不允许初始化，费用清单都要删除？还是只删除正常合同,资产状态需要处理吗？
@@ -4004,6 +4012,7 @@ long assetCategoryId = 0l;
 			}
 			contractProvider.updateContract(contract);
 			contractSearcher.feedDoc(contract);
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_INITIALIZE,contract,null);
 			processedNumber = processedNumber + 1;
 
 			contractTaskOperateLog.setProcessedNumber(processedNumber);
@@ -4058,20 +4067,28 @@ long assetCategoryId = 0l;
 		task.setProcess(0);
 		task.setOperateType(ContractOperateStatus.INITIALIZATION.getCode());
 		contractProvider.createContractOperateTask(task);
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("UserContext", UserContext.current().getUser());
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyExemptionContract(cmd, task);
+				oneKeyExemptionContract(cmd, task, params);
 			}
 		});
 		return task;
 	}
 
-	private void oneKeyExemptionContract(InitializationCommand cmd, ContractTaskOperateLog task) {
+	private void oneKeyExemptionContract(InitializationCommand cmd, ContractTaskOperateLog task, Map<String, Object> params) {
 		Date StartTime = new Date();
 		ContractTaskOperateLog contractTaskOperateLog = contractProvider.findContractOperateTaskById(task.getId());
 		contractTaskOperateLog.setStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		//异步
+		String userStr = String.valueOf(params.get("UserContext"));
+		User user = (User) StringHelper.fromJsonString(userStr, User.class);
+		user.setNamespaceId(cmd.getNamespaceId());
+		UserContext.setCurrentUser(user);
 
 		// 3.把符合条件 的合同状态置为审批通过，修改资产状态，
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
@@ -4136,6 +4153,7 @@ long assetCategoryId = 0l;
 				entryContractCommand.setPartyAId(contract.getPartyAId());
 
 				entryContract(entryContractCommand);
+				contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_EXEMPTION,contract,null);
 
 				processedNumber = processedNumber + 1;
 				contractTaskOperateLog.setProcessedNumber(processedNumber);
@@ -4233,21 +4251,29 @@ long assetCategoryId = 0l;
 		if (cmd.getContractIds() == null) {
 			return;
 		}
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("UserContext", UserContext.current().getUser());
 		// 调用初始化，启动线程
 		ExecutorUtil.submit(new Runnable() {
 			@Override
 			public void run() {
-				oneKeyCopyContract(cmd);
+				oneKeyCopyContract(cmd, params);
 			}
 		});
 	}
 
-	private void oneKeyCopyContract(InitializationCommand cmd) {
+	private void oneKeyCopyContract(InitializationCommand cmd, Map<String, Object> params) {
 		// 3.把符合条件 的合同状态置为草稿合同，去掉不符合条件的合同
 		Map<Long, Contract> contractsMap = contractProvider.listContractsByIds(cmd.getContractIds());
 		if (contractsMap.size() < 1) {
 			return;
 		}
+		String userStr = String.valueOf(params.get("UserContext"));
+		User user = (User) StringHelper.fromJsonString(userStr, User.class);
+		user.setNamespaceId(cmd.getNamespaceId());
+		UserContext.setCurrentUser(user);
+		
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Long contractId = entry.getKey();
 			Contract contract = entry.getValue();
@@ -4261,11 +4287,15 @@ long assetCategoryId = 0l;
 			String contractNumber = generateContractNumber(generateContractNumber);
 
 			checkContractNumberUnique(contract.getNamespaceId(), contractNumber, contract.getCategoryId());
-			contract.setName("测试复制合同");
+			contract.setName(contract.getName()+"(复制)");
 			contract.setContractNumber(contractNumber);
 			contract.setContractType(ContractType.NEW.getCode());
 			contract.setStatus(ContractStatus.DRAFT.getCode());
 			contract.setRent(BigDecimal.ZERO);
+			contractProvider.createContract(contract);
+			contractSearcher.feedDoc(contract);
+			Contract existContract = contractProvider.findContractById(contractId);
+			contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_COPY,contract,existContract);
 
 			FindContractCommand command = new FindContractCommand();
 			command.setId(contractId);

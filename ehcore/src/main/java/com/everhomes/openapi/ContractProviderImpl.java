@@ -883,7 +883,7 @@ public class ContractProviderImpl implements ContractProvider {
 	//记录合同修改日志 by tangcen
 	@Override
 	public void saveContractEvent(int opearteType, Contract contract, Contract comparedContract) {	
-		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY
+		//根据不同操作类型获取具体描述，1:ADD,2:DELETE,3:MODIFY,20:COPY,21:INITIALIZE,22:EXEMPTION
 		String content = null;
 		Map<String,Object> map = new HashMap<String,Object>();
 		switch(opearteType){
@@ -903,6 +903,16 @@ public class ContractProviderImpl implements ContractProvider {
 			case ContractTrackingTemplateCode.CONTRACT_CHANGE:
 				map.put("contractName", comparedContract.getName());
 				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_CHANGE , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_COPY:
+				map.put("contractName", comparedContract.getContractNumber());
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_COPY , UserContext.current().getUser().getLocale(), map, "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_INITIALIZE:
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_INITIALIZE , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case ContractTrackingTemplateCode.CONTRACT_EXEMPTION:
+				content = localeTemplateService.getLocaleTemplateString(ContractTrackingTemplateCode.SCOPE, ContractTrackingTemplateCode.CONTRACT_EXEMPTION , UserContext.current().getUser().getLocale(), new HashMap<>(), "");
 				break;
 			default :
 				break;

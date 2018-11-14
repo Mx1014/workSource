@@ -619,7 +619,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         List<Long> ids = getIds(rsp);
         ListContractsResponse response = new ListContractsResponse();
 
-        response.setTotalNum(totalHits);
+        //response.setTotalNum(totalHits);
         
         //初始化判断是否存在判断已缴的的合同，不能初始化
         if (cmd.getContractOperate() != null && cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
@@ -637,6 +637,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
     			}
     		}
 		}
+        response.setTotalNum(new Long((long)ids.size()));
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *     <li>process: 处理进度</li>
  *     <li>processedNumber: 已处理记录</li>
  *     <li>totalNumber: 总记录</li>
+ *     <li>errorDescription: 错误信息</li>
  * </ul>
  * Created by djm on 2018/8/30.
  */
@@ -22,7 +23,16 @@ public class SearchProgressDTO {
 	private Integer process;
 	private Integer processedNumber;
 	private Integer totalNumber;
+	private String errorDescription;
 	
+	public String getErrorDescription() {
+		return errorDescription;
+	}
+
+	public void setErrorDescription(String errorDescription) {
+		this.errorDescription = errorDescription;
+	}
+
 	public Integer getProcessedNumber() {
 		return processedNumber;
 	}
