@@ -37,6 +37,7 @@ import com.everhomes.rest.welfare.*;
 import com.everhomes.salary.SalaryService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -82,6 +83,8 @@ public class WelfareServiceImpl implements WelfareService {
     private OrganizationProvider organizationProvider;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserProvider userProvider;
     @Override
     public ListWelfaresResponse listWelfares(ListWelfaresCommand cmd) {
         ListWelfaresResponse response = new ListWelfaresResponse();
@@ -117,9 +120,17 @@ public class WelfareServiceImpl implements WelfareService {
 	
         WelfaresDTO dto = ConvertHelper.convert(r, WelfaresDTO.class);
         //用户头像
-        UserInfo senderInfo = userService.getUserInfo(r.getSenderUid());
-        if (senderInfo != null) {
-            dto.setSenderAvatarUrl(senderInfo.getAvatarUrl());
+        if (r.getSenderUid() != null) {
+            User queryUser = userProvider.findUserById(r.getSenderUid());
+            if (queryUser != null) {
+
+                String avatarUri = queryUser.getAvatar();
+                if (avatarUri == null || avatarUri.trim().length() == 0) {
+                    avatarUri = userService.getUserAvatarUriByGender(queryUser.getId(), queryUser.getNamespaceId(), queryUser.getGender());
+                }
+                String url = contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), r.getSenderUid());
+                dto.setSenderAvatarUrl(url);
+            }
         }
         dto.setUpdateTime(r.getUpdateTime().getTime());
         if (null != r.getSendTime()) {

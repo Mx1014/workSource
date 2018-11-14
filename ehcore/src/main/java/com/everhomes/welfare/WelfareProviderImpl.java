@@ -69,7 +69,7 @@ public class WelfareProviderImpl implements WelfareProvider {
 		if (null != pageSize && null != offset) {
 			step.limit(offset,pageSize);
 		}
-		Result<Record> records = step.orderBy(Tables.EH_WELFARES.ID.desc()).fetch();
+		Result<Record> records = step.orderBy(Tables.EH_WELFARES.CREATE_TIME.desc()).fetch();
 		if(null == records){
 			return null;
 		}
