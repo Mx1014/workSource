@@ -40,7 +40,7 @@ public interface ServiceModuleAppService {
 
     ListLaunchPadAppsResponse listLaunchPadApps(ListLaunchPadAppsCommand cmd);
 
-    RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path);
+    RouterInfo convertRouterInfo(Long moduleId, Long appId, String title, String actionData, String path, Byte locationType, Byte sceneType, Byte clientHandlerType);
 
     void updateStatus(UpdateStatusCommand cmd);
 
@@ -61,4 +61,6 @@ public interface ServiceModuleAppService {
 	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
 
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
+    
+    ListServiceModuleAppsForEnterprisePayResponse listServiceModuleAppsForEnterprisePay(ListServiceModuleAppsForEnterprisePayCommand cmd);
 }

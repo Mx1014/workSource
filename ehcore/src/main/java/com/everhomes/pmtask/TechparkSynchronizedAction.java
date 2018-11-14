@@ -31,7 +31,6 @@ import sun.misc.BASE64Encoder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -62,8 +61,6 @@ public class TechparkSynchronizedAction implements Runnable{
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
-	private CategoryProvider categoryProvider;
-	@Autowired
 	private ConfigurationProvider configProvider;
 
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
@@ -91,10 +88,10 @@ public class TechparkSynchronizedAction implements Runnable{
 		userContext.setNamespaceId(task.getNamespaceId());
 		userContext.setScheme("http");
 
-		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
-		Category category = null;
+		PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
+		PmTaskCategory category = null;
 		if(null != task.getCategoryId())
-			category = categoryProvider.findCategoryById(task.getCategoryId());
+			category = pmTaskProvider.findCategoryById(task.getCategoryId());
 		
 		//查询图片
 		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
@@ -123,7 +120,7 @@ public class TechparkSynchronizedAction implements Runnable{
         return url;
     }
 	
-	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
+	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, PmTaskCategory taskCategory, PmTaskCategory category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
 		param.put("fileFlag", String.valueOf(null==task.getPriority()?1:task.getPriority()));

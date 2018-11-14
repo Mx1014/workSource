@@ -334,13 +334,13 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	}
 
 	@Override
-	public void deleteGeneralFormVal(Integer namespaceId, Long ownerId, Long sourceId){
+	public void deleteGeneralFormVal(Integer namespaceId, Long moduleId, Long sourceId){
 		try {
 			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 			context.delete(Tables.EH_GENERAL_FORM_VALS)
-					.where(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
-					.and(Tables.EH_GENERAL_FORM_VALS.OWNER_ID.eq(ownerId))
-					.and(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.where(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId))
+					.and(Tables.EH_GENERAL_FORM_VALS.MODULE_ID.eq(moduleId))
+					.and(Tables.EH_GENERAL_FORM_VALS.NAMESPACE_ID.eq(namespaceId))
 					.execute();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -389,6 +389,12 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 	public Long saveGeneralFormValRequest(Integer namespaceId, String moduleType, String ownerType, Long ownerId, Long moduleId, Long investmentAdId,Long formOriginId, Long formVersion){
 		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGeneralFormValRequests.class));
 		GeneralFormValRequest generalFormValRequests = new GeneralFormValRequest();
+		generalFormValRequests.setCreatorUid(UserContext.currentUserId());
+		Long l2 = DateHelper.currentGMTTime().getTime();
+		generalFormValRequests.setCreatedTime(new Timestamp(l2));
+
+		generalFormValRequests.setOperatorUid(UserContext.currentUserId());
+		generalFormValRequests.setOperatorTime(new Timestamp(l2));
 		//EhGeneralFormValRequests generalFormValRequests = new EhGeneralFormValRequests();
         generalFormValRequests.setId(id);
         generalFormValRequests.setOwnerId(ownerId);
@@ -643,5 +649,32 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		if (results != null && results.size() > 0)
 			return results.get(0);
 		return null;
+	}
+
+	@Override
+	public void updateInvestmentAdApplyTransformStatus(Long id, Long transformStatus) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG1,transformStatus)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+	}
+
+	@Override
+	public void setInvestmentAdId(Long id, Long investmentAdId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormValRequests.class));
+		context.update(Tables.EH_GENERAL_FORM_VAL_REQUESTS)
+			   .set(Tables.EH_GENERAL_FORM_VAL_REQUESTS.INTEGRAL_TAG2,investmentAdId)
+			   .where(Tables.EH_GENERAL_FORM_VAL_REQUESTS.ID.eq(id))
+			   .execute();
+		
+	}
+
+	@Override
+	public List<GeneralFormVal> getGeneralFormValBySourceId(Long sourceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGeneralFormVals.class));
+		SelectQuery<EhGeneralFormValsRecord> query = context.selectQuery(Tables.EH_GENERAL_FORM_VALS);
+		query.addConditions(Tables.EH_GENERAL_FORM_VALS.SOURCE_ID.eq(sourceId));
+		return query.fetch().map(r -> ConvertHelper.convert(r, GeneralFormVal.class));
 	}
 }

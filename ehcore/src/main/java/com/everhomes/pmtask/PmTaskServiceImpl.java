@@ -25,10 +25,9 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.building.BuildingProvider;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
@@ -66,6 +65,8 @@ import com.everhomes.paySDK.pojo.PayOrderDTO;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.pmtask.ebei.EbeiBuildingType;
 import com.everhomes.portal.PortalService;
+import com.everhomes.portal.PortalVersion;
+import com.everhomes.portal.PortalVersionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -82,6 +83,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.rest.organization.*;
 
 import com.everhomes.rest.family.FamilyDTO;
@@ -89,9 +91,9 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
 import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
-import com.everhomes.rest.gorder.controller.CreatePurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.controller.GetPurchaseOrderRestResponse;
-import com.everhomes.rest.gorder.order.*;
+import com.everhomes.rest.promotion.order.controller.CreatePurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.controller.GetPurchaseOrderRestResponse;
+import com.everhomes.rest.promotion.order.*;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.order.*;
@@ -99,6 +101,7 @@ import com.everhomes.rest.order.OrderPaymentStatus;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayMethodDTO;
 import com.everhomes.rest.order.PaymentParamsDTO;
+import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.pay.controller.CreateOrderRestResponse;
 import com.everhomes.rest.pmtask.*;
@@ -110,6 +113,9 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -133,6 +139,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.aspectj.lang.annotation.Around;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,8 +203,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
     private ConfigurationProvider configProvider;
 	@Autowired
-	private CategoryProvider categoryProvider;
-	@Autowired
 	private UserProvider userProvider;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
@@ -234,8 +239,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private CommunityService communityService;
 	@Autowired
-	private UserService userService;
-	@Autowired
 	private AddressService addressService;
 	@Autowired
 	private FlowEvaluateProvider flowEvaluateProvider;
@@ -251,6 +254,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowEventLogProvider flowEventLogProvider;
 	@Autowired
 	protected GeneralOrderService orderService;
+	@Autowired
+	private PortalVersionProvider portalVersionProvider;
+	@Autowired
+	private ServiceModuleAppProvider serviceModuleAppProvider;
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 
 	@Value("${server.contextPath:}")
@@ -286,10 +295,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		&& null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
+
+//		用appId实现多应用,去除taskcategoryId
+//		cmd.setTaskCategoryId(null);
 
 		//检查多入口应用权限
 		if (!handle.equals(PmTaskHandle.EBEI)) {
@@ -304,7 +318,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
+
 		return handler.searchTasks(cmd);
 	}
 
@@ -323,8 +337,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
 		//TODO:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -544,7 +560,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskSearch.deleteById(task.getId());
 
 			LOGGER.error("Update pmTask elasticsearch error, task={}", task);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
 					"Update pmTask elasticsearch error.");
 		}
 	}
@@ -732,8 +748,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 		
@@ -769,12 +787,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 			String requestorName = cmd.getRequestorName();
 			if(StringUtils.isBlank(requestorPhone)){
 				LOGGER.error("RequestorPhone cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorPhone cannot be null.");
 			}
 			if(StringUtils.isBlank(requestorName)){
 				LOGGER.error("RequestorName cannot be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"RequestorName cannot be null.");
 			}
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, requestorPhone);
@@ -868,12 +886,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
 			LOGGER.error("RequestorPhone cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorPhone cannot be null.");
 		}
 		if(StringUtils.isBlank(requestorName)){
 			LOGGER.error("RequestorName cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"RequestorName cannot be null.");
 		}
 		checkOrganizationId(cmd.getOrganizationId());
@@ -882,8 +900,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		//Todo:为科兴与一碑对接
-		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() &&
-				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+//		 && null != cmd.getTaskCategoryId() &&
+//				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -922,7 +942,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long id = cmd.getId();
 		checkId(id);
 		
-		Category category = categoryProvider.findCategoryById(id);
+		PmTaskCategory category = pmTaskProvider.findCategoryById(id);
 		if(category == null) {
 			LOGGER.error("PmTask category not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
@@ -935,7 +955,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		
 		category.setStatus(CategoryAdminStatus.INACTIVE.getCode());
-		categoryProvider.updateCategory(category);
+		pmTaskProvider.updateCategory(category);
 	}
 
 	@Override
@@ -973,7 +993,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //		}
 		Long parentId = cmd.getParentId();
 
-		Category category = categoryProvider.findCategoryById(parentId);
+		PmTaskCategory category = pmTaskProvider.findCategoryById(parentId);
 		if(category == null) {
 			LOGGER.error("PmTask parent category not found, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_NULL,
@@ -981,14 +1001,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		String path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 
-		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId,cmd.getOwnerType(),cmd.getOwnerId(), cmd.getName());
+		category = pmTaskProvider.findCategoryByNamespaceAndName(parentId, namespaceId,cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(), cmd.getName());
 		if(category != null) {
 			LOGGER.error("PmTask category have been in existing");
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
 					"PmTask category have been in existing");
 		}
 
-		category = new Category();
+		category = new PmTaskCategory();
 		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		category.setDefaultOrder(0);
 		category.setName(cmd.getName());
@@ -998,7 +1018,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
 		category.setOwnerId(cmd.getOwnerId());
 		category.setOwnerType(cmd.getOwnerType());
-		categoryProvider.createCategory(category);
+		category.setAppId(cmd.getAppId());
+		pmTaskProvider.createCategory(category);
 		
 		return ConvertHelper.convert(category, CategoryDTO.class);
 	}
@@ -1014,8 +1035,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//为科兴与一碑对接
-		if (namespaceId == 999983 &&
-				(this.isEbeiCategory(cmd.getTaskCategoryId()) || this.isEbeiCategory(cmd.getParentId()))) {
+		ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+		if(namespaceId == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 			handle = PmTaskHandle.EBEI;
 		}
 
@@ -1069,9 +1090,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 				for(int i=0;i<size;i++){
 					Row tempRow = sheet.createRow(i + 4);
 					PmTaskDTO task = list.get(i);
-					Category category = null;
-					if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
-							cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					PmTaskCategory category = null;
+					//为科兴与一碑对接
+					ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+					if(UserContext.getCurrentNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 						category = createEbeiCategory();
 					} else {
 						category = checkCategory(task.getTaskCategoryId());
@@ -1234,7 +1256,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			baos.flush();  
 		} catch (IOException e) {
 			LOGGER.error("ExportTasks is fail, cmd={}");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"ExportTasks is fail.");
 		}  
 		// 打开一个新的输入流  
@@ -1427,7 +1449,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			CategoryTaskStatisticsDTO dto = new CategoryTaskStatisticsDTO();
 			dto.setTaskCategoryId(statistics.getTaskCategoryId());
-			Category category = checkCategory(statistics.getTaskCategoryId());
+			PmTaskCategory category = checkCategory(statistics.getTaskCategoryId());
 			dto.setTaskCategoryName(category.getName());
 			dto.setCloseCount(statistics.getCloseCount());
 			dto.setProcessedCount(statistics.getProcessedCount());
@@ -1525,17 +1547,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void createTaskStatistics(List<Namespace> namespaces, Timestamp startDate, Timestamp endDate, long now) {
 		for (Namespace n : namespaces) {
 			for (Long id : PmTaskAppType.TYPES) {
-				Category ancestor = categoryProvider.findCategoryById(id);
+				PmTaskCategory ancestor = pmTaskProvider.findCategoryById(id);
 
 				if (null != ancestor) {
 					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
 					for (Community community : communities) {
-						List<Category> categories = categoryProvider.listTaskCategories(n.getId(), "community", community.getId(), ancestor.getId(), null, null, null);
+						List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(n.getId(), "community", community.getId(),null, ancestor.getId(), null, null, null);
 						if (null != categories && !categories.isEmpty()) {
-							for (Category taskCategory : categories) {
+							for (PmTaskCategory taskCategory : categories) {
 								createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
-								List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), "community", community.getId(), taskCategory.getId(), null, null, null);
-								for (Category category : tempCategories) {
+								List<PmTaskCategory> tempCategories = pmTaskProvider.listTaskCategories(n.getId(), "community", community.getId(),null, taskCategory.getId(), null, null, null);
+								for (PmTaskCategory category : tempCategories) {
 									createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
 								}
 							}
@@ -1628,7 +1650,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkNamespaceId(Integer namespaceId){
 		if(namespaceId == null) {
         	LOGGER.error("Invalid namespaceId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid namespaceId parameter.");
         }
 	}
@@ -1636,23 +1658,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkId(Long id){
 		if(null == id) {
         	LOGGER.error("Invalid id parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid id parameter.");
         }
 	}
 	
-	private Category checkCategory(Long id){
-		Category category = categoryProvider.findCategoryById(id);
+	private PmTaskCategory checkCategory(Long id){
+		PmTaskCategory category = pmTaskProvider.findCategoryById(id);
 		if(null == category) {
         	LOGGER.error("Category not found, categoryId={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Category not found.");
         }
 		return category;
 	}
 
-	private Category createEbeiCategory() {
-		Category category = new Category();
+	private PmTaskCategory createEbeiCategory() {
+		PmTaskCategory category = new PmTaskCategory();
 		category.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
 		category.setName("物业报修");
 		category.setParentId(0L);
@@ -1662,13 +1684,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
 		if(null == ownerId) {
         	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerId parameter.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
         	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid ownerType parameter.");
         }
 	}
@@ -1677,7 +1699,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask pmTask = pmTaskProvider.findTaskById(id);
 		if(null == pmTask) {
         	LOGGER.error("PmTask not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTask not found.");
         }
 		return pmTask;
@@ -1687,7 +1709,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskLog pmTaskLog = pmTaskProvider.findTaskLogById(id);
 		if(null == pmTaskLog) {
         	LOGGER.error("PmTaskLog not found, id={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
     				"PmTaskLog not found.");
         }
 		return pmTaskLog;
@@ -1735,7 +1757,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				evaluateCount += calculatePerson(statistics);
 				totalStar += calculateStar(statistics);
 				
-				Category category = checkCategory(statistics.getTaskCategoryId());
+				PmTaskCategory category = checkCategory(statistics.getTaskCategoryId());
 				Row tempRow = sheet.createRow(i);
 				
 				tempRow.createCell(0);
@@ -1850,7 +1872,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
 			PmTaskStatistics pts = list.get(i);
-			Category category = checkCategory(pts.getTaskCategoryId());
+			PmTaskCategory category = checkCategory(pts.getTaskCategoryId());
 			Community community = communityProvider.findCommunityById(pts.getOwnerId());
 			tempRow.createCell(0).setCellValue(community.getName());
 			tempRow.createCell(1).setCellValue(category.getName());
@@ -1923,7 +1945,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOperateType(Byte operateType) {
 		if (null == operateType) {
         	LOGGER.error("Invalid operateType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid operateType parameter.");
         }
 		
@@ -1932,7 +1954,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private void checkOrganizationId(Long organizationId) {
 		if (null == organizationId) {
         	LOGGER.error("Invalid organizationId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
     				"Invalid organizationId parameter.");
         }
 	}
@@ -1987,7 +2009,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 					if(pts.getOwnerId().equals(d.getOwnerId())) {
 						CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
 						categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
-						Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+						PmTaskCategory category = pmTaskProvider.findCategoryById(pts.getCategoryId());
 						categoryStatisticsDTO.setCategoryName(category.getName());
 						categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
 						categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
@@ -1998,8 +2020,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 				TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
 				
-				Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
-				Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+				PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(pts.getTaskCategoryId());
+				PmTaskCategory category = pmTaskProvider.findCategoryById(pts.getCategoryId());
 
 				dto.setTaskCategoryId(pts.getTaskCategoryId());
 				dto.setTaskCategoryName(taskCategory.getName());
@@ -2346,7 +2368,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(familyList != null && familyList.size() > 0) {
 				familyList.forEach(f -> {
 					if(GroupMemberStatus.ACTIVE.equals(GroupMemberStatus.fromCode(f.getMembershipStatus()))) {
-						if(f.getCommunityId().equals(communityId))
+						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
 							families.add(f);
 					}
 
@@ -2361,7 +2383,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			if(organizationList != null && organizationList.size() > 0) {
 				organizationList.forEach(f -> {
 					if(OrganizationMemberStatus.ACTIVE.equals(OrganizationMemberStatus.fromCode(f.getMemberStatus()))) {
-						if(f.getCommunityId().equals(communityId))
+						if(f.getCommunityId() != null && f.getCommunityId().equals(communityId))
 							organizations.add(f);
 					}
 
@@ -2422,7 +2444,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			DownloadUtils.download(out, resp);
 		} catch (IOException e) {
 			LOGGER.error("Export pmTask excel failed.", e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_FLIE_EXPORT_FAIL,
 					"Export pmTask excel failed.");
 		}try {
 			out.close();
@@ -2461,7 +2483,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetIfHideRepresentResponse response = new GetIfHideRepresentResponse();
 		if(null == cmd.getAppId()) {
 			LOGGER.error("Invalid appId parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid appId parameter.");
 		}
 		String colName = "pmtask.hide.represent.";
@@ -2603,7 +2625,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHistoryAddress pmTaskHistoryAddress = pmTaskProvider.findTaskHistoryAddressById(cmd.getId());
 		if (null == pmTaskHistoryAddress) {
 			LOGGER.error("PmTaskHistoryAddress not found, id={}", cmd.getId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 					"PmTaskHistoryAddress not found.");
 		}
 		pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.INACTIVE.getCode());
@@ -2615,7 +2637,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
 
@@ -2701,6 +2723,47 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		return handler.getThirdTaskDetail(req);
 	}
+
+	@Override
+	public Object getThirdCategories(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdCategories(req);
+	}
+
+    @Override
+    public Object getThirdProjects(HttpServletRequest req) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+        PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+        return handler.getThirdProjects(req);
+    }
+
+	@Override
+	public Object createThirdEvaluation(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.createThirdEvaluation(req);
+	}
+
+	@Override
+	public Object getThirdEvaluation(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.getThirdEvaluation(req);
+	}
+
+	@Override
+	public Object submitThirdAttachment(HttpServletRequest req) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		return handler.submitThirdAttachment(req);
+	}
+
 	// 查找报修公司的报修记录, 对接不查
 	@Override
 	public List<SearchTasksByOrgDTO> listTasksByOrg(SearchTasksByOrgCommand cmd17) {
@@ -2721,7 +2784,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			} else if (task.getStatus() == 4) {
 				dto.setStatus("已完成");
 			}
-			dto.setTaskCategoryName(categoryProvider.findCategoryById(task.getTaskCategoryId()).getName());
+			dto.setTaskCategoryName(pmTaskProvider.findCategoryById(task.getTaskCategoryId()).getName());
 			dto.setContent(task.getContent());
 			if (task.getOrganizationUid() == null || task.getOrganizationUid() == 0) {
 				dto.setPmTaskSource("用户发起");
@@ -2760,7 +2823,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				}
 				dto.setCreateTime(r.getCreateTime());
 				dto.setBuildingName(r.getBuildingName());
-				dto.setTaskCategoryName(categoryProvider.findCategoryById(r.getTaskCategoryId()).getName());
+				dto.setTaskCategoryName(pmTaskProvider.findCategoryById(r.getTaskCategoryId()).getName());
 				dto.setContent(r.getContent());
 				dto.setFlowCaseId(r.getFlowCaseId());
 				ret.add(dto);
@@ -2911,7 +2974,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		if(null != dto.getCategoryId()){
-			Category category = categoryProvider.findCategoryById(dto.getCategoryId());
+			PmTaskCategory category = pmTaskProvider.findCategoryById(dto.getCategoryId());
 
 			if(category != null) {
 				dataMap.put("categoryName",category.getName());
@@ -2974,7 +3037,7 @@ public class PmTaskServiceImpl implements PmTaskService {
         if(list==null || list.size()==0)
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ORDER_ID,
                     "OrderId does not exist.");
-        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>7)
+        if (cmd.getStateId()==null || cmd.getStateId()<1 || cmd.getStateId()>9)
 			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_STATE_ID,
 					"Illegal stateId");
 		PmTask task = list.get(0);
@@ -2994,9 +3057,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 					case UNPROCESSED: break;
 					case PROCESSING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break;
 					case INACTIVE: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case CLOSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
                     case REVISITED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break; //已关闭
                     case PROCESSED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break;
 					case CANCELED: flowCaseStatus = FlowCaseStatus.ABSORTED.getCode();break;
+					case HANGING: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();break; //待单中
+					case REVIEWED: flowCaseStatus = FlowCaseStatus.FINISHED.getCode();break; //已回访
 					default: flowCaseStatus = FlowCaseStatus.PROCESS.getCode();
 				}
 				task.setStatus(flowCaseStatus);
@@ -3038,18 +3104,19 @@ public class PmTaskServiceImpl implements PmTaskService {
 		flowService.processAutoStep(stepDTO);
 	}
 
-	private void copyCategories(Category c,Long parentId,Long communityId){
-		List<Category> list = categoryProvider.listTaskCategories(null,null,null, c.getId(), null,
+	private void copyCategories(PmTaskCategory c,Long parentId,Long communityId,Long appId){
+		List<PmTaskCategory> list = pmTaskProvider.listTaskCategories(null,null,null,appId, c.getId(), null,
 				null, null);
-			Category newCategory = ConvertHelper.convert(c,Category.class);
+		PmTaskCategory newCategory = ConvertHelper.convert(c,PmTaskCategory.class);
 			newCategory.setOwnerType("community");
 			newCategory.setOwnerId(communityId);
 			newCategory.setParentId(parentId);
-			Long id = categoryProvider.createCategory(newCategory);
+			newCategory.setAppId(appId);
+			Long id = pmTaskProvider.createCategory(newCategory);
 			if (list!=null && list.size()>0)
 				list.forEach(r->{
 					if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
-						copyCategories(r, id,communityId);
+						copyCategories(r, id,communityId,appId);
 					}
 				});
 
@@ -3064,25 +3131,25 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.info("syncCategories test:flag = "+flag);
 			return;
 		}
-		List<Category> list = categoryProvider.listTaskCategories(null,null,null, 6L, null,
+		List<PmTaskCategory> list = pmTaskProvider.listTaskCategories(null,null,null,null, 6L, null,
 				null, null);
 		list.forEach(r->{
 			if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
 				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(r.getNamespaceId());
 				if (communities!=null && communities.size()>0)
 					for (Community community :communities)
-					copyCategories(r, 6l,community.getId());
+					copyCategories(r, 6l,community.getId(),null);
 			}
 		});
 
-		list = categoryProvider.listTaskCategories(null,null,null, 9L, null,
+		list = pmTaskProvider.listTaskCategories(null,null,null,null, 9L, null,
 				null, null);
 		list.forEach(r->{
 			if (r.getNamespaceId()!=null && r.getNamespaceId()>0) {
 				List<Community> communities = communityProvider.listCommunitiesByNamespaceId(r.getNamespaceId());
 				if (communities!=null && communities.size()>0)
 					for (Community community :communities)
-						copyCategories(r, 9l,community.getId());
+						copyCategories(r, 9l,community.getId(),null);
 			}
 		});
 	}
@@ -3125,11 +3192,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 				bean.setOwnerId(elem.getKey());
 				bean.setOwnerName(null != community ? community.getName() : "");
 				//为科兴与一碑对接
-				if(cmd.getNamespaceId() == 999983 && null != cmd.getAppId() &&
-						cmd.getAppId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+				ServiceModuleApp serviceModuleApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(cmd.getAppId());
+				if(cmd.getNamespaceId() == 999983 && StringUtils.isNotBlank(serviceModuleApp.getCustomTag()) && serviceModuleApp.getCustomTag().equals("1")) {
 					bean.setType("物业报修");
 				}else{
-					Category category = categoryProvider.findCategoryById(elem1.getKey());
+					PmTaskCategory category = pmTaskProvider.findCategoryById(elem1.getKey());
 					bean.setType(null != category ? category.getName() : "");
 				}
 				bean.setTotal(elem1.getValue().size());
@@ -3234,7 +3301,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer exportType = cmd.getExportType();
 		if(null == exportType){
 			LOGGER.error("ExportType cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"ExportType cannot be null.");
 		}
 
@@ -3324,7 +3391,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PmTaskConfigDTO setPmTaskConfig(SetPmTaskConfigCommand cmd) {
 		User user = UserContext.current().getUser();
-		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		if(null != result){
 			if(null != cmd.getContentHint())
 				result.setContentHint(cmd.getContentHint());
@@ -3351,10 +3418,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public PmTaskConfigDTO searchPmTaskConfigByProject(GetPmTaskConfigCommand cmd) {
 		if(null == cmd.getId() && (null == cmd.getNamespaceId() && null == cmd.getOwnerId())){
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid parameter.");
 		}
-		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId());
+		PmTaskConfig result = this.pmTaskProvider.findPmTaskConfigbyOwnerId(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTaskCategoryId(),cmd.getAppId());
 		return ConvertHelper.convert(result,PmTaskConfigDTO.class);
 	}
 
@@ -3539,7 +3606,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListBusinessUsersCommand cmdPay = new ListBusinessUsersCommand();
 		if(null == cmd.getOrganizationId()){
 			LOGGER.error("Invalid OrganizationId, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"Invalid OrganizationId.");
 		}
 		// 给支付系统的bizUserId的形式：EhOrganizations1037001
@@ -3741,13 +3808,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}else{
 			taskCategoryId = 9L;
 		}
-		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),taskCategoryId);
+		PmTaskConfig pmTaskConfig = pmTaskProvider.findPmTaskConfigbyOwnerId(namespaceId,task.getOwnerType(),task.getOwnerId(),null,task.getAppId());
 		if(null == pmTaskConfig.getPaymentFlag() || pmTaskConfig.getPaymentFlag().equals((byte)0)){
 			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", task.getId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());
@@ -3777,19 +3844,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 								"暂未绑定收款账户");
 					}
 				}
-			}
-			if(null != order.getBizOrderNum()){
-				preOrderDTO = ConvertHelper.convert(order,PreOrderDTO.class);
-				ListClientSupportPayMethodCommandResponse response = payService.listClientSupportPayMethod("NS" + namespaceId,
-						cmd.getClientAppName());
-				List<com.everhomes.pay.order.PayMethodDTO> paymentMethods = response.getPaymentMethods();
-				if (paymentMethods != null)
-					preOrderDTO.setPayMethod(paymentMethods.stream().map(r->{
-						PayMethodDTO convert = ConvertHelper.convert(r, PayMethodDTO.class);
-						convert.setExtendInfo(getPayMethodExtendInfo());
-						return convert;
-					}).collect(Collectors.toList()));
-				return preOrderDTO;
 			}
 			//1、检查买方（付款方）是否有会员，无则创建
 			User userById = userProvider.findUserById(UserContext.currentUserId());
@@ -3865,7 +3919,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		preOrderCommand.setOrderRemark3(String.valueOf(task.getOwnerId()));
 		preOrderCommand.setOrderRemark4(null);
 		preOrderCommand.setOrderRemark5(null);
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		preOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 
 		return preOrderCommand;
@@ -3909,7 +3963,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		// 找不到手机号则默认一个
 		if(buyerPhone == null || buyerPhone.trim().length() == 0) {
-			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.default.personal_bind_phone", "");
+			buyerPhone = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_ORDER_DEFAULT_PERSONAL_BIND_PHONE, "");
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -4021,12 +4075,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskOrder paymentBillOrder = pmTaskProvider.findPmTaskOrderByBizOrderNum(cmd.getBizOrderNum());
 		if(paymentBillOrder == null){
 			LOGGER.error("can not find order record by BizOrderNum={}", cmd.getBizOrderNum());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 					"can not find order record");
 		}
 
 		GetPurchaseOrderCommand getPurchaseOrderCommand = new GetPurchaseOrderCommand();
-		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), "gorder.system_id", "");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
 		getPurchaseOrderCommand.setBusinessSystemId(Long.parseLong(systemId));
 		String accountCode = generateAccountCode(UserContext.getCurrentNamespaceId());
 		getPurchaseOrderCommand.setAccountCode(accountCode);
@@ -4083,7 +4137,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 //			LOGGER.info("target:"+JSONObject.toJSONString(flowCase));
 			if(null == flowCase){
 				LOGGER.error("can not find flowcase PmTaskId={}", order.getTaskId());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
 						"can not find flowcase");
 			}
 			stepDTO.setFlowCaseId(flowCase.getId());
@@ -4367,12 +4421,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd1.setOwnerId(cmd.getOwnerId());
 		cmd1.setStartDate(cmd.getDateStart());
 		cmd1.setEndDate(cmd.getDateEnd());
-		cmd1.setTaskCategoryId(cmd.getAppId());
-		cmd1.setAppId(cmd.getOriginId());
+//		cmd1.setTaskCategoryId(cmd.getAppId());
+		cmd1.setAppId(cmd.getAppId());
 		cmd1.setCurrentPMId(cmd.getCurrentPMId());
 		cmd1.setCurrentProjectId(cmd.getOwnerId());
 		cmd1.setPageSize(99999);
-		List<PmTaskDTO> list = this.searchTasks(cmd1).getRequests();
+		List<PmTaskDTO> list = this.searchTasksWithoutAuth(cmd1).getRequests();
 		return null != list ? list.stream().map(r -> ConvertHelper.convert(r,PmTask.class)).collect(Collectors.toList()) : new ArrayList<>();
 	}
 

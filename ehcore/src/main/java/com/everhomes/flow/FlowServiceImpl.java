@@ -6806,7 +6806,7 @@ public class FlowServiceImpl implements FlowService {
 
     /**
      * node_enter_log 节点的实际处理人
-     * @see FlowServiceImpl#getStepTrackerLogs(List)
+     * @see FlowServiceImpl#getStepTrackerLogs(java.util.List)
      */
     @Override
     public List<FlowEventLog> getNodeEnterLogs(Long flowCaseId, Long flowNodeId, Long stepCount) {
@@ -6825,7 +6825,11 @@ public class FlowServiceImpl implements FlowService {
     /**
      * step_tracker_log 经过的节点列表
      * @param allFlowCase   所有的任务列表
+<<<<<<< HEAD
      * @see FlowServiceImpl#getAllFlowCase(Long)
+=======
+     * @see com.everhomes.flow.FlowServiceImpl#getAllFlowCase(java.lang.Long)
+>>>>>>> 5.10.1
      */
     @Override
     public List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase) {

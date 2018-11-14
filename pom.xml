@@ -19,6 +19,7 @@
         <!--<module>ehcore-persist</module>-->
         <!--<module>ehrest-response</module>-->
         <module>ehnextgen-api</module>
+        <!--<module>ehcore-sdk</module>-->
         <module>ehnextgen-messaging</module>
         <module>ehnextgen-forum</module>
         <!--<module>ehborder</module>-->

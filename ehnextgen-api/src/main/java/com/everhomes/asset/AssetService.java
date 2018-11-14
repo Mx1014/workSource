@@ -1,6 +1,7 @@
 
 package com.everhomes.asset;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -11,52 +12,140 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
-import com.everhomes.rest.asset.*;
-import com.everhomes.rest.contract.SearchContractCommand;
+import com.everhomes.rest.asset.AdjustBillGroupOrderCommand;
+import com.everhomes.rest.asset.AssetBillStatDTO;
+import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.AutoNoticeConfigCommand;
+import com.everhomes.rest.asset.BatchImportBillsCommand;
+import com.everhomes.rest.asset.BatchImportBillsResponse;
+import com.everhomes.rest.asset.BatchModifyBillSubItemCommand;
+import com.everhomes.rest.asset.BatchUpdateBillsToPaidCmd;
+import com.everhomes.rest.asset.BatchUpdateBillsToSettledCmd;
+import com.everhomes.rest.asset.BillGroupIdCommand;
+import com.everhomes.rest.asset.BillGroupRuleIdCommand;
+import com.everhomes.rest.asset.BillIdCommand;
+import com.everhomes.rest.asset.BillItemIdCommand;
+import com.everhomes.rest.asset.BillStaticsCommand;
+import com.everhomes.rest.asset.BillStaticsDTO;
+import com.everhomes.rest.asset.CalculateRentCommand;
+import com.everhomes.rest.asset.CancelGeneralBillCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageCommand;
+import com.everhomes.rest.asset.CheckEnterpriseHasArrearageResponse;
+import com.everhomes.rest.asset.CheckTokenRegisterCommand;
+import com.everhomes.rest.asset.CreateBillCommand;
+import com.everhomes.rest.asset.CreateChargingItemCommand;
+import com.everhomes.rest.asset.CreateGeneralBillCommand;
+import com.everhomes.rest.asset.CreatePaymentBillOrderCommand;
+import com.everhomes.rest.asset.DeleteChargingItemForBillGroupResponse;
+import com.everhomes.rest.asset.ExemptionItemIdCommand;
+import com.everhomes.rest.asset.ExportBillTemplatesCommand;
+import com.everhomes.rest.asset.FindAssetBillCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentCommand;
+import com.everhomes.rest.asset.FindUserInfoForPaymentResponse;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractCommand;
+import com.everhomes.rest.asset.GetAreaAndAddressByContractDTO;
+import com.everhomes.rest.asset.GetAssetBillStatCommand;
+import com.everhomes.rest.asset.GetDoorAccessInfoCommand;
+import com.everhomes.rest.asset.GetDoorAccessParamCommand;
+import com.everhomes.rest.asset.GetPayBillsForEntResultResp;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultCmd;
+import com.everhomes.rest.asset.IsProjectNavigateDefaultResp;
+import com.everhomes.rest.asset.IsUserExistInAddressCmd;
+import com.everhomes.rest.asset.IsUserExistInAddressResponse;
+import com.everhomes.rest.asset.JudgeAppShowPayCommand;
+import com.everhomes.rest.asset.JudgeAppShowPayResponse;
+import com.everhomes.rest.asset.ListAutoNoticeConfigCommand;
+import com.everhomes.rest.asset.ListAutoNoticeConfigResponse;
+import com.everhomes.rest.asset.ListAvailableVariablesCommand;
+import com.everhomes.rest.asset.ListAvailableVariablesDTO;
+import com.everhomes.rest.asset.ListBillDetailCommandStr;
+import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
+import com.everhomes.rest.asset.ListBillItemsCommand;
+import com.everhomes.rest.asset.ListBillItemsResponse;
+import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.ListBillsCommandForEnt;
+import com.everhomes.rest.asset.ListBillsDTO;
+import com.everhomes.rest.asset.ListBillsResponse;
+import com.everhomes.rest.asset.ListChargingItemDetailForBillGroupDTO;
+import com.everhomes.rest.asset.ListChargingItemsDTO;
+import com.everhomes.rest.asset.ListChargingItemsForBillGroupResponse;
+import com.everhomes.rest.asset.ListChargingStandardsCommand;
+import com.everhomes.rest.asset.ListChargingStandardsDTO;
+import com.everhomes.rest.asset.ListDoorAccessParamResponse;
+import com.everhomes.rest.asset.ListGeneralBillsDTO;
+import com.everhomes.rest.asset.ListLateFineStandardsCommand;
+import com.everhomes.rest.asset.ListLateFineStandardsDTO;
+import com.everhomes.rest.asset.ListPayeeAccountsCommand;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillResp;
+import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
+import com.everhomes.rest.asset.ListSimpleAssetBillsCommand;
+import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
+import com.everhomes.rest.asset.ListUploadCertificatesCommand;
+import com.everhomes.rest.asset.ModifyNotSettledBillCommand;
+import com.everhomes.rest.asset.ModifySettledBillCommand;
+import com.everhomes.rest.asset.OneKeyNoticeCommand;
+import com.everhomes.rest.asset.OwnerIdentityCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesCommand;
+import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
+import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
+import com.everhomes.rest.asset.ReCalBillCommand;
+import com.everhomes.rest.asset.SelectedNoticeCommand;
+import com.everhomes.rest.asset.SetDoorAccessParamCommand;
+import com.everhomes.rest.asset.ShowCreateBillDTO;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
+import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
+import com.everhomes.rest.asset.UploadCertificateCommand;
+import com.everhomes.rest.asset.UploadCertificateInfoDTO;
+import com.everhomes.rest.asset.listBillExemtionItemsCommand;
+import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.portal.AssetServiceModuleAppDTO;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.server.schema.tables.pojos.EhPaymentFormula;
-
-import java.io.OutputStream;
+import com.everhomes.util.Tuple;
 
 /**
  * Created by Administrator on 2017/2/20.
  */
 public interface AssetService {
 
-	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
-
+//	List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd);
+//
 	ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
-
-	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
-
-	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
-
-	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
-
+//
+//	HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd, HttpServletResponse response);
+//
+//	ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+//
+//	AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
+//
 	AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
-
-	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
-
-	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
-
-	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
-
-	void deleteBill(DeleteBillCommand cmd);
-
-	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
-
+//
+//	AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
+//
+//	void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
+//
+//	void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
+//
+//	void deleteBill(DeleteBillCommand cmd);
+//
+//	List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
+//
 	Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
-
-	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
-
+//
+//	NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
+//
 	AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
-
+//
 	List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
+
+	//=============================================================================
+	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
+	//=============================================================================
 
 	ListBillsResponse listBills(ListBillsCommand cmd);
 
@@ -64,15 +153,7 @@ public interface AssetService {
 
 	void selectNotice(SelectedNoticeCommand cmd);
 
-	ShowBillForClientDTO showBillForClient(ClientIdentityCommand cmd);
-
-	ShowBillDetailForClientResponse getBillDetailForClient(BillIdCommand cmd);
-
-	List<ListBillGroupsDTO> listBillGroups(OwnerIdentityCommand cmd);
-
 	ShowCreateBillDTO showCreateBill(BillGroupIdCommand cmd);
-
-	ShowBillDetailForClientResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd);
 
 	ListBillsDTO createBill(CreateBillCommand cmd);
 
@@ -85,8 +166,6 @@ public interface AssetService {
 	void modifyBillStatus(BillIdCommand cmd);
 
 	//void exportPaymentBills(ListBillsCommand cmd, HttpServletResponse response); -- by djm 对接下载中心
-
-	List<ListChargingItemsDTO> listChargingItems(OwnerIdentityCommand cmd);
 
 	List<ListChargingStandardsDTO> listChargingStandards(ListChargingStandardsCommand cmd);
 
@@ -120,35 +199,13 @@ public interface AssetService {
 
 	PaymentExemptionItems findExemptionItemById(Long ExemptionItemId);
 
-	ListChargingStandardsResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd);
-
-	void configChargingItems(ConfigChargingItemsCommand cmd);
-
-	void createChargingStandard(CreateChargingStandardCommand cmd);
-
-	void modifyChargingStandard(ModifyChargingStandardCommand cmd);
-
-	GetChargingStandardDTO getChargingStandardDetail(GetChargingStandardCommand cmd);
-
-	DeleteChargingStandardDTO deleteChargingStandard(DeleteChargingStandardCommand cmd);
-
 	List<ListAvailableVariablesDTO> listAvailableVariables(ListAvailableVariablesCommand cmd);
-
-	List<EhPaymentFormula> createFormula(CreateFormulaCommand cmd);
-
-	void createBillGroup(CreateBillGroupCommand cmd);
-
-	void modifyBillGroup(ModifyBillGroupCommand cmd);
 
 	void adjustBillGroupOrder(AdjustBillGroupOrderCommand cmd);
 
 	ListChargingItemsForBillGroupResponse listChargingItemsForBillGroup(BillGroupIdCommand cmd);
 
-	void addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd);
-
 	DeleteChargingItemForBillGroupResponse deleteChargingItemForBillGroup(BillGroupRuleIdCommand cmd);
-
-	DeleteBillGroupReponse deleteBillGroup(DeleteBillGroupCommand cmd);
 
 	ListChargingItemDetailForBillGroupDTO listChargingItemDetailForBillGroup(BillGroupRuleIdCommand cmd);
 
@@ -163,12 +220,6 @@ public interface AssetService {
 	void autoNoticeConfig(AutoNoticeConfigCommand cmd);
 
 	CheckEnterpriseHasArrearageResponse checkEnterpriseHasArrearage(CheckEnterpriseHasArrearageCommand cmd);
-
-	List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd);
-
-	List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd);
-
-	FunctionDisableListDto functionDisableList(FunctionDisableListCommand cmd);
 
 	List<ListLateFineStandardsDTO> listLateFineStandards(ListLateFineStandardsCommand cmd);
 
@@ -192,7 +243,7 @@ public interface AssetService {
     
     void exportOrders(ListPaymentBillCmd cmd, HttpServletResponse response);
 
-    void noticeTrigger(Integer namespaceId);
+//    void noticeTrigger(Integer namespaceId);
     
     List<ListBizPayeeAccountDTO> listPayeeAccounts(ListPayeeAccountsCommand cmd);
     
@@ -229,13 +280,11 @@ public interface AssetService {
     
     ListPaymentBillResp listPaymentBillForEnt(ListPaymentBillCmd cmd);
 
-	List<ListBillGroupsDTO> listBillGroupsForEnt(OwnerIdentityCommand cmd);
-	
 	ShowCreateBillSubItemListDTO showCreateBillSubItemList(ShowCreateBillSubItemListCmd cmd);
 
 	void batchModifyBillSubItem(BatchModifyBillSubItemCommand cmd);
 
-	void testLateFine(TestLateFineCommand cmd);
+//	void testLateFine(TestLateFineCommand cmd);
 	
 	void batchUpdateBillsToSettled(BatchUpdateBillsToSettledCmd cmd);
 
@@ -247,11 +296,9 @@ public interface AssetService {
 
 	GetPayBillsForEntResultResp getPayBillsForEntResult(PaymentOrderRecord cmd);
     
-    void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
+    //void createOrUpdateAnAppMapping(CreateAnAppMappingCommand cmd);
 	
 	public BigDecimal getBillItemTaxRate(Long billGroupId, Long billItemId);
-	
-	void testUpdateBillDueDayCountOnTime(TestLateFineCommand cmd);
 
 	/**
 	 * 物业缴费V6.6（对接统一账单） 获取缴费应用列表接口
@@ -261,20 +308,39 @@ public interface AssetService {
 	/**
 	 * 物业缴费V6.6（对接统一账单） 业务应用新增缴费映射关系接口
 	 */
-	public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
+	//public AssetModuleAppMapping createOrUpdateAssetMapping(AssetModuleAppMapping assetModuleAppMapping);
 	
 	/**
 	 * 物业缴费V6.6（对接统一账单） 创建统一账单接口
 	 */
-	public List<ListBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
+	public List<ListGeneralBillsDTO> createGeneralBill(CreateGeneralBillCommand cmd);
 
-	void tranferAssetMappings();
-	
-	AssetGeneralBillHandler getAssetGeneralBillHandler(String sourceType, Long sourceId);
+	GeneralBillHandler getGeneralBillHandler(String sourceType);
 
 	void createChargingItem(CreateChargingItemCommand cmd);
-	
+
+	void syncRuiAnCMBillToZuolin(List<CMSyncObject> cmSyncObjectList, Integer namespaceId, Long contractCategoryId);
+
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 	
 	default void exportAssetListByParams(Object cmd){}
+
+	void cancelGeneralBill(CancelGeneralBillCommand cmd);
+
+	void injectSmsVars(NoticeInfo noticeInfo, List<Tuple<String, Object>> variables,Integer namespaceId);
+
+	List<Long> getAllCommunity(Integer namespaceId, Long organizationId, Long appId, boolean includeNamespace);
+
+	void checkNullProhibit(String name , Object object);
+
+	AssetVendor checkAssetVendor(Integer namespaceId,Integer defaultNamespaceId);
+
+	AssetVendorHandler getAssetVendorHandler(String vendorName);
+	
+	//缴费对接门禁
+	void setDoorAccessParam(SetDoorAccessParamCommand cmd);
+	ListDoorAccessParamResponse getDoorAccessParam(GetDoorAccessParamCommand cmd);
+	void meterAutoReading(Boolean createPlanFlag);
+	AssetDooraccessLog getDoorAccessInfo(GetDoorAccessInfoCommand cmd);
+	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
 }

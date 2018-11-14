@@ -153,14 +153,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
 //                }
 //            }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
-                User user = UserContext.current().getUser();
 //                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
 //                        UserProfileContstant.IS_APPLIED_SHOP);
 //                dto.setLinkUrl(getApplyShopUrl());
 //                if (applied != null) {
 //                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
 //                }
-                dto.setLinkUrl(getManageShopUrl(user.getId()));
+                dto.setLinkUrl(getManageShopUrl());
 
             }
              switch (dto.getRegion()) {
@@ -200,7 +199,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         }
     }
 
-    private String getManageShopUrl(Long userId) {
+    private String getManageShopUrl() {
         String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
         String manageShopPath = configurationProvider.getValue(ConfigConstants.MANAGE_SHOP_URL, "");
 
@@ -208,17 +207,18 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
             LOGGER.error("Invalid home url or manage path, homeUrl=" + homeurl + ", manageShopPath=" + manageShopPath);
             return null;
         } else {
-            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
-            if (mallId != null) {
-                manageShopPath = manageShopPath.replace("?","&");
-                if (homeurl.contains("?")) {
-                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
-                }else {
-                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
-                }
-            }else {
-                return homeurl + manageShopPath;
-            }
+            //不需要拼接mallId  update by yanlong.liang 20181017
+//            ShopMallId mallId = ShopMallId.fromNamespaceId(UserContext.getCurrentNamespaceId());
+//            if (mallId != null) {
+//                manageShopPath = manageShopPath.replace("?","&");
+//                if (homeurl.contains("?")) {
+//                    return homeurl +"&mallId=" +mallId.getCode() + manageShopPath;
+//                }else {
+//                    return homeurl +"?mallId=" +mallId.getCode() + manageShopPath;
+//                }
+//            }else {
+//            }
+            return homeurl + manageShopPath;
         }
     }
 

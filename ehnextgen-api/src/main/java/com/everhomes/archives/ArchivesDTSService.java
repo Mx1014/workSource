@@ -16,6 +16,12 @@ public interface ArchivesDTSService {
 
     ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd);
 
+    void exportArchivesContacts(ListArchivesContactsCommand cmd);
+
+    OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId);
+
+    void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd);
+
     ImportFileTaskDTO importArchivesEmployees(MultipartFile mfile, ImportArchivesEmployeesCommand cmd);
 
     ImportFileResponse<ImportArchivesEmployeesDTO> getImportEmployeesResult(GetImportFileResultCommand cmd);

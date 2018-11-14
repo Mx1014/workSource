@@ -14,23 +14,23 @@ package com.everhomes.rest.portal;
  * </ul>
  */
 public enum TitleStyle {
-    NONE((byte) 0), LEFT_ONE((byte) 101), LEFT_TWO((byte) 102), LEFT_THREE((byte) 103), LEFT_FOUR((byte) 104),
-    CENTER_ONE((byte) 201), CENTER_TWO((byte) 202), CENTER_THREE((byte) 203);
+    NONE(0), LEFT_ONE(101), LEFT_TWO(102), LEFT_THREE(103), LEFT_FOUR(104),
+    CENTER_ONE(201), CENTER_TWO(202), CENTER_THREE(203);
 
-    private byte code;
+    private int code;
 
-    private TitleStyle(byte code) {
+    private TitleStyle(int code) {
         this.code = code;
     }
 
-    public byte getCode() {
+    public int getCode() {
         return this.code;
     }
 
-    public static TitleStyle fromCode(Byte code) {
+    public static TitleStyle fromCode(Integer code) {
         if (null != code) {
             for (TitleStyle value : TitleStyle.values()) {
-                if (value.code == code.byteValue()) {
+                if (value.code == code.intValue()) {
                     return value;
                 }
             }

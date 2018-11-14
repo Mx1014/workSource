@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude: 坐标纬度</li>
  * <li>longitude： 坐标经度</li>
  * <li>wifiMac： wifiMac地址信息</li>
+ * <li>createType： 创建类型 参考{@link com.everhomes.rest.techpark.punch.CreateType}</li>
  * </ul>
  */
 public class PunchClockCommand {
@@ -19,7 +20,7 @@ public class PunchClockCommand {
 	private Double latitude;
 	private Double longitude;
 	private String wifiMac;
-
+	private Byte createType;
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
@@ -71,6 +72,14 @@ public class PunchClockCommand {
 
 	public void setPunchType(Byte punchType) {
 		this.punchType = punchType;
+	}
+
+	public Byte getCreateType() {
+		return createType;
+	}
+
+	public void setCreateType(Byte createType) {
+		this.createType = createType;
 	}
 
 }

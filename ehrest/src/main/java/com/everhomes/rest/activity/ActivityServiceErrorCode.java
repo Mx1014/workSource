@@ -33,4 +33,8 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_PHONE=10029;
 	static final int ERROR_NO_ROSTER = 10030;
 	static final int ERROR_ROSTER_ALREADY_EXIST = 10031;
+	static final int ERROR_ACTIVITY_END = 10032;// 活动已经结束
+    static final int ERROR_USER_NOT_LOGIN = 10033; //用户未登录
+
+	static final int ERROR_URL_NOTEXIST = 10501;//URL未配置
 }

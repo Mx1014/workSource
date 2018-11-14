@@ -6,10 +6,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 {
 	"contract": {
 		"properties": {
-			"name":{
-                "type":"string",
-                "index":"not_analyzed"
-            },
+			"name":{ "type":"string","index":"not_analyzed"},
 			"customerName":{"type":"string","index":"not_analyzed"},
             "contractNumber":{
                 "type":"string", 
@@ -33,6 +30,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/contract" -d '
 			"contractEndDate":{"type":"date"},
 			"updateTime":{"type":"date"},
 			"categoryId":{"type":"long"},
+			"depositStatus":{"type":"byte"},
 			"rent":{"type":"double"}
 		}
 	}

@@ -150,7 +150,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
             contractProvider.updateContract(contract);
             contractSearcher.feedDoc(contract);
             //审批不通过的续约合同，变更合同不修改资产状态
-			if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
+			if ((contractCategory== null && contract.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))
 					&& ContractType.NEW.equals(ContractType.fromStatus(contract.getContractType()))) {
 				dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 			}
@@ -194,7 +194,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
                 //记录合同事件日志，by tangcen
         		contractProvider.saveContractEvent(ContractTrackingTemplateCode.CONTRACT_UPDATE,contract,exist);
             } else if(ContractStatus.DENUNCIATION.equals(ContractStatus.fromStatus(contract.getStatus()))){
-            	if (!ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
+            	if ((contractCategory== null && exist.getPaymentFlag()==1) || !ContractApplicationScene.PROPERTY.equals(ContractApplicationScene.fromStatus(contractCategory.getContractApplicationScene()))) {
 	            	 dealAddressLivingStatus(contract, AddressMappingStatus.FREE.getCode());
 	                 //查询企业客户信息，客户状态会由已成交客户变为历史客户
 	           		 if (contract.getCustomerType()==0) {
@@ -545,6 +545,7 @@ public class ContractFlowModuleListener implements FlowModuleListener {
 			if (contractDetailDTO.getChargingItems() != null) {
 				chargingItems: for (int j = 0; j < contractDetailDTO.getChargingItems().size(); j++) {
 					if (contractDetailDTO.getChargingItems().get(j).getChargingItemId() != addressProperties.getChargingItemsId()) {
+						compareResult = BigDecimal.ZERO;
 						continue chargingItems;
 					}
 					// 计价条款是否包含该房源，如果不包括不用计算

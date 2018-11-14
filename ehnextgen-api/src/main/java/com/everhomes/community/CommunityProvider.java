@@ -180,5 +180,9 @@ public interface CommunityProvider {
 	List<Building> findBuildingsByCommunityId(Long communityId);
 	List<Building> findBuildingsByNamespaceId(Integer namespaceId);
 	Map<Long, Building> mapBuildingIdAndBuilding(List<Long> buildingIds);
+	Long getOrganizationIdByCommunityId(Long communityId);
+	String findCommunityCategoryByCommunityId(Long communityId);
+	List<Building> findBuildingsByIds(List<Long> buildingIds);
+	List<Long> findCommunityIdsByOrgId(Long organizationId);
 	
 }

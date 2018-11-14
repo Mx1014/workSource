@@ -9,17 +9,13 @@ import com.everhomes.util.StringHelper;
  *     <li>margin: 外边距</li>
  *     <li>padding: 内边距</li>
  *     <li>backgroundColor: 底色</li>
+ *     <li>-----------历史遗留问题，titleFlag和title放在了InstanceConfig中，他们应该放在portal_item_groups表中，编辑一次之后会保存的到表中。-------------<li/>
  *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
  *     <li>title: 标题</li>
- *     <li>titleUri: 标题uri</li>
- *     <li>titleUrl: 标题url</li>
- *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
- *     <li>subTitle: 副标题</li>
- *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
- *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  *     <li>newsSize: 最大显示条目</li>
  *     <li>timeWidgetStyle: 时间样式</li>
  *     <li>moduleAppId: 入口id</li>
+ *     <li>appOriginId: 应用originId，跨版本不变的Id</li>
  *     <li>rowCount: 行高度</li>
  *     <li>bizUrl: 电商url</li>
  *     <li>noticeCount: noticeCount</li>
@@ -48,23 +44,13 @@ public class ItemGroupInstanceConfig {
 
 	private String title;
 
-	private String titleUri;
-
-	private String titleUrl;
-
-	private Byte titleStyle;
-
-	private String subTitle;
-
-	private Byte titleSize;
-
-	private Byte titleMoreFlag;
-
 	private Integer newsSize;
 
 	private String timeWidgetStyle;
 
 	private Long moduleAppId;
+
+	private Long appOriginId;
 
 	private Integer rowCount;
 
@@ -89,6 +75,139 @@ public class ItemGroupInstanceConfig {
 	private String allOrMoreIconUri;
 
 	private String allOrMoreIconUrl;
+
+	//banner字段
+	private String itemGroup;
+
+	private Long categoryId;
+
+	private Long appId;
+
+	private Long moreAppId;
+
+	private Byte backgroundType;
+
+	private String color;
+
+	private String topColor;
+
+	private String bottomColor;
+
+	private Byte autoScroll;
+
+	private Integer paddingFlag;
+
+	private Long widthRatio;
+
+	private Long heightRatio;
+
+	private Byte showDots;
+	//banner字段end
+
+
+    public Byte getShowDots() {
+        return showDots;
+    }
+
+    public void setShowDots(Byte showDots) {
+        this.showDots = showDots;
+    }
+
+    public String getItemGroup() {
+		return itemGroup;
+	}
+
+	public void setItemGroup(String itemGroup) {
+		this.itemGroup = itemGroup;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
+	}
+
+	public Long getMoreAppId() {
+		return moreAppId;
+	}
+
+	public void setMoreAppId(Long moreAppId) {
+		this.moreAppId = moreAppId;
+	}
+
+	public Byte getBackgroundType() {
+		return backgroundType;
+	}
+
+	public void setBackgroundType(Byte backgroundType) {
+		this.backgroundType = backgroundType;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public String getTopColor() {
+		return topColor;
+	}
+
+	public void setTopColor(String topColor) {
+		this.topColor = topColor;
+	}
+
+	public String getBottomColor() {
+		return bottomColor;
+	}
+
+	public void setBottomColor(String bottomColor) {
+		this.bottomColor = bottomColor;
+	}
+
+	public Byte getAutoScroll() {
+		return autoScroll;
+	}
+
+	public void setAutoScroll(Byte autoScroll) {
+		this.autoScroll = autoScroll;
+	}
+
+	public Integer getPaddingFlag() {
+		return paddingFlag;
+	}
+
+	public void setPaddingFlag(Integer paddingFlag) {
+		this.paddingFlag = paddingFlag;
+	}
+
+	public Long getWidthRatio() {
+		return widthRatio;
+	}
+
+	public void setWidthRatio(Long widthRatio) {
+		this.widthRatio = widthRatio;
+	}
+
+	public Long getHeightRatio() {
+		return heightRatio;
+	}
+
+	public void setHeightRatio(Long heightRatio) {
+		this.heightRatio = heightRatio;
+	}
 
 	public Integer getColumnCount() {
 		return columnCount;
@@ -138,14 +257,6 @@ public class ItemGroupInstanceConfig {
 		this.title = title;
 	}
 
-	public String getTitleUri() {
-		return titleUri;
-	}
-
-	public void setTitleUri(String titleUri) {
-		this.titleUri = titleUri;
-	}
-
 	public Integer getNewsSize() {
 		return newsSize;
 	}
@@ -170,6 +281,14 @@ public class ItemGroupInstanceConfig {
 		this.moduleAppId = moduleAppId;
 	}
 
+	public Long getAppOriginId() {
+		return appOriginId;
+	}
+
+	public void setAppOriginId(Long appOriginId) {
+		this.appOriginId = appOriginId;
+	}
+
 	public Integer getRowCount() {
 		return rowCount;
 	}
@@ -178,36 +297,12 @@ public class ItemGroupInstanceConfig {
 		this.rowCount = rowCount;
 	}
 
-	public String getTitleUrl() {
-		return titleUrl;
-	}
-
-	public void setTitleUrl(String titleUrl) {
-		this.titleUrl = titleUrl;
-	}
-
 	public String getBizUrl() {
 		return bizUrl;
 	}
 
 	public void setBizUrl(String bizUrl) {
 		this.bizUrl = bizUrl;
-	}
-
-	public String getIconUri() {
-		return iconUri;
-	}
-
-	public void setIconUri(String iconUri) {
-		this.iconUri = iconUri;
-	}
-
-	public String getIconUrl() {
-		return iconUrl;
-	}
-
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
 	}
 
 	public Integer getNoticeCount() {
@@ -224,6 +319,22 @@ public class ItemGroupInstanceConfig {
 
 	public void setStyle(Byte style) {
 		this.style = style;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
 	public Byte getShadow() {
@@ -272,38 +383,6 @@ public class ItemGroupInstanceConfig {
 
 	public void setAllOrMoreIconUrl(String allOrMoreIconUrl) {
 		this.allOrMoreIconUrl = allOrMoreIconUrl;
-	}
-
-	public Byte getTitleStyle() {
-		return titleStyle;
-	}
-
-	public void setTitleStyle(Byte titleStyle) {
-		this.titleStyle = titleStyle;
-	}
-
-	public String getSubTitle() {
-		return subTitle;
-	}
-
-	public void setSubTitle(String subTitle) {
-		this.subTitle = subTitle;
-	}
-
-	public Byte getTitleSize() {
-		return titleSize;
-	}
-
-	public void setTitleSize(Byte titleSize) {
-		this.titleSize = titleSize;
-	}
-
-	public Byte getTitleMoreFlag() {
-		return titleMoreFlag;
-	}
-
-	public void setTitleMoreFlag(Byte titleMoreFlag) {
-		this.titleMoreFlag = titleMoreFlag;
 	}
 
 	@Override

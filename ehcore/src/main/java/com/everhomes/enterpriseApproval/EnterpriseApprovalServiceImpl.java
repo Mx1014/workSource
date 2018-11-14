@@ -13,7 +13,11 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseDetail;
 import com.everhomes.flow.FlowCaseProcessorsResolver;
 import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowEventLog;
+import com.everhomes.flow.FlowEventLogProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowSubject;
+import com.everhomes.flow.FlowSubjectProvider;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalScopeMap;
@@ -59,11 +63,9 @@ import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOperateLogDTO;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowOperateLogsCommand;
 import com.everhomes.rest.flow.UpdateFlowFormCommand;
 import com.everhomes.rest.general_approval.CreateFormTemplatesCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalAttribute;
@@ -94,6 +96,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -104,9 +108,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -154,6 +160,10 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
     @Autowired
     private DbProvider dbProvider;
+    @Autowired
+    private FlowEventLogProvider flowEventLogProvider;
+    @Autowired
+    private FlowSubjectProvider flowSubjectProvider;
 
     private DateTimeFormatter archivesFormatter = DateTimeFormatter.ofPattern("MM月dd日");
 
@@ -373,9 +383,9 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
 
         //  2. data from form
         List<FlowCaseEntity> entityLists = getApprovalDetails(data.getFlowCaseId());
-        if (entityLists != null && entityLists.size() > 4) {
+        if (!CollectionUtils.isEmpty(entityLists)) {
             StringBuilder formLogs = new StringBuilder();
-            for (int i = 4; i < entityLists.size(); i++) {
+            for (int i = 0; i < entityLists.size(); i++) {
                 formLogs.append(entityLists.get(i).getKey()).append(" : ").append(entityLists.get(i).getValue()).append("\n");
             }
             Cell formCell = dataRow.createCell(5);
@@ -392,15 +402,14 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
             dataRow.createCell(6).setCellValue("已取消");
 
         //  4. the operator logs of the approval
-        SearchFlowOperateLogsCommand logsCommand = new SearchFlowOperateLogsCommand();
-        logsCommand.setFlowCaseId(data.getFlowCaseId());
-        logsCommand.setPageSize(Integer.MAX_VALUE - 1);
-        logsCommand.setAdminFlag(TrueOrFalseFlag.TRUE.getCode());
-        List<FlowOperateLogDTO> operateLogLists = flowService.searchFlowOperateLogs(logsCommand).getLogs();
+        List<FlowEventLog> operateLogLists = searchFlowOperateLogs(data.getFlowCaseId());
         if (operateLogLists != null && operateLogLists.size() > 0) {
             StringBuilder operateLogs = new StringBuilder();
-            for (FlowOperateLogDTO operateLog : operateLogLists) {
-                operateLogs.append(operateLog.getFlowUserName()).append(operateLog.getLogContent()).append("\n");
+            for (FlowEventLog operateLog : operateLogLists) {
+                if (StringUtils.hasText(operateLog.getFlowUserName())) {
+                    operateLogs.append(operateLog.getFlowUserName()).append(" ");
+                }
+                operateLogs.append(operateLog.getLogContent()).append("\n");
             }
             Cell logCell = dataRow.createCell(7);
             logCell.setCellStyle(wrapStyle);
@@ -434,8 +443,46 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
     }
 
     private List<FlowCaseEntity> getApprovalDetails(Long flowCaseId) {
-        FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-        return enterpriseApprovalFlowModuleListener.onFlowCaseDetailRender(flowCase, null);
+        return enterpriseApprovalFlowModuleListener.getApprovalDetails(flowCaseId);
+    }
+
+    private List<FlowEventLog> searchFlowOperateLogs(Long flowCaseId) {
+        List<FlowEventLog> logs = flowEventLogProvider.queryFlowEventLogs(new ListingLocator(), Integer.MAX_VALUE - 1, ((locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCaseId));
+            query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_CONTENT.isNotNull());
+            query.addOrderBy(Tables.EH_FLOW_EVENT_LOGS.CREATE_TIME.asc());
+            return query;
+        }));
+        if (CollectionUtils.isEmpty(logs)) {
+            return new ArrayList<>();
+        }
+        Set<Long> subjectIds = new HashSet<>();
+        for (FlowEventLog log : logs) {
+            if (log.getSubjectId() != null && log.getSubjectId() > 0) {
+                subjectIds.add(log.getSubjectId());
+            }
+        }
+        if(CollectionUtils.isEmpty(subjectIds)){
+            return logs;
+        }
+        List<FlowSubject> subjects = flowSubjectProvider.queryFlowSubjects(new ListingLocator(), Integer.MAX_VALUE - 1, ((locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_SUBJECTS.ID.in(subjectIds));
+            return query;
+        }));
+        if(CollectionUtils.isEmpty(subjects)){
+            return logs;
+        }
+        Map<Long, String> subjectMap = new HashMap<>();
+        for (FlowSubject subject : subjects) {
+            subjectMap.put(subject.getId(), subject.getContent());
+        }
+        Set<Long> setedList = new HashSet<>();
+        for (FlowEventLog log : logs) {
+            if (log.getSubjectId() != null && log.getSubjectId() > 0 && subjectMap.containsKey(log.getSubjectId()) && setedList.add(log.getSubjectId())) {
+                log.setLogContent(log.getLogContent() + "\n" + subjectMap.get(log.getSubjectId()));
+            }
+        }
+        return logs;
     }
 
     @Override
@@ -470,12 +517,13 @@ public class EnterpriseApprovalServiceImpl implements EnterpriseApprovalService 
         if (flowCase == null || TrueOrFalseFlag.TRUE == TrueOrFalseFlag.fromCode(flowCase.getDeleteFlag())) {
             return;
         }
+        flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+        flowCaseProvider.updateFlowCase(flowCase);
+
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(flowCase.getReferId());
         if (ga == null) {
             return;
         }
-        flowCase.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
-        flowCaseProvider.updateFlowCase(flowCase);
 
         GeneralApprovalAttribute attribute = GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute());
         if (GeneralApprovalAttribute.CUSTOMIZE == attribute || GeneralApprovalAttribute.DEFAULT == attribute) {

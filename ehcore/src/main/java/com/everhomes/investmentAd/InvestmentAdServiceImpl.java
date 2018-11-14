@@ -26,11 +26,13 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
+import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.investment.InvitedCustomerService;
 import com.everhomes.investmentAd.InvestmentAdService;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.rest.investmentAd.InvestmentAdDetailDTO;
@@ -94,6 +96,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	private TaskService taskService;
 	
 	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
 	
 	@Autowired
@@ -116,6 +121,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
 	
 	@Autowired
 	private InvitedCustomerService invitedCustomerService;
@@ -202,6 +210,12 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageSize(pageSize);
 		
+		//管理公司全部项目范围
+		if (cmd.getAllScope() != null && cmd.getAllScope() == 1) {
+			List<Long> communityIds = communityProvider.findCommunityIdsByOrgId(cmd.getOrganizationId());
+			cmd.setCommunityIds(communityIds);
+		}
+		
 		List<InvestmentAd> investmentAds = investmentAdProvider.listInvestmentAds(cmd);
 		if (investmentAds != null && investmentAds.size() > 0) {
 			if (investmentAds.size() > cmd.getPageSize()) {
@@ -228,6 +242,9 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 		}
 		
 		InvestmentAdDetailDTO dto = ConvertHelper.convert(investmentAd, InvestmentAdDetailDTO.class);
+		//获取园区所属的管理公司id
+		Long currentOrganizationId = communityProvider.getOrganizationIdByCommunityId(dto.getCommunityId());
+		dto.setCurrentOrganizationId(currentOrganizationId);
 		//设置封面图url
 		Long userId = UserContext.currentUserId();
 		if (null != dto.getPosterUri()) {
@@ -351,7 +368,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				contactDTO.setCustomerSource(InvitedCustomerType.INVITED_CUSTOMER.getCode());
 				contacts.add(contactDTO);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}else {
 				CreateInvitedCustomerCommand cmd2 = new CreateInvitedCustomerCommand();
 				//企业客户
@@ -386,7 +403,7 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 				
 				finalCommandMap.put(dto.getCustomerName(), cmd2);
 				
-				enterpriseApplyEntryProvider.updateApplyEntryTransformFlag(dto.getApplyEntryId(), (byte)1);
+				generalFormProvider.updateInvestmentAdApplyTransformStatus(dto.getApplyEntryId(), 1L);
 			}
 		}
 		
@@ -489,7 +506,8 @@ public class InvestmentAdServiceImpl implements InvestmentAdService{
 			if (address.getStatus() == AddressAdminStatus.INACTIVE.getCode()) {
 				return false;
 			}
-			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			//CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
 			if (communityAddressMapping.getLivingStatus() != AddressMappingStatus.FREE.getCode()) {
 				return false;
 			}

@@ -6,7 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.yellowPage.IdNameDTO;
+import com.everhomes.rest.yellowPage.IdNameInfoDTO;
 import com.everhomes.rest.yellowPage.ListServiceNamesCommand;
 import com.everhomes.rest.yellowPage.stat.ClickTypeDTO;
 import com.everhomes.rest.yellowPage.stat.ListClickStatCommand;
@@ -49,9 +49,9 @@ public interface AllianceClickStatService {
 
 	List<ClickTypeDTO> listClickTypes();
 
-	List<IdNameDTO> listServiceNames(ListServiceNamesCommand cmd);
+	List<IdNameInfoDTO> listServiceNames(ListServiceNamesCommand cmd);
 
-	List<IdNameDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd);
+	List<IdNameInfoDTO> listServiceTypeNames(ListServiceTypeNamesCommand cmd);
 
 	String testClickStat(TestClickStatCommand cmd);
 }

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -20,6 +21,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,10 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Autowired
     private PunchService punchService;
- 
+
+    @Autowired
+    private ArchivesService archivesService;
+    
 //    @Override
 //    public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -331,15 +336,11 @@ public class UniongroupServiceImpl implements UniongroupService {
             List<OrganizationMemberDTO> dtos = details.stream().map(r->{
                 OrganizationMemberDTO dto = ConvertHelper.convert(r, OrganizationMemberDTO.class);
                 //:todo 寻找部门名
-                List<OrganizationMember> departments = this.organizationProvider.listOrganizationMembersByDetailIdAndPath(r.getId(), org.getPath(), groupTypes);
-                if(departments != null && departments.size() > 0){
-                    for(OrganizationMember d: departments){
-                        Organization departOrg = organizationProvider.findOrganizationById(d.getOrganizationId());
-                        if(departOrg != null && departOrg.getStatus().equals(OrganizationStatus.ACTIVE.getCode())){
-                            dto.setDepartmentName(departOrg.getName());
-                        }
-                    }
 
+                Map<Long, String> dptMap = archivesService.getEmployeeDepartment(r.getId());
+                if (null != dptMap) {
+                    String depName = archivesService.convertToOrgNames(dptMap);
+                    dto.setDepartmentName(depName);
                 }
                 return dto;
             }).collect(Collectors.toList());
@@ -436,7 +437,7 @@ public class UniongroupServiceImpl implements UniongroupService {
             //存疑！
             //:todo 目前只使用到薪酬组，因此只返回一个对象。如果需要支持多组织，这里需要重构
             //:todo 查询的是0版本
-            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE, null);
+            UniongroupConfigures uniongroupConfigures = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, departmentIds.get(i), UniongroupType.SALARYGROUP.getCode(), DEFAULT_VERSION_CODE, null);
             if (uniongroupConfigures != null) {
                 groupId = uniongroupConfigures.getGroupId();
                 groupType = uniongroupConfigures.getGroupType();
@@ -463,7 +464,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 Organization _org = departs_one.get(i);
                 while (unc == null) {
                     //判断是否在配置表中
-                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId(), UniongroupType.PUNCHGROUP.getCode(), DEFAULT_VERSION_CODE,null);
+                    unc = this.uniongroupConfigureProvider.findUniongroupConfiguresByCurrentId(namespaceId, _org.getId(), UniongroupType.SALARYGROUP.getCode(), DEFAULT_VERSION_CODE,null);
                     _org = this.organizationProvider.findOrganizationById(_org.getParentId());
                     if (_org == null || unc != null) {
                         break;

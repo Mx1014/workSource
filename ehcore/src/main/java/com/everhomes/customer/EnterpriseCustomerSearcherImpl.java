@@ -66,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -207,6 +208,18 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 builder.field("requirementMaxArea", requirement.getMaxArea() == null ? "" : requirement.getMaxArea());
 
             }
+            List<CustomerContact> contact = invitedCustomerProvider.findContactByCustomerIdAndType(customer.getId(), CustomerContactType.CUSTOMER_CONTACT.getCode());
+            if(contact != null && contact.size() > 0){
+                List<String> customerContactName = new ArrayList<>();
+                List<Long> customerContactIds = new ArrayList<>();
+
+                contact.forEach(r -> {
+                    if(StringUtils.isNotBlank(r.getName())){
+                        customerContactName.add(r.getName());
+                    }
+                });
+                builder.field("customerContactName", StringUtils.join(customerContactName, "|"));
+            }
             List<CustomerEntryInfo> entryInfos = enterpriseCustomerProvider.listCustomerEntryInfos(customer.getId());
             if (entryInfos != null && entryInfos.size() > 0) {
                 List<String> buildings = new ArrayList<>();
@@ -300,15 +313,19 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if((cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) && (cmd.getCustomerName() == null || cmd.getCustomerName().isEmpty())) {
             //app端要只根据跟进人名称搜索
             if(StringUtils.isNotEmpty(cmd.getTrackingName())){
-                qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName")
+                qb = QueryBuilders.queryString("*" + cmd.getTrackingName() + "*")
                 .field("trackingName", 4.0f);
-            }else {
+            }else if(StringUtils.isNotEmpty(cmd.getTrackerName())){
+                qb = QueryBuilders.queryString("*" + cmd.getTrackerName() + "*")
+                        .field("trackerName", 4.0f);
+            }else{
                 qb = QueryBuilders.matchAllQuery();
             }
         } else {
             if(StringUtils.isNotBlank(cmd.getKeyword())) {
                 qb = QueryBuilders.queryString("*" + cmd.getKeyword() + "*").field("trackerName",5.0f)
-                        .field("contactName", 5.0f)
+                            .field("contactName", 5.0f)
+                        .field("customerContactName", 4.0f)
                         .field("contactAddress", 4.0f)
                         .field("contactPhone", 3.0f)
                         .field("name", 5.0f)
@@ -423,6 +440,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         if(cmd.getTrackerUids() != null && cmd.getTrackerUids().size()>0){
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackerUid", cmd.getTrackingUids()));
         }
+        if(cmd.getTrackingUids() != null && cmd.getTrackingUids().size()>0){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("trackingUid", cmd.getTrackingUids()));
+        }
 
         if(null != cmd.getPropertyType()){
         	fb = FilterBuilders.andFilter(fb ,FilterBuilders.inFilter("propertyType", cmd.getPropertyType().split(",")));
@@ -468,21 +488,21 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 RangeFilterBuilder rf1 = new RangeFilterBuilder("requirementMinArea");
                 RangeFilterBuilder rf2 = new RangeFilterBuilder("requirementMaxArea");
 
-                Long startArea = cmd.getMinTrackingPeriod();
-                Long endArea = cmd.getMinTrackingPeriod();
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                BigDecimal endArea = cmd.getRequirementMaxArea();
                 rf1.gte(startArea);
                 rf2.lte(endArea);
                 fb = FilterBuilders.andFilter(fb, rf1);
                 fb = FilterBuilders.andFilter(fb, rf2);
-            }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long startTime = cmd.getMinTrackingPeriod();
-                rf.gte(startTime);
+            }else if(null != cmd.getRequirementMinArea() && null == cmd.getRequirementMaxArea()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMinArea");
+                BigDecimal startArea = cmd.getRequirementMinArea();
+                rf.gte(startArea);
                 fb = FilterBuilders.andFilter(fb, rf);
             }else{
-                RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
-                Long endTime = cmd.getMinTrackingPeriod();
-                rf.lte(endTime);
+                RangeFilterBuilder rf = new RangeFilterBuilder("requirementMaxArea");
+                BigDecimal endArea = cmd.getRequirementMaxArea();
+                rf.lte(endArea);
                 fb = FilterBuilders.andFilter(fb, rf);
             }
         }
@@ -944,28 +964,37 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
 
         CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
-        dto.setRequirement(requirementDTO);
+        if(requirementDTO != null){
+            dto.setRequirement(requirementDTO);
+
+        }
 
 
 
         List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
         List<CustomerContactDTO> contactDTOS = new ArrayList<>();
-        customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
-        dto.setContacts(contactDTOS);
+        if(customerContacts != null && customerContacts.size() > 0){
+            customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+            dto.setContacts(contactDTOS);
+        }
+
 
 
         List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
-        List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
-        trackers.forEach(r-> {
-            CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
-            List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
-            if (oMembers != null && oMembers.size()>0) {
-                trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
-                trackerDTO.setTrackerName(oMembers.get(0).getContactName());
-            }
-            trackerDTOS.add(trackerDTO);
-        });
-        dto.setTrackers(trackerDTOS);
+        if(trackers != null && trackers.size() > 0){
+            List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+            trackers.forEach(r-> {
+                CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+                List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+                if (oMembers != null && oMembers.size()>0) {
+                    trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                    trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+                }
+                trackerDTOS.add(trackerDTO);
+            });
+            dto.setTrackers(trackerDTOS);
+        }
+
 
 
 

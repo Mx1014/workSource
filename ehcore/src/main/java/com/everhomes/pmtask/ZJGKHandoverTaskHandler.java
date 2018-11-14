@@ -3,8 +3,6 @@ package com.everhomes.pmtask;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.app.AppProvider;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -19,6 +17,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.zjgk.ZjgkJsonEntity;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
@@ -55,9 +54,6 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
     private CommunityProvider communityProvider;
 
     @Autowired
-    private CategoryProvider categoryProvider;
-
-    @Autowired
     private PmTaskProvider pmTaskProvider;
 
     @Autowired
@@ -90,7 +86,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
             }
         } catch (Exception e) {
             LOGGER.error("sync from shenzhou request error, param={}", params, e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                     "sync from shenzhou request error.");
         }
         return json;
@@ -109,7 +105,7 @@ public class ZJGKHandoverTaskHandler implements HandoverTaskHandler {
 
         params.put("taskSource",task.getSourceType());
         //查询服务类型
-        Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+        PmTaskCategory category = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
         if(category != null) {
             params.put("taskCategory", category.getName());
         } else {

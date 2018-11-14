@@ -30,7 +30,7 @@ public class CustomerContactDTO {
     private Long id;
     private Long customerId;
     private String name;
-    private Long phoneNumber;
+    private String phoneNumber;
     private String email;
     private String position;
     private String address;
@@ -61,11 +61,11 @@ public class CustomerContactDTO {
         this.name = name;
     }
 
-    public Long getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(Long phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 

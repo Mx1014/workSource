@@ -3,6 +3,7 @@ package com.everhomes.print;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.aclink.uclbrt.BASE64Decoder;
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.community.Community;
@@ -13,15 +14,25 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.point.constants.TrueOrFalseFlag;
+import com.everhomes.print.job.SiyinPrintMessageJob;
+import com.everhomes.print.job.SiyinPrintNotifyJob;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.*;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.xml.XMLToJSON;
+
+import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +43,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +66,8 @@ public class SiyinJobValidateServiceImpl {
 	@Autowired
 	private SiyinPrintOrderProvider siyinPrintOrderProvider;
 	@Autowired
+	private SiyinPrintPrinterProvider siyinPrintPrinterProvider;
+	@Autowired
 	private SiyinPrintRecordProvider siyinPrintRecordProvider;
 	@Autowired
 	private SiyinPrintSettingProvider siyinPrintSettingProvider;
@@ -59,16 +75,19 @@ public class SiyinJobValidateServiceImpl {
     private LocaleStringProvider localeStringProvider;
 	@Autowired
 	private BigCollectionProvider bigCollectionProvider;
-	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	
+	@Autowired
+	protected AppUrlService appUrlService;
 	@Autowired
 	private CoordinationProvider coordinationProvider;
-	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	@Autowired
 	private DbProvider dbProvider;
-	
+
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -76,6 +95,10 @@ public class SiyinJobValidateServiceImpl {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	
+	private Long PRINT_UNPAID_NOTIFY_TIME = 30 * 1000L;
+	private Long PRINT_UNPAID_MESSAGE_TIME = 60 * 1000L;
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -149,6 +172,8 @@ public class SiyinJobValidateServiceImpl {
 		record.setMonoSurfaceCount(object.getInteger("mono_surface"));
 		record.setPaperSize(getPaperSizeCode(object.getString("paper_size")));
 		record.setStartTime(object.getString("print_time"));
+		record.setSerialNumber(object.getString("serial_number"));
+		record.setPrinterName(getPrinterNameBySerialNumber(record.getSerialNumber()));
 		record.setJobStatus("FinishJob");
 		record.setGroupName("___OAUTH___");
 		record.setStatus(CommonStatus.ACTIVE.getCode());
@@ -166,20 +191,33 @@ public class SiyinJobValidateServiceImpl {
            //将记录合并到订单上,并更新到数据库
            mergeRecordToOrder(record,order);
            dbProvider.execute(r->{
+        	   
         	   //订单金额为0，那么设置成支付状态。
-//        	   	if(order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0){
-//        	   		//如果详情为空，并且价格为0，那么不做记录。
-//        	   		if(record.getColorSurfaceCount() == 0 && record.getMonoSurfaceCount() == 0){
-//        	   			return null;
-//        	   		}
-//        	   		order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
-//        	   		order.setLockFlag(PrintOrderLockType.LOCKED.getCode());
-//        	   	}
+				if (order.getOrderTotalFee() == null || order.getOrderTotalFee().compareTo(new BigDecimal(0)) == 0) {
+					order.setOrderStatus(PrintOrderStatusType.PAID.getCode());
+				} else {
+					order.setOrderStatus(PrintOrderStatusType.UNPAID.getCode());
+				}
+				
+				//如果是未支付状态，而且之前未通知过，则发送消息通知
+				boolean isNeedAlert = false;
+				if (PrintOrderStatusType.UNPAID.getCode().equals(order.getOrderStatus())
+						&& TrueOrFalseFlag.FALSE.getCode().equals(order.getUserNotifyFlag())) {
+					order.setUserNotifyFlag(TrueOrFalseFlag.TRUE.getCode());
+					isNeedAlert = true;
+				}
+				
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
 	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 	   			}
+	   			
+	   			if (isNeedAlert) {
+	   		        //创建订单成功后建立两个定时任务
+	   		        createOrderOverTimeTask(order);
+	   			}
+	   			
 	   			record.setOrderId(order.getId());
 	   			siyinPrintRecordProvider.createSiyinPrintRecord(record);
 	   			return null;
@@ -188,6 +226,52 @@ public class SiyinJobValidateServiceImpl {
 		});
 	}
 	
+	private void createOrderOverTimeTask(SiyinPrintOrder order) {
+		Long unpaidNotifyTime  = configurationProvider.getLongValue("print.unpaid.notify.time", 120 * 60 * 1000L);
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowStr = dateFormat.format(new Date());
+        String endStr = nowStr.substring(0,nowStr.indexOf(" ")) + " 23:59:59";
+        Long overTime = null;
+		try {
+			overTime = (dateFormat.parse(endStr).getTime() - dateFormat.parse(nowStr).getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Long messageTime = 15 * 60 * 60 * 1000L;
+		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", overTime + messageTime);
+		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
+				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
+		Map<String, Object> notifyMap = new HashMap<>();
+		notifyMap.put("content",notifyTextForOther);
+		notifyMap.put("orderNo", order.getOrderNo());
+		scheduleProvider.scheduleSimpleJob(
+				"siyinprintnotify" +order.getId(),
+				"sendNotify" + order.getId(),
+				new java.util.Date(order.getCreateTime().getTime() + unpaidNotifyTime),
+				SiyinPrintNotifyJob.class,
+				notifyMap
+		);
+		String appName = getAppName(order.getNamespaceId());
+		Map<String, Object> messageMap = new HashMap<>();
+		messageMap.put("appName",appName);
+		messageMap.put("orderNo", order.getOrderNo());
+		scheduleProvider.scheduleSimpleJob(
+				"siyinprintmessage" +order.getId(),
+				"sendMessage" + order.getId(),
+				new java.util.Date(order.getCreateTime().getTime() + unpaidMessageTime),
+				SiyinPrintMessageJob.class,
+				messageMap
+		);
+	}
+	
+	private String getAppName(Integer namespaceId) {
+		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(namespaceId,OSType.Android.getCode()));
+		if (appUrlDTO != null) {
+			return appUrlDTO.getName();
+		}
+		return "";
+	}
 	/*
 	 *减少用户下正在打印的任务的数量 
 	 */
@@ -314,7 +398,7 @@ public class SiyinJobValidateServiceImpl {
 		return null;
 	}
 	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId());
+		SiyinPrintOrder order = siyinPrintOrderProvider.findUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId(), record.getPrinterName());
         if(order == null){
         	order = new SiyinPrintOrder();
         	order.setNamespaceId(record.getNamespaceId());
@@ -333,8 +417,10 @@ public class SiyinJobValidateServiceImpl {
         	order.setOrderTotalFee(new BigDecimal("0"));
         	order.setCreatorUid(record.getCreatorUid());
         	order.setOperatorUid(record.getOperatorUid());
+        	order.setPrinterName(record.getPrinterName());
         	User user = userProvider.findUserById(record.getCreatorUid());
     		order.setNickName(user == null?"":user.getNickName());
+    		order.setUserNotifyFlag(TrueOrFalseFlag.FALSE.getCode());
     		
     		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
     		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, user);
@@ -348,6 +434,16 @@ public class SiyinJobValidateServiceImpl {
 		return order;
 	}
 	
+	private String getPrinterNameBySerialNumber(String serialNumber) {
+		
+		SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(serialNumber);
+		if (null == printer) {
+			return null;
+		}
+		
+		return printer.getPrinterName();
+	}
+
 	/**
 	 * 创建订单编号
 	 */

@@ -1,5 +1,7 @@
 package com.everhomes.rest.flow;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *     <li>pageAnchor: pageAnchor</li>
  *     <li>pageSize: pageSize</li>
  *     <li>snapshotFlag: snapshotFlag</li>
+ *     <li>orgId: 多管理公司id</li>
  * </ul>
  */
 public class ListFlowCommand {
@@ -32,8 +35,18 @@ public class ListFlowCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Byte snapshotFlag;
+    @NotNull
+	private Long orgId;
 
-    public Integer getNamespaceId() {
+    public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 

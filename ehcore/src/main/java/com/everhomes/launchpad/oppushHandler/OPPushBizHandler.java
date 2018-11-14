@@ -52,7 +52,7 @@ public class OPPushBizHandler implements OPPushHandler {
 
         ListBusinessPromotionEntitiesCommand cmd = new ListBusinessPromotionEntitiesCommand();
         OPPushInstanceConfig config = (OPPushInstanceConfig)StringHelper.fromJsonString(instanceConfig.toString(), OPPushInstanceConfig.class);
-        cmd.setPageSize(config.getEntityCount());
+        cmd.setPageSize(config.getNewsSize());
         ListBusinessPromotionEntitiesReponse listBisz = businessService.listBusinessPromotionEntities(cmd);
 
         List<OPPushCard> listCards = new ArrayList<>();
@@ -70,6 +70,11 @@ public class OPPushBizHandler implements OPPushHandler {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
+                String host = "default";
+                String router = "zl://" + host + card.getRouterPath() + "?moduleId=92100&clientHandlerType=2&" + card.getRouterQuery();
+                card.setRouter(router);
 
                 List<Object> properties = new ArrayList<>();
                 properties.add(dto.getPosterUrl());

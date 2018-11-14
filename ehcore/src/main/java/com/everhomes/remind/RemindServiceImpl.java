@@ -1,5 +1,6 @@
 package com.everhomes.remind;
 
+import com.everhomes.category.Category;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -63,10 +64,12 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRemindCategoryDefaultShares;
 import com.everhomes.server.schema.tables.pojos.EhRemindShares;
+import com.everhomes.share.ShareService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -281,10 +284,15 @@ public class RemindServiceImpl implements RemindService  {
         return defaultShares;
     }
 
-    private List<EhRemindShares> buildRemindShares(List<ShareMemberDTO> shareMemberDTOS, Remind remind) {
+    private List<EhRemindShares> buildRemindShares(List<ShareMemberDTO> shareMemberDTOS, Remind remind, List<RemindShare> historyShareReminds) {
+    	return buildRemindShares(shareMemberDTOS, remind, historyShareReminds, true);
+    }
+    private List<EhRemindShares> buildRemindShares(List<ShareMemberDTO> shareMemberDTOS, Remind remind, List<RemindShare> historyShareReminds, Boolean sendCreateRemindFlag) {
         if (CollectionUtils.isEmpty(shareMemberDTOS)) {
             return Collections.emptyList();
         }
+        //2018-10-23 5.10.0 增加创建日程向共享人发送提醒
+        List<Remind> trackReminds = new ArrayList<>();
         List<EhRemindShares> shares = new ArrayList<>();
         shareMemberDTOS.stream().forEach(shareMember -> {
             RemindShare remindShare = new RemindShare();
@@ -298,11 +306,42 @@ public class RemindServiceImpl implements RemindService  {
             remindShare.setSharedSourceType(shareMember.getSourceType());
             remindShare.setSharedSourceName(shareMember.getSourceName());
             shares.add(remindShare);
+            if(ShareMemberSourceType.MEMBER_DETAIL == ShareMemberSourceType.fromCode(shareMember.getSourceType())){
+            	//对于要发共享消息提醒的
+            	if(sendCreateRemindFlag){
+	            	if(checkShareRemindInHistory(historyShareReminds, shareMember)){
+	            		//已经在历史版本里存在的,就不发消息
+	            	}else{
+			            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(shareMember.getSourceId());
+			            if(null != detail && !detail.getTargetId().equals(0L)){
+				            Remind trackRemind = ConvertHelper.convert(remind, Remind.class);
+				            trackRemind.setUserId(detail.getTargetId());
+				            trackRemind.setTrackRemindId(remind.getId());
+				            trackRemind.setTrackContractName(remind.getContactName());
+				            trackRemind.setTrackRemindUserId(remind.getUserId());
+				            trackReminds.add(trackRemind);
+			            }
+	            	}
+            	}
+            }
         });
+        sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.CREATE_SUBSCRIBE);
         return shares;
     }
 
-    @Override
+    private boolean checkShareRemindInHistory(List<RemindShare> historyShareReminds,
+			ShareMemberDTO shareMember) { 
+    	if (CollectionUtils.isEmpty(historyShareReminds)) {
+            return false;
+        }
+    	for(RemindShare share: historyShareReminds){
+    		if(share.getSharedSourceId().equals(shareMember.getSourceId()) && share.getSharedSourceId().equals(shareMember.getSourceId()))
+    			return true;
+    	}
+		return false;
+	}
+
+	@Override
     public void batchSortRemindCategories(BatchSortRemindCategoryCommand cmd) {
         if (CollectionUtils.isEmpty(cmd.getSortedRemindCategoryIds())) {
             return;
@@ -602,7 +641,7 @@ public class RemindServiceImpl implements RemindService  {
         dbProvider.execute(transactionStatus -> {
             remindProvider.createRemind(remind);
             setRemindRedis(remind);
-            remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), remind));
+            remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), remind, null));
             return null;
         });
         return remind.getId();
@@ -660,8 +699,9 @@ public class RemindServiceImpl implements RemindService  {
         dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(existRemind);
             setRemindRedis(existRemind);
+            List<RemindShare> historyShareReminds = remindProvider.findShareMemberDetailsByRemindId(existRemind.getId());
             remindProvider.deleteRemindSharesByRemindId(existRemind.getId());
-            remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind));
+            remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), existRemind,historyShareReminds));
             Iterator<Remind> iterator = trackReminds.iterator();
             while (iterator.hasNext()) { 
             	Remind trackRemind = iterator.next();
@@ -754,7 +794,7 @@ public class RemindServiceImpl implements RemindService  {
         cmd.setUserId(cmd.getUserId() != null ? cmd.getUserId() : UserContext.currentUserId());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         Remind remind = remindProvider.getRemindDetail(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getUserId(), cmd.getId());
-        if (remind == null) {
+        if (remind == null || !checkRemindShare(remind)) {
             throw RuntimeErrorException
                     .errorWith(
                             RemindErrorCode.SCOPE,
@@ -1026,7 +1066,35 @@ public class RemindServiceImpl implements RemindService  {
         return response;
     }
 
-    @Override
+    private boolean checkRemindShare(Remind remind) {
+    	//验证是否为日程所有人
+    	if(remind.getUserId().equals(UserContext.currentUserId()))
+    		return true;
+    	//验证是否为在日程分类共享人
+    	if(remind.getRemindCategoryId() != null){
+    		List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(remind.getRemindCategoryId());
+    		if(!CollectionUtils.isEmpty(shares))
+    			for(RemindCategoryDefaultShare share : shares){
+    				OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(share.getSharedSourceId());
+    	            if (detail != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+    	                 return true;
+    	            }
+    			}
+    	}
+    	//验证是否为日程共享人
+		List<RemindShare> shares = remindProvider.findShareMemberDetailsByRemindId(remind.getId());
+		if(!CollectionUtils.isEmpty(shares))
+			for(RemindShare share : shares){
+				OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(share.getSharedSourceId());
+	            if (detail != null && detail.getTargetId().equals(UserContext.currentUserId())) {
+	                 return true;
+	            }
+			} 
+		//验证不通过
+		return false;
+	}
+
+	@Override
     public void subscribeShareRemind(SubscribeShareRemindCommand cmd) {
         cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1274,7 +1342,8 @@ public class RemindServiceImpl implements RemindService  {
             List<Remind> originSubscribeReminds = remindProvider.findRemindsByTrackRemindIds(Collections.singletonList(originRemind.getId()));
             remindProvider.createRemind(repeatRemind);
             setRemindRedis(repeatRemind);
-            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind));
+
+            remindProvider.batchCreateRemindShare(buildRemindShares(shareMembers, repeatRemind, null, false));
             //origin日程点完成后,origin日程被追踪的日程也会重复一份
             originSubscribeReminds.forEach(remind -> {
                 createSubscribeRemind(repeatRemind, remind.getContactName(), remind.getUserId());
@@ -1394,7 +1463,6 @@ public class RemindServiceImpl implements RemindService  {
         map.put("trackContractName", trackRemind.getTrackContractName());
         map.put("planDescription", trackRemind.getPlanDescription());
         boolean isDeleted = false;
-
         switch (modifyType) {
             case DELETE:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
@@ -1414,6 +1482,10 @@ public class RemindServiceImpl implements RemindService  {
                 		RemindContants.MSG_UN_SUBSCRIBE, RemindContants.LOCALE, map, "");
                 isDeleted = true;
                 break;
+            case CREATE_SUBSCRIBE:
+                content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
+                		RemindContants.MSG_CREATE_SUBSCRIBE, RemindContants.LOCALE, map, "");
+                break;
             default:
                 content = localeTemplateService.getLocaleTemplateString(RemindContants.MSG_SCOPE,
                 		RemindContants.MSG_SETTING_UPDATE, RemindContants.LOCALE, map, "");
@@ -1421,6 +1493,7 @@ public class RemindServiceImpl implements RemindService  {
         }
         sendMessage(trackRemind.getUserId(), content, trackRemind, isDeleted);
     }
+    
     @Override
     public void sendRemindMessage(Remind remind) {
     	SimpleDateFormat timeDF = new SimpleDateFormat("HH:mm");
@@ -1459,6 +1532,8 @@ public class RemindServiceImpl implements RemindService  {
             Map<String, String> meta = new HashMap<>();
             meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
             meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, localeStringService.getLocalizedString(RemindContants.MSG_SCOPE, 
+            		RemindContants.MSG_SUBJECT, RemindContants.LOCALE, "日程提醒"));
             message.setMeta(meta);
         }
 

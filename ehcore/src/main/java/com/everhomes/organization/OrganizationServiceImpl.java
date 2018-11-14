@@ -9,6 +9,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.archives.ArchivesProvider;
 import com.everhomes.archives.ArchivesService;
+import com.everhomes.archives.ArchivesUtil;
 import com.everhomes.asset.AssetService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.bus.LocalEventBus;
@@ -25,6 +26,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.controller.XssCleaner;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.customer.CustomerEntryInfo;
@@ -53,11 +55,15 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.namespace.NamespacesService;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -88,6 +94,9 @@ import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.archives.AddArchivesContactCommand;
+import com.everhomes.rest.archives.ArchivesContactDTO;
+import com.everhomes.rest.archives.ListArchivesContactsCommand;
+import com.everhomes.rest.archives.ListArchivesContactsResponse;
 import com.everhomes.rest.archives.TransferArchivesEmployeesCommand;
 import com.everhomes.rest.asset.AssetTargetType;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
@@ -111,6 +120,8 @@ import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.*;
+import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpadbase.AppContext;
@@ -202,6 +213,8 @@ import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.fabric.xmlrpc.base.Array;
+
 
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -212,6 +225,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,7 +235,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import javassist.bytecode.stackmap.BasicBlock.Catch;
+
 import javax.servlet.http.HttpServletResponse;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -251,6 +269,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
@@ -265,6 +284,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private DbProvider dbProvider;
 
 
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
+    
     @Autowired
     private ContractBuildingMappingProvider contractBuildingMappingProvider;
 
@@ -415,6 +437,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ServiceModuleService serviceModuleService;
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+    private NamespacesService namespacesService;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -1241,7 +1266,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 //		return response.getMembers();
         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
         command.setOrganizationId(organizationId);
-        return rolePrivilegeService.listOrganizationAdministrators(command);
+        List<OrganizationContactDTO> justOneAdmin = new ArrayList<>();
+        List<OrganizationContactDTO> getAdmin = rolePrivilegeService.listOrganizationAdministrators(command);
+        //由于之前的企业可以设置多个管理员，故有可能返回多个管理员结果，此时只显示最新新增的一个
+        if(getAdmin == null || getAdmin.size() == 0){
+            return null;
+        }else{
+            justOneAdmin.add(getAdmin.get(0));
+            return justOneAdmin;
+        }
     }
 
     private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
@@ -2037,12 +2070,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 //            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
 //                    "Insufficient privilege");
 //        }
-        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), organization.getName());
+        List<EnterpriseCustomer> customers = enterpriseCustomerProvider.listEnterpriseCustomerByNamespaceIdAndName(organization.getNamespaceId(), communityId, organization.getName());
         if(customers != null && customers.size() > 0) {
             EnterpriseCustomer customer = customers.get(0);
             customer.setOrganizationId(organization.getId());
             customer.setCorpWebsite(organization.getWebsite());
             customer.setCorpLogoUri(logo);
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
             customer.setContactAddress(enterprise.getAddress());
             customer.setLatitude(enterprise.getLatitude());
             customer.setLongitude(enterprise.getLongitude());
@@ -2083,6 +2118,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             customer.setHotline(enterprise.getContact());
             customer.setCorpEmail(enterprise.getEmailDomain());
             customer.setUnifiedSocialCreditCode(organization.getUnifiedSocialCreditCode());
+            customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+            customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
 //            customer.setTrackingUid(-1L);
             enterpriseCustomerProvider.createEnterpriseCustomer(customer);
             enterpriseCustomerSearcher.feedDoc(customer);
@@ -3964,10 +4001,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus()) && 0L == org.getParentId()) {
                 OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
                 OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(org.getId());
-                if(null == organizationDetail) {
-                    continue;
+                tempSimpleOrgDTO.setDisplayName(tempSimpleOrgDTO.getName());
+                if(null != organizationDetail) {
+                	// #39544 企业客户未认证，则企业没有 organization detail
+                	tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
                 }
-                tempSimpleOrgDTO.setDisplayName(organizationDetail.getDisplayName());
+                
                 //物业或业委增加小区Id和小区name信息
                 if(org.getOrganizationType() != null){
                 if (org.getOrganizationType().equals(OrganizationType.GARC.getCode())
@@ -6361,18 +6400,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                         this.archivesService.addArchivesContact(addArchivesContactCommand);
                         DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                         sendMessageForContactApproved(member);
-                        //记录添加log
-                        OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
-                        orgLog.setOrganizationId(member.getOrganizationId());
-                        orgLog.setContactName(member.getContactName());
-                        orgLog.setContactToken(member.getContactToken());
-                        orgLog.setUserId(member.getTargetId());
-                        orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        orgLog.setOperationType(OperationType.JOIN.getCode());
-                        orgLog.setRequestType(RequestType.USER.getCode());
-                        orgLog.setOperatorUid(UserContext.current().getUser().getId());
-                        orgLog.setContactDescription(member.getContactDescription());
-                        this.organizationProvider.createOrganizationMemberLog(orgLog);
 
                         //通过认证的同步到企业客户的人才团队中 21710
                         customerService.createCustomerTalentFromOrgMember(member.getOrganizationId(), member);
@@ -6418,19 +6445,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
         }
         this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
-
-        // 用户通过认证事件
-        LocalEventBus.publish(event -> {
-            LocalEventContext context = new LocalEventContext();
-            context.setUid(cmd.getUserId());
-            context.setNamespaceId(UserContext.getCurrentNamespaceId());
-            event.setContext(context);
-
-            event.setEntityType(EntityType.USER.getCode());
-            event.setEntityId(cmd.getUserId());
-            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
-            LOGGER.info("publish event :[{}]",event);
-        });
 
     }
 
@@ -6858,17 +6872,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationMemberCommandResponse res_1 = listOrganizationPersonnelsWithDownStream(cmd_1);
         res.setMembers(res_1.getMembers());
 
-        //:todo 部门/部门岗位
+        //:todo 部门/部门岗位 +2018年10月22日增加公司搜索
         ListOrganizationsByNameCommand cmd_2 = new ListOrganizationsByNameCommand();
         cmd_2.setName(cmd.getKeywords());
         cmd_2.setNamespaceId(namespaceId);
-        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.DEPARTMENT.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartments(this.organizationProvider.listOrganizationByName(cmd.getKeywords(),  Arrays.asList(OrganizationGroupType.DEPARTMENT.getCode(), OrganizationGroupType.ENTERPRISE.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 部门岗位
         ListOrganizationsByNameCommand cmd_3 = new ListOrganizationsByNameCommand();
         cmd_3.setName(cmd.getKeywords());
         cmd_3.setNamespaceId(namespaceId);
-        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), OrganizationGroupType.JOB_POSITION.getCode(), null, namespaceId, cmd.getOrganizationId()));
+        res.setDepartJobPoisitions(this.organizationProvider.listOrganizationByName(cmd.getKeywords(), Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()), null, namespaceId, cmd.getOrganizationId()));
 
         //:todo 岗位
         ListOrganizationsByNameCommand cmd_4 = new ListOrganizationsByNameCommand();
@@ -7268,7 +7282,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //自动加入公司
-        this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+        try {
+            this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
+        }catch(Exception e){
+            e.getMessage();
+        }
     }
 
     /**
@@ -7632,6 +7650,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return dto;
         }).collect(Collectors.toList()));
 
+        Collections.sort(response.getMembers(), new Comparator<OrganizationMemberDTO>() {
+            @Override
+            public int compare(OrganizationMemberDTO o1, OrganizationMemberDTO o2) {
+                if (o1.getApproveTime() == null || o2.getApproveTime() == null) {
+                    return -1;
+                }
+                return o2.getApproveTime().compareTo(o1.getApproveTime());
+            }
+        });
         return response;
     }
 
@@ -7703,6 +7730,30 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (employee == null)
             return true;
         return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByWorkEmail(Long orgId, String contactToken, String workEmail) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByWorkEmail(orgId, workEmail);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(Long detailId, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getId().equals(detailId);
+    }
+
+    @Override
+    public boolean verifyPersonnelByAccount(String contactToken, String account) {
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationPersonnelByAccount(account);
+        if (employee == null)
+            return true;
+        return employee.getContactToken().equals(contactToken);
     }
 
     @Override
@@ -8226,6 +8277,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (sendMsgFlag) {
             joinOrganizationAfterOperation(member,notSendMsgFlag);
         }
+        
+		//add by moubinmo；特殊情况：创建的管理员是没有注册激活的用户，添加需要添加一条 groupType 为  DIRECT_UNDER_ENTERPRISE 的部门信息到 eh_organization_members 表，否则从管理后台查出的人事记录没有部门记录。
+		createOrganiztionMemberOfDirectUnderEnterprise(member, organizationId);
+
         return member;
     }
 
@@ -8380,6 +8435,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberDTO  processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(Integer namespaceId, String identifierToken, Long ownerId) {
+        UserIdentifier identifier = userProvider.findClaimingIdentifierByToken(namespaceId, identifierToken);
+        LOGGER.info("processUserForMember namespaceId = {},identifierToken = {}, identifier={}", namespaceId, identifierToken, identifier);
+        this.propertyMgrService.processUserForOwner(identifier);
         return processUserForMember(identifier, true);
     }
 
@@ -8606,11 +8669,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                         for(String str : importEnterpriseDataDTO.getBuildingNameAndApartmentName().split(",")){
                             //创建OrganizationApartDTO类的对象
                             OrganizationSiteApartmentDTO organizationSiteApartmentDTO = new OrganizationSiteApartmentDTO();
-                            if(str.split("-")[0] != null){
+                            if(str.contains("-")){
+                                if(str.split("-")[0] != null){
+                                    organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
+                                }
+                                if(str.split("-")[1] != null){
+                                    organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
+                                }
+                            }else{
                                 organizationSiteApartmentDTO.setBuildingName(str.split("-")[0]);
-                            }
-                            if(str.split("-")[1] != null){
-                                organizationSiteApartmentDTO.setApartmentName(str.split("-")[1]);
                             }
                             siteDtos.add(organizationSiteApartmentDTO);
                         }
@@ -8771,20 +8838,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     data.setSiteDtos(siteDtos);*/
                     data.setBuildingNameAndApartmentName(r.getH().trim());
                 }
-                if (null != r.getI())
-                    data.setPmFlag(r.getI().trim());
-                if (null != r.getJ()){
+                if (null != r.getJ())
+                    data.setPmFlag(r.getJ().trim());
+                if (null != r.getK()){
                     /*for(String str : r.getJ().split(",")){
                         communityDTO.setName(str);
                         communityDTOList.add(communityDTO);
                     }
                     data.setCommunityDTOList(communityDTOList);*/
-                    data.setCommunityNames(r.getJ().trim());
+                    data.setCommunityNames(r.getK().trim());
                 }
-                if (null != r.getK())
-                    data.setServiceSupportFlag(r.getK().trim());
                 if (null != r.getL())
-                    data.setWorkPlatFormFlag(r.getL().trim());
+                    data.setServiceSupportFlag(r.getL().trim());
+                if (null != r.getM())
+                    data.setWorkPlatFormFlag(r.getM().trim());
                     datas.add(data);
             }
         }
@@ -9188,6 +9255,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                                                     communityAndBuildingRelationes.setCommunityId(createOfficeSite.getCommunityId());
                                                     communityAndBuildingRelationes.setAddressId(organizationSiteApartment.getApartmentId());
                                                     communityAndBuildingRelationes.setBuildingId(organizationSiteApartment.getBuildingId());
+                                                    communityAndBuildingRelationes.setWorkplaceId(organizationWorkPlaces.getId());
                                                     //调用organizationProvider中的insertIntoCommunityAndBuildingRelationes方法，将对象持久化到数据库
                                                     organizationProvider.insertIntoCommunityAndBuildingRelationes(communityAndBuildingRelationes);
                                                 }
@@ -9586,12 +9654,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         return map;
-    }
-
-    public static void main(String[] args) {
-        String s = "/1000750/1003880/1003883/1003903";
-        String[] pathArr = s.split("/");
-        System.out.println();
     }
 
     /**
@@ -9996,6 +10058,51 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         response.setCommunities(treeDTOs);
         return response;
+    }
+    
+    @Override
+    public OrganizationMenuResponse openListAllChildrenOrganizations(OpenListAllChildrenOrganizationsCommand cmd){
+
+        Organization org = checkOrganization(cmd.getId());
+
+		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(cmd.getAppKey());
+		if (appNamespaceMapping == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"not exist app namespace mapping");
+		}
+		
+		if(!org.getNamespaceId().equals(appNamespaceMapping.getNamespaceId())){
+			return null;
+		}
+    	return listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag());
+    }
+
+    @Override
+    public UserAuthenticationOrganizationDTO createUserAuthenticationOrganization(CreateUserAuthenticationOrganizationCommand cmd) {
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
+        if (existsAuth != null) {
+            existsAuth.setStatus(Status.INACTIVE.getCode());
+            this.organizationProvider.updateUserAuthenticationOrganization(existsAuth);
+        }
+
+        UserAuthenticationOrganization newUserAuth = ConvertHelper.convert(cmd, UserAuthenticationOrganization.class);
+        newUserAuth.setStatus(Status.ACTIVE.getCode());
+        newUserAuth.setCreateTime(new Timestamp(new Date().getTime()));
+        newUserAuth.setCreatorUid(UserContext.currentUserId());
+        this.organizationProvider.createUserAuthenticationOrganization(newUserAuth);
+        return ConvertHelper.convert(newUserAuth, UserAuthenticationOrganizationDTO.class);
+    }
+
+    @Override
+    public UserAuthenticationOrganizationDTO getUserAuthenticationOrganization(GetUserAuthenticationOrganizationCommand cmd) {
+        UserAuthenticationOrganization existsAuth = this.organizationProvider.getUserAuthenticationOrganization(cmd.getOrganizationId(), cmd.getNamespaceId());
+        if (existsAuth != null) {
+            return ConvertHelper.convert(existsAuth, UserAuthenticationOrganizationDTO.class);
+        }else {
+            UserAuthenticationOrganizationDTO dto = ConvertHelper.convert(cmd, UserAuthenticationOrganizationDTO.class);
+            dto.setAuthFlag(com.everhomes.rest.common.TrueOrFalseFlag.TRUE.getCode());
+            return dto;
+        }
     }
 
 
@@ -12301,12 +12408,35 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(enterpriseId);
                     joinOrganizationAfterOperation(organizationMember,false);
                 }
+                else{
+                	//始终都要发消息
+                    organizationMember.setOrganizationId(enterpriseId);
+                	//2018年10月17日 修改为新注册发消息,其它不发消息
+//                    sendMessageForContactApproved(organizationMember);
+                }
             }
             // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
             if (leaveMembers.size() > 0) {
                 leaveOrganizationAfterOperation(user.getId(), leaveMembers);
             }
         }
+        
+        // 用户通过认证事件
+        LocalEventBus.publish(event -> {
+            LocalEventContext context = new LocalEventContext();
+            context.setUid(organizationMember.getTargetId());
+            context.setNamespaceId(namespaceId);
+            event.setContext(context);
+
+            event.setEntityType(EntityType.USER.getCode());
+            event.setEntityId(organizationMember.getTargetId());
+            event.setEventName(SystemEvent.ACCOUNT_AUTH_SUCCESS.dft());
+            Map<String, Object> params = new HashMap<>();
+            params.put("orgId", organizationMember.getGroupPath().split("/")[1]);
+            event.setParams(params);
+            LOGGER.info("publish event :[{}]",event);
+        });
+        
         return dto;
     }
 
@@ -12520,24 +12650,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(null == org)
             return response;
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
         if (null == cmd.getNamespaceId()) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         }
-
-        //  默认（包含本节点及下级部门）
-        List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnelsWithDownStream(
-                cmd.getKeywords(), cmd.getIsSignedup(), locator, pageSize, cmd,
-                FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode(), groupTypes);
-        if (0 == organizationMembers.size())
+        ListArchivesContactsCommand cmd1 = new ListArchivesContactsCommand();
+        cmd1.setFilterScopeTypes(Collections.singletonList(FilterOrganizationContactScopeType.CURRENT.getCode()));
+        cmd1.setKeywords(cmd.getKeywords());
+        cmd1.setNamespaceId(cmd.getNamespaceId());
+        cmd1.setOrganizationId(cmd.getOrganizationId());
+        cmd1.setPageSize(pageSize);
+		ListArchivesContactsResponse resp1 = archivesService.listArchivesContacts(cmd1);
+		if(resp1.getContacts() == null)
             return response;
-
-        //  拼音及排序
-        organizationMembers = convertPinyin(organizationMembers);
+        //  默认（包含本节点及下级部门）
+		List<ArchivesContactDTO> organizationMembers = resp1.getContacts();
 
         //  校验权限（管理员）
         Long enterpriseId = getTopOrganizationId(cmd.getOrganizationId());
@@ -12548,78 +12674,70 @@ public class OrganizationServiceImpl implements OrganizationService {
             temp = false;
         }
         boolean adminFlag = temp;
-        /*
-        Organization orgCommoand = new Organization();
-        orgCommoand.setId(org.getId());
-        orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-        VisibleFlag visibleFlag = VisibleFlag.SHOW;
-        if (VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())) {
-            visibleFlag = null;
-        } else if (null != VisibleFlag.fromCode(cmd.getVisibleFlag())) {
-            visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
-        }
-
-        List<OrganizationMember> organizationMembers;
-
-        if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode()))) {
-            organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getNamespaceId(), cmd.getKeywords(), orgCommoand, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
-            response.setTotalCount(this.organizationProvider.countOrganizationPersonnels(cmd.getNamespaceId(), orgCommoand, cmd.getIsSignedup(), visibleFlag));
-        } else {
-            List<String> groupTypes = new ArrayList<>();
-            groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-            groupTypes.add(OrganizationGroupType.GROUP.getCode());
-            organizationMembers = this.organizationProvider.listOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag, locator, pageSize);
-            response.setTotalCount(this.organizationProvider.countOrganizationMemberByPath(cmd.getKeywords(), org.getPath(), groupTypes, cmd.getIsSignedup(), visibleFlag));
-        }
-        */
 
         List<OrganizationContactDTO> members = organizationMembers.stream().map(r -> {
             OrganizationContactDTO dto = ConvertHelper.convert(r, OrganizationContactDTO.class);
-            //  1.添加职位
-            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getDetailId())));
-            //  2.detailId, 隐藏性信息
-            dto.setDetailId(r.getDetailId());
-            dto.setVisibleFlag(r.getVisibleFlag());
-            //  3.头像
-            if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
-                User user = userProvider.findUserById(r.getTargetId());
-                if (null != user) {
-                    String avatarUri = user.getAvatar();
-                    if (StringUtils.isEmpty(avatarUri))
-                        avatarUri = userService.getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
-
-                    dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
-                }
-            } else {
-                String avatarUri = userService.getUserAvatarUriByGender(0L, UserContext.getCurrentNamespaceId(), dto.getGender());
-                dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
+            try{
+	            dto.setId(r.getDetailId());
+				dto.setContactName(r.getContactName());
+				dto.setContactToken(r.getContactToken());
+				dto.setTargetId(r.getTargetId());
+				//增加岗位显示与 detailId added by ryan 20120713
+				dto.setDetailId(r.getDetailId());
+				
+	            //  2.detailId, 隐藏性信息
+	            dto.setVisibleFlag(r.getVisibleFlag());
+	
+	            
+	            //  1.添加职位
+	            dto.setJobPosition(archivesService.convertToOrgNames(archivesService.getEmployeeJobPosition(r.getDetailId())));
+	            //  3.头像
+	            if (OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())) {
+	                User user = userProvider.findUserById(r.getTargetId());
+	                if (null != user) {
+	                    String avatarUri = user.getAvatar();
+	                    if (StringUtils.isEmpty(avatarUri))
+	                        avatarUri = userService.getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
+	
+	                    dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
+	                }
+	            } else {
+	                String avatarUri = userService.getUserAvatarUriByGender(0L, UserContext.getCurrentNamespaceId(), dto.getGender());
+	                dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
+	            }
+	            //  4.手机号屏蔽
+	            if (!adminFlag)
+	                if (VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE) {
+	                    dto.setContactToken(null);
+	                }
+            }catch(Exception e){
+            	LOGGER.error("listOrganizationContacts convert ArchivesContactDTO to OrganizationContactDTO has error! ArchivesContactDTO = " + r.toString(),e);
             }
-            //  4.手机号屏蔽
-            if (!adminFlag)
-                if (VisibleFlag.fromCode(dto.getVisibleFlag()) == VisibleFlag.HIDE) {
-                    dto.setContactToken(null);
-                }
-            //  其他字符置换成#号
-            if (!StringUtils.isEmpty(r.getInitial())) {
-                dto.setInitial(r.getInitial().replace("~", "#"));
-            }
-
             return dto;
         }).collect(Collectors.toList());
 
-        response.setNextPageAnchor(locator.getAnchor());
+        //  拼音及排序
+        try{
+        	members = convertPinyin(members);
+        }catch(Exception e){
+        	LOGGER.error("convertPinyin has error! ",e);
+        }
+        response.setNextPageAnchor(resp1.getNextPageAnchor());
         response.setMembers(members);
         return response;
     }
 
-    private List<OrganizationMember> convertPinyin(List<OrganizationMember> members) {
+    private List<OrganizationContactDTO> convertPinyin(List<OrganizationContactDTO> members) {
 
         members = members.stream().peek((c) -> {
             String pinyin = PinYinHelper.getPinYin(c.getContactName());
             c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
             c.setFullPinyin(pinyin.replaceAll(" ", ""));
             c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
+            //  其他字符置换成#号
+            if (!StringUtils.isEmpty(c.getInitial())) {
+                c.setInitial(c.getInitial().replace("~", "#"));
+            }
         }).collect(Collectors.toList());
 
         Collections.sort(members);
@@ -12832,6 +12950,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
         Long userId = UserContext.current().getUser().getId();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        //用户认证邮箱认证时，校验邮箱是否已经被认证.
+        OrganizationMemberDetails details = this.organizationProvider.findOrganizationMemberDetailsByEmail(cmd.getEmail(), cmd.getOrganizationId());
+        if (details != null) {
+            LOGGER.error("email is exists, email ={}", cmd.getEmail());
+            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_IS_EXISTS,
+                    "email is exists, email ={}",cmd.getEmail());
+        }
         VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
         dto.setUserId(userId);
         dto.setEnterpriseId(cmd.getOrganizationId());
@@ -13081,7 +13206,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     "Organization not found.");
         }
 
-        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()) + 1;
 
         ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
 
@@ -13096,6 +13221,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         int size = list.size();
         if (size > 0) {
+
+            if (size != pageSize) {
+                response.setNextPageAnchor(null);
+            } else {
+                list.remove(list.size() - 1);
+                response.setNextPageAnchor(list.get(list.size() - 1).getId());
+            }
+            
             response.setRequests(list.stream().map(r -> {
                 ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
                 dto.setParentName(organization.getName());
@@ -13123,11 +13256,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return dto;
             }).collect(Collectors.toList()));
 
-            if (size != pageSize) {
-                response.setNextPageAnchor(null);
-            } else {
-                response.setNextPageAnchor(list.get(list.size() - 1).getId());
-            }
         }
         return response;
     }
@@ -13137,6 +13265,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
+
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+        // 说明这是一个子模块, 再看他有没有父模块的责任部门授权
+        if (module != null && module.getPath().split("/").length > 2) {
+            String[] split = module.getPath().split("/");
+            for (int i = 2; i < split.length; i++) {
+                // 父模块授权信息
+                assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), Long.valueOf(split[i])));
+            }
+        }
+
         //如果本身是子项目,则查询其父项目对应的assignments
         ResourceCategory rc = communityProvider.findResourceCategoryById(cmd.getOwnerId());
         if(rc != null){//是子项目
@@ -13465,6 +13604,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (isCreate && find_detail == null) {
             detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
             detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
+            detail.setRegionCode(member.getRegionCode());
             detail.setContactName(member.getContactName());
             detail.setGender(member.getGender());
             detail.setContactToken(member.getContactToken());
@@ -13560,6 +13700,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
             //organizationMemberDetails表中的organizationId指的是总公司的organizationId
             organizationMemberDetail.setOrganizationId(getTopOrganizationId(organizationId));
+            organizationMemberDetail.setCheckInTime(ArchivesUtil.currentDate());
             //根据OrganizationMemberDetails来获取detailId的方法
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /* 如果档案表中有记录 */
@@ -13695,7 +13836,45 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return organizationMember;// add by xq.tian 2017/07/05
     }
-
+    
+	/**
+     * 创建企业级的member记录，因为未激活用户没有直属部门的记录，需要在添加时加入该记录
+     * @param _organizationMember
+     * @param organizationId
+     * @author mmb
+     */
+    private void createOrganiztionMemberOfDirectUnderEnterprise(OrganizationMember _organizationMember,
+    														Long organizationId){
+    	//获取登录App的用户信息
+        User user = UserContext.current().getUser();
+        //深拷贝
+        OrganizationMember member = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
+        //获取当前App所在的域空间
+        Integer namespaceId = UserContext.getCurrentNamespaceId(member.getNamespaceId());
+        
+        //从organizations表查部门数据
+        List<String> types = new ArrayList<>();
+        types.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+        Organization organization = organizationProvider.listOrganizationsByPathAndToken(member.getOrganizationId(), types,namespaceId);
+        
+        if(organization == null){
+        	return;
+        }
+        
+        //查找记录（groupType=DIRECT_UNDER_ENTERPRISE/targetId/organizationId），null则插入
+        OrganizationMember selectMember = organizationProvider.listOrganizationMembersByGroupTypeAndContactToken("DIRECT_UNDER_ENTERPRISE",member.getContactToken(),organization.getPath());
+        
+        if(selectMember == null){
+        	// organizationId要从organizations表找到主属部门记录，然后添加；
+        	member.setGroupPath(organization.getPath());
+            member.setMemberGroup(null);
+            member.setOrganizationId(organization.getId());
+        	member.setGroupType("DIRECT_UNDER_ENTERPRISE");  //必须是DIRECT_UNDER_ENTERPRISE
+        	organizationProvider.createOrganizationMember(member);
+        	LOGGER.debug("插入新的【OrganizationMember】数据： "+member.toString());
+        }
+    }
+    
     private OrganizationMember createOrganiztionMemberWithoutDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
         User user = UserContext.current().getUser();
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
@@ -13915,7 +14094,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.debug("listUnderOrganizations start, i ={}, orgs = {}, namespaceId = {}, list={}" , i, orgs, namespaceId, list);
         if (orgs == null) {
             //:todo 第一次进入
-            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByName(list[0], null, null, namespaceId);
+            List<Organization> orgs_0 = this.organizationProvider.listOrganizationByActualName(list[0], null, null, namespaceId);
             LOGGER.debug("listUnderOrganizations oneStep" + orgs_0.toString());
             if (orgs_0 != null) {
                 return listUnderOrganizations(i + 1, orgs_0, namespaceId, list);
@@ -13934,7 +14113,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             //todo 递归
             List<Organization> result = orgs.stream().map(r -> {
-                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByName(list[i], null, r.getId(), namespaceId);
+                List<Organization> orgs_1 = this.organizationProvider.listOrganizationByActualName(list[i], null, r.getId(), namespaceId);
                 LOGGER.debug("listUnderOrganizations twoStep" + orgs_1.toString());
                 if (orgs_1 != null && orgs_1.size() > 0) {
                     return listUnderOrganizations(i + 1, orgs_1, namespaceId, list);
@@ -14107,6 +14286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     officeSiteDTO.setSiteName(organizationWorkPlaces.getWorkplaceName());
                     officeSiteDTO.setCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                    officeSiteDTO.setId(organizationWorkPlaces.getId());
                     //根据查询到的community_id来查询表eh_communities然后得到所属项目的名称，并且将其封装在对象OfficeSiteDTO中
                     String communityName = organizationProvider.getCommunityNameByCommunityId(organizationWorkPlaces.getCommunityId());
                     officeSiteDTO.setCommunityName(communityName);
@@ -14269,6 +14449,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                     //调用organizationProvider中的insertIntoOrganizationWorkPlaces方法,将对象持久化到数据库
                     organizationProvider.insertIntoOrganizationWorkPlaces(organizationWorkPlaces);
                     //接下来我们需要将对应的所在项目的楼栋和门牌也持久化到项目和楼栋门牌的关系表eh_communityAndBuilding_relationes中
+
+
+                    //在这里我们还需要维护eh_organization_community_requests这张表
+                    //创建OrganizationCommunityRequest类的对象
+                    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+                    //将数据封装在对象OrganizationCommunityRequest对象中
+                    organizationCommunityRequest.setCommunityId(createOfficeSiteCommand.getCommunityId());
+                    organizationCommunityRequest.setMemberId(cmd.getOrganizationId());
+                    organizationCommunityRequest.setMemberType(EnterpriseCommunityMapType.Organization.getCode());
+                    organizationCommunityRequest.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+                    //// TODO: 2018/5/22
+                    enterpriseProvider.insertIntoOrganizationCommunityRequest(organizationCommunityRequest);
+
+
                     //首先进行遍历楼栋集合
                     if(createOfficeSiteCommand.getSiteDtos() != null){
                         //说明楼栋和门牌不为空，注意他是一个集合
@@ -14294,6 +14488,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             //持久化到数据库
                             //// TODO: 2018/5/28
                             organizationProvider.insertIntoOrganizationAddress(organizationAddress);
+
                         }
                     }
 
@@ -14505,7 +14700,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         OrganizationDTO dto = null;
 
-        if(UserContext.getCurrentNamespaceId() == 2){
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
             //标准版
             ServiceModuleAppAuthorization serviceModuleAppAuthorization = serviceModuleAppAuthorizationService.findServiceModuleAppAuthorization(cmd.getProjectId(), cmd.getAppId());
             if(serviceModuleAppAuthorization != null){
@@ -14557,6 +14752,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<OrganizationDTO> dtos = new ArrayList<>();
         for (OrganizationMember member : orgMembers) {
+
+            if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+                continue;
+            }
+
             // 如果机构不存在，则丢弃该成员对应的机构
             Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
             if (org == null) {
@@ -14610,7 +14810,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         response.setDtos(dtos);
         return response;
     }
-
+    
     @Override
 	public List<Long> getProjectIdsByCommunityAndModuleApps(Integer namespaceId, Long communityId, Long moduleId, AppInstanceConfigConfigMatchCallBack matchCallback) {
 
@@ -14657,5 +14857,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
+    //	物业组所需获取企业员工的唯一标识符
+    @Override
+    public String getAccountByTargetIdAndOrgId(Long targetId, Long orgId){
+        OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByTargetIdAndOrgId(targetId, orgId);
+        if(employee == null)
+            return "";
+        return employee.getAccount();
+    }
 }
 

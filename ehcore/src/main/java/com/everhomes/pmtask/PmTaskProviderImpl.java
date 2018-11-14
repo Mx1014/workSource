@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskOrderDetails;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskOrders;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskConfigs;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
@@ -30,11 +29,6 @@ import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskHistoryAddresses;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
-import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskHistoryAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
@@ -571,7 +565,7 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 	}
 
 	@Override
-	public PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId) {
+	public PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId, Long appId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskConfigs.class));
 		SelectQuery query = context.selectQuery(Tables.EH_PM_TASK_CONFIGS);
 		if(null != namespaceId)
@@ -582,6 +576,8 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 			query.addConditions(Tables.EH_PM_TASK_CONFIGS.OWNER_ID.eq(ownerId));
 		if(null != taskCategoryId)
 			query.addConditions(Tables.EH_PM_TASK_CONFIGS.TASK_CATEGORY_ID.eq(taskCategoryId));
+		if(null != appId)
+			query.addConditions(Tables.EH_PM_TASK_CONFIGS.APP_ID.eq(appId));
 		return ConvertHelper.convert(query.fetchOne(),PmTaskConfig.class);
 	}
 
@@ -677,4 +673,144 @@ public class PmTaskProviderImpl implements PmTaskProvider{
 		TruncateIdentityStep query1 = context.truncate(Tables.EH_PM_TASK_ORDER_DETAILS);
 		query1.execute();
 	}
+
+	@Override
+	public void deletePmTaskOrder(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskOrdersDao dao = new EhPmTaskOrdersDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public void createArchibusUser(PmTaskArchibusUserMapping bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPmTaskArchibusUserMapping.class));
+		bean.setId(id);
+		bean.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(bean);
+	}
+
+	@Override
+	public void updateArchibusUser(PmTaskArchibusUserMapping bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		bean.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(bean);
+	}
+
+	@Override
+	public void deleteArchibusUser(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPmTaskArchibusUserMapping.class));
+		EhPmTaskArchibusUserMappingDao dao = new EhPmTaskArchibusUserMappingDao(context.configuration());
+		dao.deleteById(id);
+	}
+
+	@Override
+	public PmTaskArchibusUserMapping findArchibusUserbyPhone(String phoneNum) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskArchibusUserMapping.class));
+		SelectQuery<EhPmTaskArchibusUserMappingRecord> query = context.selectQuery(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING);
+		query.addConditions(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING.IDENTIFIER_TOKEN.eq(phoneNum));
+		PmTaskArchibusUserMapping result = query.fetchOneInto(PmTaskArchibusUserMapping.class);
+		return result;
+	}
+
+	@Override
+	public PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskArchibusUserMapping.class));
+		SelectQuery<EhPmTaskArchibusUserMappingRecord> query = context.selectQuery(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING);
+		query.addConditions(Tables.EH_PM_TASK_ARCHIBUS_USER_MAPPING.ARCHIBUS_UID.eq(archibusUid));
+		PmTaskArchibusUserMapping result = query.fetchOneInto(PmTaskArchibusUserMapping.class);
+		return result;
+	}
+
+	@Override
+	public Long createCategory(PmTaskCategory bean) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskCategories.class));
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		bean.setId(id);
+		dao.insert(bean);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskCategories.class, null);
+		return id;
+	}
+
+	@Override
+	public void updateCategory(PmTaskCategory bean) {
+		assert(bean.getId() != null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		dao.update(ConvertHelper.convert(bean, EhPmTaskCategories.class));
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskCategories.class, bean.getId());
+	}
+
+	@Override
+	public PmTaskCategory findCategoryById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskCategoriesDao dao = new EhPmTaskCategoriesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PmTaskCategory.class);
+	}
+
+	@Override
+	public List<PmTaskCategory> listTaskCategories(Integer namespaceId, String ownerType, Long ownerId,Long appId, Long parentId,
+											 String keyword, Long pageAnchor, Integer pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+		SelectQuery<EhPmTaskCategoriesRecord> query = context.selectQuery(Tables.EH_PM_TASK_CATEGORIES);
+		if(null != namespaceId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+		if (null!=ownerType)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_TYPE.eq(ownerType));
+		if (null!=ownerId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_ID.eq(ownerId));
+		if (null!=appId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.APP_ID.eq(appId));
+		if(null != parentId)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PARENT_ID.eq(parentId));
+		if(StringUtils.isNotBlank(keyword))
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PATH.like("%" + keyword + "%"));
+		if(null != pageAnchor && pageAnchor != 0)
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.ID.gt(pageAnchor));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_PM_TASK_CATEGORIES.ID.asc());
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		List<PmTaskCategory> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskCategory.class))
+				.collect(Collectors.toList());
+
+		return result;
+	}
+
+
+	@Override
+	public PmTaskCategory findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,
+												   Long ownerId,Long appId,String categoryName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskCategories.class));
+
+		SelectQuery<EhPmTaskCategoriesRecord> query = context.selectQuery(Tables.EH_PM_TASK_CATEGORIES);
+
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.NAME.eq(categoryName));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_PM_TASK_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
+
+		if (ownerType!=null){
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_TYPE.eq(ownerType));
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.OWNER_ID.eq(ownerId));
+		}
+		if(appId!=null){
+			query.addConditions(Tables.EH_PM_TASK_CATEGORIES.APP_ID.eq(appId));
+		}
+
+		EhPmTaskCategoriesRecord record = query.fetchAny();
+
+		if (record != null) {
+			return ConvertHelper.convert(record, PmTaskCategory.class);
+		}
+
+		return null;
+	}
+
 }

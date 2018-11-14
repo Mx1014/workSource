@@ -13,6 +13,8 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -47,6 +49,8 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 	private PortalService portalService;
 	@Autowired
 	private FlowEventLogProvider flowEventLogProvider;
+	@Autowired
+	private ServiceModuleAppService serviceModuleAppService;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -57,31 +61,28 @@ class FlowPmTaskHandle extends DefaultPmTaskHandle {
 			Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 			Flow flow = null;
 
-            Long parentTaskId = categoryProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
-            if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
-                flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                        FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
-            else
-               // if (cmd.getTaskCategoryId()==PmTaskAppType.REPAIR_ID)
-                    flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
-
+//            Long parentTaskId = pmTaskProvider.findCategoryById(cmd.getTaskCategoryId()).getParentId();
+//            if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+//                flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                        FlowModuleType.SUGGESTION_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+//            else
+//                if (cmd.getTaskCategoryId()==PmTaskAppType.REPAIR_ID)
+//                    flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                        FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+			flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                        String.valueOf(task.getAppId()), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
 			if(null == flow) {
 				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+			PmTaskCategory taskCategory = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
 
-			ListServiceModuleAppsCommand listServiceModuleAppsCommand = new ListServiceModuleAppsCommand();
-			listServiceModuleAppsCommand.setNamespaceId(namespaceId);
-			listServiceModuleAppsCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-			listServiceModuleAppsCommand.setCustomTag(String.valueOf(parentTaskId));
-			ListServiceModuleAppsResponse apps = portalService.listServiceModuleAppsWithConditon(listServiceModuleAppsCommand);
+			ServiceModuleApp app = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(task.getAppId());
 
-			if (apps!=null && apps.getServiceModuleApps().size()>0)
-				createFlowCaseCommand.setTitle(apps.getServiceModuleApps().get(0).getName());
+			if (app!=null)
+				createFlowCaseCommand.setTitle(app.getName());
 			else
 				createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setServiceType(taskCategory.getName());

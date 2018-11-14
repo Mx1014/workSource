@@ -16,6 +16,8 @@ package com.everhomes.rest.launchpad;
  * <li>OPPUSH：首页运营</li>
  * <li>TAB：Tab类型样式</li>
  * <li>CARD：卡片式icon容器</li>
+ * <li>CARDEXTENSION：运营卡片</li>
+ * <li>VANKESMARTCARD: 万智汇一卡通</li>
  * </ul>
  */
 public enum Widget {
@@ -31,7 +33,9 @@ public enum Widget {
     BULLETINS("Bulletins"),
     OPPUSH("OPPush"),
 	TAB("Tab"),
-    CARD("Card");
+    CARD("Card"),
+    CARDEXTENSION("CardExtension"),
+    VANKESMARTCARD("VankeSmartCard");
 
     private String code;
 

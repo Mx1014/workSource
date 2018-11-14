@@ -10,6 +10,8 @@ import java.sql.Timestamp;
  * <li>uid: 人员ID (必填)</li>
  * <li>namespaceId: 域空间id(必填)</li>
  * <li>communityId: 园区ID(必填)</li>
+ * <li>signToken: signToken</li>
+ * <li>extra: 其他信息</li>
  * <li>communityType: 园区类型(必填) {@link com.everhomes.rest.community.CommunityType}</li>
  * </ul>
  */
@@ -19,6 +21,24 @@ public class UserCurrentSceneCommand {
     private Integer namespaceId;
     private Long communityId ;
     private Byte communityType ;
+    private String signToken ;
+    private String extra ;
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public String getSignToken() {
+        return signToken;
+    }
+
+    public void setSignToken(String signToken) {
+        this.signToken = signToken;
+    }
 
     public Long getId() {
         return id;

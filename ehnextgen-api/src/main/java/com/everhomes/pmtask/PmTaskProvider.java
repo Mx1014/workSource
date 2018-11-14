@@ -70,7 +70,7 @@ public interface PmTaskProvider {
 
 	PmTaskConfig createPmTaskConfig(PmTaskConfig bean);
 	PmTaskConfig updatePmTaskConfig(PmTaskConfig bean);
-	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId);
+	PmTaskConfig findPmTaskConfigbyOwnerId(Integer namespaceId, String ownerType, Long ownerId, Long taskCategoryId, Long appId);
 
 //	订单明细CRUD
 	void createOrderDetails(List<PmTaskOrderDetail> beans);
@@ -89,5 +89,23 @@ public interface PmTaskProvider {
 	PmTaskOrder findPmTaskOrderByBizOrderNum(String BizOrderNum);
 
 	void clearOrderDetails();
+
+	void deletePmTaskOrder(Long id);
+
+//	国贸对接用户映射表
+	void createArchibusUser(PmTaskArchibusUserMapping bean);
+	void updateArchibusUser(PmTaskArchibusUserMapping bean);
+	void deleteArchibusUser(Long id);
+	PmTaskArchibusUserMapping findArchibusUserbyPhone(String phoneNum);
+	PmTaskArchibusUserMapping findArchibusUserbyArchibusId(String archibusUid);
+
+//	服务类型
+	Long createCategory(PmTaskCategory bean);
+	void updateCategory(PmTaskCategory bean);
+	PmTaskCategory findCategoryById(Long id);
+	List<PmTaskCategory> listTaskCategories(Integer namespaceId, String ownerType, Long ownerId, Long appId,Long parentId,
+										String keyword, Long pageAnchor, Integer pageSize);
+	PmTaskCategory findCategoryByNamespaceAndName(Long parentId, Integer namespaceId,String ownerType,
+											Long ownerId,Long appId,String categoryName);
 
 }

@@ -29,45 +29,7 @@ import com.everhomes.rest.asset.ImportFieldsExcelResponse;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ListEnterpriseCustomerContractsCommand;
-import com.everhomes.rest.customer.CustomerAccountDTO;
-import com.everhomes.rest.customer.CustomerApplyProjectDTO;
-import com.everhomes.rest.customer.CustomerCertificateDTO;
-import com.everhomes.rest.customer.CustomerCommercialDTO;
-import com.everhomes.rest.customer.CustomerDepartureInfoDTO;
-import com.everhomes.rest.customer.CustomerEconomicIndicatorDTO;
-import com.everhomes.rest.customer.CustomerEntryInfoDTO;
-import com.everhomes.rest.customer.CustomerEventDTO;
-import com.everhomes.rest.customer.CustomerEventType;
-import com.everhomes.rest.customer.CustomerInvestmentDTO;
-import com.everhomes.rest.customer.CustomerPatentDTO;
-import com.everhomes.rest.customer.CustomerTalentDTO;
-import com.everhomes.rest.customer.CustomerTaxDTO;
-import com.everhomes.rest.customer.CustomerTrackingDTO;
-import com.everhomes.rest.customer.CustomerTrackingPlanDTO;
-import com.everhomes.rest.customer.CustomerTrademarkDTO;
-import com.everhomes.rest.customer.EnterpriseCustomerDTO;
-import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.GetEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ListCustomerAccountsCommand;
-import com.everhomes.rest.customer.ListCustomerApplyProjectsCommand;
-import com.everhomes.rest.customer.ListCustomerCertificatesCommand;
-import com.everhomes.rest.customer.ListCustomerCommercialsCommand;
-import com.everhomes.rest.customer.ListCustomerDepartureInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEconomicIndicatorsCommand;
-import com.everhomes.rest.customer.ListCustomerEntryInfosCommand;
-import com.everhomes.rest.customer.ListCustomerEventsCommand;
-import com.everhomes.rest.customer.ListCustomerInvestmentsCommand;
-import com.everhomes.rest.customer.ListCustomerPatentsCommand;
-import com.everhomes.rest.customer.ListCustomerRentalBillsCommand;
-import com.everhomes.rest.customer.ListCustomerSeviceAllianceAppRecordsCommand;
-import com.everhomes.rest.customer.ListCustomerTalentsCommand;
-import com.everhomes.rest.customer.ListCustomerTaxesCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingPlansCommand;
-import com.everhomes.rest.customer.ListCustomerTrackingsCommand;
-import com.everhomes.rest.customer.ListCustomerTrademarksCommand;
-import com.everhomes.rest.customer.PotentialCustomerType;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.SearchEnterpriseCustomerResponse;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.investment.CustomerContactDTO;
@@ -283,41 +245,53 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldItemDTO> items = systemItems.stream().map(systemItem -> {
                 return ConvertHelper.convert(systemItem, SystemFieldItemDTO.class);
             }).collect(Collectors.toList());
-            addExpandItems(items,cmd.getFieldId());
+            addExpandItems(items,cmd.getFieldId(), cmd.getOwnerId(), cmd.getOwnerType());
             return items;
         }
         return null;
     }
 
-    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId) {
+    private void addExpandItems(List<SystemFieldItemDTO> items,Long fieldId, Long ownerId, String ownerType) {
         Field field = fieldProvider.findFieldById(fieldId);
         if (field!=null && field.getName().equals("sourceItemId")) {
-            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
-            if (activityCategories != null && activityCategories.size() > 0) {
-                activityCategories.forEach((a) -> {
-                    SystemFieldItemDTO activityItem = new SystemFieldItemDTO();
-                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
-                    activityItem.setFieldId(field.getId());
-                    activityItem.setId(a.getEntryId());
-                    activityItem.setModuleName(field.getModuleName());
-                    activityItem.setDisplayName(a.getName());
-                    items.add(activityItem);
-                });
-            }
-            //add service alliance categories
-            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
-            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
-                serviceAllianceCategories.forEach((r) -> {
-                    SystemFieldItemDTO allianceItem = new SystemFieldItemDTO();
-                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
-                    allianceItem.setFieldId(field.getId());
-                    allianceItem.setId(r.getId());
-                    allianceItem.setModuleName(field.getModuleName());
-                    allianceItem.setDisplayName(r.getName());
-                    items.add(allianceItem);
-                });
+            CustomerConfigurationCommand cccmd = new CustomerConfigurationCommand();
+            cccmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            List<CustomerConfigurationDTO> customerConfigurations = customerService.listSyncPotentialCustomer(cccmd);
+            for(CustomerConfigurationDTO dto : customerConfigurations){
+                if(dto.getScopeType().equals("activity") && dto.getStatus() == 2 && dto.getValue() == 1){
+                    List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+                    if (activityCategories != null && activityCategories.size() > 0) {
+                        activityCategories.forEach((a) -> {
+                            SystemFieldItemDTO activityItem = new SystemFieldItemDTO();
+                            activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                            activityItem.setFieldId(field.getId());
+                            activityItem.setId(a.getEntryId());
+                            activityItem.setModuleName(field.getModuleName());
+                            activityItem.setDisplayName(a.getName());
+                            items.add(activityItem);
+                        });
+                    }
+                    continue;
+                }
+                if(dto.getScopeType().equals("service_alliance") && dto.getStatus() == 2 && dto.getValue() == 1){
+                    //add service alliance categories
+                    ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+                    cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    cmd.setOwnerId(ownerId);
+                    cmd.setOwnerType(ownerType);
+                    List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+                    if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                        serviceAllianceCategories.forEach((r) -> {
+                            SystemFieldItemDTO allianceItem = new SystemFieldItemDTO();
+                            allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                            allianceItem.setFieldId(field.getId());
+                            allianceItem.setId(r.getId());
+                            allianceItem.setModuleName(field.getModuleName());
+                            allianceItem.setDisplayName(r.getName());
+                            items.add(allianceItem);
+                        });
+                    }
+                }
             }
         }
     }
@@ -336,7 +310,7 @@ public class FieldServiceImpl implements FieldService {
         if(results != null && results.size() > 0) {
             List<String> sheetNames = results.stream().map((r)->r.getGroupId().toString()).collect(Collectors.toList());
             // for equipment inspection dynamicExcelTemplate
-            String excelTemplateName = "客户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
+            String excelTemplateName = "租户管理模板" + new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(Calendar.getInstance().getTime()) + ".xls";;
             if (StringUtils.isNotEmpty(cmd.getEquipmentCategoryName())) {
                 // for equipment inspection custom design
                 sheetNames.removeIf((s) -> !(Long.parseLong(s)==cmd.getInspectionCategoryId()));
@@ -351,7 +325,10 @@ public class FieldServiceImpl implements FieldService {
                 sheetNames.remove("35");
                 sheetNames.remove("36");
                 sheetNames.remove("37");
-                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+                sheetNames.removeIf((s) -> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户事件"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("活动记录"));
+                sheetNames.removeIf((s)-> fieldProvider.findFieldGroup(Long.valueOf(s)).getTitle().equals("客户账单"));
+
             }
 
             dynamicExcelService.exportDynamicExcel(response, DynamicExcelStrings.CUSTOEMR, null, sheetNames, cmd, true, false, excelTemplateName);
@@ -491,7 +468,6 @@ public class FieldServiceImpl implements FieldService {
             code =  DynamicExcelStrings.CUSTOEMR;
         }
         if (3 == cmd.getPrivilegeCode()) {
-            userPrivilegeMgr.checkUserPrivilege(UserContext.currentUserId(), cmd.getOrgId(), PrivilegeConstants.INVITED_CUSTOMER_IMPORT, ServiceModuleConstants.BUSINESS_INVITATION, ActionType.OFFICIAL_URL.getCode(), null, null, cmd.getCommunityId());
             code =  DynamicExcelStrings.INVITED_CUSTOMER;
         }
         return dynamicExcelService.importMultiSheet(file, code, null, cmd);
@@ -530,7 +506,7 @@ public class FieldServiceImpl implements FieldService {
             List<SystemFieldDTO> fields = systemFields.stream().map(systemField -> {
                 SystemFieldDTO dto = ConvertHelper.convert(systemField, SystemFieldDTO.class);
                 List<SystemFieldItemDTO> itemDTOs = getSystemFieldItems(systemField.getId());
-                addExpandItems(itemDTOs, systemField.getId());
+                addExpandItems(itemDTOs, systemField.getId(), cmd.getOwnerId(), cmd.getOwnerType());
                 dto.setItems(itemDTOs);
                 return dto;
             }).collect(Collectors.toList());
@@ -556,14 +532,6 @@ public class FieldServiceImpl implements FieldService {
         List<FieldDTO> dtos = null;
         if(cmd.getNamespaceId() == null) {
             return null;
-//            List<Field> fields = fieldProvider.listFields(cmd.getModuleName(), cmd.getGroupPath());
-//            if(fields != null && fields.size() > 0) {
-//                dtos = fields.stream().map(field -> {
-//                    FieldDTO dto = ConvertHelper.convert(field, FieldDTatusO.class);
-//                    dto.setFieldDisplayName(field.getDisplayName());
-//                    return dto;
-//                }).collect(Collectors.toList());
-//            }
         } else {
             dtos = listScopeFields(cmd);
         }
@@ -578,10 +546,6 @@ public class FieldServiceImpl implements FieldService {
         if (cmd.getCommunityId() != null) {
             // only namespace scope ,using organization id as search condition
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), null, cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-            /*if (scopeFields != null && scopeFields.size() < 1) {
-            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(),cmd.getOwnerId(), cmd.getCommunityId(), cmd.getModuleName(), cmd.getGroupPath(), null);
-			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 namespaceFlag = false;
                 globalFlag = false;
@@ -589,17 +553,9 @@ public class FieldServiceImpl implements FieldService {
         }
         if (namespaceFlag) {
             scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(), null, cmd.getModuleName(), cmd.getGroupPath(), cmd.getCategoryId());
-            //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-            /*if (scopeFields != null && scopeFields.size() < 1) {
-            	scopeFields = fieldProvider.listScopeFields(cmd.getNamespaceId(), cmd.getOwnerId(),null, cmd.getModuleName(), cmd.getGroupPath(), null);
-			}*/
             if (scopeFields != null && scopeFields.size() > 0) {
                 globalFlag = false;
             }
-            // don't read general configutations when choose all scope
-//            if (cmd.getCommunityId() == null && cmd.getNamespaceId() != null) {
-//                globalFlag = false;
-//            }
         }
         // add general scope fields version 3.5
         if (globalFlag) {
@@ -626,8 +582,6 @@ public class FieldServiceImpl implements FieldService {
 
             if (globalFlag) {
                 scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, cmd.getCategoryId(), cmd.getModuleName());
-//                if (scopeItems != null && scopeItems.size() < 1) {
-//                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,null, 0, null, null, cmd.getModuleName());
                 if (scopeItems != null && scopeItems.size() < 1) {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, cmd.getCategoryId(), cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
@@ -641,99 +595,96 @@ public class FieldServiceImpl implements FieldService {
                     scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), null, cmd.getCategoryId(), cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
-                        //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), cmd.getCommunityId(), null);
-//    			}}
                     }
-                    //查询旧数据 多入口  categoryId已经初始化过，不再进行查询
-                /*if (scopeItems != null && scopeItems.size() < 1) {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), null);
                 }
+                //查询表单初始化的数据
                 if (scopeItems != null && scopeItems.size() < 1) {
-                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(),cmd.getNamespaceId(), null, null);
-    			}*/
-                    //查询表单初始化的数据
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
-                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, 0, null, null, cmd.getModuleName());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
-                        }
+                        scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, 0, null, null, cmd.getModuleName());
                     }
+                }
 
-                } else {
-                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+            } else {
+                scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, null, cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId(), cmd.getModuleName());
+                if (scopeItems != null && scopeItems.size() < 1) {
+                    scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
                     if (scopeItems != null && scopeItems.size() < 1) {
                         scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        //                if (scopeItems != null && scopeItems.size() < 1) {
-//                	scopeItems = fieldProvider.listScopeFieldsItems(fieldIds,cmd.getOwnerId(), cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getCategoryId());
-                        if (scopeItems != null && scopeItems.size() < 1) {
-                            scopeItems = fieldProvider.listScopeFieldsItems(fieldIds, cmd.getNamespaceId(), cmd.getCommunityId(), null, cmd.getModuleName());
-                        }
                     }
-//    			}
-                }
-
-                Map<Long, ScopeFieldItem> fieldItems = scopeItems;
-                if (fields != null && fields.size() > 0) {
-                    List<FieldDTO> dtos = new ArrayList<>();
-                    fields.forEach(field -> {
-                        FieldDTO dto = dtoMap.get(field.getId());
-                        dto.setFieldType(field.getFieldType());
-                        dto.setFieldName(field.getName());
-                        if (fieldItems != null && fieldItems.size() > 0) {
-                            List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
-                            fieldItems.forEach((id, item) -> {
-                                if (field.getId().equals(item.getFieldId())) {
-                                    FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
-                                    items.add(fieldItem);
-                                }
-                            });
-                            //按default order排序
-                            items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
-                            // service alliance and activity expand items ,we add expand item flag for it
-                            addExpandItems(dto, items);
-                            dto.setItems(items);
-                        }
-                        dtos.add(dto);
-                    });
-                    dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
-                    //按default order排序
-                    dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
-                    return dtos;
                 }
             }
+            Map<Long, ScopeFieldItem> fieldItems = scopeItems;
+            if (fields != null && fields.size() > 0) {
+                List<FieldDTO> dtos = new ArrayList<>();
+                fields.forEach(field -> {
+                    FieldDTO dto = dtoMap.get(field.getId());
+                    dto.setFieldType(field.getFieldType());
+                    dto.setFieldName(field.getName());
+                    if (fieldItems != null && fieldItems.size() > 0) {
+                        List<FieldItemDTO> items = new ArrayList<FieldItemDTO>();
+                        fieldItems.forEach((id, item) -> {
+                            if (field.getId().equals(item.getFieldId())) {
+                                FieldItemDTO fieldItem = ConvertHelper.convert(item, FieldItemDTO.class);
+                                items.add(fieldItem);
+                            }
+                        });
+                        //按default order排序
+                        items.sort(Comparator.comparingInt(FieldItemDTO::getDefaultOrder));
+                        // service alliance and activity expand items ,we add expand item flag for it
+                        addExpandItems(dto, items, cmd.getNamespaceId());
+                        dto.setItems(items);
+                    }
+                    dtos.add(dto);
+                });
+                dtos.forEach((r) -> r.setOwnerId(cmd.getOwnerId()));
+                //按default order排序
+                dtos.sort(Comparator.comparingInt(FieldDTO::getDefaultOrder));
+                return dtos;
+            }
         }
+
         return null;
     }
 
-    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items) {
+    private void addExpandItems(FieldDTO dto, List<FieldItemDTO> items, Integer namespaceId) {
         if (dto.getFieldName().equals("sourceItemId")) {
-            List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
-            if (activityCategories != null && activityCategories.size() > 0) {
-                activityCategories.forEach((a) -> {
-                    FieldItemDTO activityItem = new FieldItemDTO();
-                    activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
-                    activityItem.setFieldId(dto.getId());
-                    activityItem.setItemId(a.getEntryId());
-                    activityItem.setItemDisplayName(a.getName());
-                    activityItem.setFieldId(a.getId());
-                    items.add(activityItem);
-                });
-            }
-            //add service alliance categories
-            ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
-            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-            List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
-            if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
-                serviceAllianceCategories.forEach((r) -> {
-                    FieldItemDTO allianceItem = new FieldItemDTO();
-                    allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
-                    allianceItem.setFieldId(dto.getId());
-                    allianceItem.setItemId(r.getId());
-                    allianceItem.setItemDisplayName(r.getName());
-                    allianceItem.setFieldId(r.getId());
-                    items.add(allianceItem);
-                });
+            CustomerConfigurationCommand cccmd = new CustomerConfigurationCommand();
+            cccmd.setNamespaceId(namespaceId);
+            List<CustomerConfigurationDTO> customerConfigurations = customerService.listSyncPotentialCustomer(cccmd);
+            for(CustomerConfigurationDTO ccdto : customerConfigurations){
+                if(ccdto.getScopeType().equals("activity") && ccdto.getStatus() == 2 && ccdto.getValue() == 1){
+                    List<ActivityCategories> activityCategories = activityProivider.listActivityCategory(UserContext.getCurrentNamespaceId(), null);
+                    if (activityCategories != null && activityCategories.size() > 0) {
+                        activityCategories.forEach((a) -> {
+                            FieldItemDTO activityItem = new FieldItemDTO();
+                            activityItem.setExpandFlag(PotentialCustomerType.ACTIVITY.getValue());
+                            activityItem.setFieldId(dto.getId());
+                            activityItem.setItemId(a.getEntryId());
+                            activityItem.setItemDisplayName(a.getName());
+                            activityItem.setFieldId(a.getId());
+                            items.add(activityItem);
+                        });
+                    }
+                    continue;
+                }
+                if(ccdto.getScopeType().equals("service_alliance") && ccdto.getStatus() == 2 && ccdto.getValue() == 1){
+                    //add service alliance categories
+                    ListServiceAllianceCategoriesCommand cmd = new ListServiceAllianceCategoriesCommand();
+                    cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    List<ServiceAllianceCategoryDTO> serviceAllianceCategories =  yellowPageService.listServiceAllianceCategories(cmd);
+                    if (serviceAllianceCategories != null && serviceAllianceCategories.size() > 0) {
+                        serviceAllianceCategories.forEach((r) -> {
+                            FieldItemDTO allianceItem = new FieldItemDTO();
+                            allianceItem.setExpandFlag(PotentialCustomerType.SERVICE_ALLIANCE.getValue());
+                            allianceItem.setFieldId(dto.getId());
+                            allianceItem.setItemId(r.getId());
+                            allianceItem.setItemDisplayName(r.getName());
+                            allianceItem.setFieldId(r.getId());
+                            items.add(allianceItem);
+                        });
+                    }
+                }
             }
         }
     }
@@ -1393,9 +1344,17 @@ public class FieldServiceImpl implements FieldService {
     private String getFromObj(String fieldName, FieldParams params, FieldDTO field, Object dto,Long communityId,Integer namespaceId,String moduleName, String sheetName) throws NoSuchFieldException, IntrospectionException, InvocationTargetException, IllegalAccessException {
         // get params ownerId and ownerType
         PropertyDescriptor dtoDes = new PropertyDescriptor("ownerId", dto.getClass());
-        Long ownerId = (Long)dtoDes.getReadMethod().invoke(dto);
+        Long ownerId = null;
+        Object ownerIdObj = dtoDes.getReadMethod().invoke(dto);
+        if(ownerIdObj != null){
+            ownerId = (Long)ownerIdObj;
+        }
         PropertyDescriptor dtoDesOwnerType = new PropertyDescriptor("ownerType", dto.getClass());
-        String  ownerType = (String)dtoDes.getReadMethod().invoke(dto);
+        String ownerType = "";
+        Object ownerTypeObj = dtoDesOwnerType.getReadMethod().invoke(dto);
+        if(ownerTypeObj != null){
+            ownerType = ownerTypeObj.toString();
+        }
         Class<?> clz = dto.getClass();
         PropertyDescriptor pd;
         if(fieldName.equals("customerContact") || fieldName.equals("channelContact")){

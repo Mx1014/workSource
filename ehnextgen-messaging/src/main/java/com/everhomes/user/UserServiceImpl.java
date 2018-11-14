@@ -13,6 +13,7 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.asset.AssetPaymentStrings;
+import com.everhomes.asset.PaymentConstants;
 import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -83,9 +84,10 @@ import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
 import com.everhomes.rest.asset.TargetDTO;
 import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.buttscript.TrueOrFalseCode;
 import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.CommunityInfoDTO;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.contentserver.ContentCacheConfigDTO;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
@@ -100,6 +102,7 @@ import com.everhomes.rest.group.GroupLocalStringCode;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupNameEmptyFlag;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -127,10 +130,12 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
 import com.everhomes.sms.*;
+import com.everhomes.user.sdk.SdkUserService;
+import com.everhomes.user.smartcard.SmartCardModuleManager;
+import com.everhomes.user.smartcard.SmartCardProcessorContext;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.collect.Lists;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -144,6 +149,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.CollectionUtils;
@@ -166,7 +172,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -225,6 +230,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     private static String ANBANG_CURRENT_USER_URL;
     private static Integer ANBANG_NAMESPACE_ID;
 
+    @Autowired
+    private SdkUserService sdkUserService;
 
     @Autowired
     private DbProvider dbProvider;
@@ -388,11 +395,19 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 	@Autowired
 	private SmartCardKeyProvider smartCardKeyProvider;
 
+    @Autowired
+    private NamespacesService namespacesService;
+
+	@Autowired
+	private SmartCardModuleManager smartCardModuleManager;
+
 	private static long stepInSecond = 30;
 
    private static ThreadLocal<TimeBasedOneTimePasswordGenerator> totpLocal = new ThreadLocal<TimeBasedOneTimePasswordGenerator>();
 
-	private static final String DEVICE_KEY = "device_login";
+    @Autowired
+    private NamespaceProvider namespaceProvider;
+    private static final String DEVICE_KEY = "device_login";
 
 	@Autowired
     private ArchivesService archivesService;
@@ -662,7 +677,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return StringUtils.join(Arrays.asList(keys), ":");
     }
 
-    private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
+    @Override
+    public void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode) {
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
         String templateScope = SmsTemplateCode.SCOPE;
         int templateId = SmsTemplateCode.VERIFICATION_CODE;
@@ -1080,12 +1096,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 if (user == null) {
                     LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                             namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+                    throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "User does not exist");
                 }
             } else {
                 LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}",
                         namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
-                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Unable to locate user");
             }
         }
 
@@ -1094,7 +1110,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
             LOGGER.error("Password does not match for " + userIdentifierToken);
-            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_USER_NAME_OR_PASSORD, "Invalid password");
         }
 
         if (deviceIdentifier != null && deviceIdentifier.isEmpty())
@@ -1280,7 +1296,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         UserLogin foundLogin = null;
         int nextLoginId = 1;
         if (maxLoginId != null) {
-            for (int i = 1; i <= maxLoginId.intValue(); i++) {
+            for (int i = 1; i <= maxLoginId; i++) {
                 String hkeyLogin = String.valueOf(i);
                 Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
                 UserLogin login = accessorLogin.getMapValueObject(hkeyLogin);
@@ -1314,7 +1330,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
                         //found twice, delete all logins
                         accessor.getTemplate().delete(accessor.getBucketName());
-                        accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
+                        // accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
                         ref.setOldDeviceId("");
                         ref.setNextLoginId(1);
                         ref.setFoundLogin(null);
@@ -1330,7 +1346,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 }
 
                 //check
-                if (foundLogin == null && login.getLoginId() >= nextLoginId) {
+                if (login.getLoginId() >= nextLoginId) {
                     nextLoginId = login.getLoginId() + 1;
                 }
 
@@ -1347,6 +1363,10 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     }
 
     private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify) {
+        return createLogin(namespaceId, inUser, deviceIdentifier, pusherIdentify, null);
+    }
+
+    private UserLogin createLogin(int namespaceId, User inUser, String deviceIdentifier, String pusherIdentify, LoginToken loginToken) {
         Boolean isNew = false;
         User user = null;
         Long impId = null;
@@ -1367,7 +1387,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         // get "index" accessor
         String hkeyIndex = "0";
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, hkeyIndex);
-        Object o = accessor.getMapValueObject(hkeyIndex);
+        // Object o = accessor.getMapValueObject(hkeyIndex);
         LogonRef ref = new LogonRef();
         ref.setNamespaceId(namespaceId);
         ref.setOldDeviceId("");
@@ -1391,12 +1411,21 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             isNew = true;
         }
 
+        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
+        // 统一用户那边登录的 loginInstanceNumber,这里需要和那边一样才行
+        if (loginToken != null) {
+            foundLogin.setLoginInstanceNumber(loginToken.getLoginInstanceNumber());
+            foundLogin.setLoginId(loginToken.getLoginId());
+            hkeyLogin = String.valueOf(loginToken.getLoginId());
+        }
+
         foundLogin.setImpersonationId(impId);
         foundLogin.setStatus(UserLoginStatus.LOGGED_IN);
         foundLogin.setLastAccessTick(DateHelper.currentGMTTime().getTime());
         foundLogin.setPusherIdentify(pusherIdentify);
         foundLogin.setAppVersion(appVersion);
-        String hkeyLogin = String.valueOf(ref.getNextLoginId());
+
         Accessor accessorLogin = this.bigCollectionProvider.getMapAccessor(userKey, hkeyLogin);
         LOGGER.debug("createLogin|hId = " + hkeyLogin);
         accessorLogin.putMapValueObject(hkeyLogin, foundLogin);
@@ -1532,10 +1561,6 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     /**
      * 微信端活跃记录
-     * @param loginToken
-     * @param borderId
-     * @param borderSessionId
-     * @return
      */
     @Override
     public void registerWXLoginConnection(HttpServletRequest request) {
@@ -1718,12 +1743,77 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
         Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
         UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
+
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
+            try {
+                // 这个代码只是为了修复错误的数据，后期删除
+                LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
+            } catch (Exception e) {
+                LOGGER.error("Fetch user error", e);
+            }
             return true;
         } else {
+            // 去统一用户那边检查登录状态
+            String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
+            com.everhomes.rest.user.user.UserInfo userInfo = null;
+            try {
+                userInfo = sdkUserService.validateToken(tokenString);
+            } catch (Exception e) {
+                //
+            }
+
+            if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
+                User user = userProvider.findUserById(userInfo.getId());
+                UserIdentifier userIdentifier = this.userProvider.getUserByToken(userInfo.getPhones().iterator().next(), userInfo.getNamespaceId());
+
+                if (user != null && userIdentifier != null) {
+                    LOGGER.info("User service check success, loginToken={}", loginToken);
+                    createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                    return true;
+                }
+
+                try {
+                    if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
+                        user = userProvider.findUserById(userInfo.getId());
+                        createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
+                        return true;
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Fetch user error", e);
+                }
+            } else {
+                LOGGER.error("Never be here, userInfo should contains phones, userInfo={}", userInfo);
+            }
+
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }
+    }
+
+    private boolean fetchUserSuccess(Long userId, Integer namespaceId) {
+        //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
+        //如果core server和统一用户都没有用户，说明真的没有该用户
+        // add by yanlong.liang 20180928
+        User user = userProvider.findUserById(userId);
+        if (user == null) {
+            user = ConvertHelper.convert(this.sdkUserService.getUser(userId), User.class);
+            if (user != null) {
+                this.userProvider.createUserFromUnite(user);
+            } else {
+                LOGGER.warn("Sdk user service getUser return null, userId={}", userId);
+            }
+        }
+
+        UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(userId, namespaceId);
+        if (userIdentifier == null) {
+            userIdentifier = ConvertHelper.convert(this.sdkUserService.getUserIdentifier(userId), UserIdentifier.class);
+            if (userIdentifier != null) {
+                this.userProvider.createIdentifierFromUnite(userIdentifier);
+            } else {
+                LOGGER.warn("Sdk user service getUserIdentifier return null, userId={}", userId);
+            }
+        }
+        return user != null && userIdentifier != null;
     }
 
     private static boolean isVerificationExpired(Timestamp ts) {
@@ -1995,6 +2085,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (!containPartnerCommunity(namespaceId, entityList)) {
                 List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
                 if (resources != null && resources.size() > 1) {
+                    if (resources.get(0) == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("namespaceResource is null, namespaceId = {}", namespaceId);
+                        }
+                        return communityId;
+                    }
                     communityId = resources.get(0).getResourceId();
                     updateUserCurrentCommunityToProfile(userId, communityId, namespaceId);
                     if (LOGGER.isInfoEnabled()) {
@@ -3885,6 +3981,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //	    SceneTokenDTO sceneToken = checkSceneToken(userId, cmd.getSceneToken());
 
+        AppContext appContext = UserContext.current().getAppContext();
+        //工作台场景没有communityId跪了，先让它不跪吧，后面再让产品设计一下，工作台的搜索到底要搜索啥
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            List<OrganizationCommunityRequest> requests = organizationProvider.listOrganizationCommunityRequestsByOrganizationId(appContext.getOrganizationId());
+            if(requests != null && requests.size() > 0){
+                appContext.setCommunityId(requests.get(0).getCommunityId());
+            }
+        }
+
+        //工作台场景没有communityId，跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
+
         if (StringUtils.isEmpty(cmd.getContentType())) {
             cmd.setContentType(SearchContentType.ALL.getCode());
         }
@@ -4753,12 +4867,12 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String xqt = "xq.tian@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
-        String account = configurationProvider.getValue(0, "mail.smtp.account", "zuolin@zuolin.com");
+        // String account = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
 
         String body = String.format("User \"%s(%s)\" has send a appeal, server is \"%s\", please check out. \n[%s]",
                 cmd.getName(), cmd.getOldIdentifier(), home, log.toString());
-        handler.sendMail(0, account, wjl, "User Appeal", body);
-        handler.sendMail(0, account, xqt, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, wjl, "User Appeal", body);
+        handler.sendMail(UserContext.getCurrentNamespaceId(), null, xqt, "User Appeal", body);
         // ------------------------------------------------------------------------
 
         return toUserAppealLogDTO(log);
@@ -5107,7 +5221,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         Organization parentDep = organizationProvider.findOrganizationById(dep.getParentId());
         OrganizationDTO dto = new OrganizationDTO();
-        if(OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.DIRECT_UNDER_ENTERPRISE){
+        //2018年11月13日 修改,by吴寒 因为添加管理员的时候有人搞了明明organizationId是总公司,groupType却是直属部门的数据,这里要判断有没有parentDep
+        if(parentDep != null && OrganizationGroupType.fromCode(member.getGroupType()) == OrganizationGroupType.DIRECT_UNDER_ENTERPRISE){
             dto.setId(parentDep.getId());
             dto.setParentId(parentDep.getId());
             dto.setName(parentDep.getName());
@@ -5118,7 +5233,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             dto.setParentId(dep.getParentId());
             dto.setPath(dep.getPath());
             dto.setName(dep.getName());
-            dto.setParentName(parentDep.getName());
+            dto.setParentName(parentDep == null ? dto.getName() : parentDep.getName());
         }
         return Collections.singletonList(dto);
     }
@@ -6186,6 +6301,9 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         Integer addressDialogStyle = configurationProvider.getIntValue(namespaceId, "zhifuhui.display.flag", 1);
         resp.setAddressDialogStyle(addressDialogStyle);
 
+        //查询场景的显示方式：公司1，园区0
+        Integer sceneShowType = configurationProvider.getIntValue(namespaceId, "scene.show.type", 0);
+        resp.setSceneShowType(sceneShowType);
 		resp.setScanForLogonServer(this.configurationProvider.getValue(namespaceId, "scanForLogonServer", SCAN_FOR_LOGON_SERVER));
 
 		// 客户端资源缓存配置
@@ -6729,6 +6847,11 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 				for (OrganizationMember member : orgMembers) {
 					AddressUserDTO dto = new AddressUserDTO();
 
+
+                    if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(member.getGroupType())){
+                        continue;
+                    }
+
 					Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 					if(org == null ||  OrganizationStatus.ACTIVE != OrganizationStatus.fromCode(org.getStatus()) || OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 						continue;
@@ -6772,16 +6895,32 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 								//创建一个集合List<String>来承载办公地点名称的集合
 								//List<String> siteNameList = Lists.newArrayList();
 								//采用forEach循环来遍历集合List<OrganizationWorkPlaces>
-								for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
-									//将每一个办公地点名称都保存在集合siteNameList中
-									//siteNameList.add(organizationWorkPlaces.getWorkplaceName());
-									AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
-									addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
-									addressSiteDTO.setCommunityName(community.getName());
-									addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
-									addressSiteDTO.setCommunityId(community.getId());
-									addressSiteDtos.add(addressSiteDTO);
-								}
+
+
+                                //定制版没有办公点
+                                if(namespacesService.isStdNamespace(community.getNamespaceId())){
+                                    for(OrganizationWorkPlaces organizationWorkPlaces : organizationWorkPlacesList){
+                                        //将每一个办公地点名称都保存在集合siteNameList中
+                                        //siteNameList.add(organizationWorkPlaces.getWorkplaceName());
+                                        AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                        addressSiteDTO.setName(organizationWorkPlaces.getWorkplaceName());
+                                        addressSiteDTO.setCommunityName(community.getName());
+                                        addressSiteDTO.setWholeAddressName(organizationWorkPlaces.getWholeAddressName());
+                                        addressSiteDTO.setCommunityId(community.getId());
+                                        addressSiteDtos.add(addressSiteDTO);
+                                    }
+                                }else {
+                                    AddressSiteDTO addressSiteDTO = new AddressSiteDTO();
+                                    addressSiteDTO.setCommunityName(community.getName());
+                                    addressSiteDTO.setCommunityId(community.getId());
+                                    if(organizationDetail != null){
+                                        addressSiteDTO.setName(organizationDetail.getAddress());
+                                        addressSiteDTO.setWholeAddressName(organizationDetail.getAddress());
+                                    }
+                                    addressSiteDtos.add(addressSiteDTO);
+
+                                }
+
 
 							}
 
@@ -6817,7 +6956,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
 			if(familyDtos != null && familyDtos.size() > 0){
 				for(FamilyDTO family : familyDtos){
-					if(cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())){
+					if((cmd.getStatus() != null && GroupMemberStatus.fromCode(cmd.getStatus()) != GroupMemberStatus.fromCode(family.getMembershipStatus())) || (family.getCommunityId() == null)){ //防止null值，这里对CommunityId进行判断
 						continue;
 					}
 
@@ -6907,7 +7046,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public GetUserConfigAfterStartupResponse getUserConfigAfterStartup(GetUserConfigAfterStartupCommand cmd) {
         GetUserConfigAfterStartupResponse resp = new GetUserConfigAfterStartupResponse();
-        resp.setSmartCardDescLink("https://www.zuolin.com");
+        SmartCardInfo smartCardInfo = new SmartCardInfo();
+
+        //一卡通是否展示两个选择项 add by yanlong.liang 20181024
+        String showCardOpenFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_OPEN_OPTION, "是");
+        String showCardSortFlag = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHOW_CARD_SORT_OPTION, "是");
+        smartCardInfo.setShowCardOpenOption(TrueOrFalseFlag.fromText(showCardOpenFlag).getCode());
+        smartCardInfo.setShowCardSortOption(TrueOrFalseFlag.fromText(showCardSortFlag).getCode());
+        String homeUrl = this.configProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.HOME_URL, "");
+
+        resp.setSmartCardInfo(smartCardInfo);
+        String descLink = homeUrl + "/mobile/static/smart-card/instructions.html?ns=" + UserContext.getCurrentNamespaceId();
+        smartCardInfo.setSmartCardDescLink(descLink);
         TimeBasedOneTimePasswordGenerator totp;
 
         try {
@@ -6932,9 +7082,94 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 //use the newest one
                 obj = cards.get(0);
             }
+            
+            List<SmartCardDisplayConfig> displayConfigs = new ArrayList<SmartCardDisplayConfig>();
+            SmartCardDisplayConfig dispConf = new SmartCardDisplayConfig();
+            dispConf.setDefaultValue(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setIsDisplay(TrueOrFalseFlag.TRUE.getCode());
+            dispConf.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+            displayConfigs.add(dispConf);
+            smartCardInfo.setDisplayConfigs(displayConfigs);
 
-            resp.setSmartCardId(obj.getId());
-            resp.setSmartCardKey(obj.getCardkey());
+            smartCardInfo.setSmartCardId(obj.getId());
+            smartCardInfo.setSmartCardKey(obj.getCardkey());
+
+            List<SmartCardHandler> smartCardhandlers = new ArrayList<SmartCardHandler>();
+            SmartCardHandler aclinkCard = new SmartCardHandler();
+//            aclinkCard.setAppOriginId(41010L);
+//            aclinkCard.setModuleId(41010L);
+//            aclinkCard.setData("test-aclink-only");
+//            aclinkCard.setTitle("公共门禁");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+
+
+//            List<SmartCardHandlerItem> items = new ArrayList<SmartCardHandlerItem>();
+
+//            item.setTitle("楼层");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-floor");
+//            item.setDefaultValue("5");
+//            items.add(item);
+//
+//            item = new SmartCardHandlerItem();
+//            item.setTitle("VIP");
+//            item.setRouterUrl("zl://aclink/index");
+//            item.setName("aclink-vip");
+//            item.setDefaultValue("VIP3");
+//            items.add(item);
+
+//            aclinkCard.setItems(items);
+//            smartCardhandlers.add(aclinkCard);
+
+//            aclinkCard = new SmartCardHandler();
+//            aclinkCard.setAppOriginId(41015L);
+//            aclinkCard.setModuleId(41016L);
+//            aclinkCard.setData("test-aclink-onlybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbtest-aclink-only555aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//            aclinkCard.setTitle("公共门禁555");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            smartCardhandlers.add(aclinkCard);
+
+            SmartCardProcessorContext ctx = new SmartCardProcessorContext();
+            ctx.setUserId(UserContext.currentUserId());
+            List<SmartCardHandler> hs = smartCardModuleManager.generateSmartCards(ctx);
+            if(hs != null) {
+            	smartCardhandlers.addAll(hs);
+            }
+
+            smartCardInfo.setSmartCardHandlers(smartCardhandlers);
+
+            List<SmartCardHandler> stand2 = new ArrayList<SmartCardHandler>();
+            smartCardInfo.setStandaloneHandlers(stand2);
+//            stand2.add(aclinkCard);
+
+            hs = smartCardModuleManager.generateStandaloneCards(ctx);
+            if(hs != null) {
+            	stand2.addAll(hs);
+            }
+
+//            aclinkCard = new SmartCardHandler();
+//            aclinkCard.setAppOriginId(41015L);
+//            aclinkCard.setModuleId(41016L);
+//            aclinkCard.setData("test-aclink-onlybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbtest-aclink-only555aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//            aclinkCard.setTitle("公共门禁555");
+//            aclinkCard.setSmartCardType(SmartCardType.SMART_CARD_ACLINK.getCode());
+//            stand2.add(aclinkCard);
+
+            List<SmartCardHandlerItem> payItems = new ArrayList<SmartCardHandlerItem>();
+            SmartCardHandlerItem item = new SmartCardHandlerItem();
+            item = new SmartCardHandlerItem();
+            item.setTitle("个人钱包");
+            item.setRouterUrl("zl://wallet/index");
+            item.setName("wallet");
+            payItems.add(item);
+
+            item = new SmartCardHandlerItem();
+            item.setTitle("我的钥匙");
+            item.setRouterUrl("zl://access-control/mykeys");
+            item.setName("key");
+            payItems.add(item);
+
+            smartCardInfo.setBaseItems(payItems);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("generate totp failed", e);
         }
@@ -6947,51 +7182,124 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         return code;
     }
 
+    private List<SmartCardItem> getSmartCardSegments(String cardCode) {
+//    	byte[] code = Base64.getDecoder().decode(cardCode);
+    	byte[] code = org.apache.commons.codec.binary.Base64.decodeBase64(cardCode);
+    	int i = 0, len, typ;
+    	Map<Integer, byte[]> segments = new HashMap<Integer, byte[]>();
+    	List<SmartCardItem> items = new ArrayList<SmartCardItem>();
+
+    	while(i+2 < code.length) {
+			len = (int)code[i+1];
+			if(i+2+len > code.length) {
+				break;
+			}
+			typ = (int)code[i];
+			i += 2;
+			byte[] seg = new byte[len];
+			System.arraycopy(code, i, seg, 0, len);
+			segments.put(new Integer(typ), seg);
+			SmartCardItem item = new SmartCardItem();
+			item.setSmartCardCode(seg);
+			item.setSmartCardType((byte)typ);
+			items.add(item);
+			i += len;
+    	}
+
+    	return items;
+    }
+
+    private boolean payCodeVerify(String payCode) throws InvalidKeyException, NoSuchAlgorithmException {
+        TimeBasedOneTimePasswordGenerator totp;
+        int validWindow = 1;
+        boolean ok = false;
+
+        totp = getTotp();
+        Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
+        String randomUid = payCode.substring(0, 9);
+        String totpCode = payCode.substring(9, 17);
+        Long uid = Long.parseLong(randomUid);
+        Long totpCodeInt = Long.parseLong(totpCode);
+        uid = (uid ^ totpCodeInt);
+        List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
+        if(cards != null) {
+            int j;
+            CARD_IGNORES:
+            for(j = 0; j < cards.size(); j++) {
+                SmartCardKey card = cards.get(j);
+                for(long i = -validWindow; i <= validWindow; i++) {
+                    int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
+                    if(code == totpCodeInt) {
+                        ok = true;
+                        break CARD_IGNORES;
+                    }
+                }
+            }
+
+            if(j < cards.size()) {
+                for(j = j+1; j < cards.size(); j++) {
+                    //invalid the old one
+                    SmartCardKey card = cards.get(j);
+                    if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
+                        card.setStatus(TrueOrFalseFlag.FALSE.getCode());
+                        smartCardKeyProvider.updateSmartCardKey(card);
+                    }
+                }
+            }
+
+        }
+
+        return ok;
+    }
+
+    @Override
+    public SmartCardVerifyResponse smartCardBarcodeVerify(SmartCardVerifyCommand cmd) {
+    	SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
+    	String payCode = cmd.getCardCode().substring(1);
+
+      try {
+			if(payCodeVerify(payCode)) {
+				resp.getVerifyResults().add("PayOK");
+			} else {
+				resp.getVerifyResults().add("ERROR");
+			}
+		} catch (InvalidKeyException | NoSuchAlgorithmException e) {
+			LOGGER.error("generate totp failed", e);
+		}
+
+      return resp;
+    }
+
     @Override
     public SmartCardVerifyResponse smartCardVerify(SmartCardVerifyCommand cmd) {
-        TimeBasedOneTimePasswordGenerator totp;
         SmartCardVerifyResponse resp = new SmartCardVerifyResponse();
-        resp.setVerifyOk(new Long(TrueOrFalseFlag.FALSE.getCode()));
-        int validWindow = 1;
 
         try {
-            totp = getTotp();
-            Long nowInSec = DateHelper.currentGMTTime().getTime() / 1000;
-            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 18) {
+            if(cmd.getCardCode() == null || cmd.getCardCode().length() < 19) {
                 return resp;
             }
 
-            String randomUid = cmd.getCardCode().substring(1, 10);
-            String totpCode = cmd.getCardCode().substring(10, 18);
-            Long uid = Long.parseLong(randomUid);
-            Long totpCodeInt = Long.parseLong(totpCode);
-            uid = (uid ^ totpCodeInt);
-            List<SmartCardKey> cards = smartCardKeyProvider.queryLatestSmartCardKeys(uid);
-            if(cards != null) {
+            List<SmartCardItem> items = getSmartCardSegments(cmd.getCardCode());
+            for(int i = 0; i < items.size(); i++) {
+            	SmartCardItem item = items.get(i);
 
-                int j;
-                OUTLOOP:
-                for(j = 0; j < cards.size(); j++) {
-                    SmartCardKey card = cards.get(j);
-                    for(long i = -validWindow; i <= validWindow; i++) {
-                        int code = generateTotp(totp, card.getCardkey(), nowInSec + i*stepInSecond);
-                        if(code == totpCodeInt) {
-                            resp.setVerifyOk(new Long(TrueOrFalseFlag.TRUE.getCode()));
-                            break OUTLOOP;
-                        }
+            	if(item.getSmartCardType().equals(SmartCardType.SMART_CARD_PAY.getCode())) {
+                    String payCode = new String(item.getSmartCardCode());
+                    if(payCodeVerify(payCode)) {
+                    	resp.getVerifyResults().add("PayOk");
+                    } else {
+                    	resp.getVerifyResults().add("PayError");
                     }
-                }
-
-                if(j < cards.size()) {
-                    for(j = j+1; j < cards.size(); j++) {
-                        //invalid the old one
-                        SmartCardKey card = cards.get(j);
-                        if( (card.getCreateTime().getTime()/1000 + 120) < nowInSec) {
-                            card.setStatus(TrueOrFalseFlag.FALSE.getCode());
-                            smartCardKeyProvider.updateSmartCardKey(card);
-                        }
+            	} else if (item.getSmartCardType().equals(SmartCardType.SMART_CARD_ACLINK.getCode())) {
+                    String aclinkCode = new String(item.getSmartCardCode());
+                    if(aclinkCode.contains("test-aclink-only")) {
+                    	resp.getVerifyResults().add("AclinkOk");
+                    } else {
+                    	resp.getVerifyResults().add("AclinkError");
                     }
-                }
+            	} else {
+            		resp.getVerifyResults().add("UnKnownTypeError");
+            	}
 
             }
 
@@ -7024,8 +7332,14 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 s2 = s1;
             }
 
-            resp.setQrCode("1" + s2 + String.valueOf(topt));
+            String val = s2 + String.valueOf(topt);
+            byte[] valByte = val.getBytes();
+            byte[] cardCode = new byte[valByte.length + 2];
+            cardCode[0] = SmartCardType.SMART_CARD_PAY.getCode();
+            cardCode[1] = 17;
+            System.arraycopy(valByte, 0, cardCode, 2, valByte.length);
 
+            resp.setQrCode(org.apache.commons.codec.binary.Base64.encodeBase64String(cardCode));
             resp.setSmartCardCode(String.valueOf(topt));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.error("generateOneCardCode failed", e);
@@ -7182,12 +7496,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
     @Override
     public void updateUserVipLevel(Long userId, Integer vipLevel) {
+
+    }
+
+    @Override
+    public void updateUserVipLevel(Long userId, Integer vipLevel ,String vipLevelText) {
         User user = this.userProvider.findUserById(userId);
         if(user == null){
             LOGGER.error("Unable to find the user , userId= {}",  userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
         }
         user.setVipLevel(vipLevel);
+        user.setVipLevelText(vipLevelText);
         userProvider.updateUser(user);
     }
 
@@ -7201,5 +7521,208 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             return org;
         }
 
+    /**
+     * 根据手机号查询某域空间中的用户
+     * @param cmd
+     * @return
+     */
+    @Override
+    public FindUsersByPhonesResponse findUsersByPhones(FindUsersByPhonesCommand cmd) {
+        LOGGER.info("findUsersByPhones  -->  cmd:[{}]",cmd);
+        Integer namespaceId = cmd.getNamespaceId();
+        List<String> phones = cmd.getPhones() ;
+        FindUsersByPhonesResponse res = new FindUsersByPhonesResponse();
+        List<FindUsersByPhonesDTO> list = new ArrayList<FindUsersByPhonesDTO>();
+        res.setDtos(list);
+        //如果
+        if(namespaceId ==null || phones ==null||phones.size()<1 ){
+            res.setErrorMsg("namespaceId is null");
+            return res ;
+        }
+        if( phones ==null||phones.size()<1 ){
+            res.setErrorMsg("phones is null");
+            return res ;
+        }
+        for(String phone : phones){
+            FindUsersByPhonesDTO dto = new FindUsersByPhonesDTO() ;
+            dto.setPhone(phone);
+            UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+            if (userIdentifier != null) {
+                User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+                if (user != null) {
+                    user.setIdentifierToken(userIdentifier.getIdentifierToken());
+                    UserDTO userDTO = ConvertHelper.convert(user, UserDTO.class);
+                    //查询有结果，保存
+                    dto.setUserDTO(userDTO);
+                    dto.setResult(TrueOrFalseCode.TRUE.getCode());
+                }else  {
+                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+                }
+            } else if(TrueOrFalseCode.FALSE.getCode().equals(cmd.getClear())){//若是不消除查询失败的数据才返回这些
+                    dto.setResult(TrueOrFalseCode.FALSE.getCode());
+            }
+            if(TrueOrFalseCode.TRUE.getCode().equals(dto.getResult()) //结果为查询有结果的
+                    || (TrueOrFalseCode.FALSE.getCode().equals(dto.getResult()) //或查询无结果但清除标记为否的才返回
+                    && !TrueOrFalseCode.TRUE.getCode().equals(cmd.getClear()))){
+                res.getDtos().add(dto);
+            }
+        }
+        return res;
+    }
+    /*******************统一用户同步数据**********************/
+    @KafkaListener(topics = "user-create-event")
+    public void syncCreateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-create-event ] {}", record.value());
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                //在接收到kafka的消息之前，core server可能已经向统一用户拉取数据了，
+                //所以这里加个判断，是新增还是更新.
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                User existsUser = this.userProvider.findUserById(user.getId());
+                if (existsUser != null) {
+                    this.userProvider.updateUserFromUnite(user);
+                }else {
+                    this.userProvider.createUserFromUnite(user);
+                }
+            }
+        }
+    }
 
+    @KafkaListener(topics = "user-update-event")
+    // @KafkaListener(topics = "user-update-event")
+    public void syncUpdateUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-update-event ] {}", record.value());
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.updateUserFromUnite(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.updateUserFromUnite(user);
+            }
+        }
+    }
+
+    @KafkaListener(topics = "user-delete-event")
+    public void syncDeleteUser(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-delete-event ] {}", record.value());
+        User user =  (User) StringHelper.fromJsonString(record.value(), User.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(user.getNamespaceId())) {
+                this.userProvider.deleteUser(user);
+            }
+        }
+
+    }
+
+    @KafkaListener(topics = "userIdentifier-create-event")
+    public void syncCreateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-create-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                UserIdentifier existsIdentifier = this.userProvider.findClaimingIdentifierByToken(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken());
+                if (existsIdentifier != null) {
+                    this.userProvider.updateIdentifierFromUnite(userIdentifier);
+                }else {
+                    this.userProvider.createIdentifierFromUnite(userIdentifier);
+                }
+            }
+        }
+
+    }
+
+    @KafkaListener(topics = "userIdentifier-update-event")
+    // @KafkaListener(topics = "userIdentifier-update-event")
+    public void syncUpdateUserIdentifier(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ userIdentifier-update-event ] {}", record.value());
+        UserIdentifier userIdentifier =  (UserIdentifier) StringHelper.fromJsonString(record.value(), UserIdentifier.class);
+        Namespace namespace = this.namespaceProvider.findNamespaceById(2);
+        if (namespace != null) {
+            if (namespace.getId().equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
+            }
+        }else {
+            if (!Integer.valueOf(2).equals(userIdentifier.getNamespaceId())) {
+                this.userProvider.updateIdentifierFromUnite(userIdentifier);
+            }
+        }
+    }
+
+
+    /**
+	 * 获取商户跳转URL
+     * @param cmd
+     * @return
+     */
+    @Override
+    public GetPrintMerchantUrlResponse getPrintMerchantUrl(GetPrintMerchantUrlCommand cmd) {
+    	GetPrintMerchantUrlResponse response = new GetPrintMerchantUrlResponse();
+        String homeUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(),"prmt.merchant.home.url","http://promo-alpha.zuolin.com/prmt");
+		String systemId = configProvider.getValue(UserContext.getCurrentNamespaceId(), PaymentConstants.KEY_SYSTEM_ID, "");
+		String infoUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.info.url", "${mercharntHomeUrl}/merchantLogin/logon/login?sourceUrl=${sourceUrl}&systemId=${systemId}");
+		String sourceUrl = configProvider.getValue(UserContext.getCurrentNamespaceId(), "prmt.merchant.url", "${mercharntHomeUrl}/merchant/getMerchantDetail?enterpriseId=${enterpriseId}&ns=${namespaceId}");
+
+        Map<String, String> sourceUrlParam= new HashMap<String, String>();
+        sourceUrlParam.put("merchantHomeUrl", homeUrl);
+        sourceUrlParam.put("enterpriseId", String.valueOf(cmd.getEnterpriseId()));
+        sourceUrlParam.put("namespaceId", String.valueOf(UserContext.getCurrentNamespaceId()));
+        sourceUrl = StringHelper.interpolate(sourceUrl,sourceUrlParam);
+        Map<String, String> infoUrlParam = new HashMap<String, String>();
+        infoUrlParam.put("merchantHomeUrl", homeUrl);
+        infoUrlParam.put("systemId", systemId);
+        try {
+        	infoUrlParam.put("sourceUrl", URLEncoder.encode(sourceUrl, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+        response.setInfoUrl(StringHelper.interpolate(infoUrl,infoUrlParam));
+        return response;
+    }
+    @KafkaListener(topics = "user-kickoff")
+    public void userKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-kickoff ] {}", record.value());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> dataMap = (Map<String, Object>) StringHelper.fromJsonString(record.value(), Map.class);
+        Double namespaceId = (Double) dataMap.get("namespaceId");
+        String loginToken = (String) dataMap.get("loginToken");
+
+        kickoffService.kickoff(namespaceId.intValue(), (LoginToken) StringHelper.fromJsonString(loginToken, LoginToken.class));
+    }
+
+    @KafkaListener(topics = "user-device-kickoff")
+    public void userDeviceKickoffMessage(ConsumerRecord<?, String> record) {
+        LOGGER.debug("received message [ user-device-kickoff ] {}", record.value());
+
+        UserLogin newLogin = (UserLogin) StringHelper.fromJsonString(record.value(), UserLogin.class);
+        kickoffLoginByDevice(newLogin);
+    }
 }

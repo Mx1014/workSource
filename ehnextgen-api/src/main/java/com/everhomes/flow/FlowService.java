@@ -483,7 +483,13 @@ public interface FlowService {
      */
     FlowCaseTree getProcessingFlowCaseTree(Long flowCaseId);
 
-    FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
+    List<FlowEventLog> getNodeEnterLogs(Long flowCaseId, Long flowNodeId, Long stepCount);
+
+    List<FlowEventLog> getNodeEnterLogsIgnoreCompleteFlag(Long flowCaseId, Long flowNodeId);
+
+    List<FlowNodeLogDTO> getStepTrackerLogs(List<FlowCase> allFlowCase);
+
+	FlowEvaluateItemDTO createFlowEvaluateItem(CreateFlowEvaluateItemCommand cmd);
 
     void deleteFlowEvaluateItem(DeleteFlowEvaluateItemCommand cmd);
 

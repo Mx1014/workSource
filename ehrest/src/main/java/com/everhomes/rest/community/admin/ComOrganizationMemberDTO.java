@@ -38,6 +38,7 @@ import java.util.List;
  *     <li>operatorName: 操作人名字</li>
  *     <li>operatorPhone: 操作人电话</li>
  *     <li>operateType: 认证方式,请参考{@link com.everhomes.rest.community.admin.OperateType}</li>
+ *     <li>authFlag: 是否有审核权限, 请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ComOrganizationMemberDTO {
@@ -78,6 +79,16 @@ public class ComOrganizationMemberDTO {
     private String operatorName;
     private String operatorPhone;
     private Byte operateType;
+    private Byte authFlag;
+
+    public Byte getAuthFlag() {
+        return authFlag;
+    }
+
+    public void setAuthFlag(Byte authFlag) {
+        this.authFlag = authFlag;
+    }
+
     public Long getId() {
         return id;
     }

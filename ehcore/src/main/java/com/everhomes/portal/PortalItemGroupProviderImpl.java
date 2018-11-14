@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.launchpad.Widget;
 import com.everhomes.rest.portal.PortalItemGroupStatus;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
@@ -139,7 +140,17 @@ public class PortalItemGroupProviderImpl implements PortalItemGroupProvider {
 				.and(Tables.EH_PORTAL_ITEM_GROUPS.STYLE.eq(style))
 				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
 	}
-	
+
+	@Override
+	public List<PortalItemGroup> listBannerItemGroupByAppId(String instanceConfig) {
+		return getReadOnlyContext().select().from(Tables.EH_PORTAL_ITEM_GROUPS)
+				.where(Tables.EH_PORTAL_ITEM_GROUPS.INSTANCE_CONFIG.like(instanceConfig))
+				.and(Tables.EH_PORTAL_ITEM_GROUPS.WIDGET.eq(Widget.BANNERS.getCode()))
+                .and(Tables.EH_PORTAL_ITEM_GROUPS.STATUS.eq(PortalItemGroupStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_PORTAL_ITEM_GROUPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, PortalItemGroup.class));
+	}
+
 	private EhPortalItemGroupsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

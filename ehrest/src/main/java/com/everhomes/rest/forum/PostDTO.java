@@ -72,6 +72,7 @@ import com.everhomes.util.StringHelper;
  *	   <li>stickTime: 置顶时间</li>
  *	   <li>moduleType: 模块类型，现在所有的帖子都要往帖子表里写，通过判断条件已经很难区分是哪里来的帖子了，现在由创建帖子的时候带来。 参考{@link ForumModuleType}</li>
  *     <li>moduleCategoryId: 业务模块的入口id</li>
+ *     <li>creatorFlag: 是否为创建者，请参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class PostDTO {
@@ -201,6 +202,26 @@ public class PostDTO {
     private Byte moduleType;
 
     private Long moduleCategoryId;
+
+    private Byte creatorFlag;
+
+    public Byte getCreatorFlag() {
+        return creatorFlag;
+    }
+
+    public void setCreatorFlag(Byte creatorFlag) {
+        this.creatorFlag = creatorFlag;
+    }
+
+    private Long categoryId;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getMinQuantity() {
         return minQuantity;

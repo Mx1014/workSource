@@ -139,6 +139,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session,
         Throwable exception) throws Exception {
+        if(session.isOpen()){  
+            session.close();  
+        }  
         unregisterSession(session);
         this.sessionStatsMap.remove(session);
     }

@@ -7,15 +7,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.asset.app.AssetAppService;
+import com.everhomes.asset.chargingitem.AssetChargingItemService;
+import com.everhomes.asset.group.AssetGroupService;
+import com.everhomes.asset.standard.AssetStandardService;
+import com.everhomes.asset.statistic.AssetStatisticService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -24,46 +26,69 @@ import com.everhomes.order.PaymentOrderRecord;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByBuildingTotalCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityResponse;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityTotalCmd;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
 public class AssetController extends ControllerBase {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
 	@Autowired
 	private AssetService assetService;
+	
+	@Autowired
+	private AssetGroupService assetGroupService;
+	
+	@Autowired
+	private AssetChargingItemService assetChargingItemService;
+	
+	@Autowired
+	private AssetStandardService assetStandardService;
+	
+	@Autowired
+	private AssetAppService assetAppService;
+	
+	@Autowired
+	private AssetStatisticService assetStatisticService;
 
-	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
-	/**
-	 * <b>URL: /asset/listAssetBillTemplate</b>
-	 * <p>
-	 * 查用户的资产账单模板字段列表
-	 * </p>
-	 * 
-	 * @return 资产账单模板字段列表
-	 */
-	@RequestMapping("listAssetBillTemplate")
-	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
-	public RestResponse listAssetBillTemplate(@Valid ListAssetBillTemplateCommand cmd) {
-		List<AssetBillTemplateFieldDTO> dtos = this.assetService.listAssetBillTemplate(cmd);
-
-		RestResponse response = new RestResponse(dtos);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
+//	// 根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
+//	/**
+//	 * <b>URL: /asset/listAssetBillTemplate</b>
+//	 * <p>
+//	 * 查用户的资产账单模板字段列表
+//	 * </p>
+//	 * 
+//	 * @return 资产账单模板字段列表
+//	 */
+//	@RequestMapping("listAssetBillTemplate")
+//	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
+//	public RestResponse listAssetBillTemplate(@Valid ListAssetBillTemplateCommand cmd) {
+//		List<AssetBillTemplateFieldDTO> dtos = this.assetService.listAssetBillTemplate(cmd);
+//
+//		RestResponse response = new RestResponse(dtos);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
 	/**
 	 * <p>获取公司物业账单统计信息（一些老旧的项目还在用，如：张江高科）</p>
 	 * <b>URL: /asset/getAssetBillStat</b>
@@ -93,66 +118,66 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-	// 导出账单
-	/**
-	 * <b>URL: /asset/exportAssetBills</b>
-	 * <p>
-	 * 导出账单
-	 * </p>
-	 */
-	@RequestMapping("exportAssetBills")
-	public HttpServletResponse exportAssetBills(@Valid ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
-
-		HttpServletResponse commandResponse = assetService.exportAssetBills(cmd, response);
-
-		return commandResponse;
-	}
-
-	// 批量上传账单（与模板字段按字段展示名对应）
-	/**
-	 * <b>URL: /asset/importAssetBills</b>
-	 * <p>
-	 * 批量上传账单（与用户当前设置的模板字段按字段展示名对应）
-	 * </p>
-	 */
-	@RequestMapping("importAssetBills")
-	@RestReturn(value = ImportDataResponse.class)
-	public RestResponse importAssetBills(@Valid ImportOwnerCommand cmd,
-			@RequestParam(value = "attachment") MultipartFile[] files) {
-		User manaUser = UserContext.current().getUser();
-		Long userId = manaUser.getId();
-		if (null == files || null == files[0]) {
-			LOGGER.error("files is null。userId=" + userId);
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
-					"files is null");
-		}
-		ImportDataResponse importDataResponse = this.assetService.importAssetBills(cmd, files[0], userId);
-		RestResponse response = new RestResponse(importDataResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	// 新增账单
-	/**
-	 * <b>URL: /asset/creatAssetBill</b>
-	 * <p>
-	 * 新增账单
-	 * </p>
-	 */
-	@RequestMapping("creatAssetBill")
-	@RestReturn(value = AssetBillTemplateValueDTO.class)
-	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
-
-		AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
-
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
+//
+//	// 导出账单
+//	/**
+//	 * <b>URL: /asset/exportAssetBills</b>
+//	 * <p>
+//	 * 导出账单
+//	 * </p>
+//	 */
+//	@RequestMapping("exportAssetBills")
+//	public HttpServletResponse exportAssetBills(@Valid ListSimpleAssetBillsCommand cmd, HttpServletResponse response) {
+//
+//		HttpServletResponse commandResponse = assetService.exportAssetBills(cmd, response);
+//
+//		return commandResponse;
+//	}
+//
+//	// 批量上传账单（与模板字段按字段展示名对应）
+//	/**
+//	 * <b>URL: /asset/importAssetBills</b>
+//	 * <p>
+//	 * 批量上传账单（与用户当前设置的模板字段按字段展示名对应）
+//	 * </p>
+//	 */
+//	@RequestMapping("importAssetBills")
+//	@RestReturn(value = ImportDataResponse.class)
+//	public RestResponse importAssetBills(@Valid ImportOwnerCommand cmd,
+//			@RequestParam(value = "attachment") MultipartFile[] files) {
+//		User manaUser = UserContext.current().getUser();
+//		Long userId = manaUser.getId();
+//		if (null == files || null == files[0]) {
+//			LOGGER.error("files is null。userId=" + userId);
+//			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+//					"files is null");
+//		}
+//		ImportDataResponse importDataResponse = this.assetService.importAssetBills(cmd, files[0], userId);
+//		RestResponse response = new RestResponse(importDataResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	// 新增账单
+//	/**
+//	 * <b>URL: /asset/creatAssetBill</b>
+//	 * <p>
+//	 * 新增账单
+//	 * </p>
+//	 */
+//	@RequestMapping("creatAssetBill")
+//	@RestReturn(value = AssetBillTemplateValueDTO.class)
+//	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
+//
+//		AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
+//
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
 	// 查看账单
 	/**
 	 * <b>URL: /asset/findAssetBill</b>
@@ -169,127 +194,126 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-	// 编辑账单
-	/**
-	 * <b>URL: /asset/updateAssetBill</b>
-	 * <p>
-	 * 编辑账单
-	 * </p>
-	 */
-	@RequestMapping("updateAssetBill")
-	@RestReturn(value = AssetBillTemplateValueDTO.class)
-	public RestResponse updateAssetBill(@Valid UpdateAssetBillCommand cmd) {
-
-		AssetBillTemplateValueDTO bill = assetService.updateAssetBill(cmd);
-
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	// 一键催缴
-	/**
-	 * <b>URL: /asset/notifyUnpaidBillsContact</b>
-	 * <p>
-	 * 一键催缴
-	 * </p>
-	 */
-	@RequestMapping("notifyUnpaidBillsContact")
-	@RestReturn(value = String.class)
-	public RestResponse notifyUnpaidBillsContact(@Valid NotifyUnpaidBillsContactCommand cmd) {
-
-		assetService.notifyUnpaidBillsContact(cmd);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	// 批量设置已缴
-	// 批量设置待缴
-	/**
-	 * <b>URL: /asset/setBillsPaid</b>
-	 * <p>
-	 * 批量设置已缴
-	 * </p>
-	 */
-	@RequestMapping("setBillsPaid")
-	@RestReturn(value = String.class)
-	public RestResponse setBillsPaid(@Valid BillIdListCommand cmd) {
-
-		assetService.setBillsStatus(cmd, AssetBillStatus.PAID);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /asset/setBillsUnpaid</b>
-	 * <p>
-	 * 批量设置待缴
-	 * </p>
-	 */
-	@RequestMapping("setBillsUnpaid")
-	@RestReturn(value = String.class)
-	public RestResponse setBillsUnpaid(@Valid BillIdListCommand cmd) {
-
-		assetService.setBillsStatus(cmd, AssetBillStatus.UNPAID);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	// 删除账单
-	/**
-	 * <b>URL: /asset/deleteBill</b>
-	 * <p>
-	 * 删除账单
-	 * </p>
-	 */
-//	@RequestMapping("deleteBill")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
 //
-//		assetService.deleteBill(cmd);
+//	// 编辑账单
+//	/**
+//	 * <b>URL: /asset/updateAssetBill</b>
+//	 * <p>
+//	 * 编辑账单
+//	 * </p>
+//	 */
+//	@RequestMapping("updateAssetBill")
+//	@RestReturn(value = AssetBillTemplateValueDTO.class)
+//	public RestResponse updateAssetBill(@Valid UpdateAssetBillCommand cmd) {
+//
+//		AssetBillTemplateValueDTO bill = assetService.updateAssetBill(cmd);
+//
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	// 一键催缴
+//	/**
+//	 * <b>URL: /asset/notifyUnpaidBillsContact</b>
+//	 * <p>
+//	 * 一键催缴
+//	 * </p>
+//	 */
+//	@RequestMapping("notifyUnpaidBillsContact")
+//	@RestReturn(value = String.class)
+//	public RestResponse notifyUnpaidBillsContact(@Valid NotifyUnpaidBillsContactCommand cmd) {
+//
+//		assetService.notifyUnpaidBillsContact(cmd);
 //
 //		RestResponse response = new RestResponse();
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-
-	// 设置用户模板显示顺序
-	// 设置用户模板
-	/**
-	 * <b>URL: /asset/updateAssetBillTemplate</b>
-	 * <p>
-	 * 设置用户的资产账单模板
-	 * </p>
-	 * 
-	 * @return 资产账单模板字段列表
-	 */
-	@RequestMapping("updateAssetBillTemplate")
-	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
-	public RestResponse updateAssetBillTemplate(@Valid UpdateAssetBillTemplateCommand cmd) {
-		List<AssetBillTemplateFieldDTO> dtos = this.assetService.updateAssetBillTemplate(cmd);
-
-		RestResponse response = new RestResponse(dtos);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
+//
+//	// 批量设置已缴
+//	// 批量设置待缴
+//	/**
+//	 * <b>URL: /asset/setBillsPaid</b>
+//	 * <p>
+//	 * 批量设置已缴
+//	 * </p>
+//	 */
+//	@RequestMapping("setBillsPaid")
+//	@RestReturn(value = String.class)
+//	public RestResponse setBillsPaid(@Valid BillIdListCommand cmd) {
+//
+//		assetService.setBillsStatus(cmd, AssetBillStatus.PAID);
+//
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <b>URL: /asset/setBillsUnpaid</b>
+//	 * <p>
+//	 * 批量设置待缴
+//	 * </p>
+//	 */
+//	@RequestMapping("setBillsUnpaid")
+//	@RestReturn(value = String.class)
+//	public RestResponse setBillsUnpaid(@Valid BillIdListCommand cmd) {
+//
+//		assetService.setBillsStatus(cmd, AssetBillStatus.UNPAID);
+//
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	// 删除账单
+//	/**
+//	 * <b>URL: /asset/deleteBill</b>
+//	 * <p>
+//	 * 删除账单
+//	 * </p>
+//	 */
+////	@RequestMapping("deleteBill")
+////	@RestReturn(value = String.class)
+////	public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
+////
+////		assetService.deleteBill(cmd);
+////
+////		RestResponse response = new RestResponse();
+////		response.setErrorCode(ErrorCodes.SUCCESS);
+////		response.setErrorDescription("OK");
+////		return response;
+////	}
+//
+//	// 设置用户模板显示顺序
+//	// 设置用户模板
+//	/**
+//	 * <b>URL: /asset/updateAssetBillTemplate</b>
+//	 * <p>
+//	 * 设置用户的资产账单模板
+//	 * </p>
+//	 * 
+//	 * @return 资产账单模板字段列表
+//	 */
+//	@RequestMapping("updateAssetBillTemplate")
+//	@RestReturn(value = AssetBillTemplateFieldDTO.class, collection = true)
+//	public RestResponse updateAssetBillTemplate(@Valid UpdateAssetBillTemplateCommand cmd) {
+//		List<AssetBillTemplateFieldDTO> dtos = this.assetService.updateAssetBillTemplate(cmd);
+//
+//		RestResponse response = new RestResponse(dtos);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
 	/**
 	 * <b>URL: /asset/checkTokenRegister</b>
-	 * <p>检查手机号是否是注册用户
-	 * </p>
+	 * <p>检查手机号是否是注册用户</p>
 	 * @return
 	 */
 	@RequestMapping("checkTokenRegister")
@@ -300,25 +324,25 @@ public class AssetController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-
-	/**
-	 * <b>URL: /asset/notifyTimes</b>
-	 * <p>
-	 * 本月已催缴次数
-	 * </p>
-	 * 
-	 * @return
-	 */
-	@RequestMapping("notifyTimes")
-	@RestReturn(value = NotifyTimesResponse.class)
-	public RestResponse notifyTimes(@Valid ImportOwnerCommand cmd) {
-
-		RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
+//
+//	/**
+//	 * <b>URL: /asset/notifyTimes</b>
+//	 * <p>
+//	 * 本月已催缴次数
+//	 * </p>
+//	 * 
+//	 * @return
+//	 */
+//	@RequestMapping("notifyTimes")
+//	@RestReturn(value = NotifyTimesResponse.class)
+//	public RestResponse notifyTimes(@Valid ImportOwnerCommand cmd) {
+//
+//		RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
 	/**
 	 * <p>获取用户为管理员的公司列表（一些老旧的项目还在用，如：张江高科）</p>
 	 * <b>URL: /asset/listOrganizationsByPmAdmin</b>
@@ -333,7 +357,9 @@ public class AssetController extends ControllerBase {
 		return response;
 	}
 
+	//=============================================================================
 	// wentian's controlls for payment module（从这里开始的接口都是基于新的eh_payment_*表开头的）
+	//=============================================================================
 
 	/**
 	 * <p>获取园区启用的收费项目列表</p>
@@ -342,7 +368,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listAllChargingItems")
 	@RestReturn(value = ListChargingItemsDTO.class, collection = true)
 	public RestResponse listAllChargingItems(OwnerIdentityCommand cmd) {
-		List<ListChargingItemsDTO> list = assetService.listChargingItems(cmd);
+		List<ListChargingItemsDTO> list = assetChargingItemService.listAllChargingItems(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -384,7 +410,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("configChargingItems")
 	@RestReturn(value = String.class)
 	public RestResponse configChargingItems(ConfigChargingItemsCommand cmd) {
-		assetService.configChargingItems(cmd);
+		assetChargingItemService.configChargingItems(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -412,7 +438,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listOnlyChargingStandards")
 	@RestReturn(value = ListChargingStandardsResponse.class, collection = true)
 	public RestResponse listOnlyChargingStandards(ListChargingStandardsCommand cmd) {
-		ListChargingStandardsResponse resp = assetService.listOnlyChargingStandards(cmd);
+		ListChargingStandardsResponse resp = assetStandardService.listOnlyChargingStandards(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -426,7 +452,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse createChargingStandard(CreateChargingStandardCommand cmd) {
-		assetService.createChargingStandard(cmd);
+		assetStandardService.createChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -440,7 +466,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyChargingStandard")
 	@RestReturn(value = String.class)
 	public RestResponse modifyChargingStandard(ModifyChargingStandardCommand cmd) {
-		assetService.modifyChargingStandard(cmd);
+		assetStandardService.modifyChargingStandard(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -454,7 +480,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("getChargingStandardDetail")
 	@RestReturn(value = GetChargingStandardDTO.class)
 	public RestResponse getChargingStandardDetail(GetChargingStandardCommand cmd) {
-		GetChargingStandardDTO dto = assetService.getChargingStandardDetail(cmd);
+		GetChargingStandardDTO dto = assetStandardService.getChargingStandardDetail(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -468,7 +494,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteChargingStandard")
 	@RestReturn(value = DeleteChargingStandardDTO.class)
 	public RestResponse deleteChargingStandard(DeleteChargingStandardCommand cmd) {
-		DeleteChargingStandardDTO dto = assetService.deleteChargingStandard(cmd);
+		DeleteChargingStandardDTO dto = assetStandardService.deleteChargingStandard(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -496,7 +522,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillGroups")
 	@RestReturn(value = ListBillGroupsDTO.class, collection = true)
 	public RestResponse listBillGroups(OwnerIdentityCommand cmd) {
-		List<ListBillGroupsDTO> list = assetService.listBillGroups(cmd);
+		List<ListBillGroupsDTO> list = assetGroupService.listBillGroups(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -510,7 +536,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("createBillGroup")
 	@RestReturn(value = String.class)
 	public RestResponse createBillGroup(CreateBillGroupCommand cmd) {
-		assetService.createBillGroup(cmd);
+		assetGroupService.createBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -524,7 +550,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("modifyBillGroup")
 	@RestReturn(value = String.class)
 	public RestResponse modifyBillGroup(ModifyBillGroupCommand cmd) {
-		assetService.modifyBillGroup(cmd);
+		assetGroupService.modifyBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -552,7 +578,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("deleteBillGroup")
 	@RestReturn(value = DeleteBillGroupReponse.class)
 	public RestResponse deleteBillGroup(DeleteBillGroupCommand cmd) {
-		DeleteBillGroupReponse res = assetService.deleteBillGroup(cmd);
+		DeleteBillGroupReponse res = assetGroupService.deleteBillGroup(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -594,7 +620,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("addOrModifyRuleForBillGroup")
 	@RestReturn(value = AddOrModifyRuleForBillGroupResponse.class)
 	public RestResponse addOrModifyRuleForBillGroup(AddOrModifyRuleForBillGroupCommand cmd) {
-		assetService.addOrModifyRuleForBillGroup(cmd);
+		assetGroupService.addOrModifyRuleForBillGroup(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -870,11 +896,25 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("showBillForClient")
 	@RestReturn(value = ShowBillForClientDTO.class)
 	public RestResponse showBillForClient(ClientIdentityCommand cmd) {
-		ShowBillForClientDTO dto = assetService.showBillForClient(cmd);
+		ShowBillForClientDTO dto = assetAppService.showBillForClient(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
+	}
+	
+	/**
+	 * <b>URL: /asset/functionDisableList</b>
+	 * <p>功能失效列表</p>
+	 */
+	@RequestMapping("functionDisableList")
+	@RestReturn(value = FunctionDisableListDto.class)
+	public RestResponse functionDisableList(FunctionDisableListCommand cmd) {
+		FunctionDisableListDto dto = assetAppService.functionDisableList(cmd);
+		RestResponse restResponse = new RestResponse(dto);
+		restResponse.setErrorCode(ErrorCodes.SUCCESS);
+		restResponse.setErrorDescription("OK");
+		return restResponse;
 	}
 
 	/**
@@ -887,7 +927,7 @@ public class AssetController extends ControllerBase {
 		if (cmd.getNamespaceId() != UserContext.getCurrentNamespaceId()) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
-		List<ShowBillForClientV2DTO> dtos = assetService.showBillForClientV2(cmd);
+		List<ShowBillForClientV2DTO> dtos = assetAppService.showBillForClientV2(cmd);
 		RestResponse response = new RestResponse(dtos);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -901,7 +941,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listAllBillsForClient")
 	@RestReturn(value = ListAllBillsForClientDTO.class, collection = true)
 	public RestResponse listAllBillsForClient(ListAllBillsForClientCommand cmd) {
-		List<ListAllBillsForClientDTO> dtos = assetService.listAllBillsForClient(cmd);
+		List<ListAllBillsForClientDTO> dtos = assetAppService.listAllBillsForClient(cmd);
 		RestResponse response = new RestResponse(dtos);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -915,7 +955,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("showBillDetailForClient")
 	@RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
 	public RestResponse showBillDetailForClient(BillIdCommand cmd) {
-		ShowBillDetailForClientResponse res = assetService.getBillDetailForClient(cmd);
+		ShowBillDetailForClientResponse res = assetAppService.getBillDetailForClient(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -929,7 +969,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillDetailOnDateChange")
 	@RestReturn(value = ShowBillDetailForClientResponse.class, collection = true)
 	public RestResponse listBillDetailOnDateChange(ListBillDetailOnDateChangeCommand cmd) {
-		ShowBillDetailForClientResponse res = assetService.listBillDetailOnDateChange(cmd);
+		ShowBillDetailForClientResponse res = assetAppService.listBillDetailOnDateChange(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1109,20 +1149,6 @@ public class AssetController extends ControllerBase {
 		RestResponse restResponse = new RestResponse(res);
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return restResponse;
-	}
-
-	/**
-	 * <b>URL: /asset/functionDisableList</b>
-	 * <p>功能失效列表</p>
-	 */
-	@RequestMapping("functionDisableList")
-	@RestReturn(value = FunctionDisableListDto.class)
-	public RestResponse functionDisableList(FunctionDisableListCommand cmd) {
-		FunctionDisableListDto dto = assetService.functionDisableList(cmd);
-		RestResponse restResponse = new RestResponse(dto);
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		restResponse.setErrorDescription("OK");
 		return restResponse;
 	}
 
@@ -1376,7 +1402,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("listBillGroupsForEnt")
 	@RestReturn(value = ListBillGroupsDTO.class, collection = true)
 	public RestResponse listBillGroupsForEnt(OwnerIdentityCommand cmd) {
-		List<ListBillGroupsDTO> list = assetService.listBillGroupsForEnt(cmd);
+		List<ListBillGroupsDTO> list = assetGroupService.listBillGroupsForEnt(cmd);
 		RestResponse response = new RestResponse(list);
 		response.setErrorDescription("OK");
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1466,20 +1492,6 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		return response;
 	}
-
-	/**
-	 * <p>物业缴费V6.6（对接统一账单） ：业务应用与缴费的关联关系表历史数据迁移</p>
-	 * <b>URL: /asset/tranferAssetMappings</b>
-	 */
-	@RequestMapping("tranferAssetMappings")
-	@RestReturn(value = String.class)
-	public RestResponse tranferAssetMappings(HttpServletResponse response) {
-		assetService.tranferAssetMappings();
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return restResponse;
-	}
 	
 	/**
      * <p>新增收费项配置（物业缴费V6.0（UE优化）-30557）</p>
@@ -1523,5 +1535,209 @@ public class AssetController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+    }
+    
+    /**
+	 * <p>创建统一账单接口</p>
+	 * <b>URL: /asset/createGeneralBill</b>
+	 */
+	@RequestMapping("createGeneralBill")
+	@RestReturn(value = ListGeneralBillsResponse.class, collection = false)
+	@RequireAuthentication(value = false)
+	public RestResponse createGeneralBill(CreateGeneralBillCommand cmd) {
+		List<ListGeneralBillsDTO> dtos = assetService.createGeneralBill(cmd);
+		ListGeneralBillsResponse listGeneralBillsResponse = new ListGeneralBillsResponse();
+		listGeneralBillsResponse.setListGeneralBillsDTOs(dtos);
+	    RestResponse response = new RestResponse(listGeneralBillsResponse);
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+	 * <p>取消统一账单接口</p>
+	 * <b>URL: /asset/cancelGeneralBill</b>
+	 */
+	@RequestMapping("cancelGeneralBill")
+	@RestReturn(value = String.class)
+	@RequireAuthentication(value = false)
+	public RestResponse cancelGeneralBill(CancelGeneralBillCommand cmd) {
+		assetService.cancelGeneralBill(cmd);
+	    RestResponse response = new RestResponse();
+	    response.setErrorDescription("OK");
+	    response.setErrorCode(ErrorCodes.SUCCESS);
+	    return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunity")
+	@RestReturn(value = ListBillStatisticByCommunityResponse.class)
+	public RestResponse listBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		ListBillStatisticByCommunityResponse res = assetStatisticService.listBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("listBillStatisticByBuilding")
+	@RestReturn(value = ListBillStatisticByBuildingResponse.class)
+	public RestResponse listBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		ListBillStatisticByBuildingResponse res = assetStatisticService.listBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目-合计</p>
+	 * <b>URL: /asset/listBillStatisticByCommunityTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByCommunityTotal")
+	@RestReturn(value = ListBillStatisticByCommunityDTO.class)
+	public RestResponse listBillStatisticByCommunityTotal(ListBillStatisticByCommunityTotalCmd cmd) {
+		ListBillStatisticByCommunityDTO dto = assetStatisticService.listBillStatisticByCommunityTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇-合计</p>
+	 * <b>URL: /asset/listBillStatisticByBuildingTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByBuildingTotal")
+	@RestReturn(value = ListBillStatisticByBuildingDTO.class)
+	public RestResponse listBillStatisticByBuildingTotal(ListBillStatisticByBuildingTotalCmd cmd) {
+		ListBillStatisticByBuildingDTO dto = assetStatisticService.listBillStatisticByBuildingTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-分页数据</p>
+	 * <b>URL: /asset/listBillStatisticByAddress</b>
+	 */
+	@RequestMapping("listBillStatisticByAddress")
+	@RestReturn(value = ListBillStatisticByAddressResponse.class)
+	public RestResponse listBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		ListBillStatisticByAddressResponse res = assetStatisticService.listBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源-合计</p>
+	 * <b>URL: /asset/listBillStatisticByAddressTotal</b>
+	 */
+	@RequestMapping("listBillStatisticByAddressTotal")
+	@RestReturn(value = ListBillStatisticByAddressDTO.class)
+	public RestResponse listBillStatisticByAddressTotal(ListBillStatisticByAddressTotalCmd cmd) {
+		ListBillStatisticByAddressDTO dto = assetStatisticService.listBillStatisticByAddressTotal(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorDescription("OK");
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByCommunity</b>
+	 */
+	@RequestMapping("exportBillStatisticByCommunity")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByCommunity(ListBillStatisticByCommunityCmd cmd) {
+		assetStatisticService.exportBillStatisticByCommunity(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-楼宇 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByBuilding</b>
+	 */
+	@RequestMapping("exportBillStatisticByBuilding")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByBuilding(ListBillStatisticByBuildingCmd cmd) {
+		assetStatisticService.exportBillStatisticByBuilding(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <p>issue-38508 缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-房源 (导出对接下载中心)</p>
+	 * <b>URL: /asset/exportBillStatisticByAddress</b>
+	 */
+	@RequestMapping("exportBillStatisticByAddress")
+	@RestReturn(value = String.class)
+	public RestResponse exportBillStatisticByAddress(ListBillStatisticByAddressCmd cmd) {
+		assetStatisticService.exportBillStatisticByAddress(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+    /**
+     * <p>对接门禁：设置缴费门禁基础参数</p>
+     * <b>URL: /asset/setDoorAccessParam</b>
+     */
+    @RequestMapping("setDoorAccessParam")
+    @RestReturn(value = String.class)
+    public RestResponse setDoorAccessParam(@Valid SetDoorAccessParamCommand cmd) {
+		assetService.setDoorAccessParam(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    
+    /**
+     * <p>对接门禁：获取缴费门禁基础参数</p>
+     * <b>URL: /asset/getDoorAccessParam</b>
+     */
+    @RequestMapping("getDoorAccessParam")
+    @RestReturn(value=ListDoorAccessParamResponse.class)
+    public RestResponse createAuthBatch(@Valid GetDoorAccessParamCommand cmd) {
+        return new RestResponse(assetService.getDoorAccessParam(cmd));
+    }
+    /**
+     * <p>对接门禁：定时任务手动</p>
+     * <b>URL: /asset/excuteDoorAccessSchedule</b>
+     */
+    @RequestMapping("excuteDoorAccessSchedule")
+    @RestReturn(value=String.class)
+    public RestResponse excuteDoorAccessSchedule() {
+    	assetService.meterAutoReading(true);
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
+    /**
+     * <p>对接门禁：查询公司门禁状态</p>
+     * <b>URL: /asset/getDoorAccessInfo</b>
+     */
+    @RequestMapping("getDoorAccessInfo")
+    @RestReturn(value=String.class)
+    public RestResponse getDoorAccessInfo(@Valid GetDoorAccessInfoCommand cmd) {
+    	return new RestResponse(assetService.getDoorAccessInfo(cmd));
     }
 }

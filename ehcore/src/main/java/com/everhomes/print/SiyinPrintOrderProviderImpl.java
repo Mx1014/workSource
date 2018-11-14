@@ -2,18 +2,14 @@
 package com.everhomes.print;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.everhomes.paySDK.pojo.PayUserDTO;
-import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.OwnerType;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.util.RuntimeErrorException;
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Query;
 import org.jooq.SelectConditionStep;
 import org.jooq.UpdateConditionStep;
 import org.jooq.impl.DSL;
@@ -27,6 +23,11 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.paySDK.pojo.PayUserDTO;
+import com.everhomes.rest.general.order.GorderPayType;
+import com.everhomes.rest.order.ListBizPayeeAccountDTO;
+import com.everhomes.rest.order.OwnerType;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.print.PrintOrderLockType;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -34,10 +35,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintOrdersDao;
 import com.everhomes.server.schema.tables.pojos.EhSiyinPrintOrders;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.PascalCaseStrategy;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
@@ -189,14 +189,21 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId) {
+	public SiyinPrintOrder findUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId, String printerName) {
 		SelectConditionStep<?> query =  getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
-			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
+//			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG.eq(PrintOrderLockType.UNLOCKED.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
+		
+		if (!StringUtils.isBlank(printerName)) {
+			query.and(Tables.EH_SIYIN_PRINT_ORDERS.PRINTER_NAME.eq(printerName));
+		}
+		
+		query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc());
+		
 		LOGGER.info("findUnpaidUnlockedOrderByUserId sql = {}, param = {}.",query.getSQL(),query.getBindValues());
 		List<SiyinPrintOrder> list  = query.fetch()
 			.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
@@ -208,7 +215,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Override
 	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,
-			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize) {
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode, String payType) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(DSL.trueCondition());
 		Condition condition = null;
@@ -236,6 +243,18 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(orderStatus));
 		}
 		
+		if(payMode!=null){
+			if (payMode == GorderPayType.ENTERPRISE_PAY.getCode()){
+				List<Byte> modes = new ArrayList();
+				modes.add(GorderPayType.ENTERPRISE_PAID.getCode());
+				modes.add(GorderPayType.WAIT_FOR_ENTERPRISE_PAY.getCode());
+				query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.in(modes));
+			} else
+				query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAY_MODE.eq(payMode));
+		}
+		if(payType!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.PAID_TYPE.eq(payType));
+		}
 		if(keywords!=null){
 			condition = Tables.EH_SIYIN_PRINT_ORDERS.NICK_NAME.like("%"+keywords+"%");
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_COMPANY.like("%"+keywords+"%"));
@@ -248,6 +267,8 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		
 		LOGGER.info("listSiyinPrintOrderByOwners sql = {},param = {}",query.getSQL(),query.getBindValues());
+		
+		query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.desc());
 		
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
 				.fetch()
@@ -276,11 +297,19 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum) {
-		
+	public SiyinPrintOrder findSiyinPrintOrderByGeneralOrderId(String BizOrderNum) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 				.where(Tables.EH_SIYIN_PRINT_ORDERS.GENERAL_ORDER_ID.eq(BizOrderNum));
-		LOGGER.info("findSiyinPrintOrderByBizOrderNum sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		if(list!=null && list.size()>0)
+			return list.get(0);
+		return null;
+	}
+	
+	@Override
+	public SiyinPrintOrder findSiyinPrintOrderByGeneralBillId(String generalBillId) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.GENERAL_BILL_ID.eq(generalBillId));
 		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 		if(list!=null && list.size()>0)
 			return list.get(0);

@@ -2,6 +2,8 @@
 package com.everhomes.address;
 
 import com.everhomes.asset.AddressIdAndName;
+import com.everhomes.building.Building;
+import com.everhomes.community.Community;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.openapi.ContractBuildingMapping;
@@ -10,6 +12,7 @@ import com.everhomes.rest.address.ApartmentAbstractDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.GetApartmentNameByBuildingNameDTO;
 import com.everhomes.rest.community.ListApartmentsInCommunityCommand;
+import com.everhomes.rest.organization.pm.reportForm.ApartmentReportFormDTO;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -142,4 +145,44 @@ public interface AddressProvider {
 
     List<Long> listThirdPartRelatedAddresses(String code, List<String> addressIds);
     List<Address> findActiveApartmentsByBuildingId(Long buildingId);
+    
+    /**
+     * 根据第三方数据的id列表查询房源
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */ 
+    Address findApartmentByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询楼宇
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @param thirdPartyToken，第三方数据id
+     * @return
+     */
+    Building findBuildingByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+    /**
+     * 根据第三方数据的id列表查询园区
+     * @param thirdPartyType，对接第三方的名称，例如：瑞安CM就填“ruian_cm”
+     * @return
+     */
+    Community findCommunityByThirdPartyId(String thirdPartyType,String thirdPartyToken);
+	int getTotalApartmentCount();
+
+	List<ApartmentReportFormDTO> findActiveApartments(int startIndex, int pageSize);
+	
+	/**
+	 * 分页获取地址信息中城市ID不在eh_regions表里的数据，这些数据都是有问题的，需要修复；
+	 * @param namespaceId 域空间ID
+	 * @param pageAnchor 分页锚点
+	 * @param pageSize 每页数量
+	 * @return 地址数据
+	 */
+	List<Address> listAddressesOfInvalidCity(Integer namespaceId, Long pageAnchor, Integer pageSize);
+	
+	/**
+	 * 更新地址信息中的城市ID，为了减少干扰，只更换城市ID
+	 * @param addressId 地址ID
+	 * @param cityId 城市ID
+	 */
+	void updateAddressOfCityId(Long addressId, Long cityId);
 }

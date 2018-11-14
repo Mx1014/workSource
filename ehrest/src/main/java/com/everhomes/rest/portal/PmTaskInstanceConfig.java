@@ -30,6 +30,8 @@ public class PmTaskInstanceConfig {
 
 	private Byte bgAgentSwitch;
 
+	private Long appId;
+
 	public Long getTaskCategoryId() {
 		return taskCategoryId;
 	}
@@ -84,6 +86,14 @@ public class PmTaskInstanceConfig {
 
 	public void setBgAgentSwitch(Byte bgAgentSwitch) {
 		this.bgAgentSwitch = bgAgentSwitch;
+	}
+
+	public Long getAppId() {
+		return appId;
+	}
+
+	public void setAppId(Long appId) {
+		this.appId = appId;
 	}
 
 	@Override

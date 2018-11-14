@@ -123,7 +123,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             init();
         }
     }
-    
+
     private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
         JSONObject param = new JSONObject();
         param.put("projectId", projectId);
@@ -135,10 +135,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         if(entity.isSuccess()) {
             EbeiServiceType type = entity.getData();
 //			List<EbeiServiceType> types = type.getItems();
-            type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
+            type.setServiceId(String.valueOf(1));
             List<EbeiServiceType> types;
 
-            if (null == parentId || PmTaskHandle.EBEI_TASK_CATEGORY == parentId) {
+            if (null == parentId || 1L == parentId) {
                 types = type.getItems();
             }else {
                 String mappingId = getMappingIdByCategoryId(parentId);
@@ -178,7 +178,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         CategoryDTO dto = new CategoryDTO();
         dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
         String parentId = ebeiServiceType.getParentId();
-        dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
+        dto.setParentId("".equals(parentId)?1:getCategoryIdByMapping(parentId));
         dto.setName(ebeiServiceType.getServiceName());
         dto.setIsSupportDelete((byte)0);
 
@@ -255,7 +255,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         } catch (IOException e) {
             LOGGER.error("Pmtask request error, param={}", param, e);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                     "Pmtask request error.");
         }finally {
             if (null != response) {
@@ -355,7 +355,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 return dto;
             }
         }
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
     }
 
@@ -376,7 +376,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             }
         }
 
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
 
     }
@@ -426,7 +426,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         if(entity.isSuccess())
             return entity.getData();
 
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_REMOTE_INVOKE_FAIL,
                 "Request of third failed.");
     }
 
@@ -440,7 +440,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         }
         if(null == cmd.getAddressType()){
             LOGGER.error("Invalid addressType parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid addressType parameter.");
         }
         final PmTask task = new PmTask();
@@ -489,8 +489,10 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
                 task.setOrganizationUid(user.getId());
             }
             task.setIfUseFeelist((byte)0);
-//      新增需求人企业Id用于物业线根据企业查询报修任务
+//          新增需求人企业Id用于物业线根据企业查询报修任务
             task.setEnterpriseId(cmd.getEnterpriseId());
+//          新增多应用标识
+            task.setAppId(cmd.getAppId());
 
             pmTaskProvider.createTask(task);
             createFlowCase(task);
@@ -504,7 +506,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
             //附件
             pmTaskCommonService.addAttachments(cmd.getAttachments(), user.getId(), task.getId(), PmTaskAttachmentType.TASK.getCode());
             task.setStatus(FlowCaseStatus.PROCESS.getCode());
-           pmTaskProvider.updateTask(task);
+            pmTaskProvider.updateTask(task);
             return null;
         });
 
@@ -517,23 +519,23 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         Integer namespaceId = UserContext.getCurrentNamespaceId(task.getNamespaceId());
 
         Flow flow = null;
-        Long parentTaskId = categoryProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
-
-        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
-            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
-        else
-             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+//        Long parentTaskId = pmTaskProvider.findCategoryById(task.getTaskCategoryId()).getParentId();
+//
+//        if (parentTaskId == PmTaskAppType.SUGGESTION_ID)
+//            flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                    FlowModuleType.SUGGESTION_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+//        else
+//             flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+//                 FlowModuleType.NO_MODULE.getCode(), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
+        flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+                String.valueOf(task.getAppId()), task.getOwnerId(), FlowOwnerType.PMTASK.getCode());
         if(null == flow) {
             LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
             throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
                     "Enable pmtask flow not found.");
         }
 
-
         CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-        Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
         createFlowCaseCommand.setTitle("物业报修");
         createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
@@ -568,7 +570,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         checkOwnerIdAndOwnerType(ownerType, ownerId);
         if(null == taskCategoryId) {
             LOGGER.error("Invalid taskCategoryId parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid taskCategoryId parameter.");
         }
 
@@ -583,13 +585,13 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
         if(null == ownerId) {
             LOGGER.error("Invalid ownerId parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid ownerId parameter.");
         }
 
         if(StringUtils.isBlank(ownerType)) {
             LOGGER.error("Invalid ownerType parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid ownerType parameter.");
         }
     }
@@ -634,7 +636,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         PmTask task = checkPmTask(cmd.getId());
         if(!task.getStatus().equals(PmTaskFlowStatus.COMPLETED.getCode())){
             LOGGER.error("Task have not been completed, cmd={}", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Task have not been completed.");
         }
         task.setOperatorStar(cmd.getOperatorStar());
@@ -648,7 +650,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
     private void checkId(Long id){
         if(null == id) {
             LOGGER.error("Invalid id parameter.");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_INVALD_PARAMS,
                     "Invalid id parameter.");
         }
     }
@@ -657,7 +659,7 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
         PmTask pmTask = pmTaskProvider.findTaskById(id);
         if(null == pmTask) {
             LOGGER.error("PmTask not found, id={}", id);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_NOT_EXIST,
                     "PmTask not found.");
         }
         return pmTask;
@@ -738,20 +740,25 @@ public class EbeiPmTaskHandle extends DefaultPmTaskHandle implements Application
 
         ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 
-        List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
+        if(cmd.getParentId() != null && cmd.getParentId() == 0){
+            List<PmTaskCategory> categories = pmTaskProvider.listTaskCategories(cmd.getNamespaceId(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getAppId(),cmd.getParentId(),null,null,Integer.MAX_VALUE);
+            response.setRequests(categories.stream().map(r->ConvertHelper.convert(r,CategoryDTO.class)).collect(Collectors.toList()));
+        } else {
+            List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 //      V3.6 过滤正中会办事的中间类型
 //        if(childrens.size() == 1){
 //            childrens = childrens.get(0).getChildrens();
 //        }
 
-        if(null == cmd.getParentId()) {
-            CategoryDTO dto = createCategoryDTO();
-            dto.setChildrens(childrens);
+            if(null == cmd.getParentId()) {
+                CategoryDTO dto = createCategoryDTO();
+                dto.setChildrens(childrens);
 
-            response.setRequests(Collections.singletonList(dto));
-        }else {
-            response.setRequests(childrens);
+                response.setRequests(Collections.singletonList(dto));
+            }else {
+                response.setRequests(childrens);
 
+            }
         }
 
         return response;

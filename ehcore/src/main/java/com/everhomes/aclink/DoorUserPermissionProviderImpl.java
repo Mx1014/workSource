@@ -159,7 +159,7 @@ public class DoorUserPermissionProviderImpl implements DoorUserPermissionProvide
                 if(ownerType != null) {
                     query.addConditions(Tables.EH_DOOR_USER_PERMISSION.OWNER_TYPE.eq(ownerType));     
                 }
-               
+
                 return query;
             }
             

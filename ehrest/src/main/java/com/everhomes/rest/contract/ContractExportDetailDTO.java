@@ -16,9 +16,23 @@ public class ContractExportDetailDTO {
 	private String apartments;
 	private BigDecimal rent;
 	private String sponsorName;
+	private BigDecimal deposit;
+	private String depositStatus;
 	private String syncErrorMsg;
 	private String status;
 	
+	public BigDecimal getDeposit() {
+		return deposit;
+	}
+	public void setDeposit(BigDecimal deposit) {
+		this.deposit = deposit;
+	}
+	public String getDepositStatus() {
+		return depositStatus;
+	}
+	public void setDepositStatus(String depositStatus) {
+		this.depositStatus = depositStatus;
+	}
 	public String getCustomerId() {
 		return customerId;
 	}

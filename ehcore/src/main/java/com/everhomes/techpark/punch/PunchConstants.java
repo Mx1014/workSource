@@ -1,6 +1,8 @@
 package com.everhomes.techpark.punch;
 
 public class PunchConstants {
+
+	public static final Long MODULE_ID = 50600L;
 	public static final Integer PAGE_SIZE_AT_A_TIME = 1000;
 	public static final Long ONE_DAY_MS = 24 * 3600 * 1000L;
 	public static final Long DEFAULT_SPLIT_TIME = 4 * 3600 * 1000L;
@@ -102,6 +104,17 @@ public class PunchConstants {
 	public static final int PUNCH_NOTIFICATION_TITLE = 1;
 	public static final int PUNCH_NOTIFICATION_ON_DUTY_CONTENT = 2;
 	public static final int PUNCH_NOTIFICATION_OFF_DUTY_CONTENT = 3;
+	public static final int PUNCH_NOTIFICATION_DISPLAY_NAME = 4;
 
 	public static final String NEXT_DAY ="nextDay";
+	public static final String PUNCH_CREATE_TYPE ="punch.create.type";
+	public static final String PUNCH_CREATE_MSG ="punch.create";
+	
+
+	/**单位 scope*/
+	public static final String UNIT_SCOPE ="oa.unit";
+	/**次*/
+	public static final String UNIT_TIME ="2";
+	/**天*/
+	public static final String UNIT_DAY ="1";
 }

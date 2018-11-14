@@ -25,13 +25,15 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
 	
-	SiyinPrintOrder findSiyinPrintOrderByBizOrderNum(String BizOrderNum);
+	SiyinPrintOrder findSiyinPrintOrderByGeneralOrderId(String GeneralOrderId);
 
-	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
+	SiyinPrintOrder findUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId, String printerName);
 
 	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
 			List<Object> ownerIdList, Timestamp startTime,
-			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize, Byte payMode, String paymentType);
 
     ListBizPayeeAccountDTO createPersonalPayUserIfAbsent(String s, String sNamespaceId, String userIdentifier, Object o, Object o1, Object o2);
+
+	SiyinPrintOrder findSiyinPrintOrderByGeneralBillId(String generalBillId);
 }

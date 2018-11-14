@@ -246,6 +246,15 @@ public class UpdateEnterpriseCustomerCommand {
     private CustomerRequirementDTO requirement;
     private CustomerCurrentRentDTO currentRent;
 
+    private Long transCommunityId;
+
+    public Long getTransCommunityId() {
+        return transCommunityId;
+    }
+
+    public void setTransCommunityId(Long transCommunityId) {
+        this.transCommunityId = transCommunityId;
+    }
 
     public String getModuleName() {
         return moduleName;

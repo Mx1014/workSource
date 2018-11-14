@@ -14,6 +14,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespacesService;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.portal.PortalPublishHandler;
@@ -21,6 +22,7 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.rest.portal.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.rest.acl.*;
@@ -33,12 +35,6 @@ import com.everhomes.rest.module.*;
 import com.everhomes.rest.oauth2.ControlTargetOption;
 import com.everhomes.rest.oauth2.ModuleManagementType;
 import com.everhomes.rest.openapi.techpark.AllFlag;
-import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
-import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.portal.MultipleFlag;
-import com.everhomes.rest.portal.ServiceModuleAppDTO;
-import com.everhomes.rest.portal.ServiceModuleAppStatus;
-import com.everhomes.rest.portal.TreeServiceModuleAppsResponse;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
@@ -67,6 +63,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.*;
@@ -140,7 +137,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     
     @Autowired
     private PortalService portalService;
-    
+
+    @Autowired
+    private NamespacesService namespacesService;
 
 
     @Override
@@ -601,7 +600,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         //过滤出与scopes匹配的serviceModule
 //        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
         //todo
@@ -609,6 +607,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if(moduleIds.size() == 0){
             return response;
         }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<Long> authCommunityIds = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgId(namespaceId, cmd.getOwnerId()).stream().map(r->r.getProjectId()).collect(Collectors.toList());
+        //判断是否是仅仅有 OA 应用的普通公司
+        boolean isOaOnly = false;
+        if(authCommunityIds == null || authCommunityIds.size() == 0) {
+        	isOaOnly = true;
+        }
+        final boolean oaOnly = isOaOnly; 
+        
         List<ServiceModuleDTO> tempList = this.serviceModuleProvider.listServiceModuleDtos(moduleIds);
 
         List<ServiceModuleDTO> communityControlList = new ArrayList<>();
@@ -619,13 +627,17 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         tempList.stream().filter(r->!"".equals(r.getModuleControlType()) && r.getModuleControlType() != null && r.getLevel() == 3).map(r->{
             switch (ModuleManagementType.fromCode(r.getModuleControlType())){
                 case COMMUNITY_CONTROL:
-                    communityControlList.add(r);
+                	if(!oaOnly) {
+                		communityControlList.add(r);	
+                	}
                     break;
                 case ORG_CONTROL:
                     orgControlList.add(r);
                     break;
                 case UNLIMIT_CONTROL:
+                	if(!oaOnly) {
                     unlimitControlList.add(r);
+                	}
                     break;
             }
             return null;
@@ -977,14 +989,29 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         }
 
-        //获取公司管理的全部项目
-        List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+        List<Long> projectIds  = new ArrayList<>();
+
+        //标准版和定制版之分
+        if(namespacesService.isStdNamespace(UserContext.getCurrentNamespaceId())){
+            //获取公司管理的全部项目
+            List<ServiceModuleAppAuthorization> serviceModuleAppAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(), organizationId, appId);
+            if(serviceModuleAppAuthorizations != null){
+                projectIds = serviceModuleAppAuthorizations.stream().map(r -> r.getProjectId()).collect(Collectors.toList());
+            }
+
+        }else {
+            List<Community> communities = communityProvider.listCommunitiesByNamespaceId(UserContext.getCurrentNamespaceId());
+
+            if(communities != null){
+                projectIds = communities.stream().map(r -> r.getId()).collect(Collectors.toList());
+            }
+        }
 
         // 获取到了授权项目
-        if(serviceModuleAppAuthorizations != null && serviceModuleAppAuthorizations.size() >0){
+        if(projectIds != null && projectIds.size() >0){
             List<ProjectDTO> projectDtos = new ArrayList<>();
-            for (ServiceModuleAppAuthorization authorization : serviceModuleAppAuthorizations) {
-                Community community = communityProvider.findCommunityById(authorization.getProjectId());
+            for (Long projectId : projectIds) {
+                Community community = communityProvider.findCommunityById(projectId);
                 if (null == community) {
                     continue;
                 }
@@ -1124,7 +1151,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 String handlerPrefix = PortalPublishHandler.PORTAL_PUBLISH_OBJECT_PREFIX;
                 PortalPublishHandler handler = PlatformContext.getComponent(handlerPrefix + serviceModule.getId());
                 if(null != handler){
-                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig);
+                    HandlerGetCustomTagCommand gtCustomTagCommand = new HandlerGetCustomTagCommand();
+
+                    customTag = handler.getCustomTag(namespaceId, serviceModule.getId(), instanceConfig, gtCustomTagCommand);
                     LOGGER.debug("get customTag from handler = {}, customTag =s {}",handler,customTag);
                     // 取多入口的模块的菜单id
                     webMenuId = handler.getWebMenuId(namespaceId, serviceModule.getId(), instanceConfig);
@@ -1299,12 +1328,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 functionIds.remove(excludeFunction.getFunctionId());
             });
         }
+        //白名单的定义：无论是配置在白名单还是黑名单中的按钮，都要先配置在eh_service_module_functions中，在此基础上，如果配置在白名单中的按钮所在的域空间与当前域空间一致，则显示该按钮。没有配置白名单的域空间则不显示该按钮
+        //实现方法是先取出所有的白名单中有的ID，作为准备从所有按钮（functionIds）中去掉的list（withoutWhiteList）。然后取出当前域空间和园区生效的白名单的ID（includeFunctions），并将它从withoutWhiteList中去除，将剩下的withoutWhiteList从functionIds中刨去，则剩下的就是根据白名单保留后的结果
+        //group by出所有的在白名单中的按钮ID，作为准备去除的部分
+        List<Long> withoutWhiteList = serviceModuleProvider.listExcludeCauseWhiteList();
+        //获得当前生效的白名单按钮ID
         List<ServiceModuleIncludeFunction> includeFunctions = serviceModuleProvider.listIncludeFunctions(cmd.getNamespaceId(), cmd.getCommunityId(), cmd.getModuleId());
-        if (includeFunctions != null && includeFunctions.size() > 0) {
-            includeFunctions.forEach(includeFunction -> {
-                functionIds.remove(includeFunction.getFunctionId());
-            });
+        if(withoutWhiteList != null && withoutWhiteList.size() > 0){
+            if (includeFunctions != null && includeFunctions.size() > 0) {
+                //将生效的白名单从将要去除的id列表中去除
+                includeFunctions.forEach(r -> withoutWhiteList.remove(r.getFunctionId()));
+
+                //将剩下的去除列表中的id从全部生效的按钮id中去除
+                /*
+                includeFunctions.forEach(includeFunction -> {
+                    functionIds.remove(includeFunction.getFunctionId());
+                });*/
+            }
+            withoutWhiteList.forEach(functionIds::remove);
+
         }
+
 
         return functionIds;
     }

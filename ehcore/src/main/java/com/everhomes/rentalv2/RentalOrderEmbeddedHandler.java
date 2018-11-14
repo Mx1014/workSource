@@ -81,7 +81,8 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 //				orderMap.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //				rentalProvider.updateRentalOrderPayorderMap(orderMap);
 
-				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+				if (order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())||
+						order.getStatus().equals(SiteBillStatus.APPROVING.getCode())) {
 					//判断支付金额与订单金额是否相同
 					if (order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0) {
 						onOrderRecordSuccess(order);
@@ -130,49 +131,24 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 			rentalProvider.updateRentalBill(order);
 			rentalService.onOrderSuccess(order);
-			//发短信
-			RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
-
-			handler.sendRentalSuccessSms(order);
 
 		} else {
-
-//		rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
-			rentalProvider.updateRentalBill(order);
+				rentalProvider.updateRentalBill(order);
+				//改变订单状态
+				rentalService.changeRentalOrderStatus(order,SiteBillStatus.SUCCESS.getCode(),true);
+			//工作流自动进到下一节点
 			FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+			FlowCaseTree tree = flowService.getProcessingFlowCaseTree(flowCase.getId());
+			flowCase = tree.getLeafNodes().get(0).getFlowCase();//获取真正正在进行的flowcase
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			flowService.processAutoStep(stepDTO);
 
-			FlowAutoStepDTO dto = new FlowAutoStepDTO();
-			dto.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-			dto.setFlowCaseId(flowCase.getId());
-			dto.setFlowMainId(flowCase.getFlowMainId());
-			dto.setFlowNodeId(flowCase.getCurrentNodeId());
-			dto.setFlowVersion(flowCase.getFlowVersion());
-			dto.setStepCount(flowCase.getStepCount());
-			flowService.processAutoStep(dto);
-
-			//发消息和短信
-			//发给发起人
-			Map<String, String> map = new HashMap<>();
-			map.put("useTime", order.getUseDetail());
-			map.put("resourceName", order.getResourceName());
-			rentalCommonService.sendMessageCode(order.getRentalUid(), map,
-					RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
-
-			String templateScope = SmsTemplateCode.SCOPE;
-			String templateLocale = RentalNotificationTemplateCode.locale;
-			int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
-
-			List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
-
-			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(),
-					IdentifierType.MOBILE.getCode());
-			if (null == userIdentifier) {
-				LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-			} else {
-				smsProvider.sendSms(order.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
-						templateId, templateLocale, variables);
-			}
 		}
 	}
 }

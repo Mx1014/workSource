@@ -57,6 +57,10 @@ public interface OrganizationProvider {
 
     List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
 
+    List<Organization> listOrganizationsByPath(Long organizationId);
+    
+    Organization listOrganizationsByPathAndToken(Long organizationId, List<String> types,Integer namespaceId);
+
     void createOrganizationMember(OrganizationMember organizationMember);
 
     void updateOrganizationMember(OrganizationMember organizationMember);
@@ -71,6 +75,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
+    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType,String contactToken,String grouPath);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 
@@ -229,6 +234,7 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationPersonnelByWorkEmail(Long orgId, String workEmail);
 
+    OrganizationMemberDetails findOrganizationPersonnelByAccount(String account);
     /**
      * Create enterprise details
      *
@@ -261,7 +267,6 @@ public interface OrganizationProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback);
 
     OrganizationCommunityRequest findOrganizationCommunityRequestByOrganizationId(Long communityId, Long organizationId);
-
     List<OrganizationCommunityRequest> queryOrganizationCommunityRequests(CrossShardListingLocator locator, int count,
                                                                           ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -502,9 +507,9 @@ public interface OrganizationProvider {
 
     Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+    List listOrganizationByActualName(String name, String groupType, Long parentId, Integer namespaceId);
 
-    List listOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId, Long enterpriseId);
+    List listOrganizationByName(String name, List<String> groupTypes, Long parentId, Integer namespaceId, Long enterpriseId);
 
     void createImportFileTask(ImportFileTask importFileTask);
 
@@ -687,7 +692,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberDetails> queryOrganizationMemberDetails(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
-    List<Long> listOrganizationPersonnelDetailIdsByDepartmentId(Long departmentId);
+    List<Long> listOrganizationPersonnelDetailIdsByDepartmentIds(List<Long> departmentIds);
 
 	//List<OrganizationMember> queryOrganizationPersonnels(ListingLocator locator, Long organizationId, ListingQueryBuilderCallback queryBuilderCallback);
 
@@ -791,7 +796,9 @@ public interface OrganizationProvider {
 	 */
 	List<EnterpriseDTO> findOrganizationsByOrgIdList(List<Integer> organizationIdList, String keyword, CrossShardListingLocator locator, int pageSize);
 
-	/**
+    List<Organization> listOrganizationsByNamespaceId(Integer namesapceId, Long excludeCommunityId, String keyword, CrossShardListingLocator locator, int pageSize);
+
+    /**
 	 * 根据项目编号communityId查询eh_organization_workPlaces表中的信息
 	 * @param communityId
 	 * @return
@@ -963,7 +970,8 @@ public interface OrganizationProvider {
 
     OrganizationMemberDetails findOrganizationMemberDetailsByTargetId(
             Long targetId, Long organizationId);
-    
+    OrganizationMemberDetails findOrganizationMemberDetailsByEmail(String email, Long organizationId);
+
 	OrganizationMember findOrganizationMemberByOrgIdAndToken(
 			String contactPhone, Long organizationId, String memberGroup);
  /**
@@ -981,8 +989,20 @@ public interface OrganizationProvider {
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIds(
 			List<Long> organizationIds);
 
-    OrganizationMember findMemberByType(Long aLong, Long orgId, String code);
+    OrganizationMember findMemberByType(Long aLong, String groupPath, String code);
 
     List<OrganizationMemberDetails>  listOrganizationMemberDetails(Long ownerId, String userName);
 	TargetDTO findUserContactByUserId(Integer namespaceId, Long userId);
+
+	Integer countOrganizationMemberDetails(Long orgId, Long departmentId);
+
+	//用户认证审核
+	Long createUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+	void updateUserAuthenticationOrganization(UserAuthenticationOrganization userAuthenticationOrganization);
+
+    UserAuthenticationOrganization getUserAuthenticationOrganization(Long organizationId, Integer namespaceId);
+
+    List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag);
+    //用户认证审核end
 }

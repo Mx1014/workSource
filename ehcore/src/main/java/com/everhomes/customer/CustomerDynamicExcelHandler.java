@@ -6,53 +6,34 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.dynamicExcel.DynamicColumnDTO;
-import com.everhomes.dynamicExcel.DynamicExcelHandler;
-import com.everhomes.dynamicExcel.DynamicExcelStrings;
-import com.everhomes.dynamicExcel.DynamicField;
-import com.everhomes.dynamicExcel.DynamicRowDTO;
-import com.everhomes.dynamicExcel.DynamicSheet;
+import com.everhomes.dynamicExcel.*;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationAttachment;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
 import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.address.CreateOfficeSiteCommand;
 import com.everhomes.rest.common.TrueOrFalseFlag;
-import com.everhomes.rest.customer.CustomerDynamicSheetClass;
-import com.everhomes.rest.customer.CustomerErrorCode;
-import com.everhomes.rest.customer.CustomerType;
-import com.everhomes.rest.customer.TrackingPlanNotifyStatus;
-import com.everhomes.rest.customer.TrackingPlanReadStatus;
+import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
+import com.everhomes.rest.enterprise.FindEnterpriseDetailCommand;
+import com.everhomes.rest.enterprise.UpdateWorkPlaceCommand;
 import com.everhomes.rest.field.ExportFieldsExcelCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerType;
 import com.everhomes.rest.module.CheckModuleManageCommand;
-import com.everhomes.rest.organization.ImportFileResultLog;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
-import com.everhomes.rest.varField.FieldDTO;
-import com.everhomes.rest.varField.FieldGroupDTO;
-import com.everhomes.rest.varField.FieldItemDTO;
-import com.everhomes.rest.varField.ImportFieldExcelCommand;
-import com.everhomes.rest.varField.ListFieldCommand;
-import com.everhomes.rest.varField.ListFieldGroupCommand;
+import com.everhomes.rest.varField.*;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -60,11 +41,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import com.everhomes.varField.FieldGroup;
-import com.everhomes.varField.FieldProvider;
-import com.everhomes.varField.FieldService;
-import com.everhomes.varField.ScopeField;
-import com.everhomes.varField.ScopeFieldItem;
+import com.everhomes.varField.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -86,12 +63,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -139,6 +111,9 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
     private PortalService portalService;
@@ -279,11 +254,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 if (k == 10L) {
                     //产品要求 企业管理员和楼栋门牌放在excel的前面
                     if (CustomerDynamicSheetClass.CUSTOMER.equals(CustomerDynamicSheetClass.fromStatus(ds.getClassName()))) {
-                        DynamicField df = new DynamicField();
+                        /*DynamicField df = new DynamicField();
                         df.setFieldName("enterpriseAdmins");
                         df.setDisplayName("企业管理员");
                         df.setFieldParam("{\"fieldParamType\": \"text\", \"length\": 20}");
-                        fields.add(df);
+                        fields.add(df);*/
                         DynamicField df1 = new DynamicField();
                         df1.setFieldName("entryInfos");
                         df1.setDisplayName("楼栋门牌");
@@ -311,6 +286,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 return;
             }
             int failedNumber = 0;
+            List<DynamicCustomer> dynamicCustomers = new ArrayList<>();
             for(DynamicRowDTO rowData : rowDatas) {
                 // record import file logs
                 ImportFileResultLog<Map<String,String>> importLogs = new ImportFileResultLog<>(CustomerErrorCode.SCOPE);
@@ -318,7 +294,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 Boolean flag = true;
                 switch (sheet) {
                     case CUSTOMER:
-                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns,ds.getDisplayName());
+                        DynamicCustomer dynamicCustomer = new DynamicCustomer();
+                        failedNumber = importCustomerInfo(customerInfo, importLogs, failedNumber, columns,ds.getDisplayName(), dynamicCustomer);
+                        if(dynamicCustomer.getCustomer() != null){
+                            dynamicCustomers.add(dynamicCustomer);
+                        }
                         if(importLogs.getData()!=null)
                         resultLogs.add(importLogs);
                         break;
@@ -649,6 +629,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                             }
                         }
                         if(flag) {
+                            tracking.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
                             customerProvider.createCustomerTracking(tracking);
                             EnterpriseCustomer customer = customerProvider.findById(customerId);
                             if(customer != null) {
@@ -764,12 +745,15 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
             }
+            if(dynamicCustomers.size() > 0){
+                batchInsertCustomerData(dynamicCustomers);
+            }
             response.setSuccessRowNumber(response.getSuccessRowNumber() + rowDatas.size() - failedNumber);
             response.setFailedRowNumber(response.getFailedRowNumber() + failedNumber);
         }
     }
 
-    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns, String sheetName) {
+    private int importCustomerInfo(ImportFieldExcelCommand customerInfo, ImportFileResultLog<Map<String, String>> importLogs, int failedNumber, List<DynamicColumnDTO> columns, String sheetName, DynamicCustomer dynamicCustomer) {
         if (customerInfo.getCustomerId() != 0) {
             //不为0时为管理里面导入的 直接break
             return failedNumber;
@@ -783,11 +767,12 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         enterpriseCustomer.setOwnerType(customerInfo.getOwnerType());
         enterpriseCustomer.setCreatorUid(UserContext.currentUserId());
         enterpriseCustomer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        String customerAdminString = "";
         String customerAddressString = "";
         Class<?> clz = EnterpriseCustomer.class.getSuperclass();//校验数字日期格式
         Boolean flag = true;
 
+        long startColumnsDataTime = System.currentTimeMillis();
+        LOGGER.debug("start to getColumn Data : {} " , startColumnsDataTime);
         if (columns != null && columns.size() > 0) {
             List<DynamicColumnDTO> originColumns = new ArrayList<>();
             columns.forEach((c) -> {
@@ -819,7 +804,7 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
                 //校验数字格式及日期格式
                 try {
-                    if(!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())){
+                    if(!"entryInfos".equals(column.getFieldName())){
                         String type = clz.getDeclaredField(column.getFieldName()).getType().getSimpleName();
                         switch (type) {
                             case "Integer":
@@ -873,18 +858,18 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
 
                 try {
-                    if (!"enterpriseAdmins".equals(column.getFieldName()) && !"entryInfos".equals(column.getFieldName())) {
+                    if (!"entryInfos".equals(column.getFieldName())) {
                         // 非企业管理员和楼栋门牌字段 直接invoke
                         setToObj(column.getFieldName(), enterpriseCustomer, column.getValue(), null);
-                    } else {
+                    } else {/*
                         if ("enterpriseAdmins".equals(column.getFieldName())) {
                             customerAdminString = column.getValue();
-                        }
+                        }*/
                         if ("entryInfos".equals(column.getFieldName())) {
                             customerAddressString = column.getValue();
                         }
                         // 校验 admin address  异常日志在校验中
-                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, customerAdminString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
+                        boolean dealResult = dealCustomerAdminsAndAddress(customerAddressString, importLogs, enterpriseCustomer, column, originColumns, sheetName);
                         if (dealResult) {
                             flag = false;
                             break;
@@ -903,6 +888,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 }
             }
         }
+        long endColumnsDataTime = System.currentTimeMillis();
+        LOGGER.debug("the function : getColumn is end {},amount cost : {} ms" , endColumnsDataTime, endColumnsDataTime - startColumnsDataTime);
 
         if (flag) {
             if (null != enterpriseCustomer.getLongitude() && null != enterpriseCustomer.getLatitude()) {
@@ -910,15 +897,24 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 enterpriseCustomer.setGeohash(geohash);
             }
             if (StringUtils.isNotBlank(enterpriseCustomer.getName())) {
-                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getName());
+                List<EnterpriseCustomer> customers = customerProvider.listEnterpriseCustomerByNamespaceIdAndName(customerInfo.getNamespaceId(), enterpriseCustomer.getCommunityId(), enterpriseCustomer.getName());
                 if (customers != null && customers.size() > 0) {
                     for (EnterpriseCustomer customer : customers) {
-                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerAdminString, customerAddressString);
+                        updateEnterpriseCustomer(customer, enterpriseCustomer, customerAddressString);
                     }
                  return failedNumber ;
                 }
             }
+
+            dynamicCustomer.setCustomer(enterpriseCustomer);
+            dynamicCustomer.setCustomerAddressString(customerAddressString);
+            //dynamicCustomer.setCustomerAdminString(customerAdminString);
+
+            /*long startCreateEnterpriseCustomerTime = System.currentTimeMillis();
+            LOGGER.debug("the function : createEnterpriseCustomer is start : {} " , startCreateEnterpriseCustomerTime);
             customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+            long endCreateEnterpriseCustomerTime = System.currentTimeMillis();
+            LOGGER.debug("the function : createEnterpriseCustomer is end {},amount cost : {} ms" , endCreateEnterpriseCustomerTime, endCreateEnterpriseCustomerTime - startCreateEnterpriseCustomerTime);
 
             //企业客户新增成功,保存客户事件
             customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
@@ -926,16 +922,89 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 OrganizationDTO organizationDTO = customerService.createOrganization(enterpriseCustomer);
                 enterpriseCustomer.setOrganizationId(organizationDTO.getId());
             }
+
+            long startUpdateSyncCustomerTime = System.currentTimeMillis();
+            LOGGER.debug("updateCustomer and syncElastic is start : {} " , startUpdateSyncCustomerTime);
             customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
             customerSearcher.feedDoc(enterpriseCustomer);
+            long endUpdateSyncCustomerTime = System.currentTimeMillis();
+            LOGGER.debug("updateCustomer and syncElastic is end {},amount cost : {} ms" , endUpdateSyncCustomerTime, endUpdateSyncCustomerTime - startUpdateSyncCustomerTime);
+
             //这里还需要增加企业管理员的record和role  & address buildings 呵
+            long startExtraCustomerInfoTime = System.currentTimeMillis();
+            LOGGER.debug("create customer extra info is start : {} " , startExtraCustomerInfoTime);
             createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
             createEnterpriseCustomerEntryInfo(enterpriseCustomer, customerAddressString);
+            long endExtraCustomerInfoTime = System.currentTimeMillis();
+            LOGGER.debug("create customer extra info is end {},amount cost : {} ms" , endExtraCustomerInfoTime, endExtraCustomerInfoTime - startExtraCustomerInfoTime);
+*/
         }
         return failedNumber;
     }
 
-    private boolean dealCustomerAdminsAndAddress(String customerAddressString, String customerAdminString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
+    private void batchInsertCustomerData(List<DynamicCustomer> dynamicCustomers){
+
+        long startExtraCustomerInfoTime = System.currentTimeMillis();
+        LOGGER.debug("function batchInsertCustomerData is start : {} ms" , startExtraCustomerInfoTime);
+
+
+        List<EhEnterpriseCustomers> customers = new ArrayList<>();
+        dynamicCustomers.forEach(r -> {
+            customers.add(r.getCustomer());
+        });
+
+        long startbatchInsertCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("batch insert customer is start : {} " , startbatchInsertCustomerTime);
+        //customerProvider.createEnterpriseCustomer(enterpriseCustomer);
+        customerProvider.createEnterpriseCustomers(customers);
+        long endbatchInsertCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("batch insert customer is end : {},amount cost : {} ms" , endbatchInsertCustomerTime, endbatchInsertCustomerTime - startbatchInsertCustomerTime);
+
+        //企业客户新增成功,保存客户事件
+        //customerService.saveCustomerEvent(1, enterpriseCustomer, null, (byte) 0);
+        //customerProvider.saveCustomerEvents(1, customers, (byte) 0);
+
+
+        dynamicCustomers.forEach(r -> {
+            customerSearcher.feedDoc(r.getCustomer());
+        });
+
+
+        long startUpdateSyncCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("updateCustomer and syncElastic is start : {} " , startUpdateSyncCustomerTime);
+        List<EhEnterpriseCustomers> updateCustomers = new ArrayList<>();
+        dynamicCustomers.forEach(r -> {
+            if (StringUtils.isNotEmpty(r.getCustomerAddressString())) {
+                OrganizationDTO organizationDTO = customerService.createOrganization(r.getCustomer());
+                r.getCustomer().setOrganizationId(organizationDTO.getId());
+            }
+
+
+            //customerProvider.updateEnterpriseCustomer(enterpriseCustomer);
+            updateCustomers.add(r.getCustomer());
+            customerSearcher.feedDoc(r.getCustomer());
+
+            //createEnterpriseCustomerAdmin(r.getCustomer(), r.getCustomerAdminString());
+            createEnterpriseCustomerEntryInfo(r.getCustomer(), r.getCustomerAddressString());
+        });
+        long endUpdateSyncCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("updateCustomer and syncElastic is end {},amount cost : {} ms" , endUpdateSyncCustomerTime, endUpdateSyncCustomerTime - startUpdateSyncCustomerTime);
+
+
+
+        long startbatchUpdateCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("batch update customer is start : {} " , startbatchUpdateCustomerTime);
+        customerProvider.updateEnterpriseCustomers(updateCustomers);
+        long endbatchUpdateCustomerTime = System.currentTimeMillis();
+        LOGGER.debug("batch update customer is end : {},amount cost : {} ms" , endbatchUpdateCustomerTime, endbatchUpdateCustomerTime - startbatchUpdateCustomerTime);
+
+
+
+        long endExtraCustomerInfoTime = System.currentTimeMillis();
+        LOGGER.debug("function batchInsertCustomerData is end {},amount cost : {} ms" , endExtraCustomerInfoTime, endExtraCustomerInfoTime - startExtraCustomerInfoTime);
+    }
+
+    private boolean dealCustomerAdminsAndAddress(String customerAddressString, ImportFileResultLog<Map<String, String>> importLogs, EnterpriseCustomer enterpriseCustomer, DynamicColumnDTO column, List<DynamicColumnDTO> columns,String sheetName) {
         if (StringUtils.isNotBlank(customerAddressString)) {
             //todo:校验格式
             String[] buildingNames = null;
@@ -974,24 +1043,6 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 importLogs.setData(dataMap);
                 importLogs.setErrorDescription("wrong building and address format");
                 importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADDRESS_FORMAT_ERROR);
-                importLogs.setFieldName(column.getHeaderDisplay());
-                importLogs.setSheetName(sheetName);
-                return true;
-            }
-        }
-        if (StringUtils.isNotBlank(customerAdminString)) {
-            try {
-                String  regex  = "^((?:(?!([,|()])).)*\\(\\d+\\),)*(?:(?!([,|()])).)*\\(\\d+\\)";
-                if(!Pattern.matches(regex,customerAdminString)){
-                    throw  new Exception("customer enterprise admins format error");
-                }
-            } catch (Exception e) {
-                Map<String, String> dataMap = new LinkedHashMap<>();
-                columns.forEach((c) -> dataMap.put(c.getFieldName(), c.getValue()));
-                LOGGER.error("customer enterprise admins format error: field ={}", column.getHeaderDisplay());
-                importLogs.setData(dataMap);
-                importLogs.setErrorDescription("customer enterprise admins format error");
-                importLogs.setCode(CustomerErrorCode.ERROR_CUSTOMER_ADMIN_FORMAT_ERROR);
                 importLogs.setFieldName(column.getHeaderDisplay());
                 importLogs.setSheetName(sheetName);
                 return true;
@@ -1097,16 +1148,11 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         return false;
     }
 
-    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAdminString, String customerAddressString) {
+    private void updateEnterpriseCustomer(EnterpriseCustomer exist, EnterpriseCustomer enterpriseCustomer, String customerAddressString) {
         if (exist != null && enterpriseCustomer != null) {
             enterpriseCustomer.setId(exist.getId());
             enterpriseCustomer.setOrganizationId(exist.getOrganizationId());
-            try {
-                createEnterpriseCustomerAdmin(enterpriseCustomer, customerAdminString);
-            } catch (Exception e) {
-                //todo:接口过时 没有批量删除 需要基线提供
-                LOGGER.error("create enterprise admin error :{}", e);
-            }
+
 
             //对比 如果被更新有数据则补上exist
             compareCustomerFieldValues(exist, enterpriseCustomer);
@@ -1237,6 +1283,29 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
                 organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 
                 this.organizationProvider.createOrganizationAddress(organizationAddress);
+
+                UpdateWorkPlaceCommand cmd = new UpdateWorkPlaceCommand();
+                cmd.setOrganizationId(enterpriseCustomer.getOrganizationId());
+                CreateOfficeSiteCommand cmd2 = new CreateOfficeSiteCommand();
+                cmd2.setCommunityId(address.getCommunityId());
+                cmd2.setSiteName(address.getAddress());
+                cmd2.setWholeAddressName(address.getAddress());
+                OrganizationSiteApartmentDTO siteDto = new OrganizationSiteApartmentDTO();
+                siteDto.setBuildingId(building.getId());
+                siteDto.setApartmentId(address.getId());
+                List<OrganizationSiteApartmentDTO> siteDtos = new ArrayList<>();
+                siteDtos.add(siteDto);
+                cmd2.setSiteDtos(siteDtos);
+                List<CreateOfficeSiteCommand> cmd2s = new ArrayList<>();
+                cmd2s.add(cmd2);
+                cmd.setOfficeSites(cmd2s);
+
+                try{
+                    organizationService.insertWorkPlacesAndBuildings(cmd);
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                }
+
                 Organization organization = organizationProvider.findOrganizationById(enterpriseCustomer.getOrganizationId());
                 if (organization != null)
                     organizationSearcher.feedDoc(organization);
@@ -1249,6 +1318,8 @@ public class CustomerDynamicExcelHandler implements DynamicExcelHandler {
         if (StringUtils.isNotEmpty(customerAdminString)) {
             customerAdminString = customerAdminString.replaceAll("\n", "");
             customerProvider.deleteAllEnterpriseCustomerAdminRecord(enterpriseCustomer.getId());
+
+
 
             List<CustomerAdminRecord> records = customerProvider.listEnterpriseCustomerAdminRecords(enterpriseCustomer.getId(), null);
             if(records!=null && records.size()>0){

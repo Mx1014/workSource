@@ -2,6 +2,8 @@ package com.everhomes.preview;
 
 import javax.validation.Valid;
 
+import com.everhomes.controller.XssCleaner;
+import com.everhomes.controller.XssExclude;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +34,7 @@ public class PreviewController extends ControllerBase {
     @Autowired
     PreviewService previewService;
 
+    @XssExclude
     @RequestMapping("addPreview")
     @RestReturn(value=PreviewDTO.class)
     public RestResponse addPreview(@Valid AddPreviewCommand cmd) {

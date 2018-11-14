@@ -104,6 +104,8 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
 
             flowService.createFlowCase(createFlowCaseCommand);
             PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+            generalFormProvider.setInvestmentAdId(referId,cmd.getInvestmentAdId());
+            
             return dto;
         });
         return result;
@@ -178,7 +180,7 @@ public class InvestmentAdFormHandler implements GeneralFormModuleHandler{
                 flowService.deleteFlowCase(cmd2);
                 return generalFormService.deleteGeneralFormVal(cmd);
             }else{
-                return null;
+            	return generalFormService.deleteGeneralForm(cmd);
             }
         });
         return sourceId;

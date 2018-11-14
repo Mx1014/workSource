@@ -14,4 +14,6 @@ public interface OAuth2Provider {
     void deleteAccessTokenById(long id);
     AccessToken findAccessTokenById(long id);
     AccessToken findAccessTokenByTokenString(String tokenString);
+
+    AccessToken findAccessTokenByAppAndGrantorUid(Long appId, Long grantorUid);
 }

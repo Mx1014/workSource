@@ -8,24 +8,21 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>values : 新顺序集合
- * ServiceAllianceDTO 中赋予id值和defaultOrder即可，其他目前功能不需要赋值。参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceDTO}</li>
+ * serviceIds : 排好序的id列表
  * </ul>
  *
  *  @author:dengs 2017年5月23日
  */
-public class UpdateServiceAllianceEnterpriseDefaultOrderCommand {
+public class UpdateServiceAllianceEnterpriseDefaultOrderCommand extends AllianceAdminCommand{
 	
-	@ItemType(ServiceAllianceDTO.class)
-	private List<ServiceAllianceDTO> values;
-	public List<ServiceAllianceDTO> getValues() {
-		return values;
+	private List<Long> serviceIds;
+
+	public List<Long> getServiceIds() {
+		return serviceIds;
 	}
-	public void setValues(List<ServiceAllianceDTO> values) {
-		this.values = values;
+
+	public void setServiceIds(List<Long> serviceIds) {
+		this.serviceIds = serviceIds;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
+	
 }

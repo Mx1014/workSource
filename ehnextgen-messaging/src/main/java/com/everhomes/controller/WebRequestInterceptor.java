@@ -20,6 +20,7 @@ import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.tachikoma.commons.sdk.SdkSettings;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
@@ -41,6 +42,8 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Interceptor that checks REST API signatures
@@ -58,6 +61,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
+
+    private static final String DEFAULT_CLIENT_APP_KEY_API_STR =
+            "/stat/event/postDevice,/pusher/registDevice,/user/syncActivity,/user/signupByAppKey,/user/signup,/user/logoff";
 
     @Autowired
     private UserService userService;
@@ -88,7 +94,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-    public WebRequestInterceptor() {
+    public WebRequestInterceptor() throws ClassNotFoundException {
+        Class.forName("com.everhomes.tool.BlutoAccessor");
     }
 
     @Override
@@ -185,9 +192,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //                                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
 //                    }
                     if (this.isInnerSignLogon(request)) {
+                        LOGGER.debug("this is inner sign logon before");
                         token = this.innerSignLogon(request, response);
                         setupUserContext(token);
                         MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                        LOGGER.debug("this is inner sign logon, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
@@ -204,12 +213,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                         if (null != UserContext.current().getUser()) {
                             MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
                         }
+                        LOGGER.debug("check request signature success, UserContext.current(): {}", UserContext.current().getUser());
                         return true;
                     }
 
                     //Update by Janson, when the request is using apiKey, we generate a 403 response to app.
                     String appKey = request.getParameter(APP_KEY_NAME);
-                    if (null != appKey && (!appKey.isEmpty())) {
+                    if (null != appKey && (!appKey.isEmpty()) && !requireLogonToken(request)) {
                         LOGGER.info("appKey=" + appKey + " is Forbidden");
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
@@ -220,6 +230,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 } else {
                     setupUserContext(token);
                     MDC.put("uid", String.valueOf(UserContext.current().getUser().getId()));
+                    LOGGER.debug("token check success, setup user context: {}, uid={}", token, String.valueOf(UserContext.current().getUser().getId()));
                 }
 
             } else {
@@ -448,8 +459,12 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (paramMap.get("signature") == null)
             return false;
 
+        if (requireLogonToken(request)) {
+            return false;
+        }
+
         String appKey = getParamValue(paramMap, APP_KEY_NAME);
-        App app = this.appProvider.findAppByKey(appKey);
+        App app = getAppByKey(appKey);
         if (app == null) {
             LOGGER.warn("Invalid app key: " + appKey);
             return false;
@@ -467,6 +482,19 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         String signature = getParamValue(paramMap, "signature");
 
         return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
+    }
+
+    private App getAppByKey(String appKey) {
+        // 给 SDK 调用提供的便捷方式
+        if (SdkSettings.APP_KEY_SDK.equalsIgnoreCase(appKey)) {
+            App app = new App();
+            app.setAppKey(appKey);
+            app.setSecretKey(SdkSettings.SECRET_KEY_SDK);
+            app.setName("SDK");
+            app.setId(0L);
+            return app;
+        }
+        return this.appProvider.findAppByKey(appKey);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
@@ -595,7 +623,46 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         Map<String, String[]> paramMap = request.getParameterMap();
         String signAppKey = getParamValue(paramMap, "appKey");
         String osignAppKey = configurationProvider.getValue(SIGN_APP_KEY, "44952417-b120-4f41-885f-0c1110c6aece");
-        return signAppKey == null ? false : signAppKey.equals(osignAppKey);
+        return signAppKey != null && signAppKey.equals(osignAppKey) && !requireLogonToken(request);
+    }
+
+    private boolean requireLogonToken(HttpServletRequest request) {
+        String appKey = getParamValue(request.getParameterMap(), "appKey");
+        if (appKey != null) {
+            String contextPath = request.getContextPath();
+            String requestURI = request.getRequestURI();
+            String uri = requestURI.replaceFirst(contextPath, "");
+
+            String clientAppKeyApi = configurationProvider.getValue("client.appKeyApi", DEFAULT_CLIENT_APP_KEY_API_STR);
+            Set<String> apiSet = Stream
+                    .of(clientAppKeyApi.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            // appKey 不为空的时候，如果是客户端来的请求，除了特殊的几个，都是需要 logon token 的
+            boolean needLogonToken = AppConstants.APPKEY_APP.equals(appKey) && !apiSet.contains(uri);
+
+            // log start
+            try {
+                if (needLogonToken) {
+                    String token = getParamValue(request.getParameterMap(), "token");
+                    if (token == null) {
+                        Cookie cookie = findCookieInRequest("token", request);
+                        if (cookie != null) {
+                            token = cookie.getValue();
+                        }
+                    }
+                    LOGGER.debug("Need logon token, but they are invalid, requestURI={}, token={}", uri, token);
+                }
+            } catch (Exception e) {
+                //
+            }
+            // log end
+
+            return needLogonToken;
+        }
+        // 受保护的 API 里，没有 appKey 的请求都是需要 logon token 的
+        return true;
     }
 
     private LoginToken innerSignLogon(HttpServletRequest request, HttpServletResponse response) {

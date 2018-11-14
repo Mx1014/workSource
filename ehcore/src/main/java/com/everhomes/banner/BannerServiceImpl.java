@@ -16,10 +16,16 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.portal.PortalItemGroup;
+import com.everhomes.portal.PortalItemGroupProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.banner.*;
 import com.everhomes.rest.banner.BannerOrder;
@@ -41,20 +47,26 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.widget.BannersInstanceConfig;
 import com.everhomes.scene.SceneService;
 import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
+import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -102,7 +114,16 @@ public class BannerServiceImpl implements BannerService {
 
     @Autowired
     private LaunchPadService launchPadService;
-    
+
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private PortalItemGroupProvider portalItemGroupProvider;
+
+    @Autowired
+    private ServiceModuleAppService serviceModuleAppService;
+
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
         if(cmd.getCommunityId() == null){
@@ -457,8 +478,25 @@ public class BannerServiceImpl implements BannerService {
         AppContext appContext = UserContext.current().getAppContext();
         //Long communityId = parseCommunityIdFromSceneToken(sceneToken);
 
+        //旧版本的公司场景没有communityId跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getOrganizationId() != null){
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(appContext.getOrganizationId());
+            if(communityRequest != null){
+                appContext.setCommunityId(communityRequest.getCommunityId());
+            }
+        }
+
+        //旧版本的家庭场景没有communityId，又跪了
+        if(appContext != null && appContext.getCommunityId() == null && appContext.getFamilyId() != null){
+            FamilyDTO family = familyProvider.getFamilyById(appContext.getFamilyId());
+            if(family != null){
+                appContext.setCommunityId(family.getCommunityId());
+            }
+        }
+
+
         if (appContext != null && appContext.getCommunityId() != null) {
-            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId());
+            List<Banner> bannerList = bannerProvider.listBannersByCommunityId(UserContext.getCurrentNamespaceId(), appContext.getCommunityId(),cmd.getCategoryId());
             return bannerList.stream().map(r -> {
                 BannerDTO dto = toBannerDTO(r);
                 // 本来posterPath是 cs:// 开头的
@@ -494,17 +532,26 @@ public class BannerServiceImpl implements BannerService {
                 }
 
                 try {
-                    RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
-
-                    if(routerInfo != null){
-                        dto.setModuleId(routerInfo.getModuleId());
-                        dto.setRouterPath(routerInfo.getPath());
-                        dto.setRouterQuery(routerInfo.getQuery());
-                    }
 
                     Byte clientHandlerType = handler.getClientHandlerType(dto.getTargetData());
                     dto.setClientHandlerType(clientHandlerType);
 
+                    RouterInfo routerInfo = handler.getRouterInfo(dto.getTargetData());
+                    if(routerInfo != null){
+                        dto.setModuleId(routerInfo.getModuleId());
+                        dto.setRouterPath(routerInfo.getPath());
+                        dto.setRouterQuery(routerInfo.getQuery());
+
+                        String host = "default";
+                        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(routerInfo.getModuleId());
+                        if (serviceModule != null) {
+                            if (!StringUtils.isBlank(serviceModule.getHost())) {
+                                host = serviceModule.getHost();
+                            }
+                        }
+                        String router = "zl://" + host + dto.getRouterPath() + "?moduleId="+routerInfo.getModuleId()+"&clientHandlerType="+ clientHandlerType +"&" + dto.getRouterQuery();
+                        dto.setRouter(router);
+                    }
 
                 } catch (Exception e) {
                     throw RuntimeErrorException.errorWith(e,
@@ -545,7 +592,10 @@ public class BannerServiceImpl implements BannerService {
     public CountEnabledBannersByScopeResponse countEnabledBannersByScope(CountEnabledBannersByScopeCommand cmd) {
 	    ValidatorUtil.validate(cmd);
 
-        Map<Long, Integer> communityIdTOEnabledCountMap = bannerProvider.countEnabledBannersByScope(cmd.getNamespaceId());
+	    if (cmd.getCategoryId() == null) {
+	        cmd.setCategoryId(0L);
+        }
+        Map<Long, Integer> communityIdTOEnabledCountMap = bannerProvider.countEnabledBannersByScope(cmd.getNamespaceId(), cmd.getCategoryId());
 
         List<EnabledBannersDTO> list = new ArrayList<>();
         communityIdTOEnabledCountMap.forEach((k, v) -> list.add(new EnabledBannersDTO(k, v)));
@@ -603,6 +653,27 @@ public class BannerServiceImpl implements BannerService {
             bannerProvider.updateBanner(banner);
         }
         return toBannerDTO(banner);
+    }
+
+    @Override
+    public BannerInstanconfigDTO getBannerInstanconfig(GetBannerInstanconfigCommand cmd) {
+        BannerInstanconfigDTO dto = new BannerInstanconfigDTO();
+        String instanceConfig = "%\"appId\":\""+cmd.getOriginId()+"\"%";
+        List<PortalItemGroup> list = this.portalItemGroupProvider.listBannerItemGroupByAppId(instanceConfig);
+        if (!CollectionUtils.isEmpty(list)) {
+            PortalItemGroup portalItemGroup = list.get(0);
+            if (portalItemGroup.getStyle().equals("Shape")) {
+                dto.setWidthRatio(22L);
+                dto.setHeightRatio(10L);
+            }else {
+                BannersInstanceConfig config = (BannersInstanceConfig)StringHelper.fromJsonString(portalItemGroup.getInstanceConfig(), BannersInstanceConfig.class);
+                if (config != null) {
+                    dto.setWidthRatio(config.getWidthRatio());
+                    dto.setHeightRatio(config.getHeightRatio());
+                }
+            }
+        }
+        return dto;
     }
 
     private void setupOrderToBanner(Banner banner, Byte status) {
@@ -842,7 +913,7 @@ public class BannerServiceImpl implements BannerService {
             banner.setStatus(BannerStatus.ACTIVE.getCode());
             banner.setScopeCode(ScopeType.COMMUNITY.getCode());
             banner.setScopeId(communityId);
-
+            banner.setCategoryId(cmd.getCategoryId());
             Integer minOrder = bannerProvider.getMinOrderByCommunityId(UserContext.getCurrentNamespaceId(), communityId);
             banner.setOrder(minOrder == null ? 10 : minOrder - 1);
             bannerProvider.createBanner(banner);
@@ -952,7 +1023,7 @@ public class BannerServiceImpl implements BannerService {
         locator.setAnchor(cmd.getPageAnchor());
 
         List<Banner> bannerList = bannerProvider.listBannersByCommunityId(
-                cmd.getNamespaceId(), cmd.getScope(), pageSize, locator);
+                cmd.getNamespaceId(), cmd.getScope(), cmd.getCategoryId(), pageSize, locator);
 
         List<BannerDTO> dtoList = bannerList.stream().map(this::toBannerDTO).collect(Collectors.toList());
 

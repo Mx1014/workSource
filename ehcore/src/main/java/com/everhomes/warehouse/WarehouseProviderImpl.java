@@ -287,9 +287,9 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.ID.eq(id));
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
-//        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
         query.fetch().map((r) -> {
@@ -1340,9 +1340,10 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
-        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
 //        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
-//        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
+        //		标准版仓库管理领用管理只与具体项目有关，去掉管理公司
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.COMMUNITY_ID.eq(communityId));
 
         query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());
         List<WarehouseRequestMaterials> result = new ArrayList<>();

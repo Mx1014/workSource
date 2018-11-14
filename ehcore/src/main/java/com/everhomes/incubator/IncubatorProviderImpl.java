@@ -258,4 +258,60 @@ public class IncubatorProviderImpl implements IncubatorProvider {
 
         return result;
     }
+
+    @Override
+    public IncubatorApply findSameApply(IncubatorApply incubatorApply) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhIncubatorAppliesRecord> query = context.selectQuery(Tables.EH_INCUBATOR_APPLIES);
+
+        if(incubatorApply.getApplyUserId() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_USER_ID.eq(incubatorApply.getApplyUserId()));
+        }
+
+
+        if(incubatorApply.getApplyType() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.APPLY_TYPE.eq(incubatorApply.getApplyType()));
+        }
+
+
+        if(incubatorApply.getParentId() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.PARENT_ID.eq(incubatorApply.getParentId()));
+        }
+
+
+
+        if(incubatorApply.getTeamName() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.TEAM_NAME.eq(incubatorApply.getTeamName()));
+        }
+
+        if(incubatorApply.getProjectType() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.PROJECT_TYPE.eq(incubatorApply.getProjectType()));
+        }
+
+        if(incubatorApply.getProjectName() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.PROJECT_NAME.eq(incubatorApply.getProjectName()));
+        }
+
+        if(incubatorApply.getChargerName() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CHARGER_NAME.eq(incubatorApply.getChargerName()));
+        }
+        if(incubatorApply.getChargerPhone() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CHARGER_PHONE.eq(incubatorApply.getChargerPhone()));
+        }
+
+        if(incubatorApply.getChargerEmail() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CHARGER_EMAIL.eq(incubatorApply.getChargerEmail()));
+        }
+
+
+        if(incubatorApply.getCreateTime() != null){
+            query.addConditions(Tables.EH_INCUBATOR_APPLIES.CREATE_TIME.ge(new Timestamp(incubatorApply.getCreateTime().getTime() - 10*1000)));
+        }
+
+        query.addLimit(1);
+
+        IncubatorApply sameApply = query.fetchOneInto(IncubatorApply.class);
+
+        return sameApply;
+    }
 }

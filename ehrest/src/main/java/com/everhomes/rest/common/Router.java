@@ -8,6 +8,7 @@ import com.everhomes.rest.meeting.MeetingReservationDetailActionData;
 import com.everhomes.rest.notice.EnterpriseNoticeDetailActionData;
 import com.everhomes.rest.remind.SelfRemindDetailActionData;
 import com.everhomes.rest.remind.TrackRemindDetailActionData;
+import com.everhomes.rest.techpark.punch.PunchNotificationActionData;
 import com.everhomes.rest.workReport.WorkReportDetailsActionData;
 import com.everhomes.rest.workReport.WorkReportIndexActionData;
 
@@ -254,8 +255,11 @@ public enum Router {
      * attendance
      */
     ATTENDANCE_PUNCH(ActionType.PUNCH,
-            "zl://attendance/punch", NoParamActionData.class),
+            "zl://attendance/index", PunchNotificationActionData.class),
 
+    ATTENDANCE_PUNCHCLOCK_RECORD(ActionType.PUNCH,
+                    "zl://attendance/punchClockRecord", PunchClockRecordData.class),
+            
     /**
      * video-conference
      */
@@ -294,7 +298,13 @@ public enum Router {
             "zl://meeting-reservation/meeting-detail", MeetingReservationDetailActionData.class),
 
     MEETING_RECORD_DETAIL(
-            "zl://meeting-reservation/meeting-recordDetail", MeetingRecordDetailActionData.class);
+            "zl://meeting-reservation/meeting-recordDetail", MeetingRecordDetailActionData.class),
+    
+    /**
+     * cloud-print
+     */
+    CLOUD_PRINT_DETAIL(
+            "zl://cloud-print/detail", PrintOrderActionData.class);
 
     // 此actionType不是必须的，
     // 有这个字段只是为了将之前的actionType形式的转换成router形式时的对照

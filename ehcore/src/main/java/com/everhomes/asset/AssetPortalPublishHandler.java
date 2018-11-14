@@ -1,20 +1,19 @@
 //@formatter:off
 package com.everhomes.asset;
 
-import com.everhomes.portal.PortalPublishHandler;
-import com.everhomes.rest.asset.AssetInstanceConfigDTO;
-import com.everhomes.rest.common.ServiceModuleConstants;
-import com.everhomes.rest.servicemoduleapp.CreateAnAppMappingCommand;
-import com.everhomes.serviceModuleApp.ServiceModuleApp;
-import com.everhomes.serviceModuleApp.ServiceModuleAppService;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.StringHelper;
+import com.everhomes.rest.portal.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.everhomes.portal.PortalPublishHandler;
+import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
+import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.user.UserContext;
 
 /**
  * Created by Wentian Wang on 2018/5/24.
@@ -26,12 +25,9 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     @Autowired
     private AssetService assetService;
     
-    @Autowired
-    private ServiceModuleAppService serviceModuleAppService;
-    
     // zhang jiang gao ke holds a different uri because in this namespace, the older asset UI is still in use
    @Override
-    public String publish(Integer namespaceId, String instanceConfig, String appName) {
+    public String publish(Integer namespaceId, String instanceConfig, String appName, HandlerPublishCommand cmd) {
         if(instanceConfig == null || !instanceConfig.contains("categoryId")){
             // new pushlish app
             JSONObject config = new JSONObject();
@@ -55,12 +51,12 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String processInstanceConfig(Integer namespaceId,String instanceConfig) {
+    public String processInstanceConfig(Integer namespaceId, String instanceConfig, HandlerProcessInstanceConfigCommand cmd) {
         return instanceConfig;
     }
 
     @Override
-    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig) {
+    public String getCustomTag(Integer namespaceId, Long moudleId, String instanceConfig, HandlerGetCustomTagCommand cmd) {
         if(instanceConfig == null) return null;
         try{
             JSONObject obj = (JSONObject)new JSONParser().parse(instanceConfig);
@@ -71,7 +67,7 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getItemActionData(Integer namespaceId, String instanceConfig) {
+    public String getItemActionData(Integer namespaceId, String instanceConfig, HandlerGetItemActionDataCommand cmd) {
     	try {
             JSONObject ret = new JSONObject();
             JSONObject jsonObject = (JSONObject) new JSONParser().parse(instanceConfig);
@@ -101,42 +97,16 @@ public class AssetPortalPublishHandler implements PortalPublishHandler{
     }
 
     @Override
-    public String getAppInstanceConfig(Integer namespaceId, String actionData){
+    public String getAppInstanceConfig(Integer namespaceId, String actionData, HandlerGetAppInstanceConfigCommand cmd){
        return null;
     }
     
-    public void afterAllAppPulish(ServiceModuleApp app){
-    	String instanceConfig = app.getInstanceConfig();
-    	try {
-    		if(instanceConfig != null && instanceConfig != "") {
-    			//格式化instanceConfig的json成对象
-    			AssetInstanceConfigDTO assetInstanceConfigDTO = (AssetInstanceConfigDTO) StringHelper.fromJsonString(instanceConfig, AssetInstanceConfigDTO.class);
-    			if(assetInstanceConfigDTO != null && assetInstanceConfigDTO.getContractOriginId() != null) {
-    				Long originId = assetInstanceConfigDTO.getContractOriginId();
-    				ServiceModuleApp contractApp = serviceModuleAppService.findReleaseServiceModuleAppByOriginId(originId);
-    				if(contractApp != null) {
-    					AssetInstanceConfigDTO contractInstanceConfigDTO = 
-    							(AssetInstanceConfigDTO) StringHelper.fromJsonString(contractApp.getInstanceConfig(), AssetInstanceConfigDTO.class);
-    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
-    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					cmd.setContractCategoryId(contractInstanceConfigDTO.getCategoryId());
-    					cmd.setContractChangeFlag(assetInstanceConfigDTO.getContractChangeFlag());
-    					cmd.setContractOriginId(assetInstanceConfigDTO.getContractOriginId());
-    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
-    					cmd.setNamespaceId(app.getNamespaceId());
-    					assetService.createOrUpdateAnAppMapping(cmd);
-    				}else {
-    					CreateAnAppMappingCommand cmd = new CreateAnAppMappingCommand();
-    					cmd.setAssetCategoryId(assetInstanceConfigDTO.getCategoryId());
-    					cmd.setEnergyFlag(assetInstanceConfigDTO.getEnergyFlag());
-    					cmd.setNamespaceId(app.getNamespaceId());
-    					assetService.createOrUpdateAnAppMapping(cmd);
-    				}
-    			}
+    public void afterAllAppPulish(ServiceModuleApp app, HandlerAfterAllAppPulishCommand cmd){
+    	for (AssetSourceTypeEnum e : AssetSourceTypeEnum.values()) {
+    		GeneralBillHandler generalBillHandler = assetService.getGeneralBillHandler(e.getSourceType());
+    		if(generalBillHandler != null) {
+    			generalBillHandler.createOrUpdateAssetModuleAppMapping(app);
     		}
-    	}catch (Exception e) {
-            LOGGER.error("failed to afterAllAppPulish in AssetPortalHandler, instanceConfig is={}", instanceConfig, e);
-            e.printStackTrace();
-        }
+    	}
     }
 }

@@ -103,4 +103,10 @@ public interface AddressService {
 	void excuteAddressArrangementOnTime();
 	void excuteAddressArrangement(ExcuteAddressArrangementCommand cmd);
 	void exportApartmentsInBuilding(ListPropApartmentsByKeywordCommand cmd, HttpServletResponse httpServletResponse);
+	
+	/**
+	 * 在现网中有些地址中的城市ID的ID在region表中找不到（原因未明），故需要进行修复；
+	 * @param namespaceId
+	 */
+	void fixInvalidCityInAddresses(Integer namespaceId);
 }

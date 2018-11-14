@@ -23,9 +23,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  *     <li>iconUrl: 标题图片</li>
  *     <li>align: align</li>
  *     <li>titleFlag: 是否有标题，5.8.4之后：0-无，1-居左，2-居中, 参考{@link TitleFlag}</li>
+ *     <li>titleUrl: titleUrl</li>
  *     <li>titleStyle: 样式，0-无标题，101,102,103,104为居左样式，201,202,203为居中样式，参考{@link TitleStyle}</li>
  *     <li>subTitle: subTitle</li>
- *     <li>titleSize: 标题大小，1-小，2-中，3-大，参考{@link TitleSize}</li>
+ *     <li>titleSize: 标题大小，0-小，1-中，2-大，参考{@link TitleSize}</li>
  *     <li>titleMoreFlag: 标题中是否带了“更多”，参考{@link com.everhomes.rest.common.TrueOrFalseFlag}</li>
  * </ul>
  */
@@ -47,7 +48,9 @@ public class LaunchPadLayoutGroup {
 
     private Byte titleFlag;
 
-    private Byte titleStyle;
+    private String titleUrl;
+
+    private Integer titleStyle;
 
     private String subTitle;
 
@@ -175,11 +178,19 @@ public class LaunchPadLayoutGroup {
         this.titleFlag = titleFlag;
     }
 
-    public Byte getTitleStyle() {
+    public String getTitleUrl() {
+        return titleUrl;
+    }
+
+    public void setTitleUrl(String titleUrl) {
+        this.titleUrl = titleUrl;
+    }
+
+    public Integer getTitleStyle() {
         return titleStyle;
     }
 
-    public void setTitleStyle(Byte titleStyle) {
+    public void setTitleStyle(Integer titleStyle) {
         this.titleStyle = titleStyle;
     }
 

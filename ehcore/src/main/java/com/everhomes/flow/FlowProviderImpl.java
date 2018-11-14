@@ -270,6 +270,11 @@ public class FlowProviderImpl implements FlowProvider {
         if (cmd.getProjectType() != null) {
             query.addConditions(t.PROJECT_TYPE.eq(cmd.getProjectType()));
         }
+        //多管理公司
+        if (cmd.getOrgId() != null) {
+            query.addConditions(t.ORGANIZATION_ID.eq(cmd.getOrgId()));
+        }
+
         query.addConditions(t.STATUS.ne(FlowStatusType.INVALID.getCode()));
     }
 

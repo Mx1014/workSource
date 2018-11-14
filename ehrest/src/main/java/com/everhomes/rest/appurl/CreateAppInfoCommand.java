@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>dtos:  参考{@link com.everhomes.rest.appurl.AppUrlDeviceDTO}</li>
  *  <li>logoUrl: logo路径</li>
  *  <li>description: 相关描述</li>
+ *  <li>themeColor: 主题色</li>
  * </ul>
  *
  */
@@ -24,7 +25,16 @@ public class CreateAppInfoCommand {
 	private String logoUrl;
 	private String description;
 	private List<AppUrlDeviceDTO> dtos ;
-	
+	private String themeColor;
+
+	public String getThemeColor() {
+		return themeColor;
+	}
+
+	public void setThemeColor(String themeColor) {
+		this.themeColor = themeColor;
+	}
+
 	public CreateAppInfoCommand() {
 		super();
 	}

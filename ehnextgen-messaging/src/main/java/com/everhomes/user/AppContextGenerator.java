@@ -63,6 +63,7 @@ public class AppContextGenerator {
                     case ORGANIZATION:
                     case ENTERPRISE:
                         context.setOrganizationId(dto.getEntityId());
+                        break;
                     case FAMILY:
                         context.setFamilyId(dto.getEntityId());
                         break;

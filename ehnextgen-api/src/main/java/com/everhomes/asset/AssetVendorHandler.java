@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
@@ -54,12 +53,10 @@ import com.everhomes.rest.asset.ShowCreateBillSubItemListCmd;
 import com.everhomes.rest.asset.ShowCreateBillSubItemListDTO;
 import com.everhomes.rest.asset.listBillExemtionItemsCommand;
 import com.everhomes.rest.asset.listBillRelatedTransacCommand;
+import com.everhomes.rest.contract.CMSyncObject;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
-import com.everhomes.rest.order.PayServiceErrorCode;
 import com.everhomes.rest.order.PreOrderCommand;
 import com.everhomes.rest.order.PreOrderDTO;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -107,19 +104,19 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
     };
 
-    ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractId, Integer namespaceId){
+    public ShowBillForClientDTO showBillForClient(Long ownerId, String ownerType, String targetType, Long targetId, Long billGroupId,Byte isOnlyOwedBill,String contractId, Integer namespaceId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     };
 
-    ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType, Long organizationId){
+    public ShowBillDetailForClientResponse getBillDetailForClient(Long ownerId, String billId,String targetType, Long organizationId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     };
 
-    ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId, Long billGroupId){
+    public ShowBillDetailForClientResponse listBillDetailOnDateChange(Byte billStatus,Long ownerId, String ownerType, String targetType, Long targetId, String dateStr,String contractId, Long billGroupId){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -215,13 +212,13 @@ public abstract class AssetVendorHandler {
                 "Insufficient privilege");
     };
 
-    List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd){
+    public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     };
 
-    List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd){
+    public List<ListAllBillsForClientDTO> listAllBillsForClient(ListAllBillsForClientCommand cmd){
         LOGGER.error("Insufficient privilege, zjgkhandler deleteBillItem");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -259,14 +256,14 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
-	
+
 	public PreOrderDTO payBillsForEnt(PlaceAnAssetOrderCommand cmd) {
 		LOGGER.error("Insufficient privilege, handler payBillsForEnt");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
-    
-    public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
+	
+	public PreOrderDTO createOrder(CreatePaymentBillOrderCommand cmd) {
     	LOGGER.error("Insufficient privilege, handler createOrder");
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
@@ -283,5 +280,11 @@ public abstract class AssetVendorHandler {
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
 	}
-    
+	
+	public void syncRuiAnCMBillToZuolin(CMSyncObject cmSyncObject, Integer namespaceId){
+		LOGGER.error("Insufficient privilege, handler syncRuiAnCMBillToZuolin");
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
+	}
+	
 }

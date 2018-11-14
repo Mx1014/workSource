@@ -593,26 +593,34 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
         FlowCaseState ctx = new FlowCaseState();
         FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
-        if (flowCase == null
-                || flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
-                || flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
-                || flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
+
+        if (flowCase == null) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
                     "flowcase noexists, flowCaseId=" + cmd.getFlowCaseId());
         }
-
         if (cmd.getStepCount() == null || !cmd.getStepCount().equals(flowCase.getStepCount())) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
                     "step busy");
         }
-
-        ctx.setFlowCase(flowCase);
-        ctx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
-
-        ctx.setOperator(logonUser);
+        FlowCaseStatus status = FlowCaseStatus.fromCode(flowCase.getStatus());
+        if (status == FlowCaseStatus.INVALID || status == FlowCaseStatus.FINISHED || status == FlowCaseStatus.ABSORTED) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_STATUS_MISMATCH_ERROR,
+                    "flow case status mismatch, flowCaseId=" + cmd.getFlowCaseId() + ", status=" + flowCase.getStatus());
+        }
 
         FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
         ctx.setFlowGraph(flowGraph);
+
+        // 暂缓状态下只允许取消暂缓一个操作
+        FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
+        if (status == FlowCaseStatus.SUSPEND && !FlowStepType.ABORT_SUSPEND_STEP.getCode().equals(button.getFlowButton().getFlowStepType())) {
+            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_STATUS_MISMATCH_ERROR,
+                    "flow case status mismatch, flowCaseId=" + cmd.getFlowCaseId() + ", status=" + flowCase.getStatus());
+        }
+
+        ctx.setFlowCase(flowCase);
+        ctx.setModule(flowListenerManager.getModule(flowCase.getModuleId()));
+        ctx.setOperator(logonUser);
 
         FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
         if (node == null) {
@@ -631,7 +639,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
         }
         ctx.setCurrentLane(currentLane);
 
-        FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
         FlowGraphButtonEvent event = new FlowGraphButtonEvent();
 
         Integer namespaceId = button.getFlowButton().getNamespaceId();
@@ -969,8 +976,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 
                 tracker = new FlowEventLog();
                 Map<String, Object> templateMap = new HashMap<>();
-                if (ctx.getOperator() != null) {
-                    templateMap.put("applierName", ctx.getOperator().getNickName());
+                UserInfo operator = ctx.getOperator();
+                if (operator != null) {
+                    flowService.fixupUserInfoInContext(ctx, operator);
+                    templateMap.put("applierName", operator.getNickName());
                 }
 
                 tracker.setLogContent(flowService.getStepMessageTemplate(fromStep, FlowCaseStatus.ABSORTED, ctx.getCurrentEvent(), templateMap));

@@ -19,6 +19,9 @@ import javax.validation.constraints.NotNull;
  * <li>dueDayType:最晚还款日的单位类型，1:日; 2:月</li>
  * <li>bizPayeeType:收款方账户类型：EhUsers/EhOrganizations</li>
  * <li>bizPayeeId:收款方账户id</li>
+ * <li>categoryId: 缴费多应用ID</li>
+ * <li>organizationId:管理公司ID</li>
+ * <li>appId:应用ID</li>
  *</ul>
  */
 public class CreateBillGroupCommand {
@@ -47,8 +50,8 @@ public class CreateBillGroupCommand {
     private Long categoryId;
 
     private Long organizationId;
-
     private Long appId;
+    private Boolean allScope;//标准版增加的allScope参数，true：默认/全部，false：具体项目
 
     public Long getCategoryId() {
         return categoryId;
@@ -57,7 +60,6 @@ public class CreateBillGroupCommand {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
-
 
     @Override
     public String toString() {
@@ -171,4 +173,13 @@ public class CreateBillGroupCommand {
     public void setAppId(Long appId) {
         this.appId = appId;
     }
+
+	public Boolean getAllScope() {
+		return allScope;
+	}
+
+	public void setAllScope(Boolean allScope) {
+		this.allScope = allScope;
+	}
+
 }

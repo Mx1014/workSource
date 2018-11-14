@@ -1,10 +1,9 @@
 package com.everhomes.archives;
 
+import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.archives.*;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -14,11 +13,18 @@ import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -32,6 +38,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,6 +67,9 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private ImportFileService importFileService;
@@ -118,13 +128,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             RowResult r = (RowResult) resultLists.get(i);
             ImportArchivesContactsDTO data = new ImportArchivesContactsDTO();
             data.setContactName(r.getCells().get("A") != null ? r.getCells().get("A") : "");
-            data.setContactEnName(r.getCells().get("B") != null ? r.getCells().get("B") : "");
-            data.setGender(r.getCells().get("C") != null ? r.getCells().get("C") : "");
-            data.setContactToken(r.getCells().get("D") != null ? r.getCells().get("D") : "");
-            data.setContactShortToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
-            data.setWorkEmail(r.getCells().get("F") != null ? r.getCells().get("F") : "");
-            data.setDepartment(r.getCells().get("G") != null ? r.getCells().get("G") : "");
-            data.setJobPosition(r.getCells().get("H") != null ? r.getCells().get("H") : "");
+            data.setAccount(r.getCells().get("B") != null ? r.getCells().get("B").trim() : "");
+            data.setContactEnName(r.getCells().get("C") != null ? r.getCells().get("C") : "");
+            data.setGender(r.getCells().get("D") != null ? r.getCells().get("D") : "");
+            data.setContactToken(r.getCells().get("E") != null ? r.getCells().get("E") : "");
+            data.setContactShortToken(r.getCells().get("F") != null ? r.getCells().get("F") : "");
+            data.setWorkEmail(r.getCells().get("G") != null ? r.getCells().get("G") : "");
+            data.setDepartment(r.getCells().get("H") != null ? r.getCells().get("H") : "");
+//            data.setJobPosition(r.getCells().get("I") != null ? r.getCells().get("I") : "");
             datas.add(data);
         }
         return datas;
@@ -142,10 +153,21 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 errorDataLogs.add(log);
                 continue;
             }
-            //  2.导入数据库
-            boolean flag = saveContactsInfo(data, organizationId, departmentId);
-            if (flag)
-                coverCount++;
+            try{
+	            //  2.导入数据库
+	            boolean flag = saveContactsInfo(data, organizationId, departmentId);
+	            if (flag)
+	                coverCount++;
+            }catch(RuntimeErrorException e){
+            	LOGGER.warn("导入通讯录,保存单个数据出错", e);
+            	log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
+            	log.setData(data);
+                log.setErrorLog(e.getMessage());
+                log.setCode(e.getErrorCode());
+                errorDataLogs.add(log);
+                continue;
+            	
+            }
         }
         //  3.存储所有数据行数
         response.setTotalCount((long) datas.size());
@@ -160,7 +182,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     //  模板校验
     private String checkContactsTitle(ImportArchivesContactsDTO title) {
 
-        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门", "岗位"));
+        List<String> module = new ArrayList<>(Arrays.asList("姓名", "英文名", "性别", "手机", "短号", "工作邮箱", "部门" ));
         //  存储字段来进行校验
         List<String> temp = new ArrayList<>();
         temp.add(title.getContactName());
@@ -170,7 +192,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         temp.add(title.getContactShortToken());
         temp.add(title.getWorkEmail());
         temp.add(title.getDepartment());
-        temp.add(title.getJobPosition());
+//        temp.add(title.getJobPosition());
 
         for (int i = 0; i < module.size(); i++) {
             if (!module.get(i).equals(temp.get(i)))
@@ -183,16 +205,24 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         ImportFileResultLog<ImportArchivesContactsDTO> log = new ImportFileResultLog<>(ArchivesLocaleStringCode.SCOPE);
 
+        //  手机号
+        if (checkArchivesContactToken(log, data, data.getContactToken()))
+            return log;
+        OrganizationMemberDetails contact = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, data.getContactToken());
+        String realContactToken = getRealContactToken(data.getContactToken().trim(), ArchivesParameter.CONTACT_TOKEN);
         //  姓名校验
         if (checkArchivesContactName(log, data, data.getContactName()))
             return log;
 
+        //  账号校验
+        if (checkArchivesAccount(log, data, data.getAccount(), realContactToken))
+            return log;
+        if (contact != null)
+            if (checkArchivesAccount(log, data, data.getAccount(), contact))
+                return log;
+
         //  英文名校验
         if (checkArchivesContactEnName(log, data, data.getContactEnName()))
-            return log;
-
-        //  手机号
-        if (checkArchivesContactToken(log, data, data.getContactToken()))
             return log;
 
         //  短号
@@ -200,16 +230,16 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return log;
 
         //  工作邮箱
-        if (checkArchivesWorkEmail(log, data, data.getWorkEmail(), organizationId))
+        if (checkArchivesWorkEmail(log, data, realContactToken, data.getWorkEmail(), organizationId))
             return log;
 
         //  部门
         if (checkArchivesDepartment(log, data, data.getDepartment()))
             return log;
 
-        //  职务
-        if (checkArchivesJobPosition(log, data, data.getJobPosition()))
-            return log;
+//        //  职务 2018年9月30日临时去掉岗位
+//        if (checkArchivesJobPosition(log, data, data.getJobPosition()))
+//            return log;
 
         return null;
     }
@@ -217,8 +247,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     private boolean saveContactsInfo(ImportArchivesContactsDTO data, Long organizationId, Long departmentId) {
         AddArchivesContactCommand addCommand = new AddArchivesContactCommand();
         //  1.设置信息
+        OrganizationMember employee = organizationProvider.findOrganizationPersonnelByPhone(organizationId, getRealContactToken(data.getContactToken(), ArchivesParameter.CONTACT_TOKEN), null);
+        if(null != employee){
+        	addCommand.setUpdateDetailId(employee.getDetailId());
+        	addCommand.setDetailId(employee.getDetailId());
+        }
         addCommand.setOrganizationId(organizationId);
         addCommand.setContactName(data.getContactName());
+        addCommand.setAccount(StringUtils.isEmpty(data.getAccount()) ? null : data.getAccount());
         addCommand.setContactEnName(data.getContactEnName());
         addCommand.setGender(ArchivesUtil.convertToArchivesEnum(data.getGender(), ArchivesParameter.GENDER));
         addCommand.setContactShortToken(data.getContactShortToken());
@@ -252,6 +288,167 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
     @Override
     public ImportFileResponse<ImportArchivesContactsDTO> getImportContactsResult(GetImportFileResultCommand cmd) {
         return importFileService.getImportFileResult(cmd.getTaskId());
+    }
+
+    @Override
+    public void exportArchivesContacts(ListArchivesContactsCommand cmd) {
+        //  export with the file download center
+        Map<String, Object> params = new HashMap<>();
+        //  the value could be null if it is not exist
+        params.put("organizationId", cmd.getOrganizationId());
+        params.put("keywords", cmd.getKeywords());
+        params.put("filterScopeTypes", JSON.toJSONString(cmd.getFilterScopeTypes()));
+        params.put("targetTypes", JSON.toJSONString(cmd.getTargetTypes()));
+        params.put("namespaceId", UserContext.getCurrentNamespaceId());
+        String fileName = ArchivesExcelLocaleString.C_FILENAME + "_" + employeeFormat.format(LocalDate.now()) + ".xlsx";
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ArchivesContactsExportTaskHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+    
+    public Long getTopEnterpriseId(Long organizationId) {
+        Organization organization = organizationProvider.findOrganizationById(organizationId);
+        if(organization != null){
+            if (organization.getParentId() == null)
+                return organizationId;
+            else {
+                return Long.valueOf(organization.getPath().split("/")[1]);
+            }
+        }else{
+            return organizationId;
+        }
+    }
+    
+    @Override
+    public OutputStream getArchivesContactsExportStream(ListArchivesContactsCommand cmd, Long taskId) {
+        //  title 2018年9月30日 临时去掉岗位
+        List<String> title = new ArrayList<>(Arrays.asList("姓名", "账号", "英文名", "性别", "手机", "短号", "工作邮箱", "部门"));
+        taskService.updateTaskProcess(taskId, 15);
+        //  data
+        ListArchivesContactsResponse response = archivesService.listArchivesContacts(cmd);
+        taskService.updateTaskProcess(taskId, 46);
+        List<Organization> orgs = organizationProvider.listOrganizationsByPath(getTopEnterpriseId(cmd.getOrganizationId()));
+        Map<Long, String> fullPathMap = orgs.stream().collect(Collectors.toMap(Organization::getId, Organization::getName));
+        taskService.updateTaskProcess(taskId, 75);
+        /*
+        OutputStream outputStream = null;
+        cmd.setPageSize(Integer.MAX_VALUE - 1);
+        taskService.updateTaskProcess(taskId, 10);
+        if (response.getContacts() != null && response.getContacts().size() > 0) {
+            //  1.设置导出文件名与 sheet 名
+            String fileName = localeStringService.getLocalizedString(ArchivesLocaleStringCode.SCOPE, ArchivesLocaleStringCode.CONTACT_LIST, "zh_CN", "userLists");
+            ExcelUtils excelUtils = new ExcelUtils(fileName, fileName);
+            //  2.设置导出标题栏
+            List<String> titleNames;
+            //  3.设置格式长度
+            List<Integer> cellSizes = new ArrayList<>(Arrays.asList(20, 10, 20, 20, 30, 30, 20));
+            //  4.设置导出变量名
+            List<String> propertyNames = new ArrayList<>(Arrays.asList("contactName", "genderString", "contactToken",
+                    "contactShortToken", "workEmail", "departmentString", "jobPositionString"));
+            excelUtils.setNeedSequenceColumn(false);
+            //  5.处理导出变量的值并导出
+            List<ArchivesContactDTO> contacts = response.getContacts().stream().peek(this::convertArchivesContactForExcel).collect(Collectors.toList());
+            taskService.updateTaskProcess(taskId, 60);
+            outputStream = excelUtils.getOutputStream(propertyNames, titleNames, cellSizes, contacts);
+            taskService.updateTaskProcess(taskId, 90);
+        }*/
+        XSSFWorkbook workbook = exportArchivesContactsFiles(title, response.getContacts(), fullPathMap);
+        taskService.updateTaskProcess(taskId, 95);
+        return writeExcel(workbook);
+    }
+
+    private XSSFWorkbook exportArchivesContactsFiles(List<String> title, List<ArchivesContactDTO> contacts, Map<Long, String> fullPathMap) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.C_FILENAME);
+        sheet.setColumnWidth(6, 30 * 256);
+        sheet.setColumnWidth(7, 49 * 256);
+        sheet.setColumnWidth(8, 49 * 256);
+        // sheet.createFreezePane(1,2,1,1);
+        //  1.head
+        Row headRow = sheet.createRow(0);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
+        headRow.setHeight((short) (150 * 20));
+        createExcelHead(workbook, headRow, ArchivesExcelLocaleString.C_HEAD);
+        //  2.title
+        Row titleRow = sheet.createRow(1);
+        createExcelTitle(workbook, sheet, titleRow, title);
+        //  3.data
+        XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
+        for (int rowIndex = 2; rowIndex - 2 < contacts.size(); rowIndex++) {
+            Row dataRow = sheet.createRow(rowIndex);
+            createContactsFileData(dataRow, bodyStyle, contacts.get(rowIndex - 2), fullPathMap);
+        }
+        return workbook;
+    }
+
+    private void createContactsFileData(Row dataRow, XSSFCellStyle style, ArchivesContactDTO contact, Map<Long, String> fullPathMap) {
+        Cell cellA = dataRow.createCell(0); // 姓名
+        Cell cellB = dataRow.createCell(1); // 账号
+        Cell cellC = dataRow.createCell(2); // 英文名
+        Cell cellD = dataRow.createCell(3); // 性别
+        Cell cellE = dataRow.createCell(4); // 手机
+        Cell cellF = dataRow.createCell(5); // 短号
+        Cell cellG = dataRow.createCell(6); // 工作邮箱
+        Cell cellH = dataRow.createCell(7); // 部门
+//        Cell cellI = dataRow.createCell(8); // 岗位 2018年9月30日 临时去掉了岗位
+        cellA.setCellStyle(style);
+        cellB.setCellStyle(style);
+        cellC.setCellStyle(style);
+        cellD.setCellStyle(style);
+        cellE.setCellStyle(style);
+        cellF.setCellStyle(style);
+        cellG.setCellStyle(style);
+        cellH.setCellStyle(style);
+//        cellI.setCellStyle(style);
+        cellA.setCellValue(contact.getContactName());
+        cellB.setCellValue(contact.getAccount());
+        cellC.setCellValue(contact.getContactEnName());
+        cellD.setCellValue(ArchivesUtil.resolveArchivesEnum(contact.getGender(), ArchivesParameter.GENDER));
+        cellE.setCellValue(((contact.getRegionCode() != null && "86".equals(contact.getRegionCode())) ? "" : "+" + contact.getRegionCode() + " ") + contact.getContactToken());
+        cellF.setCellValue(contact.getContactShortToken());
+        cellG.setCellValue(contact.getWorkEmail());
+        if (contact.getDepartments() != null)
+            cellH.setCellValue(getFullPathOrgNames(contact.getDepartments(), fullPathMap));
+//        if (contact.getJobPositions() != null)
+//            cellI.setCellValue(getFullPathOrgNames(contact.getJobPositions(), fullPathMap));
+    }
+
+    private String getFullPathOrgNames(List<OrganizationDTO> dtos, Map<Long, String> fullPathMap) {
+        StringBuilder names = new StringBuilder();
+        if (dtos == null || dtos.size() == 0)
+            return "";
+        for (OrganizationDTO dto : dtos) {
+            StringBuilder name = new StringBuilder();
+            String[] tokens = dto.getPath().split("/");
+            if(tokens.length == 0)
+                continue;
+            for (int i = 1; i < tokens.length; i++)
+                name.append(fullPathMap.get(Long.valueOf(tokens[i]))).append("/");
+            names.append(name).append(",");
+        }
+        names = new StringBuilder(names.substring(0, names.length() - 2));
+        return names.toString();
+    }
+
+    @Override
+    public void verifyPersonnelByPassword(VerifyPersonnelByPasswordCommand cmd) {
+        if (StringUtils.isEmpty(cmd.getPassword())) {
+            LOGGER.error("Password is null ");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
+        if (user == null) {
+            LOGGER.error("Unable to find owner user,  namespaceId={}", namespaceId);
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
+        }
+
+        if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_ACCOUNT_NOT_ACTIVATED, "User account has not been activated yet");
+
+        if (!EncryptionUtils.validateHashPassword(cmd.getPassword(), user.getSalt(), user.getPasswordHash())) {
+            LOGGER.error("Password does not match for " + user.getIdentifierToken());
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Invalid password");
+        }
     }
 
     @Override
@@ -425,12 +622,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 map.put(ArchivesParameter.JOB_LEVEL_IDS, organizationService.getOrganizationNameByNameAndType(itemValue.getFieldValue(), OrganizationGroupType.JOB_LEVEL.getCode()));
         }
 
-        if(ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())){
-            if (!StringUtils.isEmpty(itemValue.getFieldValue())){
-                if(checkArchivesWorkEmail(log, convertListToMap(data), itemValue.getFieldValue(), organizationId))
+        //  邮箱校验存在重复校验问题 需修改逻辑
+/*        if (ArchivesParameter.WORK_EMAIL.equals(itemValue.getFieldName())) {
+            if (!StringUtils.isEmpty(itemValue.getFieldValue())) {
+                if (checkArchivesWorkEmail(log, convertListToMap(data), itemValue.getFieldValue(), organizationId))
                     return log;
             }
-        }
+        }*/
 
         return null;
     }
@@ -544,7 +742,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         Sheet sheet = workbook.createSheet(ArchivesExcelLocaleString.E_FILENAME);
-        sheet.createFreezePane(1,2,1,1);
+        sheet.createFreezePane(1, 2, 1, 1);
         //  1.head
         Row headRow = sheet.createRow(0);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
@@ -554,24 +752,18 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         Row titleRow = sheet.createRow(1);
         createExcelTitle(workbook, sheet, titleRow, title);
         //  3.data
+        XSSFCellStyle bodyStyle = commonBodyStyle(workbook);
         for (int rowIndex = 2; rowIndex < value.size(); rowIndex++) {
             Row dataRow = sheet.createRow(rowIndex);
-            createEmployeesFileData(workbook, dataRow, value.get(rowIndex - 2).getVals());
+            createEmployeesFileData(dataRow, bodyStyle, value.get(rowIndex - 2).getVals());
         }
         return workbook;
     }
 
-    private void createEmployeesFileData(XSSFWorkbook workbook, Row dataRow, List<String> list) {
-        //  设置样式
-        XSSFCellStyle contentStyle = workbook.createCellStyle();
-        XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setFontName("微软雅黑");
-        contentStyle.setAlignment(HorizontalAlignment.CENTER);
-        contentStyle.setFont(font);
+    private void createEmployeesFileData(Row dataRow, XSSFCellStyle style, List<String> list) {
         for (int i = 0; i < list.size(); i++) {
             Cell cell = dataRow.createCell(i);
-            cell.setCellStyle(contentStyle);
+            cell.setCellStyle(style);
             cell.setCellValue(list.get(i));
         }
     }
@@ -582,7 +774,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             workbook.write(out);
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        }finally {
+        } finally {
             try {
                 workbook.close();
             } catch (IOException e) {
@@ -602,7 +794,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(fileName);
-        sheet.createFreezePane(1,2,1,1);
+        sheet.createFreezePane(1, 2, 1, 1);
 
         //  1.set the header
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, title.size() - 1));
@@ -639,7 +831,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         XSSFCellStyle mandatoryStyle = mandatoryTitleStyle(workbook);
         for (int i = 0; i < title.size(); i++) {
             Cell cell = titleRow.createCell(i);
-            sheet.setColumnWidth( i,18 * 256);
+            sheet.setColumnWidth(i, 18 * 256);
             if (checkMandatory(title.get(i)))
                 cell.setCellStyle(mandatoryStyle);
             else
@@ -657,12 +849,12 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             return true;
         if (ArchivesExcelLocaleString.T_EMPLOYEE_TYPE.equals(text))
             return true;
-        if (ArchivesExcelLocaleString.T_DEPARTMENT.equals(text))
-            return true;
+/*        if (ArchivesExcelLocaleString.T_DEPARTMENT.equals(text))
+            return true;*/
         return false;
     }
 
-    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook){
+    private XSSFCellStyle commonTitleStyle(XSSFWorkbook workbook) {
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
@@ -675,7 +867,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return titleStyle;
     }
 
-    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook){
+    private XSSFCellStyle mandatoryTitleStyle(XSSFWorkbook workbook) {
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
         font.setFontHeightInPoints((short) 11);
@@ -689,6 +881,16 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return titleStyle;
     }
 
+    private XSSFCellStyle commonBodyStyle(XSSFWorkbook workbook) {
+        XSSFCellStyle contentStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 12);
+        font.setFontName("微软雅黑");
+        contentStyle.setAlignment(HorizontalAlignment.CENTER);
+        contentStyle.setFont(font);
+        return contentStyle;
+    }
+
     private void writeHttpExcel(Workbook workbook, HttpServletResponse httpResponse, String fileName) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -696,7 +898,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             DownloadUtil.download(out, httpResponse, fileName);
         } catch (Exception e) {
             LOGGER.error("export error, e = {}", e);
-        }finally {
+        } finally {
             try {
                 workbook.close();
             } catch (IOException e) {
@@ -731,8 +933,13 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             token[0] = token[0].substring(1, token[0].length());
             if (type.equals(ArchivesParameter.CONTACT_TOKEN))
                 return token[1];
-            else
-                return token[0];
+            else{
+            	if(Pattern.matches("^1\\d{10}$", token[0])){
+                    return token[0];
+            	}else{
+            		return null;
+            	}
+            }
         }
     }
 
@@ -751,7 +958,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setCode(ArchivesLocaleStringCode.ERROR_NAME_TOO_LONG);
             return true;
         }
-        if (!Pattern.matches("^[\\u4E00-\\u9FA5A-Za-z0-9_\\n]+$", contactName)) {
+        if (!Pattern.matches("^[\\u4E00-\\u9FA5 A-Za-z0-9_\\n]+$", contactName)) {
             LOGGER.warn("Contact name wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact name wrong format.");
@@ -761,9 +968,42 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account, String contactToken) {
+        if (!StringUtils.isEmpty(account)) {
+            if (account.length() > 32 || !Pattern.matches("^[a-zA-Z0-9_\\-.]+$", account)) {
+                LOGGER.warn("Account wrong format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Account EnName wrong format");
+                log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_WRONG_FORMAT);
+                return true;
+            }
+            if (!organizationService.verifyPersonnelByAccount(contactToken, account.trim())) {
+                LOGGER.warn("Duplicate account. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Duplicate account");
+                log.setCode(ArchivesLocaleStringCode.ERROR_DUPLICATE_ACCOUNT);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private <T> boolean checkArchivesAccount(ImportFileResultLog<T> log, T data, String account, OrganizationMemberDetails contact) {
+        if (contact.getAccount() != null) {
+            if (!contact.getAccount().equals(account)) {
+                LOGGER.warn("Refuse updating account. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Refuse updating account");
+                log.setCode(ArchivesLocaleStringCode.ERROR_ACCOUNT_UPDATE_REFUSE);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private <T> boolean checkArchivesContactEnName(ImportFileResultLog<T> log, T data, String contactEnName) {
         if (!StringUtils.isEmpty(contactEnName)) {
-            if (!Pattern.matches("^[a-zA-Z0-9_\\-.]+$", contactEnName)) {
+            if (!Pattern.matches("^[a-zA-Z0-9_ \\-.]+$", contactEnName)) {
                 LOGGER.warn("Contact EnName wrong format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Contact EnName wrong format");
@@ -782,7 +1022,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
             log.setCode(ArchivesLocaleStringCode.ERROR_CONTACT_TOKEN_IS_EMPTY);
             return true;
         }
-        if (!Pattern.matches("^1\\d{10}$", getRealContactToken(contactToken, ArchivesParameter.CONTACT_TOKEN))) {
+        if (!checkContactToken(contactToken)) {
             LOGGER.warn("Contact token wrong format. data = {}", data);
             log.setData(data);
             log.setErrorLog("Contact token wrong format");
@@ -792,7 +1032,14 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesDepartment(ImportFileResultLog<T> log, T data, String department) {
+    private boolean checkContactToken(String contactToken) {
+    	if("86".equals(getRealContactToken(contactToken, ArchivesParameter.REGION_CODE))){
+    		return Pattern.matches("^1\\d{10}$", getRealContactToken(contactToken, ArchivesParameter.CONTACT_TOKEN));
+    	}
+    	return true; 
+	}
+
+	private <T> boolean checkArchivesDepartment(ImportFileResultLog<T> log, T data, String department) {
         if (!StringUtils.isEmpty(department)) {
             if (organizationService.getOrganizationNameByNameAndType(department, OrganizationGroupType.DEPARTMENT.getCode()) == null) {
                 LOGGER.warn("Department not found. data = {}", data);
@@ -831,7 +1078,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
         return false;
     }
 
-    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String workEmail, Long organizationId) {
+    private <T> boolean checkArchivesWorkEmail(ImportFileResultLog<T> log, T data, String contactToken, String workEmail, Long organizationId) {
         if (!StringUtils.isEmpty(workEmail)) {
             if (!Pattern.matches("^([a-zA-Z0-9]+[_|_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\\_|\\.]?)*[a-zA-Z0-9]+\\.[a-zA-Z]{2,3}$", workEmail)) {
                 LOGGER.warn("WorkEmail wrong format. data = {}", data);
@@ -840,7 +1087,7 @@ public class ArchivesDTSServiceImpl implements ArchivesDTSService {
                 log.setCode(ArchivesLocaleStringCode.ERROR_WORK_EMAIL_WRONG_FORMAT);
                 return true;
             }
-            if (!organizationService.verifyPersonnelByWorkEmail(organizationId, null, workEmail)) {
+            if (!organizationService.verifyPersonnelByWorkEmail(organizationId, contactToken, workEmail)) {
                 LOGGER.warn("Duplicate workEmail. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Duplicate workEmail");

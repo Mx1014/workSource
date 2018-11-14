@@ -1,6 +1,10 @@
 package com.everhomes.pmtask;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,15 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
-import com.everhomes.rest.pmtask.PmTaskAppType;
-import com.everhomes.rest.pmtask.PmtaskCreatorType;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.*;
+import org.apache.commons.lang.CharSet;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -41,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -52,8 +52,6 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
     @Autowired
 	private PmTaskProvider pmTaskProvider;
-    @Autowired
-    private CategoryProvider categoryProvider;
     @Autowired
     private ServiceModuleService serviceModuleService;
 
@@ -79,12 +77,15 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("flowCaseId", task.getFlowCaseId());
             b.field("requestorName", task.getRequestorName());
             b.field("requestorPhone", task.getRequestorPhone());
-            b.field("buildingName", task.getBuildingName());
+            String buildingName = URLEncoder.encode(task.getBuildingName(), StandardCharsets.UTF_8.name());
+            b.field("buildingName", buildingName);
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
             b.field("star",task.getStar());
             b.field("amount",task.getAmount());
+//          多应用标识
+            b.field("appId",task.getAppId());
 
-            Category appType = categoryProvider.findCategoryById(task.getTaskCategoryId());
+            PmTaskCategory appType = pmTaskProvider.findCategoryById(task.getTaskCategoryId());
             //多入口查全部数据
             if (null != appType && Arrays.asList(PmTaskAppType.TYPES).contains(appType.getParentId())) {
                 b.field("appType", appType.getParentId());
@@ -94,7 +95,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             return b;
         } catch (IOException ex) {
             LOGGER.error("Create pmtask error, taskId={}", task.getId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SYNC_ES_FAIL,
     				"Create pmtask error.");
         }
     }
@@ -308,7 +309,13 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         }
 
         if(StringUtils.isNotBlank(cmd.getBuildingName())){
-            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getBuildingName()).field("buildingName");
+            String buildingName = "";
+            try {
+                buildingName = URLEncoder.encode(cmd.getBuildingName(),StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(buildingName).field("buildingName");
             qb = qb.must(sb);
         }
 
@@ -329,6 +336,11 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 
         if(null != cmd.getAddressId()){
             QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getAddressId().toString()).field("addressId");
+            qb = qb.must(sb);
+        }
+
+        if(null != cmd.getAppId()){
+            QueryStringQueryBuilder sb = QueryBuilders.queryString(cmd.getAppId().toString()).field("appId");
             qb = qb.must(sb);
         }
 
@@ -372,15 +384,18 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setRequestorName((String)source.get("requestorName"));
             doc.setRequestorPhone((String)source.get("requestorPhone"));
             doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
-            doc.setBuildingName((String)source.get("buildingName"));
+            String buildingName = (String)source.get("buildingName");
+            doc.setBuildingName(URLDecoder.decode(buildingName,StandardCharsets.UTF_8.name()));
             doc.setOrganizationUid(SearchUtils.getLongField(source.get("organizationUid")));
             doc.setStar( null != source.get("star") ? (String)source.get("star"):"");
             doc.setAmount(SearchUtils.getLongField(source.get("amount")));
+//          多应用标识
+            doc.setAppId(SearchUtils.getLongField(source.get("appId")));
             
             return doc;
         }catch (Exception ex) {
             LOGGER.error("Pmtask readDoc failed, source={}, id={}", source, idAsStr);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+            throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_QUERY_ES_FAIL,
     				"readDoc Exception.");
         }
 
