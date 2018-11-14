@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>formId: 表单id</li>
- * <li>id: 门禁或门禁组ID </li>
+ * <li>doorId: 门禁或门禁组ID </li>
  * <li>type: 类型：1门禁 2门禁组</li>
  * <li>name: 门禁（组）名称</li>
  * <li>status：状态： 0失效 1有效</li>
@@ -19,7 +19,10 @@ import java.util.List;
  */
 public class DoorsAndGroupsDTO {
 	private Long formId;
-	private Long id;
+//	private Long id;
+//	private Long doorId;
+//	private Long groupId;
+	private String id;
 	private Byte type;
 	private String name;
 	private Byte Status;
@@ -32,13 +35,28 @@ public class DoorsAndGroupsDTO {
 		this.formId = formId;
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
+	//	public Long getDoorId() {
+//		return doorId;
+//	}
+//
+//	public void setDoorId(Long doorId) {
+//		this.doorId = doorId;
+//	}
+//
+//	public Long getGroupId() {
+//		return groupId;
+//	}
+//
+//	public void setGroupId(Long groupId) {
+//		this.groupId = groupId;
+//	}
 
 	public Byte getType() {
 		return type;

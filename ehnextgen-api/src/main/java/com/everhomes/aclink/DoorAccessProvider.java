@@ -117,5 +117,6 @@ public interface DoorAccessProvider {
 
     List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
                                                  ListDoorGroupCommand cmd);
+    List<DoorAccessLiteDTO> listGroupDoors (Long groupId);
 
 }

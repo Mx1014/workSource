@@ -93,6 +93,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.JsonArray;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import com.sun.xml.bind.v2.TODO;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -1350,12 +1351,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccessId, 20);
                 if(childs != null && childs.size() > 0) {
                     for(DoorAccess dc : childs) {
+                        //若有管理授权则不能删除
+                        List<AclinkManagementDTO> management = new ArrayList<>();
+                        management = doorAccessProvider.searchAclinkManagementByDoorId(dc.getId());
+                        if(null == management || management.isEmpty()){
+                            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_MANAGER_EXIST, "Manager exist");
+                        }
                         dc.setStatus(DoorAccessStatus.INVALID.getCode());
                         doorAccessProvider.updateDoorAccess(doorAcc);
                     }
                 }
                 
                 if(doorAcc != null) {
+                    //若有管理授权则不能删除
+                    List<AclinkManagementDTO> management = new ArrayList<>();
+                    management = doorAccessProvider.searchAclinkManagementByDoorId(doorAcc.getId());
+                    if(null != management && !management.isEmpty()){
+                        throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_MANAGER_EXIST, "Manager exist");
+                    }
                     doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
                     doorAccessProvider.updateDoorAccess(doorAcc);
                     return doorAcc;
@@ -6011,6 +6024,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     //add bu liqingyan 添加临时授权
     @Override
     public DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd){
+	    //检查该用户是否已存在临时授权
+        if(cmd.getConfirm() != (byte)1){
+            List<DoorAuth> auth = doorAuthProvider.listValidDoorAuthByVisitorPhone(cmd.getDoorId(),cmd.getPhone());
+            if(null != auth && !auth.isEmpty()){
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "Auth exist");
+            }
+        }
 	    CreateLocalVistorCommand itemCmd = ConvertHelper.convert(cmd,CreateLocalVistorCommand.class);
 	    itemCmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
         if(itemCmd.getValidEndMs() == null) {
@@ -6898,6 +6918,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
+    public ListGroupDoorsResponse listGroupDoors(ListGroupDoorsCommand cmd){
+	    ListGroupDoorsResponse resp = new ListGroupDoorsResponse();
+        List<DoorAccessLiteDTO> doors = new ArrayList<>();
+        doors = doorAccessProvider.listGroupDoors(cmd.getGroupId());
+        resp.setDoors(doors);
+        return resp;
+    }
+
+    @Override
     public void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd){
         User user = UserContext.current().getUser();
 	    AclinkGroupDoors door = new AclinkGroupDoors();
@@ -6970,7 +6999,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null != doorResp.getDoors() && doorResp.getDoors().size()>0){
             for(DoorAccessDTO door: doorResp.getDoors()){
                 DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
-                dto.setId(door.getId());
+                dto.setId(door.getId().toString());
                 dto.setType((byte)1); //门禁
                 dto.setName(door.getDisplayName());
                 dto.setStatus(door.getStatus());
@@ -6980,7 +7009,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null != groups && groups.size()>0){
             for(AclinkGroupDTO group :groups){
                 DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
-                dto.setId(group.getGroupId());
+                dto.setId("_" + group.getGroupId().toString());//门禁组加下划线
                 dto.setType((byte)2); //门禁组
                 dto.setName(group.getGroupName());
                 dto.setStatus(group.getStatus());
@@ -7016,15 +7045,28 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
 
     @Override
-    public AclinkFormValuesDTO deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd){
+    public DeleteTempAuthPriorityResponse deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd){
 	    User user = UserContext.current().getUser();
-	    AclinkFormValues value = doorAccessProvider.findAclinkFormValuesById(cmd.getId());
-	    if (null != value && value.getId() != null){
-	        value.setStatus((byte)0);
-            value.setOperatorUid(user.getId());
-            value.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    }
-	    return doorAccessProvider.updateAclinkFormValues(value);
+        DeleteTempAuthPriorityResponse resp = new DeleteTempAuthPriorityResponse();
+        List<AclinkFormValuesDTO> dtos = new ArrayList<>();
+        if(null !=cmd.getId() && !cmd.getId().isEmpty()){
+	        for(Long id:cmd.getId()){
+	            if(null != id){
+                    AclinkFormValues value = new AclinkFormValues();
+                    value = doorAccessProvider.findAclinkFormValuesById(id);
+                    if (null != value && value.getId() != null){
+                        value.setStatus((byte)0);
+                        value.setOperatorUid(user.getId());
+                        value.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        AclinkFormValuesDTO dto = new AclinkFormValuesDTO();
+                        dto = doorAccessProvider.updateAclinkFormValues(value);
+                        dtos.add(dto);
+                    }
+                }
+            }
+        }
+        resp.setDoors(dtos);
+	    return resp;
     }
 
 	@Override
@@ -7295,13 +7337,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     value.setOwnerType(cmd.getOwnerType());
                     if(dto.getType() == 1){ //门禁
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode());
+                        value.setValue(dto.getId());
                     }
                     else if(dto.getType() == 2) { //门禁组
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode());
+                        value.setValue(dto.getId());
                     }else continue;
                     value.setStatus((byte)1);
                     value.setTitleId(0L);
-                    value.setValue(String.valueOf(dto.getId()));
+//                    value.setValue(String.valueOf(dto.getId()));
                     value.setCreatorUid(user.getId());
                     value.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     doorAccessProvider.createAclinkFormValues(value);

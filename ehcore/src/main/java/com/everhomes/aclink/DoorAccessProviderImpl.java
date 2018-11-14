@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.Comparator;
 
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.aclink.*;
@@ -565,11 +566,13 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         List<DoorsAndGroupsDTO> values = query.fetch().map((r) -> {
             DoorsAndGroupsDTO door = new DoorsAndGroupsDTO();
             door.setFormId(r.getValue(t.ID));
-            door.setId(Long.parseLong(r.getValue(t.VALUE)));
+//            door.setId(Long.parseLong(r.getValue(t.VALUE)));
             if(r.getValue(t.TYPE).equals(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode())){
+                door.setId(r.getValue(t.VALUE));
                 door.setType((byte)1);
                 door.setName(r.getValue(Tables.EH_DOOR_ACCESS.DISPLAY_NAME));
             }else if(r.getValue(t.TYPE).equals(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode())){
+                door.setId("_" + r.getValue(t.VALUE));//门禁组前面加下划线
                 door.setType((byte)2);
                 door.setName(r.getValue(Tables.EH_ACLINK_GROUP.NAME));
             }
@@ -699,6 +702,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
         });
         objs.removeAll(Collections.singleton(null));
+//        TODO: 门禁按displayName排序
+//        objs.sort(Comparator.comparing());
         return objs;
 	}
 
@@ -849,6 +854,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             }
         }
         return groups;
+    }
+
+    @Override
+    public List<DoorAccessLiteDTO> listGroupDoors (Long groupId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        com.everhomes.server.schema.tables.EhDoorAccess t1 = Tables.EH_DOOR_ACCESS;
+        com.everhomes.server.schema.tables.EhAclinkGroupDoors t2 = Tables.EH_ACLINK_GROUP_DOORS;
+        List<DoorAccessLiteDTO> doors = context.select().from(t2)
+                .leftOuterJoin(t1)
+                .on(t1.ID.eq(t2.DOOR_ID))
+                .and(t1.DOOR_TYPE.ge(DoorAccessType.ZLACLINK_WIFI_2.getCode()))
+                .and(t1.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))
+                .where(t2.GROUP_ID.eq(groupId))
+                .and(t2.STATUS.eq((byte)1))
+                .fetch().map((r) ->{
+                    DoorAccessLiteDTO door = new DoorAccessLiteDTO();
+                    door.setId(r.getValue(t1.ID));
+                    door.setName(r.getValue(t1.NAME));
+                    door.setDisplayName(r.getValue(t1.DISPLAY_NAME));
+                    return door;
+                });
+        return doors;
     }
 
     @Override

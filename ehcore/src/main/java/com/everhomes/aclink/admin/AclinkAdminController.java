@@ -437,7 +437,7 @@ public class AclinkAdminController extends ControllerBase {
      * @return OK 成功
      */
     @RequestMapping("deleteTempAuthPriority")
-    @RestReturn(value=AclinkFormValuesDTO.class)
+    @RestReturn(value=DeleteTempAuthPriorityResponse.class)
     public RestResponse deleteTempAuthPriority (@Valid DeleteTempAuthPriorityCommand cmd){
         RestResponse response = new RestResponse(doorAccessService.deleteTempAuthPriority(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -574,6 +574,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse createDoorGroup(@Valid CreateDoorAccessGroupCommand cmd) {
         doorAccessService.createDoorGroup(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/listGroupDoors</b>
+     * <p>列出门禁组</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("listGroupDoors")
+    @RestReturn(value=ListGroupDoorsResponse.class)
+    public RestResponse listGroupDoors(@Valid ListGroupDoorsCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listGroupDoors(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

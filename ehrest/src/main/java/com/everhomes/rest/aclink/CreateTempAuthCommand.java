@@ -43,6 +43,15 @@ public class CreateTempAuthCommand {
 	private Byte authRuleType;
 	private Integer totalAuthAmount;
     private String headImgUri;
+    private Byte confirm;
+
+    public Byte getConfirm() {
+        return confirm;
+    }
+
+    public void setConfirm(Byte confirm) {
+        this.confirm = confirm;
+    }
 
     @ItemType(CreateCustomFieldCommand.class)
     private List<CreateCustomFieldCommand> list;

@@ -270,7 +270,7 @@ public interface DoorAccessService {
 
     ListTempAuthPriorityResponse listTempAuthPriority (ListTempAuthPriorityCommand cmd);
 
-    AclinkFormValuesDTO deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd);
+    DeleteTempAuthPriorityResponse deleteTempAuthPriority(DeleteTempAuthPriorityCommand cmd);
 
     void createTempAuthDefaultRule(CreateTempAuthDefaultRuleCommand cmd);
 
@@ -294,6 +294,8 @@ public interface DoorAccessService {
     void updateDoorGroup(UpdateDoorAccessGroupCommand cmd);
 
     ListDoorGroupResponse listDoorGroupNew(ListDoorGroupCommand cmd);
+
+    ListGroupDoorsResponse listGroupDoors(ListGroupDoorsCommand cmd);
 
     void deleteDoorGroupRel (DeleteDoorGroupRelCommand cmd);
     //列出可加入门禁组门禁

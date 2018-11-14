@@ -4,6 +4,7 @@ package com.everhomes.rest.aclink;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -11,18 +12,18 @@ import javax.validation.constraints.NotNull;
  * </ul>
  */
 public class DeleteTempAuthPriorityCommand {
-    @NotNull
-    private Long id;
-    
-    public Long getId() {
+
+    private List<Long> id;
+
+    public List<Long> getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId( List<Long> id) {
         this.id = id;
     }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
