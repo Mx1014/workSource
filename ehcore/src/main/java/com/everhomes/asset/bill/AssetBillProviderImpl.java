@@ -22,6 +22,7 @@ import com.everhomes.rest.asset.AssetSubtractionType;
 import com.everhomes.rest.asset.BillGroupDTO;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -202,6 +203,18 @@ public class AssetBillProviderImpl implements AssetBillProvider {
         vo.setBillGroupDTO(dto);
         return vo;
     }
+	
+	public void changeChargeStatus(Integer currentNamespaceId, Long billId, BigDecimal amountReceived,
+			BigDecimal amountOwed, Integer paymentType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
+        context.update(t)
+                .set(t.PAYMENT_TYPE, paymentType)
+                .set(t.AMOUNT_RECEIVED, amountReceived)
+                .set(t.AMOUNT_OWED, amountOwed)
+                .where(t.ID.eq(billId))
+                .execute();
+	}
 
 
 }

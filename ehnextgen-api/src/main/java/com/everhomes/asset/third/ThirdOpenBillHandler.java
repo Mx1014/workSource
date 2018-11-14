@@ -1,6 +1,8 @@
 package com.everhomes.asset.third;
 
+import com.everhomes.asset.PaymentBills;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 
 /**
@@ -12,9 +14,15 @@ public interface ThirdOpenBillHandler {
     
     /**
      * 创建或更新缴费模块与其他模块的映射关系
-     * @param assetInstanceConfigDTO
      */
     default ListBillsResponse listOpenBills(ListBillsCommand cmd) {
+    	return null;
+    }
+
+    /**
+     * EAS系统收到款项录入凭证，将收款状态回传至左邻
+     */
+    default PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
     	return null;
     }
     

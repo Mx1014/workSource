@@ -9,15 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.asset.AssetVendorHandler;
+import com.everhomes.asset.PaymentBills;
 import com.everhomes.asset.third.ThirdOpenBillHandler;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillCommand;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractCmd;
 import com.everhomes.rest.asset.bill.BatchDeleteBillFromContractDTO;
+import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillCmd;
 import com.everhomes.rest.asset.bill.CheckContractIsProduceBillDTO;
 import com.everhomes.rest.asset.bill.DeleteContractBillFlag;
@@ -25,7 +25,6 @@ import com.everhomes.rest.asset.bill.ListBatchDeleteBillFromContractResponse;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.bill.ListCheckContractIsProduceBillResponse;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
 
 /**
  * @author created by ycx
@@ -112,5 +111,10 @@ public class AssetBillServiceImpl implements AssetBillService {
 		}
         return handler;
     }
+
+	public PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
+		ThirdOpenBillHandler handler = getThirdOpenBillHandler(UserContext.getCurrentNamespaceId());
+		return handler.changeChargeStatus(cmd);
+	}
 	
 }

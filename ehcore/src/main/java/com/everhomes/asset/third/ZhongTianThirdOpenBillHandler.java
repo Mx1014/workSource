@@ -1,5 +1,6 @@
 package com.everhomes.asset.third;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,15 +9,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.asset.AssetErrorCodes;
 import com.everhomes.asset.AssetProvider;
+import com.everhomes.asset.PaymentBills;
 import com.everhomes.asset.bill.AssetBillProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.openapi.ContractProvider;
 import com.everhomes.portal.PortalService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.asset.AssetPaymentBillStatus;
 import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.rest.asset.ListBillDetailResponse;
 import com.everhomes.rest.asset.ListBillsCommand;
+import com.everhomes.rest.asset.bill.ChangeChargeStatusCommand;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
 import com.everhomes.rest.asset.modulemapping.AssetInstanceConfigDTO;
@@ -25,6 +31,7 @@ import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.portal.ServiceModuleAppDTO;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -193,6 +200,36 @@ public class ZhongTianThirdOpenBillHandler implements ThirdOpenBillHandler{
 		dto.setChargingItemsId(null);
 		dto.setItemFineType(null);
 		dto.setItemType(null);
+	}
+	
+	/**
+	 * EAS系统收到款项录入凭证，将收款状态回传至左邻
+	 * 总体原则：不支持同一笔账单即在左邻支付一半，又在EAS支付一半，不允许两边分别支付
+	 */
+	public PaymentBills changeChargeStatus(ChangeChargeStatusCommand cmd) {
+		PaymentBills response = new PaymentBills();
+		if(cmd.getBillId() != null) {
+			//如果账单已经在左邻支付，那么EAS调用左邻的收款回传接口是无效调用，已支付的数据以左邻为准
+			PaymentBills bill = assetProvider.findBillById(cmd.getBillId());
+	        if(bill != null && bill.getStatus().equals(AssetPaymentBillStatus.PAID.getCode()))  {
+	            if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("Bill orders have been paid, billId={}", cmd.getBillId());
+	            }
+	            throw RuntimeErrorException.errorWith(AssetErrorCodes.SCOPE, AssetErrorCodes.HAS_PAID_BILLS, "Bills have been paid");
+	        }
+	        //重新计算待收 = 应收 - 已收
+	        BigDecimal amountOwed = bill.getAmountReceivable().subtract(cmd.getAmountReceived());
+	        amountOwed = amountOwed.setScale(2, BigDecimal.ROUND_HALF_UP);
+			assetBillProvider.changeChargeStatus(UserContext.getCurrentNamespaceId(), cmd.getBillId(), cmd.getAmountReceived(), amountOwed, cmd.getPaymentType());
+			response.setAmountReceivable(bill.getAmountReceivable());
+			response.setAmountReceived(cmd.getAmountReceived());
+			response.setAmountOwed(bill.getAmountOwed());
+		}else {
+			LOGGER.info("/openapi/asset/changeChargeStatus billId can not be null!");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "/openapi/asset/changeChargeStatus billId can not be null!");
+		}
+		return response;
 	}
 
 }
