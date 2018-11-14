@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.asset.PaymentBills;
+import com.everhomes.asset.PaymentLateFine;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.asset.AssetPaymentBillDeleteFlag;
 import com.everhomes.rest.asset.AssetPaymentBillStatus;
+import com.everhomes.rest.asset.AssetSourceType;
 import com.everhomes.rest.asset.statistic.BuildingStatisticParam;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -56,7 +58,7 @@ public class AssetBillProviderImpl implements AssetBillProvider {
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_TYPE.eq(ownerType))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.OWNER_ID.eq(ownerId))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.STATUS.notEqual(AssetPaymentBillStatus.PAID.getCode())) //已支付的不允许删除
-                .and(Tables.EH_PAYMENT_BILLS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
+                .and(Tables.EH_PAYMENT_BILL_ITEMS.DELETE_FLAG.eq(AssetPaymentBillDeleteFlag.VALID.getCode()))
                 .and(Tables.EH_PAYMENT_BILL_ITEMS.ID.in(billIdList))
 	            .execute();
             return null;
@@ -104,6 +106,23 @@ public class AssetBillProviderImpl implements AssetBillProvider {
 	            .execute();
             return null;
         });
+	}
+	
+	/**
+	 * 缴费V7.3(账单组规则定义)：批量删除“非已缴”账单接口
+	 * 批量删除只支持删除只支持：手动新增 、 批量导入 、合同产生的账单
+	 * 第三方或对接其他模块不管是已缴还是未缴都不允许删除
+	 */
+	public List<PaymentBills> findCannotDeleteBill(List<Long> billIdList) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentBills r = Tables.EH_PAYMENT_BILLS.as("r");
+		List<PaymentBills> bills = context.selectFrom(r)
+                .where(r.ID.in(billIdList))
+                .and(r.STATUS.eq(AssetPaymentBillStatus.PAID.getCode())
+                		.or(r.SOURCE_TYPE.ne(AssetSourceType.ASSET_MODULE)
+                                .and(r.SOURCE_TYPE.ne(AssetSourceType.CONTRACT_MODULE))))
+                .fetchInto(PaymentBills.class);
+		return bills;
 	}
     
 
