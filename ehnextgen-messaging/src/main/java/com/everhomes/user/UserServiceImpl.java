@@ -1747,7 +1747,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         if (login != null && login.getLoginInstanceNumber() == loginToken.getLoginInstanceNumber()) {
             try {
                 // 这个代码只是为了修复错误的数据，后期删除
-                LOGGER.debug("Fetch user: {}", fetchUserSuccess(login.getUserId(), login.getNamespaceId()));
+                LOGGER.debug("Fetch user: {}", fetchUser(login.getUserId(), login.getNamespaceId()));
             } catch (Exception e) {
                 LOGGER.error("Fetch user error", e);
             }
@@ -1756,41 +1756,44 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             // 去统一用户那边检查登录状态
             String tokenString = WebTokenGenerator.getInstance().toWebToken(loginToken);
             com.everhomes.rest.user.user.UserInfo userInfo = null;
-            try {
-                userInfo = sdkUserService.validateToken(tokenString);
-            } catch (Exception e) {
-                //
-            }
+
+            try { userInfo = sdkUserService.validateToken(tokenString); } catch (Exception e) { }
 
             if (userInfo != null && userInfo.getId().equals(loginToken.getUserId())) {
-                User user = userProvider.findUserById(userInfo.getId());
-                UserIdentifier userIdentifier = this.userProvider.getUserByToken(userInfo.getPhones().iterator().next(), userInfo.getNamespaceId());
-
-                if (user != null && userIdentifier != null) {
+                User user = validateUser(userInfo);
+                if (user != null) {
                     LOGGER.info("User service check success, loginToken={}", loginToken);
                     createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
                     return true;
                 }
-
-                try {
-                    if (fetchUserSuccess(userInfo.getId(), userInfo.getNamespaceId())) {
-                        user = userProvider.findUserById(userInfo.getId());
-                        createLogin(userInfo.getNamespaceId(), user, null, null, loginToken);
-                        return true;
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("Fetch user error", e);
-                }
             } else {
-                LOGGER.error("Never be here, userInfo should contains phones, userInfo={}", userInfo);
+                LOGGER.error("Validate token failed, userInfo={}", userInfo);
             }
-
             LOGGER.error("Invalid token, userKey=" + userKey + ", loginToken=" + loginToken + ", login=" + login);
             return false;
         }
     }
 
-    private boolean fetchUserSuccess(Long userId, Integer namespaceId) {
+    private User validateUser(com.everhomes.rest.user.user.UserInfo userInfo) {
+        if (userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+            // 手机号找用户
+            UserIdentifier userIdentifier = this.userProvider.getUserByToken(userInfo.getPhones().iterator().next(), userInfo.getNamespaceId());
+            if (userIdentifier == null) {
+                try { fetchUser(userInfo.getId(), userInfo.getNamespaceId()); } catch (Exception e) { }
+            }
+        } else {
+            LOGGER.debug("UserInfo phones empty, maybe weixin user, userInfo={}", userInfo);
+        }
+
+        User user = userProvider.findUserById(userInfo.getId());
+        if (user == null) {
+            try { fetchUser(userInfo.getId(), userInfo.getNamespaceId()); } catch (Exception e) { }
+            user = userProvider.findUserById(userInfo.getId());
+        }
+        return user;
+    }
+
+    private boolean fetchUser(Long userId, Integer namespaceId) {
         //当查不到用户时，主动向统一用户拉取用户，看是否是kafka消息延迟，导致用户不能及时同步.
         //如果core server和统一用户都没有用户，说明真的没有该用户
         // add by yanlong.liang 20180928
