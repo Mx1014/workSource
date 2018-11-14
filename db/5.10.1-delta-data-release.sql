@@ -110,10 +110,10 @@ update eh_parking_business_payee_accounts ac set ac.merchant_id = ac.payee_id ;
 
 -- AUTHOR:黄明波
 -- REMARK:删除现网有误数据
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212660 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217590 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=212984 and namespace_id = 999961;
-DELETE FROM `ehcore`.`eh_service_alliance_categories` WHERE  `id`=217589 and namespace_id = 999961;
+DELETE FROM `eh_service_alliance_categories` WHERE  `id`=212660 and namespace_id = 999961;
+DELETE FROM `eh_service_alliance_categories` WHERE  `id`=217590 and namespace_id = 999961;
+DELETE FROM `eh_service_alliance_categories` WHERE  `id`=212984 and namespace_id = 999961;
+DELETE FROM `eh_service_alliance_categories` WHERE  `id`=217589 and namespace_id = 999961;
 
 
 -- --------------------- SECTION END zuolin-base ---------------------------------------------
