@@ -181,4 +181,12 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: wanzhihui
 -- DESCRIPTION: 此SECTION只在万智汇-999953执行的脚本
+
+-- AUTHOR:黄明波
+-- REMARK:离线包配置
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('serviceAlliance.offline.flag', 'true', '是否开启服务联盟离线包模式', 999953, NULL, 1);
+
+update eh_service_modules set client_handler_type = 3 where id = 40500;
+
+
 -- --------------------- SECTION END wanzhihui ------------------------------------------

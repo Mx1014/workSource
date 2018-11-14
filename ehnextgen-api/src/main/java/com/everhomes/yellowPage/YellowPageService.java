@@ -144,4 +144,8 @@ public interface YellowPageService {
 	void updateOperateServiceOrders(UpdateOperateServiceOrdersCommand cmd);
 
 	String processDetailUrl(Long serviceId, String serviceName, String ownerType, Long ownerId);
+
+	boolean isAllianceOffLine(Integer namespaceId);
+
+	String buildEntryUrl(Integer namespaceId, ServiceAllianceInstanceConfig config, String pageRealDisplayType);
 }
