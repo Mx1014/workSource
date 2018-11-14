@@ -4142,6 +4142,14 @@ long assetCategoryId = 0l;
 					// 房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
 					return;
 				}
+				
+				//生成正常合同清单
+				ExecutorUtil.submit(new Runnable() {
+					@Override
+					public void run() {
+						generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
+					}
+				});
 
 				// 合同入场
 				EntryContractCommand entryContractCommand = new EntryContractCommand();
