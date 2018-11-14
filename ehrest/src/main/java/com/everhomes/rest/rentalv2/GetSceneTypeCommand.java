@@ -5,6 +5,7 @@ public class GetSceneTypeCommand {
     private Long organizationId;
     private Long appid;
     private Long resourceTypeId;
+    private Long uid;
 
     public Long getCommunityId() {
         return communityId;
@@ -36,5 +37,13 @@ public class GetSceneTypeCommand {
 
     public void setResourceTypeId(Long resourceTypeId) {
         this.resourceTypeId = resourceTypeId;
+    }
+
+    public Long getUid() {
+        return uid;
+    }
+
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 }

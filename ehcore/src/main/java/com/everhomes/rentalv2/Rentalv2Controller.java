@@ -95,7 +95,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(value = GetSceneTypeResponse.class)
 	@RequireAuthentication()
 	public RestResponse getSceneType(@Valid GetSceneTypeCommand cmd) {
-		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
+		RestResponse response = new RestResponse(rentalService.getSceneType(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

@@ -106,6 +106,7 @@ public class RentalBillDTO {
 	private String offlinePayPhone;
 	private String payChannel;
 	private String vipLevel;
+	private Byte source;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 
@@ -456,6 +457,13 @@ public class RentalBillDTO {
 		this.refundFlag = refundFlag;
 	}
 
+	public Byte getSource() {
+		return source;
+	}
+
+	public void setSource(Byte source) {
+		this.source = source;
+	}
 
 	public BigDecimal getRefundAmount() {
 		return refundAmount;

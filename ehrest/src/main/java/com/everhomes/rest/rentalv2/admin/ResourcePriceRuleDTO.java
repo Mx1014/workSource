@@ -1,6 +1,7 @@
 package com.everhomes.rest.rentalv2.admin;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.RentalPriceClassificationDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.util.StringHelper;
@@ -19,6 +20,7 @@ import java.util.List;
  * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * <li>pricePackages: 套餐价格表{@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
+ * <li>vipLevels: 会员等级</li>
  * </ul>
  */
 public class ResourcePriceRuleDTO {
@@ -42,6 +44,7 @@ public class ResourcePriceRuleDTO {
     private List<PriceRuleDTO> priceRules;
     @ItemType(PricePackageDTO.class)
     private List<PricePackageDTO> pricePackages;
+    private List<RentalPriceClassificationDTO> vipLevels;
 
     @Override
     public String toString() {
@@ -126,5 +129,13 @@ public class ResourcePriceRuleDTO {
 
     public void setPricePackages(List<PricePackageDTO> pricePackages) {
         this.pricePackages = pricePackages;
+    }
+
+    public List<RentalPriceClassificationDTO> getVipLevels() {
+        return vipLevels;
+    }
+
+    public void setVipLevels(List<RentalPriceClassificationDTO> vipLevels) {
+        this.vipLevels = vipLevels;
     }
 }

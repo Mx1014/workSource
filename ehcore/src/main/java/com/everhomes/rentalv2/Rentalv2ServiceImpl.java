@@ -75,6 +75,7 @@ import com.everhomes.rest.rentalv2.SceneType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -84,12 +85,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
 
 import net.greghaines.jesque.Job;
@@ -240,6 +236,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private Rentalv2AccountProvider rentalv2AccountProvider;
 	@Autowired
 	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
+	@Autowired
+	private UserActivityService userActivityService;
 
 	private ExecutorService executorPool = Executors.newFixedThreadPool(5);
 
@@ -1697,7 +1695,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return sitePriceRuleDTO;
 	}
 
-	private String getClassification(Byte userPriceTyoe){
+	private String getClassification(Byte userPriceType){
+		if (userPriceType == null || userPriceType.equals(RentalUserPriceType.UNIFICATION.getCode()))
+			return null;
+		String sceneType = currentSceneType.get();
+		if (userPriceType.equals(RentalUserPriceType.USER_TYPE.getCode())){
+			String[] sceneTypes = sceneType.split(",");
+			if (sceneTypes.length > 0)
+				return sceneTypes[0];
+		}else{
+			String[] sceneTypes = sceneType.split(",");
+			if (sceneTypes.length > 1)
+				return sceneTypes[1];
+		}
 		return null;
 	}
 
@@ -1820,7 +1830,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			cmd.setResourceType(RentalV2ResourceType.DEFAULT.getCode());
 		}
 
-		Long userId = UserContext.currentUserId();
+		Long userId = cmd.getUid() == null ? UserContext.currentUserId() : cmd.getUid();
 		currentSceneType.set(cmd.getSceneType());
 
 		RentalResource rs = rentalCommonService.getRentalResource(cmd.getResourceType(), cmd.getRentalSiteId());
@@ -1862,6 +1872,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId());
 		//设置订单模式
 		rentalBill.setPayMode(rsType.getPayMode());
+		if (cmd.getSource() != null && cmd.getSource().equals(RentalBillSource.BACK_GROUND.getCode()))
+			rentalBill.setPayMode(PayMode.OFFLINE_PAY.getCode());
 		rentalBill.setReserveTime(new Timestamp(System.currentTimeMillis()));
 		//修改 by sw 点击下一步时，初始化订单状态，点击立即预约才进去各个模式流程  PayMode
 		rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
@@ -4098,10 +4110,33 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			bill.setUserPhone(cmd.getUserPhone());
 			bill.setAddressId(cmd.getAddressId());
 			bill.setPaidVersion(version.getCode());
+			//
+			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode()) || bill.getSource().equals(RentalBillSource.BACK_GROUND.getCode())) {
 
-			if (bill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())
-					|| bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())) {
+				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
+				if (compare == 0 || bill.getSource().equals((byte)2)) {
+					// 总金额为0 或者后台录入，直接预订成功状态
+					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+					bill.setPaidMoney(bill.getPayTotalMoney());
+				} else {
+					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
+					orderCancelFlag[0] = true;
+				}
 
+				//发消息给管理员
+				RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(bill.getResourceType());
+
+				handler.updateOrderResourceInfo(bill);
+
+				rentalv2Provider.updateRentalBill(bill);
+
+				if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
+					//发短信
+					RentalMessageHandler handler2 = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
+					handler2.sendRentalSuccessSms(bill);
+					onOrderSuccess(bill);
+				}
+			}else{
 				bill.setStatus(SiteBillStatus.APPROVING.getCode());
 
 				//验证订单下的资源是否足够
@@ -4128,30 +4163,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				}
 
 				rentalv2Provider.updateRentalBill(bill);
-			} else {
-
-				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
-				if (compare == 0) {
-					// 总金额为0，直接预订成功状态
-					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-				} else {
-					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
-					orderCancelFlag[0] = true;
-				}
-
-				//发消息给管理员
-				RentalOrderHandler handler = rentalCommonService.getRentalOrderHandler(bill.getResourceType());
-
-				handler.updateOrderResourceInfo(bill);
-
-				rentalv2Provider.updateRentalBill(bill);
-
-				if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())) {
-					//发短信
-					RentalMessageHandler handler2 = rentalCommonService.getRentalMessageHandler(bill.getResourceType());
-					handler2.sendRentalSuccessSms(bill);
-					onOrderSuccess(bill);
-				}
 			}
 
 
@@ -7619,7 +7630,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 	private ResourcePriceRuleDTO convertResourcePriceRuleDTO(RentalDefaultRule rule, String sourceType) {
 		ResourcePriceRuleDTO dto = ConvertHelper.convert(rule, ResourcePriceRuleDTO.class);
-
 		String priceRuleType = null;
 		Long id = null;
 		if (RuleSourceType.DEFAULT.getCode().equals(sourceType)) {
@@ -7637,7 +7647,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rule.getResourceType(),
 				priceRuleType, id, null, null);
 		dto.setPricePackages(pricePackages.stream().map(this::convert).collect(Collectors.toList()));
-
+		//获取会员等级
+		List<VipPriority> vipPriorities = userActivityService.listVipPriorityByNamespaceId(UserContext.getCurrentNamespaceId());
+		if (vipPriorities != null){
+			List<RentalPriceClassificationDTO> vipLevels = new ArrayList<>();
+			for (VipPriority vipPriority : vipPriorities){
+				RentalPriceClassificationDTO dto1 = new RentalPriceClassificationDTO();
+				dto1.setUserPriceType(RentalUserPriceType.VIP_TYPE.getCode());
+				dto1.setClassification(vipPriority.getVipLevelText());
+				vipLevels.add(dto1);
+			}
+			dto.setVipLevels(vipLevels);
+		}
 		return dto;
 	}
 
@@ -8794,13 +8815,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	@Override
 	public GetSceneTypeResponse getSceneType(GetSceneTypeCommand cmd) {
 		GetSceneTypeResponse response = new GetSceneTypeResponse();
+		Long userId = cmd.getUid() == null ? UserContext.currentUserId() : cmd.getUid();
 		String sceneType = SceneType.PARK_TOURIST.getCode();
 		RentalResourceType resourceType = rentalv2Provider.findRentalResourceTypeById(cmd.getResourceTypeId());
 		GetAuthOrgByProjectIdAndAppIdCommand cmd2 = new GetAuthOrgByProjectIdAndAppIdCommand();
 		cmd2.setProjectId(cmd.getCommunityId());
 		cmd2.setAppId(cmd.getAppid());
 		OrganizationDTO manageOrganization = organizationService.getAuthOrgByProjectIdAndAppId(cmd2);//管理公司
-		if (resourceType != null && resourceType.getCrossCommuFlag().equals(TrueOrFalseFlag.TRUE.getCode())){
+		if (resourceType != null && TrueOrFalseFlag.TRUE.getCode().equals(resourceType.getCrossCommuFlag())){
 			List<Long> communityIds = new ArrayList<>();
 			if (UserContext.getCurrentNamespaceId().equals(2)) { //标准版
 				List<ServiceModuleAppAuthorization> appAuthorizations = serviceModuleAppAuthorizationService.listCommunityRelationOfOrgIdAndAppId(UserContext.getCurrentNamespaceId(),
@@ -8814,7 +8836,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 				ListUserOrganizationsCommand cmd3 = new ListUserOrganizationsCommand();
 				cmd3.setAppId(cmd.getAppid());
 				cmd3.setProjectId(communityId);
-				cmd3.setUserId(UserContext.currentUserId());
+				cmd3.setUserId(userId);
 				ListUserOrganizationsResponse response1 = organizationService.listUserOrganizations(cmd3);
 				if (response1 != null && response1.getDtos() != null){
 					for (OrganizationDTO dto : response1.getDtos()) {
@@ -8832,7 +8854,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			ListUserOrganizationsCommand cmd3 = new ListUserOrganizationsCommand();
 			cmd3.setAppId(cmd.getAppid());
 			cmd3.setProjectId(cmd.getCommunityId());
-			cmd3.setUserId(UserContext.currentUserId());
+			cmd3.setUserId(userId);
 			ListUserOrganizationsResponse response1 = organizationService.listUserOrganizations(cmd3);
 			if (response1 != null && response1.getDtos() != null){
 				for (OrganizationDTO dto : response1.getDtos()) {
@@ -8845,6 +8867,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 				}
 			}
+		}
+		//会员等级
+		User user = userProvider.findUserById(userId);
+		if (user.getVipLevelText() != null){
+			sceneType = sceneType + "," + user.getVipLevelText();
 		}
 		response.setSceneType(sceneType);
 		return response;

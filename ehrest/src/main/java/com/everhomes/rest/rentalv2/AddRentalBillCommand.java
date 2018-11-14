@@ -33,6 +33,7 @@ public class AddRentalBillCommand {
 	private String sceneToken;
 	private Byte source;
 	private String packageName;
+	private Long uid;
 
 	public String getResourceType() {
 		return resourceType;
@@ -109,6 +110,14 @@ public class AddRentalBillCommand {
 
 	public void setSceneToken(String sceneToken) {
 		this.sceneToken = sceneToken;
+	}
+
+	public Long getUid() {
+		return uid;
+	}
+
+	public void setUid(Long uid) {
+		this.uid = uid;
 	}
 
 	//	public List<SiteItemDTO> getRentalItems() {
