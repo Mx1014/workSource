@@ -63,7 +63,12 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     private static final String HTTPS = "https";
 
     private static final String DEFAULT_CLIENT_APP_KEY_API_STR =
-            "/stat/event/postDevice,/pusher/registDevice,/user/syncActivity,/user/signupByAppKey,/user/signup,/user/logoff";
+            "/stat/event/postDevice," +
+                    "/pusher/registDevice," +
+                    "/user/syncActivity,/user/signupByAppKey," +
+                    "/user/signup,/user/logoff,/community/findDefaultCommunity," +
+                    "/user/systemInfo,/user/resendVerificationCodeByAppKey," +
+                    "/user/resendVerificationCodeByIdentifierAndAppKey";
 
     @Autowired
     private UserService userService;
