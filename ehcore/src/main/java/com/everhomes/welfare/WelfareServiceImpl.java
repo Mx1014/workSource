@@ -261,6 +261,10 @@ public class WelfareServiceImpl implements WelfareService {
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能发送");
                 }
             }
+            Boolean isDarft = false;
+            if (welfaresDTO.getId() != null) {
+                isDarft = true;
+            }
             welfaresDTO.setStatus(WelfareStatus.SENDED.getCode());
             //校验在职离职
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
@@ -305,7 +309,14 @@ public class WelfareServiceImpl implements WelfareService {
             	}
                 welfareReceiverProvider.deleteWelfareReceivers(welfare.getId());
                 welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
-            	return response;
+                //原本是草稿的状态恢复成草稿,直接发送的删除welfare
+                if(isDarft) {
+                    welfare.setStatus(WelfareStatus.DRAFT.getCode());
+                    welfareProvider.updateWelfare(welfare);
+                }else{
+                    welfareProvider.deleteWelfare(welfare.getId());
+                }
+                return response;
             }
             //发消息
             welfaresDTO.getReceivers().forEach(r -> {
