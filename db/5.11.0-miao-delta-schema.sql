@@ -50,3 +50,20 @@ CREATE TABLE `eh_office_cubicle_time_interval` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_office_cubicle_price_rules` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'default, resource, cell',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'default_rule_id, resource_id, cell_id',
+  `cubicle_type` TINYINT COMMENT '0按半天，1按天，3按半天带晚上',
+  `price_type` TINYINT,
+  `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
+  `original_price` DECIMAL(10,2),
+  `initiate_price` DECIMAL(10,2),
+  `full_price` DECIMAL(10,2) COMMENT '满XX',
+  `cut_price` DECIMAL(10,2) COMMENT '减XX元',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `user_price_type` TINYINT COMMENT '用户价格类型, 1:统一价格 2：用户类型价格',
+  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
