@@ -1,6 +1,6 @@
 -- AUTHOR: 梁燕龙 20181115
 -- 工作台公司推荐应用
-CREATE TABLE `eh_recommend_apps` (
+CREATE TABLE `eh_work_platform_apps` (
   `id` BIGINT NOT NULL,
   `app_id` BIGINT NOT NULL,
   `scope_type` TINYINT COMMENT '范围，1-园区，4-公司',
