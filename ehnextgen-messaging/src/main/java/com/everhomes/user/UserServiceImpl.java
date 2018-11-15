@@ -1,79 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.Size;
-import javax.validation.metadata.ConstraintDescriptor;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.client.AsyncRestTemplate;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import com.alibaba.fastjson.JSON;
 import com.everhomes.PictureValidate.PictureValidateService;
 import com.everhomes.PictureValidate.PictureValidateServiceErrorCode;
@@ -87,11 +14,7 @@ import com.everhomes.app.AppProvider;
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.asset.AssetPaymentStrings;
 import com.everhomes.asset.PaymentConstants;
-import com.everhomes.authorization.AuthorizationErrorCode;
-import com.everhomes.authorization.AuthorizationThirdPartyButton;
-import com.everhomes.authorization.AuthorizationThirdPartyButtonProvider;
-import com.everhomes.authorization.AuthorizationThirdPartyForm;
-import com.everhomes.authorization.AuthorizationThirdPartyFormProvider;
+import com.everhomes.authorization.*;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -99,13 +22,7 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusMessageDispatcher;
-import com.everhomes.bus.LocalBusMessageHandler;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.bus.LocalEventBus;
-import com.everhomes.bus.LocalEventContext;
-import com.everhomes.bus.SystemEvent;
+import com.everhomes.bus.*;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -145,24 +62,11 @@ import com.everhomes.messaging.PusherService;
 import com.everhomes.messaging.UserMessageRoutingHandler;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.namespace.NamespaceResourceProvider;
-import com.everhomes.namespace.NamespaceResourceService;
-import com.everhomes.namespace.NamespacesService;
+import com.everhomes.namespace.*;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.NewsService;
 import com.everhomes.openapi.FunctionCardHandler;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationMemberDetails;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.OrganizationWorkPlaces;
+import com.everhomes.organization.*;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.otp.TimeBasedOneTimePasswordGenerator;
 import com.everhomes.point.UserLevel;
@@ -174,11 +78,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.PrivilegeServiceErrorCode;
-import com.everhomes.rest.address.ClaimAddressCommand;
-import com.everhomes.rest.address.ClaimedAddressInfo;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandV2Response;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.PushUsersCommand;
 import com.everhomes.rest.asset.PushUsersResponse;
@@ -205,31 +105,11 @@ import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.launchpadbase.IndexDTO;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.BlockingEventResponse;
-import com.everhomes.rest.messaging.BlockingEventStatus;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagePopupFlag;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.UserMessageType;
-import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.namespace.NamespaceDetailDTO;
-import com.everhomes.rest.namespace.NamespaceNameType;
-import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.namespace.*;
 import com.everhomes.rest.openapi.FunctionCardDto;
 import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.GetUserTreasureCommand;
 import com.everhomes.rest.point.GetUserTreasureResponse;
@@ -239,147 +119,9 @@ import com.everhomes.rest.qrcode.QRCodeDTO;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.BindPhoneCommand;
-import com.everhomes.rest.ui.user.BindPhoneType;
-import com.everhomes.rest.ui.user.CheckContactAdminCommand;
-import com.everhomes.rest.ui.user.CheckContactAdminResponse;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.FamilyButtonStatusType;
-import com.everhomes.rest.ui.user.FormSourceDTO;
-import com.everhomes.rest.ui.user.GetContactInfoByUserIdCommand;
-import com.everhomes.rest.ui.user.GetFamilyButtonStatusResponse;
-import com.everhomes.rest.ui.user.GetRelevantContactInfoCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListAllCommunityScenesIfGeoExistCommand;
-import com.everhomes.rest.ui.user.ListAnBangRelatedScenesCommand;
-import com.everhomes.rest.ui.user.ListAuthFormsResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.ListUserRelateScenesByCommunityId;
-import com.everhomes.rest.ui.user.ListUserRelatedScenesByCurrentTypeCommand;
-import com.everhomes.rest.ui.user.ListUserRelatedScenesCommand;
-import com.everhomes.rest.ui.user.SceneContactV2DTO;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.SearchTypeDTO;
-import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneCommand;
-import com.everhomes.rest.ui.user.VerificationCodeForBindPhoneResponse;
-import com.everhomes.rest.user.AddressSiteDTO;
-import com.everhomes.rest.user.AddressUserDTO;
-import com.everhomes.rest.user.AddressUserType;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CheckUserTemporaryTokenCommand;
-import com.everhomes.rest.user.CheckVerifyCodeAndResetPasswordCommand;
-import com.everhomes.rest.user.CheckVerifyCodeAndResetPasswordWithoutIdentifyTokenCommand;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateResetIdentifierAppealCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.FindUserByPhoneCommand;
-import com.everhomes.rest.user.FindUsersByPhonesCommand;
-import com.everhomes.rest.user.FindUsersByPhonesDTO;
-import com.everhomes.rest.user.FindUsersByPhonesResponse;
-import com.everhomes.rest.user.GenerateSmartCardCodeCommand;
-import com.everhomes.rest.user.GenerateSmartCardCodeResponse;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetMessageSessionInfoCommand;
-import com.everhomes.rest.user.GetPrintMerchantUrlCommand;
-import com.everhomes.rest.user.GetPrintMerchantUrlResponse;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetTopAdministratorCommand;
-import com.everhomes.rest.user.GetUserConfigAfterStartupCommand;
-import com.everhomes.rest.user.GetUserConfigAfterStartupResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.GetUserNotificationSettingCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.ListAddressUsersCommand;
-import com.everhomes.rest.user.ListAddressUsersResponse;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.ListResetIdentifierCodeCommand;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.MessageSessionInfoDTO;
-import com.everhomes.rest.user.NamespaceUserType;
-import com.everhomes.rest.user.PointCheckVCDTO;
-import com.everhomes.rest.user.PointCheckVerificationCodeCommand;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.SearchUserByIdentifierCommand;
-import com.everhomes.rest.user.SearchUserByIdentifierResponse;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SearchUsersCommand;
-import com.everhomes.rest.user.SearchUsersResponse;
-import com.everhomes.rest.user.SendCodeWithPictureValidateCommand;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SendVerificationCodeByResetIdentifierCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SmartCardDisplayConfig;
-import com.everhomes.rest.user.SmartCardHandler;
-import com.everhomes.rest.user.SmartCardHandlerItem;
-import com.everhomes.rest.user.SmartCardInfo;
-import com.everhomes.rest.user.SmartCardType;
-import com.everhomes.rest.user.SmartCardVerifyCommand;
-import com.everhomes.rest.user.SmartCardVerifyResponse;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.SyncUsersFromAnBangWuYeCommand;
-import com.everhomes.rest.user.SystemInfoCommand;
-import com.everhomes.rest.user.SystemInfoResponse;
-import com.everhomes.rest.user.UpdateUserNotificationSettingCommand;
-import com.everhomes.rest.user.UserAppealLogDTO;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserDTO;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserIdentifierLogDTO;
-import com.everhomes.rest.user.UserImperInfo;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLocalStringCode;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.rest.user.UserMuteNotificationFlag;
-import com.everhomes.rest.user.UserNotificationSettingDTO;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
-import com.everhomes.rest.user.UserResetIdentifierVo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.UserTemporaryTokenDTO;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.VerifyResetIdentifierCodeCommand;
-import com.everhomes.rest.user.admin.InvitatedUsers;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUserAppealLogsCommand;
-import com.everhomes.rest.user.admin.ListUserAppealLogsResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UpdateUserAppealLogCommand;
-import com.everhomes.rest.user.admin.UserAppealLogStatus;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.admin.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
 import com.everhomes.server.schema.tables.EhGroupMemberLogs;
@@ -387,24 +129,70 @@ import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.smartcard.SmartCardKey;
 import com.everhomes.smartcard.SmartCardKeyProvider;
-import com.everhomes.sms.SmsBlackList;
-import com.everhomes.sms.SmsBlackListCreateType;
-import com.everhomes.sms.SmsBlackListProvider;
-import com.everhomes.sms.SmsBlackListStatus;
-import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.*;
 import com.everhomes.user.sdk.SdkUserService;
 import com.everhomes.user.smartcard.SmartCardModuleManager;
 import com.everhomes.user.smartcard.SmartCardProcessorContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.GsonUtil;
-import com.everhomes.util.PinYinHelper;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.*;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.everhomes.rest.ui.user.SceneType.*;
+import static com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 /**
@@ -1893,7 +1681,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
     @Override
     public List<UserLogin> listUserLogins(long uid) {
         if (uid == 0) {
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "uid=0 not found");
         }
 
         List<UserLogin> logins = new ArrayList<>();
@@ -2430,13 +2218,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		//判断手机号的用户与当前用户是否一致
 		if (userIdentifier.getOwnerUid() == null || !userIdentifier.getOwnerUid().equals(UserContext.currentUserId())) {
 			LOGGER.error("phone not match user error");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
 					"phone not match user error");
 		}
 
 		if (cmd.getRegionCode() != null && userIdentifier.getRegionCode() != null && !cmd.getRegionCode().equals(userIdentifier.getRegionCode())) {
 			LOGGER.error("phone not match user error");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+			throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
 					"phone not match user error");
 		}
 
@@ -3562,7 +3350,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         SceneDTO sceneDto = new SceneDTO();
 
         // 增加场景类型到sceneDTO中，使得客户端不需要使用EntityType来作场景 by lqs 20160510
-        sceneDto.setSceneType(SceneType.FAMILY.getCode());
+        sceneDto.setSceneType(FAMILY.getCode());
 
         sceneDto.setEntityType(UserCurrentEntityType.FAMILY.getCode());
 
@@ -3620,7 +3408,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         String entityContent = StringHelper.toJsonString(familyDto);
         sceneDto.setEntityContent(entityContent);
 
-        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, familyDto, SceneType.FAMILY);
+        SceneTokenDTO sceneTokenDto = toSceneTokenDTO(namespaceId, userId, familyDto, FAMILY);
         String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
         sceneDto.setSceneToken(sceneToken);
 
@@ -4691,7 +4479,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         // 判断是否是登录 by sfyan 20161009
         if (!this.isLogon()) {
             // 没登录 检查场景是否是游客
-            if (sceneType == SceneType.FAMILY || sceneType == SceneType.PM_ADMIN || sceneType == SceneType.ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH) {
+            if (sceneType == FAMILY || sceneType == SceneType.PM_ADMIN || sceneType == ENTERPRISE || sceneType == SceneType.ENTERPRISE_NOAUTH) {
                 LOGGER.error("Not logged in.Cannot access this scene. sceneType = {}", sceneType.getCode());
                 throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNAUTHENTITICATION,
                         "Not logged in.Cannot access this scene");
@@ -5828,7 +5616,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         //:todo 校验
         if (userId < User.MAX_SYSTEM_USER_ID) {
             LOGGER.error("userId is not legal! userId: {}", userId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userId is not legal! userId: {}", userId);
         }
 
         List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
@@ -5837,7 +5625,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             SceneType sceneType = SceneType.PM_ADMIN;
             if (!OrganizationType.isGovAgencyOrganization(orgType)) {
                 if (OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-                    sceneType = SceneType.ENTERPRISE;
+                    sceneType = ENTERPRISE;
                 } else {
                     sceneType = SceneType.ENTERPRISE_NOAUTH;
                 }
@@ -5860,7 +5648,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             if (!OrganizationType.isGovAgencyOrganization(orgType)) {
                 SceneType sceneType;
                 if (OrganizationMemberStatus.fromCode(orgDto.getMemberStatus()) == OrganizationMemberStatus.ACTIVE) {
-                    sceneType = SceneType.ENTERPRISE;
+                    sceneType = ENTERPRISE;
                 } else {
                     sceneType = SceneType.ENTERPRISE_NOAUTH;
                 }
@@ -6268,33 +6056,33 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 cmd.getIdentifierToken());
         if (null == identifier) {
             LOGGER.error("invalid operation,can not find verify information");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
                     "invalid params");
         }
 
         // check the expire time
         if (DateHelper.currentGMTTime().getTime() - identifier.getNotifyTime().getTime() > 10 * 60000) {
             LOGGER.error("the verifycode is invalid with timeout");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_VERIFICATION_CODE_EXPIRED, "Invalid token status");
         }
 
         if (namespaceId == null || identifier.getNamespaceId() == null || namespaceId.intValue() != identifier.getNamespaceId().intValue()) {
             LOGGER.error("the namespaceId is invalid");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_PARAMS, "Invalid namespaceId");
         }
 
 		//判断手机号的用户与当前用户是否一致
 		if (identifier.getOwnerUid() == null || !identifier.getOwnerUid().equals(UserContext.currentUserId())) {
             LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
                     "phone not match user error");
         }
 
 		if (cmd.getRegionCode() != null && identifier.getRegionCode() != null && !cmd.getRegionCode().equals(identifier.getRegionCode())) {
             LOGGER.error("phone not match user error");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PHONE_NOT_MATCH_USER,
                     "phone not match user error");
         }// find user by uid
 		User user = userProvider.findUserById(identifier.getOwnerUid());
@@ -6308,24 +6096,24 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		User user = UserContext.current().getUser();
 		if (user == null) {
             LOGGER.error("user not exists");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,
                     "user not exists");
 		}
 		UserIdentifier userIdentifier = this.userProvider.findUserIdentifiersOfUser(user.getId(),user.getNamespaceId());
 		if (userIdentifier == null) {
             LOGGER.error("userIdentifier not exists");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "userIdentifier not exists");
         }
         if (StringUtils.isBlank(userIdentifier.getVerificationCode()) || !userIdentifier.getVerificationCode().equals(cmd.getVerifyCode())) {
             LOGGER.error("invalid operation,can not find verify information");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_VERIFICATION_CODE,
                     "invalid params");
         }
         // check the expire time
         if (DateHelper.currentGMTTime().getTime() - userIdentifier.getNotifyTime().getTime() > 10 * 60000) {
             LOGGER.error("the verifycode is invalid with timeout");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALD_TOKEN_STATUS, "Invalid token status");
         }
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
@@ -6337,7 +6125,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         if (StringUtils.isEmpty(cmd.getUserToken())) {
             LOGGER.error("userToken is empty");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
         }
 
@@ -6347,13 +6135,13 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             if (token == null || token.getStartTime() == null || token.getInterval() == null) {
                 LOGGER.error("userToken is invalid");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                throw errorWith(UserServiceErrorCode.SCOPE,
                         UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
             }
 
             if (System.currentTimeMillis() > token.getStartTime() + token.getInterval()) {
                 LOGGER.error("time expired");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                throw errorWith(UserServiceErrorCode.SCOPE,
                         UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
             }
 
@@ -6361,7 +6149,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
         } catch (Exception ex) {
             LOGGER.error("userToken is invalid");
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+            throw errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_USERTOKEN, "invalid usertoken");
         }
 
@@ -6629,7 +6417,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                                 @Override
                                 public void onFailure(Throwable ex) {
                                     LOGGER.error(ex.getMessage());
-                                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                             "Unable to sync2");
                                 }
                             });
@@ -6641,7 +6429,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                     @Override
                     public void onFailure(Throwable ex) {
                         LOGGER.error(ex.getMessage());
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                                 "Unable to sync1");
                     }
                 });
@@ -6752,7 +6540,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", salt)));
             } catch (Exception e) {
                 LOGGER.error("encode password failed");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+                throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
             }
 
             List<User> users = new ArrayList<>();
@@ -6933,15 +6721,15 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 BlockingEventResponse response = (BlockingEventResponse) restResponse.getResponseObject();
                 if (response.getStatus() != BlockingEventStatus.CONTINUTE) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
                 if (!response.getSubject().equals("blockingEventKey." + subjectId)) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
                 if (StringUtils.isEmpty(response.getMessage())) {
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
 
                 String token = null;
@@ -6983,7 +6771,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                 } else {
                     restResponse.setErrorCode(ErrorCodes.ERROR_ACCESS_DENIED);
                     LOGGER.error("waitScanForLogon failure");
-                    throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "waitScanForLogon failure");
                 }
             }
 
@@ -7702,7 +7490,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 
             if(cmd.getOrgId() == null ){
                 LOGGER.error("orgId is null in the  cmd = {}",  cmd);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
+                throw errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"orgId is null.");
             }
           Organization org = checkOrganization(cmd.getOrgId());
         //  Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
@@ -7733,7 +7521,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
         User user = this.userProvider.findUserById(userId);
         if(user == null){
             LOGGER.error("Unable to find the user , userId= {}",  userId);
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
+            throw errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST,"Unable to find the user.");
         }
         user.setVipLevel(vipLevel);
         user.setVipLevelText(vipLevelText);
@@ -7745,7 +7533,7 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
             Organization org = organizationProvider.findOrganizationById(organizationId);
             if(org == null){
                 LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
-                throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
+                throw errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,"Unable to find the organization.");
             }
             return org;
         }
