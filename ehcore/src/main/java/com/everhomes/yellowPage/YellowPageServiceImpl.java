@@ -2147,10 +2147,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		final String APP_ID = "appId";
 		String jumpConfig = dto.getInstanceConfig();
 		JSONObject json = JSONObject.parseObject(jumpConfig);
-		Long jumpCheckId = json.getLong(APP_ID);
-		if (null == jumpCheckId) {
-			return null;
-		}
+//		Long jumpCheckId = json.getLong(APP_ID);
+//		if (null == jumpCheckId) {
+//			return null;
+//		}
 
 		// 获取url相关配置
 		String skipRoute = json.getString("skipRoute"); // 跳转路由，如zl://browser/i?url=
@@ -2172,32 +2172,32 @@ public class YellowPageServiceImpl implements YellowPageService {
 					continue;
 				}
 
-				// 截取url的参数部分
-				int index = url.indexOf("?");
-				if (index < 0) {
-					continue;
-				}
-
-				// 获取特定参数
-				url = url.substring(index + 1);
-				String[] items = url.split("&");
-				String findStr = APP_ID + "=";
-				for (String item : items) {
-					if (item.startsWith(findStr)) {
-						appId = Long.parseLong(item.substring(findStr.length()));
-					}
-				}
-
-				// 如果未找到，继续
-				if (null == appId) {
-					continue;
-				}
+//				// 截取url的参数部分
+//				int index = url.indexOf("?");
+//				if (index < 0) {
+//					continue;
+//				}
+//
+//				// 获取特定参数
+//				url = url.substring(index + 1);
+//				String[] items = url.split("&");
+//				String findStr = APP_ID + "=";
+//				for (String item : items) {
+//					if (item.startsWith(findStr)) {
+//						appId = Long.parseLong(item.substring(findStr.length()));
+//					}
+//				}
+//
+//				// 如果未找到，继续
+//				if (null == appId) {
+//					continue;
+//				}
 			}
 
 			// 比较两者是否相同
-			if (!jumpCheckId.equals(appId)) {
-				continue;
-			}
+//			if (!jumpCheckId.equals(appId)) {
+//				continue;
+//			}
 
 			Map<String, String> normalParams = new HashMap<>(10);
 			normalParams.put("appId", appId + "");
@@ -2210,7 +2210,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			// 生成url
 			String finalModuleUrl = generateModuleUrl(skipRoute, prefix, normalParams, encodeParams, suffix);
 
-			dto.setModuleUrl(finalModuleUrl.toString());
+			dto.setModuleUrl(finalModuleUrl);
 			List<JumpModuleDTO> dtos = new ArrayList<>(1);
 			dtos.add(dto);
 			return dtos;
