@@ -5,10 +5,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.flow.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowNodeType;
 import com.everhomes.rest.flow_statistics.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -74,7 +76,9 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             return dto ;
         }
         list.stream().map(r->{
-            dto.getFlowVersions().add(r.getFlowVersion());
+            FlowDTO flowDTO = ConvertHelper.convert(r, FlowDTO.class);
+            flowDTO.fixDisplayVersion();
+            dto.getFlowVersions().add(flowDTO.getLastVersion());
             return null ;
         }).collect(Collectors.toList());
         return dto ;
