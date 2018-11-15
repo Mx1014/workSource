@@ -33,7 +33,7 @@ public class ZTContractController extends ControllerBase {
         
         Integer namespaceId = cmd.getNamespaceId()==null? UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
         cmd.setPaymentFlag((byte)0);
-        
+        cmd.setNamespaceId(namespaceId);
         RestResponse response = new RestResponse(contractSearcher.openapiListContracts(cmd));
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
