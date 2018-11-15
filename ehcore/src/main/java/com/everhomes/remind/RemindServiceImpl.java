@@ -641,10 +641,15 @@ public class RemindServiceImpl implements RemindService  {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         cmd.setStatus(cmd.getStatus() == null ? RemindStatus.UNDO.getCode() : cmd.getStatus());
         String shareShortDisplay = "无";
-        Integer shareCount = 0;
+        List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(cmd.getRemindCategoryId());
+        int shareCount = 0;
+        if (!CollectionUtils.isEmpty(shares)) {
+            shareShortDisplay = String.format("%s等%d人", shares.get(0).getSharedContractName(), shares.size());
+            shareCount += shares.size();
+        }
         if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
             shareShortDisplay = String.format("%s等%d人", cmd.getShareToMembers().get(0).getSourceName(), cmd.getShareToMembers().size());
-            shareCount = cmd.getShareToMembers().size();
+            shareCount += cmd.getShareToMembers().size();
         }
 
         RemindSetting remindSetting = null;
@@ -720,10 +725,15 @@ public class RemindServiceImpl implements RemindService  {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         String shareShortDisplay = "无";
-        Integer shareCount = 0;
+        int shareCount = 0;
+        List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(cmd.getRemindCategoryId());
+        if (!CollectionUtils.isEmpty(shares)) {
+            shareShortDisplay = String.format("%s等%d人", shares.get(0).getSharedContractName(), shares.size());
+            shareCount += shares.size();
+        }
         if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
             shareShortDisplay = String.format("%s等%d人", cmd.getShareToMembers().get(0).getSourceName(), cmd.getShareToMembers().size());
-            shareCount = cmd.getShareToMembers().size();
+            shareCount += cmd.getShareToMembers().size();
         }
 
         RemindSetting remindSetting = null;
@@ -1403,6 +1413,13 @@ public class RemindServiceImpl implements RemindService  {
 
         List<RemindShare> originRemindShares = remindProvider.findShareMemberDetailsByRemindId(originRemind.getId());
 
+        List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(originRemind.getRemindCategoryId());
+        int shareCount = 0;
+        if (!CollectionUtils.isEmpty(shares)) {
+            String shareShortDisplay = String.format("%s等%d人", shares.get(0).getSharedContractName(), shares.size());
+            repeatRemind.setShareShortDisplay(shareShortDisplay);
+            shareCount += shares.size();
+        }
         List<ShareMemberDTO> shareMembers = new ArrayList<>();
         originRemindShares.forEach(remindShare -> {
             OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(remindShare.getSharedSourceId());
@@ -1418,9 +1435,9 @@ public class RemindServiceImpl implements RemindService  {
         if (!CollectionUtils.isEmpty(shareMembers)) {
             String shareShortDisplay = String.format("%s等%d人", shareMembers.get(0).getSourceName(), shareMembers.size());
             repeatRemind.setShareShortDisplay(shareShortDisplay);
-            repeatRemind.setShareCount(shareMembers.size());
+            shareCount += shareMembers.size();
         }
-
+        repeatRemind.setShareCount(shareCount);
         dbProvider.execute(transactionStatus -> {
             List<Remind> originSubscribeReminds = remindProvider.findRemindsByTrackRemindIds(Collections.singletonList(originRemind.getId()));
             remindProvider.createRemind(repeatRemind);

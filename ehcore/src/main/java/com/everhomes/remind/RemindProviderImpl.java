@@ -32,6 +32,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -283,6 +284,8 @@ public class RemindProviderImpl implements RemindProvider {
 
     @Override
     public List<RemindCategoryDefaultShare> findShareMemberDetailsByCategoryId(Long categoryId) {
+    	if(null == categoryId)
+            return Collections.emptyList();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectConditionStep<Record> query = context.select().from(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES).where(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID.eq(categoryId));
         Result<Record> result = query.fetch();
