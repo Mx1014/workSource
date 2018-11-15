@@ -8,6 +8,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractScheduleJob;
 import com.everhomes.customer.CustomerExportHandler;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -38,6 +39,7 @@ import com.everhomes.rest.varField.FieldItemDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import com.everhomes.rest.varField.ListFieldItemCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnterpriseCustomerSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
@@ -130,15 +132,25 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private ScheduleProvider scheduleProvider;
 
 
 
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-
+    public void setup(){
+        String triggerName = CustomerStatisticsScheduleJob.SCHEDELE_NAME + System.currentTimeMillis();
+        String jobName = triggerName;
+        String cronExpression = CustomerStatisticsScheduleJob.CRON_EXPRESSION;
+        //启动定时任务
+        scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, CustomerStatisticsScheduleJob.class, null);
     }
 
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().getParent() == null) {
+            setup();
+        }
+    }
 
 
 
