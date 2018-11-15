@@ -1,11 +1,14 @@
 package com.everhomes.openapi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.community.CommunityService;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
@@ -20,11 +23,12 @@ import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyResponse;
 @RestDoc(value="property open Controller", site="core")
 @RestController
 @RequestMapping("/openapi/property")
-public class ZTPropertyController {
+public class ZTPropertyController extends ControllerBase{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ZTPropertyController.class);
 	
 	@Autowired
 	private CommunityService communityService;
-	
 	
 	/**
      * <b>URL: /openapi/property/listCommunities</b>

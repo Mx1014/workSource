@@ -6441,12 +6441,19 @@ public class CommunityServiceImpl implements CommunityService {
 		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
 		Integer pageSize = cmd.getPageSize();
 		if (pageSize == null) {
-			pageSize = 0;
+			pageSize = 10;
 		}else if (pageSize > 1000) {
 			pageSize = 1000;
 		}
 		
-		List<com.everhomes.rest.openapi.CommunityDTO> results = communityProvider.listCommunitiesForThirdParty(cmd.getNamespaceId(),cmd.getCommunityId(),pageAnchor,pageSize+1,cmd.getUpdateTime());
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.CommunityDTO> results = communityProvider.listCommunitiesForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
 		
 		if (results!=null && results.size() > pageSize) {
 			results.remove(results.size()-1);
@@ -6467,12 +6474,19 @@ public class CommunityServiceImpl implements CommunityService {
 		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
 		Integer pageSize = cmd.getPageSize();
 		if (pageSize == null) {
-			pageSize = 0;
+			pageSize = 10;
 		}else if (pageSize > 1000) {
 			pageSize = 1000;
 		}
 		
-		List<com.everhomes.rest.openapi.BuildingDTO> results = communityProvider.listBuildingsForThirdParty(cmd.getNamespaceId(),cmd.getCommunityId(),pageAnchor,pageSize+1,cmd.getUpdateTime());
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.BuildingDTO> results = communityProvider.listBuildingsForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
 		
 		if (results!=null && results.size() > pageSize) {
 			results.remove(results.size()-1);
@@ -6501,12 +6515,19 @@ public class CommunityServiceImpl implements CommunityService {
 		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
 		Integer pageSize = cmd.getPageSize();
 		if (pageSize == null) {
-			pageSize = 0;
+			pageSize = 10;
 		}else if (pageSize > 1000) {
 			pageSize = 1000;
 		}
 		
-		List<com.everhomes.rest.openapi.ApartmentDTO> results = communityProvider.listAddressesForThirdParty(cmd.getNamespaceId(),cmd.getCommunityId(),cmd.getBuildingId(),pageAnchor,pageSize+1,cmd.getUpdateTime());
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.ApartmentDTO> results = communityProvider.listAddressesForThirdParty(currentNamespaceId,cmd.getCommunityId(),cmd.getBuildingId(),pageAnchor,pageSize+1,timestamp);
 		
 		if (results!=null && results.size() > pageSize) {
 			results.remove(results.size()-1);

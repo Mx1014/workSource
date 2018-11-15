@@ -38,6 +38,7 @@ import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;

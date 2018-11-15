@@ -11,7 +11,8 @@ public class ListAddressesForThirdPartyCommand {
 	private Long buildingId;
 	private Long pageAnchor;
 	private Integer pageSize;
-	private Timestamp updateTime;
+	//private Timestamp updateTime;
+	private Long updateTime;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -43,10 +44,10 @@ public class ListAddressesForThirdPartyCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	public Timestamp getUpdateTime() {
+	public Long getUpdateTime() {
 		return updateTime;
 	}
-	public void setUpdateTime(Timestamp updateTime) {
+	public void setUpdateTime(Long updateTime) {
 		this.updateTime = updateTime;
 	}
 	
