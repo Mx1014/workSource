@@ -6,5 +6,6 @@ CREATE TABLE `eh_address_events` (
   `operate_time` datetime ON UPDATE CURRENT_TIMESTAMP COMMENT '操作时间',
   `operate_type` tinyint(4) COMMENT '操作类型（1：增加，2：删除，3：修改）',
   `content` text COMMENT '日志内容',
+  `status` tinyint(4) COMMENT '状态（0：无效，1：待确认，2：生效）',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房源日志表';

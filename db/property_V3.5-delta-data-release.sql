@@ -1,4 +1,4 @@
--- AUTHOR: tangcen
+-- AUTHOR: tangcen 2018年11月15日
 -- REMARK: 添加房源招商的权限
 SET @id = (select max(id) from eh_service_module_privileges);
 -- 新增房源权限
@@ -131,3 +131,12 @@ INSERT INTO `eh_service_module_privileges`(`id`, `module_id`, `privilege_type`, 
 	VALUES (@id:=@id+1 , 38000, 0, 38126, '按房源导出', 0, SYSDATE());
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`) 
 	VALUES (38126, 0, '楼宇资产管理 按房源导出', '楼宇资产管理 业务模块权限', NULL);
+	
+	
+-- AUTHOR: tangcen 2018年11月15日
+-- REMARK: 添加房源日志模板
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('address.tracking', '1', 'zh_CN', '创建房源', '创建房源', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('address.tracking', '2', 'zh_CN', '删除房源', '删除房源', '0');	
+	
+	
+	
