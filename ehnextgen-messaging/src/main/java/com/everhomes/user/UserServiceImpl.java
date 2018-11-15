@@ -7201,8 +7201,8 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
                         AddressSiteDTO addressSiteDTO = ConvertHelper.convert(community, AddressSiteDTO.class);
                         addressSiteDTO.setCommunityId(community.getId());
 						addressSiteDTO.setCommunityName(community.getName());
-						addressSiteDTO.setWholeAddressName(community.getProvinceName() + community.getCityName()
-								+ community.getAreaName() + community.getAddress());
+						addressSiteDTO.setWholeAddressName(getNotNullString(community.getProvinceName() , community.getCityName()
+						, community.getAreaName() , community.getAddress()));
 						addressSiteDtos.add(addressSiteDTO);
 					}
 
@@ -7228,12 +7228,18 @@ public class UserServiceImpl implements UserService, ApplicationListener<Context
 		return response;
 	}
 	
-	//多个可能为null值的参数拼接字符串
-	private String getStringIgnNull(String ... list){
-		new StringBuilder();
-		for(String s : list){
-			
+	/**
+	 * 用于多个可能为null值的参数拼接字符串
+	 * @author momoubin 18/11/15
+	 * */
+	private String getNotNullString(String ... list){
+		StringBuffer stringBuffer = new StringBuffer();
+		for(String string : list){
+			if(!StringUtils.isEmpty(string)){
+				stringBuffer.append(string);				
+			}
 		}
+		return stringBuffer.toString();
 	}
 	
 	private TimeBasedOneTimePasswordGenerator getTotp() throws NoSuchAlgorithmException {
