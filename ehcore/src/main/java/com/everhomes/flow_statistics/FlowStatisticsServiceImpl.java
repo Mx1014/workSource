@@ -244,10 +244,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
                 averageCycle = cycles/times ;
             }
             Double average = 0D;
-            //由秒转化为小时
+            //直接返回秒
             if(averageCycle!=0){
-                average = averageCycle.doubleValue()/60/60 ;
-                average = handleDecimal(average);
+               // average = averageCycle.doubleValue()/60/60 ;
+                average = averageCycle.doubleValue() ;
+                //average = handleDecimal(average);
             }
             dto.setHandleTimes(times);
             dto.setAverageHandleCycle(average);
@@ -266,10 +267,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
              averageCycle = cycles/times ;
         }
         Double average = 0D;
-        //由秒转化为小时
+        //直接返回秒
         if(averageCycle != 0){
-            average = averageCycle.doubleValue()/60/60 ;
-            average = handleDecimal(average);
+            //average = averageCycle.doubleValue()/60/60 ;
+            average = averageCycle.doubleValue() ;
+            //average = handleDecimal(average);
         }
         response.setCurrentCycleNodesAverage(average);
         return response;
@@ -325,10 +327,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
                 lastAverageCycle = lastCycles/lastTimes ;
             }
             Double lastAverage = 0D;
-            //由秒转化为小时
+            //直接返回秒
             if(lastAverageCycle!=0){
-                lastAverage = lastAverageCycle.doubleValue()/60/60 ;
-                lastAverage = handleDecimal(lastAverage);
+                //lastAverage = lastAverageCycle.doubleValue()/60/60 ;
+                lastAverage = lastAverageCycle.doubleValue() ;
+                //lastAverage = handleDecimal(lastAverage);
             }
 
             dto.setLastCycleAverage(lastAverage);
@@ -343,10 +346,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
                 averageCycle = cycles/times ;
             }
             Double average = 0D;
-            //由秒转化为小时
+            //直接返回秒
             if(averageCycle!=0){
-                average = averageCycle.doubleValue()/60/60 ;
-                average = handleDecimal(average);
+                //average = averageCycle.doubleValue()/60/60 ;
+                average = averageCycle.doubleValue() ;
+                //average = handleDecimal(average);
             }
             dto.setCurrentCycleAverage(average);
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
@@ -372,10 +376,11 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             averageCycle = cycles/lanesCount ;
         }
         Double average = 0D;
-        //由秒转化为小时
+        //直接返回秒
         if(averageCycle!=0){
-            average = averageCycle.doubleValue()/60/60 ;
-            average = handleDecimal(average);
+            //average = averageCycle.doubleValue()/60/60 ;
+            average = averageCycle.doubleValue() ;
+            //average = handleDecimal(average);
         }
         response.setCurrentCycleLanesAverage(average);
         return response ;
