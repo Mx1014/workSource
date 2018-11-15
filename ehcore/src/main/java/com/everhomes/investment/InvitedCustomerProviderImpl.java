@@ -559,8 +559,9 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         com.everhomes.server.schema.tables.EhEnterpriseCustomers customer = Tables.EH_ENTERPRISE_CUSTOMERS;
         SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(customer);
-        query.addSelect(customer.ID,customer.LEVEL_ITEM_ID,customer.CREATE_TIME);
+        query.addSelect(customer.ID, customer.LEVEL_ITEM_ID, customer.CREATE_TIME, customer.NAMESPACE_ID, customer.COMMUNITY_ID);
         query.addConditions(customer.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+        query.addConditions(customer.LEVEL_ITEM_ID.isNotNull());
 
 
         if(nextAnchor != null && nextAnchor != 0){
@@ -604,22 +605,39 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 
         SelectQuery<EhCustomerLevelChangeRecordsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS);
 
-        Condition c1 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.NAMESPACE_ID.eq(namespaceId));
-        Condition c2 = (Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.COMMUNITY_ID.eq(communityId));
-
-        query.addConditions(c1);
-        query.addConditions(c2);
-
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.COMMUNITY_ID.eq(communityId));
+        }
         if(queryEndDate != null){
             query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.CHANGE_DATE.le(queryEndDate));
         }
-
         if(queryStartDate != null){
             query.addConditions(Tables.EH_CUSTOMER_LEVEL_CHANGE_RECORDS.CHANGE_DATE.ge(queryStartDate));
         }
 
         return query.fetchInto(CustomerLevelChangeRecord.class);
 
+    }
+
+    @Override
+    public Integer countCustomerNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnterpriseCustomersRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CUSTOMERS);
+
+
+        if(queryEndDate != null){
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.le(queryEndDate));
+        }
+        if(queryStartDate != null){
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.CREATE_TIME.ge(queryStartDate));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        }
+        return query.fetchCount();
     }
 
 }

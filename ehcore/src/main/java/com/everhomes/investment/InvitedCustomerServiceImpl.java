@@ -55,6 +55,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,7 +69,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class InvitedCustomerServiceImpl implements InvitedCustomerService {
+public class InvitedCustomerServiceImpl implements InvitedCustomerService , ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InvitedCustomerServiceImpl.class);
     private static final String CreateCustomer = "/CreateCustomer";
@@ -127,6 +129,19 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Autowired
     private TaskService taskService;
+
+
+
+
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+
+    }
+
+
+
+
 
 
     private void checkCustomerAuth(Integer namespaceId, Long privilegeId, Long orgId, Long communityId) {
@@ -957,15 +972,17 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService {
 
     @Override
     public void recordCustomerLevelChange(Long oldLevelItemId, Long newLevelItemId, Integer namespaceId, Long communityId, Long customerId, Timestamp changeDate) {
-        if (!newLevelItemId.equals(oldLevelItemId)) {
-            CustomerLevelChangeRecord record = new CustomerLevelChangeRecord();
-            record.setCustomerId(customerId);
-            record.setCommunityId(communityId);
-            record.setOldStatus(oldLevelItemId);
-            record.setNewStatus(newLevelItemId);
-            record.setChangeDate(changeDate);
-            record.setNamespaceId(namespaceId);
-            invitedCustomerProvider.createCustomerLevelChangeRecord(record);
+        if(newLevelItemId != null) {
+            if (!newLevelItemId.equals(oldLevelItemId)) {
+                CustomerLevelChangeRecord record = new CustomerLevelChangeRecord();
+                record.setCustomerId(customerId);
+                record.setCommunityId(communityId);
+                record.setOldStatus(oldLevelItemId);
+                record.setNewStatus(newLevelItemId);
+                record.setChangeDate(changeDate);
+                record.setNamespaceId(namespaceId);
+                invitedCustomerProvider.createCustomerLevelChangeRecord(record);
+            }
         }
     }
     @Override

@@ -81,4 +81,6 @@ public interface InvitedCustomerProvider {
     void createCustomerLevelChangeRecord(CustomerLevelChangeRecord record);
 
     List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
+
+    Integer countCustomerNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 }

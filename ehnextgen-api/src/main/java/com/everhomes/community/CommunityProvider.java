@@ -184,5 +184,12 @@ public interface CommunityProvider {
 	String findCommunityCategoryByCommunityId(Long communityId);
 	List<Building> findBuildingsByIds(List<Long> buildingIds);
 	List<Long> findCommunityIdsByOrgId(Long organizationId);
+
+
+    /**
+     * Author: 黄鹏宇
+     * Remark: 获取所有生效的业务用community
+     */
+    List<Long> listAllBizCommunities();
 	
 }
