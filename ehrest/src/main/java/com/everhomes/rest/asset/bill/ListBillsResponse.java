@@ -1,5 +1,5 @@
 //@formatter:off
-package com.everhomes.rest.asset;
+package com.everhomes.rest.asset.bill;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  *<ul>
- * <li>listBillsDTOS: 已出账单的集合，参考{@link ListBillsDTO}</li>
+ * <li>listBillsDTOS: 账单的集合，参考{@link ListBillsDTO}</li>
  * <li>nextPageAnchor: 下一次锚点</li>
  *</ul>
  */

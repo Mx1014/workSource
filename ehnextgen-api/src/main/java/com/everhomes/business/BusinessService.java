@@ -1,6 +1,8 @@
 package com.everhomes.business;
 
 import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.asset.CheckPaymentUserCommand;
 import com.everhomes.rest.asset.CheckPaymentUserResponse;
