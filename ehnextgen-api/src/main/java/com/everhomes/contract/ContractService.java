@@ -78,4 +78,5 @@ public interface ContractService {
 	default ContractTaskOperateLog exemptionContract(InitializationCommand cmd){return null;};
 	default void copyContract(InitializationCommand cmd){};
 	default SearchProgressDTO findContractOperateTaskById(SearchProgressCommand cmd){return null;};
+	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
 }

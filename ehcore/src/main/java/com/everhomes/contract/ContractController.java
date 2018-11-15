@@ -688,4 +688,16 @@ public class ContractController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <p>合同更新/根据合同id,自动刷新合同账单</p>
+	 * <b>URL: /contract/autoGeneratingBill</b>
+	 */
+	@RequestMapping("autoGeneratingBill")
+	@RestReturn(String.class)
+	public RestResponse autoGeneratingBill(AutoGeneratingBillCommand cmd){
+		ContractService contractService = getContractService(cmd.getNamespaceId());
+		contractService.autoGeneratingBill(cmd);
+		return new RestResponse();
+	}
 }
