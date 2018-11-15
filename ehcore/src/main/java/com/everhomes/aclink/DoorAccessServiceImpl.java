@@ -281,9 +281,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private AclinkIpadService aclinkIpadService;
+
+    @Autowired
+    private AclinkIpadProvider aclinkIpadProvider;
     
     @Autowired
     private AclinkCameraService aclinkCameraService;
+
+    @Autowired
+    private AclinkCameraProvider aclinkCameraProvider;
     
     @Autowired
     private BusinessService businessService;
@@ -2945,6 +2951,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         Long t2 = DateHelper.currentGMTTime().getTime();
         LOGGER.info("auths 获取 "+(t2-t1));
         for(DoorAuth auth : auths) {
+//            TODO: 按门禁组授权查找门禁
+            if(auth.getGroupType() != (byte)2){
+                return resp;
+            }
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
                 //The door is delete, set it to invalid
@@ -6996,23 +7006,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         groups = doorAccessProvider.listAclinkGroup(locator, count, groupCmd);
         //合并门禁及门禁组
         List<DoorsAndGroupsDTO> dtos = new ArrayList<DoorsAndGroupsDTO>();
-        if(null != doorResp.getDoors() && doorResp.getDoors().size()>0){
-            for(DoorAccessDTO door: doorResp.getDoors()){
-                DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
-                dto.setId(door.getId().toString());
-                dto.setType((byte)1); //门禁
-                dto.setName(door.getDisplayName());
-                dto.setStatus(door.getStatus());
-                dtos.add(dto);
-            }
-        }
         if(null != groups && groups.size()>0){
             for(AclinkGroupDTO group :groups){
                 DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
-                dto.setId("_" + group.getGroupId().toString());//门禁组加下划线
+                dto.setId(group.getGroupId());//门禁组加下划线
                 dto.setType((byte)2); //门禁组
                 dto.setName(group.getGroupName());
                 dto.setStatus(group.getStatus());
+                dtos.add(dto);
+            }
+        }
+        if(null != doorResp.getDoors() && doorResp.getDoors().size()>0){
+            for(DoorAccessDTO door: doorResp.getDoors()){
+                DoorsAndGroupsDTO dto = new DoorsAndGroupsDTO();
+                dto.setId(door.getId());
+                dto.setType((byte)1); //门禁
+                dto.setName(door.getDisplayName());
+                dto.setStatus(door.getStatus());
                 dtos.add(dto);
             }
         }
@@ -7337,11 +7347,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     value.setOwnerType(cmd.getOwnerType());
                     if(dto.getType() == 1){ //门禁
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode());
-                        value.setValue(dto.getId());
+                        value.setValue(dto.getId().toString());
                     }
                     else if(dto.getType() == 2) { //门禁组
                         value.setType(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode());
-                        value.setValue(dto.getId());
+                        value.setValue(dto.getId().toString());
                     }else continue;
                     value.setStatus((byte)1);
                     value.setTitleId(0L);
@@ -7563,6 +7573,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		rsp.setMsg("success");
 		return rsp;
 	}
+
+	@Override
+    public SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd){
+	    SearchDoorServerResponse resp = new SearchDoorServerResponse();
+        DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(null != door && door.getLocalServerId() != null){
+            AclinkServerDTO server = new AclinkServerDTO();
+            server = aclinkServerService.findLocalServerById(door.getLocalServerId());
+            resp.setServer(server);
+            List<AclinkCameraDTO> camera = new ArrayList<>();
+            camera = aclinkCameraProvider.findCameraByDoorId(door.getId());
+            resp.setCameras(camera);
+            List<AclinkIPadDTO> Ipad = new ArrayList<>();
+            Ipad = aclinkIpadProvider.findIpadByDoorId(door.getId());
+            resp.setIpad(Ipad);
+        }
+        return resp;
+    }
 }
 
 

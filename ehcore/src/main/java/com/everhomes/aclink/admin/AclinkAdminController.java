@@ -70,7 +70,21 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /admin/aclink/searchDoorServer</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("searchDoorServer")
+    @RestReturn(value=SearchDoorServerResponse.class)
+    public RestResponse searchDoorServer(@Valid SearchDoorServerCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.searchDoorServer(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /admin/aclink/listDoorAccess</b>
      * <p>获取门禁列表 lite版</p>

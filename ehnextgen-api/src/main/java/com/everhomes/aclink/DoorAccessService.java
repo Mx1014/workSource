@@ -302,5 +302,6 @@ public interface DoorAccessService {
     ListSelectDoorsResponse listSelectDoors(ListSelectDoorsCommand cmd);
     //列出所有管理门禁(组)
     ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd);
-
+    //查询门禁关联服务器、摄像头
+    SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd);
 }

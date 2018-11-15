@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 public class CreateTempAuthCommand {
 
     private String phone;
-    private Long     doorId;
+    private Long doorId;
     private Byte groupType;
     private Integer namespaceId;
     private String userName;

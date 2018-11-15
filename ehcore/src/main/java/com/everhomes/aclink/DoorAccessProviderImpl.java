@@ -568,11 +568,11 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             door.setFormId(r.getValue(t.ID));
 //            door.setId(Long.parseLong(r.getValue(t.VALUE)));
             if(r.getValue(t.TYPE).equals(AclinkFormValuesType.AUTH_PRIORITY_DOOR.getCode())){
-                door.setId(r.getValue(t.VALUE));
+                door.setId(Long.parseLong(r.getValue(t.VALUE)));
                 door.setType((byte)1);
                 door.setName(r.getValue(Tables.EH_DOOR_ACCESS.DISPLAY_NAME));
             }else if(r.getValue(t.TYPE).equals(AclinkFormValuesType.AUTH_PRIORITY_GROUP.getCode())){
-                door.setId("_" + r.getValue(t.VALUE));//门禁组前面加下划线
+                door.setId(Long.parseLong(r.getValue(t.VALUE)));//门禁组前面加下划线
                 door.setType((byte)2);
                 door.setName(r.getValue(Tables.EH_ACLINK_GROUP.NAME));
             }
@@ -702,8 +702,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
         });
         objs.removeAll(Collections.singleton(null));
-//        TODO: 门禁按displayName排序
-//        objs.sort(Comparator.comparing());
+        //门禁按displayName排序
+        Collections.sort(objs,new DoorAccessComparator());
         return objs;
 	}
 

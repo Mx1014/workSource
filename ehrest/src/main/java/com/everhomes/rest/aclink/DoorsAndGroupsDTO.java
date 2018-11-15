@@ -19,10 +19,10 @@ import java.util.List;
  */
 public class DoorsAndGroupsDTO {
 	private Long formId;
-//	private Long id;
+	private Long id;
 //	private Long doorId;
 //	private Long groupId;
-	private String id;
+
 	private Byte type;
 	private String name;
 	private Byte Status;
@@ -35,14 +35,14 @@ public class DoorsAndGroupsDTO {
 		this.formId = formId;
 	}
 
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	//	public Long getDoorId() {
+//	public Long getDoorId() {
 //		return doorId;
 //	}
 //

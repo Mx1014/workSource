@@ -140,3 +140,8 @@ CREATE TABLE `eh_aclink_group_doors` (
 	`operator_time` datetime DEFAULT NULL COMMENT '修改时间',
 	PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COMMENT = '门禁组门禁关系表';
+-- AUTHOR: 李清岩
+-- REMARK: 门禁v3.0.2 issue-34771
+-- REMARK: 门禁iPad自定义logo
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_uri` VARCHAR(2048) DEFAULT NULL COMMENT 'logo uri' ;
+ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_url` VARCHAR(2048) DEFAULT NULL COMMENT 'logo url' ;
