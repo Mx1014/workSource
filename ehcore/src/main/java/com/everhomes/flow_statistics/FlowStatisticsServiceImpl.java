@@ -63,7 +63,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
     public FindFlowVersionDTO findFlowVersion(FindFlowVersionCommand cmd ){
         FindFlowVersionDTO dto = new FindFlowVersionDTO();
         if(dto.getFlowVersions() == null){
-            dto.setFlowVersions(new ArrayList<Integer>());
+            dto.setFlowVersions(new ArrayList<StatisticFlowVersion>());
         }
         if(cmd.getFlowMainId() == null ){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -79,7 +79,10 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             FlowDTO flowDTO = ConvertHelper.convert(r, FlowDTO.class);
             flowDTO.setLastVersion(r.getFlowVersion());
             flowDTO.fixDisplayVersion();
-            dto.getFlowVersions().add(flowDTO.getLastVersion());
+            StatisticFlowVersion sf = new StatisticFlowVersion();
+            sf.setFlowVersion(r.getFlowVersion());
+            sf.setLastVersion(flowDTO.getLastVersion());
+            dto.getFlowVersions().add(sf);
             return null ;
         }).collect(Collectors.toList());
         return dto ;

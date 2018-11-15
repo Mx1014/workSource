@@ -13,20 +13,20 @@ import java.util.List;
  */
 public class FindFlowVersionDTO {
 
-    private List<Integer> flowVersions ;
+    private List<StatisticFlowVersion> flowVersions ;
 
     public FindFlowVersionDTO(){
         if(flowVersions == null){
-            flowVersions = new ArrayList<Integer>();
+            flowVersions = new ArrayList<StatisticFlowVersion>();
         }
     }
 
 
-    public List<Integer> getFlowVersions() {
+    public List<StatisticFlowVersion> getFlowVersions() {
         return flowVersions;
     }
 
-    public void setFlowVersions(List<Integer> flowVersions) {
+    public void setFlowVersions(List<StatisticFlowVersion> flowVersions) {
         this.flowVersions = flowVersions;
     }
 
