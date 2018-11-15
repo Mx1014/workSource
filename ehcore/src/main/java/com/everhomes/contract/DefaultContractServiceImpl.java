@@ -2378,6 +2378,9 @@ long assetCategoryId = 0l;
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if (chargingItems.get(i).getChargingStartTime() == null || contract.getContractStartDate() == null) {
+						continue ;
+					}
 					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getContractStartDate())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
@@ -2413,6 +2416,9 @@ long assetCategoryId = 0l;
 			if (chargingItems!=null && chargingItems.size()>0) {
 				List<ChargingItemVariables>  chargingPaymentTypeVariables = new ArrayList<ChargingItemVariables>();
 				for (int i = 0; i < chargingItems.size(); i++) {
+					if (chargingItems.get(i).getChargingStartTime() == null || contract.getContractStartDate() == null) {
+						continue ;
+					}
 					if ((chargingItems.get(i).getChargingStartTime()).before(contract.getDenunciationTime())) {
 					// <li>costGenerationMethod: 费用截断方式，0：按计费周期，1：按实际天数</li>
 					ChargingItemVariables  chargingPaymentTypeVariable = new ChargingItemVariables();
