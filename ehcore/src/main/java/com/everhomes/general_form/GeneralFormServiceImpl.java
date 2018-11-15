@@ -12,6 +12,7 @@ import com.everhomes.general_approval.*;
 import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.activity.ruian.ActivityCategoryList;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
@@ -21,12 +22,16 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGeneralFormFilterUserMap;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
+import com.everhomes.util.*;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -389,8 +394,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
         GeneralFormFieldDTO dto = null;
         // 审批的值是在一张表
         if (moduleId == 52000L) {
-            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(
-                    formOriginId, 0L/*这张表的version好像都是0*/, ownerId, fieldName);
+            GeneralApprovalVal approvalVal = generalApprovalValProvider.getGeneralApprovalVal(ownerId,
+                    formOriginId, 0L/*这张表的version好像都是0*/, fieldName);
             if (approvalVal != null) {
                 dto = new GeneralFormFieldDTO();
                 dto.setFieldType(approvalVal.getFieldType());
@@ -487,6 +492,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
     @Override
     public GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd) {
+        //处理一下入参
+        List<GeneralFormFieldDTO> dtos = processGeneralFormField(cmd.getFormFields());
+        cmd.setFormFields(dtos);
 
         GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
         form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
@@ -503,6 +511,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     @Override
     public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
         return this.dbProvider.execute((TransactionStatus status) -> {
+            //处理一下入参
+            List<GeneralFormFieldDTO> dtos = processGeneralFormField(cmd.getFormFields());
+            cmd.setFormFields(dtos);
+
             GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
                     .getFormOriginId());
             if (null == form || form.getStatus().equals(GeneralFormStatus.INVALID.getCode()))
@@ -1107,6 +1119,56 @@ public class GeneralFormServiceImpl implements GeneralFormService {
     private String gogsGet(GogsRepo repo, String path, String lastCommit) {
         byte[] file = gogsService.getFile(repo, path, lastCommit);
         return new String(file, Charset.forName("UTF-8"));
+    }
+
+    //对fieldType　为＂MULTI_SELECT＂的GeneralFormFieldDTO进行处理
+    private List<GeneralFormFieldDTO>  processGeneralFormField(List<GeneralFormFieldDTO> dtos){
+        if(CollectionUtils.isEmpty(dtos)){
+            return dtos ;
+        }
+        for(GeneralFormFieldDTO dto : dtos){
+            String type = dto.getFieldType();
+            if(GeneralFormFieldType.MULTI_SELECT.getCode().equals(type)){
+                String selectValue = dto.getFieldExtra();
+                selectValue = multiSelectTransferPingyin(selectValue);
+                dto.setFieldExtra(selectValue);
+            }
+        }
+        return dtos ;
+    }
+
+    /**
+     * 初始化出拼音
+     * @param selectValue
+     * @return
+     */
+    private String multiSelectTransferPingyin(String selectValue){
+        if(StringUtils.isBlank(selectValue)){
+            LOGGER.info("multiSelectTransferPingyin : selectValue is blank !");
+            return selectValue ;
+        }
+
+        GeneralFormMultiSelectDTO dto = (GeneralFormMultiSelectDTO)StringHelper.fromJsonString(selectValue,GeneralFormMultiSelectDTO.class);
+        if(CollectionUtils.isEmpty(dto.getSelectValue())){
+            LOGGER.info("multiSelectTransferPingyin : selectValue is empty !");
+            return selectValue ;
+        }
+        List<String> pinyins = new ArrayList<String>();
+        for(String str : dto.getSelectValue()){
+            String pinyin = "";
+            try{ //转换拼音出错不应该影响该功能的进行
+                 pinyin = PinYinHelper.getPinYin(str);
+            }catch(Exception e ){
+                LOGGER.info("multiSelectTransferPingyin  : str:{} can not transfer pinyin !",str);
+            }
+
+            pinyins.add(pinyin);
+        }
+
+        dto.setPingYin(pinyins);
+        selectValue = StringHelper.toJsonString(dto);
+
+        return selectValue ;
     }
 }
 

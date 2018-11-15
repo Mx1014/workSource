@@ -1737,5 +1737,19 @@ public class CustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /customer/transNewAdmin</b>
+     * <p>将旧的管理员转化为新的管理员</p>
+     */
+    @RequestMapping("transNewAdmin")
+    @RestReturn(value = String.class)
+    public RestResponse transNewAdmin(TransNewAdminCommand cmd) {
+        customerService.transNewAdmin(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
 }

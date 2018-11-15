@@ -1,5 +1,7 @@
 package com.everhomes.rest.common;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 
  * <ul>true false
@@ -35,5 +37,16 @@ public enum TrueOrFalseFlag {
 			}
 		}
 		return null;
+	}
+
+	public static TrueOrFalseFlag fromText(String text) {
+		if (!StringUtils.isBlank(text)) {
+			for (TrueOrFalseFlag trueOrFalseFlag : TrueOrFalseFlag.values()) {
+				if (trueOrFalseFlag.getText().equals(text)) {
+					return trueOrFalseFlag;
+				}
+			}
+		}
+		return TRUE;
 	}
 }

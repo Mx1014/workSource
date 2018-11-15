@@ -8,6 +8,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.rest.rentalv2.SiteItemDTO;
+import com.everhomes.rest.rentalv2.SiteStructureDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -37,6 +38,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>rentalTypes: rentalTypes</li>
+ * <li>structures: 基础设施</li>
  * <li>priceRules: priceRules {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * <li>pricePackages: pricePackages {@link com.everhomes.rest.rentalv2.admin.PricePackageDTO}</li>
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
@@ -102,6 +104,8 @@ public class AddDefaultRuleAdminCommand {
 
 	@ItemType(RentalOpenTimeDTO.class)
 	private List<RentalOpenTimeDTO> openTimes;
+
+	private List<SiteStructureDTO> structures;
 
 
 	private Byte refundStrategy;
@@ -417,5 +421,13 @@ public class AddDefaultRuleAdminCommand {
 
 	public void setRefundTips(List<RentalRefundTipDTO> refundTips) {
 		this.refundTips = refundTips;
+	}
+
+	public List<SiteStructureDTO> getStructures() {
+		return structures;
+	}
+
+	public void setStructures(List<SiteStructureDTO> structures) {
+		this.structures = structures;
 	}
 }
