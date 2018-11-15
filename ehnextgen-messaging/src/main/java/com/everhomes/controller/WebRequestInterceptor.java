@@ -13,6 +13,8 @@ import com.everhomes.domain.Domain;
 import com.everhomes.domain.DomainService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.AppNamespaceMapping;
+import com.everhomes.openapi.AppNamespaceMappingProvider;
 import com.everhomes.portal.PortalVersionUser;
 import com.everhomes.portal.PortalVersionUserProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -96,6 +98,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    private AppNamespaceMappingProvider appNamespaceMappingProvider;
 
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
@@ -475,7 +480,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        // add by 杨崇鑫  物业缴费V7.5（中天-资管与财务EAS系统对接）
+        AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
         UserContext.current().setCallerApp(app);
+        UserContext.setCurrentNamespaceId(mapping.getNamespaceId());
 
         Map<String, String> mapForSignature = new HashMap<String, String>();
         for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
