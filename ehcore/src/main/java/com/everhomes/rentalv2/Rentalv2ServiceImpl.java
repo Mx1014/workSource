@@ -1257,7 +1257,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<RentalResource> rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, Integer.MAX_VALUE, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
 		rentalSites = filteRentalSites(rentalSites,cmd);
-		siteIds = rentalSites.stream().map(RentalResource::getId).collect(Collectors.toList());
+        if (null == rentalSites){
+            response.setRentalSites(new ArrayList<>());
+            return response;
+        }
+        siteIds = rentalSites.stream().map(RentalResource::getId).collect(Collectors.toList());
 		siteIds = filteRentalSitesByTime(siteIds,cmd);
         rentalSites = rentalv2Provider.findRentalSites(cmd.getResourceTypeId(), cmd.getKeyword(),
 				locator, pageSize + 1, RentalSiteStatus.NORMAL.getCode(), siteIds, cmd.getCommunityId());
