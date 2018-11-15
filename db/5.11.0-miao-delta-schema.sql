@@ -44,6 +44,9 @@ CREATE TABLE `eh_office_cubicle_time_interval` (
   `night_begin_time` DOUBLE COMMENT '晚上开始时间-24小时制',
   `night_end_time` DOUBLE COMMENT '晚上结束时间-24小时制',
   `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `begin_time` DOUBLE COMMENT '整天开始时间-24小时制',
+  `end_time`  DOUBLE COMMENT '整天开始时间-24小时制',
+  `cubicle_type` TINYINT COMMENT '0按半天，1按天，3按半天带晚上',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
