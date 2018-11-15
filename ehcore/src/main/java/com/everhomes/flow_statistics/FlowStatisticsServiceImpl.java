@@ -77,6 +77,7 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
         }
         list.stream().map(r->{
             FlowDTO flowDTO = ConvertHelper.convert(r, FlowDTO.class);
+            flowDTO.setLastVersion(r.getFlowVersion());
             flowDTO.fixDisplayVersion();
             dto.getFlowVersions().add(flowDTO.getLastVersion());
             return null ;
