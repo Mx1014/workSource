@@ -31,3 +31,19 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `remark` VARCHAR(255) COMMENT '备注显示文案',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `eh_office_cubicle_time_interval` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
+  `morning_begin_time` DOUBLE COMMENT '上午开始时间-24小时制',
+  `morning_end_time` DOUBLE COMMENT '上午结束时间-24小时制',
+  `afternoon_begin_time` DOUBLE COMMENT '下午开始时间-24小时制',
+  `afternoon_end_time` DOUBLE COMMENT '下午结束时间-24小时制',
+  `night_begin_time` DOUBLE COMMENT '晚上开始时间-24小时制',
+  `night_end_time` DOUBLE COMMENT '晚上结束时间-24小时制',
+  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
