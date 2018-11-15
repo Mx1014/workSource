@@ -352,7 +352,7 @@ public class WelfareServiceImpl implements WelfareService {
     private void sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
         //卡券
         TransferToPersonalCommand cmd1 = new TransferToPersonalCommand();
-        cmd1.setNamespaceId((long) UserContext.getCurrentNamespaceId());
+        cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         cmd1.setOrganizationId(organizationId);
         cmd1.setTargetUserList(targetUserIds);
         List<ObtainDetailsExtendDTO> obtainsList = welfaresDTO.getCoupons().stream()
