@@ -1,5 +1,7 @@
 package com.everhomes.rest.flow_statistics;
 
+import com.everhomes.util.StringHelper;
+
 public class StatisticFlowVersion {
 
     /**
@@ -27,5 +29,10 @@ public class StatisticFlowVersion {
 
     public void setLastVersion(Integer lastVersion) {
         this.lastVersion = lastVersion;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
