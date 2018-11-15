@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.welfare;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.everhomes.rest.welfare.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,8 +57,8 @@ public class WelfareController extends ControllerBase {
 	 */
 	@RequestMapping("sendWelfare")
 	@RestReturn(SendWelfaresResponse.class)
-	public RestResponse sendWelfare(SendWelfareCommand cmd){
-		return new RestResponse(welfareService.sendWelfare(cmd));
+	public RestResponse sendWelfare(SendWelfareCommand cmd, HttpServletRequest request){
+		return new RestResponse(welfareService.sendWelfare(cmd, request));
 	}
 
 	/**

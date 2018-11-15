@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerResource;
@@ -27,6 +29,8 @@ import com.everhomes.paySDK.PaySDKController;
 import com.everhomes.paySDK.api.PayService;
 import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.OfficialActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.coupon.CouponDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
@@ -44,6 +48,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
@@ -257,12 +262,15 @@ public class WelfareServiceImpl implements WelfareService {
 		return coupon;
 	}
 
-	String getWelfareZLUrl(Long welfareId) {
-        return "zl:" + welfareId;
+	String getWelfareZLUrl(Welfare welfare,HttpServletRequest request) {
+
+        String homeUrl = request.getHeader("Host");
+        return "http://"+homeUrl+"/enterprise-welfare/build/index.html?organizationId="+welfare.getOrganizationId()+"&namespaceId="+UserContext.getCurrentNamespaceId()
+        		+"&id="+welfare.getId()+"#/detail#sign_suffix";
     }
 
     @Override
-    public SendWelfaresResponse sendWelfare(SendWelfareCommand cmd) {
+    public SendWelfaresResponse sendWelfare(SendWelfareCommand cmd, HttpServletRequest request) {
         String lockName = CoordinationLocks.WELFARE_EDIT_LOCK.getCode();
         WelfaresDTO welfaresDTO = ConvertHelper.convert(cmd, WelfaresDTO.class);
         if (welfaresDTO.getId() != null) {
@@ -342,7 +350,7 @@ public class WelfareServiceImpl implements WelfareService {
             }
             //发消息
             welfaresDTO.getReceivers().forEach(r -> {
-                sendPayslipMessage(welfare.getSubject(), welfare.getId(), r.getReceiverUid());
+                sendPayslipMessage(welfare, r.getReceiverUid(), request);
             });
             return response;
         }).first();
@@ -378,15 +386,15 @@ public class WelfareServiceImpl implements WelfareService {
         }
     }
 
-    private void sendPayslipMessage(String subject, Long welfareId, Long receiverId) {
+    private void sendPayslipMessage(Welfare welfare, Long receiverId, HttpServletRequest request) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("subject", subject);
+        map.put("subject", welfare.getSubject());
         String content = localeTemplateService.getLocaleTemplateString(0, WelfareConstants.SEND_NOTIFICATION_SCOPE, WelfareConstants.SEND_NOTIFICATION_CODE,
-                "zh_CN", map, "你收到了" + subject + ",快去查看吧!");
-        sendMessage(content, subject, receiverId, welfareId);
+                "zh_CN", map, "你收到了" + welfare.getSubject() + ",快去查看吧!");
+        sendMessage(content, welfare, receiverId, request);
     }
 
-    private void sendMessage(String content, String subject, Long receiverId, Long welfareId) {
+    private void sendMessage(String content, Welfare welfare, Long receiverId, HttpServletRequest request) {
         //  set the message
         MessageDTO message = new MessageDTO();
         message.setBodyType(MessageBodyType.TEXT.getCode());
@@ -394,12 +402,16 @@ public class WelfareServiceImpl implements WelfareService {
         message.setMetaAppId(AppConstants.APPID_DEFAULT);
         message.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(receiverId)));
         //  set the route
-        String url = getWelfareZLUrl(welfareId);
+        String url = getWelfareZLUrl(welfare, request);
+
         RouterMetaObject metaObject = new RouterMetaObject();
-        metaObject.setUrl(url);
+        OfficialActionData data = new OfficialActionData();
+        data.setUrl(url);
+        metaObject.setUrl(RouterBuilder.build(Router.BROWSER_I, data, welfare.getSubject()));
+        
         Map<String, String> meta = new HashMap<>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
-        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, welfare.getSubject());
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
         message.setMeta(meta);
 
