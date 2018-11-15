@@ -11,6 +11,13 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
 import com.everhomes.archives.ArchivesService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerResource;
@@ -20,26 +27,44 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.gorder.sdk.order.GeneralOrderService;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.paySDK.PaySDKController;
 import com.everhomes.paySDK.api.PayService;
-import com.everhomes.paySDK.pojo.PayUserDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
-import com.everhomes.rest.coupon.CouponDTO;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.ChannelType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
-import com.everhomes.rest.promotion.coupon.couponmanagement.ObtainDetailsExtendDTO;
-import com.everhomes.rest.promotion.coupon.couponmanagement.TransferToPersonalCommand;
-import com.everhomes.rest.socialSecurity.NormalFlag;
+import com.everhomes.rest.promotion.coupon.enterprise.ObtainDetailsExtendDTO;
+import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalCommand;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.welfare.*;
-import com.everhomes.salary.SalaryService;
+import com.everhomes.rest.welfare.DeleteWelfareCommand;
+import com.everhomes.rest.welfare.DraftWelfareCommand;
+import com.everhomes.rest.welfare.DraftWelfareResponse;
+import com.everhomes.rest.welfare.GetUserWelfareCommand;
+import com.everhomes.rest.welfare.GetUserWelfareResponse;
+import com.everhomes.rest.welfare.GetWelfareCommand;
+import com.everhomes.rest.welfare.GetWelfareResponse;
+import com.everhomes.rest.welfare.ListUserWelfaresCommand;
+import com.everhomes.rest.welfare.ListUserWelfaresResponse;
+import com.everhomes.rest.welfare.ListWelfaresCommand;
+import com.everhomes.rest.welfare.ListWelfaresResponse;
+import com.everhomes.rest.welfare.SendWelfareCommand;
+import com.everhomes.rest.welfare.SendWelfaresResponse;
+import com.everhomes.rest.welfare.WelfareCheckStatus;
+import com.everhomes.rest.welfare.WelfareCouponDTO;
+import com.everhomes.rest.welfare.WelfareReceiverDTO;
+import com.everhomes.rest.welfare.WelfareStatus;
+import com.everhomes.rest.welfare.WelfaresDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -51,14 +76,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 @Component
 public class WelfareServiceImpl implements WelfareService {
@@ -367,7 +384,7 @@ public class WelfareServiceImpl implements WelfareService {
                 .map(r->{
                     ObtainDetailsExtendDTO dto = new ObtainDetailsExtendDTO();
                     dto.setId(r.getCouponId());
-                    dto.setEnterpriseAmount(r.getAmount());
+                    dto.setDistributionPerAmount(r.getAmount());
                     return dto;
                 }).collect(Collectors.toList());
 
