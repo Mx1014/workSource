@@ -153,14 +153,13 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
 //                }
 //            }
             if (PersonalCenterSettingType.MY_SHOP.getCode().equals(r.getType())) {
-                User user = UserContext.current().getUser();
 //                UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
 //                        UserProfileContstant.IS_APPLIED_SHOP);
 //                dto.setLinkUrl(getApplyShopUrl());
 //                if (applied != null) {
 //                    if (NumberUtils.toInt(applied.getItemValue(), 0) != 0)
 //                }
-                dto.setLinkUrl(getManageShopUrl(user.getId()));
+                dto.setLinkUrl(getManageShopUrl());
 
             }
              switch (dto.getRegion()) {
@@ -200,7 +199,7 @@ public class PersonalCenterSettingServiceImpl implements PersonalCenterService{
         }
     }
 
-    private String getManageShopUrl(Long userId) {
+    private String getManageShopUrl() {
         String homeurl = configurationProvider.getValue(ConfigConstants.PREFIX_URL, "");
         String manageShopPath = configurationProvider.getValue(ConfigConstants.MANAGE_SHOP_URL, "");
 

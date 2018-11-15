@@ -8503,14 +8503,15 @@ public class PunchServiceImpl implements PunchService {
         if (null != cmd.getUserId()) {
             userId = cmd.getUserId();
         }
-        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, cmd.getEnterpriseId());
-        if(null !=detail){
-            response.setDetailId(detail.getId());
-        }
         response.setUserId(userId);
         response.setEnterpriseId(cmd.getEnterpriseId());
 
         cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
+        //2018年11月12日 修改 要用总公司id找detail才可以找到
+        OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByTargetId(userId, cmd.getEnterpriseId());
+        if(null !=detail){
+            response.setDetailId(detail.getId());
+        }
         PunchRule pr = getPunchRule(detail);
         Date punchTime = new Date();
         Calendar punCalendar = Calendar.getInstance();

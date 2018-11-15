@@ -58,6 +58,8 @@ public interface OrganizationProvider {
     List<Organization> listOrganizations(String organizationType, Integer namespaceId, Long parentId, Long pageAnchor, Integer pageSize);
 
     List<Organization> listOrganizationsByPath(Long organizationId);
+    
+    Organization listOrganizationsByPathAndToken(Long organizationId, List<String> types,Integer namespaceId);
 
     void createOrganizationMember(OrganizationMember organizationMember);
 
@@ -73,7 +75,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
-    OrganizationMember listOrganizationMembersByTargetIdAndGroupTypeAndOrganizationIdAndContactToken(Long memberUid,String groupType,Long organizationId,String contactToken);
+    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType,String contactToken,String grouPath);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 

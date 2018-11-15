@@ -49,6 +49,7 @@ import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.asset.calculate.AssetCalculateUtil;
 import com.everhomes.asset.chargingitem.AssetChargingItemProvider;
 import com.everhomes.asset.group.AssetGroupProvider;
 import com.everhomes.asset.standard.AssetStandardProvider;
@@ -101,6 +102,7 @@ import com.everhomes.rest.asset.*;
 import com.everhomes.rest.asset.AssetSourceType.AssetSourceTypeEnum;
 import com.everhomes.rest.asset.bill.ListBillsDTO;
 import com.everhomes.rest.asset.bill.ListBillsResponse;
+import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
@@ -284,6 +286,9 @@ public class AssetServiceImpl implements AssetService {
     
     @Autowired
     private DoorAccessService doorAccessService;
+    
+    @Autowired
+    private AssetCalculateUtil assetCalculateUtil;
 
     @Override
     public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
@@ -1311,7 +1316,21 @@ public class AssetServiceImpl implements AssetService {
                 aWithoutLimit.setTime(a.getTime());
                 if(!cycle.isContract()){
                     aWithoutLimit.set(Calendar.DAY_OF_MONTH, aWithoutLimit.getActualMinimum(Calendar.DAY_OF_MONTH));
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                    //issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+                    	try {
+							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+						} catch (ParseException e) {
+							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+						}
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                     dWithoutLimit.setTime(d.getTime());
                  }else{
@@ -1653,7 +1672,21 @@ public class AssetServiceImpl implements AssetService {
                 // the end of a cycle -- d now should also react to contract cycle by wentian @ 1018/5/16
                 d.setTime(a.getTime());
                 if(!cycle.isContract()){
-                    d.add(Calendar.MONTH,cycle.getMonthOffset());
+                	//issue-40616 缴费管理V7.2（修正自然季的计算规则）
+                    int monthOffset;
+                    if(cycle.getMonthOffset().equals(BillingCycle.NATURAL_QUARTER.getMonthOffset())) {
+                    	NatualQuarterMonthDTO natualQuarterMonthDTO = assetCalculateUtil.getNatualQuarterMonthOffset(d);
+                    	monthOffset = natualQuarterMonthDTO.getMonthOffset();
+                    	//设置自然季的开始时间
+//                    	try {
+//							aWithoutLimit.setTime(yyyyMMdd.parse(natualQuarterMonthDTO.getDateStrBegin()));
+//						} catch (ParseException e) {
+//							LOGGER.info("assetFeeHandler set aWithoutLimit error, e = {}", e);
+//						}
+                    }else {
+                    	monthOffset = cycle.getMonthOffset();
+                    }
+                    d.add(Calendar.MONTH, monthOffset);
                     d.set(Calendar.DAY_OF_MONTH,d.getActualMaximum(Calendar.DAY_OF_MONTH));
                 }else{
                     // #32243  check if the next day is beyond the maximum day of the next month
@@ -4718,7 +4751,7 @@ public class AssetServiceImpl implements AssetService {
 				List<CMDataObject> data = cmSyncObject.getData();
 				if(data != null) {
 					for(CMDataObject cmDataObject : data) {
-						//CMContractHeader contractHeader = cmDataObject.getContractHeader();
+						CMContractHeader contractHeader = cmDataObject.getContractHeader();
 						//1、根据propertyId获取左邻communityId
 						Long communityId = null;
 //						Community community = addressProvider.findCommunityByThirdPartyId("ruian_cm", contractHeader.getPropertyID());

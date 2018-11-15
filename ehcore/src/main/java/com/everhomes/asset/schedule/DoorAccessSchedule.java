@@ -1,7 +1,10 @@
 package com.everhomes.asset.schedule;
 
-import java.time.format.DateTimeFormatter;
-
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.scheduler.AssetDoorAccessJob;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.scheduler.AssetDoorAccessJob;
-import com.everhomes.scheduler.RunningFlag;
-import com.everhomes.scheduler.ScheduleProvider;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 缴费欠费对接门禁定时任务
@@ -64,7 +63,11 @@ public class DoorAccessSchedule implements ApplicationListener<ContextRefreshedE
 		
 		if (taskServer.equals(equipmentIp)) {
 			if (RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-				scheduleProvider.scheduleCronJob(autoReading, autoReading, cronExpression, AssetDoorAccessJob.class, null);
+				try {
+					scheduleProvider.scheduleCronJob(autoReading, autoReading, cronExpression, AssetDoorAccessJob.class, null);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

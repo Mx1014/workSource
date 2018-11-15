@@ -213,7 +213,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 			String string1 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN1, "zh_CN", "邀请%s参与《");
 			String string2 = stringService.getLocalizedString(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.UNKNOWN2, "zh_CN", "》问卷调查。");
 			String homeurl = configurationProvider.getValue(ConfigConstants.HOME_URL,"https://core.zuolin.com");
-			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question?questionId=%s&orgId=%s#sign_suffix");
+			String contextUrl = configurationProvider.getValue(ConfigConstants.QUESTIONNAIRE_DETAIL_URL, "/questionnaire-survey/build/index.html#/question?questionId=%s&orgId=%s&ns=%s#sign_suffix");
 
 //			MessageChannel channel2 = new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId()));
 
@@ -264,7 +264,7 @@ public class QuestionnaireAsynSendMessageServiceImpl implements QuestionnaireAsy
 					orgId = range.getOrgId();
 				}
 
-				String url = String.format(homeurl+contextUrl, questionnaire.getId(), orgId);
+				String url = String.format(homeurl+contextUrl, questionnaire.getId(), orgId, String.valueOf(namespace.getId()));
 
 				// 组装路由
 				OfficialActionData actionData = new OfficialActionData();
