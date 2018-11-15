@@ -87,6 +87,19 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /launchpadbase/updateUserAppsForWorkPlatform</b>
+     * <p>标准版编辑用户首页数据</p>
+     */
+    @RequestMapping("updateUserAppsForWorkPlatform")
+    @RestReturn(value=String.class)
+    public RestResponse updateUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd) {
+//        serviceModuleAppService.updateBaseUserApps(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /launchpadbase/listAllLaunchPadApps</b>
@@ -120,6 +133,20 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /launchpadbase/listAllAppsForWorkPlatform</b>
+     * <p>工作台根据组件获取全部应用，包括自定义的</p>
+     */
+    @RequestMapping("listAllAppsForWorkPlatform")
+    @RestReturn(value=ListAllAppsResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd) {
+        ListAllAppsResponse res = serviceModuleAppService.listAllApps(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
@@ -152,5 +179,32 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /launchpadbase/listWorkPlatformApps</b>
+     * <p>获取工作台app</p>
+     */
+    @RequestMapping("listWorkPlatformApps")
+    @RestReturn(value=ListBulletinsCardsResponse.class)
+    public RestResponse listWorkPlatformApps(ListWorkPlatformAppCommand cmd) {
+        ListWorkPlatformAppResponse res = serviceModuleAppService.listWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpadbase/saveWorkPlatformApps</b>
+     * <p>保存工作台app设置</p>
+     */
+    @RequestMapping("saveWorkPlatformApps")
+    @RestReturn(value=String.class)
+    public RestResponse saveWorkPlatformApps(SaveWorkPlatformAppCommand cmd) {
+        serviceModuleAppService.saveWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

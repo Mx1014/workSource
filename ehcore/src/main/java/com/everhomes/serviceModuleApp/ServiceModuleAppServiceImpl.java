@@ -28,6 +28,10 @@ import com.everhomes.rest.common.OwnerType;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.launchpad.LaunchPadCategoryDTO;
 import com.everhomes.rest.launchpad.ListAllAppsResponse;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.ListWorkPlatformAppResponse;
+import com.everhomes.rest.launchpad.SaveWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.WorkPlatformAppDTO;
 import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
 import com.everhomes.rest.common.ScopeType;
@@ -65,6 +69,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -148,6 +153,8 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     @Autowired
 	private LaunchPadConfigProvider launchPadConfigProvider;
 
+    @Autowired
+    private WorkPlatformAppProvider workPlatformAppProvider;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -360,6 +367,18 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		dto.setStatus(orgapps.getStatus());
 		dto.setOrgAppId(id);
 
+        //安装应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(cmd.getOriginId(), cmd.getOrganizationId());
+        if (!CollectionUtils.isEmpty(list)) {
+            Integer maxSort = this.workPlatformAppProvider.getMaxSort(cmd.getOriginId(), cmd.getOrganizationId());
+            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+            workPlatformApp.setOrder(maxSort);
+            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+            workPlatformApp.setScopeId(cmd.getOrganizationId());
+            workPlatformApp.setAppId(cmd.getOriginId());
+            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+        }
 		return dto;
 	}
 
@@ -390,6 +409,19 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			}
 
 		}
+
+        //卸载应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        WorkPlatformApp oldApp = this.workPlatformAppProvider.getWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+        if (oldApp != null) {
+            this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
+            List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getAppId(),oldApp.getScopeId(), oldApp.getOrder());
+            if (!CollectionUtils.isEmpty(list)) {
+                for (WorkPlatformApp app : list) {
+                    app.setOrder(app.getOrder()-1);
+                    this.workPlatformAppProvider.updateWorkPlatformApp(app);
+                }
+            }
+        }
 
 	}
 
@@ -841,6 +873,34 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		orgapp.setStatus(cmd.getStatus());
 
 		organizationAppProvider.updateOrganizationApp(orgapp);
+
+		//禁用或启用应用时，同时修改工作台配置顺序 add by yanlong.liang 20181115
+        if (OrganizationAppStatus.DISABLE.getCode().equals(cmd.getStatus())) {
+            WorkPlatformApp oldApp = this.workPlatformAppProvider.getWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+            if (oldApp != null) {
+                this.workPlatformAppProvider.deleteWorkPlatformApp(oldApp);
+                List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(oldApp.getAppId(),oldApp.getScopeId(), oldApp.getOrder());
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (WorkPlatformApp app : list) {
+                        app.setOrder(app.getOrder()-1);
+                        this.workPlatformAppProvider.updateWorkPlatformApp(app);
+                    }
+                }
+            }
+        }else {
+            List<WorkPlatformApp> list = this.workPlatformAppProvider.listWorkPlatformApp(orgapp.getAppOriginId(), orgapp.getOrgId());
+            if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
+            Integer maxSort = this.workPlatformAppProvider.getMaxSort(orgapp.getAppOriginId(), orgapp.getOrgId());
+            WorkPlatformApp workPlatformApp = new WorkPlatformApp();
+            workPlatformApp.setOrder(maxSort);
+            workPlatformApp.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+            workPlatformApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+            workPlatformApp.setScopeId(orgapp.getOrgId());
+            workPlatformApp.setAppId(orgapp.getAppOriginId());
+            this.workPlatformAppProvider.createWorkPlatformApp(workPlatformApp);
+        }
 	}
 
 	@Override
@@ -1350,7 +1410,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		return response;
 	}
 
-	private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
+    @Override
+    public ListAllAppsResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd) {
+
+	    return null;
+    }
+
+    private List<AppDTO> toAppDtos(Long communityId, Long orgId, Byte sceneType, List<ServiceModuleApp> userCommunityApps) {
 		List<AppDTO> appDtos = new ArrayList<>() ;
 		if(userCommunityApps != null && userCommunityApps.size() > 0){
 			for (ServiceModuleApp app: userCommunityApps){
@@ -1486,4 +1552,74 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		return response;
 	}
+
+	@Override
+	public ListWorkPlatformAppResponse listWorkPlatformApp(ListWorkPlatformAppCommand cmd) {
+
+		ListWorkPlatformAppResponse response = new ListWorkPlatformAppResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
+
+		Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
+		Long orgId = cmd.getOrganizationId();
+		Byte appType = ServiceModuleAppType.COMMUNITY.getCode();
+		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+
+		List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), 0L);
+
+		if(appCategories == null){
+			return null;
+		}
+
+        List<WorkPlatformAppDTO> list = new ArrayList<>();
+		for (AppCategory appCategory: appCategories) {
+
+			List<ServiceModuleApp> apps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, appType, sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+
+			if (CollectionUtils.isEmpty(apps)) {
+			    continue;
+            }
+
+            for (int i=0;i<apps.size();i++) {
+                ServiceModuleApp app = apps.get(i);
+			    WorkPlatformAppDTO dto = new WorkPlatformAppDTO();
+			    dto.setAppEntryCategory(appCategory.getName());
+			    dto.setAppName(app.getName());
+			    dto.setAppOriginId(app.getOriginId());
+                List<ServiceModuleEntry> entries = this.serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()), locationType, sceneType);
+                if (!CollectionUtils.isEmpty(entries)) {
+                    dto.setAppEntry(entries.get(0).getEntryName());
+                }
+                WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId);
+                if (workPlatformApp != null) {
+                    dto.setVisibleFlag(workPlatformApp.getVisibleFlag());
+                    dto.setSortNum(workPlatformApp.getOrder());
+                }else {
+                    dto.setVisibleFlag(TrueOrFalseFlag.TRUE.getCode());
+                    dto.setSortNum(i+1);
+                }
+                list.add(dto);
+            }
+
+		}
+		response.setApps(list);
+		return response;
+	}
+
+    @Override
+    public void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd) {
+        for (WorkPlatformAppDTO dto : cmd.getApps()) {
+            WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId());
+            if (app != null) {
+                this.workPlatformAppProvider.deleteWorkPlatformApp(app);
+            }
+            WorkPlatformApp newApp = new WorkPlatformApp();
+            newApp.setAppId(dto.getAppOriginId());
+            newApp.setOrder(dto.getSortNum());
+            newApp.setScopeId(cmd.getOrganizationId());
+            newApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+            newApp.setVisibleFlag(dto.getVisibleFlag());
+            this.workPlatformAppProvider.createWorkPlatformApp(newApp);
+        }
+    }
 }
