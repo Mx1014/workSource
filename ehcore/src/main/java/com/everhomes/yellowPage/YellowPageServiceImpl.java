@@ -2211,6 +2211,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			String finalModuleUrl = generateModuleUrl(skipRoute, prefix, normalParams, encodeParams, suffix);
 
 			dto.setModuleUrl(finalModuleUrl);
+			dto.setModuleName(app.getName());
 			List<JumpModuleDTO> dtos = new ArrayList<>(1);
 			dtos.add(dto);
 			return dtos;
