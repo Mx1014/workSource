@@ -153,7 +153,12 @@ public class WelfareServiceImpl implements WelfareService {
         if (null != coupons) {
             for (WelfareCoupon coupon : coupons) {
                 WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
-                couponDTO.setValidDate(coupon.getValidDate().getTime());
+                if (coupon.getValidDate() != null) {
+                    couponDTO.setValidDate(coupon.getValidDate().getTime());
+                }
+                if (coupon.getBeginDate() != null) {
+                    couponDTO.setBeginDate(coupon.getBeginDate().getTime());
+                }
                 dto.getCoupons().add(couponDTO);
             }
         }
@@ -240,9 +245,13 @@ public class WelfareServiceImpl implements WelfareService {
 
     private WelfareCoupon ConvertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId) {
     	WelfareCoupon coupon = ConvertHelper.convert(couponDto, WelfareCoupon.class);
-    	coupon.setValidDate(new Date(couponDto.getValidDate()));
-    	coupon.setBeginDate(new Date(couponDto.getBeginDate()));
-    	coupon.setOrganizationId(organizationId);
+        if (couponDto.getValidDate() != null) {
+            coupon.setValidDate(new Date(couponDto.getValidDate()));
+        }
+        if (couponDto.getBeginDate() != null) {
+            coupon.setBeginDate(new Date(couponDto.getBeginDate()));
+        }
+        coupon.setOrganizationId(organizationId);
     	coupon.setWelfareId(welfareId);
     	
 		return coupon;
