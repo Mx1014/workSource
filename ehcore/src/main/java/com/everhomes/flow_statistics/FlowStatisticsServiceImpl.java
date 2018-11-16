@@ -362,15 +362,20 @@ public class FlowStatisticsServiceImpl implements FlowStatisticsService {
             }
             dto.setCurrentCycleAverage(average);
             //环比效率值(上周期平均处理时间-当前周期平均处理时间)/当前周期平均处理时间 * 100%)
-            Double earlyComaredVal = 0D ;
-            if(lastAverage != 0){
-                earlyComaredVal = 100D ;
+            Double earlyComaredVal = null ;
+            if(lastAverage == 0 ||lastAverage == null){
+               //无法比较的时候就返回null
+                dto.setEarlyComparedVal(null);
             }
-            if(average != 0){
+            else if(average == 0 ||average == null){
+                //无法比较的时候就返回null
+                dto.setEarlyComparedVal(null);
+            }
+            else{
                 earlyComaredVal = (lastAverage - average) /average ;
                 earlyComaredVal = handleDecimal(earlyComaredVal);
+                dto.setEarlyComparedVal(earlyComaredVal);
             }
-            dto.setEarlyComparedVal(earlyComaredVal);
             response.getDtos().add(dto);
         }
         //当前周期泳道平均处理时长(所有泳道的处理时长总和/泳道个数)
