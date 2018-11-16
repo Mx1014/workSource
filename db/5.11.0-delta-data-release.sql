@@ -12,6 +12,9 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
+-- AUTHOR: xq.tian  20181116
+-- REMARK: 报错提示模板
+INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013', 'zh_CN', '任务状态已经改变，请刷新重试');
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------
