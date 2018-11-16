@@ -89,12 +89,12 @@ public class LaunchPadBaseController extends ControllerBase {
 
     /**
      * <b>URL: /launchpadbase/updateUserAppsForWorkPlatform</b>
-     * <p>标准版编辑用户首页数据</p>
+     * <p>标准版工作台编辑用户首页数据</p>
      */
     @RequestMapping("updateUserAppsForWorkPlatform")
     @RestReturn(value=String.class)
     public RestResponse updateUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd) {
-//        serviceModuleAppService.updateBaseUserApps(cmd);
+        serviceModuleAppService.updateBaseUserAppsForWorkPlatform(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

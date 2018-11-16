@@ -61,6 +61,8 @@ public interface ServiceModuleAppService {
 
 	void updateBaseUserApps(UpdateUserAppsCommand cmd);
 
+	void updateBaseUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd);
+
 	void updateRecommendApps(UpdateRecommendAppsCommand cmd);
 
     ListAllAppsResponse listAllApps(ListAllLaunchPadAppsCommand cmd);
