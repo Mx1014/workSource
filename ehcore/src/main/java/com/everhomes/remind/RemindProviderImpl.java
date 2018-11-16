@@ -586,7 +586,7 @@ public class RemindProviderImpl implements RemindProvider {
         		.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()))
         		.and(Tables.EH_REMIND_SHARES.OWNER_USER_ID.eq(request.getShareUserId())));
 
-        Condition categorySharesExitstCondition = DSL.exists(DSL.selectOne().from(Tables.EH_REMIND_SHARES)
+        Condition categorySharesExitstCondition = DSL.exists(DSL.selectOne().from(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES)
         		.where(Tables.EH_REMINDS.REMIND_CATEGORY_ID.eq(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID))
         		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()))
         		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode())));
