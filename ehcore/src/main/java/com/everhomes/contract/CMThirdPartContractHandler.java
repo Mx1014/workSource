@@ -219,13 +219,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+        //此方法可以获取当前正在进行同步的数据
         List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         try{
             syncAllEnterprises(cmSyncObjects);
         }catch(Exception e){
-
             LOGGER.error("sync data from RuiAnCM is fail cause customer ",e );
+            //将同步锁置为失效，此时可以再次创建任务
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer:" + e.getMessage());
         }
@@ -237,7 +238,8 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
             syncDataToDb(DataType.CONTRACT.getCode(), dataObjects, taskId, categoryId, contractApplicationScene);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause contract " );
+            LOGGER.error("sync data from RuiAnCM is fail cause contract ",e);
+            //将同步锁置为失效，此时可以再次创建任务
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CONTRACT_ERROR, "sync data from RuiAnCM is fail cause contract");
         }
@@ -247,12 +249,14 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
+            //将同步锁置为失效，此时可以再次创建任务
             zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_BILL_ERROR, "sync data from RuiAnCM is fail cause Bill");
         }
         //String url = "http://183.62.222.87:5902/sf";
 
 
+        //将同步锁置为失效，此时可以再次创建任务
         zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
         //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
 
