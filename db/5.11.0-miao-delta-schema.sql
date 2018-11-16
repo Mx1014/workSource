@@ -94,7 +94,7 @@ CREATE TABLE `eh_office_cubicle_order_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_rentalv2_refund_tips` (
+CREATE TABLE `eh_office_cubicle_refund_tips` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,
   `source_type` VARCHAR(20),
