@@ -1,8 +1,8 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
--- AUTHOR:
--- REMARK:
+-- AUTHOR: xq.tian 20181116
+-- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
 
 
 
