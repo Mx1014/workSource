@@ -7,14 +7,74 @@ import com.everhomes.util.StringHelper;
  */
 
 public class EnterpriseDTO {
-    private Long enterpriseId;
+    private Long id;
 
-    public Long getEnterpriseId() {
-        return enterpriseId;
+    private Long communityId;
+
+    private String communityName;
+
+    private String name;
+
+    private String contactName;
+
+    private String corpNatureItemName;
+
+    private String hotline;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setEnterpriseId(Long enterpriseId) {
-        this.enterpriseId = enterpriseId;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getCorpNatureItemName() {
+        return corpNatureItemName;
+    }
+
+    public void setCorpNatureItemName(String corpNatureItemName) {
+        this.corpNatureItemName = corpNatureItemName;
+    }
+
+    public String getHotline() {
+        return hotline;
+    }
+
+    public void setHotline(String hotline) {
+        this.hotline = hotline;
     }
 
     @Override
