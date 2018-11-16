@@ -91,6 +91,9 @@ import org.springframework.util.StringUtils;
 
 
 
+
+
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -7192,4 +7195,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .fetchInto(Long.class);
         return targetIdList;
     }
+
+	@Override
+	public void updateOrganizationMemberDetailsContactToken(Integer namespaceId, Long userId, String newContactToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS).set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN, newContactToken)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID.ne(0L)).execute();
+	}
+
+	@Override
+	public void updateOrganizationMembersContactToken(Integer namespaceId, Long userId, String newContactToken) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBERS).set(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN, newContactToken)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L)).execute();
+	}
 }

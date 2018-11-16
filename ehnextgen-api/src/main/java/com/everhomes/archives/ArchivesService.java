@@ -100,4 +100,6 @@ public interface ArchivesService {
     /* 同步数据接口 end */
 
 	ArchivesContactDTO getArchivesContact(GetArchivesContactCommand cmd);
+
+	void updateArchivesEmployeeContact(Integer namespaceId, Long userId, String newContactToken);
 }
