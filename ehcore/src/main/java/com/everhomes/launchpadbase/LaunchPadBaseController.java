@@ -192,10 +192,10 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpadbase/updateWorkPlatformApps</b>
+     * <b>URL: /launchpadbase/updateWorkPlatformAppsSort</b>
      * <p>保存工作台app排序设置</p>
      */
-    @RequestMapping("updateWorkPlatformApps")
+    @RequestMapping("updateWorkPlatformAppsSort")
     @RestReturn(value=String.class)
     public RestResponse updateWorkPlatformAppsSort(UpdateWorkPlatformAppSortCommand cmd) {
         serviceModuleAppService.updateWorkPlatformAppSort(cmd);
