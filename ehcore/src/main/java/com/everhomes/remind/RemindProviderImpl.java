@@ -34,6 +34,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
+import org.apache.tools.ant.types.resources.comparators.Exists;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteConditionStep;
@@ -45,6 +46,9 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectOnConditionStep;
 import org.jooq.SelectQuery;
 import org.jooq.UpdateQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -54,12 +58,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class RemindProviderImpl implements RemindProvider {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(RemindProviderImpl.class);
     @Autowired
     private DbProvider dbProvider;
     @Autowired
@@ -417,18 +424,44 @@ public class RemindProviderImpl implements RemindProvider {
         condition = condition.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(sourceType));
         condition = condition.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(sourceId));
 
-        SelectConditionStep<Record2<Long, String>> query = context.selectDistinct(Tables.EH_REMIND_SHARES.OWNER_USER_ID, Tables.EH_REMIND_SHARES.OWNER_CONTRACT_NAME).from(Tables.EH_REMIND_SHARES).where(condition);
+        SelectConditionStep<Record2<Long, String>> query = context.selectDistinct(Tables.EH_REMIND_SHARES.OWNER_USER_ID, Tables.EH_REMIND_SHARES.OWNER_CONTRACT_NAME)
+        		.from(Tables.EH_REMIND_SHARES).where(condition);
 
-        Result<Record2<Long, String>> result = query.fetch();
-        if (result != null && result.size() > 0) {
-            return result.map(r -> {
+        Result<Record2<Long, String>> records = query.fetch();
+
+        Set<SharingPersonDTO> results = new HashSet<>();
+        if (records != null && records.size() > 0) {
+        	results.addAll(records.map(r -> {
                 SharingPersonDTO sharingPersonDTO = new SharingPersonDTO();
                 sharingPersonDTO.setUserId(r.value1());
                 sharingPersonDTO.setContractName(r.value2());
                 return sharingPersonDTO;
-            });
+            	}));
         }
-        return Collections.emptyList();
+        //增加找分类共享人逻辑
+        query = context.selectDistinct(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID, Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME)
+                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .where(DSL.exists(DSL.selectOne()
+                		.from(Tables.EH_REMIND_CATEGORIES)
+                		.join(Tables.EH_REMINDS).on(Tables.EH_REMINDS.REMIND_CATEGORY_ID.eq(Tables.EH_REMIND_CATEGORIES.ID))
+                		.join(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES).on(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID.eq(Tables.EH_REMIND_CATEGORIES.ID))
+                		.where(Tables.EH_REMIND_CATEGORIES.USER_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.TARGET_ID))
+                		.and(Tables.EH_REMINDS.OWNER_TYPE.eq(ownerType))
+                		.and(Tables.EH_REMINDS.OWNER_ID.eq(ownerId))
+                        .and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_TYPE.eq(sourceType))
+                        .and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_ID.eq(sourceId))));
+        LOGGER.debug("新增分类共享人 query : "+query);
+        records = query.fetch();
+        
+        if (records != null && records.size() > 0) {
+        	results.addAll(records.map(r -> {
+                SharingPersonDTO sharingPersonDTO = new SharingPersonDTO();
+                sharingPersonDTO.setUserId(r.value1());
+                sharingPersonDTO.setContractName(r.value2());
+                return sharingPersonDTO;
+            	}));
+        }
+		return new ArrayList<>(results) ;
     }
 
     @Override
@@ -542,15 +575,24 @@ public class RemindProviderImpl implements RemindProvider {
     @Override
     public List<Remind> findShareReminds(QueryShareRemindsCondition request) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectOnConditionStep<Record> query = context.select(Tables.EH_REMINDS.fields()).from(Tables.EH_REMINDS).join(Tables.EH_REMIND_SHARES).on(Tables.EH_REMINDS.ID.eq(Tables.EH_REMIND_SHARES.REMIND_ID));
-        query.and(Tables.EH_REMINDS.NAMESPACE_ID.eq(request.getNamespaceId()));
+        SelectConditionStep<Record> query = context.select().from(Tables.EH_REMINDS)
+        		.where(Tables.EH_REMINDS.NAMESPACE_ID.eq(request.getNamespaceId()));
         query.and(Tables.EH_REMINDS.OWNER_TYPE.eq(request.getOwnerType()));
         query.and(Tables.EH_REMINDS.OWNER_ID.eq(request.getOwnerId()));
-        query.and(Tables.EH_REMIND_SHARES.OWNER_USER_ID.eq(request.getShareUserId()));
-        query.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()));
-        query.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()));
-        query.orderBy(Tables.EH_REMINDS.CREATE_TIME.desc());
+        //满足：存在于共享人列表 或者 存在于分类默认共享人列表
+        Condition sharesExitstCondition = DSL.exists(DSL.DSL.selectOne().from(Tables.EH_REMIND_SHARES)
+        		.where(Tables.EH_REMINDS.ID.eq(Tables.EH_REMIND_SHARES.REMIND_ID))
+        		.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()))
+        		.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()))
+        		.and(Tables.EH_REMIND_SHARES.OWNER_USER_ID.eq(request.getShareUserId())));
 
+        Condition categorySharesExitstCondition = DSL.exists(DSL.DSL.selectOne().from(Tables.EH_REMIND_SHARES)
+        		.where(Tables.EH_REMINDS.REMIND_CATEGORY_ID.eq(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID))
+        		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()))
+        		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode())));
+        query.and(sharesExitstCondition.or(categorySharesExitstCondition));
+        query.orderBy(Tables.EH_REMINDS.CREATE_TIME.desc());
+       
         if (StringUtils.hasText(request.getKeyWord())) {
             query.and(Tables.EH_REMINDS.PLAN_DESCRIPTION.like("%" + request.getKeyWord() + "%"));
         }
