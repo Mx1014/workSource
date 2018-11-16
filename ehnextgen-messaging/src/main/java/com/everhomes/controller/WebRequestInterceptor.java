@@ -483,7 +483,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         // add by 杨崇鑫  物业缴费V7.5（中天-资管与财务EAS系统对接）
         AppNamespaceMapping mapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(app.getAppKey());
         UserContext.current().setCallerApp(app);
-        UserContext.setCurrentNamespaceId(mapping.getNamespaceId());
+        if(mapping != null) {
+        	UserContext.setCurrentNamespaceId(mapping.getNamespaceId());
+        }
 
         Map<String, String> mapForSignature = new HashMap<String, String>();
         for (Map.Entry<String, String[]> entry : paramMap.entrySet()) {
