@@ -3,8 +3,8 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
   `owner_id` BIGINT COMMENT 'community id or organization id',
   `resource_type_id` BIGINT COMMENT 'resource type id',
-  `rental_start_time` BIGINT COMMENT '最多提前多少时间预定',
-  `rental_end_time` BIGINT COMMENT '最少提前多少时间预定',
+  `cubicle_start_time` BIGINT COMMENT '最多提前多少时间预定',
+  `cubicle_end_time` BIGINT COMMENT '最少提前多少时间预定',
   `refund_flag` TINYINT COMMENT '是否支持退款: 1-是, 0-否',
   `refund_ratio` INTEGER COMMENT '退款比例',
   `creator_uid` BIGINT,
@@ -17,7 +17,6 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `end_date` DATE COMMENT '结束日期',
   `day_open_time` DOUBLE,
   `day_close_time` DOUBLE,
-  `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
   `cubicle_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
   `cubicle_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
   `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
@@ -65,5 +64,32 @@ CREATE TABLE `eh_office_cubicle_price_rules` (
   `create_time` DATETIME,
   `user_price_type` TINYINT COMMENT '用户价格类型, 1:统一价格 2：用户类型价格',
   `resource_type` VARCHAR(64) COMMENT '资源类型',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_close_dates` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT,
+  `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
+  `close_date` DATE,
+  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_order_rules` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `owner_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
+  `owner_id` BIGINT,
+  `handle_type` TINYINT COMMENT '1: 退款, 2: 加收',
+  `duration_type` TINYINT COMMENT '1: 时长内, 2: 时长外',
+  `duration_unit` TINYINT COMMENT '时长单位，比如 天，小时',
+  `duration` DOUBLE COMMENT '时长',
+  `factor` DOUBLE COMMENT '价格系数',
+  `status` TINYINT,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
