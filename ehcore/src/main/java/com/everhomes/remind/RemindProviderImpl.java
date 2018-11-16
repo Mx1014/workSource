@@ -580,13 +580,13 @@ public class RemindProviderImpl implements RemindProvider {
         query.and(Tables.EH_REMINDS.OWNER_TYPE.eq(request.getOwnerType()));
         query.and(Tables.EH_REMINDS.OWNER_ID.eq(request.getOwnerId()));
         //满足：存在于共享人列表 或者 存在于分类默认共享人列表
-        Condition sharesExitstCondition = DSL.exists(DSL.DSL.selectOne().from(Tables.EH_REMIND_SHARES)
+        Condition sharesExitstCondition = DSL.exists(DSL.selectOne().from(Tables.EH_REMIND_SHARES)
         		.where(Tables.EH_REMINDS.ID.eq(Tables.EH_REMIND_SHARES.REMIND_ID))
         		.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()))
         		.and(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()))
         		.and(Tables.EH_REMIND_SHARES.OWNER_USER_ID.eq(request.getShareUserId())));
 
-        Condition categorySharesExitstCondition = DSL.exists(DSL.DSL.selectOne().from(Tables.EH_REMIND_SHARES)
+        Condition categorySharesExitstCondition = DSL.exists(DSL.selectOne().from(Tables.EH_REMIND_SHARES)
         		.where(Tables.EH_REMINDS.REMIND_CATEGORY_ID.eq(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID))
         		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_ID.eq(request.getCurrentUserDetailId()))
         		.and(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode())));
