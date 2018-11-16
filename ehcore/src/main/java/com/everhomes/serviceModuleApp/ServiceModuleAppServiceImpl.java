@@ -1515,6 +1515,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
+		//如果项目ID未空，则获取工作台app
+		if (cmd.getContext().getCommunityId() == null) {
+		    return listAllAppsForWorkPlatform(cmd);
+        }
 		Byte locationType = ServiceModuleLocationType.MOBILE_COMMUNITY.getCode();
 		Long communityId = cmd.getContext().getCommunityId();
 		OrganizationCommunity organizationProperty = organizationProvider.findOrganizationProperty(communityId);
@@ -1652,10 +1656,13 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
 		}
 
+		//如果项目ID为空，则更新工作台app
 		if(cmd.getCommunityId() == null){
-            LOGGER.error("communityId is null");
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "communityId is null");
-
+            UpdateUserAppsForWorkPlatformCommand command = new UpdateUserAppsForWorkPlatformCommand();
+            command.setAppIds(cmd.getAppIds());
+            command.setOrganizationId(cmd.getContext().getOrganizationId());
+            updateBaseUserAppsForWorkPlatform(command);
+            return;
         }
 
         dbProvider.execute(status -> {
@@ -1870,15 +1877,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         for (WorkPlatformAppDTO dto : cmd.getApps()) {
             WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId());
             if (app != null) {
-                this.workPlatformAppProvider.deleteWorkPlatformApp(app);
+                app.setVisibleFlag(dto.getVisibleFlag());
+                app.setOrder(dto.getSortNum());
+                this.workPlatformAppProvider.updateWorkPlatformApp(app);
             }
-            WorkPlatformApp newApp = new WorkPlatformApp();
-            newApp.setAppId(dto.getAppOriginId());
-            newApp.setOrder(dto.getSortNum());
-            newApp.setScopeId(cmd.getOrganizationId());
-            newApp.setScopeType(ScopeType.ORGANIZATION.getCode());
-            newApp.setVisibleFlag(dto.getVisibleFlag());
-            this.workPlatformAppProvider.createWorkPlatformApp(newApp);
         }
     }
 }

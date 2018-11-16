@@ -17,6 +17,16 @@ public class UpdateUserAppsCommand {
 
     private List<Long> appIds;
 
+    private AppContext context;
+
+    public AppContext getContext() {
+        return context;
+    }
+
+    public void setContext(AppContext context) {
+        this.context = context;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }

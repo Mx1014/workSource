@@ -88,20 +88,6 @@ public class LaunchPadBaseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /launchpadbase/updateUserAppsForWorkPlatform</b>
-     * <p>标准版工作台编辑用户首页数据</p>
-     */
-    @RequestMapping("updateUserAppsForWorkPlatform")
-    @RestReturn(value=String.class)
-    public RestResponse updateUserAppsForWorkPlatform(UpdateUserAppsForWorkPlatformCommand cmd) {
-        serviceModuleAppService.updateBaseUserAppsForWorkPlatform(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /launchpadbase/listAllLaunchPadApps</b>
      * <p>广场根据组件获取全部应用</p>
      */
