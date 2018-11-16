@@ -75,7 +75,7 @@ public interface OrganizationProvider {
 
     List<OrganizationMember> listOrganizationMembers(Long memberUid);
 
-    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(String groupType,String contactToken,String grouPath);
+    OrganizationMember listOrganizationMembersByGroupTypeAndContactToken(List<String> groupTypeList,String contactToken,String grouPath);
 
     void createOrganizationCommunity(OrganizationCommunity organizationCommunity);
 

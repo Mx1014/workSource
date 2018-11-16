@@ -353,7 +353,9 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         FilterBuilder nfb = FilterBuilders.termFilter("status", CommonStatus.INACTIVE.getCode());
         fb = FilterBuilders.notFilter(nfb);
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        if(cmd.getCommunityId() != null){
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+        }
         //是否为资质客户增加筛选
 
         if(cmd.getContractSearchCustomerFlag() != null && cmd.getContractSearchCustomerFlag() == 1){

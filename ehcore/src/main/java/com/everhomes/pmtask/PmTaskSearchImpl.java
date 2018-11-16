@@ -77,7 +77,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("flowCaseId", task.getFlowCaseId());
             b.field("requestorName", task.getRequestorName());
             b.field("requestorPhone", task.getRequestorPhone());
-            String buildingName = URLEncoder.encode(task.getBuildingName(), StandardCharsets.UTF_8.name());
+            String buildingName = URLEncoder.encode(task.getBuildingName() == null ? "" : task.getBuildingName(), StandardCharsets.UTF_8.name());
             b.field("buildingName", buildingName);
             b.field("organizationUid",task.getOrganizationUid()==null?0:task.getOrganizationUid());
             b.field("star",task.getStar());

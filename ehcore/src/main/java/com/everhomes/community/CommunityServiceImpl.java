@@ -229,6 +229,12 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListAddressesForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListBuildingsForThirdPartyResponse;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyCommand;
+import com.everhomes.rest.openapi.ListCommunitiesForThirdPartyResponse;
 import com.everhomes.rest.organization.AuditAuth;
 import com.everhomes.rest.organization.AuthFlag;
 import com.everhomes.rest.organization.ExecutiveFlag;
@@ -6426,6 +6432,113 @@ public class CommunityServiceImpl implements CommunityService {
 		OrgDTO dto = new OrgDTO();
 		dto.setId(currentOrganizationId);
 		return dto;
+	}
+
+
+	@Override
+	public ListCommunitiesForThirdPartyResponse listCommunitiesForThirdParty(ListCommunitiesForThirdPartyCommand cmd) {
+		ListCommunitiesForThirdPartyResponse response = new ListCommunitiesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.CommunityDTO> results = communityProvider.listCommunitiesForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+
+	@Override
+	public ListBuildingsForThirdPartyResponse listBuildingsForThirdParty(ListBuildingsForThirdPartyCommand cmd) {
+		ListBuildingsForThirdPartyResponse response = new ListBuildingsForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.BuildingDTO> results = communityProvider.listBuildingsForThirdParty(currentNamespaceId,cmd.getCommunityId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		for (com.everhomes.rest.openapi.BuildingDTO buildingDTO : results) {
+			if (buildingDTO.getCommunityId() != null) {
+				Community community = communityProvider.findCommunityById(buildingDTO.getCommunityId());
+				if (community != null) {
+					buildingDTO.setCommunityName(community.getName());
+				}
+			}
+		}
+		
+		response.setResults(results);
+		
+		return response;
+	}
+
+	@Override
+	public ListAddressesForThirdPartyResponse listAddressesForThirdParty(ListAddressesForThirdPartyCommand cmd) {
+		ListAddressesForThirdPartyResponse response = new ListAddressesForThirdPartyResponse();
+		
+		Long pageAnchor = cmd.getPageAnchor()!=null ? cmd.getPageAnchor() : 0L;
+		Integer pageSize = cmd.getPageSize();
+		if (pageSize == null) {
+			pageSize = 10;
+		}else if (pageSize > 1000) {
+			pageSize = 1000;
+		}
+		
+		Timestamp timestamp = null;
+		if (cmd.getUpdateTime() != null) {
+			timestamp = new Timestamp(cmd.getUpdateTime());
+		}
+		
+		Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+		
+		List<com.everhomes.rest.openapi.ApartmentDTO> results = communityProvider.listAddressesForThirdParty(currentNamespaceId,cmd.getCommunityId(),cmd.getBuildingId(),pageAnchor,pageSize+1,timestamp);
+		
+		if (results!=null && results.size() > pageSize) {
+			results.remove(results.size()-1);
+			Long nextPageAnchor = pageAnchor + pageSize.longValue();
+			response.setNextPageAnchor(nextPageAnchor);
+		}
+		
+		response.setResults(results);
+		
+		return response;
 	}
 
 }
