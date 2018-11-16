@@ -126,7 +126,3 @@ ALTER TABLE `eh_service_alliance_application_records` ADD COLUMN `update_time` D
 -- AUTHOR: 黄明波
 -- REMARK: issue-41586
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `user_notify_flag` TINYINT(4) NULL DEFAULT '0' COMMENT '0-未起定时器通知用户 1-已起定时器通知用户';
-
--- AUTHOR: xq.tian  20181115
--- REMARK: issue-42372,增加 target_data 的长度
-ALTER TABLE eh_banners MODIFY COLUMN target_data TEXT;
