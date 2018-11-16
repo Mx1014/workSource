@@ -1,6 +1,7 @@
 -- 企业福利1.0 建表sql
 CREATE TABLE `eh_welfares` (
   `id` BIGINT NOT NULL COMMENT 'id',
+  `namespace_id` INTEGER ,
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
   `subject` VARCHAR(128) COMMENT '主题名称',
   `content` TEXT COMMENT '祝福语',
@@ -24,8 +25,9 @@ CREATE TABLE `eh_welfares` (
 
 CREATE TABLE `eh_welfare_receivers` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
+  `namespace_id` INTEGER ,
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
+  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
   `receiver_uid` BIGINT COMMENT '接收者userId(必有项目)',
   `receiver_name` VARCHAR(128) COMMENT '接收者姓名',
   `receiver_detail_id` BIGINT COMMENT '接收者detailId', 
@@ -38,8 +40,9 @@ CREATE TABLE `eh_welfare_receivers` (
 
 CREATE TABLE `eh_welfare_coupons` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
+  `namespace_id` INTEGER ,
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
+  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
   `coupon_id` BIGINT COMMENT '卡券的id',
   `coupon_type` VARCHAR(128) COMMENT '卡券类型',
   `coupon_name` VARCHAR(128) COMMENT '卡券名称',
@@ -57,8 +60,9 @@ CREATE TABLE `eh_welfare_coupons` (
 
 CREATE TABLE `eh_welfare_points` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
+  `namespace_id` INTEGER ,
   `organization_id` BIGINT DEFAULT NULL COMMENT 'organization id',
+  `welfare_id` BIGINT NOT NULL COMMENT '福利id',
   `point_id` BIGINT COMMENT '积分的id',
   `point_name` VARCHAR(128) COMMENT '积分名称',
   `coupon_type` VARCHAR(128) COMMENT '卡券类型',
