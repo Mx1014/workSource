@@ -118,22 +118,6 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
-
-    /**
-     * <b>URL: /launchpadbase/listAllAppsForWorkPlatform</b>
-     * <p>工作台根据组件获取全部应用，包括自定义的</p>
-     */
-    @RequestMapping("listAllAppsForWorkPlatform")
-    @RestReturn(value=ListAllAppsResponse.class)
-    @RequireAuthentication(false)
-    public RestResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd) {
-        ListAllAppsResponse res = serviceModuleAppService.listAllAppsForWorkPlatform(cmd);
-        RestResponse response =  new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
     /**
      * <b>URL: /launchpadbase/listOPPushCards</b>
      * <p>获取运营板块信息</p>
