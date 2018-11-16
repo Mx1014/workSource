@@ -93,3 +93,14 @@ CREATE TABLE `eh_office_cubicle_order_rules` (
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_rentalv2_refund_tips` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `source_type` VARCHAR(20),
+  `source_id` BIGINT,
+  `refund_strategy` TINYINT,
+  `tips` VARCHAR(255),
+  `resource_type` VARCHAR(20),
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
