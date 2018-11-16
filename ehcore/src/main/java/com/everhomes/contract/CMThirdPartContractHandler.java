@@ -219,12 +219,15 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             }
 
         }
+        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         try{
             syncAllEnterprises(cmSyncObjects);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause customer " );
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer");
+
+            LOGGER.error("sync data from RuiAnCM is fail cause customer ",e );
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CUSTOMER_ERROR, "sync data from RuiAnCM is fail cause customer:" + e.getMessage());
         }
         //存储瑞安合同
         try {
@@ -235,6 +238,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
             syncDataToDb(DataType.CONTRACT.getCode(), dataObjects, taskId, categoryId, contractApplicationScene);
         }catch(Exception e){
             LOGGER.error("sync data from RuiAnCM is fail cause contract " );
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_CONTRACT_ERROR, "sync data from RuiAnCM is fail cause contract");
         }
 
@@ -242,12 +246,12 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         try{
             assetService.syncRuiAnCMBillToZuolin(cmSyncObjects, NAMESPACE_ID, categoryId);
         }catch(Exception e){
-            LOGGER.error("sync data from RuiAnCM is fail cause Bill " );
+            LOGGER.error("sync data from RuiAnCM is fail cause Bill " ,e);
+            zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ContractErrorCode.ERROR_CONTRACT_SYNC_BILL_ERROR, "sync data from RuiAnCM is fail cause Bill");
         }
         //String url = "http://183.62.222.87:5902/sf";
 
-        List<ZjSyncdataBackup> backupList = zjSyncdataBackupProvider.listZjSyncdataBackupByParam(NAMESPACE_ID, communityIdentifier, DataType.CONTRACT.getCode());
 
         zjSyncdataBackupProvider.updateZjSyncdataBackupInactive(backupList);
         //syncDataTaskService.createSyncErrorMsg(NAMESPACE_ID, taskId);
@@ -760,9 +764,12 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
 
         syncObjects.forEach(object -> {
             object.getData().forEach(data -> {
-                Community community1 = addressProvider.findCommunityByThirdPartyId("ruian_cm", data.getContractHeader().getPropertyID());
-                if(community1 != null) {
-                    data.setCommunityId(community1.getId());
+                CMContractUnit cmContractUnit = data.getContractUnit().get(0);
+                Address address = addressProvider.findApartmentByThirdPartyId("ruian_cm", cmContractUnit.getUnitID());
+                if(address != null) {
+                    data.setCommunityId(address.getCommunityId());
+                }else{
+                    return;
                 }
                 //进行去重判断
                 Boolean pushFlag = true;
@@ -779,7 +786,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     customer.setConnector(data.getContractHeader().getConnector());
                     customer.setMail(data.getContractHeader().getMail());
                     customer.setConnectorPhone(data.getContractHeader().getConnectorPhone());
-                    customer.setCommunityId(community1.getId());
+                    customer.setCommunityId(address.getCommunityId());
                     cmCustomers.add(customer);
                 }
             });
@@ -828,8 +835,10 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
                     CMContractHeader cmContractHeader = dataObject.getContractHeader();
 
                     for(CMCustomer customer : cmCustomers){
-                        if(dataObject.getCommunityId().equals(customer.getCommunityId()) && cmContractHeader.getAccountID().equals(customer.getAccountId())){
-                            dataObject.setCustomerId(customer.getCustomerId());
+                        if(dataObject.getCommunityId() != null){
+                            if (dataObject.getCommunityId().equals(customer.getCommunityId()) && cmContractHeader.getAccountID().equals(customer.getAccountId())) {
+                                dataObject.setCustomerId(customer.getCustomerId());
+                            }
                         }
                     }
                 }
@@ -896,7 +905,7 @@ public class CMThirdPartContractHandler implements ThirdPartContractHandler{
         customer.setStatus(CommonStatus.ACTIVE.getCode());
         customer.setOperatorUid(1L);
         customer.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
-        customer.setLevelItemId((long)CustomerLevelType.REGISTERED_CUSTOMER.getCode());
+        customer.setLevelItemId(CustomerLevelType.REGISTERED_CUSTOMER.getCode());
         customer.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //      customer.setVersion(ebeiCustomer.getVersion());
 //            if(customer.getTrackingUid() == null) {

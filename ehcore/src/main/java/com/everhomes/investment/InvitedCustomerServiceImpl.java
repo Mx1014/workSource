@@ -66,6 +66,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1054,13 +1055,15 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             StatisticDataDTO data = new StatisticDataDTO();
             data.setCommunityId(community.getId());
             data.setNamespaceId(community.getNamespaceId());
-            data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
+            data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
             data.setLossCustomerNum(listLossCustomer.size());
-
-
+            data.setHistoryCustomerNum(listHistoryCustomer.size());
+            data.setRegisteredCustomerNum(listRegisteredCustomer.size());
+            result.add(data);
 
 
         }
+        return result;
     }
 
     @Override
@@ -1130,8 +1133,19 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     public void statisticCustomerDaily(Date date){
         LOGGER.info("the scheduleJob of customer daily statistics is start!");
         StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. DAY_OF_MONTH);
-        startCustomerStatistic(statisticTime);
-
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime);
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticDaily daily = ConvertHelper.convert(data, CustomerStatisticDaily.class);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override

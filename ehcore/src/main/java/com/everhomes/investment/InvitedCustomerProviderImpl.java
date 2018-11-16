@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -638,6 +639,26 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
         }
         return query.fetchCount();
+    }
+
+    @Override
+    public void createCustomerStatisticsDaily(CustomerStatisticDaily daily) {
+
+    }
+
+    @Override
+    public CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date) {
+        return null;
+    }
+
+    @Override
+    public void createCustomerStatisticsMonthly(CustomerStatisticMonthly daily) {
+
+    }
+
+    @Override
+    public CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date) {
+        return null;
     }
 
 }

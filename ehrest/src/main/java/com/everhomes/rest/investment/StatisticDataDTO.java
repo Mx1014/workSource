@@ -10,13 +10,14 @@ public class StatisticDataDTO {
     private Integer namespaceId;
     private Date dateStr;
     private Long communityId;
-    private Long newCustomerNum;
-    private Long registeredCustomerNum;
-    private Long lossCustomerNum;
-    private Long historyCustomerNum;
-    private Long deleteCustomerNum;
-    private Long trackingNum;
-    private Long customerConut;
+    private Integer newCustomerNum;
+    private Integer registeredCustomerNum;
+    private Integer lossCustomerNum;
+    private Integer historyCustomerNum;
+    private Integer deleteCustomerNum;
+    private Integer trackingNum;
+    private Integer customerConut;
+
 
     public Long getId() {
         return id;
@@ -50,59 +51,59 @@ public class StatisticDataDTO {
         this.communityId = communityId;
     }
 
-    public Long getNewCustomerNum() {
+    public Integer getNewCustomerNum() {
         return newCustomerNum;
     }
 
-    public void setNewCustomerNum(Long newCustomerNum) {
+    public void setNewCustomerNum(Integer newCustomerNum) {
         this.newCustomerNum = newCustomerNum;
     }
 
-    public Long getRegisteredCustomerNum() {
+    public Integer getRegisteredCustomerNum() {
         return registeredCustomerNum;
     }
 
-    public void setRegisteredCustomerNum(Long registeredCustomerNum) {
+    public void setRegisteredCustomerNum(Integer registeredCustomerNum) {
         this.registeredCustomerNum = registeredCustomerNum;
     }
 
-    public Long getLossCustomerNum() {
+    public Integer getLossCustomerNum() {
         return lossCustomerNum;
     }
 
-    public void setLossCustomerNum(Long lossCustomerNum) {
+    public void setLossCustomerNum(Integer lossCustomerNum) {
         this.lossCustomerNum = lossCustomerNum;
     }
 
-    public Long getHistoryCustomerNum() {
+    public Integer getHistoryCustomerNum() {
         return historyCustomerNum;
     }
 
-    public void setHistoryCustomerNum(Long historyCustomerNum) {
+    public void setHistoryCustomerNum(Integer historyCustomerNum) {
         this.historyCustomerNum = historyCustomerNum;
     }
 
-    public Long getDeleteCustomerNum() {
+    public Integer getDeleteCustomerNum() {
         return deleteCustomerNum;
     }
 
-    public void setDeleteCustomerNum(Long deleteCustomerNum) {
+    public void setDeleteCustomerNum(Integer deleteCustomerNum) {
         this.deleteCustomerNum = deleteCustomerNum;
     }
 
-    public Long getTrackingNum() {
+    public Integer getTrackingNum() {
         return trackingNum;
     }
 
-    public void setTrackingNum(Long trackingNum) {
+    public void setTrackingNum(Integer trackingNum) {
         this.trackingNum = trackingNum;
     }
 
-    public Long getCustomerConut() {
+    public Integer getCustomerConut() {
         return customerConut;
     }
 
-    public void setCustomerConut(Long customerConut) {
+    public void setCustomerConut(Integer customerConut) {
         this.customerConut = customerConut;
     }
 
