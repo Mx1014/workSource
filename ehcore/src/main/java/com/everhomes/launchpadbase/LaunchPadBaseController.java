@@ -141,7 +141,7 @@ public class LaunchPadBaseController extends ControllerBase {
     @RestReturn(value=ListAllAppsResponse.class)
     @RequireAuthentication(false)
     public RestResponse listAllAppsForWorkPlatform(ListAllLaunchPadAppsCommand cmd) {
-        ListAllAppsResponse res = serviceModuleAppService.listAllApps(cmd);
+        ListAllAppsResponse res = serviceModuleAppService.listAllAppsForWorkPlatform(cmd);
         RestResponse response =  new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -184,7 +184,7 @@ public class LaunchPadBaseController extends ControllerBase {
      * <p>获取工作台app</p>
      */
     @RequestMapping("listWorkPlatformApps")
-    @RestReturn(value=ListBulletinsCardsResponse.class)
+    @RestReturn(value=ListWorkPlatformAppResponse.class)
     public RestResponse listWorkPlatformApps(ListWorkPlatformAppCommand cmd) {
         ListWorkPlatformAppResponse res = serviceModuleAppService.listWorkPlatformApp(cmd);
         RestResponse response =  new RestResponse(res);
