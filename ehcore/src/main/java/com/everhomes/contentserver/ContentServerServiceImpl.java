@@ -512,18 +512,6 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
 
     @Override
     public UploadCsFileResponse uploadFileToContentServer(InputStream fileStream, String fileName, String token) {
-        String contentServerUri;
-        try {
-            ContentServer contentServer = selectContentServer();
-            contentServerUri = contentServer.getPublicAddress();
-
-            //add by xq.tian
-            if (contentServer.getPublicPort() != 443) {
-                contentServerUri = contentServerUri + ":" + contentServer.getPublicPort();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
         String fileSuffix = FilenameUtils.getExtension(fileName);
 
         // 通过文件后缀确定Content server中定义的媒体类型
@@ -533,8 +521,8 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
                     "Unsupported content media type for [%s], fix your file name extension.", fileName);
         }
 
-        // https 默认端口443 by sfyan 20161226
-        String url = String.format("%s://%s/upload/%s?token=%s", HTTP, contentServerUri, mediaType, token);
+        String serverHost = getServerHost();
+        String url = String.format("%s://%s/upload/%s?token=%s", HTTP, serverHost, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
 
         CloseableHttpResponse response = null;
@@ -575,6 +563,24 @@ public class ContentServerServiceImpl implements ContentServerService, Applicati
             }
 
         }
+    }
+
+    private String getServerHost() {
+        String serverHost;
+        try {
+            ContentServer contentServer = selectContentServer();
+
+            String address = contentServer.getPrivateAddress();
+            Integer port = contentServer.getPrivatePort();
+            if (org.springframework.util.StringUtils.isEmpty(address)) {
+                address = contentServer.getPublicAddress();
+                port = contentServer.getPublicPort();
+            }
+            serverHost = address + ":" + port;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return serverHost;
     }
 
     private void setUploadFileInfo() {
