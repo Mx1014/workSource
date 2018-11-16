@@ -247,7 +247,7 @@ public class WelfareServiceImpl implements WelfareService {
 	        welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
 	        if(welfareDTO.getCoupons() != null){
 	        	for(WelfareCouponDTO couponDto : welfareDTO.getCoupons()){
-	        		WelfareCoupon coupon = ConvertDTO2WelfareCoupon(couponDto,welfare.getOrganizationId(),welfare.getId());
+	        		WelfareCoupon coupon = convertDTO2WelfareCoupon(couponDto,welfare.getOrganizationId(),welfare.getId());
 	        		welfareCouponProvider.createWelfareCoupon(coupon);
 	        	}
 	        }
@@ -265,7 +265,7 @@ public class WelfareServiceImpl implements WelfareService {
         return welfare;
     }
 
-    private WelfareCoupon ConvertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId) {
+    private WelfareCoupon convertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId) {
     	WelfareCoupon coupon = ConvertHelper.convert(couponDto, WelfareCoupon.class);
         if (couponDto.getValidDate() != null) {
             coupon.setValidDate(new Date(couponDto.getValidDate()));
