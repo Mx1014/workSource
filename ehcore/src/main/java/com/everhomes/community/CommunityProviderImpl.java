@@ -2127,8 +2127,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
-    public List<Long> listAllBizCommunities() {
+    public List<Community> listAllBizCommunities() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        return context.select(Tables.EH_COMMUNITIES.ID).from(Tables.EH_COMMUNITIES).where(Tables.EH_COMMUNITIES.NAMESPACE_ID.ne(0)).fetchInto(Long.class);
+        return context.select(Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAMESPACE_ID).from(Tables.EH_COMMUNITIES).where(Tables.EH_COMMUNITIES.NAMESPACE_ID.ne(0)).fetchInto(Community.class);
     }
 }

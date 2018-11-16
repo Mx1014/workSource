@@ -39,30 +39,18 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        statisticCustomerDaily();
+        LOGGER.info("the scheduleJob of customer statistics is start!");
+
+        invitedCustomerService.statisticCustomerDaily(new Date());
+        invitedCustomerService.statisticCustomerAll(new Date());
         Calendar calendar = Calendar. getInstance();
         calendar.setTime(new Date());
-        if(calendar.get(Calendar.DAY_OF_MONTH) == 1){
-            statisticCustomerMonthly();
+        if(calendar.get(Calendar.DAY_OF_MONTH) == Calendar.SUNDAY){
+            invitedCustomerService.statisticCustomerMonthly(new Date());
         }
 
     }
 
-    private void statisticCustomerDaily(){
-        LOGGER.info("the scheduleJob of customer statistics is start!");
-        //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
-        StatisticTime statisticTime = invitedCustomerService.getBeforeForStatistic(new Date(), Calendar. DAY_OF_MONTH);
-        if(statisticTime != null){
-            invitedCustomerService.startCustomerStatistic(statisticTime);
-        }else{
-            LOGGER.error("only support day or month before one");
-        }
-
-    }
-
-    private void statisticCustomerMonthly(){
-
-    }
 
     public static void main(String[] args) {
         Calendar calendar = Calendar. getInstance();

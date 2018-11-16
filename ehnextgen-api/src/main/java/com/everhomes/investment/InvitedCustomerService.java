@@ -69,8 +69,14 @@ public interface InvitedCustomerService {
 
     void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
 
-    void startCustomerStatistic(StatisticTime time);
+    List<StatisticDataDTO> startCustomerStatistic(StatisticTime time);
 
     StatisticTime getBeforeForStatistic(Date date, int type);
+
+    void statisticCustomerAll(Date date);
+
+    void statisticCustomerDaily(Date date);
+
+    void statisticCustomerMonthly(Date date);
 
 }

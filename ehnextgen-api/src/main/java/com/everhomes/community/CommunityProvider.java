@@ -190,6 +190,6 @@ public interface CommunityProvider {
      * Author: 黄鹏宇
      * Remark: 获取所有生效的业务用community
      */
-    List<Long> listAllBizCommunities();
+    List<Community> listAllBizCommunities();
 	
 }

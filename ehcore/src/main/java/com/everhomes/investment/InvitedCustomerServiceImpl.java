@@ -1020,36 +1020,46 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
 
 
+
     @Override
-    public void startCustomerStatistic(StatisticTime time){
-        List<Long> allCommunities = communityProvider.listAllBizCommunities();
+    public List<StatisticDataDTO> startCustomerStatistic(StatisticTime time){
+        List<Community>  allCommunities = communityProvider.listAllBizCommunities();
         Timestamp statisticStartTime = time.getStatisticStartTime();
         Timestamp statisticEndTime = time.getStatisticEndTime();
 
 
-        for(Long communityId : allCommunities){
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
+        List<StatisticDataDTO> result = new ArrayList<>();
 
-            List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, communityId, statisticStartTime, statisticEndTime);
-            Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
+        for(Community community : allCommunities){
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
+
+            List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
+            Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, add customer num : {}", community.getId(), statisticStartTime, statisticEndTime, addCustomerNum);
 
             List<CustomerLevelChangeRecord> listRegisteredCustomer =
                     listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to registered num : {}", communityId, statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to registered num : {}", community.getId(), statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
 
 
             List<CustomerLevelChangeRecord> listLossCustomer =
                     listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to loss num : {}", communityId, statisticStartTime, statisticEndTime, listLossCustomer.size());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to loss num : {}", community.getId(), statisticStartTime, statisticEndTime, listLossCustomer.size());
 
             List<CustomerLevelChangeRecord> listHistoryCustomer =
                     listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to history num : {}", communityId, statisticStartTime, statisticEndTime, listHistoryCustomer.size());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to history num : {}", community.getId(), statisticStartTime, statisticEndTime, listHistoryCustomer.size());
 
-            CustomerStatisticDaily daily = new CustomerStatisticDaily();
-            daily.setCommunityId(communityId);
-            daily.setRegisteredCustomerNum((long)listRegisteredCustomer.size());
+
+            StatisticDataDTO data = new StatisticDataDTO();
+            data.setCommunityId(community.getId());
+            data.setNamespaceId(community.getNamespaceId());
+            data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
+            data.setLossCustomerNum(listLossCustomer.size());
+
+
+
+
         }
     }
 
@@ -1112,6 +1122,33 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             return result;
         }
         return null;
+
+    }
+
+
+    @Override
+    public void statisticCustomerDaily(Date date){
+        LOGGER.info("the scheduleJob of customer daily statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. DAY_OF_MONTH);
+        startCustomerStatistic(statisticTime);
+
+    }
+
+    @Override
+    public void statisticCustomerMonthly(Date date){
+        LOGGER.info("the scheduleJob of customer monthly statistics is start!");
+        StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. MONTH);
+        startCustomerStatistic(statisticTime);
+
+    }
+
+    @Override
+    public void statisticCustomerAll(Date date){
+        LOGGER.info("the scheduleJob of customer monthly statistics is start!");
+        //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+        StatisticTime statisticTime = getBeforeForStatistic(date , Calendar. DAY_OF_MONTH);
+        statisticTime.setStatisticEndTime(null);
+        startCustomerStatistic(statisticTime);
 
     }
 }
