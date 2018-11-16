@@ -177,4 +177,32 @@ public class LaunchPadBaseController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /launchpadbase/updateWorkPlatformApps</b>
+     * <p>保存工作台app可见性设置</p>
+     */
+    @RequestMapping("updateWorkPlatformApps")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkPlatformApps(UpdateWorkPlatformAppCommand cmd) {
+        serviceModuleAppService.updateWorkPlatformApp(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /launchpadbase/updateWorkPlatformApps</b>
+     * <p>保存工作台app排序设置</p>
+     */
+    @RequestMapping("updateWorkPlatformApps")
+    @RestReturn(value=String.class)
+    public RestResponse updateWorkPlatformAppsSort(UpdateWorkPlatformAppSortCommand cmd) {
+        serviceModuleAppService.updateWorkPlatformAppSort(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

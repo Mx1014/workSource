@@ -31,6 +31,8 @@ import com.everhomes.rest.launchpad.ListAllAppsResponse;
 import com.everhomes.rest.launchpad.ListWorkPlatformAppCommand;
 import com.everhomes.rest.launchpad.ListWorkPlatformAppResponse;
 import com.everhomes.rest.launchpad.SaveWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppCommand;
+import com.everhomes.rest.launchpad.UpdateWorkPlatformAppSortCommand;
 import com.everhomes.rest.launchpad.WorkPlatformAppDTO;
 import com.everhomes.rest.module.AppCategoryDTO;
 import com.everhomes.rest.acl.AppEntryInfoDTO;
@@ -1876,9 +1878,34 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
     public void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd) {
         for (WorkPlatformAppDTO dto : cmd.getApps()) {
             WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId());
+            if (app == null) {
+                WorkPlatformApp newApp = new WorkPlatformApp();
+                newApp.setOrder(dto.getSortNum());
+                newApp.setVisibleFlag(dto.getVisibleFlag());
+                newApp.setAppId(dto.getAppOriginId());
+                newApp.setScopeId(cmd.getOrganizationId());
+                newApp.setScopeType(ScopeType.ORGANIZATION.getCode());
+                this.workPlatformAppProvider.createWorkPlatformApp(newApp);
+            }
+        }
+    }
+
+    @Override
+    public void updateWorkPlatformApp(UpdateWorkPlatformAppCommand cmd) {
+        WorkPlatformApp app = this.workPlatformAppProvider.findWorkPlatformById(cmd.getId());
+        if (app != null) {
+            app.setVisibleFlag(cmd.getVisibleFlag());
+            this.workPlatformAppProvider.updateWorkPlatformApp(app);
+        }
+    }
+
+    @Override
+    public void updateWorkPlatformAppSort(UpdateWorkPlatformAppSortCommand cmd) {
+        for (int i = 0;i<cmd.getIds().size();i++) {
+            Long id = cmd.getIds().get(i);
+            WorkPlatformApp app = this.workPlatformAppProvider.findWorkPlatformById(id);
             if (app != null) {
-                app.setVisibleFlag(dto.getVisibleFlag());
-                app.setOrder(dto.getSortNum());
+                app.setOrder(i+1);
                 this.workPlatformAppProvider.updateWorkPlatformApp(app);
             }
         }

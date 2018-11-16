@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>id:id</li>
  *     <li>appOriginId: 应用originId</li>
  *     <li>appName: 应用名称</li>
  *     <li>appEntry: 应用入口</li>
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class WorkPlatformAppDTO {
+
+    private Long id;
 
     private Long appOriginId;
 
@@ -26,6 +29,14 @@ public class WorkPlatformAppDTO {
     private Byte visibleFlag;
 
     private Integer sortNum;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getAppOriginId() {
         return appOriginId;

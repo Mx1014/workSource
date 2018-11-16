@@ -114,4 +114,11 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
          return context.select(DSL.max(Tables.EH_WORK_PLATFORM_APPS.ORDER)).from(Tables.EH_WORK_PLATFORM_APPS).where(condition).fetchOneInto(Integer.class);
     }
+
+    @Override
+    public WorkPlatformApp findWorkPlatformById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
+        EhWorkPlatformAppsDao dao = new EhWorkPlatformAppsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), WorkPlatformApp.class);
+    }
 }
