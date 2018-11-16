@@ -124,6 +124,8 @@ public interface DoorAccessService {
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
+    void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse);
+
     //add by liqingyan
     void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse);
 
@@ -180,7 +182,7 @@ public interface DoorAccessService {
 
     public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd);
 
-    public int invalidVistorAuth(Long DoorId, String phone);
+    public int invalidVistorAuth(Long DoorId, String phone, Byte groupType);
 
     public ListDoorAccessQRKeyResponse listBusAccessQRKey();
 

@@ -741,7 +741,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
     }
-//add by liqingyan 日志导出
+    //add by liqingyan 日志导出
     @Override
     public void exportAclinkLogsXls(AclinkQueryLogCommand cmd, HttpServletResponse httpResponse){
         ByteArrayOutputStream output = null;
@@ -762,6 +762,25 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
     }
 
+    @Override
+    public void exportTempAuthXls(SearchDoorAuthCommand cmd, HttpServletResponse httpResponse){
+        ByteArrayOutputStream output = null;
+        XSSFWorkbook wb = this.createTempAuthXSSFWorkbook(cmd);
+        try {
+            output = new ByteArrayOutputStream();
+            wb.write(output);
+            DownloadUtil.download(output, httpResponse);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally{
+            try {
+                wb.close();
+                output.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
 
 
     /**
@@ -889,7 +908,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         return wb;
     }
-//add by liqingyan 待翻译
+    //add by liqingyan 待翻译
     /**
      * 创建导出日志excel
      * @param cmd
@@ -943,6 +962,61 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 break;
             }
             cmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
+        return wb;
+    }
+    /**
+     * 创建导出授权记录excel
+     * @param cmd
+     * @return
+     */
+    private XSSFWorkbook createTempAuthXSSFWorkbook(SearchDoorAuthCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "临时授权列表";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        int cellN = 0;
+
+        row1.createCell(cellN ++).setCellValue("被授权人");
+        row1.createCell(cellN ++).setCellValue("手机号码");
+        row1.createCell(cellN ++).setCellValue("授权门禁");
+        row1.createCell(cellN ++).setCellValue("创建时间");
+        row1.createCell(cellN ++).setCellValue("创建者");
+        row1.createCell(cellN ++).setCellValue("授权状态");
+        cmd.setPageSize(1000);
+        while (true){
+            ListDoorAuthResponse resp = this.listTempAuth(cmd);
+            for (DoorAuthDTO auth: resp.getDtos()) {
+                cellN = 0;
+                XSSFRow row = sheet.createRow(rowNum ++);
+                row.setRowStyle(style);
+                row.createCell(cellN ++).setCellValue(auth.getUserName());
+                row.createCell(cellN ++).setCellValue(auth.getPhone());
+                row.createCell(cellN ++).setCellValue(auth.getDoorName());
+                row.createCell(cellN ++).setCellValue(auth.getCreateTime());
+                row.createCell(cellN ++).setCellValue(auth.getApproveUserName());
+                row.createCell(cellN ++).setCellValue(auth.getStatus().equals((byte)1) ? "有效":"已失效");
+            }
+
+            if(null == resp.getNextPageAnchor()){
+                break;
+            }
+            cmd.setPageAnchor(resp.getNextPageAnchor());
         }
 
         return wb;
@@ -3413,6 +3487,82 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
     }
 
+    private DoorAuth createZuolinGroupQrAuth(User user, AclinkGroup group, CreateDoorVisitorCommand cmd){
+        if(null == group && group.getStatus() != 1){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
+
+        DoorAuth auth = new DoorAuth();
+        auth.setApplyUserName(cmd.getUserName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setGroupType(cmd.getGroupType());
+        auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
+        auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setLinglingUuid(uuid);
+        auth.setCurrStorey(cmd.getDoorNumber());
+        auth.setRightOpen((byte) 1);
+        invalidVistorAuth(cmd.getDoorId(), cmd.getPhone(), cmd.getGroupType());
+        if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
+            //TODO 访客授权,将以前的授权失效
+
+            auth.setAuthRuleType(cmd.getAuthRuleType());
+            auth.setTotalAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+            auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
+            auth.setValidFromMs(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+            auth.setKeyValidTime(cmd.getValidFromMs() == null ? System.currentTimeMillis() : cmd.getValidFromMs());
+            if(cmd.getValidEndMs() == null){
+                auth.setValidEndMs(auth.getValidFromMs() + KEY_TICK_7_DAY);
+            }else{
+                auth.setValidEndMs(cmd.getValidEndMs());
+            }
+            auth.setRightRemote((byte) 1);
+        } else {
+            auth.setAuthRuleType(DoorAuthRuleType.DURATION.getCode());
+            if (cmd.getValidFromMs() == null) {
+                auth.setValidFromMs(System.currentTimeMillis());
+            } else {
+                auth.setValidFromMs(cmd.getValidFromMs());
+            }
+
+            if (cmd.getValidEndMs() == null) {
+                auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+                auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+            } else {
+                auth.setKeyValidTime(cmd.getValidEndMs());
+                auth.setValidEndMs(cmd.getValidEndMs());
+            }
+        }
+        auth.setUserId(0l);
+        auth.setOwnerType(group.getOwnerType());
+        auth.setOwnerId(group.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setAuthMethod(cmd.getAuthMethod());
+        doorAuthProvider.createDoorAuth(auth);
+//      TODO:根据门禁组修改
+//        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+//        if(aesUserKey == null) {
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+//        }
+//        auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+//        String resultStr;
+//        if(auth.getAuthRuleType() != null && auth.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())){
+//            resultStr = createZuolinQrByCount(auth.getId());
+//        }else{
+//            resultStr = createZuolinQrV1(aesUserKey.getSecret());
+//        }
+//        auth.setQrKey(resultStr);
+        doorAuthProvider.updateDoorAuth(auth);
+        return auth;
+    }
+
     private DoorAuth createZuolinQrAuth(User user, DoorAccess doorAccess, CreateDoorVisitorCommand cmd){
         if(doorAccess == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
@@ -3442,11 +3592,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setLinglingUuid(uuid);
         auth.setCurrStorey(cmd.getDoorNumber());
         auth.setRightOpen((byte) 1);
-        
+        invalidVistorAuth(cmd.getDoorId(), cmd.getPhone(),cmd.getGroupType());
         //按次开门只适用于左邻门禁 by liuyilin 20180509
 		if (cmd.getAuthRuleType() != null && cmd.getAuthRuleType().equals(DoorAuthRuleType.COUNT.getCode())) {
 			//TODO 访客授权,将以前的授权失效
-			invalidVistorAuth(cmd.getDoorId(), cmd.getPhone());
+
 			auth.setAuthRuleType(cmd.getAuthRuleType());
 			auth.setTotalAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
 			auth.setValidAuthAmount(cmd.getTotalAuthAmount() == null ? 0 : cmd.getTotalAuthAmount());
@@ -5649,8 +5799,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	@Override
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
 		User user = UserContext.current().getUser();
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        DoorAuth auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+		//非门禁组按原方法查找
+        DoorAuth auth = new DoorAuth();
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+            auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         //创建自定义表单记录
         if(null != cmd.getList() && !cmd.getList().isEmpty()){
@@ -5692,8 +5850,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	 * doorId为门禁组id
 	 */
 	@Override
-	public int invalidVistorAuth(Long doorId, String phone) {
-		List<DoorAuth> listAuth = doorAuthProvider.listValidDoorAuthByVisitorPhone(doorId, phone);
+	public int invalidVistorAuth(Long doorId, String phone,Byte groupType) {
+		List<DoorAuth> listAuth = doorAuthProvider.listValidDoorAuthByVisitorPhone(doorId, phone, groupType);
 		if(listAuth != null && listAuth.size() > 0){
 			for(DoorAuth auth : listAuth){
 				auth.setStatus(DoorAuthStatus.INVALID.getCode());
@@ -5729,7 +5887,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		for(DoorAccess doorAccess : doorAccesses){
 			for(OpenAuthDTO dto : cmd.getAuthList()){
 				if(!StringUtils.isEmpty(dto.getPhone())){
-					invalidVistorAuth(doorAccess.getId(), dto.getPhone());
+					invalidVistorAuth(doorAccess.getId(), dto.getPhone(),null);
 				}
 			}
 		}
@@ -6035,8 +6193,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     @Override
     public DoorAuthDTO createTempAuth(CreateTempAuthCommand cmd){
 	    //检查该用户是否已存在临时授权
-        if(cmd.getConfirm() != (byte)1){
-            List<DoorAuth> auth = doorAuthProvider.listValidDoorAuthByVisitorPhone(cmd.getDoorId(),cmd.getPhone());
+        if(null == cmd.getConfirm() || cmd.getConfirm() != (byte)1){
+            List<DoorAuth> auth = doorAuthProvider.listValidDoorAuthByVisitorPhone(cmd.getDoorId(),cmd.getPhone(),cmd.getGroupType());
             if(null != auth && !auth.isEmpty()){
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "Auth exist");
             }

@@ -402,6 +402,20 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/aclink/exportTempAuthXls</b>
+     * <p>导出临时授权列表</p>
+     */
+    @RequestMapping("exportTempAuthXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportTempAuthXls(@Valid SearchDoorAuthCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportTempAuthXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/createTempAuthCustomField</b>
      * <p>创建临时授权自定义字段</p>
      * @return OK 成功
@@ -1567,6 +1581,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse updateLocalIpad(UpdateLocalIpadCommand cmd){
     	aclinkIpadService.updateLocalIpad(cmd);
     	RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/updateIpadLogo</b>
+     * <p>修改内网ipadLogo</p>
+     */
+    @RequestMapping("updateIpadLogo")
+    @RestReturn(value=String.class)
+    public RestResponse updateLocalIpad(UpdateIpadLogoCommand cmd){
+        aclinkIpadService.updateIpadLogo(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -770,7 +770,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 	@Override
     public List<AclinkGroupDTO> listAclinkGroup (CrossShardListingLocator locator, Integer count,
                                                  ListDoorGroupCommand cmd){
-        List<AclinkGroupDTO> groups= new ArrayList<>();
+        List<AclinkGroupDTO> groups= new ArrayList<AclinkGroupDTO>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         com.everhomes.server.schema.tables.EhAclinkGroup t = Tables.EH_ACLINK_GROUP;
         com.everhomes.server.schema.tables.EhDoorAccess t1 = Tables.EH_DOOR_ACCESS;
@@ -784,7 +784,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             con = con.and(t.ID.ge(locator.getAnchor()));
         }
         //列出门禁组及组内门禁数量 by liqingyan
-        SelectOffsetStep groupBy = context.select(t2.ID.count(),
+        SelectOffsetStep<Record5<Integer,Long,String,Timestamp,Byte>> groupBy = context.select(t2.ID.count(),
                 (t.ID),
                 (t.NAME),
                 (t.CREATE_TIME),
