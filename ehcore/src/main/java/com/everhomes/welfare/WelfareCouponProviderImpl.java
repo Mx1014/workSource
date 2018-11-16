@@ -90,6 +90,7 @@ public class WelfareCouponProviderImpl implements WelfareCouponProvider {
 	@Override
 	public List<WelfareCoupon> listWelfareCoupon(Long welfareId) {
 		Result<Record> records = getReadOnlyContext().select().from(Tables.EH_WELFARE_COUPONS)
+				.where(Tables.EH_WELFARE_COUPONS.WELFARE_ID.eq(welfareId))
 				.orderBy(Tables.EH_WELFARE_COUPONS.ID.asc()).fetch();
 		if(CollectionUtils.isEmpty(records))
 			return null;

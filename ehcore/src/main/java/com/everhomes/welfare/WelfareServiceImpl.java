@@ -275,7 +275,6 @@ public class WelfareServiceImpl implements WelfareService {
         }
         coupon.setOrganizationId(organizationId);
     	coupon.setWelfareId(welfareId);
-    	
 		return coupon;
 	}
 
@@ -345,8 +344,9 @@ public class WelfareServiceImpl implements WelfareService {
             try{
                 //调用发送接口
                 if (CollectionUtils.isNotEmpty(welfaresDTO.getCoupons())) {
-                    sendCouponsToUsers(welfaresDTO, response, targetUserIds, welfare.getOrganizationId());
+                    welfare.setCouponOrders(StringHelper.toJsonString(sendCouponsToUsers(welfaresDTO, response, targetUserIds, welfare.getOrganizationId())));
                 }
+                welfareProvider.updateWelfare(welfare);
                 //积分 TODO
             }catch(Exception e){
             	//转账异常处理 删除接受人和卡券记录
@@ -374,7 +374,7 @@ public class WelfareServiceImpl implements WelfareService {
 
     }
 
-    private void sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
+    private EnterpriseDistributionToPersonRestResponse sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
         //卡券
         TransferToPersonalCommand cmd1 = new TransferToPersonalCommand();
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -401,6 +401,7 @@ public class WelfareServiceImpl implements WelfareService {
             LOGGER.error("发送卡券出错 resp:" + StringHelper.toJsonString(resp));
             throw new Exception();
         }
+        return resp;
     }
 
     private void sendPayslipMessage(Welfare welfare, Long receiverId, HttpServletRequest request) {
