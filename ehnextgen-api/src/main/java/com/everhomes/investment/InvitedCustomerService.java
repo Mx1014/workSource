@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public interface InvitedCustomerService {
@@ -66,5 +68,9 @@ public interface InvitedCustomerService {
     void changeCustomerLevel(EnterpriseCustomer customer, Long levelItemId);
 
     void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
+
+    void startCustomerStatistic(StatisticTime time);
+
+    StatisticTime getBeforeForStatistic(Date date, int type);
 
 }

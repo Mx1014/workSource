@@ -2,6 +2,7 @@ package com.everhomes.investment;
 
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.rest.investment.CustomerLevelType;
+import com.everhomes.rest.investment.StatisticTime;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -32,6 +33,8 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
     @Autowired
     InvitedCustomerProvider invitedCustomerProvider;
     @Autowired
+    InvitedCustomerService invitedCustomerService;
+    @Autowired
     CommunityProvider communityProvider;
 
     @Override
@@ -47,49 +50,12 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
 
     private void statisticCustomerDaily(){
         LOGGER.info("the scheduleJob of customer statistics is start!");
-        Timestamp nowTime = new Timestamp(System.currentTimeMillis());
-        Calendar calendar = Calendar. getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar. HOUR_OF_DAY, 0);
-        calendar.set(Calendar. MINUTE, 0);
-        calendar.set(Calendar. SECOND, 0);
-        calendar.set(Calendar. MILLISECOND, 0);
-        calendar.add(Calendar. DAY_OF_MONTH, -1);
-        Date date = calendar.getTime();
-        System.out.println(date);
-        Timestamp statisticStartTime = new Timestamp(date.getTime());
-        calendar.set(Calendar. HOUR_OF_DAY, 23);
-        calendar.set(Calendar. MINUTE, 59);
-        calendar.set(Calendar. SECOND, 59);
-        calendar.set(Calendar. MILLISECOND, 999);
-        date = calendar.getTime();
-        Timestamp statisticEndTime = new Timestamp(date.getTime());
-
-        List<Long> allCommunities = communityProvider.listAllBizCommunities();
-
-        for(Long communityId : allCommunities){
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
-
-            List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, communityId, statisticStartTime, statisticEndTime);
-            Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
-
-            List<CustomerLevelChangeRecord> listRegisteredCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to registered num : {}", communityId, statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
-
-
-            List<CustomerLevelChangeRecord> listLossCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to loss num : {}", communityId, statisticStartTime, statisticEndTime, listLossCustomer.size());
-
-            List<CustomerLevelChangeRecord> listHistoryCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to history num : {}", communityId, statisticStartTime, statisticEndTime, listHistoryCustomer.size());
-
-            CustomerStatisticDaily daily = new CustomerStatisticDaily();
-            daily.setCommunityId(communityId);
-            daily.setRegisteredCustomerNum((long)listRegisteredCustomer.size());
+        //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+        StatisticTime statisticTime = invitedCustomerService.getBeforeForStatistic(new Date(), Calendar. DAY_OF_MONTH);
+        if(statisticTime != null){
+            invitedCustomerService.startCustomerStatistic(statisticTime);
+        }else{
+            LOGGER.error("only support day or month before one");
         }
 
     }

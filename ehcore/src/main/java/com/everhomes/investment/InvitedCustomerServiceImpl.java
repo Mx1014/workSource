@@ -1018,6 +1018,102 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         changeCustomerLevel(customer, newLevelItemId);
     }
 
+
+
+    @Override
+    public void startCustomerStatistic(StatisticTime time){
+        List<Long> allCommunities = communityProvider.listAllBizCommunities();
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        for(Long communityId : allCommunities){
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
+
+            List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, communityId, statisticStartTime, statisticEndTime);
+            Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
+
+            List<CustomerLevelChangeRecord> listRegisteredCustomer =
+                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to registered num : {}", communityId, statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
+
+
+            List<CustomerLevelChangeRecord> listLossCustomer =
+                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to loss num : {}", communityId, statisticStartTime, statisticEndTime, listLossCustomer.size());
+
+            List<CustomerLevelChangeRecord> listHistoryCustomer =
+                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
+            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to history num : {}", communityId, statisticStartTime, statisticEndTime, listHistoryCustomer.size());
+
+            CustomerStatisticDaily daily = new CustomerStatisticDaily();
+            daily.setCommunityId(communityId);
+            daily.setRegisteredCustomerNum((long)listRegisteredCustomer.size());
+        }
+    }
+
+    @Override
+    public StatisticTime getBeforeForStatistic(Date date, int type) {
+
+        /*
+         * 支持两种计算
+         * Calendar. DAY_OF_MONTH：获取当前传入时间的前一天的一整天的时间
+         * Calendar. MONTH ： 获取当前传入时间的前一月的一整月的时间
+         *
+         */
+        if(type == Calendar. DAY_OF_MONTH) {
+            //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        if(type == Calendar. MONTH){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar. HOUR_OF_DAY, 0);
+            calendar.set(Calendar. MINUTE, 0);
+            calendar.set(Calendar. SECOND, 0);
+            calendar.add(Calendar. MONTH, -1);
+            calendar.set(Calendar. MILLISECOND, 0);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        return null;
+
+    }
 }
 
 
