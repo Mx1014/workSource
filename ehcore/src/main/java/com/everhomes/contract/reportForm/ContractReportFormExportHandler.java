@@ -9,38 +9,17 @@ import org.springframework.stereotype.Component;
 import com.everhomes.filedownload.FileDownloadTaskHandler;
 import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
-import com.everhomes.rest.asset.statistic.ListBillStatisticByAddressCmd;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsCommand;
 import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
 import com.everhomes.util.StringHelper;
 
 @Component
-public class CommunityReportFormExportHandler implements FileDownloadTaskHandler{
+public class ContractReportFormExportHandler {
+//implements FileDownloadTaskHandler{
 
-	@Override
-	public void beforeExecute(Map<String, Object> params) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execute(Map<String, Object> params) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void commit(Map<String, Object> params) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void afterExecute(Map<String, Object> params) {
-		// TODO Auto-generated method stub
-		
-	}/*
-
+	/*
+	
 	@Autowired
 	private TaskService taskService;
 	
@@ -61,10 +40,10 @@ public class CommunityReportFormExportHandler implements FileDownloadTaskHandler
 		//前端传过来的所有数据信息
         String fileName = (String) params.get("name");
         Long taskId = (Long) params.get("taskId");
-        String GetTotalCommunityStaticsCommandStr =  String.valueOf(params.get("GetTotalCommunityStaticsCommand"));
-        GetTotalCommunityStaticsCommand cmd = (GetTotalCommunityStaticsCommand) 
-        		StringHelper.fromJsonString(GetTotalCommunityStaticsCommandStr, GetTotalCommunityStaticsCommand.class);
-    	OutputStream outputStream = propertyReportFormService.exportOutputStreamForCommunity(cmd, taskId);
+        String getTotalBuildingStaticsCommandStr =  String.valueOf(params.get("GetTotalBuildingStaticsCommand"));
+        GetTotalBuildingStaticsCommand cmd = (GetTotalBuildingStaticsCommand) 
+        		StringHelper.fromJsonString(getTotalBuildingStaticsCommandStr, GetTotalBuildingStaticsCommand.class);
+    	OutputStream outputStream = propertyReportFormService.exportOutputStreamForBuilding(cmd, taskId);
     	CsFileLocationDTO fileLocationDTO = fileDownloadTaskService.uploadToContenServer(fileName, outputStream, taskId);
     	taskService.processUpdateTask(taskId, fileLocationDTO);
 	}

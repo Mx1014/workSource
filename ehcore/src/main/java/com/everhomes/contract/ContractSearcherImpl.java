@@ -27,6 +27,7 @@ import com.everhomes.rest.contract.ContractCategoryCommand;
 import com.everhomes.rest.contract.ContractCategoryListDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
+import com.everhomes.rest.contract.ContractReportFormListContractsCommand;
 import com.everhomes.rest.contract.ContractStatus;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.OpenapiListContractsCommand;
@@ -68,6 +69,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -637,5 +639,176 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 	private ContractService getContractService(Integer namespaceId) {
 		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
 		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+	
+	
+	//合同报表查询 查询所有的合同 正常合同
+	@Override
+	public ListContractsResponse contractReportFormListContracts(ContractReportFormListContractsCommand cmd) {
+		
+		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+		QueryBuilder qb = null;
+		if (cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
+			qb = QueryBuilders.matchAllQuery();
+		} else {
+			String pattern = "*" + cmd.getKeywords() + "*";
+			qb = QueryBuilders.boolQuery().should(QueryBuilders.wildcardQuery("name", pattern))
+					.should(QueryBuilders.wildcardQuery("customerName", pattern))
+					.should(QueryBuilders.wildcardQuery("contractNumber", pattern));
+
+			builder.setHighlighterFragmentSize(60);
+			builder.setHighlighterNumOfFragments(8);
+			builder.addHighlightedField("name").addHighlightedField("customerName")
+					.addHighlightedField("contractNumber");
+		}
+
+		FilterBuilder fb = null;
+		FilterBuilder nfb = FilterBuilders.termFilter("status", ContractStatus.INACTIVE.getCode());
+		fb = FilterBuilders.notFilter(nfb);
+		
+		if (cmd.getNamespaceId() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+		
+		//查询租赁合同
+		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("paymentFlag", ContractStatus.INACTIVE.getCode()));
+		
+		if (cmd.getCommunityId() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
+
+		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+
+		if (cmd.getContractType() != null)
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
+
+		if (cmd.getCustomerType() != null) {
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
+		}
+
+		if (cmd.getBuildingId() != null) {
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
+		}
+
+		if (cmd.getAddressId() != null) {
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
+		}
+		
+		
+		// 传过来的时间进行格式化时间戳转化
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		//设置本月第一天
+		Calendar firstCa = Calendar.getInstance();
+		firstCa.add(Calendar.MONTH, 0);
+		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+		firstCa.set(Calendar.HOUR_OF_DAY, 0);
+		firstCa.set(Calendar.MINUTE, 0);
+		firstCa.set(Calendar.SECOND, 0);
+		firstCa.set(Calendar.MILLISECOND, 0);
+		String firststr = sdf.format(firstCa.getTime());
+		
+		//设置本月最后
+		Calendar lastCa = Calendar.getInstance();
+		lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
+		lastCa.set(Calendar.HOUR_OF_DAY, 23);
+		lastCa.set(Calendar.MINUTE, 59);
+		lastCa.set(Calendar.SECOND, 59);
+		String laststr = sdf.format(lastCa.getTime());
+		
+		Date firstdateUpdateTime = null;
+		Date lastdateUpdateTime = null;
+		try {
+			firstdateUpdateTime = sdf.parse(firststr);
+			lastdateUpdateTime = sdf.parse(laststr);
+		} catch (ParseException e) {
+			LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
+		}
+		qb = QueryBuilders.boolQuery()
+					.must(QueryBuilders.rangeQuery("updateTime").from(firstdateUpdateTime).to(lastdateUpdateTime));
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Long anchor = 0l;
+		Long pageNumber = 1l;
+
+		// 传入的变为页码 pageNumber
+		if (cmd.getPageAnchor() != null) {
+			anchor = cmd.getPageAnchor();
+		}
+
+		if (cmd.getPageNumber() != null) {
+			pageNumber = cmd.getPageNumber();
+		}
+
+		qb = QueryBuilders.filteredQuery(qb, fb);
+		builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+		builder.setFrom((pageNumber.intValue() - 1) * pageSize).setSize(pageSize + 1);
+		builder.setQuery(qb);
+		builder.addSort("communityId", SortOrder.DESC);
+
+		SearchResponse rsp = builder.execute().actionGet();
+		Long totalHits = rsp.getHits().getTotalHits();
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.info("ContractSearcherImpl query builder: {}, rsp: {}", builder, rsp);
+
+		List<Long> ids = getIds(rsp);
+		ListContractsResponse response = new ListContractsResponse();
+
+		response.setTotalNum(totalHits);
+
+		if (ids.size() > pageSize) {
+			response.setNextPageAnchor(anchor + 1);
+			ids.remove(ids.size() - 1);
+		}
+
+		List<ContractDTO> dtos = new ArrayList<ContractDTO>();
+		Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
+		if (contracts != null && contracts.size() > 0) {
+			ids.forEach(id -> {
+				Contract contract = contracts.get(id);
+				ContractDTO dto = ConvertHelper.convert(contract, ContractDTO.class);
+				if (contract.getCustomerType() != null
+						&& CustomerType.ENTERPRISE.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+					EnterpriseCustomer customer = enterpriseCustomerProvider.findById(contract.getCustomerId());
+					if (customer != null) {
+						dto.setCustomerName(customer.getName());
+					}
+				} else if (contract.getCustomerType() != null
+						&& CustomerType.INDIVIDUAL.equals(CustomerType.fromStatus(contract.getCustomerType()))) {
+					OrganizationOwner owner = individualCustomerProvider
+							.findOrganizationOwnerById(contract.getCustomerId());
+					if (owner != null) {
+						dto.setCustomerName(owner.getContactName());
+					}
+
+				}
+				if (contract.getPartyAId() != null && contract.getPartyAType() != null) {
+					if (0 == contract.getPartyAType()) {
+						Organization organization = organizationProvider.findOrganizationById(contract.getPartyAId());
+						if (organization != null) {
+							dto.setPartyAName(organization.getName());
+						}
+					}
+
+				}
+				if (contract.getSponsorUid() != null) {
+					if (contract.getNamespaceId() == 999929) {
+						dto.setSponsorName(contract.getSponsorUid());
+					} else {
+						User user = userProvider.findUserById(Long.parseLong(contract.getSponsorUid()));
+						if (user != null) {
+							dto.setSponsorName(user.getNickName());
+						}
+					}
+				}
+				processContractApartments(dto);
+				// 查询合同适用场景，物业合同不修改资产状态。
+				ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
+				if (contractCategory != null) {
+					dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
+				dtos.add(dto);
+			});
+		}
+		response.setContracts(dtos);
+		return response;
 	}
 }

@@ -14,6 +14,7 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractLogDTO;
 
@@ -145,6 +146,9 @@ public interface ContractProvider {
 
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 
+	
+	//合同报表
 	int getTotalContractCount();
+	void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics);
 
 }

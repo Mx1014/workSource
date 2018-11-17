@@ -1,9 +1,9 @@
 package com.everhomes.contract;
 
-import com.everhomes.server.schema.tables.pojos.EhPropertyStatisticCommunity;
+import com.everhomes.server.schema.tables.pojos.EhContractReportformStatisticCommunitys;
 import com.everhomes.util.StringHelper;
 
-public class CommunityStatistics extends EhPropertyStatisticCommunity{
+public class ContractReportformStatisticCommunitys extends EhContractReportformStatisticCommunitys{
 
 	private static final long serialVersionUID = 1L;
 	

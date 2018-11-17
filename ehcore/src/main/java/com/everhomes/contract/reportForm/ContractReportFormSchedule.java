@@ -59,8 +59,8 @@ public class ContractReportFormSchedule implements ApplicationListener<ContextRe
 		@Autowired
 		private ScheduleProvider scheduleProvider;
 
-		static final String cronExpression = "0/10 * *  * * ?";
-		//static final String cronExpression = "0 0 3,5 * * ?";
+		//static final String cronExpression = "0/10 * *  * * ?";
+		static final String cronExpression = "0 0 3,5 * * ?";
 		//final String cronExpression = configurationProvider.getValue("contract.contractreportform.cronexpression", "");
 
 		@Override

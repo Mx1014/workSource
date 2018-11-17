@@ -1,6 +1,7 @@
 package com.everhomes.search;
 
 import com.everhomes.openapi.Contract;
+import com.everhomes.rest.contract.ContractReportFormListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.contract.OpenapiListContractsCommand;
 import com.everhomes.rest.contract.SearchContractCommand;
@@ -17,4 +18,5 @@ public interface ContractSearcher {
     void syncFromDb();
     ListContractsResponse queryContracts(SearchContractCommand cmd);
     ListContractsResponse openapiListContracts(OpenapiListContractsCommand cmd);
+	ListContractsResponse contractReportFormListContracts(ContractReportFormListContractsCommand cmd);
 }

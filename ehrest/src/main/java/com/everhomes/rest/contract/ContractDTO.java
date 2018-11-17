@@ -81,7 +81,25 @@ public class ContractDTO {
 	private Long sponsorUid;
 	private BigDecimal deposit;
 	private Byte depositStatus;
+	private Long communityId;
+	private Byte customerType;
 	
+	public Byte getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(Byte customerType) {
+		this.customerType = customerType;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
 	public BigDecimal getDeposit() {
 		return deposit;
 	}

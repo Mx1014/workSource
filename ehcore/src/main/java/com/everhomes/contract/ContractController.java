@@ -621,5 +621,20 @@ public class ContractController extends ControllerBase {
 		contractService.autoGeneratingBill(cmd);
 		return new RestResponse();
 	}
+	
+	/**
+     * <p>合同报表：定时任务手动</p>
+     * <b>URL: /contract/excuteContractReportFormJob</b>
+     */
+    @RequestMapping("excuteContractReportFormJob")
+    @RestReturn(value=String.class)
+    public RestResponse excuteDoorAccessSchedule() {
+    	ContractService contractService = getContractService(1111111);
+		contractService.generateReportFormStatics();
+        RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
 
 }

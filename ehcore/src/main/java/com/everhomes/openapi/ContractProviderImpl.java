@@ -41,6 +41,7 @@ import com.everhomes.contract.ContractChargingItem;
 import com.everhomes.contract.ContractEvents;
 import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
+import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
@@ -68,6 +69,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
 import com.everhomes.server.schema.tables.pojos.EhContractParamGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhContractParams;
+import com.everhomes.server.schema.tables.pojos.EhContractReportformStatisticCommunitys;
 import com.everhomes.server.schema.tables.records.EhContractParamGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhContractParamsRecord;
 import com.everhomes.server.schema.tables.records.EhContractsRecord;
@@ -116,6 +118,7 @@ import java.util.Map;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.reportForm.CommunityStatistics;
 
 @Component
 public class ContractProviderImpl implements ContractProvider {
@@ -1672,7 +1675,18 @@ public class ContractProviderImpl implements ContractProvider {
 		return  context.selectCount()
 				       .from(Tables.EH_CONTRACTS)
 				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
-				       .and(Tables.EH_ADDRESSES.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				       .and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
 				       .fetchAnyInto(Integer.class);
+	}
+	
+	@Override
+	public void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhContractReportformStatisticCommunitys.class));
+		EhContractReportformStatisticCommunitysDao dao = new EhContractReportformStatisticCommunitysDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContractReportformStatisticCommunitys.class));
+		communityStatistics.setId(id);
+		communityStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(communityStatistics);
 	}
 }
