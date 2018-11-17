@@ -1,5 +1,5 @@
 -- 合同报表数据表
-CREATE TABLE `eh_contract_reportform_statistic_community` (
+CREATE TABLE `eh_contract_reportform_statistic_communitys` (
 	`id` BIGINT (20) NOT NULL,
 	`namespace_id` INT (11) DEFAULT NULL,
 	`community_id` BIGINT (20) DEFAULT NULL,
