@@ -44,6 +44,7 @@ import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
@@ -84,6 +85,8 @@ import com.everhomes.varField.FieldParams;
 import com.everhomes.varField.FieldProvider;
 import com.everhomes.varField.FieldService;
 import com.everhomes.varField.ScopeFieldItem;
+import com.itextpdf.tool.xml.html.table.Table;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -1662,5 +1665,14 @@ public class ContractProviderImpl implements ContractProvider {
 				       .fetchAnyInto(BigDecimal.class);
 	}
 
-
+	//合同报表
+	@Override
+	public int getTotalContractCount() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return  context.selectCount()
+				       .from(Tables.EH_CONTRACTS)
+				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
+				       .and(Tables.EH_ADDRESSES.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				       .fetchAnyInto(Integer.class);
+	}
 }

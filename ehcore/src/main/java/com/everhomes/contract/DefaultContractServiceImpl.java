@@ -3955,4 +3955,122 @@ long assetCategoryId = 0l;
 			}
         }
 	}
+	
+	//产生合同报表信息
+	@Override
+	public void generateReportFormStatics() {
+		//开事务
+		dbProvider.execute((TransactionStatus status) -> {
+			//先删掉这个月的的统计数据
+			String todayDateStr = getTodayDateStr();
+			//propertyReportFormProvider.deleteCommunityDataByDateStr(todayDateStr);
+			//propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
+			
+			//开始遍历，进行数据统计
+			int pageSize = 5000;
+			//int totalCount = addressProvider.getTotalApartmentCount();
+			
+			int totalCount = contractProvider.getTotalContractCount();
+			int totalPage = 0;
+			if (totalCount%pageSize == 0) {
+				totalPage = totalCount/pageSize;
+			}else {
+				totalPage = totalCount/pageSize + 1;
+			}
+			
+			//园区统计结果集
+			Map<Long, CommunityStatistics> communityResultMap = new HashMap<>();
+			//Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
+			//分页遍历开始
+			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
+				long startTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("Start PropertyReportFormJob for "+ (currentPage+1) +" time.........");
+				}
+				
+				int startIndex = currentPage * pageSize;
+				//List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
+				//获取合同列表，根据园区排序
+				List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
+				
+				//插入上一页统计得到的数据
+				if (currentPage != 0 ) {
+					//插入园区信息统计数据
+					if (apartments != null && apartments.size() > 0 && communityResultMap.containsKey(apartments.get(0).getCommunityId())) {
+						CommunityStatistics remove = communityResultMap.remove(apartments.get(0).getCommunityId());
+						createCommunityStatics(communityResultMap);
+						communityResultMap.put(remove.getCommunityId(), remove);
+					}else{
+						createCommunityStatics(communityResultMap);
+					}
+					//插入楼宇信息统计数据
+					if (apartments != null && apartments.size() > 0 && buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
+						BuildingStatistics remove = buildingResultMap.remove(apartments.get(0).getBuildingId());
+						createBuildingStatics(buildingResultMap);
+						buildingResultMap.put(remove.getBuildingId(), remove);
+					}else{
+						createBuildingStatics(buildingResultMap);
+					}
+				}
+				
+				//生成统计数据
+				for (ApartmentReportFormDTO apartment : apartments) {
+					//园区信息统计数据
+					if (communityResultMap.containsKey(apartment.getCommunityId())) {
+						CommunityStatistics communityStatistics = communityResultMap.get(apartment.getCommunityId());
+						countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
+					}else{
+						Community community = communityProvider.findCommunityById(apartment.getCommunityId());
+						if (community != null) {
+							CommunityStatistics communityStatistics = initCommunityStatistics(apartment.getCommunityId());
+							communityResultMap.put(apartment.getCommunityId(), communityStatistics);
+							countApartmentsForCommunity(communityStatistics,apartment.getLivingStatus());
+						}else {
+							if (LOGGER.isDebugEnabled()) {
+								LOGGER.debug("community is null !!! communityId is " + apartment.getCommunityId());
+							}
+						}
+					}
+					//楼宇信息统计数据
+					if (buildingResultMap.containsKey(apartment.getBuildingId())) {
+						if (apartment.getBuildingId() != null) {
+							BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
+							countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+						}
+					}else{
+						if(apartment.getBuildingId() != null){
+							Building building = communityProvider.findBuildingById(apartment.getBuildingId());
+							if (building != null) {
+								BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
+								buildingResultMap.put(apartment.getBuildingId(), buildingStatistics);
+								countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
+							}else {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("building is null !!! buildingId is " + apartment.getBuildingId());
+								}
+							}
+						}
+					}
+				}
+				
+				long endTime = System.currentTimeMillis();
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("End PropertyReportFormJob for "+ (currentPage+1) +" time.........");
+					LOGGER.debug("PropertyReportFormJob progress for " + (currentPage+1) +" time spend " + (endTime-startTime) + "ms");
+				}
+				
+			}
+			return null;
+		});
+		
+	}
+	
+	private String getTodayDateStr(){
+		Date currentTime = DateHelper.currentGMTTime();
+		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
+		String todayDateStr = yyyyMM.format(currentTime);
+		return todayDateStr;
+	}
+	
+	
 }

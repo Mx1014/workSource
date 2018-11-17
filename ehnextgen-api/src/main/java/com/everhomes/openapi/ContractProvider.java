@@ -145,4 +145,6 @@ public interface ContractProvider {
 
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 
+	int getTotalContractCount();
+
 }

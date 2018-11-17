@@ -76,4 +76,6 @@ public interface ContractService {
 	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
    
+	//合同报表
+	default void generateReportFormStatics(){};
 }
