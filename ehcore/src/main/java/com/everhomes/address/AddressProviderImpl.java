@@ -17,6 +17,8 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.openapi.ContractBuildingMapping;
 import com.everhomes.openapi.ContractProvider;
+import com.everhomes.organization.pm.AddressEvent;
+import com.everhomes.organization.pm.AddressEventStatus;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.region.Region;
 import com.everhomes.rest.aclink.DoorAccessStatus;
@@ -32,6 +34,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.daos.EhAddressArrangementDao;
 import com.everhomes.server.schema.tables.daos.EhAddressAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhAddressEventsDao;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddressArrangement;
@@ -90,6 +93,7 @@ public class AddressProviderImpl implements AddressProvider {
 
         address.setId(id);
         address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setOperateTime(address.getCreateTime());
         address.setUuid(UUID.randomUUID().toString());
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAddresses.class, id));
 
@@ -1331,4 +1335,33 @@ public class AddressProviderImpl implements AddressProvider {
                 .where(Tables.EH_ADDRESSES.ID.eq(addressId))
                 .execute();
     }
+
+	@Override
+	public void createAddressEvent(AddressEvent event) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAddressEventsDao dao = new EhAddressEventsDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(com.everhomes.server.schema.tables.EhAddressEvents.class));
+		event.setId(id);
+		dao.insert(event);
+	}
+
+	@Override
+	public void deleteAddressEventByAddressId(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		context.update(Tables.EH_ADDRESS_EVENTS)
+			   .set(Tables.EH_ADDRESS_EVENTS.STATUS, AddressEventStatus.INACTIVE.getCode())
+			   .where(Tables.EH_ADDRESS_EVENTS.ADDRESS_ID.eq(addressId))
+			   .and(Tables.EH_ADDRESS_EVENTS.STATUS.eq(AddressEventStatus.ACTIVE.getCode()))
+			   .execute();
+	}
+
+	@Override
+	public List<AddressEvent> listAddressEvents(Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		return context.select()
+					  .from(Tables.EH_ADDRESS_EVENTS)
+			          .where(Tables.EH_ADDRESS_EVENTS.ADDRESS_ID.eq(addressId))
+			          .and(Tables.EH_ADDRESS_EVENTS.STATUS.eq(AddressEventStatus.ACTIVE.getCode()))
+			          .fetchInto(AddressEvent.class);
+	}
 }

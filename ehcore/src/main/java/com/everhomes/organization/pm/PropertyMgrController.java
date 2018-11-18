@@ -2317,7 +2317,7 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-	//展示房源日志：pm/listApartmentEvents（新增接口）(5.8.0未实现)
+	//展示房源日志：pm/listApartmentEvents
 	/**
 	 * <p>展示房源日志</p>
 	 * <b>URL: /pm/listApartmentEvents</b>

@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 * <li>operatorUid: 操作人id</li>
 * <li>operatorName: 操作人名称</li>
 * <li>opearteTime:操作时间</li>
-* <li>opearteType:操作类型（1：增加，2：删除，3：拆分，4：合并）</li>
+* <li>opearteType:操作类型（1：增加，2：删除，3：删除）</li>
 * <li>content:日志内容</li>
 *</ul>
 */
@@ -20,7 +20,7 @@ public class ApartmentEventDTO {
 	private Long addressId;
 	private Long operatorUid;
 	private String operatorName;
-	private Timestamp opearteTime;
+	private Timestamp operateTime;
 	private Byte opearteType;
 	private String content;
 	
@@ -48,11 +48,11 @@ public class ApartmentEventDTO {
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
 	}
-	public Timestamp getOpearteTime() {
-		return opearteTime;
+	public Timestamp getOperateTime() {
+		return operateTime;
 	}
-	public void setOpearteTime(Timestamp opearteTime) {
-		this.opearteTime = opearteTime;
+	public void setOperateTime(Timestamp operateTime) {
+		this.operateTime = operateTime;
 	}
 	public Byte getOpearteType() {
 		return opearteType;

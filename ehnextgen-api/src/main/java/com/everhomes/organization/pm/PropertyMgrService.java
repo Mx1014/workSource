@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import com.everhomes.address.Address;
 import com.everhomes.community.Community;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
@@ -544,5 +545,7 @@ public interface PropertyMgrService {
 	List<ApartmentBriefInfoDTO> listApartmentsInBuilding(ListApartmentsInBuildingCommand cmd);
 
 	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
+
+	void saveAddressEvent(int opearteType, Address newAddress, Address oldAddress,Byte newLivingStatus,Byte oldLivingStatus);
 
 }

@@ -135,8 +135,12 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`, `description`, `tag`)
 	
 -- AUTHOR: tangcen 2018年11月15日
 -- REMARK: 添加房源日志模板
-INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('address.tracking', '1', 'zh_CN', '创建房源', '创建房源', '0');
-INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ('address.tracking', '2', 'zh_CN', '删除房源', '删除房源', '0');	
-	
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '1', 'zh_CN', '房源事件', '创建房源', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '2', 'zh_CN', '房源事件', '删除房源', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '3', 'zh_CN', '房源事件', '修改${display}:由${oldData}更改为${newData}	', '0');	
+
 	
 	
