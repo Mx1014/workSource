@@ -31,7 +31,7 @@ public interface DoorAccessService {
 
     Long deleteDoorAuth(Long doorAuthId);
 
-    Long deleteDoorAccess(Long doorAccessId);
+    Long deleteDoorAccess(AclinkDeleteByIdCommand cmd);
 
     ListAesUserKeyByUserResponse listAesUserKeyByUser(ListAesUserKeyByUserCommand cmd);
 

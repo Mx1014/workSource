@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -12,6 +14,8 @@ import java.util.*;
 import java.util.Comparator;
 
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.admin.NamespaceDTO;
 import com.everhomes.rest.energy.util.EnumType;
@@ -59,6 +63,12 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 
     @Autowired
     private AclinkServerProvider aclinkServerProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityprovider;
 
     @Override
     public Long createDoorAccess(DoorAccess obj) {
@@ -719,12 +729,23 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             	dto.setGroupId(r.getValue(Tables.EH_DOOR_ACCESS.GROUPID));
             	dto.setDisplayName(dto.getDisplayNameNotEmpty());
             	//园区门禁门牌号
-                if(dto.getOwnerType() == (byte)1){
-                    dto.getCommunityName();
+                if(dto.getOwnerType() == (byte)1 && dto.getOwnerId() != null){
+                    Community com = new Community();
+                    com = communityprovider.findCommunityById(dto.getOwnerId());
+                    if(null != com && com.getId() != null) {
+                        dto.setCommunityName(com.getName());
+                    }
                     if(null != dto.getAddressDetail() && dto.getAddressDetail().length()>0){
                         String[] str = dto.getAddressDetail().split("_");
                         dto.setBuildingName(str[0]);
                         dto.setFloorName(str[1]);
+                    }
+                }
+                if(dto.getOwnerType() == (byte)0 && dto.getOwnerId() != null){
+                    Organization org = new Organization();
+                    org = organizationProvider.findOrganizationById(dto.getOwnerId());
+                    if(null != org && org.getId() != null){
+                        dto.setOrganizationName(org.getName());
                     }
                 }
 

@@ -237,7 +237,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("deleteDoorAccess")
     @RestReturn(value=String.class)
     public RestResponse deleteDoorAccess(@Valid AclinkDeleteByIdCommand cmd) {
-        doorAccessService.deleteDoorAccess(cmd.getId());
+        doorAccessService.deleteDoorAccess(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -557,6 +557,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             resp.setDoors(dtos);
         	return resp;
         }
+        //TODO:只拥有管理权限的门禁添加人显示下放管理权限者的名字
         for(DoorAccessDTO dto : dtos) {
             Long rv = getDoorAccessLastTick(ConvertHelper.convert(dto, DoorAccess.class));
             
@@ -1060,7 +1061,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 row.createCell(cellN ++).setCellValue(auth.getUserName());
                 row.createCell(cellN ++).setCellValue(auth.getPhone());
                 row.createCell(cellN ++).setCellValue(auth.getDoorName());
-                row.createCell(cellN ++).setCellValue(auth.getCreateTime());
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(auth.getCreateTime(), DateUtil.DATE_TIME));
                 row.createCell(cellN ++).setCellValue(auth.getApproveUserName());
                 row.createCell(cellN ++).setCellValue(auth.getStatus().equals((byte)1) ? "有效":"已失效");
             }
@@ -1492,14 +1493,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     
     @Override
-    public Long deleteDoorAccess(Long doorAccessId) {
+    public Long deleteDoorAccess(AclinkDeleteByIdCommand cmd) {
         DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
-                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
+                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getId());
                 
                 //delete childs
-                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccessId, 20);
+                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(cmd.getId(), 20);
                 if(childs != null && childs.size() > 0) {
                     for(DoorAccess dc : childs) {
                         //若有管理授权则不能删除
