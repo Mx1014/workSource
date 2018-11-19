@@ -145,3 +145,4 @@ CREATE TABLE `eh_aclink_group_doors` (
 -- REMARK: 门禁iPad自定义logo
 ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_uri` VARCHAR(2048) DEFAULT NULL COMMENT 'logo uri' ;
 ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_url` VARCHAR(2048) DEFAULT NULL COMMENT 'logo url' ;
+ALTER TABLE `eh_door_access` CHANGE adress_detail address_detail VARCHAR(64);

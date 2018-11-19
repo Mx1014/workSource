@@ -106,14 +106,14 @@ db.tx.timeout: 600
 #
 # ElasticSearch configuration
 #
-elastic:    
-    index: everhomesv3
-    nodes:
-        hosts: elasticsearch
-        cluster.name: elasticsearch06
-        ports: 9300
-        httpports: 9200
+elastic:
+  index: everhomesv3
+  nodes:
+    hosts: elasticsearch
+    ports: 9300
+    httpports: 9200
 
+cluster.name: elasticsearch06
 #
 # for API code generation
 #

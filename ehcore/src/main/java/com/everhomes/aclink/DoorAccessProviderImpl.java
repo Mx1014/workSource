@@ -497,7 +497,11 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
 //            dto.setNamespaceId(r.getValue(Tables.EH_DOOR_ACCESS.NAMESPACE_ID));
             dto.setId(r.getValue(t.ID));
             dto.setName(r.getValue(t.NAME));
-            dto.setDisplayName(r.getValue(t.DISPLAY_NAME));
+            if(null != r.getValue(t.DISPLAY_NAME) && r.getValue(t.DISPLAY_NAME).length()>0){
+                dto.setDisplayName(r.getValue(t.DISPLAY_NAME));
+            }else{
+                dto.setDisplayName(r.getValue(t.NAME));
+            }
             dto.setDeviceId(r.getValue(t.DEVICE_ID));
             dto.setDeviceName(r.getValue(t.DEVICE_NAME));
             dto.setFirmwareName(r.getValue(t.FIRMWARE_NAME));
