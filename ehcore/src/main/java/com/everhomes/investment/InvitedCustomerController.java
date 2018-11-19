@@ -360,10 +360,10 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某月的数据</p>
      */
     @RequestMapping("queryCustomerStatisticMonthly")
-    @RestReturn(value = CommunityCustomerStatisticDTO.class, collection = true)
+    @RestReturn(value = GetCustomerStatisticResponse.class)
     public RestResponse queryCustomerStatisticMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
-        List<CommunityCustomerStatisticDTO> dtos = invitedCustomerService.getCustomerStatisticsMonthly(cmd);
-        RestResponse response = new RestResponse(dtos);
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthly(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

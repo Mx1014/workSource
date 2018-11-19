@@ -1374,7 +1374,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 try {
                     Date date = format.parse(cmd.getDate());
                     statisticCustomerDaily(date);
-                    startCustomerStatisticTotal(date);
+                    statisticCustomerDailyTotal(date);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
