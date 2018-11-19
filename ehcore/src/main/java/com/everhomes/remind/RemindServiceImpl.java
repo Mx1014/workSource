@@ -371,7 +371,7 @@ public class RemindServiceImpl implements RemindService  {
         		}
         	}
         }
-        if(RemindStatus.fromCode(remind.getStatus()) != RemindStatus.DONE){
+        if(sendCreateRemindFlag && RemindStatus.fromCode(remind.getStatus()) != RemindStatus.DONE){
         	sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.CREATE_SUBSCRIBE);
         }
         return shares;
@@ -680,14 +680,18 @@ public class RemindServiceImpl implements RemindService  {
         String shareShortDisplay = "无";
         List<RemindCategoryDefaultShare> shares = remindProvider.findShareMemberDetailsByCategoryId(cmd.getRemindCategoryId());
         int shareCount = 0;
+        String shareName = "";
         if (!CollectionUtils.isEmpty(shares)) {
-            shareShortDisplay = String.format("%s等%d人", shares.get(0).getSharedContractName(), shares.size());
+        	shareName = shares.get(0).getSharedContractName();
             shareCount += shares.size();
         }
         if (!CollectionUtils.isEmpty(cmd.getShareToMembers())) {
-            shareShortDisplay = String.format("%s等%d人", cmd.getShareToMembers().get(0).getSourceName(), cmd.getShareToMembers().size());
+        	if("".equals(shareName)){
+        		shareName = shares.get(0).getSharedContractName();
+        	}
             shareCount += cmd.getShareToMembers().size();
         }
+        shareShortDisplay = String.format("%s等%d人", shareName, shareCount);
 
         RemindSetting remindSetting = null;
         if (cmd.getRemainTypeId() != null) {
@@ -729,14 +733,6 @@ public class RemindServiceImpl implements RemindService  {
             remindProvider.batchCreateRemindShare(buildRemindShares(cmd.getShareToMembers(), remind, null));
             return null;
         });
-        if(remind.getRemindCategoryId() != null){
-            List<Remind> trackReminds = new ArrayList<>();
-            List<RemindCategoryDefaultShare> categoryShareReminds = remindProvider.findShareMemberDetailsByCategoryId(remind.getRemindCategoryId());
-            if(!CollectionUtils.isEmpty(categoryShareReminds)){
-            	categoryShareReminds.forEach(r->{trackReminds.add(convertRemindShareToMSGRemind(remind, r));});
-            }
-			sendTrackMessageOnBackGround(remind.getPlanDescription(), trackReminds, RemindModifyType.CREATE_SUBSCRIBE);
-        }
         
         return remind.getId();
     }
