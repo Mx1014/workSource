@@ -3957,24 +3957,21 @@ long assetCategoryId = 0l;
         }
 	}
 	
-	//产生合同报表信息
+	// 产生合同报表信息
 	@Override
 	public void generateReportFormStatics() {
-		//开事务
+		// 开事务
 		dbProvider.execute((TransactionStatus status) -> {
-			//先删掉这个月的的统计数据
+			// 先删掉这个月的的统计数据
 			String todayDateStr = getTodayDateStr();
 			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
-			//propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
-			
-			//开始遍历，进行数据统计
+
+			// 开始遍历，进行数据统计
 			int pageSize = 1000;
-			//int totalCount = addressProvider.getTotalApartmentCount();
-			
-			//只统计本月的数据，每次统计，会把本月的此次之前的数据清空
+			// 只统计本月的数据，每次统计，会把本月的此次之前的数据清空
 			// 传过来的时间进行格式化时间戳转化
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			//设置本月第一天
+			// 设置本月第一天
 			Calendar firstCa = Calendar.getInstance();
 			firstCa.add(Calendar.MONTH, 0);
 			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
@@ -3983,181 +3980,116 @@ long assetCategoryId = 0l;
 			firstCa.set(Calendar.SECOND, 0);
 			firstCa.set(Calendar.MILLISECOND, 0);
 			String firststr = sdf.format(firstCa.getTime());
-			
-			//设置本月最后
+
+			// 设置本月最后
 			Calendar lastCa = Calendar.getInstance();
 			lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
 			lastCa.set(Calendar.HOUR_OF_DAY, 23);
 			lastCa.set(Calendar.MINUTE, 59);
 			lastCa.set(Calendar.SECOND, 59);
 			String laststr = sdf.format(lastCa.getTime());
-			
-			Timestamp firstdateUpdateTime = new Timestamp(System.currentTimeMillis());;
+
+			Timestamp firstdateUpdateTime = new Timestamp(System.currentTimeMillis());
 			Timestamp lastdateUpdateTime = new Timestamp(System.currentTimeMillis());
-			//try {
-				//firstdateUpdateTime = sdf.parse(firststr);
 			try {
 				firstdateUpdateTime = Timestamp.valueOf(firststr);
-				//lastdateUpdateTime = sdf.parse(laststr);
 				lastdateUpdateTime = Timestamp.valueOf(laststr);
 			} catch (Exception e) {
 				LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
 				e.printStackTrace();
 			}
-			/*} catch (ParseException e) {
-				LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
-			}*/
-			
-			
-			int totalCount = contractProvider.getTotalContractCount(firstdateUpdateTime,lastdateUpdateTime);
+
+			int totalCount = contractProvider.getTotalContractCount(firstdateUpdateTime, lastdateUpdateTime);
 			int totalPage = 0;
-			if (totalCount%pageSize == 0) {
-				totalPage = totalCount/pageSize;
-			}else {
-				totalPage = totalCount/pageSize + 1;
+			if (totalCount % pageSize == 0) {
+				totalPage = totalCount / pageSize;
+			} else {
+				totalPage = totalCount / pageSize + 1;
 			}
-			
-			//园区统计结果集
+
+			// 园区统计结果集
 			Map<Long, ContractReportformStatisticCommunitys> communityResultMap = new HashMap<>();
-			//Map<Long, BuildingStatistics> buildingResultMap = new HashMap<>();
-			//分页遍历开始
+			// 分页遍历开始
 			for (int currentPage = 0; currentPage <= totalPage; currentPage++) {
 				long startTime = System.currentTimeMillis();
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("Start PropertyReportFormJob for "+ (currentPage+1) +" time.........");
+					LOGGER.debug("Start PropertyReportFormJob for " + (currentPage + 1) + " time.........");
 				}
-				
+
 				int startIndex = currentPage * pageSize;
-				//List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
-				//获取合同列表，根据园区排序
-				//List<ApartmentReportFormDTO> apartments = addressProvider.findActiveApartments(startIndex,pageSize);
+				// 获取合同列表，根据园区排序
 				ContractReportFormListContractsCommand crfcmd = new ContractReportFormListContractsCommand();
 				crfcmd.setPageSize(pageSize);
-				//crfcmd.setPageAnchor(new Long((long)currentPage));
-				crfcmd.setPageNumber(new Long((long)currentPage +1 ));
+				crfcmd.setPageNumber(new Long((long) currentPage + 1));
 				ListContractsResponse listContractsResponse = contractSearcher.contractReportFormListContracts(crfcmd);
 				List<ContractDTO> contracts = listContractsResponse.getContracts();
-				
-				//插入上一页统计得到的数据
-				if (currentPage != 0 ) {
-					//插入园区信息统计数据
+
+				// 插入上一页统计得到的数据
+				if (currentPage != 0) {
+					// 插入园区信息统计数据
 					if (contracts != null && contracts.size() > 0 && communityResultMap.containsKey(contracts.get(0).getCommunityId())) {
 						ContractReportformStatisticCommunitys remove = communityResultMap.remove(contracts.get(0).getCommunityId());
 						createCommunityStatics(communityResultMap);
 						communityResultMap.put(remove.getCommunityId(), remove);
-					}else{
+					} else {
 						createCommunityStatics(communityResultMap);
 					}
-					//插入楼宇信息统计数据
-					/*if (apartments != null && apartments.size() > 0 && buildingResultMap.containsKey(apartments.get(0).getBuildingId())) {
-						BuildingStatistics remove = buildingResultMap.remove(apartments.get(0).getBuildingId());
-						createBuildingStatics(buildingResultMap);
-						buildingResultMap.put(remove.getBuildingId(), remove);
-					}else{
-						createBuildingStatics(buildingResultMap);
-					}*/
 				}
-				
-				//生成统计数据
+
+				// 生成统计数据
 				for (ContractDTO contract : contracts) {
-					//园区信息统计数据
+					// 园区信息统计数据
 					if (communityResultMap.containsKey(contract.getCommunityId())) {
 						ContractReportformStatisticCommunitys communityStatistics = communityResultMap.get(contract.getCommunityId());
-						countApartmentsForCommunity(communityStatistics,contract);
-					}else{
+						countContractForCommunity(communityStatistics, contract);
+					} else {
 						Community community = communityProvider.findCommunityById(contract.getCommunityId());
 						if (community != null) {
 							ContractReportformStatisticCommunitys communityStatistics = initCommunityStatistics(contract.getCommunityId());
 							communityResultMap.put(contract.getCommunityId(), communityStatistics);
-							countApartmentsForCommunity(communityStatistics,contract);
-						}else {
+							countContractForCommunity(communityStatistics, contract);
+						} else {
 							if (LOGGER.isDebugEnabled()) {
 								LOGGER.debug("community is null !!! communityId is " + contract.getCommunityId());
 							}
 						}
 					}
-					//楼宇信息统计数据
-					/*if (buildingResultMap.containsKey(apartment.getBuildingId())) {
-						if (apartment.getBuildingId() != null) {
-							BuildingStatistics buildingStatistics = buildingResultMap.get(apartment.getBuildingId());
-							countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
-						}
-					}else{
-						if(apartment.getBuildingId() != null){
-							Building building = communityProvider.findBuildingById(apartment.getBuildingId());
-							if (building != null) {
-								BuildingStatistics buildingStatistics = initBuildingStatistics(apartment.getBuildingId());
-								buildingResultMap.put(apartment.getBuildingId(), buildingStatistics);
-								countApartmentsForBuilding(buildingStatistics,apartment.getLivingStatus());
-							}else {
-								if (LOGGER.isDebugEnabled()) {
-									LOGGER.debug("building is null !!! buildingId is " + apartment.getBuildingId());
-								}
-							}
-						}
-					}*/
 				}
-				
+
 				long endTime = System.currentTimeMillis();
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug("End PropertyReportFormJob for "+ (currentPage+1) +" time.........");
-					LOGGER.debug("PropertyReportFormJob progress for " + (currentPage+1) +" time spend " + (endTime-startTime) + "ms");
+					LOGGER.debug("End PropertyReportFormJob for " + (currentPage + 1) + " time.........");
+					LOGGER.debug("PropertyReportFormJob progress for " + (currentPage + 1) + " time spend " + (endTime - startTime) + "ms");
 				}
-				
+
 			}
 			return null;
 		});
-		
+
 	}
-	
-	
+
 	private ContractReportformStatisticCommunitys initCommunityStatistics(Long communityId) {
 		ContractReportformStatisticCommunitys communityStatistics = new ContractReportformStatisticCommunitys();
 		Community community = communityProvider.findCommunityById(communityId);
-		
-			communityStatistics.setNamespaceId(community.getNamespaceId());
-			communityStatistics.setCommunityId(communityId);
-			communityStatistics.setCommunityName(community.getName());
-			
-			communityStatistics.setMonthStr(getTodayDateStr());
-			communityStatistics.setYearStr(getYearDateStr());
-			
-			//获取该园区所有合同租赁总额
-			
-			//BigDecimal totalCount = contractProvider.getTotalContractRentAmount();
-			
-			//Integer buildingCount = communityProvider.countActiveBuildingsByCommunityId(community.getId());
-			/*communityStatistics.setBuildingCount(buildingCount);
-			
-			communityStatistics.setTotalApartmentCount(0);
-			communityStatistics.setFreeApartmentCount(0);
-			communityStatistics.setRentApartmentCount(0);
-			communityStatistics.setOccupiedApartmentCount(0);
-			communityStatistics.setLivingApartmentCount(0);
-			communityStatistics.setSaledApartmentCount(0);
-			
-			communityStatistics.setAreaSize(BigDecimal.valueOf(community.getAreaSize()!=null?community.getAreaSize():0.0));
-			communityStatistics.setRentArea(BigDecimal.valueOf(community.getRentArea()!=null?community.getRentArea():0.0));
-			communityStatistics.setFreeArea(BigDecimal.valueOf(community.getFreeArea()!=null?community.getFreeArea():0.0));*/
-			
-			/*BigDecimal rentRate;
-			BigDecimal freeRate;
-			if (communityStatistics.getAreaSize() == null || communityStatistics.getAreaSize().compareTo(BigDecimal.ZERO)==0) {
-				rentRate = BigDecimal.ZERO;
-				freeRate = BigDecimal.ZERO;
-			}else {
-				rentRate = communityStatistics.getRentArea().divide(communityStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
-				freeRate = communityStatistics.getFreeArea().divide(communityStatistics.getAreaSize(),2,RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+		if (community == null) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("community is null !!! communityId is " + communityId);
 			}
-			communityStatistics.setRentRate(rentRate);
-			communityStatistics.setFreeRate(freeRate);*/
-			
-			communityStatistics.setStatus(ContractStatus.ACTIVE.getCode());
-			
-			
+		}
+		communityStatistics.setNamespaceId(community.getNamespaceId());
+		communityStatistics.setCommunityId(communityId);
+		communityStatistics.setCommunityName(community.getName());
+		communityStatistics.setMonthStr(getTodayDateStr());
+		communityStatistics.setYearStr(getYearDateStr());
+		communityStatistics.setRentAmount(BigDecimal.ZERO);
+		communityStatistics.setRentalArea(BigDecimal.ZERO);
+		communityStatistics.setChargingItemRentAmount(BigDecimal.ZERO);
+		communityStatistics.setChargingItemPropertyfeeAmount(BigDecimal.ZERO);
+		// 获取该园区所有合同租赁总额
+		communityStatistics.setStatus(ContractStatus.ACTIVE.getCode());
 		return communityStatistics;
 	}
-	
+
 	private void createCommunityStatics(Map<Long, ContractReportformStatisticCommunitys> communityResultMap) {
 		Collection<ContractReportformStatisticCommunitys> values = communityResultMap.values();
 		for (ContractReportformStatisticCommunitys communityStatistics : values) {
@@ -4165,22 +4097,40 @@ long assetCategoryId = 0l;
 		}
 		communityResultMap.clear();
 	}
-	
-	//判断合同类型进行统计
-	private void countApartmentsForCommunity(ContractReportformStatisticCommunitys communityStatistics, ContractDTO contract) {
 
-		// SimpleDateFormat sdfYM = new SimpleDateFormat("yyyy-MM");
-		// SimpleDateFormat sdfY = new SimpleDateFormat("yyyy");
-		// Calendar cal = Calendar.getInstance();
-		// String yearStr = sdfY.format(cal.getTime());
-		// String monthStr = sdfYM.format(cal.getTime());
-		// 园区客户总数
+	// 判断合同类型进行统计
+	private void countContractForCommunity(ContractReportformStatisticCommunitys communityStatistics, ContractDTO contract) {
+		// 每个园区园区客户总数
+		communityStatistics.setRentAmount((communityStatistics.getRentAmount() != null ? communityStatistics.getRentAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+		List<BuildingApartmentDTO> buildings = contract.getBuildings();
+		for (BuildingApartmentDTO building : buildings) {
+			communityStatistics.setRentalArea((communityStatistics.getRentalArea() != null ? communityStatistics.getRentalArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+		}
+		//统计具体费项的金额
+		//List<ContractChargingItemReportformDTO> chargingItemDTO = contractProvider.getContractChargingItemInfoList(contract);
+//		for (ContractChargingItemReportformDTO chargingItem : chargingItemDTO) {
+//			ChargingItemsType chargingItemsType = ChargingItemsType.fromStatus(chargingItem.getChargingItemId());
+//			if (chargingItemsType == null) {
+//				continue;
+//			} else {
+//				switch (chargingItemsType) {
+//				// 租金private BigDecimal amountReceivable;  private BigDecimal amountReceived;
+//				case RENT:
+//				communityStatistics.setChargingItemRentAmount((communityStatistics.getChargingItemRentAmount() != null ? 
+//						communityStatistics.getChargingItemRentAmount() : BigDecimal.ZERO).add(chargingItem.getAmountReceivable() != null ? chargingItem.getAmountReceivable() : BigDecimal.ZERO));
+//				// 物业费
+//				case PROPERTYFEE:
+//				communityStatistics.setChargingItemPropertyfeeAmount((communityStatistics.getChargingItemPropertyfeeAmount() != null ? 
+//						communityStatistics.getChargingItemPropertyfeeAmount() : BigDecimal.ZERO).add(chargingItem.getAmountReceivable() != null ? chargingItem.getAmountReceivable() : BigDecimal.ZERO));
+//				default:
+//					break;
+//				}
+//			}
+//
+//		}
+		communityStatistics.setContractCount((communityStatistics.getContractCount() != null ? communityStatistics.getContractCount() : 0) + 1);
 		communityStatistics.setCustomerCount((communityStatistics.getCustomerCount() != null ? communityStatistics.getCustomerCount() : 0) + 1);
-		// communityStatistics.setMonthStr(monthStr);
-		// communityStatistics.setYearStr(yearStr);//deposit_amount
-		communityStatistics.setDepositAmount((communityStatistics.getDepositAmount() != null ? communityStatistics.getDepositAmount() : BigDecimal.ZERO)
-						.add(contract.getDeposit() != null ? contract.getDeposit() : BigDecimal.ZERO));
-
+		communityStatistics.setDepositAmount((communityStatistics.getDepositAmount() != null ? communityStatistics.getDepositAmount() : BigDecimal.ZERO).add(contract.getDeposit() != null ? contract.getDeposit() : BigDecimal.ZERO));
 		ContractType contractType = ContractType.fromStatus(contract.getContractType());
 		if (contractType == null) {
 			communityStatistics.setNewcontractCount((communityStatistics.getNewcontractCount() != null ? communityStatistics.getNewcontractCount() : 0) + 1);
@@ -4188,118 +4138,71 @@ long assetCategoryId = 0l;
 			switch (contractType) {
 			// 新签合同的
 			case NEW:
-				communityStatistics.setNewcontractCount((communityStatistics.getNewcontractCount() != null
-						? communityStatistics.getNewcontractCount() : 0) + 1);
-				communityStatistics.setNewcontractAmount((communityStatistics.getNewcontractAmount() != null
-						? communityStatistics.getNewcontractAmount() : BigDecimal.ZERO)
-								.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
-
-				// 判断企业客户个人客户 organizationcontract_count
-				// organizationcontract_amount individualcontract_count
-				// individualcontract_amount
+				communityStatistics.setNewcontractCount((communityStatistics.getNewcontractCount() != null ? communityStatistics.getNewcontractCount() : 0) + 1);
+				communityStatistics.setNewcontractAmount((communityStatistics.getNewcontractAmount() != null ? communityStatistics.getNewcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setNewcontractArea((communityStatistics.getNewcontractArea() != null ? communityStatistics.getNewcontractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				// 判断企业客户个人客户
 				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
-					communityStatistics
-							.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null
-									? communityStatistics.getIndividualcontractCount() : 0) + 1);
-					communityStatistics
-							.setIndividualcontractAmount((communityStatistics.getIndividualcontractAmount() != null
-									? communityStatistics.getIndividualcontractAmount() : BigDecimal.ZERO)
-											.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null ? communityStatistics.getIndividualcontractCount() : 0) + 1);
+					communityStatistics.setIndividualcontractAmount((communityStatistics.getIndividualcontractAmount() != null ? communityStatistics.getIndividualcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
-					communityStatistics
-							.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null
-									? communityStatistics.getOrganizationcontractCount() : 0) + 1);
-					communityStatistics
-							.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null
-									? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO)
-											.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null ? communityStatistics.getOrganizationcontractCount() : 0) + 1);
+					communityStatistics.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null ? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else {
 
 				}
 				break;
 			// 续约
 			case RENEW:// renewcontract_count
-				communityStatistics.setRenewcontractCount((communityStatistics.getRenewcontractCount() != null
-						? communityStatistics.getRenewcontractCount() : 0) + 1);
-				communityStatistics.setRenewcontractAmount((communityStatistics.getRenewcontractAmount() != null
-						? communityStatistics.getRenewcontractAmount() : BigDecimal.ZERO)
-								.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
-
-				// 判断企业客户个人客户 organizationcontract_count
-				// organizationcontract_amount individualcontract_count
-				// individualcontract_amount
+				communityStatistics.setRenewcontractCount((communityStatistics.getRenewcontractCount() != null ? communityStatistics.getRenewcontractCount() : 0) + 1);
+				communityStatistics.setRenewcontractAmount((communityStatistics.getRenewcontractAmount() != null ? communityStatistics.getRenewcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setRenewcontractArea((communityStatistics.getRenewcontractArea() != null ? communityStatistics.getRenewcontractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				// 判断企业客户个人客户
 				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
-					communityStatistics
-							.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null
-									? communityStatistics.getIndividualcontractCount() : 0) + 1);
-					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount()
-							.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null ? communityStatistics.getIndividualcontractCount() : 0) + 1);
+					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
-					communityStatistics
-							.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null
-									? communityStatistics.getOrganizationcontractCount() : 0) + 1);
-					communityStatistics
-							.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null
-									? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO)
-											.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null? communityStatistics.getOrganizationcontractCount() : 0) + 1);
+					communityStatistics.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else {
 
 				}
 				break;
 			// 变更
 			case CHANGE:// changecontract_count
-				communityStatistics.setChangecontractCount((communityStatistics.getChangecontractCount() != null
-						? communityStatistics.getChangecontractCount() : 0) + 1);
-
-				communityStatistics.setChangecontractAmount(communityStatistics.getChangecontractAmount()
-						.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
-
-				// 判断企业客户个人客户 organizationcontract_count
-				// organizationcontract_amount individualcontract_count
-				// individualcontract_amount
+				communityStatistics.setChangecontractCount((communityStatistics.getChangecontractCount() != null ? communityStatistics.getChangecontractCount() : 0) + 1);
+				communityStatistics.setChangecontractAmount(communityStatistics.getChangecontractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				for (BuildingApartmentDTO building : buildings) {
+					communityStatistics.setChangecontractArea((communityStatistics.getChangecontractArea() != null ? communityStatistics.getChangecontractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				// 判断企业客户个人客户
 				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
-					communityStatistics
-							.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null
-									? communityStatistics.getIndividualcontractCount() : 0) + 1);
-					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount()
-							.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null ? communityStatistics.getIndividualcontractCount() : 0) + 1);
+					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
-					communityStatistics
-							.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null
-									? communityStatistics.getOrganizationcontractCount() : 0) + 1);
-					communityStatistics
-							.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null
-									? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO)
-											.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null ? communityStatistics.getOrganizationcontractCount() : 0) + 1);
+					communityStatistics.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null ? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else {
 
 				}
 				break;
 			// 退约denunciationcontract_count
 			case DENUNCIATION:
-				communityStatistics
-						.setDenunciationcontractCount((communityStatistics.getDenunciationcontractCount() != null
-								? communityStatistics.getDenunciationcontractCount() : 0) + 1);
-				communityStatistics.setDenunciationcontractAmount(communityStatistics.getDenunciationcontractAmount()
-						.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
-
-				// 判断企业客户个人客户 organizationcontract_count
-				// organizationcontract_amount individualcontract_count
-				// individualcontract_amount
+				communityStatistics.setDenunciationcontractCount((communityStatistics.getDenunciationcontractCount() != null ? communityStatistics.getDenunciationcontractCount() : 0) + 1);
+				communityStatistics.setDenunciationcontractAmount(communityStatistics.getDenunciationcontractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+				for (BuildingApartmentDTO building : buildings) {communityStatistics.setDenunciationcontractArea((communityStatistics.getDenunciationcontractArea() != null ? communityStatistics.getDenunciationcontractArea() : BigDecimal.ZERO).add(new BigDecimal(Double.toString(building.getChargeArea() != null ? building.getChargeArea() : 0.0))));
+				}
+				// 判断企业客户个人客户
 				if (contract.getCustomerType() == CustomerType.INDIVIDUAL.getCode()) {
-					communityStatistics
-							.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null
-									? communityStatistics.getIndividualcontractCount() : 0) + 1);
-					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount()
-							.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setIndividualcontractCount((communityStatistics.getIndividualcontractCount() != null ? communityStatistics.getIndividualcontractCount() : 0) + 1);
+					communityStatistics.setIndividualcontractAmount(communityStatistics.getIndividualcontractAmount().add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else if (contract.getCustomerType() == CustomerType.ENTERPRISE.getCode()) {
-					communityStatistics
-							.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null
-									? communityStatistics.getOrganizationcontractCount() : 0) + 1);
-					communityStatistics
-							.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null
-									? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO)
-											.add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
+					communityStatistics.setOrganizationcontractCount((communityStatistics.getOrganizationcontractCount() != null ? communityStatistics.getOrganizationcontractCount() : 0) + 1);
+					communityStatistics.setOrganizationcontractAmount((communityStatistics.getOrganizationcontractAmount() != null ? communityStatistics.getOrganizationcontractAmount() : BigDecimal.ZERO).add(contract.getRent() != null ? contract.getRent() : BigDecimal.ZERO));
 				} else {
 
 				}
@@ -4309,15 +4212,17 @@ long assetCategoryId = 0l;
 			}
 		}
 	}
-	//获取月计时间
-	private String getTodayDateStr(){
+
+	// 获取月计时间
+	private String getTodayDateStr() {
 		Date currentTime = DateHelper.currentGMTTime();
 		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy-MM");
 		String todayDateStr = yyyyMM.format(currentTime);
 		return todayDateStr;
 	}
+
 	// 获取年计时间
-	private String getYearDateStr(){
+	private String getYearDateStr() {
 		Date currentTime = DateHelper.currentGMTTime();
 		SimpleDateFormat yyyyMM = new SimpleDateFormat("yyyy");
 		String todayDateStr = yyyyMM.format(currentTime);

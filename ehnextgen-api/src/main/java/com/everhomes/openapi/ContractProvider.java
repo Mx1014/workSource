@@ -17,6 +17,8 @@ import com.everhomes.contract.ContractParam;
 import com.everhomes.contract.ContractParamGroupMap;
 import com.everhomes.contract.ContractReportformStatisticCommunitys;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
 
 import java.sql.Timestamp;
@@ -152,5 +154,7 @@ public interface ContractProvider {
 	int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime);
 	void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics);
 	void deleteCommunityDataByDateStr(String todayDateStr);
+
+	List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract);
 
 }

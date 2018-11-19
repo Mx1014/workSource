@@ -48,6 +48,9 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
+import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.contract.ContractLogDTO;
 import com.everhomes.rest.contract.ContractStatus;
@@ -65,6 +68,7 @@ import com.everhomes.server.schema.tables.EhContracts;
 import com.everhomes.server.schema.tables.EhEnterpriseCustomers;
 import com.everhomes.server.schema.tables.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.EhOrganizations;
+import com.everhomes.server.schema.tables.EhPaymentBillItems;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhContractCategories;
@@ -1684,7 +1688,7 @@ public class ContractProviderImpl implements ContractProvider {
 		return  context.selectCount()
 				       .from(Tables.EH_CONTRACTS)
 				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
-				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
+				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()).or(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.DENUNCIATION.getCode())))
 				       .and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
 				       .and(Tables.EH_CONTRACTS.UPDATE_TIME.between(firstdateUpdateTime, lastdateUpdateTime))
 				       .fetchAnyInto(Integer.class);
@@ -1699,4 +1703,25 @@ public class ContractProviderImpl implements ContractProvider {
 		communityStatistics.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.insert(communityStatistics);
 	}
+	
+	@Override
+	public List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract) {
+		List<ContractChargingItemReportformDTO> list = new ArrayList<ContractChargingItemReportformDTO>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhPaymentBillItems pbt = Tables.EH_PAYMENT_BILL_ITEMS.as("pbt");
+		list = context.select(pbt.NAMESPACE_ID, pbt.OWNER_ID,pbt.CHARGING_ITEMS_ID,
+	    		DSL.sum(pbt.AMOUNT_RECEIVABLE).as("AMOUNT_RECEIVABLE"), 
+	    		DSL.sum(pbt.AMOUNT_RECEIVED).as("AMOUNT_RECEIVED"), 
+	    		DSL.sum(pbt.AMOUNT_OWED).as("AMOUNT_OWED"),
+	    		DSL.sum(pbt.AMOUNT_RECEIVABLE_WITHOUT_TAX).as("AMOUNT_RECEIVABLE_WITHOUT_TAX"), 
+	    		DSL.sum(pbt.AMOUNT_RECEIVED_WITHOUT_TAX).as("AMOUNT_RECEIVED_WITHOUT_TAX"), 
+	    		DSL.sum(pbt.AMOUNT_OWED_WITHOUT_TAX).as("AMOUNT_OWED_WITHOUT_TAX"),
+	    		DSL.sum(pbt.TAX_AMOUNT).as("TAX_AMOUNT"))
+	        .from(pbt)
+	        .where(pbt.CONTRACT_ID.eq(contract.getId()))
+	        //.and(pbt.DELETE_FLAG.eq(ContractStatus.ACTIVE.getCode()))
+	        .fetchInto(ContractChargingItemReportformDTO.class);
+		return list;
+	}
+	
 }

@@ -675,7 +675,20 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		if (cmd.getCommunityId() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
-		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+		//fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
+		
+		List<Byte> statusList = new ArrayList<Byte>();
+		// 为初始化合同
+		statusList.add(ContractStatus.ACTIVE.getCode());
+//		statusList.add(ContractStatus.WAITING_FOR_APPROVAL.getCode());
+//		statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
+//		statusList.add(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
+//		statusList.add(ContractStatus.EXPIRING.getCode());
+//		statusList.add(ContractStatus.EXPIRED.getCode());
+//		statusList.add(ContractStatus.HISTORY.getCode());
+//		statusList.add(ContractStatus.INVALID.getCode());
+		statusList.add(ContractStatus.DENUNCIATION.getCode());
+		qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
 
 		if (cmd.getContractType() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
