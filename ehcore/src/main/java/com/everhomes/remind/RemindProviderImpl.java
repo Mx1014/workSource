@@ -318,13 +318,22 @@ public class RemindProviderImpl implements RemindProvider {
     }
 
     @Override
-    public boolean checkRemindShareToUser(Long memberDetailId, Long remindId) {
+    public boolean checkRemindShareToUser(Long memberDetailId, Long remindId, Long categoryId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhRemindSharesRecord> query = context.selectQuery(Tables.EH_REMIND_SHARES);
         query.addConditions(Tables.EH_REMIND_SHARES.SHARED_SOURCE_ID.eq(memberDetailId));
         query.addConditions(Tables.EH_REMIND_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()));
         query.addConditions(Tables.EH_REMIND_SHARES.REMIND_ID.eq(remindId));
-        return query.fetchCount() > 0;
+        int count = query.fetchCount();
+        if(categoryId != null){
+
+            SelectQuery<EhRemindCategoryDefaultSharesRecord> query1 = context.selectQuery(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES);
+            query.addConditions(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_ID.eq(memberDetailId));
+            query.addConditions(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.SHARED_SOURCE_TYPE.eq(ShareMemberSourceType.MEMBER_DETAIL.getCode()));
+            query.addConditions(Tables.EH_REMIND_CATEGORY_DEFAULT_SHARES.REMIND_CATEGORY_ID.eq(categoryId));
+            count += query1.fetchCount();
+        }
+        return count > 0;
     }
 
     @Override
