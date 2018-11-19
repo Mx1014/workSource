@@ -123,7 +123,7 @@ CREATE TABLE `eh_office_cubicle_resource_types` (
 CREATE TABLE `eh_office_cubicle_stations` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `parent_id` BIGINT,
-  `station_id` 
+  `station_id` ,
   `station_name` VARCHAR(127) COMMENT '名称：',
   `price` DECIMAL(10,2) COMMENT '价格',
   `status` TINYINT,
