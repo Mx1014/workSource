@@ -4638,6 +4638,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        //issue-42656 选门禁组查门禁组下所有门禁 by liuyilin 20181119
+        List<DoorAccess> doors = doorAccessProvider.listDoorAccessByGroupId(cmd.getDoorId(), 0);
+        List<Long> doorIds = new ArrayList<Long>();
+        //TODO 3.0,门禁组类型需要传,根据组类型判断是否添加doorId
+        doorIds.add(cmd.getDoorId());
+		if (doors != null && doors.size() > 0) {
+			for (DoorAccess door : doors) {
+				doorIds.add(door.getId());
+			}
+		}
+		
         List<AclinkLogDTO> objs = aclinkLogProvider.queryAclinkLogDTOsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -4657,7 +4668,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                             .or(Tables.EH_ACLINK_LOGS.USER_NAME.like(cmd.getKeyword()+"%")));
                 }
                 if(cmd.getDoorId() != null) {
-                    query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.eq(cmd.getDoorId()));
+                    query.addConditions(Tables.EH_ACLINK_LOGS.DOOR_ID.in(doorIds));
                 }
                 //时间比较
                 if(cmd.getStartTime() != null && cmd.getEndTime() != null ) {
