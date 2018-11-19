@@ -90,19 +90,41 @@ public interface InvitedCustomerProvider {
 
     void createCustomerStatisticsDaily(CustomerStatisticDaily daily);
 
+    void createCustomerStatisticsDailyTotal(CustomerStatisticDailyTotal dailyTotal);
+
     CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date);
 
     List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
 
-    void createCustomerStatisticsMonthly(CustomerStatisticMonthly daily);
+    void createCustomerStatisticsMonthly(CustomerStatisticMonthly monthly);
+
+    void createCustomerStatisticsMonthlyTotal(CustomerStatisticMonthlyTotal monthlyTotal);
 
     CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date);
 
     List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
 
-    void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate);
+    List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
 
-    void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+    List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
+
+
+    void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate);
+
+    void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
 
     void createCustomerStatisticsAll(EhCustomerStatisticsTotal total);
 

@@ -52,13 +52,15 @@ public interface InvitedCustomerService {
 
     List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
 
-    GetCustomerStatisticDailyResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
 
-    List<CommunityCustomerStatisticDTO> getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd);
 
-    List<CommunityCustomerStatisticDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
 
-    List<CustomerStatisticsDTO> getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsDailyCommand cmd);
+
+    GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 
     void initCustomerStatusToDB();
 
@@ -68,13 +70,19 @@ public interface InvitedCustomerService {
 
     void changeCustomerLevelByCustomerId(Long customerId, Long levelItemId);
 
+    List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time);
+
     List<StatisticDataDTO> startCustomerStatistic(StatisticTime time);
 
     StatisticTime getBeforeForStatistic(Date date, int type);
 
     void statisticCustomerAll(Date date);
 
+    void statisticCustomerDailyTotal(Date date);
+
     void statisticCustomerDaily(Date date);
+
+    void statisticCustomerMonthlyTotal(Date date);
 
     void statisticCustomerMonthly(Date date);
 

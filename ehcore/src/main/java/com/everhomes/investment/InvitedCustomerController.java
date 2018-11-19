@@ -345,9 +345,9 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某天的数据，分园区获取</p>
      */
     @RequestMapping("queryCustomerStatisticDaily")
-    @RestReturn(value = GetCustomerStatisticDailyResponse.class)
+    @RestReturn(value = GetCustomerStatisticResponse.class)
     public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsDailyCommand cmd) {
-        GetCustomerStatisticDailyResponse dto = invitedCustomerService.getCustomerStatisticsDaily(cmd);
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDaily(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

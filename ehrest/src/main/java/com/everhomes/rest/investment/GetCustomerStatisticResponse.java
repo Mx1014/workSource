@@ -2,7 +2,7 @@ package com.everhomes.rest.investment;
 
 import java.util.List;
 
-public class GetCustomerStatisticDailyResponse {
+public class GetCustomerStatisticResponse {
 
     private List<CustomerStatisticsDTO> dtos;
 
