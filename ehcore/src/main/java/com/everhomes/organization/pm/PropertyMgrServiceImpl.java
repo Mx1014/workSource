@@ -7877,6 +7877,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		resourceReservation.setEnterpriseCustomerId(cmd.getEnterpriseCustomerId());
 		resourceReservation.setStatus((byte)2);
 		resourceReservation.setAddressId(cmd.getAddressId());
+		resourceReservation.setCreateTime(getCurrentTimestamp());
+		resourceReservation.setUpdateTime(resourceReservation.getCreateTime());
 		//add by tangcen 解决EH_ORGANIZATION_ADDRESS_MAPPINGS表中，一个address_id会对应两条数据的问题，实际应该是脏数据导致的。
 		Address address = addressProvider.findAddressById(cmd.getAddressId());
 		Byte livingStatus = addressProvider.getAddressLivingStatus(address.getId(),address.getAddress());
@@ -7893,6 +7895,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 						"result in "+effectedRow+" rows affected, addressid is "+cmd.getAddressId());
 			}
 			propertyMgrProvider.insertResourceReservation(resourceReservation);
+			//添加房源日志
+			saveAddressReservationEvent(AddressTrackingTemplateCode.ADDRESS_RESERVATION_ADD,cmd.getAddressId(),resourceReservation,null);
             // 未来1小时内结束的开启一个任务
             if(end.toLocalDateTime().minusHours(1l).isBefore(LocalDateTime.now()) || end.toLocalDateTime().minusHours(1l).equals(LocalDateTime.now())){
                 HashMap<String, Object> param = new HashMap<>();
@@ -7988,7 +7992,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 		this.dbProvider.execute((status) -> {
 			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.DELTED.getCode());
-//			addressProvider.changeAddressLivingStatus(addressId, AddressLivingStatus.ACTIVE);
+			//添加房源日志
+			PmResourceReservation resourceReservation = propertyMgrProvider.findReservationById(cmd.getReservationId());
+			saveAddressReservationEvent(AddressTrackingTemplateCode.ADDRESS_RESERVATION_DELETE,addressId,resourceReservation,null);
 			return null;
 		});
 
@@ -8002,6 +8008,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		this.dbProvider.execute((status) -> {
 			Long addressId = propertyMgrProvider.changeReservationStatus(cmd.getReservationId(), ReservationStatus.INACTIVE.getCode());
 			addressProvider.changeAddressLivingStatus(addressId, previousStatus);
+			//添加房源日志
+			PmResourceReservation resourceReservation = propertyMgrProvider.findReservationById(cmd.getReservationId());
+			saveAddressReservationEvent(AddressTrackingTemplateCode.ADDRESS_RESERVATION_CANCEL,addressId,resourceReservation,null);
 			return null;
 		});
 	}
@@ -8153,6 +8162,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 
 		propertyMgrProvider.createAuthorizePrice(addressProperties);
+		//添加房源日志
+		saveAddressAuthorizePriceEvent(AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_ADD,cmd.getAddressId(),addressProperties,null);
 	}
 
 	@Override
@@ -8215,7 +8226,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		}
 
 		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
-		if (cmd.getAddressId() != null) {
+		//用于日志记录
+		AddressProperties oldAddressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
+		if (cmd.getAddressId() != null && !cmd.getAddressId().equals(addressProperties.getAddressId())) {
 			addressProperties.setAddressId(cmd.getAddressId());
 		}
 		if (cmd.getApartmentAuthorizeType() != null) {
@@ -8228,6 +8241,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			addressProperties.setChargingItemsId(cmd.getChargingItemsId());
 		}
 		propertyMgrProvider.updateAuthorizePrice(addressProperties);
+		//添加房源日志
+		if (cmd.getAddressId() != null && !cmd.getAddressId().equals(oldAddressProperties.getAddressId())) {
+			//之前的房源相当于删除了房源授权价
+			saveAddressAuthorizePriceEvent(AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_DELETE,oldAddressProperties.getAddressId(),addressProperties,null);
+			//新的房源相当于添加了房源授权价
+			saveAddressAuthorizePriceEvent(AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_ADD,cmd.getAddressId(),addressProperties,null);
+		}else {
+			//如果addressId没有改变，继续在原address上添加日志
+			saveAddressAuthorizePriceEvent(AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_UPDATE,addressProperties.getAddressId(),addressProperties,oldAddressProperties);
+		}
 	}
 
 	@Override
@@ -8241,6 +8264,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 
 		AddressProperties addressProperties = propertyMgrProvider.findAddressPropertiesById(cmd.getId());
 		propertyMgrProvider.deleteAuthorizePrice(addressProperties);
+		//添加房源日志
+		saveAddressAuthorizePriceEvent(AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_DELETE,addressProperties.getAddressId(),addressProperties,null);
 	}
 
 	@Override
@@ -8717,13 +8742,188 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			event.setContent(content);
 			event.setNamespaceId(UserContext.getCurrentNamespaceId());
 			event.setAddressId(newAddress.getId());	
-			event.setOperateTime(newAddress.getOperateTime());
 			event.setStatus(AddressEventStatus.ACTIVE.getCode());
 			event.setOperatorUid(UserContext.currentUserId());
 			event.setOperateTime(newAddress.getOperateTime());
 			event.setOperateType((byte)opearteType);
 	        addressProvider.createAddressEvent(event);
 		}
+	}
+	
+	//记录房源拆分计划修改日志
+	@Override
+	public void saveAddressArrangementEvent(int opearteType, Address address,AddressArrangement newArrangement,AddressArrangement oldArrangement) {	
+		String content = null;
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		//根据不同操作类型获取具体描述
+		switch(opearteType){
+			case AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_ADD : 
+				dataMap.put("dateBegin", getDateStr(newArrangement.getDateBegin()));
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_ADD ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_ADD :
+				dataMap.put("dateBegin", getDateStr(newArrangement.getDateBegin()));
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_ADD ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_DELETE ,UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_DELETE ,UserContext.current().getUser().getLocale(), new HashMap<>(), "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE:
+				content = compareAddressArrangement(newArrangement,oldArrangement);
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE:
+				content = compareAddressArrangement(newArrangement,oldArrangement);
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			AddressEvent event = new AddressEvent(); 
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setAddressId(address.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOperateTime(newArrangement.getUpdateTime());
+			event.setOperateType((byte)opearteType);
+			event.setStatus(AddressEventStatus.ACTIVE.getCode());
+	        addressProvider.createAddressEvent(event);
+		}
+	}
+	
+	//记录房源拆分计划修改日志
+	@Override
+	public void saveAddressArrangementEventAboutAddress(int opearteType,AddressArrangement arrangement, Address newAddress, Address oldAddress) {
+		String content = null;
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		//根据不同操作类型获取具体描述
+		switch(opearteType){
+			case AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE : 
+				content = compareAddress(newAddress, oldAddress, null, null);
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE :
+				content = compareAddress(newAddress, oldAddress, null, null);
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			AddressEvent event = new AddressEvent(); 
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setAddressId(newAddress.getId());	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOperateTime(arrangement.getUpdateTime());
+			event.setOperateType((byte)opearteType);
+			event.setStatus(AddressEventStatus.ACTIVE.getCode());
+	        addressProvider.createAddressEvent(event);
+		}
+	}
+	
+	//记录一房一价日志
+	@Override
+	public void saveAddressAuthorizePriceEvent(int opearteType,Long addressId, AddressProperties newAddressProperties, AddressProperties oldAddressProperties) {
+		String content = null;
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		//根据不同操作类型获取具体描述
+		switch(opearteType){
+			case AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_ADD ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_DELETE ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_AUTHORIZE_PRICE_UPDATE:
+				content = compareAddressProperties(newAddressProperties,oldAddressProperties);
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			AddressEvent event = new AddressEvent(); 
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setAddressId(addressId);	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOperateTime(newAddressProperties.getOperatorTime());
+			event.setOperateType((byte)opearteType);
+			event.setStatus(AddressEventStatus.ACTIVE.getCode());
+	        addressProvider.createAddressEvent(event);
+		}
+	}
+	
+	//记录房源预定计划日志
+	@Override
+	public void saveAddressReservationEvent(int opearteType, Long addressId,PmResourceReservation newResourceReservation, PmResourceReservation oldResourceReservation) {
+		String content = null;
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		//根据不同操作类型获取具体描述
+		switch(opearteType){
+			case AddressTrackingTemplateCode.ADDRESS_RESERVATION_ADD : 
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_RESERVATION_ADD ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_RESERVATION_DELETE :
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_RESERVATION_DELETE ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_RESERVATION_CANCEL :
+				content = localeTemplateService.getLocaleTemplateString(AddressTrackingTemplateCode.SCOPE, AddressTrackingTemplateCode.ADDRESS_RESERVATION_CANCEL ,UserContext.current().getUser().getLocale(), dataMap, "");
+				break;
+			case AddressTrackingTemplateCode.ADDRESS_RESERVATION_UPDATE:
+//				content = compareAddressProperties(newAddressProperties,oldAddressProperties);
+				break;
+			default :
+				break;
+		}
+		if(!StringUtils.isEmpty(content)){
+			AddressEvent event = new AddressEvent(); 
+			event.setContent(content);
+			event.setNamespaceId(UserContext.getCurrentNamespaceId());
+			event.setAddressId(addressId);	
+			event.setOperatorUid(UserContext.currentUserId());
+			event.setOperateTime(newResourceReservation.getUpdateTime());
+			event.setOperateType((byte)opearteType);
+			event.setStatus(AddressEventStatus.ACTIVE.getCode());
+	        addressProvider.createAddressEvent(event);
+		}
+	}
+
+	//对比AddressArrangement类
+	private String compareAddressProperties(AddressProperties newAddressProperties,AddressProperties oldAddressProperties) {
+		StringBuffer buffer = new StringBuffer();
+		
+		String chargingItemsContent = getAddressEventContent("费项名称",newAddressProperties.getChargingItemsId(),oldAddressProperties.getChargingItemsId());
+		if (chargingItemsContent != null) {
+			buffer.append(chargingItemsContent);
+			buffer.append(";");
+		}
+		String authorizePriceContent = getAddressEventContent("金额",newAddressProperties.getAuthorizePrice(),oldAddressProperties.getAuthorizePrice());
+		if (authorizePriceContent != null) {
+			buffer.append(authorizePriceContent.trim());
+			buffer.append(";");
+		}
+		String authorizePriceTypeContent = getAddressEventContent("周期",newAddressProperties.getApartmentAuthorizeType(),oldAddressProperties.getApartmentAuthorizeType());
+		if (authorizePriceTypeContent != null) {
+			buffer.append(authorizePriceTypeContent);
+			buffer.append(";");
+		}
+		//去除最后一个分号
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+	}
+
+	//对比AddressArrangement类
+	private String compareAddressArrangement(AddressArrangement newArrangement,AddressArrangement oldArrangement) {
+		StringBuffer buffer = new StringBuffer();
+		
+		String dateBeginContent = getAddressEventContent("计划生效时间",newArrangement.getDateBegin(),oldArrangement.getDateBegin());
+		if (dateBeginContent != null) {
+			buffer.append(dateBeginContent);
+			buffer.append(";");
+		}
+		//去除最后一个分号
+		return buffer.toString().length() > 0 ? buffer.toString().substring(0,buffer.toString().length() -1) : buffer.toString();
+		
 	}
 
 	//对比address类，获取改变的信息，只对比“楼宇资产管理/楼宇详情/房源详情”页面上可以修改的参数
@@ -8783,6 +8983,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		return new Timestamp(DateHelper.currentGMTTime().getTime());
 	}
 	
+	private String getDateStr(Timestamp timestamp){
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String format = simpleDateFormat.format(timestamp);
+		return format;
+	}
+	
 	private String getAddressEventContent(String displayName,Object newData,Object oldData){
 		Map<String,Object> dataMap = new HashMap<String,Object>();
 		
@@ -8797,6 +9003,39 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			}
 			if (oldData != null) {
 				convertedOldData = AddressMappingStatus.fromCode((Byte)oldData).getDesc();
+			}else {
+				convertedOldData = "空";
+			}
+		}else if ("计划生效时间".equals(displayName)) {
+			if (newData != null) {
+				convertedNewData = getDateStr((Timestamp) newData);
+			}else {
+				convertedNewData = "空";
+			}
+			if (oldData != null) {
+				convertedOldData = getDateStr((Timestamp) oldData);
+			}else {
+				convertedOldData = "空";
+			}
+		}else if ("费项名称".equals(displayName)) {
+			if (newData != null) {
+				convertedNewData =  assetProvider.findChargingItemNameById((Long) newData);
+			}else {
+				convertedNewData = "空";
+			}
+			if (oldData != null) {
+				convertedOldData = assetProvider.findChargingItemNameById((Long) oldData);
+			}else {
+				convertedOldData = "空";
+			}
+		}else if ("周期".equals(displayName)) {
+			if (newData != null) {
+				convertedNewData = ApartmentAuthorizeType.fromCode((Byte)newData).getDesc();
+			}else {
+				convertedNewData = "空";
+			}
+			if (oldData != null) {
+				convertedOldData = ApartmentAuthorizeType.fromCode((Byte)oldData).getDesc();
 			}else {
 				convertedOldData = "空";
 			}
@@ -8824,4 +9063,5 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 			return null;
 		}
 	}
+
 }

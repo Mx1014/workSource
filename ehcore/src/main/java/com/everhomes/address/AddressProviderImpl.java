@@ -943,6 +943,7 @@ public class AddressProviderImpl implements AddressProvider {
 
 		arrangement.setId(id);
 		arrangement.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		arrangement.setUpdateTime(arrangement.getCreateTime());
 
         LOGGER.info("createAddressArrangement: " + arrangement);
 

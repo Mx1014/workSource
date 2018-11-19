@@ -158,6 +158,7 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 import com.hp.hpl.sparta.xpath.TrueExpr;
@@ -1173,7 +1174,6 @@ public class PropertyMgrController extends ControllerBase {
 	public RestResponse listApartments(@Valid ListApartmentsCommand cmd) {
 		ListApartmentsResponse results =  propertyMgrService.listApartments(cmd);
 		RestResponse response = new RestResponse(results);
-		
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

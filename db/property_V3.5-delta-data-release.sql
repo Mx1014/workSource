@@ -140,7 +140,28 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ('address.tracking', '2', 'zh_CN', '房源事件', '删除房源', '0');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('address.tracking', '3', 'zh_CN', '房源事件', '修改${display}:由${oldData}更改为${newData}	', '0');	
-
-	
-	
+	VALUES ('address.tracking', '3', 'zh_CN', '房源事件', '修改${display}:由${oldData}更改为${newData}	', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '4', 'zh_CN', '房源拆分、合并计划事件', '创建房源合并计划，生效时间为${dateBegin}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '5', 'zh_CN', '房源拆分、合并计划事件', '创建房源拆分计划，生效时间为${dateBegin}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '6', 'zh_CN', '房源拆分、合并计划事件', '删除房源合并计划', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '7', 'zh_CN', '房源拆分、合并计划事件', '删除房源拆分计划', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '8', 'zh_CN', '房源拆分、合并计划事件', '修改${display}:由${oldData}更改为${newData}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '9', 'zh_CN', '房源拆分、合并计划事件', '修改${display}:由${oldData}更改为${newData}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '10', 'zh_CN', '房源授权价事件', '创建房源授权价', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '11', 'zh_CN', '房源授权价事件', '删除房源授权价', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '12', 'zh_CN', '房源授权价事件', '修改${display}:由${oldData}更改为${newData}', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '13', 'zh_CN', '房源预定事件', '创建房源预定计划', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '14', 'zh_CN', '房源预定事件', '删除房源预定计划', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '15', 'zh_CN', '房源预定事件', '取消房源预定计划', '0');

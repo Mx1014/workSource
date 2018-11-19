@@ -2,6 +2,8 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.address.Address;
+import com.everhomes.address.AddressArrangement;
+import com.everhomes.address.AddressProperties;
 import com.everhomes.community.Community;
 import com.everhomes.rest.activity.ListSignupInfoByOrganizationIdResponse;
 import com.everhomes.rest.activity.ListSignupInfoResponse;
@@ -547,5 +549,14 @@ public interface PropertyMgrService {
 	OrganizationOwnerDTO getOrgOwnerByContactToken(GetOrgOwnerByContactTokenCommand cmd);
 
 	void saveAddressEvent(int opearteType, Address newAddress, Address oldAddress,Byte newLivingStatus,Byte oldLivingStatus);
+	
+	void saveAddressArrangementEvent(int opearteType, Address address,AddressArrangement newArrangement,AddressArrangement oldArrangement);
+
+	void saveAddressArrangementEventAboutAddress(int opearteType, AddressArrangement arrangement,Address newAddress, Address oldAddress);
+
+	void saveAddressAuthorizePriceEvent(int opearteType, Long addressId, AddressProperties newAddressProperties,AddressProperties oldAddressProperties);
+
+	void saveAddressReservationEvent(int opearteType, Long addressId, PmResourceReservation newResourceReservation,
+			PmResourceReservation oldResourceReservation); 	
 
 }

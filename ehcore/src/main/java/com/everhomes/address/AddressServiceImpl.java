@@ -50,6 +50,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.AddressTrackingTemplateCode;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -3208,6 +3209,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 		User user = UserContext.current().getUser();
 		arrangement.setCreatorUid(user.getId());
 		addressProvider.createAddressArrangement(arrangement);
+		//记录到房源日志中
+		propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_ADD, targetAddress, arrangement, null);
 	}
 
 	private void createMergeArrangement(CreateAddressArrangementCommand cmd) {
@@ -3268,6 +3271,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 		User user = UserContext.current().getUser();
 		arrangement.setCreatorUid(user.getId());
 		addressProvider.createAddressArrangement(arrangement);
+		//记录到房源日志中
+		propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_ADD, targetAddress, arrangement, null);
 	}
 
 	//添加房源、小区、机构的对应关系，设置房源的具体状态存在eh_organization_address_mappings表中
@@ -3283,6 +3288,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
         organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
 	}
 
+	//转化为0时0分0秒的Timestamp
 	private Timestamp formatTime(Long time){
 		Timestamp result = null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -3400,12 +3406,22 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ARRANGEMENT_NOT_EXIST,
                     "the addressArrangement does not exist!");
 		}
+		//用于日志记录
+		AddressArrangement oldArrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		Address targetAddress = addressProvider.findAddressById(arrangement.getAddressId());
+		
 		if (cmd.getDateBegin()!=null && formatTime(cmd.getDateBegin()) != arrangement.getDateBegin()) {
 			arrangement.setDateBegin(formatTime(cmd.getDateBegin()));
 			arrangement.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			User user = UserContext.current().getUser();
 			arrangement.setUpdateUid(user.getId());
 			addressProvider.updateAddressArrangement(arrangement);
+			//记录到房源日志中
+			if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+				propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, targetAddress, arrangement, oldArrangement);
+			}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+				propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, targetAddress, arrangement, oldArrangement);
+			}
 		}
 
 		List<ArrangementApartmentDTO> apartments = cmd.getApartments();
@@ -3416,6 +3432,8 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 					throw RuntimeErrorException.errorWith(PropertyErrorCode.SCOPE, PropertyErrorCode.ERROR_ADDRESS_NOT_EXIST,
 		                    "the address does not exist!");
 				}
+				//用于日志记录
+				Address oldAddress = addressProvider.findAddressById(dto.getAddressId());
 				if (dto.getApartmentName() != null && !dto.getApartmentName().equals(address.getApartmentName())) {
 					address.setApartmentName(dto.getApartmentName());
 					address.setAddress(address.getBuildingName() + "-" + address.getApartmentName());
@@ -3425,6 +3443,12 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 				address.setFreeArea(dto.getFreeArea());
 				address.setRentArea(dto.getRentArea());
 				addressProvider.updateAddress(address);
+				//记录到房源日志中
+				if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+					propertyMgrService.saveAddressArrangementEventAboutAddress(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+				}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+					propertyMgrService.saveAddressArrangementEventAboutAddress(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+				}
 			}
 		}
 	}
@@ -3432,6 +3456,7 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 	@Override
 	public void deleteAddressArrangement(DeleteAddressArrangementCommand cmd) {
 		AddressArrangement arrangement = addressProvider.findAddressArrangementById(cmd.getId());
+		Address address = addressProvider.findAddressById(arrangement.getAddressId());
 		List<String> targetIds = (List<String>)StringHelper.fromJsonString(arrangement.getTargetId(), ArrayList.class);
 		//删除未来房源
 		for (String addressId : targetIds) {
@@ -3440,6 +3465,12 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 			addressProvider.updateAddress(futureAddress);
 		}
 		addressProvider.deleteAddressArrangement(cmd.getId());
+		//记录到房源日志中
+		if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
+			propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_DELETE, address, arrangement, null);
+		}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
+			propertyMgrService.saveAddressArrangementEvent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_DELETE, address, arrangement, null);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
