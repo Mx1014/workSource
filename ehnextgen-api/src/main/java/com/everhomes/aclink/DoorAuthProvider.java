@@ -103,7 +103,7 @@ public interface DoorAuthProvider {
 
     DoorAuth queryValidDoorAuthByVisitorPhone(Long doorId, String phone);
 
-	List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone);
+	List<DoorAuth> listValidDoorAuthByVisitorPhone(Long doorId, String phone, Byte groupType);
 
 	List<User> listCommunityAclinkUsers(Byte isAuth, Byte isOpenAuth, Long doorId, Byte communityType, Long ownerId,
 			CrossShardListingLocator locator, int pageSize, Integer namespaceId);

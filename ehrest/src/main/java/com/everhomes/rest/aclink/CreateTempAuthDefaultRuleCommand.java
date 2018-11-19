@@ -2,7 +2,6 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -15,29 +14,30 @@ import java.util.List;
  * </ul>
  *
  */
-public class CreateTempAuthPriorityCommand {
+public class CreateTempAuthDefaultRuleCommand {
 
     private Long ownerId;
     private Byte ownerType;
-//    private List<Long> doorIds;
-    @ItemType(DoorsAndGroupsDTO.class)
-    private List<DoorsAndGroupsDTO> doors;
 
-    public List<DoorsAndGroupsDTO> getDoors() {
-        return doors;
+    private String maxDuration;
+
+    private String maxCount;
+
+    public String getMaxDuration() {
+        return maxDuration;
     }
 
-    public void setDoors(List<DoorsAndGroupsDTO> doors) {
-        this.doors = doors;
+    public void setMaxDuration(String maxDuration) {
+        this.maxDuration = maxDuration;
     }
 
-//    public List<Long> getDoorIds() {
-//        return doorIds;
-//    }
-//
-//    public void setDoorIds(List<Long> doorIds) {
-//        this.doorIds = doorIds;
-//    }
+    public String getMaxCount() {
+        return maxCount;
+    }
+
+    public void setMaxCount(String maxCount) {
+        this.maxCount = maxCount;
+    }
 
     public Long getOwnerId() {
         return ownerId;

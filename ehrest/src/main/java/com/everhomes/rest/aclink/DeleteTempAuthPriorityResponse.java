@@ -8,21 +8,19 @@ import java.util.List;
 
 /**
  * <ul>获取门禁列表
- * <li> nextPageAnchor: 下一页锚点 </li>
- * <li> groupRels: 门禁组关系列表，参考{@link DoorAccessGroupRelDTO}</li>
  * </ul>
  *
  */
-public class ListSelectDoorsResponse {
+public class DeleteTempAuthPriorityResponse {
 
-	@ItemType(DoorAccessDTO.class)
-	private List<DoorAccessDTO> doors;
+	@ItemType(AclinkFormValuesDTO.class)
+	private List<AclinkFormValuesDTO> doors;
 
-	public List<DoorAccessDTO> getDoors() {
+	public List<AclinkFormValuesDTO> getDoors() {
 		return doors;
 	}
 
-	public void setDoors(List<DoorAccessDTO> doors) {
+	public void setDoors(List<AclinkFormValuesDTO> doors) {
 		this.doors = doors;
 	}
 

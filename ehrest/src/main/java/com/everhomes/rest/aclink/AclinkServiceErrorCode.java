@@ -16,4 +16,5 @@ public interface AclinkServiceErrorCode {
     static final int ERROR_ACLINK_UUID = 10011;//uuid错误
     static final int ERROR_ACLINK_LATEST_DATA = 10012;//已经是最新数据,无需同步
     static final int ERROR_ACLINK_SERVER_NOT_FOUND = 10013;
+    static final int ERROR_ACLINK_MANAGER_EXIST = 10014;//存在被授权企业
 }
