@@ -3,20 +3,20 @@ package com.everhomes.qrcode;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.activity.ActivityQRCodeDTO;
-import com.everhomes.rest.qrcode.*;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.*;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.everhomes.rest.qrcode.GetQRCodeInfoCommand;
 import com.everhomes.rest.qrcode.NewQRCodeCommand;
 import com.everhomes.rest.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeStatus;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.sdk.SdkQRCodeService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +48,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         return ConvertHelper.convert(sdkDelegate.createQRCode(command), QRCodeDTO.class);
     }
 
-
     @Override
     public QRCodeDTO createQRCodeForActivity(NewQRCodeCommand cmd) {
         User operator = UserContext.current().getUser();
@@ -79,7 +78,8 @@ public class QRCodeServiceImpl implements QRCodeService {
 
     @Override
     public QRCodeDTO getQRCodeInfo(GetQRCodeInfoCommand cmd) {
-        return getQRCodeInfoById(cmd.getQrid(), cmd.getSource());
+        com.everhomes.rest.user.qrcode.GetQRCodeInfoCommand command = ConvertHelper.convert(cmd, com.everhomes.rest.user.qrcode.GetQRCodeInfoCommand.class);
+        return ConvertHelper.convert(sdkDelegate.getQRCodeInfo(command), QRCodeDTO.class);
     }
 
     @Override
@@ -87,65 +87,8 @@ public class QRCodeServiceImpl implements QRCodeService {
         GetQRCodeInfoCommand cmd = new GetQRCodeInfoCommand();
         cmd.setQrid(qrid);
         cmd.setSource(source);
-        User operator = UserContext.current().getUser();
-        Long operatorId = -1L;
-        if(operator != null) {
-            operatorId = operator.getId();
-        }
-
-        if(qrid == null) {
-            LOGGER.error("QR code id is null, operatorId=" + operatorId + ", qrid=" + qrid);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid QR code id");
-        }
-
-        try {
-            IdToken token = WebTokenGenerator.getInstance().fromWebToken(qrid, IdToken.class);
-            long qrcodeId = token.getId();
-            QRCode qrcode = qrcodeProvider.findQRCodeById(qrcodeId);
-            if (qrcode.getExpireTime() != null) {
-                Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
-                if (qrcode.getExpireTime().before(current)) {
-                    LOGGER.error("QR code expired, operatorId=" + operatorId + ", qrid=" + qrid
-                            + ", current=" + current.getTime() + ", expiredTime=" + qrcode.getExpireTime().getTime());
-                    throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE,
-                            QRCodeServiceErrorCode.ERROR_QR_CODE_EXPIRED, "QR code expired");
-                }
-            }
-
-            QRCodeDTO qrCodeDTO = toQRCodeDTO(qrcode);
-            qrCodeListenerManager.onGetQRCodeInfo(qrCodeDTO, source);
-            return qrCodeDTO;
-        } catch (RuntimeErrorException ree) {
-            throw ree;
-        } catch (Exception e) {
-            LOGGER.error("QR code id is invalid format, operatorId=" + operatorId + ", qrid=" + qrid);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid QR code id");
-        }
+        return this.getQRCodeInfo(cmd);
     }
-
-    private QRCodeDTO toQRCodeDTO(QRCode qrcode) {
-        QRCodeDTO qrcodeDto = ConvertHelper.convert(qrcode, QRCodeDTO.class);
-
-        IdToken idToken = new IdToken(qrcode.getId());
-        String qrid = WebTokenGenerator.getInstance().toWebToken(idToken);
-        qrcodeDto.setQrid(qrid);
-        IdToken token = WebTokenGenerator.getInstance().fromWebToken(qrid, IdToken.class);
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("id=" + qrcode.getId() + ", qrid=" + qrid + ", decodeId=" + token.getId());
-        }
-
-        String url = configProvider.getValue(ConfigConstants.HOME_URL, "");
-        if(!url.endsWith("/")) {
-            url += "/";
-        }
-        url += "qr?qrid=" + qrid;
-        qrcodeDto.setUrl(url);
-
-        return qrcodeDto;
-    }
-
 
     private QRCodeDTO toQRCodeDTOForActivity(QRCode qrcode) {
         QRCodeDTO qrcodeDto = ConvertHelper.convert(qrcode, QRCodeDTO.class);

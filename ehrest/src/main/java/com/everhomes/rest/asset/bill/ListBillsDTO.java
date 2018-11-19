@@ -1,12 +1,12 @@
 //@formatter:off
-package com.everhomes.rest.asset;
+package com.everhomes.rest.asset.bill;
 
-
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.asset.BillItemDTO;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 /**
  *<ul>
  * <li>defaultOrder:排序数字</li>
@@ -44,6 +44,7 @@ import java.util.List;
  * <li>canDelete:0：不可删除；1：可删除</li>
  * <li>canModify:0：不可编辑；1：可编辑</li>
  * <li>isReadOnly:只读状态：0：非只读；1：只读</li>
+ * <li>billItemDTOList:账单组收费项目的集合，参考{@link com.everhomes.rest.asset.BillItemDTO}</li>
  *</ul>
  */
 public class ListBillsDTO {
@@ -58,7 +59,6 @@ public class ListBillsDTO {
     private String targetType;
     private String buildingName;
     private String apartmentName;
-    //private String noticeTel;
     private BigDecimal amountReceivable;
     private BigDecimal amountReceived;
     private BigDecimal amountOwed;
@@ -93,6 +93,8 @@ public class ListBillsDTO {
     private Byte isReadOnly;
     //催缴手机号码列表
     private List<String> noticeTelList;
+    @ItemType(BillItemDTO.class)
+    private List<BillItemDTO> billItemDTOList;
 
     public List<String> getNoticeTelList() {
 		return noticeTelList;
@@ -388,6 +390,14 @@ public class ListBillsDTO {
 
 	public void setIsReadOnly(Byte isReadOnly) {
 		this.isReadOnly = isReadOnly;
+	}
+
+	public List<BillItemDTO> getBillItemDTOList() {
+		return billItemDTOList;
+	}
+
+	public void setBillItemDTOList(List<BillItemDTO> billItemDTOList) {
+		this.billItemDTOList = billItemDTOList;
 	}
 
 }

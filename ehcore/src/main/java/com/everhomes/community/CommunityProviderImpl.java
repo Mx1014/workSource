@@ -16,6 +16,8 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.listEnterpriseNoReleaseWithCommunityIdCommand;
+import com.everhomes.rest.openapi.ApartmentDTO;
+import com.everhomes.rest.openapi.BuildingDTO;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.*;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -2126,9 +2128,128 @@ public class CommunityProviderImpl implements CommunityProvider {
 						.fetchInto(Long.class);
 	}
 
+
     @Override
     public List<Community> listAllBizCommunities() {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select(Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAMESPACE_ID).from(Tables.EH_COMMUNITIES).where(Tables.EH_COMMUNITIES.NAMESPACE_ID.ne(0)).fetchInto(Community.class);
     }
+
+	@Override
+	public List<com.everhomes.rest.openapi.CommunityDTO> listCommunitiesForThirdParty(Integer namespaceId,Long communityId, Long pageAnchor,
+			int pageSize, Timestamp updateTime) {
+		List<com.everhomes.rest.openapi.CommunityDTO> results = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<Record> selectQuery = context.selectQuery();
+		selectQuery.addFrom(Tables.EH_COMMUNITIES);
+		selectQuery.addSelect(Tables.EH_COMMUNITIES.ID,Tables.EH_COMMUNITIES.NAME,Tables.EH_COMMUNITIES.ADDRESS,Tables.EH_COMMUNITIES.DESCRIPTION);
+		
+		if (namespaceId != null) {
+			selectQuery.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+		}
+		if (communityId != null) {
+			selectQuery.addConditions(Tables.EH_COMMUNITIES.ID.eq(communityId));
+		}
+		if (updateTime != null) {
+			selectQuery.addConditions(Tables.EH_COMMUNITIES.CREATE_TIME.ge(updateTime));
+		}
+		if (namespaceId != null || communityId != null) {
+			selectQuery.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+			selectQuery.addLimit(pageAnchor.intValue(), pageSize);
+			
+			selectQuery.fetch().forEach(r->{
+				com.everhomes.rest.openapi.CommunityDTO dto = new com.everhomes.rest.openapi.CommunityDTO();
+				dto.setCommunityId(r.getValue(Tables.EH_COMMUNITIES.ID));
+				dto.setName(r.getValue(Tables.EH_COMMUNITIES.NAME));
+				dto.setAddress(r.getValue(Tables.EH_COMMUNITIES.ADDRESS));
+				dto.setDescription(r.getValue(Tables.EH_COMMUNITIES.DESCRIPTION));
+				results.add(dto);
+			});
+		}
+		return results;
+	}
+
+	@Override
+	public List<BuildingDTO> listBuildingsForThirdParty(Integer namespaceId, Long communityId, Long pageAnchor,
+			int pageSize, Timestamp updateTime) {
+		List<com.everhomes.rest.openapi.BuildingDTO> results = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<Record> selectQuery = context.selectQuery();
+		selectQuery.addFrom(Tables.EH_BUILDINGS);
+		selectQuery.addSelect(Tables.EH_BUILDINGS.ID,Tables.EH_BUILDINGS.NAME,Tables.EH_BUILDINGS.COMMUNITY_ID);
+		
+		if (namespaceId != null) {
+			selectQuery.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
+		}
+		if (communityId != null) {
+			selectQuery.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+		}
+		if (updateTime != null) {
+			selectQuery.addConditions(Tables.EH_BUILDINGS.CREATE_TIME.ge(updateTime));
+		}
+		if (namespaceId != null || communityId != null) {
+			selectQuery.addConditions(Tables.EH_BUILDINGS.STATUS.eq(BuildingAdminStatus.ACTIVE.getCode()));
+			
+			selectQuery.addLimit(pageAnchor.intValue(), pageSize);
+			
+			selectQuery.fetch().forEach(r->{
+				com.everhomes.rest.openapi.BuildingDTO dto = new com.everhomes.rest.openapi.BuildingDTO();
+				dto.setBuildingId(r.getValue(Tables.EH_BUILDINGS.ID));
+				dto.setBuildingName(r.getValue(Tables.EH_BUILDINGS.NAME));
+				dto.setCommunityId(r.getValue(Tables.EH_BUILDINGS.COMMUNITY_ID));
+				results.add(dto);
+			});
+		}
+		return results;
+	}
+
+	@Override
+	public List<ApartmentDTO> listAddressesForThirdParty(Integer namespaceId, Long communityId, Long buildingId,
+			Long pageAnchor, int pageSize, Timestamp updateTime) {
+		List<com.everhomes.rest.openapi.ApartmentDTO> results = new ArrayList<>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<Record> selectQuery = context.selectQuery();
+		selectQuery.addFrom(Tables.EH_ADDRESSES);
+		selectQuery.addSelect(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.COMMUNITY_ID,
+				Tables.EH_ADDRESSES.COMMUNITY_NAME,Tables.EH_ADDRESSES.BUILDING_ID,Tables.EH_ADDRESSES.BUILDING_NAME,
+				Tables.EH_ADDRESSES.ADDRESS);
+		
+		if (namespaceId != null) {
+			selectQuery.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+		}
+		if (communityId != null) {
+			selectQuery.addConditions(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId));
+		}
+		if (buildingId != null) {
+			selectQuery.addConditions(Tables.EH_ADDRESSES.BUILDING_ID.eq(buildingId));
+		}
+		if (updateTime != null) {
+			selectQuery.addConditions(Tables.EH_ADDRESSES.CREATE_TIME.ge(updateTime));
+		}
+		if (namespaceId != null || communityId != null || buildingId != null) {
+			selectQuery.addConditions(Tables.EH_ADDRESSES.STATUS.eq(AddressAdminStatus.ACTIVE.getCode()));
+			
+			selectQuery.addLimit(pageAnchor.intValue(), pageSize);
+			
+			selectQuery.fetch().forEach(r->{
+				com.everhomes.rest.openapi.ApartmentDTO dto = new com.everhomes.rest.openapi.ApartmentDTO();
+				dto.setApartmentId(r.getValue(Tables.EH_ADDRESSES.ID));
+				dto.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+				dto.setBuildingId(r.getValue(Tables.EH_ADDRESSES.BUILDING_ID));
+				dto.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+				dto.setCommunityId(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_ID));
+				dto.setCommunityName(r.getValue(Tables.EH_ADDRESSES.COMMUNITY_NAME));
+				dto.setAddress(r.getValue(Tables.EH_ADDRESSES.ADDRESS));
+				results.add(dto);
+			});
+		}
+		return results;
+	}
+
 }

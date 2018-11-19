@@ -43,7 +43,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,17 +200,22 @@ public class SiyinJobValidateServiceImpl {
 				}
 				
 				//如果是未支付状态，而且之前未通知过，则发送消息通知
+				boolean isNeedAlert = false;
 				if (PrintOrderStatusType.UNPAID.getCode().equals(order.getOrderStatus())
 						&& TrueOrFalseFlag.FALSE.getCode().equals(order.getUserNotifyFlag())) {
-	   		        //创建订单成功后建立两个定时任务
-	   		        createOrderOverTimeTask(order);
 					order.setUserNotifyFlag(TrueOrFalseFlag.TRUE.getCode());
+					isNeedAlert = true;
 				}
 				
 	   			if(order.getId() == null){
 	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
 	   			}else{
 	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+	   			}
+	   			
+	   			if (isNeedAlert) {
+	   		        //创建订单成功后建立两个定时任务
+	   		        createOrderOverTimeTask(order);
 	   			}
 	   			
 	   			record.setOrderId(order.getId());
@@ -220,7 +228,18 @@ public class SiyinJobValidateServiceImpl {
 	
 	private void createOrderOverTimeTask(SiyinPrintOrder order) {
 		Long unpaidNotifyTime  = configurationProvider.getLongValue("print.unpaid.notify.time", 120 * 60 * 1000L);
-		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", (24 * 60 * 60 * 1000L) - System.currentTimeMillis() + (15 * 60 * 60 * 1000L));
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowStr = dateFormat.format(new Date());
+        String endStr = nowStr.substring(0,nowStr.indexOf(" ")) + " 23:59:59";
+        Long overTime = null;
+		try {
+			overTime = (dateFormat.parse(endStr).getTime() - dateFormat.parse(nowStr).getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Long messageTime = 15 * 60 * 60 * 1000L;
+		Long unpaidMessageTime  = configurationProvider.getLongValue("print.unpaid.message.time", overTime + messageTime);
 		String notifyTextForOther = localeTemplateService.getLocaleTemplateString(SiyinPrintNotificationTemplateCode.SCOPE,
 				SiyinPrintNotificationTemplateCode.PRINT_UNPAID_NOTIFY, SiyinPrintNotificationTemplateCode.locale, "", "您有一笔云打印的订单未支付，请及时支付。");
 		Map<String, Object> notifyMap = new HashMap<>();

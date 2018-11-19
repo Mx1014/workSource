@@ -1172,6 +1172,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());  
             } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
         			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+            } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_UCLBRT_DOOR.getCode())) {
+        		doorAuth.setDriver(DoorAccessDriverType.UCLBRT.getCode());
             } else {
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
@@ -2827,7 +2829,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
         qr.setDoorDisplayName(doorAccess.getDisplayNameNotEmpty());
-        qr.setExpireTimeMs(auth.getKeyValidTime());
+		qr.setExpireTimeMs(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) ? 0 : auth.getValidEndMs());	
         qr.setId(auth.getId());
         qr.setQrDriver(DoorAccessDriverType.UCLBRT.getCode());
         qr.setDoorOwnerId(doorAccess.getOwnerId());
@@ -2836,7 +2838,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(null !=ca){
         	UclbrtParamsDTO paramsDTO = JSON.parseObject(ca.getUclbrtParams(), UclbrtParamsDTO.class); 
         	UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(UserContext.currentUserId(), UserContext.getCurrentNamespaceId());
-        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, userIdentifier.getIdentifierToken()));
+        	qr.setQrCodeKey(uclbrtHttpClient.getQrCode(paramsDTO, auth.getPhone(), qr.getExpireTimeMs()));
         	if(null != qr.getQrCodeKey()){
         		qrKeys.add(qr);
         	}
@@ -2903,73 +2905,69 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 
         Long t2 = DateHelper.currentGMTTime().getTime();
         LOGGER.info("auths 获取 "+(t2-t1));
-        for(DoorAuth auth : auths) {
-            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
-            if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
-                //The door is delete, set it to invalid
-                auth.setStatus(DoorAuthStatus.INVALID.getCode());
-                doorAuthProvider.updateDoorAuth(auth);
-                continue;
-            }
-            
-            //没有二维码读头的门禁不返回二维码,by liuyilin 20180529
-            if(doorAccess.getHasQr() != (byte) 1){
-            	continue;
-            }
-            
-            
-            if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
-            	//Forever + true of rightOpen
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                //这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
-            	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
-                doLinglingQRKey(user, doorAccess, auth, qrKeys);
-            } else if(DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())){
-            	//锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
-            	//added by wh
-            	Long t3 = DateHelper.currentGMTTime().getTime();
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+		for (DoorAuth auth : auths) {
+			DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+			if (!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
+				// The door is delete, set it to invalid
+				auth.setStatus(DoorAuthStatus.INVALID.getCode());
+				doorAuthProvider.updateDoorAuth(auth);
+				continue;
+			}
 
-                Long t4 = DateHelper.currentGMTTime().getTime();
+			// 没有二维码读头或者没开门权限的门禁不返回二维码,by liuyilin 20180529
+			if (!(doorAccess.getHasQr().equals((byte) 1) && auth.getRightOpen().equals((byte) 1))) {
+				continue;
+			}
 
-                LOGGER.info("拿一个uclbrt 的二维码"+(t4-t3));
-            } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
-            	//Forever + true of rightOpen
-                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                    continue;
-                }
-                
-            	doHuarunQRKey(user, doorAccess, auth, qrKeys);
-            } else {
-            	
-            	//rightOpen and more
-            	if(!auth.getRightOpen().equals((byte)1)) {
-            		continue;
-            		}
-            	if(!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-            		Long now = DateHelper.currentGMTTime().getTime();
-            		if(auth.getValidEndMs() < now) {
-            			//已经失效，删除它
-                    auth.setStatus(DoorAuthStatus.INVALID.getCode());
-                    doorAuthProvider.updateDoorAuth(auth);
-                    continue;
-                    }
-            		
-            		if(auth.getValidFromMs() > now) {
-            			continue;
-            		}
-            	}
-            	resp.setQrTimeout(this.getQrTimeout()/1000l);
-//            	resp.setQrIntro("http://xxxx.com");
-                doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
-                }
-           
-            }
+			if (!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+				Long now = DateHelper.currentGMTTime().getTime();
+				if (auth.getValidEndMs() < now) {
+					// 已经失效，删除它
+					auth.setStatus(DoorAuthStatus.INVALID.getCode());
+					doorAuthProvider.updateDoorAuth(auth);
+					continue;
+				}
+
+				// 未到时间不显示
+				if (auth.getValidFromMs() > now) {
+					continue;
+				}
+			}
+
+			if (auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
+				// Forever + true of rightOpen
+				if (!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())	&& auth.getRightOpen().equals((byte) 1))) {
+					continue;
+				}
+				// 这个时间才是有效的二维码超时时间， dto 里面的时间是为了兼容过去的 app 版本。
+				resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(),	AclinkConstant.ACLINK_QR_TIMEOUTS, 4 * 24 * 60));
+				doLinglingQRKey(user, doorAccess, auth, qrKeys);
+			} else if (auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())) {
+				// Forever + true of rightOpen
+				if (!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())	&& auth.getRightOpen().equals((byte) 1))) {
+					continue;
+				}
+
+				doHuarunQRKey(user, doorAccess, auth, qrKeys);
+			} else if (DoorAccessDriverType.UCLBRT == DoorAccessDriverType.fromCode(auth.getDriver())) {
+				// 锁管家是由app远程请求获取二维码的,这里给他组装存在aclinks表里的参数就行
+				// added by wh
+				Long t3 = DateHelper.currentGMTTime().getTime();
+				if (!auth.getRightOpen().equals((byte) 1)) {
+					continue;
+				}
+				doUclbrtQRKey(user, doorAccess, auth, qrKeys);
+
+				Long t4 = DateHelper.currentGMTTime().getTime();
+
+				LOGGER.info("拿一个uclbrt 的二维码" + (t4 - t3));
+			} else {
+				//左邻门禁
+				resp.setQrTimeout(this.getQrTimeout() / 1000l);
+				doZuolinQRKey(generate, user, doorAccess, auth, qrKeys);
+			}
+
+		}
         LOGGER.debug("总请求时间" + (DateHelper.currentGMTTime().getTime() - t0)); 
         if (resp.getKeys() == null || resp.getKeys().size() ==0 ){
         	LOGGER.info(String.format("user{%d} has no valid auth,phone:%d",user.getId(),user.getIdentityNumberTag()));
