@@ -1,6 +1,32 @@
 package com.everhomes.remind;
 
-import com.everhomes.category.Category;
+import java.security.InvalidParameterException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -60,38 +86,19 @@ import com.everhomes.rest.remind.UnSubscribeShareRemindCommand;
 import com.everhomes.rest.remind.UpdateRemindStatusCommand;
 import com.everhomes.rest.remind.UpdateRemindStatusResponse;
 import com.everhomes.scheduler.CalendarRemindScheduleJob;
-import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.pojos.EhRemindCategoryDefaultShares;
 import com.everhomes.server.schema.tables.pojos.EhRemindShares;
-import com.everhomes.share.ShareService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.*;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.security.InvalidParameterException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import javassist.runtime.DotClass;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateStatisticHelper;
+import com.everhomes.util.RouterBuilder;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Version;
 
 @Service
 public class RemindServiceImpl implements RemindService  {
@@ -801,6 +808,9 @@ public class RemindServiceImpl implements RemindService  {
 
         List<Remind> trackReminds = remindProvider.findRemindsByTrackRemindIds(Collections.singletonList(existRemind.getId()));
         List<Remind> unSubscribeReminds = new ArrayList<>();
+
+    	List<RemindCategoryDefaultShare> categoryShares = remindProvider.findShareMemberDetailsByCategoryId(existRemind.getRemindCategoryId());
+    	
         dbProvider.execute(transactionStatus -> {
             remindProvider.updateRemind(existRemind);
             setRemindRedis(existRemind);
@@ -811,7 +821,7 @@ public class RemindServiceImpl implements RemindService  {
             while (iterator.hasNext()) { 
             	Remind trackRemind = iterator.next();
                 OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByTargetId(trackRemind.getUserId(), trackRemind.getOwnerId());
-                if (!shareMemberDTOcontainsShareId(cmd.getShareToMembers(), member.getId())) {
+                if (!shareMemberDTOcontainsShareId(cmd.getShareToMembers(), member.getId()) && !categoryShareMembeContainsShareId(categoryShares, member.getId())) {
                     //取消共享,删日程发消息
                     remindProvider.deleteRemind(trackRemind);
                     deleteRemindRedis(trackRemind);
@@ -822,7 +832,6 @@ public class RemindServiceImpl implements RemindService  {
             updateTrackReminds(trackReminds, existRemind, false);
           //修改category也要发消息
             if(existRemind.getRemindCategoryId() != null && existRemind.getRemindCategoryId().equals(oldCategoryId)){
-            	List<RemindCategoryDefaultShare> categoryShares = remindProvider.findShareMemberDetailsByCategoryId(existRemind.getRemindCategoryId());
             	if(!CollectionUtils.isEmpty(categoryShares)){
             		for(RemindCategoryDefaultShare cs : categoryShares){
             			if(checkShareRemindInHistory(historyShareReminds, cs)){
@@ -845,7 +854,19 @@ public class RemindServiceImpl implements RemindService  {
         return existRemind.getId();
     }
     
-    private List<ShareMemberDTO> findRemindShares(Long remindId, Long categoryId) {
+    private boolean categoryShareMembeContainsShareId(
+			List<RemindCategoryDefaultShare> categoryShares, Long id) {
+		if(CollectionUtils.isEmpty(categoryShares))
+			return false;
+		for(RemindCategoryDefaultShare cs : categoryShares){
+			if(cs.getSharedSourceId().equals(id)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private List<ShareMemberDTO> findRemindShares(Long remindId, Long categoryId) {
 		List<ShareMemberDTO> result = new ArrayList<>();
 		List<RemindShare> historyShareReminds1 = remindProvider.findShareMemberDetailsByRemindId(remindId);
 		if(!CollectionUtils.isEmpty(historyShareReminds1)){
