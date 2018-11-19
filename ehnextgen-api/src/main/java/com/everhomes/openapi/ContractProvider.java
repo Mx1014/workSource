@@ -3,6 +3,7 @@ package com.everhomes.openapi;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -147,8 +148,9 @@ public interface ContractProvider {
 	BigDecimal getTotalChargeArea(List<Long> contractIds, List<String> buildindNames, List<String> apartmentNames);
 
 	
-	//合同报表
-	int getTotalContractCount();
+	//合同报表Date firstdateUpdateTime = null;Date lastdateUpdateTime = null;
+	int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime);
 	void createCommunityStatics(ContractReportformStatisticCommunitys communityStatistics);
+	void deleteCommunityDataByDateStr(String todayDateStr);
 
 }

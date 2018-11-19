@@ -3964,14 +3964,52 @@ long assetCategoryId = 0l;
 		dbProvider.execute((TransactionStatus status) -> {
 			//先删掉这个月的的统计数据
 			String todayDateStr = getTodayDateStr();
-			//propertyReportFormProvider.deleteCommunityDataByDateStr(todayDateStr);
+			contractProvider.deleteCommunityDataByDateStr(todayDateStr);
 			//propertyReportFormProvider.deleteBuildingDataByDateStr(todayDateStr);
 			
 			//开始遍历，进行数据统计
 			int pageSize = 1000;
 			//int totalCount = addressProvider.getTotalApartmentCount();
 			
-			int totalCount = contractProvider.getTotalContractCount();
+			//只统计本月的数据，每次统计，会把本月的此次之前的数据清空
+			// 传过来的时间进行格式化时间戳转化
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			//设置本月第一天
+			Calendar firstCa = Calendar.getInstance();
+			firstCa.add(Calendar.MONTH, 0);
+			firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+			firstCa.set(Calendar.HOUR_OF_DAY, 0);
+			firstCa.set(Calendar.MINUTE, 0);
+			firstCa.set(Calendar.SECOND, 0);
+			firstCa.set(Calendar.MILLISECOND, 0);
+			String firststr = sdf.format(firstCa.getTime());
+			
+			//设置本月最后
+			Calendar lastCa = Calendar.getInstance();
+			lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
+			lastCa.set(Calendar.HOUR_OF_DAY, 23);
+			lastCa.set(Calendar.MINUTE, 59);
+			lastCa.set(Calendar.SECOND, 59);
+			String laststr = sdf.format(lastCa.getTime());
+			
+			Timestamp firstdateUpdateTime = new Timestamp(System.currentTimeMillis());;
+			Timestamp lastdateUpdateTime = new Timestamp(System.currentTimeMillis());
+			//try {
+				//firstdateUpdateTime = sdf.parse(firststr);
+			try {
+				firstdateUpdateTime = Timestamp.valueOf(firststr);
+				//lastdateUpdateTime = sdf.parse(laststr);
+				lastdateUpdateTime = Timestamp.valueOf(laststr);
+			} catch (Exception e) {
+				LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
+				e.printStackTrace();
+			}
+			/*} catch (ParseException e) {
+				LOGGER.info("ContractSearcherImpl openapiListContracts SimpleDateFormat  is error");
+			}*/
+			
+			
+			int totalCount = contractProvider.getTotalContractCount(firstdateUpdateTime,lastdateUpdateTime);
 			int totalPage = 0;
 			if (totalCount%pageSize == 0) {
 				totalPage = totalCount/pageSize;

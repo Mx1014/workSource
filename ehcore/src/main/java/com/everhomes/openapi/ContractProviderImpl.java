@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1670,13 +1671,22 @@ public class ContractProviderImpl implements ContractProvider {
 
 	//合同报表
 	@Override
-	public int getTotalContractCount() {
+	public void deleteCommunityDataByDateStr(String dateStr) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		context.delete(Tables.EH_CONTRACT_REPORTFORM_STATISTIC_COMMUNITYS)
+				.where(Tables.EH_CONTRACT_REPORTFORM_STATISTIC_COMMUNITYS.MONTH_STR.eq(dateStr))
+				.execute();
+	}
+	
+	@Override
+	public int getTotalContractCount(Timestamp firstdateUpdateTime, Timestamp lastdateUpdateTime) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return  context.selectCount()
 				       .from(Tables.EH_CONTRACTS)
 				       .where(Tables.EH_CONTRACTS.NAMESPACE_ID.ne(0))
 				       .and(Tables.EH_CONTRACTS.STATUS.eq(ContractStatus.ACTIVE.getCode()))
 				       .and(Tables.EH_CONTRACTS.COMMUNITY_ID.isNotNull())
+				       .and(Tables.EH_CONTRACTS.UPDATE_TIME.between(firstdateUpdateTime, lastdateUpdateTime))
 				       .fetchAnyInto(Integer.class);
 	}
 	
