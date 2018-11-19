@@ -6045,7 +6045,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     }
     @Override
     public void changeDoorName(ChangeDoorNameCommand cmd){
-        DoorAccess doorAccess = doorAccessProvider.findDoorAccessById(cmd.getDoorId());
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(null == doorAccess){
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
+        }
         doorAccess.setDisplayName(cmd.getName());
         doorAccess.setAddress(cmd.getDoorAddress());
         doorAccess.setDescription(cmd.getDoorDescription());
