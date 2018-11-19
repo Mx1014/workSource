@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.aclink.AclinkIPadDTO;
 import com.everhomes.rest.aclink.ListLocalIpadCommand;
 
 public interface AclinkIpadProvider {
@@ -17,6 +18,8 @@ public interface AclinkIpadProvider {
 	void createLocalIpad(AclinkIpad ipad);
 
 	AclinkIpad findIpadById(Long id);
+
+	List<AclinkIPadDTO> findIpadByDoorId(Long doorId);
 
 	void updateLocalIpad(AclinkIpad ipad);
 

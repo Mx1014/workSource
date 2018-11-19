@@ -8,21 +8,19 @@ import java.util.List;
 
 /**
  * <ul>获取门禁列表
- * <li> nextPageAnchor: 下一页锚点 </li>
- * <li> groupRels: 门禁组关系列表，参考{@link DoorAccessGroupRelDTO}</li>
  * </ul>
  *
  */
-public class ListSelectDoorsResponse {
+public class ListSelectDoorsAndGroupsResponse {
 
-	@ItemType(DoorAccessDTO.class)
-	private List<DoorAccessDTO> doors;
+	@ItemType(DoorsAndGroupsDTO.class)
+	private List<DoorsAndGroupsDTO> doors;
 
-	public List<DoorAccessDTO> getDoors() {
+	public List<DoorsAndGroupsDTO> getDoors() {
 		return doors;
 	}
 
-	public void setDoors(List<DoorAccessDTO> doors) {
+	public void setDoors(List<DoorsAndGroupsDTO> doors) {
 		this.doors = doors;
 	}
 

@@ -570,7 +570,7 @@ public class AclinkServerServiceImpl implements AclinkServerService {
 			throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "door is not found");
 		}
 		//TODO 非空判断,原门禁没有关联服务器,现在也没
-		if(da.getLocalServerId() != cmd.getServerId()){
+		if(null !=da.getLocalServerId() && da.getLocalServerId() != cmd.getServerId()){
 			if(cmd.getServerId() != null || cmd.getServerId() != 0L){
 				AclinkServer server = aclinkServerProvider.findServerById(cmd.getServerId());
 				if(server == null){

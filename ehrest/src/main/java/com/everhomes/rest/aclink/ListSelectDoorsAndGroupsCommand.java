@@ -10,12 +10,22 @@ import javax.validation.constraints.NotNull;
  * <li>ownerId: 所属上级的id</li>
  * </ul>
  */
-public class ListTempAuthPriorityCommand {
+public class ListSelectDoorsAndGroupsCommand {
     @NotNull
     private Long ownerId;
     
     @NotNull
     private Byte ownerType;
+
+    private String keyWord;
+
+    public String getKeyWord() {
+        return keyWord;
+    }
+
+    public void setKeyWord(String keyWord) {
+        this.keyWord = keyWord;
+    }
 
     public Long getOwnerId() {
         return ownerId;
