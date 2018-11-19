@@ -3131,7 +3131,7 @@ public class FlowServiceImpl implements FlowService {
                     entity.setEntityType(FlowCaseEntityType.LIST.getCode());
                 } else {
                     entity.setValue(line);
-                    entity.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                    entity.setEntityType(FlowCaseEntityType.TEXT.getCode());
                 }
                 entities.add(entity);
             }
