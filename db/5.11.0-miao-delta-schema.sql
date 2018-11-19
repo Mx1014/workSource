@@ -142,3 +142,35 @@ CREATE TABLE `eh_office_cubicle_stations` (
   `resource_type` VARCHAR(64) COMMENT '资源类型',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_orders` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `order_no` BIGINT,
+  `biz_order_no` VARCHAR(64),
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `rent_owner_name` VARCHAR(64) COMMENT 'the name of rent owner',
+  `rent_owner_phone` VARCHAR(64) COMMENT 'the phone of rent owner',
+  `rent_count`  DECIMAL(10,2),
+  `begin_time` DATETIME,
+  `end_time` DATETIME,
+  `payer_enterprise_id` BIGINT DEFAULT 0 COMMENT 'the id of organization where the payer is in',
+  `payer_enterprise_name` VARCHAR(64),
+  `payer_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id of payer',
+  `payer_phone` VARCHAR(64) COMMENT 'the phone of payer',
+  `paid_time` DATETIME COMMENT 'the pay time',
+  `price` DECIMAL(10,2) COMMENT 'the total price in the item for recharging the parking card',
+  `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
+  `creator_uid` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME,
+  `error_description` TEXT COMMENT 'error description',
+  `error_description_json` TEXT COMMENT 'error description',
+  `refund_time` DATETIME COMMENT 'refund time',
+  `delay_time` INTEGER COMMENT 'delay time',
+  `order_type` TINYINT DEFAULT 1,
+  `payee_id` BIGINT COMMENT '收款方id',
+  `pay_mode` TINYINT COMMENT '0:个人支付，1：已记账，2：已支付，支付类型',
+  `general_order_id` VARCHAR(64) COMMENT '统一订单ID',
+  `remark` TEXT COMMENT '备注',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
