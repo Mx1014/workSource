@@ -16,7 +16,7 @@ CREATE TABLE `eh_customer_statistics_daily` (
   `create_uid` BIGINT COMMENT '创建人',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每日';
-/CommunityProvider
+
 -- REMARK: 创建 客户统计表，每日，按管理公司汇总
 CREATE TABLE `eh_customer_statistics_daily_total` (
  `id` BIGINT NOT NULL,

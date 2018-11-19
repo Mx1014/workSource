@@ -342,13 +342,13 @@ public class InvitedCustomerController extends ControllerBase {
     /**
      *
      * <b>URL: /invitedCustomer/queryCustomerStatisticDaily</b>
-     * <p>获取某天的数据</p>
+     * <p>获取某天的数据，分园区获取</p>
      */
     @RequestMapping("queryCustomerStatisticDaily")
-    @RestReturn(value = CommunityCustomerStatisticDTO.class, collection = true)
+    @RestReturn(value = GetCustomerStatisticDailyResponse.class)
     public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsDailyCommand cmd) {
-        List<CommunityCustomerStatisticDTO> dtos = invitedCustomerService.getCustomerStatisticsDaily(cmd);
-        RestResponse response = new RestResponse(dtos);
+        GetCustomerStatisticDailyResponse dto = invitedCustomerService.getCustomerStatisticsDaily(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
