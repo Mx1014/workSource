@@ -1,7 +1,7 @@
 
 -- AUTHOR: 杨崇鑫
 -- REMARK: 缺陷 #42416 【中天】更新自然季，合同刷新账单报错。
-ALTER TABLE `preupdate`.`eh_contracts` MODIFY COLUMN `rent` decimal(20, 2) NULL DEFAULT NULL COMMENT '租金' AFTER `rent_size`;
+ALTER TABLE `eh_contracts` MODIFY COLUMN `rent` decimal(20, 2) NULL DEFAULT NULL COMMENT '租金' AFTER `rent_size`;
 
 -- AUTHOR: 李清岩
 -- REMARK: 门禁v3.0.2 issue-34771
