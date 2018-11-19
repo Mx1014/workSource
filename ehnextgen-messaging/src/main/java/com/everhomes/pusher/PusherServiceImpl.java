@@ -936,9 +936,9 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
 				messageDto.setCreateTime(System.currentTimeMillis());
 				messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 				if(cmd.getMsgType() == 1){//上车信息
-					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好乘车准备！"));				
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 "+cmd.getNextStation()," 】站，请您做好乘车准备！"));				
 				}else if(cmd.getMsgType() == 2){//下车信息
-					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 "+cmd.getRouteName()+" 】即将到达 【 "+cmd.getNextStation()+" 】站，请您做好下车准备！"));				
+					messageDto.setBody(thirdPartMessageBuild("班车消息通知：线路名称为【 ",cmd.getRouteName()," 】即将到达 【 "+cmd.getNextStation()," 】站，请您做好下车准备！"));				
 				}else{
 					// 4.2 班车信息类型有误则返回标志位3
 					messageDto.setBody("班车信息类型有误，请稍后重试！");

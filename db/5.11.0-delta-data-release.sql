@@ -1,8 +1,8 @@
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: OPERATION
 -- DESCRIPTION: 此SECTION放升级相关的操作要求，如调接口、查询数据确认、修改配置文件、更新特殊程序等
--- AUTHOR:
--- REMARK:
+-- AUTHOR: xq.tian 20181116
+-- REMARK: 替换最新的 contentserver 二进制 #40547 contentserver/release/server/contentserver
 
 
 
@@ -12,6 +12,9 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
+-- AUTHOR: xq.tian  20181116
+-- REMARK: 报错提示模板
+INSERT INTO eh_locale_strings (scope, code, locale, text) VALUES ('flow', '10013', 'zh_CN', '任务状态已经改变，请刷新重试');
 
 
 -- --------------------- SECTION END ALL -----------------------------------------------------

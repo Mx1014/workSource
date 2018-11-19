@@ -82,6 +82,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.pay.order.OrderCommandResponse;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.pay.order.PaymentType;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
 import com.everhomes.paySDK.pojo.PayUserDTO;
@@ -661,6 +662,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
             throw RuntimeErrorException.errorWith(PrintErrorCode.SCOPE, PrintErrorCode.ERROR_PAYEE_ACCOUNT_NOT_CONFIG,
                     "暂未绑定收款账户");
         }
+        
+        buildSpecificPayMethod(cmd);
 
         //4、组装报文，发起下单请求
         PurchaseOrderCommandResponse orderCommandResponse = createOrder(cmd, order, bizPayeeId);
@@ -675,6 +678,35 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		siyinPrintOrderProvider.updateSiyinPrintOrder(order);
 
 		return preOrderDTO;
+	}
+	
+	
+	private void buildSpecificPayMethod(PayPrintOrderCommandV2 createOrderCommand) {
+
+		Integer paymentType = createOrderCommand.getPaymentType();
+		if (null == paymentType) {
+			return;
+		}
+
+		String namespaceUserToken = UserContext.current().getUser().getNamespaceUserToken();
+		Map<String, String> flattenMap = new HashMap<>();
+		flattenMap.put("acct", namespaceUserToken);
+		flattenMap.put("payType", "no_credit");
+
+		createOrderCommand.setCommitFlag(1);
+
+		// 公众号支付
+		if (paymentType == PaymentType.WECHAT_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			createOrderCommand.setPaymentParams(flattenMap);
+		} else if (paymentType != null && paymentType == PaymentType.ALI_JS_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.ALI_JS_PAY.getCode());
+			createOrderCommand.setPaymentParams(flattenMap);
+		} else if (paymentType != null && paymentType == PaymentType.WECHAT_SCAN_PAY.getCode()) {
+			createOrderCommand.setPaymentType(PaymentType.WECHAT_JS_ORG_PAY.getCode());
+			createOrderCommand.setPaymentParams(flattenMap);
+		}
+
 	}
 	
 	@Override
@@ -925,6 +957,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
        // preOrderCommand.setPaymentPayeeType(billGroup.getBizPayeeType()); 不填会不会有问题?
         preOrderCommand.setPaymentPayeeId(bizPayeeId); //不知道填什么
+        preOrderCommand.setPaymentType(cmd.getPaymentType());
+        preOrderCommand.setPaymentParams(cmd.getPaymentParams());
+        preOrderCommand.setCommitFlag(cmd.getCommitFlag());
+        
 
 //        preOrderCommand.setPaymentParams(flattenMap);
         //preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
@@ -1777,6 +1813,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(r != null){
 			r.setOrderId(list.get(0).getId());
 			r.setTotalFee(list.get(0).getOrderTotalFee());
+			r.setOrderNo(list.get(0).getOrderNo());
 		}
 		return PrintLogonStatusType.HAVE_UNPAID_ORDER;
 	}
