@@ -377,8 +377,7 @@ public class RemindServiceImpl implements RemindService  {
         return shares;
     }
 
-	private boolean checkShareRemindInHistory(List<ShareMemberDTO> historyShareReminds,
-			RemindCategoryDefaultShare cs) {
+	private boolean checkShareRemindInHistory(List<ShareMemberDTO> historyShareReminds, RemindCategoryDefaultShare cs) {
 		if (CollectionUtils.isEmpty(historyShareReminds)) {
             return false;
         }
