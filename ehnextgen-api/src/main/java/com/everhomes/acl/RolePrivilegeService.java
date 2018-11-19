@@ -207,7 +207,6 @@ public interface RolePrivilegeService {
 	 */
 	void deleteOrganizationAdministrators(DeleteOrganizationAdminCommand cmd);
 
-
 	void deleteOrganizationAdministratorsForOnes(DeleteOrganizationAdminCommand cmd);
 
 	/**
@@ -456,5 +455,6 @@ public interface RolePrivilegeService {
 												   String contactToken,
 												   Long adminPrivilegeId,
 												   Long roleId ,boolean notSendMsgFlag ,boolean realSuperAdmin);
+
 
 }

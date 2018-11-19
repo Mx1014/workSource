@@ -940,6 +940,68 @@ CREATE TABLE `eh_alliance_extra_events` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工作流中，新建事件表';
 
+DROP TABLE IF EXISTS `eh_alliance_faq_service_customers`;
+
+
+CREATE TABLE `eh_alliance_faq_service_customers` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(20) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `type` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `user_name` VARCHAR(50) NOT NULL,
+  `hotline_number` VARCHAR(50) NOT NULL,
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_uid` BIGINT NOT NULL COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='faq的客服';
+
+DROP TABLE IF EXISTS `eh_alliance_faq_types`;
+
+
+CREATE TABLE `eh_alliance_faq_types` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(20) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `type` BIGINT NOT NULL,
+  `name` VARCHAR(50) NOT NULL COMMENT '分类名称',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-已被删除 2-正常',
+  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT '默认排序 数字小的在上面',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_uid` BIGINT NOT NULL COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='问题分类表';
+
+DROP TABLE IF EXISTS `eh_alliance_faqs`;
+
+
+CREATE TABLE `eh_alliance_faqs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(20) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `type` BIGINT NOT NULL COMMENT '服务联盟类型',
+  `title` VARCHAR(128) NOT NULL COMMENT '标题',
+  `type_id` BIGINT NOT NULL COMMENT '分类id',
+  `type_name` VARCHAR(50) NOT NULL COMMENT '分类名称',
+  `content` MEDIUMTEXT NOT NULL COMMENT '内容详情',
+  `solve_times` INTEGER NOT NULL DEFAULT 0 COMMENT '解决次数',
+  `un_solve_times` INTEGER NOT NULL DEFAULT 0 COMMENT '未解决次数',
+  `top_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0-非热门 1-热门',
+  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT '默认排序 数字小的在上面',
+  `top_order` BIGINT NOT NULL DEFAULT 0 COMMENT '热门排序 数字小的在上面',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0-已被删除 2-正常',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_uid` BIGINT NOT NULL COMMENT '创建人',
+  PRIMARY KEY (`id`),
+  KEY `i_eh_top_order` (`top_order`),
+  KEY `i_eh_default_order` (`default_order`),
+  KEY `i_eh_type_id_type` (`owner_type`,`owner_id`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='问题表';
+
+
 DROP TABLE IF EXISTS `eh_alliance_online_service`;
 
 -- 服务联盟v3.4 服务新增客服会话表 add by huangmingbo 2018.07.03
@@ -954,6 +1016,22 @@ CREATE TABLE `eh_alliance_online_service` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_owner_user` (`owner_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='服务联盟客服表，新增服务时会指派客服专员。这个表保存服务添加过的客服信息。';
+
+DROP TABLE IF EXISTS `eh_alliance_operate_services`;
+
+
+CREATE TABLE `eh_alliance_operate_services` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(20) NOT NULL,
+  `owner_id` BIGINT NOT NULL,
+  `type` BIGINT NOT NULL,
+  `service_id` BIGINT NOT NULL COMMENT '服务id',
+  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT '排序，数字小的在上面',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_uid` BIGINT NOT NULL COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='运营模块展示服务';
 
 DROP TABLE IF EXISTS `eh_alliance_service_category_match`;
 
@@ -2118,7 +2196,7 @@ CREATE TABLE `eh_banners` (
   `apply_policy` TINYINT,
   `update_time` DATETIME,
   `target_type` VARCHAR(32) NOT NULL COMMENT 'e.g: NONE, POST_DETAIL, ACTIVITY_DETAIL, APP, URL, ROUTE',
-  `target_data` VARCHAR(1024) COMMENT 'It is different by different target_type',
+  `target_data` TEXT COMMENT 'It is different by different target_type',
   `category_id` BIGINT COMMENT '应用入口ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -16333,6 +16411,7 @@ CREATE TABLE `eh_rentalv2_resources` (
   `building_id` BIGINT,
   `address` VARCHAR(192) COMMENT '地址',
   `address_id` BIGINT,
+  `people_spec` int(10) COMMENT '容纳人数',
   `spec` VARCHAR(255) COMMENT '规格',
   `own_company_name` VARCHAR(60),
   `contact_name` VARCHAR(40),
@@ -16380,6 +16459,36 @@ CREATE TABLE `eh_rentalv2_site_resources` (
   `resource_type` VARCHAR(64) COMMENT '资源类型',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_rentalv2_structure_template`;
+
+
+CREATE TABLE `eh_rentalv2_structure_template` (
+  `id` BIGINT NOT NULL,
+  `name` VARCHAR(255),
+  `display_name` VARCHAR(255),
+  `icon_uri` VARCHAR(255),
+  `default_order` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_rentalv2_structures`;
+
+
+CREATE TABLE `eh_rentalv2_structures` (
+  `id` BIGINT NOT NULL,
+  `template_id` BIGINT NOT NULL,
+  `source_type` VARCHAR(45),
+  `source_id` BIGINT,
+  `name` VARCHAR(255),
+  `display_name` VARCHAR(255),
+  `icon_uri` VARCHAR(255),
+  `is_surport` TINYINT,
+  `default_order` BIGINT,
+  `resource_type` VARCHAR(45),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 DROP TABLE IF EXISTS `eh_rentalv2_time_interval`;
 
@@ -17224,6 +17333,7 @@ CREATE TABLE `eh_service_alliance_application_records` (
   `creator_organization` VARCHAR(128),
   `service_organization` VARCHAR(128),
   `service_alliance_id` BIGINT,
+  `update_time` DATETIME COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -17621,6 +17731,8 @@ CREATE TABLE `eh_service_alliances` (
   `end_time` DATETIME COMMENT 'for policydeclare ; end time of the policy',
   `form_id` BIGINT COMMENT '表单id',
   `flow_id` BIGINT COMMENT '工作流id',
+  `update_time` DATETIME COMMENT '更新时间',
+  `update_uid` BIGINT COMMENT '更新用户id',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `i_eh_default_order` (`default_order`) USING BTREE,
   KEY `i_eh_type` (`type`) USING BTREE
@@ -18030,6 +18142,7 @@ CREATE TABLE `eh_siyin_print_orders` (
   `is_invoiced` TINYINT DEFAULT 0 COMMENT '是否开具发票 0-未开发票 1-已发票',
   `printer_name` VARCHAR(128) COMMENT '打印机名称',
   `pay_mode` TINYINT COMMENT '支付方式',
+  `user_notify_flag` TINYINT DEFAULT 0 COMMENT '0-未起定时器通知用户 1-已起定时器通知用户',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -19843,6 +19956,7 @@ CREATE TABLE `eh_user_current_scene` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `sign_token` VARCHAR(2048),
+  `extra` TEXT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

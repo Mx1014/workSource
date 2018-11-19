@@ -1743,8 +1743,8 @@ public class CustomerController extends ControllerBase {
      */
     @RequestMapping("transNewAdmin")
     @RestReturn(value = String.class)
-    public RestResponse transNewAdmin() {
-        customerService.transNewAdmin();
+    public RestResponse transNewAdmin(TransNewAdminCommand cmd) {
+        customerService.transNewAdmin(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

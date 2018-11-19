@@ -4970,17 +4970,28 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void transNewAdmin(){
+    public void transNewAdmin(TransNewAdminCommand cmd2){
         Long nextPageAnchor = 0l;
         boolean breakFlag = true;
+        int totalCount = 0;
+        long roundStartTime = System.currentTimeMillis();
         while(breakFlag){
-            List<CreateOrganizationAdminCommand> list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+
+            List<CreateOrganizationAdminCommand> list = new ArrayList<>();
+
+            if(cmd2.getNamespaceId() != null && cmd2.getNamespaceId() != 0){
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor, cmd2.getNamespaceId());
+            }else{
+                list = enterpriseCustomerProvider.getOrganizationAdmin(nextPageAnchor);
+            }
             nextPageAnchor = list.get(list.size()-1).getOwnerId();
             if(list.size() < 101){
                 breakFlag = false;
             }else{
                 list.remove(list.size()-1);
             }
+            long roundQueryEndTime = System.currentTimeMillis();
+
             for(CreateOrganizationAdminCommand cmd : list){
                 cmd.setOwnerId(null);
                 dbProvider.execute((TransactionStatus status) -> {
@@ -4999,7 +5010,16 @@ public class CustomerServiceImpl implements CustomerService {
                     return null;
                 });
             }
+
+            totalCount += list.size();
+            if(LOGGER.isInfoEnabled()) {
+                long roundEndTime = System.currentTimeMillis();
+                LOGGER.info("Replace organization admin, namespaceId={}, totalCount={}, pageAnchor={}, queryElapse={}, elapse={}",
+                        cmd2.getNamespaceId(), totalCount, nextPageAnchor, (roundEndTime - roundQueryEndTime), (roundEndTime - roundStartTime));
+                roundStartTime  = roundEndTime;
+            }
         }
     }
+
 
 }

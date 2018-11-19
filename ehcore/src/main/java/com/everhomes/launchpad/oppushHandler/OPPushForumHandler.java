@@ -60,6 +60,8 @@ public class OPPushForumHandler implements OPPushHandler{
     private ContentServerService contentServerService;
     @Autowired
     private RouterInfoService routerInfoService;
+
+
     @Override
     public List<OPPushCard> listOPPushCard(Long layoutId, Object instanceConfig, AppContext context) {
         ListTopicCommand listTopicCommand = new ListTopicCommand();
@@ -98,19 +100,12 @@ public class OPPushForumHandler implements OPPushHandler{
 
                 contentRouterJson.setForumId(postDTO.getForumId());
                 contentRouterJson.setTopicId(postDTO.getId());
+
                 RouterInfo routerInfo = serviceModuleAppService.convertRouterInfo(10100L, app.getId(),"论坛", contentRouterJson.toString(), "/detail",null,null, ClientHandlerType.NATIVE.getCode());
-
-                card.setRouterPath(routerInfo.getPath());
-                card.setRouterQuery(routerInfo.getQuery());
-                card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
-
-                String host = "post";
-                String router = "zl://" + host + card.getRouterPath() + "?" + card.getRouterQuery();
-                card.setRouter(router);
-
 
                 List<Object> properties = new ArrayList<>();
                 String imageUrl = "";
+                String router = "";
                 if (postDTO.getEmbeddedAppId() != null && postDTO.getEmbeddedAppId().equals(AppConstants.APPID_ACTIVITY)) {
                     if (!StringUtils.isBlank(postDTO.getEmbeddedJson())) {
                         ActivityDTO activityDTO = (ActivityDTO) StringHelper.fromJsonString(postDTO.getEmbeddedJson(), ActivityDTO.class);
@@ -118,17 +113,27 @@ public class OPPushForumHandler implements OPPushHandler{
                             imageUrl = activityDTO.getPosterUrl();
                         }
                     }
+                    routerInfo = routerInfoService.getRouterInfo(10600L, "/detail", contentRouterJson.toString());
+                    card.setRouterPath(routerInfo.getPath());
+                    card.setRouterQuery(routerInfo.getQuery());
+                    card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+                    router = "zl://activity" + card.getRouterPath() + "?moduleId=10600&clientHandlerType=0&" + card.getRouterQuery();
                 }else {
                     if (!CollectionUtils.isEmpty(postDTO.getAttachments())) {
                         for (int i=0;i<postDTO.getAttachments().size();i++) {
                             AttachmentDTO attachmentDTO = ConvertHelper.convert(postDTO.getAttachments().get(i), AttachmentDTO.class);
-                            if (PostContentType.IMAGE.getCode().toUpperCase().equals(attachmentDTO.getContentType())) {
+                            if (!StringUtils.isBlank(attachmentDTO.getContentType()) && PostContentType.IMAGE.getCode().toUpperCase().equals(attachmentDTO.getContentType().toUpperCase())) {
                                 imageUrl = contentServerService.parserUri(attachmentDTO.getContentUri(), EntityType.TOPIC.getCode(), postDTO.getId());
                                 break;
                             }
                         }
                     }
+                    card.setRouterPath(routerInfo.getPath());
+                    card.setRouterQuery(routerInfo.getQuery());
+                    card.setClientHandlerType(ClientHandlerType.NATIVE.getCode());
+                    router = "zl://post" + card.getRouterPath() + "?" + card.getRouterQuery();
                 }
+                card.setRouter(router);
                 properties.add(imageUrl);
                 String tag = "";
                 String title = "";
@@ -137,9 +142,15 @@ public class OPPushForumHandler implements OPPushHandler{
                     tag = "活动";
                 }else if (postDTO.getCategoryId() != null && postDTO.getCategoryId().equals(CategoryConstants.CATEGORY_ID_TOPIC_POLLING)){
                     title = postDTO.getContent();
+                    if (StringUtils.isBlank(title)) {
+                        title = postDTO.getSubject();
+                    }
                     tag = "投票";
                 }else {
                     title = postDTO.getContent();
+                    if (StringUtils.isBlank(title)) {
+                        title = postDTO.getSubject();
+                    }
                     tag = "话题";
                 }
                 properties.add(title);

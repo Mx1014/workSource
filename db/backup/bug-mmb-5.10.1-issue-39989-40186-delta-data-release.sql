@@ -91,11 +91,11 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 update eh_locale_templates set text = '由于您未在规定时间内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。' where `scope` = 'rental.notification' and `code` = 14;
 update eh_locale_templates set text = '由于您未在规定时间内完成支付，您预约的${useDetail}已自动取消，期待下次为您服务。' where `scope` = 'sms.default' and `code` = 58;
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '25', 'zh_CN', '退款成功', '尊敬的用户，您预约的${useDetail}已退款成功，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '83', 'zh_CN', '退款成功', '尊敬的用户，您预约的${useDetail}已退款成功，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '84', 'zh_CN', '退款成功', '尊敬的用户，您预约的${useDetail}已退款成功，订单编号：${orderNum}，订单金额：${totalAmount}元，退款金额：${refundAmount}元，期待下次为您服务。', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '26', 'zh_CN','取消订单', '尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '84', 'zh_CN', '取消订单', '尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '85', 'zh_CN', '取消订单', '尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：0元，期待下次为您服务。', '0');
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'rental.notification', '27', 'zh_CN', '取消订单 需要退款', '尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。', '0');
-INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '85', 'zh_CN', '取消订单 需要退款','尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。', '0');
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default', '86', 'zh_CN', '取消订单 需要退款','尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。', '0');
 
 
 
@@ -123,6 +123,19 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 -- DESCRIPTION: 此SECTION只在光大-999979执行的脚本
 -- AUTHOR:
 -- REMARK:
+
+-- AUTHOR:黄明波 20181112
+-- REMARK: #41990【光大we谷】独立部署，停车对接调整。A区停车场前期对接百世，现替换成捷顺，请调整正式环境参数。B区停车场暂时不变
+update eh_parking_lots set vendor_name = 'JIESHUN_GQY1' where vendor_name = 'GUANG_DA_WE_GU';
+
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.cid', '000000008002520', '客户号', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.usr', '000000008002520', '捷顺登录账户名', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.psw', '000000008002520', '捷顺登录密码', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.signKey', '24e7f28eb0b6044beb3a3ac8afd6402c', 'signKey', 0, NULL, 1);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`, `is_readonly`) VALUES ('parking.jieshun.JIESHUN_GQY1.parkCode', 'p180905025', '小区编号', 0, NULL, 1);
+
+
 -- --------------------- SECTION END guangda -------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: szbay

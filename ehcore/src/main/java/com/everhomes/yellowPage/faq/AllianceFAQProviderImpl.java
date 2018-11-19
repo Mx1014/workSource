@@ -51,8 +51,8 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor) {
-		return allianceFaqTypeProvider.listFAQTypes(cmd, locator, pageSize, pageAnchor);
+	public List<AllianceFAQType> listFAQTypes(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize) {
+		return allianceFaqTypeProvider.listFAQTypes(cmd, locator, pageSize);
 	}
 
 	@Override
@@ -81,14 +81,14 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 	}
 
 	@Override
-	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator,  Integer pageSize, Long pageAnchor, Long faqType,
+	public List<AllianceFAQ> listFAQs(AllianceCommonCommand cmd, ListingLocator locator,  Integer pageSize, Long faqType,
 			Byte topFlag, String keyword, Byte orderType, Byte sortType) {
-		return allianceFaqsProvider.listFAQs(cmd, locator, pageSize, pageAnchor, faqType, topFlag, keyword, orderType, sortType);
+		return allianceFaqsProvider.listFAQs(cmd, locator, pageSize, faqType, topFlag, keyword, orderType, sortType);
 	}
 
 	@Override
-	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize, Long pageAnchor) {
-		return allianceFaqsProvider.listTopFAQs(cmd, locator, pageSize, pageAnchor);
+	public List<AllianceFAQ> listTopFAQs(AllianceCommonCommand cmd, ListingLocator locator, Integer pageSize) {
+		return allianceFaqsProvider.listTopFAQs(cmd, locator, pageSize);
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class AllianceFAQProviderImpl implements AllianceFAQProvider{
 
 	@Override
 	public List<AllianceFAQ> listAllFAQs(AllianceCommonCommand cmd) {
-		return listFAQs(cmd, null, null, null, null, null, null, null, null);
+		return listFAQs(cmd, null, null, null, null, null,  null, null);
 	}
 
 	@Override
