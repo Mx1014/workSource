@@ -208,7 +208,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
         //TODO：若是门禁组则查门禁组表
-        query.addConditions();
+        //query.addConditions();
         query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.in(context.select(Tables.EH_DOOR_ACCESS.ID).from(Tables.EH_DOOR_ACCESS).where(Tables.EH_DOOR_ACCESS.STATUS.eq(DoorAccessStatus.ACTIVE.getCode()))));
         //根据userId查询userName add by liqingyan
 //        query.addJoin(Tables.EH_USERS,JoinType.LEFT_OUTER_JOIN,Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(Tables.EH_USERS.ID));
