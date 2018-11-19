@@ -491,10 +491,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         List<Long> doorIds = new ArrayList<>();
         if(null != managements && !managements.isEmpty()){
             for(AclinkManagementDTO management: managements){
-//                DoorAccess manageDoor = doorAccessProvider.getDoorAccessById(management.getDoorId());
-//                DoorAccessDTO dto = new DoorAccessDTO();
-//                dto = ConvertHelper.convert(manageDoor, DoorAccessDTO.class);
-//                dto.setGroupId(manageDoor.getGroupid());
                 if(null != management && management.getDoorId() != null){
                     doorIds.add(management.getDoorId());
                 }
@@ -6809,16 +6805,16 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 	con = con.or(Tables.EH_DOOR_ACCESS.OWNER_ID.in(communityIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(buildingIds.size() > 0) {
-                	//公共门禁的ADRESS_DETAIL是楼栋或楼栋+楼层
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(buildingIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+                	//公共门禁的ADDRESS_DETAIL是楼栋或楼栋+楼层
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(buildingIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(floorIds.size() > 0) {
-                	//公共门禁的ADRESS_DETAIL是楼栋或楼栋_楼层
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(floorIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
+                	//公共门禁的ADDRESS_DETAIL是楼栋或楼栋_楼层
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(floorIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode())));
                 }
                 if(addressIds.size() > 0) {
-                	//企业门禁的ADRESS_DETAIL是办公地点
-                	con = con.or(Tables.EH_DOOR_ACCESS.ADRESS_DETAIL.in(addressIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode())));
+                	//企业门禁的ADDRESS_DETAIL是办公地点
+                	con = con.or(Tables.EH_DOOR_ACCESS.ADDRESS_DETAIL.in(addressIds).and(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode())));
                 }
                 return query;
             }
@@ -6841,10 +6837,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode()))
 						|| ((authCmd.getType().equals(AuthGroupType.BUILDING.getCode())
 							|| authCmd.getType().equals(AuthGroupType.FLOOR.getCode()))
-							&& authCmd.getId().equals(doorAcc.getAdressDetail())
+							&& authCmd.getId().equals(doorAcc.getAddressDetail())
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.COMMUNITY.getCode()))
 						|| (authCmd.getType().equals(AuthGroupType.ADDRESS.getCode())
-							&& authCmd.getId().equals(doorAcc.getAdressDetail())
+							&& authCmd.getId().equals(doorAcc.getAddressDetail())
 							&& doorAcc.getOwnerType().equals(DoorAccessOwnerType.ENTERPRISE.getCode()))) {
 						
 						//生成单个用户正式授权列表
