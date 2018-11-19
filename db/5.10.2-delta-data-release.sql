@@ -19,6 +19,15 @@
 -- ENV: ALL
 -- DESCRIPTION: 此SECTION放所有域空间都需要执行的脚本，包含基线、独立部署、研发数据等环境
 
+-- AUTHOR: 黄明波
+-- REMARK: 云打印支持微信支付
+update eh_service_modules set instance_config = replace (instance_config, '#/home#sign_suffix', '?namespaceId=1&communityId=1&organizationId=1#/home#sign_suffix') where id = 41400 and instance_config not like '%?namespaceId=1&communityId=1&organizationId=1%';
+update eh_service_module_apps set instance_config = replace (instance_config, '#/home#sign_suffix', '?namespaceId=1&communityId=1&organizationId=1#/home#sign_suffix') where module_id = 41400 and instance_config not like '%?namespaceId=1&communityId=1&organizationId=1%';
+update eh_launch_pad_items  set   action_data = replace ( action_data, '#/home#sign_suffix', '?namespaceId=1&communityId=1&organizationId=1#/home#sign_suffix')   where action_data like '%/cloud-print/build/index.html%' and action_data not like '%namespaceId=1&communityId=1%';
+
+
+
+
 -- --------------------- SECTION END ALL -----------------------------------------------------
 -- --------------------- SECTION BEGIN -------------------------------------------------------
 -- ENV: zuolin-base
