@@ -3937,15 +3937,17 @@ long assetCategoryId = 0l;
 						generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
 						//判断是否为正常合同，为正常合同进行入场
 						if (contract.getStatus() == ContractStatus.ACTIVE.getCode()) {
-							// 合同入场
-							EntryContractCommand entryContractCommand = new EntryContractCommand();
-							entryContractCommand.setCategoryId(contract.getCategoryId());
-							entryContractCommand.setCommunityId(contract.getCommunityId());
-							entryContractCommand.setId(contract.getId());
-							entryContractCommand.setNamespaceId(contract.getNamespaceId());
-							entryContractCommand.setOrgId(contract.getPartyAId());
-							entryContractCommand.setPartyAId(contract.getPartyAId());
-							entryContract(entryContractCommand);
+							//由于合同入场的接口有Bug，导致无法更新账单，所以如果是正常合同，那么直接调用代码
+							assetService.upodateBillStatusOnContractStatusChange(contract.getId(), AssetPaymentConstants.CONTRACT_SAVE);
+//							// 合同入场
+//							EntryContractCommand entryContractCommand = new EntryContractCommand();
+//							entryContractCommand.setCategoryId(contract.getCategoryId());
+//							entryContractCommand.setCommunityId(contract.getCommunityId());
+//							entryContractCommand.setId(contract.getId());
+//							entryContractCommand.setNamespaceId(contract.getNamespaceId());
+//							entryContractCommand.setOrgId(contract.getPartyAId());
+//							entryContractCommand.setPartyAId(contract.getPartyAId());
+//							entryContract(entryContractCommand);
 						}
 					}
 				});
