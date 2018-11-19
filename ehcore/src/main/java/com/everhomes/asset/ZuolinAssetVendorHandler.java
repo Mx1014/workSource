@@ -1297,6 +1297,15 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void modifyBillForUser(CreateBillCommand command, List<Boolean> isCreate){
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
+    	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+    	command.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	command.setCanDelete((byte)1);
+    	command.setCanModify((byte)1);
+    	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
@@ -1339,6 +1348,15 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     }
     
     private void modifyBillForOrg(CreateBillCommand command, List<Boolean> isCreate){
+    	//物业缴费V6.0（UE优化) 账单区分数据来源
+    	command.setSourceType(AssetSourceTypeEnum.ASSET_MODULE.getSourceType());
+    	command.setSourceId(AssetPaymentBillSourceId.IMPORT.getCode());
+    	LocaleString localeString = localeStringProvider.find(AssetSourceNameCodes.SCOPE, AssetSourceNameCodes.ASSET_IMPORT_CODE, "zh_CN");
+    	command.setSourceName(localeString.getText());
+    	//物业缴费V6.0 ：批量导入的未出账单及已出未缴账单需支持修改和删除（修改和删除分为：修改和删除整体）
+    	command.setCanDelete((byte)1);
+    	command.setCanModify((byte)1);
+    	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         EhPaymentBillItems t2 = Tables.EH_PAYMENT_BILL_ITEMS.as("t2");
