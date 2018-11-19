@@ -2,18 +2,15 @@ package com.everhomes.investment;
 
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.rest.customer.ExportEnterpriseCustomerCommand;
-import com.everhomes.rest.customer.ImportEnterpriseCustomerDataCommand;
 import com.everhomes.rest.customer.SearchEnterpriseCustomerCommand;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
 import com.everhomes.rest.investment.*;
-import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.varField.ImportFieldExcelCommand;
 import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +52,7 @@ public interface InvitedCustomerService {
 
     List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
 
-    List<CustomerStatisticsDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
+    List<CommunityCustomerStatisticDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
 
     List<CustomerStatisticsDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
 
@@ -78,5 +75,9 @@ public interface InvitedCustomerService {
     void statisticCustomerDaily(Date date);
 
     void statisticCustomerMonthly(Date date);
+
+    void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd);
+
+    java.sql.Date getDateByTimestamp(Timestamp time);
 
 }

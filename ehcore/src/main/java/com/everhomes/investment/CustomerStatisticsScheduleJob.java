@@ -27,7 +27,7 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
     public static final String SCHEDELE_NAME = "invitedCustomer-";
 
     //public static String CRON_EXPRESSION = "0 0 3 * * ?";
-    public static String CRON_EXPRESSION = "0 0/5 * * * ?";
+    public static String CRON_EXPRESSION = "0 3/5 * * * ?";
 
 
     @Autowired
@@ -51,63 +51,5 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
 
     }
 
-
-    public static void main(String[] args) {
-        Calendar calendar = Calendar. getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar. HOUR_OF_DAY, 0);
-        calendar.set(Calendar. MINUTE, 0);
-        calendar.set(Calendar. SECOND, 0);
-        calendar.set(Calendar. MILLISECOND, 0);
-        calendar.add(Calendar. DAY_OF_MONTH, -1);
-        Date date = calendar.getTime();
-        System.out.println(date);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss" );
-        String str = sdf.format(date);
-        System. out.println(str);
-
-        calendar.setTime(new Date());
-        calendar.set(Calendar. HOUR_OF_DAY, 23);
-        calendar.set(Calendar. MINUTE, 59);
-        calendar.set(Calendar. SECOND, 59);
-        calendar.set(Calendar. MILLISECOND, 999);
-        date = calendar.getTime();
-        System.out.println(date);
-        str = sdf.format(date);
-        System. out.println(str);
-
-        calendar.setTime(new Date());
-        calendar.set(Calendar. HOUR_OF_DAY, 23);
-        calendar.set(Calendar. MINUTE, 59);
-        calendar.set(Calendar. SECOND, 59);
-        calendar.add(Calendar. MONTH, -1);
-        calendar.set(Calendar. MILLISECOND, 999);
-        calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-
-        date = calendar.getTime();
-        System.out.println(date);
-        str = sdf.format(date);
-        System. out.println(str);
-
-
-        calendar.setTime(new Date());
-        calendar.set(Calendar. HOUR_OF_DAY, 0);
-        calendar.set(Calendar. MINUTE, 0);
-        calendar.set(Calendar. SECOND, 0);
-        calendar.add(Calendar. MONTH, -1);
-        calendar.set(Calendar. MILLISECOND, 0);
-        calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-
-
-        date = calendar.getTime();
-        System.out.println(date);
-        str = sdf.format(date);
-        System. out.println(str);
-
-
-        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
-
-    }
 
 }

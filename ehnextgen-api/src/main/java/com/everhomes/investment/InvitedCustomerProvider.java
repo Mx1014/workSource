@@ -5,6 +5,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.varField.FieldItemDTO;
+import com.everhomes.server.schema.tables.pojos.EhCustomerStatisticsTotal;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -89,9 +90,19 @@ public interface InvitedCustomerProvider {
 
     CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date);
 
-    //List<CustomerStatisticDaily>
+    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
 
     void createCustomerStatisticsMonthly(CustomerStatisticMonthly daily);
 
     CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date);
+
+    void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate);
+
+    void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+
+    void createCustomerStatisticsAll(EhCustomerStatisticsTotal total);
+
+    CustomerStatisticTotal getCustomerStatisticTotal(Integer namespaceId, Long communityId, Date date);
+
+
 }

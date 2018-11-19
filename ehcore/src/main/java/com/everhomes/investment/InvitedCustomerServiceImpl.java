@@ -6,10 +6,9 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contract.ContractScheduleJob;
-import com.everhomes.customer.CustomerExportHandler;
 import com.everhomes.customer.CustomerService;
 import com.everhomes.customer.EnterpriseCustomer;
 import com.everhomes.customer.EnterpriseCustomerProvider;
@@ -24,8 +23,11 @@ import com.everhomes.portal.PortalService;
 import com.everhomes.quality.QualityConstant;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.common.ServiceModuleConstants;
+import com.everhomes.rest.community.ListCommunitiesCommand;
+import com.everhomes.rest.community.ListCommunitiesResponse;
 import com.everhomes.rest.contract.ContractErrorCode;
 import com.everhomes.rest.customer.*;
 import com.everhomes.rest.dynamicExcel.DynamicImportResponse;
@@ -78,6 +80,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     private static final String CreateCustomer = "/CreateCustomer";
     private static final Integer SUCCESS_CODE = 0;
     private static final String CreateContract = "/CreateContract";
+
+    @Autowired
+    private CommunityService communityService;
 
     @Autowired
     private EnterpriseCustomerSearcher customerSearcher;
@@ -961,8 +966,35 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public List<CustomerStatisticsDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
-        return null;
+    public List<CommunityCustomerStatisticDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
+        List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
+        if(cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
+            for(Long communityId : cmd.getCommunities()){
+                CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
+                List<CustomerStatisticsDTO> dtos = new ArrayList<>();
+                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), communityId, getDateByTimestamp(cmd.getStartQueryTime()), getDateByTimestamp(cmd.getEndQueryTime()));
+                dto.setCommunityId(communityId);
+                dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
+                dto.setDtos(dtos);
+                result.add(dto);
+            }
+        }else{
+            ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+            cmd2.setNamespaceId(cmd.getNamespaceId());
+            cmd2.setOrgId(cmd.getOrgId());
+            ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+            List<CommunityDTO> communities = response.getList();
+            for(CommunityDTO community : communities){
+                CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
+                List<CustomerStatisticsDTO> dtos = new ArrayList<>();
+                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(cmd.getStartQueryTime()), getDateByTimestamp(cmd.getEndQueryTime()));
+                dto.setCommunityId(community.getId());
+                dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
+                dto.setDtos(dtos);
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -1132,27 +1164,45 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void statisticCustomerDaily(Date date){
         LOGGER.info("the scheduleJob of customer daily statistics is start!");
-        StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. DAY_OF_MONTH);
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. DAY_OF_MONTH);
         List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerstatisticDaily(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
         if(datas != null && datas.size() > 0) {
             for (StatisticDataDTO data : datas) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                String str = format.format(statisticTime);
+                String str = format.format(statisticTime.getStatisticStartTime());
                 try {
                     data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
                     CustomerStatisticDaily daily = ConvertHelper.convert(data, CustomerStatisticDaily.class);
+                    invitedCustomerProvider.createCustomerStatisticsDaily(daily);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
         }
+        LOGGER.info("the scheduleJob of customer daily statistics is end!, result = {}" , datas);
+
     }
 
     @Override
     public void statisticCustomerMonthly(Date date){
         LOGGER.info("the scheduleJob of customer monthly statistics is start!");
         StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. MONTH);
-        startCustomerStatistic(statisticTime);
+        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+        if(datas != null && datas.size() > 0) {
+            for (StatisticDataDTO data : datas) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                String str = format.format(statisticTime.getStatisticStartTime());
+                try {
+                    data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
+                    CustomerStatisticMonthly monthly = ConvertHelper.convert(data, CustomerStatisticMonthly.class);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        LOGGER.info("the scheduleJob of customer monthly statistics is end!, result = {}" , datas);
 
     }
 
@@ -1164,6 +1214,45 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         statisticTime.setStatisticEndTime(null);
         startCustomerStatistic(statisticTime);
 
+    }
+
+    @Override
+    public void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd){
+        CustomerStatisticType type = CustomerStatisticType.fromCode(cmd.getType());
+
+        switch (type) {
+            case STATISTIC_DAILY:
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerDaily(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case STATISTIC_MONTHLY:
+                break;
+
+            case STATISTIC_ALL:
+                break;
+
+            default:
+        }
+    }
+
+    @Override
+    public java.sql.Date getDateByTimestamp(Timestamp time){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = format.parse(time.toString());
+            java.sql.Date result = new java.sql.Date(date.getTime());
+            return result;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
 

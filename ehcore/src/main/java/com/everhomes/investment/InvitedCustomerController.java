@@ -324,5 +324,33 @@ public class InvitedCustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     *
+     <b>URL: /invitedCustomer/testCustomerStatistic</b>
+     * <p>将现在系统中所有客户的状态初始化进数据库</p>
+     */
+    @RequestMapping("testCustomerStatistic")
+    @RestReturn(value = String.class)
+    public RestResponse testCustomerStatistic(TestCreateCustomerStatisticCommand cmd) {
+        invitedCustomerService.testCustomerStatistic(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("queryCustomerStatisticDaily")
+    @RestReturn(value = String.class)
+    public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsDailyCommand cmd) {
+        invitedCustomerService.getCustomerStatisticsDaily(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+
 
 }

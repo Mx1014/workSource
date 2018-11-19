@@ -7,6 +7,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.customer.CustomerErrorCode;
 import com.everhomes.rest.investment.CustomerLevelType;
 import com.everhomes.rest.investment.InvitedCustomerStatisticsDTO;
 import com.everhomes.rest.investment.InvitedCustomerStatus;
@@ -23,6 +24,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -643,11 +645,98 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
 
     @Override
     public void createCustomerStatisticsDaily(CustomerStatisticDaily daily) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhCustomerStatisticsDaily.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerStatisticsDaily.class));
+        daily.setId(id);
 
+
+        if(daily.getCreateDate() == null) {
+            Long l2 = DateHelper.currentGMTTime().getTime();
+            daily.setCreateDate(new Timestamp(l2));
+        }
+
+        EhCustomerStatisticsDailyDao dao = new EhCustomerStatisticsDailyDao(context.configuration());
+        dao.insert(daily);
+        //return id;
     }
 
     @Override
     public CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhCustomerStatisticsDailyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.eq(communityId));
+        }
+        if(date != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.eq(date));
+        }
+
+        return query.fetchAnyInto(CustomerStatisticDaily.class);
+    }
+
+    @Override
+    public List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhCustomerStatisticsDailyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.eq(communityId));
+        }
+        if(startDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.le(endDate));
+        }
+        if(endDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.ge(startDate));
+        }
+
+        return query.fetchInto(CustomerStatisticDaily.class);
+    }
+
+    @Override
+    public void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerStatisticsDaily.class));
+        DeleteQuery<EhCustomerStatisticsDailyRecord> query = context.deleteQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.eq(communityId));
+        }
+        if(startDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.eq(startDate));
+        }else{
+            LOGGER.error("delete date can not be null");
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_STATISTIC_DELETE_DATE,
+                    "delete date can not be null");
+        }
+        query.execute();
+    }
+
+    @Override
+    public void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate){
+
+    }
+
+    @Override
+    public void createCustomerStatisticsAll(EhCustomerStatisticsTotal total) {
+
+    }
+
+    @Override
+    public CustomerStatisticTotal getCustomerStatisticTotal(Integer namespaceId, Long communityId, Date date) {
         return null;
     }
 
