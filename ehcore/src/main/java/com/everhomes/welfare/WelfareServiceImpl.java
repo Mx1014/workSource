@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalDTO;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,6 +228,7 @@ public class WelfareServiceImpl implements WelfareService {
     private Welfare saveWelfare(WelfaresDTO welfareDTO) {
 
         Welfare welfare = ConvertHelper.convert(welfareDTO, Welfare.class);
+        welfare.setNamespaceId(UserContext.getCurrentNamespaceId());
         this.dbProvider.execute((TransactionStatus status) -> {
             String uName = "-";
             OrganizationMemberDetails operator = organizationProvider.findOrganizationMemberDetailsByTargetId(UserContext.currentUserId(), welfareDTO.getOrganizationId());
@@ -247,7 +249,7 @@ public class WelfareServiceImpl implements WelfareService {
 	        welfareCouponProvider.deleteWelfareCoupons(welfare.getId());
 	        if(welfareDTO.getCoupons() != null){
 	        	for(WelfareCouponDTO couponDto : welfareDTO.getCoupons()){
-	        		WelfareCoupon coupon = convertDTO2WelfareCoupon(couponDto,welfare.getOrganizationId(),welfare.getId());
+	        		WelfareCoupon coupon = convertDTO2WelfareCoupon(couponDto, welfare.getOrganizationId(), welfare.getId(), welfare.getNamespaceId());
 	        		welfareCouponProvider.createWelfareCoupon(coupon);
 	        	}
 	        }
@@ -257,6 +259,7 @@ public class WelfareServiceImpl implements WelfareService {
 	                WelfareReceiver receiver = ConvertHelper.convert(dto, WelfareReceiver.class);
 	                receiver.setOrganizationId(welfare.getOrganizationId());
 	                receiver.setWelfareId(welfare.getId());
+	                receiver.setNamespaceId(welfare.getNamespaceId());
 	                welfareReceiverProvider.createWelfareReceiver(receiver);
 	            }
 	        }
@@ -265,8 +268,9 @@ public class WelfareServiceImpl implements WelfareService {
         return welfare;
     }
 
-    private WelfareCoupon convertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId) {
+    private WelfareCoupon convertDTO2WelfareCoupon(WelfareCouponDTO couponDto, Long organizationId, Long welfareId, Integer namespaceId) {
     	WelfareCoupon coupon = ConvertHelper.convert(couponDto, WelfareCoupon.class);
+    	coupon.setNamespaceId(namespaceId);
         if (couponDto.getValidDate() != null) {
             coupon.setValidDate(new Date(couponDto.getValidDate()));
         }
