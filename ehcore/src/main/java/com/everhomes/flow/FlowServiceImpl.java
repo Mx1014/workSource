@@ -21,23 +21,14 @@ import com.everhomes.flow.nashornfunc.NashornScriptConfigExtractor;
 import com.everhomes.flow.nashornfunc.NashornScriptConfigValidator;
 import com.everhomes.flow.nashornfunc.NashornScriptMappingCall;
 import com.everhomes.flow.nashornfunc.NashornScriptValidator;
-import com.everhomes.flow.node.FlowGraphNodeCondition;
-import com.everhomes.flow.node.FlowGraphNodeEnd;
-import com.everhomes.flow.node.FlowGraphNodeNormal;
-import com.everhomes.flow.node.FlowGraphNodeStart;
-import com.everhomes.flow.node.FlowGraphNodeSubFlow;
+import com.everhomes.flow.node.*;
 import com.everhomes.general_approval.GeneralApprovalValProvider;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
-import com.everhomes.gogs.GogsCommit;
-import com.everhomes.gogs.GogsRawFileParam;
-import com.everhomes.gogs.GogsRepo;
-import com.everhomes.gogs.GogsRepoType;
-import com.everhomes.gogs.GogsService;
+import com.everhomes.gogs.*;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -60,13 +51,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.RouterMetaObject;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -85,21 +70,12 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.MD5Utils;
-import com.everhomes.util.RouterBuilder;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.ValidatorUtil;
+import com.everhomes.util.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -107,7 +83,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -122,16 +97,7 @@ import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
@@ -3142,6 +3108,36 @@ public class FlowServiceImpl implements FlowService {
                 dto.setNeedEvaluate((byte) 1);
             }
         }
+
+        // content 转 entity
+        dto.setEntities(contentToEntitys(flowCase.getContent()));
+    }
+
+    private List<FlowCaseEntity> contentToEntitys(String content) {
+        if (content != null) {
+            String[] split = content.split("\n");
+            List<FlowCaseEntity> entities = new ArrayList<>(split.length);
+            for (String line : split) {
+                FlowCaseEntity entity = new FlowCaseEntity();
+                // 英文冒号
+                int colonIndex = line.indexOf(":");
+                if (colonIndex == -1) {
+                    // 中文冒号
+                    colonIndex = line.indexOf("：");
+                }
+                if (colonIndex != -1) {
+                    entity.setKey(line.substring(0, colonIndex));
+                    entity.setValue(line.substring(colonIndex+1));
+                    entity.setEntityType(FlowCaseEntityType.LIST.getCode());
+                } else {
+                    entity.setValue(line);
+                    entity.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+                }
+                entities.add(entity);
+            }
+            return entities;
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -3191,11 +3187,6 @@ public class FlowServiceImpl implements FlowService {
 
     @Override
     public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd) {
-        return searchFlowCases(cmd, null);
-    }
-
-    @Override
-    public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd, ListingQueryBuilderCallback callback) {
         SearchFlowCaseResponse resp = new SearchFlowCaseResponse();
         if (cmd.getNamespaceId() == null) {
             cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -3222,15 +3213,15 @@ public class FlowServiceImpl implements FlowService {
         if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
             type = 1;
             flowUserType = FlowUserType.APPLIER;
-            details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, callback);
+            details = flowCaseProvider.findApplierFlowCases(locator, count, cmd, null);
         } else if (cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
             type = 2;
             flowUserType = FlowUserType.PROCESSOR;
-            details = flowCaseProvider.findAdminFlowCases(locator, count, cmd, callback);
+            details = flowCaseProvider.findAdminFlowCases(locator, count, cmd, null);
         } else {
             type = 3;
             flowUserType = FlowUserType.PROCESSOR;
-            details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, callback);
+            details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd, null);
         }
 
         List<FlowCaseDTO> dtos = new ArrayList<>();

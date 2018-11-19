@@ -14,10 +14,17 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowCaseEntityType {
-	LIST("list"), MULTI_LINE("multi_line"), TEXT("text"), IMAGE("image"), FILE("file"), CONTRACT_PRICE("contract_price"), ENTITY_GROUP("entity_group"), SUB_ENTITY_GROUP("sub_entity_group");
+	LIST("list"),
+	MULTI_LINE("multi_line"),
+	TEXT("text"),
+	IMAGE("image"),
+	FILE("file"),
+	CONTRACT_PRICE("contract_price"),
+	ENTITY_GROUP("entity_group"),
+	SUB_ENTITY_GROUP("sub_entity_group");
 
-	
 	private String code;
+
     private FlowCaseEntityType(String code) {
         this.code = code;
     }
