@@ -64,8 +64,6 @@ import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.lucene.util.UnicodeUtil;
 import com.google.gson.reflect.TypeToken;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -79,7 +77,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Component
@@ -2186,6 +2183,9 @@ public class PortalServiceImpl implements PortalService {
 
 				group.setInstanceConfig(config);
 
+			}else if (Widget.fromCode(group.getWidget()) == Widget.VANKESMARTCARD) {
+                VanKeSmartCardConfig config = (VanKeSmartCardConfig)StringHelper.fromJsonString(itemGroup.getInstanceConfig(), VanKeSmartCardConfig.class);
+                group.setInstanceConfig(config);
 			}
 			groups.add(group);
 
