@@ -126,3 +126,20 @@ ALTER TABLE `eh_service_alliance_application_records` ADD COLUMN `update_time` D
 -- AUTHOR: 黄明波
 -- REMARK: issue-41586
 ALTER TABLE `eh_siyin_print_orders` ADD COLUMN `user_notify_flag` TINYINT(4) NULL DEFAULT '0' COMMENT '0-未起定时器通知用户 1-已起定时器通知用户';
+
+
+-- AUTHOR: 黄鹏宇 2018-11-19
+-- REMARK: 客户表单自定义
+CREATE TABLE `eh_var_field_scope_filters` (
+  `id` bigint NOT NULL,
+  `namespace_id` int,
+  `community_id` bigint COMMENT '被筛选的表单所在的园区id',
+  `module_name` varchar(32) COMMENT '被筛选的表单的moduleName',
+  `group_path` varchar(32) COMMENT '被筛选的表单的group',
+  `field_id` bigint COMMENT '被筛选的表单id',
+  `user_id` bigint COMMENT '被筛选的表单所属的用户id',
+  `create_time` datetime,
+  `create_uid` bigint,
+  `status` tinyint,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '筛选显示的表单';
