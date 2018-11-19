@@ -867,7 +867,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listFlowModuleApps")
     @RestReturn(value = ListFlowModuleAppsResponse.class)
-    public RestResponse listFlowModuleApps(@Valid ListFlowModuleAppsCommand cmd) {
+    public RestResponse listFlowModuleApps(@Valid SearchFlowCaseCommand cmd) {
         ListFlowModuleAppsResponse resp = flowService.listFlowModuleApps(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -881,7 +881,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listFlowModuleAppServiceTypes")
     @RestReturn(value = ListFlowModuleAppServiceTypesResponse.class)
-    public RestResponse listFlowModuleAppServiceTypes(@Valid ListFlowModuleAppServiceTypesCommand cmd) {
+    public RestResponse listFlowModuleAppServiceTypes(@Valid SearchFlowCaseCommand cmd) {
         ListFlowModuleAppServiceTypesResponse resp = flowService.listFlowModuleAppServiceTypes(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);

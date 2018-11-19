@@ -16,9 +16,15 @@ import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -38,20 +44,31 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Autowired
+    private CacheManager cacheManager;
+
+    @Caching(evict = {
+        @CacheEvict(value = "ProcessorServiceTypes", key = "{#obj.flowUserId}"),
+        @CacheEvict(value = "ProcessorApps", key = "{#obj.flowUserId}"),
+    })
     @Override
     public Long createFlowEventLog(FlowEventLog obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEventLogs.class));
         if(obj.getId() == null || obj.getId() <= 0) {
-        	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
-         obj.setId(id);	
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
+            obj.setId(id);
         }
-        
+
         prepareObj(obj);
         EhFlowEventLogsDao dao = new EhFlowEventLogsDao(context.configuration());
         dao.insert(obj);
         return obj.getId();
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "ProcessorServiceTypes", key = "{#obj.flowUserId}"),
+        @CacheEvict(value = "ProcessorApps", key = "{#obj.flowUserId}"),
+    })
     @Override
     public void updateFlowEventLog(FlowEventLog obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEventLogs.class));
@@ -117,13 +134,23 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     private void prepareObj(FlowEventLog obj) {
     	Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
     	obj.setCreateTime(now);
+
+    	// 清缓存
+        Cache cache = cacheManager.getCache("ProcessorServiceTypes");
+        if (cache != null) {
+            cache.evict(obj.getFlowUserId());
+        }
+        cache = cacheManager.getCache("ProcessorApps");
+        if (cache != null) {
+            cache.evict(obj.getFlowUserId());
+        }
     }
     
     @Override
     public Long getNextId() {
     	return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
     }
-    
+
     @Override
     public void createFlowEventLogs(List<FlowEventLog> objs) {
     	if(objs.size() == 0) {
@@ -135,8 +162,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	for(FlowEventLog obj : objs) {
     		prepareObj(obj);	
     	}
-        
-        dao.insert(objs.toArray(new FlowEventLog[objs.size()]));
+        dao.insert(objs.toArray(new FlowEventLog[0]));
     }
     
     /**
@@ -222,6 +248,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
         if(cmd.getModuleId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        }
+        if (cmd.getOriginAppId() != null && cmd.getOriginAppId() != 0) {
+            cond = cond.and(Tables.EH_FLOW_CASES.ORIGIN_APP_ID.eq(cmd.getOriginAppId()));
         }
         if(cmd.getOrganizationId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
@@ -777,5 +806,74 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
                         .and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
                 .where(condition)
                 .fetchAnyInto(Integer.class);
+    }
+
+    @Cacheable(value = "ProcessorServiceTypes", key = "{#userId}", unless = "#result == null")
+    @Override
+    public List<FlowServiceTypeDTO> listProcessorServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        Condition condition = buildSearchFlowCaseCondition(new ListingLocator(), cmd);
+        return context.select(t.fields())
+                .from(Tables.EH_FLOW_EVENT_LOGS)
+                .join(t)
+                .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(t.ID))
+                .join(Tables.EH_FLOWS)
+                .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                        .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                .where(condition)
+                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .fetch(record -> {
+                    FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
+                    dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    return dto;
+                });
+    }
+
+    @Cacheable(value = "ProcessorApps", key = "{#userId}", unless = "#result == null")
+    @Override
+    public List<FlowModuleAppDTO> listProcessorApps(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        Condition condition = buildSearchFlowCaseCondition(new ListingLocator(), cmd);
+        return context.select(t.fields())
+                .from(Tables.EH_FLOW_EVENT_LOGS)
+                .join(t)
+                .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(t.ID))
+                .join(Tables.EH_FLOWS)
+                .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                        .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                .where(condition)
+                .groupBy(t.ORIGIN_APP_ID)
+                .fetch(record -> {
+                    FlowModuleAppDTO dto = RecordHelper.convert(record, FlowModuleAppDTO.class);
+                    dto.setOriginId(record.getValue(t.ORIGIN_APP_ID));
+                    return dto;
+                });
+    }
+
+    @Override
+    public List<FlowServiceTypeDTO> listAdminServiceTypes(Integer namespaceId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        cmd.setUserId(null);
+        Condition condition = buildSearchFlowCaseCondition(new ListingLocator(), cmd);
+        return context.select(t.fields())
+                .from(Tables.EH_FLOW_EVENT_LOGS)
+                .join(t)
+                .on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(t.ID))
+                .join(Tables.EH_FLOWS)
+                .on(t.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID)
+                        .and(t.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+                .where(condition)
+                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .fetch(record -> {
+                    FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
+                    dto.setServiceName(record.getValue(t.SERVICE_TYPE));
+                    return dto;
+                });
     }
 }

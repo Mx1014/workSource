@@ -6,9 +6,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
@@ -17,8 +15,12 @@ import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -35,6 +37,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
+    @Caching(evict = {
+        @CacheEvict(value = "ApplierServiceTypes", key="{#obj.namespaceId, #obj.applyUserId}"),
+        @CacheEvict(value = "ApplierApps", key="{#obj.namespaceId, #obj.applyUserId}")
+    })
     @Override
     public Long createFlowCase(FlowCase obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
@@ -46,6 +52,10 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         return id;
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "ApplierServiceTypes", key="{#obj.namespaceId, #obj.applyUserId}"),
+        @CacheEvict(value = "ApplierApps", key="{#obj.namespaceId, #obj.applyUserId}")
+    })
     @Override
     public Long createFlowCaseHasId(FlowCase obj) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
@@ -131,6 +141,60 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             return list.iterator().next();
         }
         return null;
+    }
+
+    @Cacheable(value = "ApplierServiceTypes", key="{#namespaceId, #userId}", unless="#result == null")
+    @Override
+    public List<FlowServiceTypeDTO> listApplierServiceTypes(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        Condition condition = buildSearchFlowCaseCmdCondition(new ListingLocator(), cmd);
+
+        return context.selectFrom(t)
+                .where(condition)
+                .groupBy(t.MODULE_ID, t.SERVICE_TYPE)
+                .fetch(record -> {
+                    FlowServiceTypeDTO dto = RecordHelper.convert(record, FlowServiceTypeDTO.class);
+                    dto.setServiceName(record.getServiceType());
+                    return dto;
+                });
+    }
+
+    @Override
+    public List<FlowModuleAppDTO> listAdminApps(Integer namespaceId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        cmd.setUserId(null);
+        Condition condition = buildSearchFlowCaseCmdCondition(new ListingLocator(), cmd);
+
+        return context.selectFrom(t)
+                .where(condition)
+                .groupBy(t.ORIGIN_APP_ID)
+                .fetch(record -> {
+                    FlowModuleAppDTO dto = RecordHelper.convert(record, FlowModuleAppDTO.class);
+                    dto.setOriginId(record.getOriginAppId());
+                    return dto;
+                });
+    }
+
+    @Cacheable(value = "ApplierApps", key="{#namespaceId, #userId}", unless="#result == null")
+    @Override
+    public List<FlowModuleAppDTO> listApplierApps(Integer namespaceId, Long userId, SearchFlowCaseCommand cmd) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        com.everhomes.server.schema.tables.EhFlowCases t = Tables.EH_FLOW_CASES;
+
+        Condition condition = buildSearchFlowCaseCmdCondition(new ListingLocator(), cmd);
+
+        return context.selectFrom(t)
+                .where(condition)
+                .groupBy(t.ORIGIN_APP_ID)
+                .fetch(record -> {
+                    FlowModuleAppDTO dto = RecordHelper.convert(record, FlowModuleAppDTO.class);
+                    dto.setOriginId(record.getOriginAppId());
+                    return dto;
+                });
     }
 
     @Override
@@ -274,6 +338,9 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 
         if(cmd.getModuleId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        }
+        if (cmd.getOriginAppId() != null && cmd.getOriginAppId() != 0) {
+            cond = cond.and(Tables.EH_FLOW_CASES.ORIGIN_APP_ID.eq(cmd.getOriginAppId()));
         }
         if(cmd.getOrganizationId() != null) {
             cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
