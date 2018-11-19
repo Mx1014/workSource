@@ -18,4 +18,5 @@ CREATE TABLE `eh_flow_statistics_handle_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE eh_flow_cases ADD COLUMN origin_app_id BIGINT COMMENT '应用 id';
 
