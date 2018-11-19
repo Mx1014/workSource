@@ -17,6 +17,7 @@ package com.everhomes.rest.portal;
  * <li>TEXT_WITH_BOARD("TextWithBoard")：带边框的文本</li>
  * <li>TEXT_WITH_ICON("TextWithIcon")：icon型（小图）</li>
  * <li>TEXT_WITH_IMAGE("TextWithImage")：image型（大图）</li>
+ * <li>FOLD("Fold"): 折叠样式</li>
  * </ul>
  */
 public enum PortalItemGroupWidgetStyle {
@@ -31,7 +32,8 @@ public enum PortalItemGroupWidgetStyle {
     PURE_TEXT("PureText"),
     TEXT_WITH_BOARD("TextWithBoard"),
     TEXT_WITH_ICON("TextWithIcon"),
-    TEXT_WITH_IMAGE("TextWithImage");
+    TEXT_WITH_IMAGE("TextWithImage"),
+    FOLD("Fold");
 
     private String code;
 

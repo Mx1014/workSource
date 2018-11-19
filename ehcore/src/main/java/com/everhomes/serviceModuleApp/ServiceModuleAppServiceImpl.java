@@ -6,6 +6,7 @@ import com.everhomes.acl.ServiceModuleAppProfile;
 import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -157,6 +158,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     @Autowired
     private WorkPlatformAppProvider workPlatformAppProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 	@Override
 	public List<ServiceModuleApp> listReleaseServiceModuleApps(Integer namespaceId) {
 
@@ -1592,9 +1596,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
             List<ServiceModuleApp> apps = new ArrayList<>();
             //园区应用
-            apps.addAll(serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId()));
+			List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+					ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(communityApp)) {
+				apps.addAll(communityApp);
+			}
             //OA应用
-            apps.addAll(serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId()));
+			List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+					ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if(!CollectionUtils.isEmpty(oaApp)) {
+				apps.addAll(oaApp);
+			}
             List<AppDTO> appDtos = toAppDtosForWorkPlatform(orgId, sceneType, apps);
 
             dto.setAppDtos(appDtos);
@@ -1606,8 +1618,21 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
         List<AppDTO> appDtos = toAppDtosForWorkPlatform(orgId, sceneType, userOrganizationApps);
 
-        //加上"全部"Icon
-        AppDTO allIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.ALL.getCode());
+        //加上"全部"或者“更多”Icon
+        Integer showMoreOrAllNum = this.configurationProvider.getIntValue("moreOrAll.show.number",
+                23);
+        String moreOrAllStr = AllOrMoreType.MORE.getCode();
+        Integer allAppNum = 0;
+        for (int i =0;i<categoryDtos.size();i++) {
+            LaunchPadCategoryDTO launchPadCategoryDTO = categoryDtos.get(i);
+            if (!CollectionUtils.isEmpty(launchPadCategoryDTO.getAppDtos())) {
+                allAppNum += launchPadCategoryDTO.getAppDtos().size();
+            }
+        }
+        if (allAppNum > showMoreOrAllNum) {
+            moreOrAllStr = AllOrMoreType.ALL.getCode();
+        }
+        AppDTO allIcon = getAllIconForWorkPlatform(orgId, moreOrAllStr);
         appDtos.add(allIcon);
 
         ListAllAppsResponse response = new ListAllAppsResponse();
