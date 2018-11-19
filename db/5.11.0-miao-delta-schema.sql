@@ -149,3 +149,5 @@ ALTER TABLE eh_office_cubicle_orders ADD COLUMN begin_time DATETIME COMMENT '预
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN end_time DATETIME COMMENT '预定结束时间';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN rent_count TINYINT COMMENT '预定数量';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN cubicle_type TINYINT COMMENT '工位性质';
+ALTER TABLE eh_office_cubicle_orders ADD COLUMN remark TEXT COMMENT '备注';
+ALTER TABLE eh_office_cubicle_orders ADD COLUMN order_status TINYINT COMMENT '订单状态';
