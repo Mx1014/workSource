@@ -9,9 +9,9 @@ public class GetCustomerStatisticsMonthlyCommand {
 
     private Integer namespaceId;
 
-    private Timestamp startQueryTime;
+    private Long startQueryTime;
 
-    private Timestamp endQueryTime;
+    private Long endQueryTime;
 
     private List<Long> communities;
 
@@ -51,19 +51,19 @@ public class GetCustomerStatisticsMonthlyCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Timestamp getStartQueryTime() {
+    public Long getStartQueryTime() {
         return startQueryTime;
     }
 
-    public void setStartQueryTime(Timestamp startQueryTime) {
+    public void setStartQueryTime(Long startQueryTime) {
         this.startQueryTime = startQueryTime;
     }
 
-    public Timestamp getEndQueryTime() {
+    public Long getEndQueryTime() {
         return endQueryTime;
     }
 
-    public void setEndQueryTime(Timestamp endQueryTime) {
+    public void setEndQueryTime(Long endQueryTime) {
         this.endQueryTime = endQueryTime;
     }
 

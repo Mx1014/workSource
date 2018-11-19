@@ -703,7 +703,7 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate) {
+    public List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhCustomerStatisticsDailyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY);
@@ -711,14 +711,20 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(namespaceId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.NAMESPACE_ID.eq(namespaceId));
         }
-        if(communityId != null){
-            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.eq(communityId));
+        if(communityIds != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.in(communityIds));
         }
         if(startDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.le(endDate));
         }
         if(endDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.ge(startDate));
+        }
+        if(pageAnchor != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.ID.ge(pageAnchor));
+        }
+        if(pageSize != null){
+            query.addLimit(pageSize + 1);
         }
 
         return query.fetchInto(CustomerStatisticDaily.class);
@@ -769,6 +775,35 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     @Override
     public CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date) {
         return null;
+    }
+
+    @Override
+    public List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhCustomerStatisticsMonthlyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_MONTHLY);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityIds != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.in(communityIds));
+        }
+        if(startDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.le(endDate));
+        }
+        if(endDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.ge(startDate));
+        }
+        if(pageAnchor != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.ID.ge(pageAnchor));
+        }
+        if(pageSize != null){
+            query.addLimit(pageSize + 1);
+        }
+
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.desc());
+        return query.fetchInto(CustomerStatisticMonthly.class);
     }
 
 }

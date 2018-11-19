@@ -92,11 +92,13 @@ public interface InvitedCustomerProvider {
 
     CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date);
 
-    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
 
     void createCustomerStatisticsMonthly(CustomerStatisticMonthly daily);
 
     CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date);
+
+    List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
 
     void deleteCustomerstatisticDaily(Integer namespaceId, Long communityId, Date startDate);
 

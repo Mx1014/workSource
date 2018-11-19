@@ -16,6 +16,26 @@ CREATE TABLE `eh_customer_statistics_daily` (
   `create_uid` BIGINT COMMENT '创建人',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每日';
+
+-- REMARK: 创建 客户统计表，每日，按管理公司汇总
+CREATE TABLE `eh_customer_statistics_daily_total` (
+ `id` BIGINT NOT NULL,
+  `namespace_id` int COMMENT '域空间',
+  `date_str` DATE COMMENT '统计的日期',
+  `organization_id` BIGINT COMMENT '统计字段所在的管理公司ID',
+  `community_num` INT COMMENT '管理公司下的园区数量',
+  `new_customer_num` INT COMMENT '新增客户增量',
+  `registered_customer_num` INT COMMENT '成交客户增量',
+  `loss_customer_num` INT COMMENT '流失客户增量',
+  `history_customer_num` INT COMMENT '历史客户增量',
+  `delete_customer_num` INT COMMENT '删除客户增量',
+  `tracking_num` INT COMMENT '跟进次数增量',
+  `customer_count` INT COMMENT '园区内的总客户数',
+  `create_date` DATETIME COMMENT '创建日期',
+  `create_uid` BIGINT COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每日，按管理公司汇总';
+
 -- REMARK: 创建 客户统计表，每月
 CREATE TABLE `eh_customer_statistics_monthly` (
   `id` BIGINT NOT NULL,
@@ -35,6 +55,24 @@ CREATE TABLE `eh_customer_statistics_monthly` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每月';
 
+-- REMARK: 创建 客户统计表，每月，按管理公司汇总
+CREATE TABLE `eh_customer_statistics_monthly_total` (
+ `id` BIGINT NOT NULL,
+  `namespace_id` int COMMENT '域空间',
+  `date_str` DATE COMMENT '统计的日期',
+  `organization_id` BIGINT COMMENT '统计字段所在的管理公司ID',
+  `community_num` INT COMMENT '管理公司下的园区数量',
+  `new_customer_num` INT COMMENT '新增客户增量',
+  `registered_customer_num` INT COMMENT '成交客户增量',
+  `loss_customer_num` INT COMMENT '流失客户增量',
+  `history_customer_num` INT COMMENT '历史客户增量',
+  `delete_customer_num` INT COMMENT '删除客户增量',
+  `tracking_num` INT COMMENT '跟进次数增量',
+  `customer_count` INT COMMENT '园区内的总客户数',
+  `create_date` DATETIME COMMENT '创建日期',
+  `create_uid` BIGINT COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT = '客户统计表，每月，按管理公司汇总';
 
 -- REMARK: 创建 客户状态改变记录表
 CREATE TABLE `eh_customer_level_change_records` (

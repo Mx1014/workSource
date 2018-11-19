@@ -354,6 +354,20 @@ public class InvitedCustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthly</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthly")
+    @RestReturn(value = CommunityCustomerStatisticDTO.class, collection = true)
+    public RestResponse queryCustomerStatisticMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
+        List<CommunityCustomerStatisticDTO> dtos = invitedCustomerService.getCustomerStatisticsMonthly(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 

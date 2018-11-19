@@ -966,19 +966,57 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public List<CommunityCustomerStatisticDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
+    public GetCustomerStatisticDailyResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
+        List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
+        //如果传了园区ID，则根据园区ID筛选数据，此时为分园区的查询
+        List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), cmd.getCommunities(),
+                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize(), cmd.getPageAnchor());
+
+        Long nextPageAnchor = null;
+        if(dailies.size() == cmd.getPageSize() + 1){
+            nextPageAnchor = dailies.get(dailies.size() - 1).getId();
+            dailies.remove(dailies.size() - 1);
+        }
+        GetCustomerStatisticDailyResponse response = new GetCustomerStatisticDailyResponse();
+        response.setDtos(dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        response.setNextPageAnchor(nextPageAnchor);
+        return response;
+    }
+
+    public List<CommunityCustomerStatisticDTO> getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+        ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        cmd2.setOrgId(cmd.getOrgId());
+        ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+        List<CommunityDTO> communities = response.getList();
+        List<Long> communityIds = communities.stream().map(r->r.getId()).collect(Collectors.toList());
+
+        for(CommunityDTO community : communities){
+            CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
+            List<CustomerStatisticsDTO> dtos = new ArrayList<>();
+            List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
+            dto.setCommunityId(community.getId());
+            dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
+            dto.setDtos(dtos);
+            result.add(dto);
+        }
+        return result;
+    }
+
+        @Override
+    public List<CommunityCustomerStatisticDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
         List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
         if(cmd.getCommunities() != null && cmd.getCommunities().size() > 0) {
             for(Long communityId : cmd.getCommunities()){
                 CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
                 List<CustomerStatisticsDTO> dtos = new ArrayList<>();
-                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), communityId, getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
+                List<CustomerStatisticMonthly> monthlies = invitedCustomerProvider.listCustomerStatisticMonthly(cmd.getNamespaceId(), communityId, getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
                 dto.setCommunityId(communityId);
-                dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
+                monthlies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
                 dto.setDtos(dtos);
                 result.add(dto);
             }
-        }else{
+        }else if(cmd.getOrgId() != null){
             ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
             cmd2.setNamespaceId(cmd.getNamespaceId());
             cmd2.setOrgId(cmd.getOrgId());
@@ -987,19 +1025,14 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             for(CommunityDTO community : communities){
                 CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
                 List<CustomerStatisticsDTO> dtos = new ArrayList<>();
-                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
+                List<CustomerStatisticMonthly> monthlies = invitedCustomerProvider.listCustomerStatisticMonthly(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
                 dto.setCommunityId(community.getId());
-                dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
+                monthlies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
                 dto.setDtos(dtos);
                 result.add(dto);
             }
         }
         return result;
-    }
-
-    @Override
-    public List<CustomerStatisticsDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
-        return null;
     }
 
     @Override

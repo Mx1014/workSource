@@ -52,9 +52,11 @@ public interface InvitedCustomerService {
 
     List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
 
-    List<CommunityCustomerStatisticDTO> getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticDailyResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
 
-    List<CustomerStatisticsDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
+    List<CommunityCustomerStatisticDTO> getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd);
+
+    List<CommunityCustomerStatisticDTO> getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
 
     List<CustomerStatisticsDTO> getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 
