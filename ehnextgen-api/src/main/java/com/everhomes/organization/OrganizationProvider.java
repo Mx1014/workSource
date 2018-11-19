@@ -1005,4 +1005,7 @@ public interface OrganizationProvider {
 
     List<Long> listOrganizationIdFromUserAuthenticationOrganization(List<Long> orgIds, Integer namespaceId, Byte authFlag);
     //用户认证审核end
+
+
+
 }

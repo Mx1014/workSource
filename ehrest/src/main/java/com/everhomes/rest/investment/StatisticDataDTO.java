@@ -10,14 +10,23 @@ public class StatisticDataDTO {
     private Integer namespaceId;
     private Date dateStr;
     private Long communityId;
+    private Integer communityNum;
     private Integer newCustomerNum;
     private Integer registeredCustomerNum;
     private Integer lossCustomerNum;
     private Integer historyCustomerNum;
     private Integer deleteCustomerNum;
     private Integer trackingNum;
-    private Integer customerConut;
+    private Integer customerCount;
 
+
+    public Integer getCommunityNum() {
+        return communityNum;
+    }
+
+    public void setCommunityNum(Integer communityNum) {
+        this.communityNum = communityNum;
+    }
 
     public Long getId() {
         return id;
@@ -99,12 +108,12 @@ public class StatisticDataDTO {
         this.trackingNum = trackingNum;
     }
 
-    public Integer getCustomerConut() {
-        return customerConut;
+    public Integer getCustomerCount() {
+        return customerCount;
     }
 
-    public void setCustomerConut(Integer customerConut) {
-        this.customerConut = customerConut;
+    public void setCustomerCount(Integer customerCount) {
+        this.customerCount = customerCount;
     }
 
     @Override

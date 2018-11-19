@@ -983,19 +983,22 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         return response;
     }
 
-    public List<CommunityCustomerStatisticDTO> getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+    public GetCustomerStatisticDailyTotalResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
         ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setOrgId(cmd.getOrgId());
         ListCommunitiesResponse response = communityService.listCommunities(cmd2);
         List<CommunityDTO> communities = response.getList();
-        List<Long> communityIds = communities.stream().map(r->r.getId()).collect(Collectors.toList());
+        List<Long> communityIds = communities.stream().map(CommunityDTO::getId).collect(Collectors.toList());
+
+        List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), communityIds,
+                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize() * communities.size(), cmd.getPageAnchor());
+
 
         for(CommunityDTO community : communities){
             CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
             List<CustomerStatisticsDTO> dtos = new ArrayList<>();
-            List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
-            dto.setCommunityId(community.getId());
+                        dto.setCommunityId(community.getId());
             dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
             dto.setDtos(dtos);
             result.add(dto);
@@ -1085,6 +1088,61 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
 
+    @Override
+    public List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time){
+        List<Organization> orgs = organizationProvider.listHeadEnterprises();
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> result = new ArrayList<>();
+
+        for(Organization org : orgs){
+            ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+            cmd2.setNamespaceId(org.getNamespaceId());
+            cmd2.setOrgId(org.getId());
+            ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+            List<CommunityDTO> communities = response.getList();
+
+            List<StatisticDataDTO> tempResult = new ArrayList<>();
+            for(CommunityDTO community : community) {
+                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
+
+                List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
+                Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
+                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, add customer num : {}", community.getId(), statisticStartTime, statisticEndTime, addCustomerNum);
+
+                List<CustomerLevelChangeRecord> listRegisteredCustomer =
+                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
+                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to registered num : {}", community.getId(), statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
+
+
+                List<CustomerLevelChangeRecord> listLossCustomer =
+                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
+                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to loss num : {}", community.getId(), statisticStartTime, statisticEndTime, listLossCustomer.size());
+
+                List<CustomerLevelChangeRecord> listHistoryCustomer =
+                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
+                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to history num : {}", community.getId(), statisticStartTime, statisticEndTime, listHistoryCustomer.size());
+
+
+                StatisticDataDTO data = new StatisticDataDTO();
+                data.setCommunityId(community.getId());
+                data.setNamespaceId(org.getNamespaceId());
+                data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
+                data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
+                data.setLossCustomerNum(listLossCustomer.size());
+                data.setHistoryCustomerNum(listHistoryCustomer.size());
+                data.setRegisteredCustomerNum(listRegisteredCustomer.size());
+                tempResult.add(data);
+            }
+
+            StatisticDataDTO data = new StatisticDataDTO();
+            data.set
+
+        }
+        return result;
+    }
 
 
     @Override
