@@ -3024,9 +3024,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         LOGGER.info("auths 获取 "+(t2-t1));
         for(DoorAuth auth : auths) {
 //            TODO: 按门禁组授权查找门禁
-            if(auth.getGroupType() != (byte)2){
-                return resp;
-            }
+//            if(auth.getGroupType() != (byte)2){
+//                return resp;
+//            }
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
                 //The door is delete, set it to invalid
