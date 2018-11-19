@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.aclink.AclinkCameraDTO;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -70,6 +71,18 @@ public class AclinkCameraProviderImpl implements AclinkCameraProvider{
         }
 
         return objs;
+	}
+	@Override
+	public List<AclinkCameraDTO> findCameraByDoorId(Long doorId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkCameras.class));
+		SelectQuery<EhAclinkCamerasRecord> query = context.selectQuery(Tables.EH_ACLINK_CAMERAS);
+		query.addConditions(Tables.EH_ACLINK_CAMERAS.STATUS.ne((byte) 2));
+		query.addConditions(Tables.EH_ACLINK_CAMERAS.DOOR_ACCESS_ID.eq(doorId));
+		query.addOrderBy(Tables.EH_ACLINK_CAMERAS.ID.desc());
+		List<AclinkCameraDTO> objs = query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, AclinkCameraDTO.class);
+		});
+		return objs;
 	}
 
 	@Override
