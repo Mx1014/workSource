@@ -147,4 +147,5 @@ CREATE TABLE `eh_office_cubicle_stations` (
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN price DECIMAL(10,2) COMMENT '价格';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN begin_time DATETIME COMMENT '预定开始时间';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN end_time DATETIME COMMENT '预定结束时间';
-ALTER TABLE eh_office_cubicle_orders ADD COLUMN rent_count DATETIME COMMENT '预定数量';
+ALTER TABLE eh_office_cubicle_orders ADD COLUMN rent_count TINYINT COMMENT '预定数量';
+ALTER TABLE eh_office_cubicle_orders ADD COLUMN cubicle_type TINYINT COMMENT '工位性质';
