@@ -1,26 +1,21 @@
 package com.everhomes.rest.investment;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 public class CustomerStatisticsDTO {
 
     private Long id;
-
+    private Integer namespaceId;
+    private Date dateStr;
     private Long communityId;
-
-    private Timestamp countDate;
-
-    private Long newCustomerCount;
-
-    private Long entryCustomerCount;
-
-    private Long loseCustomerCount;
-
-    private Long historyCustomerCount;
-
-    private Long trackingCount;
-
-    private Long customerCount;
+    private Integer newCustomerNum;
+    private Integer registeredCustomerNum;
+    private Integer lossCustomerNum;
+    private Integer historyCustomerNum;
+    private Integer deleteCustomerNum;
+    private Integer trackingNum;
+    private Integer customerConut;
 
     public Long getId() {
         return id;
@@ -28,6 +23,22 @@ public class CustomerStatisticsDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Date getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(Date dateStr) {
+        this.dateStr = dateStr;
     }
 
     public Long getCommunityId() {
@@ -38,59 +49,59 @@ public class CustomerStatisticsDTO {
         this.communityId = communityId;
     }
 
-    public Timestamp getCountDate() {
-        return countDate;
+    public Integer getNewCustomerNum() {
+        return newCustomerNum;
     }
 
-    public void setCountDate(Timestamp countDate) {
-        this.countDate = countDate;
+    public void setNewCustomerNum(Integer newCustomerNum) {
+        this.newCustomerNum = newCustomerNum;
     }
 
-    public Long getNewCustomerCount() {
-        return newCustomerCount;
+    public Integer getRegisteredCustomerNum() {
+        return registeredCustomerNum;
     }
 
-    public void setNewCustomerCount(Long newCustomerCount) {
-        this.newCustomerCount = newCustomerCount;
+    public void setRegisteredCustomerNum(Integer registeredCustomerNum) {
+        this.registeredCustomerNum = registeredCustomerNum;
     }
 
-    public Long getEntryCustomerCount() {
-        return entryCustomerCount;
+    public Integer getLossCustomerNum() {
+        return lossCustomerNum;
     }
 
-    public void setEntryCustomerCount(Long entryCustomerCount) {
-        this.entryCustomerCount = entryCustomerCount;
+    public void setLossCustomerNum(Integer lossCustomerNum) {
+        this.lossCustomerNum = lossCustomerNum;
     }
 
-    public Long getLoseCustomerCount() {
-        return loseCustomerCount;
+    public Integer getHistoryCustomerNum() {
+        return historyCustomerNum;
     }
 
-    public void setLoseCustomerCount(Long loseCustomerCount) {
-        this.loseCustomerCount = loseCustomerCount;
+    public void setHistoryCustomerNum(Integer historyCustomerNum) {
+        this.historyCustomerNum = historyCustomerNum;
     }
 
-    public Long getHistoryCustomerCount() {
-        return historyCustomerCount;
+    public Integer getDeleteCustomerNum() {
+        return deleteCustomerNum;
     }
 
-    public void setHistoryCustomerCount(Long historyCustomerCount) {
-        this.historyCustomerCount = historyCustomerCount;
+    public void setDeleteCustomerNum(Integer deleteCustomerNum) {
+        this.deleteCustomerNum = deleteCustomerNum;
     }
 
-    public Long getTrackingCount() {
-        return trackingCount;
+    public Integer getTrackingNum() {
+        return trackingNum;
     }
 
-    public void setTrackingCount(Long trackingCount) {
-        this.trackingCount = trackingCount;
+    public void setTrackingNum(Integer trackingNum) {
+        this.trackingNum = trackingNum;
     }
 
-    public Long getCustomerCount() {
-        return customerCount;
+    public Integer getCustomerConut() {
+        return customerConut;
     }
 
-    public void setCustomerCount(Long customerCount) {
-        this.customerCount = customerCount;
+    public void setCustomerConut(Integer customerConut) {
+        this.customerConut = customerConut;
     }
 }

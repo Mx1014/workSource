@@ -326,8 +326,8 @@ public class InvitedCustomerController extends ControllerBase {
 
     /**
      *
-     <b>URL: /invitedCustomer/testCustomerStatistic</b>
-     * <p>将现在系统中所有客户的状态初始化进数据库</p>
+     * <b>URL: /invitedCustomer/testCustomerStatistic</b>
+     * <p>进行某天的某种统计</p>
      */
     @RequestMapping("testCustomerStatistic")
     @RestReturn(value = String.class)
@@ -339,11 +339,16 @@ public class InvitedCustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDaily</b>
+     * <p>获取某天的数据</p>
+     */
     @RequestMapping("queryCustomerStatisticDaily")
-    @RestReturn(value = String.class)
+    @RestReturn(value = CommunityCustomerStatisticDTO.class, collection = true)
     public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsDailyCommand cmd) {
-        invitedCustomerService.getCustomerStatisticsDaily(cmd);
-        RestResponse response = new RestResponse();
+        List<CommunityCustomerStatisticDTO> dtos = invitedCustomerService.getCustomerStatisticsDaily(cmd);
+        RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

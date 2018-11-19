@@ -972,7 +972,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             for(Long communityId : cmd.getCommunities()){
                 CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
                 List<CustomerStatisticsDTO> dtos = new ArrayList<>();
-                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), communityId, getDateByTimestamp(cmd.getStartQueryTime()), getDateByTimestamp(cmd.getEndQueryTime()));
+                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), communityId, getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
                 dto.setCommunityId(communityId);
                 dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
                 dto.setDtos(dtos);
@@ -987,7 +987,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             for(CommunityDTO community : communities){
                 CommunityCustomerStatisticDTO dto = new CommunityCustomerStatisticDTO();
                 List<CustomerStatisticsDTO> dtos = new ArrayList<>();
-                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(cmd.getStartQueryTime()), getDateByTimestamp(cmd.getEndQueryTime()));
+                List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), community.getId(), getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())));
                 dto.setCommunityId(community.getId());
                 dailies.forEach(r->dtos.add(ConvertHelper.convert(r, CustomerStatisticsDTO.class)));
                 dto.setDtos(dtos);
@@ -1088,6 +1088,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             data.setCommunityId(community.getId());
             data.setNamespaceId(community.getNamespaceId());
             data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
+            data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
             data.setLossCustomerNum(listLossCustomer.size());
             data.setHistoryCustomerNum(listHistoryCustomer.size());
             data.setRegisteredCustomerNum(listRegisteredCustomer.size());

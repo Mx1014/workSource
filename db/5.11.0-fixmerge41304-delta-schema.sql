@@ -11,7 +11,7 @@ CREATE TABLE `eh_customer_statistics_daily` (
   `history_customer_num` INT COMMENT '历史客户增量',
   `delete_customer_num` INT COMMENT '删除客户增量',
   `tracking_num` INT COMMENT '跟进次数增量',
-  `customer_conut` INT COMMENT '园区内的总客户数',
+  `customer_count` INT COMMENT '园区内的总客户数',
   `create_date` DATETIME COMMENT '创建日期',
   `create_uid` BIGINT COMMENT '创建人',
   PRIMARY KEY (`id`)
@@ -28,7 +28,7 @@ CREATE TABLE `eh_customer_statistics_monthly` (
   `history_customer_num` INT COMMENT '历史客户增量',
   `delete_customer_num` INT COMMENT '删除客户增量',
   `tracking_num` INT COMMENT '跟进次数增量',
-  `customer_conut` INT COMMENT '园区内的总客户数',
+  `customer_count` INT COMMENT '园区内的总客户数',
   `create_date` DATETIME COMMENT '创建日期',
   `create_uid` BIGINT COMMENT '创建人',
 
@@ -61,7 +61,7 @@ CREATE TABLE `eh_customer_statistics_total` (
   `history_customer_num` INT COMMENT '历史客户总数',
   `delete_customer_num` INT COMMENT '删除客户总数',
   `tracking_num` INT COMMENT '跟进总次数',
-  `customer_conut` INT COMMENT '园区内的总客户数',
+  `customer_count` INT COMMENT '园区内的总客户数',
   `create_date` DATETIME COMMENT '创建日期',
   `create_uid` BIGINT COMMENT '创建人',
 

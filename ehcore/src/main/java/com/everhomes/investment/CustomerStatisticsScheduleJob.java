@@ -27,7 +27,7 @@ public class CustomerStatisticsScheduleJob extends QuartzJobBean {
     public static final String SCHEDELE_NAME = "invitedCustomer-";
 
     //public static String CRON_EXPRESSION = "0 0 3 * * ?";
-    public static String CRON_EXPRESSION = "0 3/5 * * * ?";
+    public static String CRON_EXPRESSION = "0 5 * * * ?";
 
 
     @Autowired

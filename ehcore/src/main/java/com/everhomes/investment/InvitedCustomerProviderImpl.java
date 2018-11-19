@@ -644,6 +644,27 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
+    public Integer countTrackingNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhCustomerTrackingsRecord> query = context.selectQuery(Tables.EH_CUSTOMER_TRACKINGS);
+        query.addSelect(Tables.EH_CUSTOMER_TRACKINGS.ID);
+
+
+        query.addJoin(Tables.EH_ENTERPRISE_CUSTOMERS, Tables.EH_ENTERPRISE_CUSTOMERS.ID.eq(Tables.EH_CUSTOMER_TRACKINGS.CUSTOMER_ID));
+
+        if(queryEndDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.le(queryEndDate));
+        }
+        if(queryStartDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_TRACKINGS.TRACKING_TIME.ge(queryStartDate));
+        }
+        if(communityId != null){
+            query.addConditions(Tables.EH_ENTERPRISE_CUSTOMERS.COMMUNITY_ID.eq(communityId));
+        }
+        return query.fetchCount();
+    }
+
+    @Override
     public void createCustomerStatisticsDaily(CustomerStatisticDaily daily) {
         long id = this.sequenceProvider.getNextSequence(NameMapper
                 .getSequenceDomainFromTablePojo(EhCustomerStatisticsDaily.class));
