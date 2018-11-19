@@ -104,3 +104,39 @@ CREATE TABLE `eh_office_cubicle_refund_tips` (
   `resource_type` VARCHAR(20),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE `eh_office_cubicle_resource_types` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `name` VARCHAR(50) COMMENT '名称',
+  `page_type` TINYINT COMMENT '预定展示0代表默认页面DefaultType, 1代表定制页面CustomType',
+  `icon_uri` VARCHAR(1024) COMMENT '工作日价格',
+  `status` TINYINT COMMENT '状态：0关闭 2开启',
+  `namespace_id` INTEGER COMMENT '域空间',
+  `pay_mode` TINYINT DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline',
+  `unauth_visible` TINYINT DEFAULT 0,
+  `menu_type` TINYINT DEFAULT 1 COMMENT '1: 通用 2:公司会议室',
+  `identify` VARCHAR(64) COMMENT '类型标识',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_office_cubicle_stations` (
+  `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
+  `parent_id` BIGINT,
+  `station_id` 
+  `station_name` VARCHAR(127) COMMENT '名称：',
+  `price` DECIMAL(10,2) COMMENT '价格',
+  `status` TINYINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `description` TEXT COMMENT '描述',
+  `cover_uri` VARCHAR(1024) COMMENT '封面图uri',
+  `rent_flag` TINYINT COMMENT '是否开放预定 1是 0否',
+  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `organization_id` BIGINT COMMENT '所属公司的ID',
+  `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
+  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
