@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,6 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.promotion.coupon.controller.EnterpriseDistributionToPersonRestResponse;
 import com.everhomes.rest.promotion.coupon.enterprise.ObtainDetailsExtendDTO;
-import com.everhomes.rest.promotion.coupon.enterprise.TransferToPersonalCommand;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.welfare.DeleteWelfareCommand;
 import com.everhomes.rest.welfare.DraftWelfareCommand;
@@ -376,7 +376,7 @@ public class WelfareServiceImpl implements WelfareService {
 
     private EnterpriseDistributionToPersonRestResponse sendCouponsToUsers(WelfaresDTO welfaresDTO, SendWelfaresResponse response, List<Long> targetUserIds, Long organizationId) throws Exception {
         //卡券
-        TransferToPersonalCommand cmd1 = new TransferToPersonalCommand();
+        TransferToPersonalDTO cmd1 = new TransferToPersonalDTO();
         cmd1.setNamespaceId(UserContext.getCurrentNamespaceId());
         cmd1.setOrganizationId(organizationId);
         cmd1.setTargetUserList(targetUserIds);
@@ -388,7 +388,7 @@ public class WelfareServiceImpl implements WelfareService {
                     return dto;
                 }).collect(Collectors.toList());
 
-        cmd1.setObtainsList(obtainsList);
+        cmd1.setObtainDetailsExtendDTOList(obtainsList);
         EnterpriseDistributionToPersonRestResponse resp = generalOrderService.distributionToPerson(cmd1);
         if (resp.getErrorCode().equals(200)) {
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
