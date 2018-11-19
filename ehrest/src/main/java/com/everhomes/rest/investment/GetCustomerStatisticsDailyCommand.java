@@ -17,7 +17,7 @@ public class GetCustomerStatisticsDailyCommand {
 
     private Integer pageSize;
 
-    private Long pageAnchor;
+    private Integer pageAnchor;
 
     public Integer getPageSize() {
         return pageSize;
@@ -27,11 +27,11 @@ public class GetCustomerStatisticsDailyCommand {
         this.pageSize = pageSize;
     }
 
-    public Long getPageAnchor() {
+    public Integer getPageAnchor() {
         return pageAnchor;
     }
 
-    public void setPageAnchor(Long pageAnchor) {
+    public void setPageAnchor(Integer pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
 

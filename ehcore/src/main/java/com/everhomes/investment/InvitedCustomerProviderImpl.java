@@ -717,11 +717,14 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.eq(date));
         }
 
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID);
+
         return query.fetchAnyInto(CustomerStatisticDaily.class);
     }
 
     @Override
-    public List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
+    public List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhCustomerStatisticsDailyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY);
@@ -731,6 +734,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if(communityIds != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.in(communityIds));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.isNull());
         }
         if(startDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.le(endDate));
@@ -738,18 +743,18 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(endDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.ge(startDate));
         }
-        if(pageAnchor != null){
-            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.ID.ge(pageAnchor));
-        }
         if(pageSize != null){
-            query.addLimit(pageSize + 1);
+            query.addLimit(offset*pageSize, pageSize + 1);
         }
+
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID);
 
         return query.fetchInto(CustomerStatisticDaily.class);
     }
 
     @Override
-    public List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
+    public List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhCustomerStatisticsDailyTotalRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL);
@@ -766,19 +771,18 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(endDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.DATE_STR.ge(startDate));
         }
-        if(pageAnchor != null){
-            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ID.ge(pageAnchor));
-        }
         if(pageSize != null){
-            query.addLimit(pageSize + 1);
+            query.addLimit(offset * pageSize, pageSize + 1);
         }
 
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ORGANIZATION_ID);
         return query.fetchInto(CustomerStatisticDailyTotal.class);
     }
 
 
     @Override
-    public List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
+    public List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         SelectQuery<EhCustomerStatisticsMonthlyTotalRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL);
@@ -795,13 +799,12 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(endDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.DATE_STR.ge(startDate));
         }
-        if(pageAnchor != null){
-            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.ID.ge(pageAnchor));
-        }
         if(pageSize != null){
             query.addLimit(pageSize + 1);
         }
 
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ORGANIZATION_ID);
         return query.fetchInto(CustomerStatisticMonthlyTotal.class);
     }
 
@@ -972,36 +975,35 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(date != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.eq(date));
         }
-
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID);
         return query.fetchAnyInto(CustomerStatisticMonthly.class);
     }
 
     @Override
-    public List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor) {
+    public List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-            SelectQuery<EhCustomerStatisticsMonthlyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_MONTHLY);
+        SelectQuery<EhCustomerStatisticsMonthlyRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_MONTHLY);
 
-            if(namespaceId != null){
-                query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.NAMESPACE_ID.eq(namespaceId));
-            }
-            if(communityIds != null){
-                query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.in(communityIds));
-            }
-            if(startDate != null){
-                query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.le(endDate));
-            }
-            if(endDate != null){
-                query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.ge(startDate));
-            }
-            if(pageAnchor != null){
-                query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.ID.ge(pageAnchor));
-            }
-            if(pageSize != null){
-            query.addLimit(pageSize + 1);
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(communityIds != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.in(communityIds));
+        }
+        if(startDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.le(endDate));
+        }
+        if(endDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.ge(startDate));
+        }
+        if(pageSize != null){
+            query.addLimit(offset * pageSize,pageSize + 1);
         }
 
         query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID);
         return query.fetchInto(CustomerStatisticMonthly.class);
     }
 

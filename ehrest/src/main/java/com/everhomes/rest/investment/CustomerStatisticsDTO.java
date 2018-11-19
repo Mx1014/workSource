@@ -9,6 +9,7 @@ public class CustomerStatisticsDTO {
     private Integer namespaceId;
     private Date dateStr;
     private Long communityId;
+    private String communityName;
     private Integer communityNum;
     private Integer newCustomerNum;
     private Integer registeredCustomerNum;
@@ -17,6 +18,14 @@ public class CustomerStatisticsDTO {
     private Integer deleteCustomerNum;
     private Integer trackingNum;
     private Integer customerCount;
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
 
     public Integer getCommunityNum() {
         return communityNum;

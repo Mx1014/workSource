@@ -7214,4 +7214,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
                 .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L)).execute();
 	}
+
+	@Override
+    public List<Long> getOrganizationIdsHaveCommunity(){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<Long> ids = context.select(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .from(Tables.EH_ORGANIZATION_COMMUNITIES).groupBy(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID)
+                .fetchInto(Long.class);
+        return ids;
+    }
 }

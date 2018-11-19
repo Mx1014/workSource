@@ -94,7 +94,7 @@ public interface InvitedCustomerProvider {
 
     CustomerStatisticDaily getCustomerStatisticsDaily(Integer namespaceId, Long communityId, Date date);
 
-    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
+    List<CustomerStatisticDaily> listCustomerStatisticDaily(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset);
 
     void createCustomerStatisticsMonthly(CustomerStatisticMonthly monthly);
 
@@ -102,11 +102,11 @@ public interface InvitedCustomerProvider {
 
     CustomerStatisticMonthly getCustomerStatisticsMonthly(Integer namespaceId, Long communityId, Date date);
 
-    List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
+    List<CustomerStatisticMonthly> listCustomerStatisticMonthly(Integer namespaceId, List<Long> communityIds, Date startDate, Date endDate, Integer pageSize, Integer offset);
 
-    List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
+    List<CustomerStatisticDailyTotal> listCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset);
 
-    List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Long pageAnchor);
+    List<CustomerStatisticMonthlyTotal> listCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate, Integer pageSize, Integer offset);
 
 
     void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate);

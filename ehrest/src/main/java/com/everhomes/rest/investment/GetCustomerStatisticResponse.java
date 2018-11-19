@@ -6,7 +6,7 @@ public class GetCustomerStatisticResponse {
 
     private List<CustomerStatisticsDTO> dtos;
 
-    private Long nextPageAnchor;
+    private Integer nextPageAnchor;
 
     public List<CustomerStatisticsDTO> getDtos() {
         return dtos;
@@ -16,11 +16,11 @@ public class GetCustomerStatisticResponse {
         this.dtos = dtos;
     }
 
-    public Long getNextPageAnchor() {
+    public Integer getNextPageAnchor() {
         return nextPageAnchor;
     }
 
-    public void setNextPageAnchor(Long nextPageAnchor) {
-        this.nextPageAnchor = nextPageAnchor;
+    public void setNextPageAnchor(Integer netPageAnchor) {
+        this.nextPageAnchor = netPageAnchor;
     }
 }

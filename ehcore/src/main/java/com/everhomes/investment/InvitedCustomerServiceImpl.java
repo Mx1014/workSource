@@ -968,17 +968,33 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
         List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
+
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
         //如果传了园区ID，则根据园区ID筛选数据，此时为分园区的查询
         List<CustomerStatisticDaily> dailies = invitedCustomerProvider.listCustomerStatisticDaily(cmd.getNamespaceId(), cmd.getCommunities(),
-                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize(), cmd.getPageAnchor());
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
 
-        Long nextPageAnchor = null;
+        Integer nextPageAnchor = null;
         if(dailies.size() == cmd.getPageSize() + 1){
-            nextPageAnchor = dailies.get(dailies.size() - 1).getId();
+            nextPageAnchor = cmd.getPageAnchor() + 1;
             dailies.remove(dailies.size() - 1);
         }
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
-        response.setDtos(dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        List<CustomerStatisticsDTO> dtos = dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
+        }
+        response.setDtos(dtos);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -986,13 +1002,24 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     @Override
     public GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
         List<CustomerStatisticDailyTotal> dailies = invitedCustomerProvider.listCustomerStatisticDailyTotal(cmd.getNamespaceId(), cmd.getOrgId(),
-                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize(), cmd.getPageAnchor());
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
 
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
-        Long nextPageAnchor = null;
+        Integer nextPageAnchor = null;
         if(dailies.size() == cmd.getPageSize() + 1){
-            nextPageAnchor = dailies.get(dailies.size() - 1).getId();
+            nextPageAnchor = cmd.getPageAnchor() + 1;
             dailies.remove(dailies.size() - 1);
         }
         response.setDtos(dailies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
@@ -1002,13 +1029,24 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     @Override
     public GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
         List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
         List<CustomerStatisticMonthly> monthlies = invitedCustomerProvider.listCustomerStatisticMonthly(cmd.getNamespaceId(), cmd.getCommunities(),
-                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize(), cmd.getPageAnchor());
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
 
-        Long nextPageAnchor = null;
+        Integer nextPageAnchor = null;
         if(monthlies.size() == cmd.getPageSize() + 1){
-            nextPageAnchor = monthlies.get(monthlies.size() - 1).getId();
+            nextPageAnchor =  cmd.getPageAnchor() + 1;
             monthlies.remove(monthlies.size() - 1);
         }
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
@@ -1018,14 +1056,26 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsDailyCommand cmd) {
+    public GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd) {
+
+        java.sql.Date startQueryTime = null;
+        java.sql.Date endQueryTime = null;
+        if(cmd.getStartQueryTime() != null){
+            startQueryTime = getDateByTimestamp(new Timestamp(cmd.getStartQueryTime()));
+        }
+        if(cmd.getEndQueryTime() != null){
+            endQueryTime = getDateByTimestamp(new Timestamp(cmd.getEndQueryTime()));
+        }
+        if(cmd.getPageAnchor() == null){
+            cmd.setPageAnchor(0);
+        }
         List<CustomerStatisticMonthlyTotal> monthlyTotals = invitedCustomerProvider.listCustomerStatisticMonthlyTotal(cmd.getNamespaceId(), cmd.getOrgId(),
-                getDateByTimestamp(new Timestamp(cmd.getStartQueryTime())), getDateByTimestamp(new Timestamp(cmd.getEndQueryTime())), cmd.getPageSize(), cmd.getPageAnchor());
+                startQueryTime, endQueryTime, cmd.getPageSize(), cmd.getPageAnchor());
 
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
-        Long nextPageAnchor = null;
+        Integer nextPageAnchor = null;
         if(monthlyTotals.size() == cmd.getPageSize() + 1){
-            nextPageAnchor = monthlyTotals.get(monthlyTotals.size() - 1).getId();
+            nextPageAnchor = cmd.getPageAnchor() + 1;
             monthlyTotals.remove(monthlyTotals.size() - 1);
         }
         response.setDtos(monthlyTotals.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
@@ -1086,7 +1136,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     //开始进行统计，将所有的管理公司取出，并根据其下的园区进行统计
     @Override
     public List<StatisticDataDTO> startCustomerStatisticTotal(StatisticTime time){
-        List<Organization> orgs = organizationProvider.listHeadEnterprises();
+        List<Long> orgIds = organizationProvider.getOrganizationIdsHaveCommunity();
+        List<Organization> orgs = organizationProvider.listOrganizationsByIds(orgIds);
         Timestamp statisticStartTime = time.getStatisticStartTime();
         Timestamp statisticEndTime = time.getStatisticEndTime();
 
@@ -1134,6 +1185,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
             StatisticDataDTO data = new StatisticDataDTO();
             data.setNamespaceId(org.getNamespaceId());
+            data.setOrganizationId(org.getId());
             data.setCommunityNum(communities.size());
             data.setNewCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getNewCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             data.setTrackingNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getTrackingNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
@@ -1258,7 +1310,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     public void statisticCustomerDailyTotal(Date date){
         LOGGER.info("the scheduleJob of customer daily total by organization statistics is start!");
         StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. DAY_OF_MONTH);
-        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
 
         invitedCustomerProvider.deleteCustomerStatisticDailyTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
         if(datas != null && datas.size() > 0) {

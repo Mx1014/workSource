@@ -58,7 +58,7 @@ public interface InvitedCustomerService {
 
     GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
 
-    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd);
 
     GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 

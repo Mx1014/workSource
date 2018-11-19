@@ -10,6 +10,7 @@ public class StatisticDataDTO {
     private Integer namespaceId;
     private Date dateStr;
     private Long communityId;
+    private Long organizationId;
     private Integer communityNum;
     private Integer newCustomerNum;
     private Integer registeredCustomerNum;
@@ -19,6 +20,14 @@ public class StatisticDataDTO {
     private Integer trackingNum;
     private Integer customerCount;
 
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public Integer getCommunityNum() {
         return communityNum;
