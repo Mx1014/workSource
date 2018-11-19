@@ -1,3 +1,8 @@
+
+-- AUTHOR: 杨崇鑫
+-- REMARK: 缺陷 #42416 【中天】更新自然季，合同刷新账单报错。
+ALTER TABLE `eh_contracts` MODIFY COLUMN `rent` decimal(20, 2) NULL DEFAULT NULL COMMENT '租金' AFTER `rent_size`;
+
 -- AUTHOR: 李清岩
 -- REMARK: 门禁v3.0.2 issue-34771
 -- REMARK: 增加门禁组门禁关系表
@@ -26,3 +31,4 @@ ALTER TABLE `eh_aclink_ipads` ADD COLUMN `logo_url` VARCHAR(2048) DEFAULT NULL C
 -- REMARK: 门禁v3.0.2 issue-34771
 -- REMARK: 调整eh_door_access列名
 ALTER TABLE `eh_door_access` CHANGE adress_detail address_detail VARCHAR(64);
+
