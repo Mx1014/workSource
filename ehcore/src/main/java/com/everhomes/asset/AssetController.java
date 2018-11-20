@@ -1249,7 +1249,7 @@ public class AssetController extends ControllerBase {
 	@RequestMapping("exportOrders")
 	public HttpServletResponse exportOrders(ListPaymentBillCmd cmd) {
 		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		assetService.exportAssetListForPaymentBillByParams(cmd);
+		assetService.exportOrdersByParams(cmd);
 		RestResponse restResponse = new RestResponse();
 		restResponse.setErrorDescription("OK");
 		restResponse.setErrorCode(ErrorCodes.SUCCESS);

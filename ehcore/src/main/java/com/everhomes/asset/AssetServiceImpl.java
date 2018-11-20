@@ -4952,7 +4952,7 @@ public class AssetServiceImpl implements AssetService {
 
     //对接下载中心的导出交易明细
 	@Override
-    public void exportAssetListForPaymentBillByParams(Object cmd) {
+    public void exportOrdersByParams(Object cmd) {
         Map<String, Object> params = new HashMap<>();
         params.put("UserContext", UserContext.current().getUser());
         Long communityId;
@@ -5227,14 +5227,11 @@ public class AssetServiceImpl implements AssetService {
 
 	//对接下载中心,下载交易明细
     @Override
-    public OutputStream exportOutputStreamAssetListForPaymentBillByContractList(Object cmd, Long taskId) {
+    public OutputStream exportOutputStreamOrders(Object cmd, Long taskId) {
         //公用字段
         Long communityId;
         List<PaymentOrderBillDTO> dtos ;
         ListFieldCommand command ;
-        Long billGroupId ;
-        Integer namespaceId;
-        Long categoryId = null;
         String moduleName = "";
         taskService.updateTaskProcess(taskId, 10);
         if(cmd instanceof ListPaymentBillCmd){
@@ -5242,31 +5239,25 @@ public class AssetServiceImpl implements AssetService {
             ListPaymentBillCmd ListPaymentBillsCMD = (ListPaymentBillCmd) cmd;
             communityId = ListPaymentBillsCMD.getCommunityId();
             ListPaymentBillsCMD.setPageSize(100000l);
-            namespaceId = UserContext.getCurrentNamespaceId(ListPaymentBillsCMD.getNamespaceId());
             dtos = listPaymentBill(ListPaymentBillsCMD).getPaymentOrderBillDTOs();
             command = ConvertHelper.convert(ListPaymentBillsCMD,ListFieldCommand.class);
             command.setModuleName("asset");
             command.setGroupPath(null);
+
+            moduleName="交易明细";
         }else {
             LOGGER.error("exportAssetListByParams is error.");
             throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
         }
         taskService.updateTaskProcess(taskId, 25);
         //初始化 字段信息
-        List<String> propertyNames = new ArrayList<String>();
-        List<String> titleName = new ArrayList<String>();
-        List<Integer> titleSize = new ArrayList<Integer>();
-        propertyNames.add("dateStrBegin");
-        titleName.add("账单开始时间");
-        titleSize.add(20);
-        propertyNames.add("dateStrEnd");
-        titleName.add("账单结束时间");
-        titleSize.add(20);
-        propertyNames.add("dateStrEnd");
-        titleName.add("账单组");
-        titleSize.add(20);
+        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
+                "amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
+        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
+                "实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
+        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
 
-        List<Map<String, String>> dataList = new ArrayList<>();
+        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {

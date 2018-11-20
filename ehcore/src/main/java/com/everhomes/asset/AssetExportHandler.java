@@ -72,7 +72,7 @@ public class AssetExportHandler  implements FileDownloadTaskHandler {
             user.setNamespaceId(cmd.getNamespaceId());
             UserContext.setCurrentUser(user);
 
-            outputStream = assetService.exportOutputStreamAssetListForPaymentBillByContractList(cmd, taskId);
+            outputStream = assetService.exportOutputStreamOrders(cmd, taskId);
         }else {
 			LOGGER.error("exportAssetListByParams is error.");
 			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");

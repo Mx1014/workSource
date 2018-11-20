@@ -235,11 +235,11 @@ public interface AssetService {
 
 	default OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){return null;}
 
-	default OutputStream exportOutputStreamAssetListForPaymentBillByContractList(Object cmd, Long taskId){return null;}
+	default OutputStream exportOutputStreamOrders(Object cmd, Long taskId){return null;}
 
 	default void exportAssetListByParams(Object cmd){}
 
-	default void exportAssetListForPaymentBillByParams(Object cmd){}
+	default void exportOrdersByParams(Object cmd){}
 
 	void cancelGeneralBill(CancelGeneralBillCommand cmd);
 
