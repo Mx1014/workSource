@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -496,7 +497,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		if (null != sa.getEndTime()) {
 			sa.setDefaultOrder(getDateDefaultOrder(sa));
 		}
-		
+		sa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		sa.setUpdateUid(UserContext.currentUserId());
         dao.update(sa);
 	}
 
@@ -1330,7 +1332,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(Long type) {
 
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME)
@@ -1341,7 +1343,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			return dto;
@@ -1461,7 +1463,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	@Override
-	public List<IdNameDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
+	public List<IdNameInfoDTO> listServiceTypeNames(String ownerType, Long ownerId, Long type) {
 		return readOnlyContext()
 		.select(SA_TYPE_TABLE.ID, SA_TYPE_TABLE.NAME, SA_TYPE_TABLE.PARENT_ID)
 		.from(SA_TYPE_TABLE)
@@ -1472,12 +1474,55 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 				.and(SA_TYPE_TABLE.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode())))
 		.fetch()
 		.map(r->{
-			IdNameDTO dto = new IdNameDTO();
+			IdNameInfoDTO dto = new IdNameInfoDTO();
 			dto.setId(r.getValue(SA_TYPE_TABLE.ID));
 			dto.setName(r.getValue(SA_TYPE_TABLE.NAME));
 			dto.setParentId(r.getValue(SA_TYPE_TABLE.PARENT_ID));
 			return dto;
 		});
 	}
+	
+	
+	com.everhomes.server.schema.tables.EhServiceAlliances TABLE = Tables.EH_SERVICE_ALLIANCES;
+	
+	Class<ServiceAlliances> CLASS = ServiceAlliances.class;	
 
+
+	private int updateSingle(Long id, UpdateQueryBuilderCallback callback) {
+		return updateTool(Arrays.asList(id), callback);
+	}
+
+	
+	private int updateTool(List<Long> updateIds, UpdateQueryBuilderCallback callback) {
+
+		if (CollectionUtils.isEmpty(updateIds)) {
+			return 0;
+		}
+
+		UpdateQuery<EhServiceAlliancesRecord> query = updateQuery();
+
+		if (callback != null) {
+			callback.buildCondition(query);
+		}
+
+		// 必须是未被删除且非固定的才可以更新
+		query.addConditions(TABLE.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+		query.addConditions(TABLE.ID.in(updateIds));
+		return query.execute();
+	}
+
+	private UpdateQuery<EhServiceAlliancesRecord> updateQuery() {
+		return readWriteContext().updateQuery(TABLE);
+	}
+
+	@Override
+	public void updateServiceAllianceOrder(Long itemId, Long defaultOrderId) {
+		int updateCnt = updateSingle(itemId, query -> {
+			query.addValue(TABLE.DEFAULT_ORDER, defaultOrderId);
+		});
+
+		if (updateCnt > 0) {
+			DaoHelper.publishDaoAction(DaoAction.MODIFY,  CLASS, null);
+		}
+	}
 }

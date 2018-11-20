@@ -298,7 +298,13 @@ public enum Router {
             "zl://meeting-reservation/meeting-detail", MeetingReservationDetailActionData.class),
 
     MEETING_RECORD_DETAIL(
-            "zl://meeting-reservation/meeting-recordDetail", MeetingRecordDetailActionData.class);
+            "zl://meeting-reservation/meeting-recordDetail", MeetingRecordDetailActionData.class),
+    
+    /**
+     * cloud-print
+     */
+    CLOUD_PRINT_DETAIL(
+            "zl://cloud-print/detail", PrintOrderActionData.class);
 
     // 此actionType不是必须的，
     // 有这个字段只是为了将之前的actionType形式的转换成router形式时的对照

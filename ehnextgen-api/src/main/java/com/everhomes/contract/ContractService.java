@@ -74,5 +74,6 @@ public interface ContractService {
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
 	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
 	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
+	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
    
 }

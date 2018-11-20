@@ -20,6 +20,11 @@ import com.everhomes.util.StringHelper;
  * <li>endTime: 结束筛选时间</li>
  * <li>startTimeAmOrPm: 开始时间上午还是下午还是晚上(半天时用) {@link AmorpmFlag}</li>
  * <li>endTimeAmOrPm: 结束时间上午还是下午还是晚上(半天时用) {@link AmorpmFlag}</li>
+ * <li>showTimeStart: 时间轴开始毫秒数</li>
+ * <li>showTimeEnd: 时间轴结束毫秒数</li>
+ * <li>peopleSpecLeast: 人数下限</li>
+ * <li>peopleSpecMost: 人数上限</li>
+ * <li>structureList: 基础设施列表 1电视 2投屏 3白板 4 投影仪 5电话会议 6视频会议 7音响 8麦克风</li>
  * </ul>
  */
 public class FindRentalSitesCommand {
@@ -34,6 +39,11 @@ public class FindRentalSitesCommand {
 	private Long endTime;
 	private Byte startTimeAmOrPm;
 	private Byte endTimeAmOrPm;
+	private Long showTimeStart;
+	private Long showTimeEnd;
+	private Integer peopleSpecLeast;
+	private Integer peopleSpecMost;
+	private List<Long> structureList;
 
 	private String sceneType;
 	private String sceneToken;
@@ -155,5 +165,45 @@ public class FindRentalSitesCommand {
 
 	public void setSceneToken(String sceneToken) {
 		this.sceneToken = sceneToken;
+	}
+
+	public Long getShowTimeStart() {
+		return showTimeStart;
+	}
+
+	public void setShowTimeStart(Long showTimeStart) {
+		this.showTimeStart = showTimeStart;
+	}
+
+	public Long getShowTimeEnd() {
+		return showTimeEnd;
+	}
+
+	public void setShowTimeEnd(Long showTimeEnd) {
+		this.showTimeEnd = showTimeEnd;
+	}
+
+	public Integer getPeopleSpecLeast() {
+		return peopleSpecLeast;
+	}
+
+	public void setPeopleSpecLeast(Integer peopleSpecLeast) {
+		this.peopleSpecLeast = peopleSpecLeast;
+	}
+
+	public Integer getPeopleSpecMost() {
+		return peopleSpecMost;
+	}
+
+	public void setPeopleSpecMost(Integer peopleSpecMost) {
+		this.peopleSpecMost = peopleSpecMost;
+	}
+
+	public List<Long> getStructureList() {
+		return structureList;
+	}
+
+	public void setStructureList(List<Long> structureList) {
+		this.structureList = structureList;
 	}
 }

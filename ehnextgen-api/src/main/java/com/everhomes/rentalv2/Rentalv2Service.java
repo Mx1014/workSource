@@ -151,6 +151,8 @@ public interface Rentalv2Service {
 
 	PreOrderDTO getRentalBillPayInfoV2(GetRentalBillPayInfoCommand cmd);
 
+	void offlinePayOrder(OfflinePayOrderCommand cmd);
+
 	AddRentalBillItemV3Response getRentalBillPayInfoV3(GetRentalBillPayInfoCommand cmd);
 
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
@@ -219,6 +221,14 @@ public interface Rentalv2Service {
 	void renewOrderSuccess(RentalOrder rentalBill,Double rentalCount);
 
 	GetResourceUsingInfoResponse getResourceUsingInfo(FindRentalSiteByIdCommand cmd);
+
+	GetStructureListResponse getStructureList(GetStructureListAdminCommand cmd);
+
+	void updateStructure(UpdateStructureAdminCommand cmd);
+
+	void updateStructures(UpdateStructuresAdminCommand cmd);
+
+	GetUserClosestBillResponse getUserClosestBill(GetUserClosestBillCommand cmd);
 
 	String parseSceneToken(String sceneToken);
 

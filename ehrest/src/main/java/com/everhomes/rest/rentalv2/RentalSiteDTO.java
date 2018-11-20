@@ -73,6 +73,8 @@ import com.everhomes.util.StringHelper;
  * <li>AclinkName: 门禁组名</li>
  * <li>holidayOpenFlag: 节假日是否开放预约 0不开放 1 开放</li>
  * <li>holidayType: 节假日类型 {@link com.everhomes.rest.rentalv2.admin.RentalHolidayType}</li>
+ * <li>structures: 设施列表</li>
+ * <li>enableTimeRanges: 可预约时间段</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -89,6 +91,7 @@ public class RentalSiteDTO {
 	private BigDecimal avgPrice;
 	private String avgPriceStr;
 	private String spec;
+	private Integer peopleSpec;
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
@@ -112,8 +115,6 @@ public class RentalSiteDTO {
 	private List<SiteNumberDTO> siteNumbers;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
-//	@ItemType(RentalSiteRulesDTO.class)
-//	private List<RentalSiteRulesDTO> siteRules;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
 	private List<RentalSiteFileDTO> siteFiles;
@@ -121,6 +122,8 @@ public class RentalSiteDTO {
 	private List<SiteOwnerDTO> owners;
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
+	private List<SiteStructureDTO> structures;
+	private List<RangeDTO> enableTimeRanges;
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
@@ -699,5 +702,29 @@ public class RentalSiteDTO {
 
 	public void setSiteFiles(List<RentalSiteFileDTO> siteFiles) {
 		this.siteFiles = siteFiles;
+	}
+
+	public Integer getPeopleSpec() {
+		return peopleSpec;
+	}
+
+	public void setPeopleSpec(Integer peopleSpec) {
+		this.peopleSpec = peopleSpec;
+	}
+
+	public List<SiteStructureDTO> getStructures() {
+		return structures;
+	}
+
+	public void setStructures(List<SiteStructureDTO> structures) {
+		this.structures = structures;
+	}
+
+	public List<RangeDTO> getEnableTimeRanges() {
+		return enableTimeRanges;
+	}
+
+	public void setEnableTimeRanges(List<RangeDTO> enableTimeRanges) {
+		this.enableTimeRanges = enableTimeRanges;
 	}
 }

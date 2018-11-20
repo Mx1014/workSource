@@ -6,7 +6,7 @@ public interface ServiceCategoryMatchProvider {
 
 	void createMatch(ServiceCategoryMatch tmp);
 
-	List<ServiceCategoryMatch> listMatches(String code, Long organizationId, Long type);
+	List<ServiceCategoryMatch> listMatches(String ownerType, Long ownerId, Long type);
 
 	void deleteMathes(String code, Long projectId, Long type);
 

@@ -272,6 +272,7 @@ public interface DoorAccessService {
 	 */
 	public UpdateFormalAuthByCommunityResponse updateFormalAuthByCommunity(UpdateFormalAuthByCommunityCommand cmd);
 
+	public String getVisitorUrlById(GetVisitorCommand cmd);
     //门禁v3.0.2 添加管理授权企业 add by liqingyan
     void addDoorManagement(AddDoorManagementCommand cmd);
 

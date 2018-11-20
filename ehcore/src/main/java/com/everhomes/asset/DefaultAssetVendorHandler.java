@@ -146,7 +146,11 @@ public class DefaultAssetVendorHandler extends AssetVendorHandler{
 
         preOrderCommand.setExtendInfo(genPaymentExtendInfo(cmd, billGroup));
         preOrderCommand.setPaymentParams(getPaymentParams(cmd, billGroup));
-        preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+        //修复缺陷 #38905 网关支付收银台支付信息显示有误
+        //手机APP支付才需要超时时间，web对公转账不需要
+        if(cmd.getSourceType().equals(SourceType.MOBILE.getCode())) {
+        	preOrderCommand.setExpirationMillis(EXPIRE_TIME_15_MIN_IN_SEC);
+        }
         preOrderCommand.setCallbackUrl(getPayCallbackUrl(cmd));
         preOrderCommand.setGoodsName("物业缴费");
         preOrderCommand.setGoodsDescription(null);

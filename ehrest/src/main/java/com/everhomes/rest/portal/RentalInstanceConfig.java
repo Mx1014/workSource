@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>resourceTypeId: 资源id</li>
- * <li>pageType: 样式</li>
+ * <li>pageType: 样式{@link com.everhomes.rest.rentalv2.RentalPageType} </li>
  * <li>payMode: 支付模式 0 :线上支付 1 :线下支付 2 :审批线上支付/li>
  * <li>identify: 资源类型的分类 {@link com.everhomes.rest.rentalv2.RentalV2ResourceType}</li>
  * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>

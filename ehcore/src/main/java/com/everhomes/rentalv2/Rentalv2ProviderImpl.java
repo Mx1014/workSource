@@ -2810,4 +2810,79 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return step.fetch().map(r-> ConvertHelper.convert(r,RentalRefundTip.class));
 	}
+
+	@Override
+	public List<RentalStructure> listRentalStructures(String sourceType, Long sourceId, String resourceType,Byte isSurport,
+													  ListingLocator locator, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURES);
+		Condition condition = Tables.EH_RENTALV2_STRUCTURES.RESOURCE_TYPE.eq(resourceType);
+		if (!StringUtils.isBlank(sourceType))
+			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.SOURCE_TYPE.eq(sourceType));
+		if (sourceId != null)
+			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.SOURCE_ID.eq(sourceId));
+		if (isSurport != null)
+			condition = condition.and(Tables.EH_RENTALV2_STRUCTURES.IS_SURPORT.eq(isSurport));
+		if (locator !=null && locator.getAnchor() != null)
+			condition.and(Tables.EH_RENTALV2_STRUCTURES.DEFAULT_ORDER.gt(locator.getAnchor()));
+		step.where(condition).orderBy(Tables.EH_RENTALV2_STRUCTURES.DEFAULT_ORDER);
+		if (pageSize != null)
+			step.limit(pageSize);
+
+		return step.fetch().map(r->ConvertHelper.convert(r,RentalStructure.class));
+	}
+
+	@Override
+	public List<RentalStructureTemplate> listRentalStructureTemplates() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURE_TEMPLATE);
+		return step.fetch().map(r->ConvertHelper.convert(r,RentalStructureTemplate.class));
+	}
+
+	@Override
+	public RentalStructure getRentalStructureById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_STRUCTURES);
+		return step.where(Tables.EH_RENTALV2_STRUCTURES.ID.eq(id)).fetchAny().map(r->ConvertHelper.convert(r,RentalStructure.class));
+	}
+
+	@Override
+	public void createRentalStructure(RentalStructure rentalStructure) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalv2Structures.class));
+		rentalStructure.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2StructuresRecord record = ConvertHelper.convert(rentalStructure,
+				EhRentalv2StructuresRecord.class);
+		InsertQuery<EhRentalv2StructuresRecord> query = context
+				.insertQuery(Tables.EH_RENTALV2_STRUCTURES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, RentalStructure.class,
+				null);
+	}
+
+	@Override
+	public void updateRentalStructure(RentalStructure rentalStructure) {
+		assert (rentalStructure.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalv2StructuresDao dao = new EhRentalv2StructuresDao(context.configuration());
+		dao.update(rentalStructure);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, RentalStructure.class,
+				rentalStructure.getId());
+	}
+
+	@Override
+	public RentalOrder getUserClosestBill(Long userId, Long resourceTypeId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS).where(Tables.EH_RENTALV2_ORDERS.CREATOR_UID.eq(userId).
+				and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID.eq(resourceTypeId)).and(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.IN_USING.getCode()).
+				or(Tables.EH_RENTALV2_ORDERS.STATUS.eq(SiteBillStatus.SUCCESS.getCode()))));
+		Record record = step.orderBy(Tables.EH_RENTALV2_ORDERS.START_TIME, Tables.EH_RENTALV2_ORDERS.CREATE_TIME).fetchAny();
+		if (record == null)
+			return null;
+		return ConvertHelper.convert(record,RentalOrder.class);
+
+	}
 }
