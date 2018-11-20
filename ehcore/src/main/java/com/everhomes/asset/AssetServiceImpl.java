@@ -5225,7 +5225,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 	}
 
-	//对接下载中心,下载交易明细
+	//对接下载中心,下载交易明细。
     @Override
     public OutputStream exportOutputStreamOrders(Object cmd, Long taskId) {
         //公用字段
