@@ -455,6 +455,7 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         if(contractApartments != null && contractApartments.size() > 0) {
             List<BuildingApartmentDTO> apartmentDtos = contractApartments.stream().map(apartment -> {
                 BuildingApartmentDTO apartmentDto = ConvertHelper.convert(apartment, BuildingApartmentDTO.class);
+                apartmentDto.setChargeArea(apartment.getAreaSize());
                 return apartmentDto;
             }).collect(Collectors.toList());
             dto.setBuildings(apartmentDtos);
@@ -675,39 +676,29 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		if (cmd.getCommunityId() != null)
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityId", cmd.getCommunityId()));
 
-		//fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", ContractStatus.ACTIVE.getCode()));
-		
+		//统计正常合同，退约合同
 		List<Byte> statusList = new ArrayList<Byte>();
-		// 为初始化合同
 		statusList.add(ContractStatus.ACTIVE.getCode());
-//		statusList.add(ContractStatus.WAITING_FOR_APPROVAL.getCode());
-//		statusList.add(ContractStatus.APPROVE_QUALITIED.getCode());
-//		statusList.add(ContractStatus.APPROVE_NOT_QUALITIED.getCode());
-//		statusList.add(ContractStatus.EXPIRING.getCode());
-//		statusList.add(ContractStatus.EXPIRED.getCode());
-//		statusList.add(ContractStatus.HISTORY.getCode());
-//		statusList.add(ContractStatus.INVALID.getCode());
 		statusList.add(ContractStatus.DENUNCIATION.getCode());
-		qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
-
-		if (cmd.getContractType() != null)
+		if (statusList != null) {
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", statusList));
+		}
+		if (cmd.getContractType() != null){
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("contractType", cmd.getContractType()));
-
+		}
 		if (cmd.getCustomerType() != null) {
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("customerType", cmd.getCustomerType()));
 		}
-
 		if (cmd.getBuildingId() != null) {
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("buildingId", cmd.getBuildingId()));
 		}
-
 		if (cmd.getAddressId() != null) {
 			fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("addressId", cmd.getAddressId()));
 		}
 		
 		
 		// 传过来的时间进行格式化时间戳转化
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		/*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//设置本月第一天
 		Calendar firstCa = Calendar.getInstance();
 		firstCa.add(Calendar.MONTH, 0);
@@ -720,6 +711,40 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		
 		//设置本月最后
 		Calendar lastCa = Calendar.getInstance();
+		lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
+		lastCa.set(Calendar.HOUR_OF_DAY, 23);
+		lastCa.set(Calendar.MINUTE, 59);
+		lastCa.set(Calendar.SECOND, 59);
+		String laststr = sdf.format(lastCa.getTime());*/
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdfMM = new SimpleDateFormat("yyyy-MM");
+		//设置本月第一天
+		Calendar firstCa = Calendar.getInstance();
+		// 设置本月最后
+		Calendar lastCa = Calendar.getInstance();
+		
+		Date userDate = null;
+		try {
+			userDate = sdfMM.parse(cmd.getDateStr());
+		} catch (ParseException e1) {
+
+		}
+		firstCa.setTime(userDate);
+		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+		// 设置本月第一天
+		//Calendar firstCa = Calendar.getInstance();
+		/*firstCa.add(Calendar.MONTH, 0);
+		firstCa.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+		firstCa.set(Calendar.HOUR_OF_DAY, 0);
+		firstCa.set(Calendar.MINUTE, 0);
+		firstCa.set(Calendar.SECOND, 0);
+		firstCa.set(Calendar.MILLISECOND, 0);*/
+		String firststr = sdf.format(firstCa.getTime());
+
+		// 设置本月最后
+		//Calendar lastCa = Calendar.getInstance();
+		lastCa.setTime(userDate);
 		lastCa.set(Calendar.DAY_OF_MONTH, lastCa.getActualMaximum(Calendar.DAY_OF_MONTH));
 		lastCa.set(Calendar.HOUR_OF_DAY, 23);
 		lastCa.set(Calendar.MINUTE, 59);

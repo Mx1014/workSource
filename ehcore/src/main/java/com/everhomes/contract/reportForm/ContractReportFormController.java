@@ -1,27 +1,21 @@
 package com.everhomes.contract.reportForm;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contract.ContractService;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.organization.pm.reportForm.BuildingReportFormDTO;
-import com.everhomes.rest.organization.pm.reportForm.CommunityReportFormDTO;
-import com.everhomes.rest.organization.pm.reportForm.GetBuildingReportFormCommand;
-import com.everhomes.rest.organization.pm.reportForm.GetCommunityReportFormCommand;
-import com.everhomes.rest.organization.pm.reportForm.GetTotalBuildingStaticsCommand;
-import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
-import com.everhomes.rest.organization.pm.reportForm.ListBuildingReportFormResponse;
-import com.everhomes.rest.organization.pm.reportForm.ListCommunityReportFormResponse;
-import com.everhomes.rest.organization.pm.reportForm.TotalBuildingStaticsDTO;
-import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
+import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
+import com.everhomes.rest.contract.ListCommunityContractReportFormResponse;
+import com.everhomes.rest.contract.SearchContractStaticsListCommand;
+import com.everhomes.rest.contract.TotalContractStaticsDTO;
+import com.everhomes.user.UserContext;
 
 /**
  * 此类用于产生合同相关的报表
@@ -31,113 +25,74 @@ import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 @RequestMapping("/contract/reportForm")
 public class ContractReportFormController extends ControllerBase{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContractReportFormController.class);
-	
-	
-	
-
-/*	@Autowired
-	private PropertyReportFormService propertyReportFormService;
-	
 	@Autowired
-	private PropertyReportFormJob propertyReportFormJob;
+	private ConfigurationProvider configurationProvider;
 	
-	*//**
-     * <b>URL: /pm/reportForm/getCommunityReportForm</b>
-     * <p>获取项目信息汇总表</p>
-     *//*
-    @RequestMapping("getCommunityReportForm")
-    @RestReturn(value=ListCommunityReportFormResponse.class)
-    public RestResponse getCommunityReportForm(GetCommunityReportFormCommand cmd) {
-    	ListCommunityReportFormResponse result = propertyReportFormService.getCommunityReportForm(cmd);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+	private ContractService getContractService(Integer namespaceId) {
+		String handler = configurationProvider.getValue(namespaceId, "contractService", "");
+		return PlatformContext.getComponent(ContractService.CONTRACT_PREFIX + handler);
+	}
+	/**
+     * <p>合同报表：获取项目信息汇总表</p>
+     * <b>URL: /contract/reportForm/searchContractStaticsList</b>
+     */
+    @RequestMapping("searchContractStaticsList")
+    @RestReturn(value = ListCommunityContractReportFormResponse.class)
+	public RestResponse searchContractStaticsList(SearchContractStaticsListCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		ListCommunityContractReportFormResponse contractStaticsList = contractService.searchContractStaticsList(cmd);
+		RestResponse response = new RestResponse(contractStaticsList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
-    *//**
-     * <b>URL: /pm/reportForm/getTotalCommunityStatics</b>
-     * <p>获取项目信息汇总表总计</p>
-     *//*
-    @RequestMapping("getTotalCommunityStatics")
-    @RestReturn(value=TotalCommunityStaticsDTO.class)
-    public RestResponse getTotalCommunityStatics(GetTotalCommunityStaticsCommand cmd) {
-    	TotalCommunityStaticsDTO result = propertyReportFormService.getTotalCommunityStatics(cmd);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+    /**
+     * <p>合同报表：获取项目信息汇总表</p>
+     * <b>URL: /contract/reportForm/getTotalContractStatics</b>
+     */
+    @RequestMapping("getTotalContractStatics")
+    @RestReturn(value = TotalContractStaticsDTO.class)
+	public RestResponse getTotalContractStatics(GetTotalContractStaticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		TotalContractStaticsDTO contractStaticsList = contractService.getTotalContractStatics(cmd);
+		RestResponse response = new RestResponse(contractStaticsList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
-    *//**
-     * <b>URL: /pm/reportForm/exportCommunityReportForm</b>
-     * <p>导出项目信息汇总表</p>
-     *//*
-    @RequestMapping("exportCommunityReportForm")
+    /**
+     * <p>合同报表：导出项目信息汇总表</p>
+     * <b>URL: /contract/reportForm/exportContractStaticsInfo</b>
+     */
+    @RequestMapping("exportContractStaticsInfo")
     @RestReturn(value=String.class)
-    public RestResponse exportCommunityReportForm(GetTotalCommunityStaticsCommand cmd) {
-    	propertyReportFormService.exportCommunityReportForm(cmd);
+	public RestResponse exportContractStaticsInfo(GetTotalContractStaticsCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId() == null ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
+		ContractService contractService = getContractService(namespaceId);
+		contractService.exportContractStaticsInfo(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+	}
     
-    *//**
-     * <b>URL: /pm/reportForm/getBuildingReportForm</b>
-     * <p>获取楼宇信息汇总表</p>
-     *//*
-    @RequestMapping("getBuildingReportForm")
-    @RestReturn(value=ListBuildingReportFormResponse.class)
-    public RestResponse getBuildingReportForm(GetBuildingReportFormCommand cmd) {
-    	ListBuildingReportFormResponse result = propertyReportFormService.getBuildingReportForm(cmd);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    *//**
-     * <b>URL: /pm/reportForm/getTotalBuildingStatics</b>
-     * <p>获取楼宇信息汇总表总计</p>
-     *//*
-    @RequestMapping("getTotalBuildingStatics")
-    @RestReturn(value=TotalBuildingStaticsDTO.class)
-    public RestResponse getTotalBuildingStatics(GetTotalBuildingStaticsCommand cmd) {
-    	TotalBuildingStaticsDTO result = propertyReportFormService.getTotalBuildingStatics(cmd);
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    *//**
-     * <b>URL: /pm/reportForm/exportBuildingReportForm</b>
-     * <p>导出楼宇信息汇总表</p>
-     *//*
-    @RequestMapping("exportBuildingReportForm")
+	/**
+     * <p>合同报表：定时任务手动</p>
+     * <b>URL: /contract/reportForm/excuteContractReportFormJob</b>
+     */
+    @RequestMapping("excuteContractReportFormJob")
     @RestReturn(value=String.class)
-    public RestResponse exportBuildingReportForm(GetTotalBuildingStaticsCommand cmd) {
-    	propertyReportFormService.exportBuildingReportForm(cmd);
+    public RestResponse excuteDoorAccessSchedule(GetTotalContractStaticsCommand cmd) {
+    	ContractService contractService = getContractService(1111111);
+		contractService.generateReportFormStatics(cmd);
         RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
     }
-    
-    *//**
-     * <b>URL: /pm/reportForm/testReportFormJob</b>
-     * <p>测试定时任务</p>
-     *//*
-    @RequestMapping("testReportFormJob")
-    @RestReturn(value=String.class)
-    public RestResponse testReportFormJob() {
-    	propertyReportFormJob.generateReportFormStatics();
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
     
 }

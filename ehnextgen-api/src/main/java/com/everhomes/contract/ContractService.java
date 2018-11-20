@@ -72,10 +72,14 @@ public interface ContractService {
 	void dealBillsGeneratedByDenunciationContract(DenunciationContractBillsCommand cmd);
 	//导出对接下载中心
 	void exportContractListByCommunityCategoryId(SearchContractCommand cmd);
-	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;}
-	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;}
+	default OutputStream exportOutputStreamListByTaskId(SearchContractCommand cmd, Long taskId){return null;};
+	default ExcelPropertyInfo exportPropertyInfo(Map<String, String> customFields, List<FieldDTO> dynamicField, String[] exportfield, int[] customFieldtitleSizes){return null;};
 	default void autoGeneratingBill(AutoGeneratingBillCommand cmd){};
    
 	//合同报表
-	default void generateReportFormStatics(){};
+	default void generateReportFormStatics(GetTotalContractStaticsCommand dateStr){};
+	default ListCommunityContractReportFormResponse searchContractStaticsList(SearchContractStaticsListCommand cmd){return null;}
+	default TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){return null;}
+	default void exportContractStaticsInfo(GetTotalContractStaticsCommand cmd){};
+	default OutputStream exportOutputStreamForContractStatics(GetTotalContractStaticsCommand cmd, Long taskId){return null;};
 }

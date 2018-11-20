@@ -3,11 +3,9 @@ package com.everhomes.openapi;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.asset.AppAssetCategory;
 import com.everhomes.contract.ContractAttachment;
 import com.everhomes.contract.ContractCategory;
 import com.everhomes.contract.ContractChargingChange;
@@ -20,10 +18,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.contract.ContractChargingItemReportformDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ContractLogDTO;
-
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
+import com.everhomes.rest.contract.ContractStaticsListDTO;
+import com.everhomes.rest.contract.TotalContractStaticsDTO;
 
 public interface ContractProvider {
 
@@ -156,5 +152,7 @@ public interface ContractProvider {
 	void deleteCommunityDataByDateStr(String todayDateStr);
 
 	List<ContractChargingItemReportformDTO> getContractChargingItemInfoList(ContractDTO contract);
+	List<ContractStaticsListDTO> listCommunityContractStaticsList(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType, Integer pageOffSet, Integer pageSize);
+	TotalContractStaticsDTO getTotalContractStatics(Integer namespaceId, List<Long> communityIds, String formatDateStr, String startTimeStr,String endTimeStr,  Byte dateType);
 
 }

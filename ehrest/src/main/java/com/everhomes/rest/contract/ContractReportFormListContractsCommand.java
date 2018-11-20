@@ -38,6 +38,15 @@ public class ContractReportFormListContractsCommand {
 	private Long addressId;
     private Long buildingId;
     private Long pageNumber;
+    private String dateStr;
+
+	public String getDateStr() {
+		return dateStr;
+	}
+
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
+	}
 
 	public Long getPageNumber() {
 		return pageNumber;

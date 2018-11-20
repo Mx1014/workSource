@@ -57,6 +57,8 @@ import com.everhomes.rest.contract.SyncContractsFromThirdPartCommand;
 import com.everhomes.rest.contract.UpdateContractCommand;
 import com.everhomes.rest.contract.UpdateContractTemplateCommand;
 import com.everhomes.rest.contract.listContractTemplateCommand;
+import com.everhomes.rest.organization.pm.reportForm.GetTotalCommunityStaticsCommand;
+import com.everhomes.rest.organization.pm.reportForm.TotalCommunityStaticsDTO;
 import com.everhomes.search.ContractSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -622,19 +624,4 @@ public class ContractController extends ControllerBase {
 		return new RestResponse();
 	}
 	
-	/**
-     * <p>合同报表：定时任务手动</p>
-     * <b>URL: /contract/excuteContractReportFormJob</b>
-     */
-    @RequestMapping("excuteContractReportFormJob")
-    @RestReturn(value=String.class)
-    public RestResponse excuteDoorAccessSchedule() {
-    	ContractService contractService = getContractService(1111111);
-		contractService.generateReportFormStatics();
-        RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-    }
-
 }

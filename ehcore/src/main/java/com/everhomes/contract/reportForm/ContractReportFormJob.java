@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contract.ContractService;
+import com.everhomes.rest.contract.GetTotalContractStaticsCommand;
 
 /**
  * Created by djm  2018/11/17
@@ -26,7 +27,8 @@ public class ContractReportFormJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         LOGGER.info("start ContractReportFormJob auto Reading task......");
         ContractService contractService = getContractService(111111);
-		contractService.generateReportFormStatics();
+        GetTotalContractStaticsCommand cmCommand = new GetTotalContractStaticsCommand();
+		contractService.generateReportFormStatics(cmCommand);
         LOGGER.info("finish  ContractReportFormJob auto Reading task......");
 
     }
