@@ -152,7 +152,7 @@ ALTER TABLE eh_office_cubicle_orders ADD COLUMN cubicle_type TINYINT COMMENT '�
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN remark TEXT COMMENT '备注';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN order_status TINYINT COMMENT '订单状态';
 
-CREATE TABLE `eh_parking_business_payee_accounts` (
+CREATE TABLE `eh_office_cubicle_payee_accounts` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
