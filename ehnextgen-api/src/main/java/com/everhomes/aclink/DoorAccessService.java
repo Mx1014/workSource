@@ -306,4 +306,8 @@ public interface DoorAccessService {
     ListSelectDoorsAndGroupsResponse listSelectDoorsAndGroups (ListSelectDoorsAndGroupsCommand cmd);
     //查询门禁关联服务器、摄像头
     SearchDoorServerResponse searchDoorServer (SearchDoorServerCommand cmd);
+    //服务热线
+    QueryServiceHotlineResponse queryServiceHotline (QueryServiceHotlineCommand cmd);
+
+    void updateServiceHotline (UpdateServiceHotlineCommand cmd);
 }

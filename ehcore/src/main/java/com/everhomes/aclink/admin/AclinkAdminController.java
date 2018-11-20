@@ -1818,5 +1818,34 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }    
+    }
+
+    /**
+     * <b>URL: /admin/aclink/updateServiceHotline</b>
+     * <p>更新服务热线</p>
+     * @return
+     */
+    @RequestMapping("updateServiceHotline")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceHotline(@Valid UpdateServiceHotlineCommand cmd) {
+        RestResponse response = new RestResponse();
+        doorAccessService.updateServiceHotline(cmd);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/queryServiceHotline</b>
+     * <p>查询服务热线</p>
+     * @return
+     */
+    @RequestMapping("queryServiceHotline")
+    @RestReturn(value = QueryServiceHotlineResponse.class)
+    public RestResponse queryServiceHotline(@Valid QueryServiceHotlineCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryServiceHotline(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

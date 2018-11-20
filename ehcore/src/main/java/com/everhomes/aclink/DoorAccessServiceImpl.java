@@ -7757,6 +7757,44 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         return resp;
     }
+
+    @Override
+    public QueryServiceHotlineResponse queryServiceHotline (QueryServiceHotlineCommand cmd){
+        QueryServiceHotlineResponse resp = new QueryServiceHotlineResponse();
+	    AclinkFormValues hotline = new AclinkFormValues();
+        hotline = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        resp.setPhone(ConvertHelper.convert(hotline, AclinkFormValuesDTO.class));
+        return resp;
+    }
+
+    @Override
+    public void updateServiceHotline (UpdateServiceHotlineCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    AclinkFormValues hotline = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        if(null == hotline || null == hotline.getId()){
+            AclinkFormValues phone = new AclinkFormValues();
+            phone.setNamespaceId(namespaceId);
+            phone.setTitleId(0L);
+            phone.setValue(cmd.getPhone());
+            phone.setType(AclinkFormValuesType.HOTLINE.getCode());
+            phone.setStatus(cmd.getStatus());
+            phone.setOwnerId(cmd.getOwnerId());
+            phone.setOwnerType(cmd.getOwnerType());
+            phone.setCreatorUid(user.getId());
+            phone.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.createAclinkFormValues(phone);
+        }
+        else if(null != hotline && hotline.getId() != null){
+            hotline.setStatus(cmd.getStatus());
+            if(null != cmd.getPhone() && cmd.getPhone().length()>0){
+                hotline.setValue(cmd.getPhone());
+            }
+            hotline.setOperatorUid(user.getId());
+            hotline.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            doorAccessProvider.updateAclinkFormValues(hotline);
+        }
+	}
 }
 
 
