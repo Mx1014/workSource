@@ -40,9 +40,11 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
 
-        step.where(condition).fetchAny().map((r) ->{
-            return ConvertHelper.convert(r, WorkPlatformApp.class);
-        });
+        if (step.where(condition).fetchAny() != null) {
+            step.where(condition).fetchAny().map((r) ->{
+                return ConvertHelper.convert(r, WorkPlatformApp.class);
+            });
+        }
         return null;
     }
 
@@ -84,10 +86,12 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()))
                 .and(Tables.EH_WORK_PLATFORM_APPS.ORDER.gt(sortNum));
-        step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny().map((r) ->{
-            list.add(ConvertHelper.convert(r, WorkPlatformApp.class));
-            return null;
-        });
+        if (step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny() != null) {
+            step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny().map((r) ->{
+                list.add(ConvertHelper.convert(r, WorkPlatformApp.class));
+                return null;
+            });
+        }
         return list;
     }
 
@@ -99,10 +103,12 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
         Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
-        step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny().map((r) ->{
-            list.add(ConvertHelper.convert(r, WorkPlatformApp.class));
-            return null;
-        });
+        if (step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny() != null) {
+            step.where(condition).orderBy(Tables.EH_WORK_PLATFORM_APPS.ORDER.asc()).fetchAny().map((r) ->{
+                list.add(ConvertHelper.convert(r, WorkPlatformApp.class));
+                return null;
+            });
+        }
         return list;
     }
 
