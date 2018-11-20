@@ -831,7 +831,7 @@ public class RemindServiceImpl implements RemindService  {
             }
             updateTrackReminds(trackReminds, existRemind, false);
           //修改category也要发消息
-            if(existRemind.getRemindCategoryId() != null && existRemind.getRemindCategoryId().equals(oldCategoryId)){
+            if(existRemind.getRemindCategoryId() != null && !existRemind.getRemindCategoryId().equals(oldCategoryId)){
             	if(!CollectionUtils.isEmpty(categoryShares)){
             		for(RemindCategoryDefaultShare cs : categoryShares){
             			if(checkShareRemindInHistory(historyShareReminds, cs)){
