@@ -128,7 +128,7 @@ public interface Rentalv2Service {
 	void onOrderSuccess(RentalOrder bill);
 
 
-	void onOrderCancel(RentalOrder order);
+	void onOrderCancel(RentalOrder order,String content);
 
 
 	void updateRentalDate(UpdateRentalDateCommand cmd);

@@ -243,6 +243,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private UserActivityService userActivityService;
 	@Autowired
 	private ArchivesService archivesService;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 
 	private ExecutorService executorPool = Executors.newFixedThreadPool(5);
 
@@ -2790,8 +2792,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					}
 				});
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE  && flag[0]){
-			//把所有状态为success-已预约的捞出来 
-
+			//把所有状态为success-已预约的捞出来
 			List<RentalOrder>  orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.SUCCESS.getCode());
 			for(RentalOrder order : orders ){
 				if (order.getResourceType().equals(RentalV2ResourceType.DEFAULT.getCode())) {
@@ -2900,6 +2901,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					}
 
+				}
+			}
+			//超时取消
+			orders = rentalv2Provider.listTargetRentalBills(SiteBillStatus.APPROVING.getCode());
+			for(RentalOrder order : orders ){
+				if (currTime >= order.getStartTime().getTime() ) {
+					onOrderCancel(order,"由于管理员超时未处理，自动中止");
 				}
 			}
 		}
@@ -3875,17 +3883,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			rentalv2Provider.deleteRentalOrderStatisticsByOrderId(order.getId());
 			return null;
 		});
-        //只要退款就给管理员发消息,不管是退款中还是已退款
-        onOrderCancel(order);
-	}
-
-
-	private Long createOrderNo(Long time) {
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-//		String prefix = sdf.format(new Date());
-		String suffix = String.valueOf(generateRandomNumber(3));
-
-		return Long.valueOf(String.valueOf(time) + suffix);
+        onOrderCancel(order,null);
+		//发消息
+		RentalMessageHandler messageHandler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
+		messageHandler.cancelOrderSendMessage(order);
 	}
 
 	private long generateRandomNumber(int n) {
@@ -3915,26 +3916,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			managerContent.append(rentalBill.getRentalCount());
 		}
 		//sendMessageToUser(rs.getChargeUid(), managerContent.toString());
-	}
-
-	/***给支付相关的参数签名*/
-	private void setSignatureParam(PayZuolinRefundCommand cmd) {
-		App app = appProvider.findAppByKey(cmd.getAppKey());
-
-		Map<String, String> map = new HashMap<>();
-		map.put("appKey", cmd.getAppKey());
-		map.put("timestamp", cmd.getTimestamp() + "");
-		map.put("nonce", cmd.getNonce() + "");
-		map.put("refundOrderNo", cmd.getRefundOrderNo());
-		map.put("orderNo", cmd.getOrderNo());
-		map.put("onlinePayStyleNo", cmd.getOnlinePayStyleNo());
-		map.put("orderType", cmd.getOrderType());
-		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
-//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
-		map.put("refundAmount", cmd.getRefundAmount().toString());
-		map.put("refundMsg", cmd.getRefundMsg());
-		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
-		cmd.setSignature(signature);
 	}
 
 	@Override
@@ -4313,27 +4294,47 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	@Override
-	public void onOrderCancel(RentalOrder order) {
+	public void onOrderCancel(RentalOrder order,String content) {
         //终止工作流
-        FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
-        if(null != flowcase  && !flowcase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
+		FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
+        if(null != flowCase  && !flowCase.getCaseType().equals(FlowCaseType.DUMB.getCode())){
             FlowAutoStepDTO dto = new FlowAutoStepDTO();
             dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-            dto.setFlowCaseId(flowcase.getId());
-            dto.setFlowMainId(flowcase.getFlowMainId());
-            dto.setFlowNodeId(flowcase.getCurrentNodeId());
-            dto.setFlowVersion(flowcase.getFlowVersion());
-            dto.setStepCount(flowcase.getStepCount());
+            dto.setFlowCaseId(flowCase.getId());
+            dto.setFlowMainId(flowCase.getFlowMainId());
+            dto.setFlowNodeId(flowCase.getCurrentNodeId());
+            dto.setFlowVersion(flowCase.getFlowVersion());
+            dto.setStepCount(flowCase.getStepCount());
+            if (content != null){
+				FlowEventLog log = new FlowEventLog();
+				log.setId(flowEventLogProvider.getNextId());
+				log.setFlowMainId(flowCase.getFlowMainId());
+				log.setFlowVersion(flowCase.getFlowVersion());
+				log.setNamespaceId(flowCase.getNamespaceId());
+				log.setFlowNodeId(flowCase.getCurrentNodeId());
+				log.setFlowCaseId(flowCase.getId());
+				log.setStepCount(flowCase.getStepCount());
+				log.setSubjectId(0L);
+				log.setParentId(0L);
+				User user = userProvider.findUserById(User.SYSTEM_UID);
+				log.setFlowUserId(user.getId());
+				log.setFlowUserName(user.getNickName());
+				log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+				log.setButtonFiredStep(FlowStepType.ABSORT_STEP.getCode());
+				log.setTrackerApplier(1L); // 申请人可以看到此条log，为0则看不到
+				log.setTrackerProcessor(1L);// 处理人可以看到此条log，为0则看不到
+				log.setLogContent(content);
+				List<FlowEventLog> logList = new ArrayList<>(1);
+				logList.add(log);
+				dto.setEventLogs(logList);
+			}
             try {
                 this.flowService.processAutoStep(dto);
             }catch (Exception e){
 
             }
         }
-		//发消息
-		RentalMessageHandler handler = rentalCommonService.getRentalMessageHandler(order.getResourceType());
 
-		handler.cancelOrderSendMessage(order);
 	}
 	@Override
 	public void onOrderSuccess(RentalOrder order) {
@@ -4858,8 +4859,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		response.setSiteDays(new ArrayList<>());
 
-		processWeekRuleDTOs(start, end, response.getSiteDays(), rs, rule,
-				null, cmd.getRentalType(),cmd.getPackageName());
+		processWeekRuleDTOs(start, end, response.getSiteDays(), rs, rule, cmd.getRentalType(),cmd.getPackageName());
 		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(), rs,  cmd.getRentalType(), cmd.getPackageName());
@@ -5033,7 +5033,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		end.add(Calendar.YEAR, 1);
 		response.setSiteDays(new ArrayList<>());
 
-		processMonthRuleDTOs(start, end, response, rule, rs, null, cmd.getPackageName());
+		processMonthRuleDTOs(start, end, response, rule, rs, cmd.getPackageName());
 		response.setResourceCounts(rs.getResourceCounts());
 		//设置优惠信息
 		PriceRuleDTO dto = processPriceCut(cmd.getSiteId(),rs,  cmd.getRentalType(),cmd.getPackageName());
@@ -5048,7 +5048,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	private void processMonthRuleDTOs(Calendar start, Calendar end, FindRentalSiteYearStatusCommandResponse response,
-									  RentalDefaultRule rule, RentalResource rs, String sceneToken, String packageName) {
+									  RentalDefaultRule rule, RentalResource rs,  String packageName) {
 		java.util.Date reserveTime = new java.util.Date();
 		Timestamp beginTime = new Timestamp(reserveTime.getTime() + rule.getRentalStartTime());
 
@@ -5173,7 +5173,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	}
 
 	private void processWeekRuleDTOs(Calendar start, Calendar end, List<RentalSiteDayRulesDTO> dtos, RentalResource rs,
-									 RentalDefaultRule rule, String sceneType, byte rentalType, String packageName) {
+									 RentalDefaultRule rule,  byte rentalType, String packageName) {
 
 		java.util.Date reserveTime = new java.util.Date();
 		Timestamp beginTime = new Timestamp(reserveTime.getTime()
@@ -5629,8 +5629,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					setRentalSiteRulesDTOExtraInfo(dto);
 
-					if (siteNumberMap.get(dto.getSiteNumber()) == null)
-						siteNumberMap.put(dto.getSiteNumber(), new ArrayList<>());
+					siteNumberMap.computeIfAbsent(dto.getSiteNumber(), k -> new ArrayList<>());
 					siteNumberMap.get(dto.getSiteNumber()).add(dto);
 				}
 			}
@@ -5774,8 +5773,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 					setRentalSiteRulesDTOExtraInfo(dto);
 
-					if (siteNumberMap.get(dto.getSiteNumber()) == null)
-						siteNumberMap.put(dto.getSiteNumber(), new ArrayList<>());
+					siteNumberMap.computeIfAbsent(dto.getSiteNumber(), k -> new ArrayList<>());
 					siteNumberMap.get(dto.getSiteNumber()).add(dto);
 				}
 			}
