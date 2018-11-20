@@ -11,6 +11,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.archives.ArchivesService;
 import com.everhomes.bus.LocalEventBus;
 import com.everhomes.bus.LocalEventContext;
 import com.everhomes.bus.SystemEvent;
@@ -47,6 +48,8 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.archives.AddArchivesContactCommand;
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
@@ -238,6 +241,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 	private ServiceModuleAppAuthorizationService serviceModuleAppAuthorizationService;
 	@Autowired
 	private UserActivityService userActivityService;
+	@Autowired
+	private ArchivesService archivesService;
 
 	private ExecutorService executorPool = Executors.newFixedThreadPool(5);
 
@@ -3322,7 +3327,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		RentalPriceClassificationDTO classification = new RentalPriceClassificationDTO();
 		classification.setWorkdayPrice(new BigDecimal(0));
 		classification.setInitiatePrice(new BigDecimal(0));
-		classification.setUserPriceType(RentalUserPriceType.UNIFICATION.getCode());
+		classification.setUserPriceType(RentalUserPriceType.USER_TYPE.getCode());
 		classification.setClassification(SceneType.ENTERPRISE.getCode());
 		rule.getClassifications().add(classification);
 		classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
@@ -8846,6 +8851,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			}
 		}
 		return null;
+	}
+
+	public void registerUser(){
+		AddArchivesContactCommand cmd2 = new AddArchivesContactCommand();
+		cmd2.setContactName(request.getDecoratorName());
+		cmd2.setGender((byte) 1);
+		cmd2.setRegionCode("86");
+		cmd2.setVisibleFlag((byte) 0);
+		cmd2.setContactToken(request.getDecoratorPhone());
+		cmd2.setOrganizationId(decorationCompany.getOrganizationId());
+		cmd2.setDepartmentIds(new ArrayList<>());
+		cmd2.getDepartmentIds().add(decorationCompany.getOrganizationId());
+		ArchivesContactDTO dto = archivesService.addArchivesContact(cmd2);
 	}
 
 	@Override

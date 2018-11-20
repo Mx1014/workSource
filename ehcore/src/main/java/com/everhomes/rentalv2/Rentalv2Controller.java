@@ -100,6 +100,22 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/register</b>
+	 * <p>
+	 * 获取用户当前的用户类型
+	 * </p>
+	 */
+	@RequestMapping("getSceneType")
+	@RestReturn(value = GetSceneTypeResponse.class)
+	@RequireAuthentication()
+	public RestResponse getSceneType(@Valid GetSceneTypeCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.getSceneType(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 /*-------------------------------------- start ---------------------------------------------------*/
 	/**
 	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
