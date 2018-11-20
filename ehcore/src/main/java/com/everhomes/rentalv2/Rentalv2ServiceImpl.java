@@ -5498,22 +5498,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		dto.setInitiatePrice(dto.getInitiatePrice()==null?null:dto.getInitiatePrice().multiply(new BigDecimal(timeStep*2)));
 		if (dto.getPriceRules() != null) {
 			for (RentalPriceClassificationDTO dto1 : dto.getPriceRules()) {
-				dto1.setWorkdayPrice(dto1.getWorkdayPrice().multiply(new BigDecimal(timeStep * 2)));
-				dto1.setOriginalPrice(dto1.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
-				dto1.setInitiatePrice(dto1.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
+				dto1.setWorkdayPrice(dto1.getWorkdayPrice()==null?null:dto1.getWorkdayPrice().multiply(new BigDecimal(timeStep * 2)));
+				dto1.setOriginalPrice(dto1.getOriginalPrice()==null?null:dto1.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
+				dto1.setInitiatePrice(dto1.getInitiatePrice()==null?null:dto1.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
 			}
 		}
 
 		if (dto.getSitePackages() != null){
 			for (RentalSitePackagesDTO packagesDTO : dto.getSitePackages()){
-				packagesDTO.setPrice(packagesDTO.getPrice().multiply(new BigDecimal(timeStep * 2)));
-				packagesDTO.setOriginalPrice(packagesDTO.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
-				packagesDTO.setInitiatePrice(packagesDTO.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
+				packagesDTO.setPrice(packagesDTO.getPrice()==null?null:packagesDTO.getPrice().multiply(new BigDecimal(timeStep * 2)));
+				packagesDTO.setOriginalPrice(packagesDTO.getOriginalPrice()==null?null:packagesDTO.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
+				packagesDTO.setInitiatePrice(packagesDTO.getInitiatePrice()==null?null:packagesDTO.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
 				if (packagesDTO.getPriceRules() != null) {
 					for (RentalPriceClassificationDTO dto1 : packagesDTO.getPriceRules()) {
-						dto1.setWorkdayPrice(dto1.getWorkdayPrice().multiply(new BigDecimal(timeStep * 2)));
-						dto1.setOriginalPrice(dto1.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
-						dto1.setInitiatePrice(dto1.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
+						dto1.setWorkdayPrice(dto1.getWorkdayPrice()==null?null:dto1.getWorkdayPrice().multiply(new BigDecimal(timeStep * 2)));
+						dto1.setOriginalPrice(dto1.getOriginalPrice()==null?null:dto1.getOriginalPrice().multiply(new BigDecimal(timeStep * 2)));
+						dto1.setInitiatePrice(dto1.getInitiatePrice()==null?null:dto1.getInitiatePrice().multiply(new BigDecimal(timeStep * 2)));
 					}
 				}
 			}
