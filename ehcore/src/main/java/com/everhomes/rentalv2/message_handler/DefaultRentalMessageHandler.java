@@ -78,15 +78,27 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
         if(null == rs)
             return;
 
-        try{
-            Map<String, String>map = new HashMap<>();
-            map.put("userName", user.getNickName());
-            map.put("resourceName", rentalBill.getResourceName());
-            map.put("useDetail", rentalBill.getUseDetail());
-            map.put("rentalCount", rentalBill.getRentalCount() ==null ? "1" : String.valueOf(rentalBill.getRentalCount()));
-            rentalCommonService.sendMessageCode(rs.getChargeUid(), map, RentalNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
-        }catch(Exception e){
-            LOGGER.error("SEND MESSAGE FAILED", e);
+        //发短信
+        String templateScope = SmsTemplateCode.SCOPE;
+        String templateLocale = RentalNotificationTemplateCode.locale;
+        int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList("userName", rentalBill.getUserName());
+        smsProvider.addToTupleList(variables, "phone", rentalBill.getUserPhone());
+        smsProvider.addToTupleList(variables, "resourceName", rentalBill.getResourceName());
+        smsProvider.addToTupleList(variables, "useDetail", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables, "freeGoods", rentalBill.getUseDetail());
+        smsProvider.addToTupleList(variables, "paidGoods", rentalBill.getUseDetail());
+        String[] chargeUids = rs.getChargeUid().split(",");
+        for (String uid : chargeUids){
+            UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(Long.valueOf(uid),
+                    IdentifierType.MOBILE.getCode());
+            if (null == userIdentifier) {
+                LOGGER.error("userIdentifier is null...userId = " + uid);
+            } else {
+                smsProvider.sendSms(rentalBill.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope,
+                        templateId, templateLocale, variables);
+            }
         }
     }
 
@@ -102,11 +114,11 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
     @Override
     public void sendRentalSuccessSms(RentalOrder order){
         //发推送
-        Map<String, String> map = new HashMap<>();
-        map.put("useTime", order.getUseDetail());
-        map.put("resourceName", order.getResourceName());
-        rentalCommonService.sendMessageCode(order.getRentalUid(), map,
-                RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+//        Map<String, String> map = new HashMap<>();
+//        map.put("useTime", order.getUseDetail());
+//        map.put("resourceName", order.getResourceName());
+//        rentalCommonService.sendMessageCode(order.getRentalUid(), map,
+//                RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;
         String templateLocale = RentalNotificationTemplateCode.locale;
@@ -146,15 +158,11 @@ public class DefaultRentalMessageHandler implements RentalMessageHandler {
 
     @Override
     public void cancelOrderWithoutPaySendMessage(RentalOrder rentalBill) {
-        //发推送
-        Map<String, String> map = new HashMap<>();
-        map.put("useDetail", rentalBill.getUseDetail());
-        rentalCommonService.sendMessageCode(rentalBill.getRentalUid(), map,
-                RentalNotificationTemplateCode.RENTAL_CANCEL_NOT_PAY);
         //发短信
         String templateScope = SmsTemplateCode.SCOPE;
         List<Tuple<String, Object>> variables = smsProvider.toTupleList("useDetail", rentalBill.getUseDetail());
-
+        smsProvider.addToTupleList(variables,"resourceName",rentalBill.getResourceName());
+        smsProvider.addToTupleList(variables,"orderNum",rentalBill.getOrderNo());
         int templateId = SmsTemplateCode.UNPAID_ORDER_OVER_TIME;
 
         String templateLocale = RentalNotificationTemplateCode.locale;

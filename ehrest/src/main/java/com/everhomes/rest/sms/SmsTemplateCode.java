@@ -187,5 +187,6 @@ public interface SmsTemplateCode {
 
     int RENTAL_CANCEL_ORDER = 86;//尊敬的用户，您预约的${useDetail}已成功取消，订单金额：${totalAmount}元，退款金额：${refundAmount}元，退款将在3个工作日内退至您的原支付账户，期待下次为您服务。
 
+    int RENTAL_ADMIN_NOTIFY = 87;//$预订人$（$联系方式$）预约了$资源名称$，使用时间：$预订时间$，需要物资：$物资名称$、$物资名称$，购买商品：$商品名称$*$数量$、$商品名称$*$数量$
 
 }

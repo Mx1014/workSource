@@ -55,6 +55,7 @@ import com.everhomes.rest.enterprise.ListUserOrganizationsCommand;
 import com.everhomes.rest.enterprise.ListUserOrganizationsResponse;
 import com.everhomes.rest.enterprise.GetAuthOrgByProjectIdAndAppIdCommand;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.launchpadbase.AppContext;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -1869,6 +1870,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (userPriceType == null || userPriceType.equals(RentalUserPriceType.UNIFICATION.getCode()))
 			return null;
 		String sceneType = currentSceneType.get();
+		if (!StringHelper.hasContent(sceneType))
+			return null;
 		if (userPriceType.equals(RentalUserPriceType.USER_TYPE.getCode())){
 			String[] sceneTypes = sceneType.split(",");
 			if (sceneTypes.length > 0)
