@@ -323,25 +323,24 @@ public class WelfareServiceImpl implements WelfareService {
             response.setDismissReceivers(new ArrayList<>());
             if(welfaresDTO.getSenderDetailId() != null) {
                 OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(welfaresDTO.getSenderDetailId());
-                if (null != member) {
-                    welfaresDTO.setSenderUid(member.getTargetId());
-                }
-                if (archivesService.checkDismiss(member)) {
+                if (member == null || archivesService.checkDismiss(member)) {
                     response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
                     response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
                     response.setDismissSenderUid(welfaresDTO.getSenderUid());
                 }
+                welfaresDTO.setSenderUid(member == null ? null : member.getTargetId());
             }
             List<Long> targetUserIds = new ArrayList<>();
             //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :welfaresDTO.getReceivers()){
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
-                receiverDTO.setReceiverUid(receiverDetail != null ? receiverDetail.getTargetId() : null);
-                targetUserIds.add(receiverDetail.getTargetId());
-                if (archivesService.checkDismiss(receiverDetail)) {
+
+                if (receiverDetail == null || archivesService.checkDismiss(receiverDetail)) {
                     response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
                     response.getDismissReceivers().add(receiverDTO);
                 }
+                receiverDTO.setReceiverUid(receiverDetail != null ? receiverDetail.getTargetId() : null);
+                targetUserIds.add(receiverDetail.getTargetId());
             }
             if (WelfareCheckStatus.SUCESS != WelfareCheckStatus.fromCode(response.getCheckStatus())) {
                 return response;
