@@ -82,7 +82,7 @@ public class RentalSiteDTO {
 	private String address; 
 	private Double longitude; 
 	private Double latitude;
-	private Long chargeUid;
+	private String chargeUid;
 	private String chargeName; 
 	private Long communityId;
 	private String communityName;
@@ -238,15 +238,13 @@ public class RentalSiteDTO {
 	}
 
 
-	public Long getChargeUid() {
+	public String getChargeUid() {
 		return chargeUid;
 	}
 
-
-	public void setChargeUid(Long chargeUid) {
+	public void setChargeUid(String chargeUid) {
 		this.chargeUid = chargeUid;
 	}
-
 
 	public String getChargeName() {
 		return chargeName;
