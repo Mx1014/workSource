@@ -60,6 +60,7 @@ import com.everhomes.rest.asset.ListAvailableVariablesCommand;
 import com.everhomes.rest.asset.ListAvailableVariablesDTO;
 import com.everhomes.rest.asset.ListBillDetailCommandStr;
 import com.everhomes.rest.asset.ListBillDetailResponse;
+import com.everhomes.rest.asset.ListBillDetailVO;
 import com.everhomes.rest.asset.ListBillExpectanciesOnContractCommand;
 import com.everhomes.rest.asset.ListBillItemsCommand;
 import com.everhomes.rest.asset.ListBillItemsResponse;
@@ -76,6 +77,7 @@ import com.everhomes.rest.asset.ListLateFineStandardsCommand;
 import com.everhomes.rest.asset.ListLateFineStandardsDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.asset.ListPaymentBillCmd;
+import com.everhomes.rest.asset.ListPaymentBillDetailCmd;
 import com.everhomes.rest.asset.ListPaymentBillResp;
 import com.everhomes.rest.asset.ListSettledBillExemptionItemsResponse;
 import com.everhomes.rest.asset.ListSimpleAssetBillsCommand;
@@ -87,6 +89,7 @@ import com.everhomes.rest.asset.OneKeyNoticeCommand;
 import com.everhomes.rest.asset.OwnerIdentityCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesCommand;
 import com.everhomes.rest.asset.PaymentExpectanciesResponse;
+import com.everhomes.rest.asset.PaymentOrderBillDTO;
 import com.everhomes.rest.asset.PublicTransferBillCmdForEnt;
 import com.everhomes.rest.asset.PublicTransferBillRespForEnt;
 import com.everhomes.rest.asset.ReCalBillCommand;
@@ -345,4 +348,6 @@ public interface AssetService {
 	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
 	
 	void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId);
+	
+	PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd);
 }

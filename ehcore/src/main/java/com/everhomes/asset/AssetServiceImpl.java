@@ -5638,5 +5638,9 @@ public class AssetServiceImpl implements AssetService {
 		}
 		return existDooraccessLog;
 	}
+
+	public PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd) {
+		return assetProvider.listPaymentBillDetail(cmd.getBillId());
+	}
 	
 }
