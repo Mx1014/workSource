@@ -10,6 +10,7 @@ public class StatisticDataDTO {
     private Integer namespaceId;
     private Date dateStr;
     private Long communityId;
+    private String communityName;
     private Long organizationId;
     private Integer communityNum;
     private Integer newCustomerNum;
@@ -20,6 +21,13 @@ public class StatisticDataDTO {
     private Integer trackingNum;
     private Integer customerCount;
 
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
 
     public Long getOrganizationId() {
         return organizationId;

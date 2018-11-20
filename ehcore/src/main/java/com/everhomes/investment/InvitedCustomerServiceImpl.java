@@ -25,6 +25,8 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityCmd;
+import com.everhomes.rest.asset.statistic.ListBillStatisticByCommunityDTO;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.ListCommunitiesCommand;
 import com.everhomes.rest.community.ListCommunitiesResponse;
@@ -35,6 +37,7 @@ import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
 import com.everhomes.rest.investment.*;
 import com.everhomes.rest.module.CheckModuleManageCommand;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.portal.ListServiceModuleAppsCommand;
 import com.everhomes.rest.portal.ListServiceModuleAppsResponse;
 import com.everhomes.rest.varField.FieldItemDTO;
@@ -56,6 +59,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +73,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -72,6 +81,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class InvitedCustomerServiceImpl implements InvitedCustomerService , ApplicationListener<ContextRefreshedEvent> {
@@ -966,7 +977,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
+    public GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsCommand cmd) {
         List<CommunityCustomerStatisticDTO> result = new ArrayList<>();
 
         java.sql.Date startQueryTime = null;
@@ -1001,7 +1012,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
 
     @Override
-    public GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+    public GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsCommand cmd) {
         java.sql.Date startQueryTime = null;
         java.sql.Date endQueryTime = null;
         if(cmd.getStartQueryTime() != null){
@@ -1028,7 +1039,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
+    public GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsCommand cmd) {
         java.sql.Date startQueryTime = null;
         java.sql.Date endQueryTime = null;
         if(cmd.getStartQueryTime() != null){
@@ -1060,7 +1071,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
-    public GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd) {
+    public GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsCommand cmd) {
 
         java.sql.Date startQueryTime = null;
         java.sql.Date endQueryTime = null;
@@ -1157,7 +1168,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
             List<StatisticDataDTO> tempResult = new ArrayList<>();
             for(CommunityDTO community : communities) {
-                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
+                /*LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
 
                 List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
                 Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
@@ -1184,7 +1195,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 data.setLossCustomerNum(listLossCustomer.size());
                 data.setHistoryCustomerNum(listHistoryCustomer.size());
                 data.setRegisteredCustomerNum(listRegisteredCustomer.size());
-                tempResult.add(data);
+                tempResult.add(data);*/
+                tempResult.add(statisticCustomerNum(org.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
             }
 
             StatisticDataDTO data = new StatisticDataDTO();
@@ -1197,6 +1209,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             result.add(data);
+
         }
         return result;
     }
@@ -1212,7 +1225,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         List<StatisticDataDTO> result = new ArrayList<>();
 
         for(Community community : allCommunities){
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
+            /*LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
 
             List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
             Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
@@ -1241,7 +1254,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             data.setHistoryCustomerNum(listHistoryCustomer.size());
             data.setRegisteredCustomerNum(listRegisteredCustomer.size());
             result.add(data);
-
+*/
+            result.add(statisticCustomerNum(community.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
 
         }
         return result;
@@ -1526,6 +1540,337 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public GetCustomerStatisticNowResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.MONTH);
+        GetCustomerStatisticNowResponse response = communityCustomerStatistic(time, cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageSize(), cmd.getPageAnchor());
+
+        return response;
+    }
+
+    @Override
+    public CustomerStatisticsDTO queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+    }
+
+    @Override
+    public GetCustomerStatisticNowResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        GetCustomerStatisticNowResponse response = communityCustomerStatistic(time, cmd.getOrgId(), cmd.getNamespaceId(), cmd.getPageSize(), cmd.getPageAnchor());
+
+        return response;
+    }
+
+    @Override
+    public CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd) {
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+    }
+
+    private GetCustomerStatisticNowResponse communityCustomerStatistic(StatisticTime time, Long orgId, Integer namespaceId, Integer pageSize, Long pageAnchor){
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> dtos = new ArrayList<>();
+
+        ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+        cmd2.setNamespaceId(namespaceId);
+        cmd2.setOrgId(orgId);
+        cmd2.setPageAnchor(pageAnchor);
+        cmd2.setPageSize(pageSize);
+        ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+        List<CommunityDTO> communities = response.getList();
+
+
+        for(CommunityDTO community: communities) {
+            StatisticDataDTO dto = statisticCustomerNum(namespaceId, community.getId(), statisticStartTime, statisticEndTime);
+            dto.setCommunityName(community.getName());
+            dtos.add(dto);
+        }
+
+        GetCustomerStatisticNowResponse result = new GetCustomerStatisticNowResponse();
+        result.setDtos(dtos.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        result.setNextPageAnchor(response.getNextPageAnchor());
+
+        return result;
+    }
+
+
+    private StatisticDataDTO organizationCustomerStatisticTotal(StatisticTime time, Long orgId, Integer namespaceId){
+        Timestamp statisticStartTime = time.getStatisticStartTime();
+        Timestamp statisticEndTime = time.getStatisticEndTime();
+
+
+        List<StatisticDataDTO> result = new ArrayList<>();
+
+        ListCommunitiesCommand cmd2 = new ListCommunitiesCommand();
+        cmd2.setNamespaceId(namespaceId);
+        cmd2.setOrgId(orgId);
+        ListCommunitiesResponse response = communityService.listCommunities(cmd2);
+        List<CommunityDTO> communities = response.getList();
+
+        List<StatisticDataDTO> tempResult = new ArrayList<>();
+        for(CommunityDTO community : communities) {
+            tempResult.add(statisticCustomerNum(namespaceId, community.getId(), statisticStartTime, statisticEndTime));
+        }
+
+        StatisticDataDTO data = new StatisticDataDTO();
+        data.setNamespaceId(namespaceId);
+        data.setOrganizationId(orgId);
+        data.setCommunityNum(communities.size());
+        data.setNewCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getNewCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setTrackingNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getTrackingNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setLossCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getLossCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        return data;
+    }
+
+    private StatisticDataDTO statisticCustomerNum(Integer namespaceId, Long communityId, Timestamp statisticStartTime, Timestamp statisticEndTime){
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
+
+        List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime);
+        Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
+
+        List<CustomerLevelChangeRecord> listRegisteredCustomer =
+                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to registered num : {}", communityId, statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
+
+
+        List<CustomerLevelChangeRecord> listLossCustomer =
+                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to loss num : {}", communityId, statisticStartTime, statisticEndTime, listLossCustomer.size());
+
+        List<CustomerLevelChangeRecord> listHistoryCustomer =
+                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
+        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to history num : {}", communityId, statisticStartTime, statisticEndTime, listHistoryCustomer.size());
+
+
+        StatisticDataDTO data = new StatisticDataDTO();
+        data.setCommunityId(communityId);
+        data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
+        data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
+        data.setLossCustomerNum(listLossCustomer.size());
+        data.setHistoryCustomerNum(listHistoryCustomer.size());
+        data.setRegisteredCustomerNum(listRegisteredCustomer.size());
+        return data;
+    }
+
+    @Override
+    public void exportCustomerStatistic(ExportCustomerStatisticsCommand cmd) {
+
+    }
+
+    //缴费管理V7.0（新增缴费相关统计报表）：缴费信息汇总表-项目 (导出对接下载中心)
+    @SuppressWarnings("deprecation")
+    public OutputStream exportOutputStreamCustomerStatistic(GetCustomerStatisticsCommand cmd, Long taskId, Byte exportType){
+        OutputStream outputStream = new ByteArrayOutputStream();
+        //每一条数据
+        Integer pageOffSet = 0;
+        Integer pageSize = 100000;
+        cmd.setPageAnchor(pageOffSet);
+        cmd.setPageSize(pageSize);
+
+        List<CustomerStatisticsDTO> dtos = new ArrayList<>();
+
+        switch(exportType){
+            case 1:
+                GetCustomerStatisticResponse response = getCustomerStatisticsDaily(cmd);
+                dtos = response.getDtos();
+                break;
+            case 2:
+                break:
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            case 7:
+                break;
+            default:
+                break;
+        }
+
+        taskService.updateTaskProcess(taskId, 20);
+        Workbook wb = null;
+        InputStream in;
+        in = this.getClass().getResourceAsStream("/excels/asset/statisticByCommunity.xlsx");
+        try {
+            wb = new XSSFWorkbook(copyInputStream(in));
+        } catch (IOException e) {
+            LOGGER.error("exportOutputStreamCustomerStatistic copy inputStream error.");
+        }
+        Sheet sheet = wb.getSheetAt(0);
+        if (null != sheet) {
+            Row defaultRow = sheet.getRow(2);
+            Cell cell = defaultRow.getCell(0);
+            CellStyle style = cell.getCellStyle();
+            style.setAlignment(HSSFCellStyle.ALIGN_CENTER); //居中
+            int size = 0;
+            if(null != dtos){
+                size = dtos.size();
+                taskService.updateTaskProcess(taskId, 30);
+                for(int i = 0;i < size;i++){
+                    Row tempRow = sheet.createRow(i + 2);
+                    CustomerStatisticsDTO dto = dtos.get(i);
+                    int orderNum = i + 1;//序号
+                    boolean isLastRow = false;
+                    fillRowCellCustomerStatistic(tempRow, style, isLastRow, orderNum, dto);
+                }
+                taskService.updateTaskProcess(taskId, 70);
+                //最后的一行总计
+                CellStyle totalStyle = getTotalStyle(wb, style);
+                Row tempRow = sheet.createRow(dtos.size() + 2);
+                int orderNum = dtos.size() + 1;//序号
+                boolean isLastRow = true;
+                GetCustomerStatisticResponse response = queryCustomerStatisticDailyTotalNow(cmd);
+                fillRowCellCustomerStatistic(tempRow, totalStyle, isLastRow, orderNum, totalDTO);
+                taskService.updateTaskProcess(taskId, 80);
+                //设置自适应列宽
+//				for(int i = 0; i < 50;i++) {
+//					sheet.autoSizeColumn(i);
+//				}
+                try {
+                    wb.write(outputStream);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return outputStream;
+            }else {
+                throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+            }
+        }
+        return outputStream;
+    }
+
+    private InputStream copyInputStream(InputStream source) {
+        if(null == source)
+            return null;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = source.read(buffer)) > -1 ) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+        } catch (IOException e) {
+            LOGGER.error("ExportTasks is fail, cmd={}");
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_FLIE_EXPORT_FAIL,
+                    "ExportTasks is fail.");
+        }
+        // 打开一个新的输入流
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    /**
+     * @param tempRow ： Excel的行
+     * @param style
+     * @param isLastRow ： 是否是最后一行
+     * @param orderNum ： 序号
+     * @param dto
+     */
+    private void fillRowCellCustomerStatistic(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        //序号
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue("合计");
+        }else {
+            cell1.setCellValue(orderNum);
+        }
+        //项目名称
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell3 = tempRow.createCell(2);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell4 = tempRow.createCell(3);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell5 = tempRow.createCell(4);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell6 = tempRow.createCell(5);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell7 = tempRow.createCell(6);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+
+    private void fillRowCellCustomerStatisticTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        //序号
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue("合计");
+        }else {
+            cell1.setCellValue(orderNum);
+        }
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+        //项目名称
+        Cell cell3 = tempRow.createCell(1);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(2);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(3);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(4);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(5);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(6);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
+
+
+    @SuppressWarnings("deprecation")
+    private CellStyle getTotalStyle(Workbook wb, CellStyle style) {
+        //生成一个字体
+        Font font = wb.createFont();
+        font.setColor(HSSFColor.BLUE.index);//字体颜色
+        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//字体增粗
+        //把字体应用到当前的样式
+        CellStyle totalStyle = wb.createCellStyle();
+        totalStyle.cloneStyleFrom(style);
+        totalStyle.setFont(font);
+        return totalStyle;
     }
 }
 

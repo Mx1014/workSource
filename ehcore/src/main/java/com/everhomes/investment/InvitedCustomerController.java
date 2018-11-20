@@ -232,81 +232,6 @@ public class InvitedCustomerController extends ControllerBase {
 
 
     //========================统计相关接口========================
-    /**
-     *
-     * <b>URL: /invitedCustomer/getAllCommunityCustomerStatisticsDaily</b>
-     * <p>统计该管理公司每日的客户信息</p>
-     */
-    @RequestMapping("getAllCommunityCustomerStatisticsDaily")
-    @RestReturn(value = String.class)
-    public RestResponse getAllCommunityCustomerStatisticsDaily(GetAllCommunityCustomerStatisticsDailyCommand cmd) {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     *
-     * <b>URL: /invitedCustomer/getAllCommunityCustomerStatisticsMonthly</b>
-     * <p>统计该管理公司每月的客户信息</p>
-     */
-    @RequestMapping("getAllCommunityCustomerStatisticsMonthly")
-    @RestReturn(value = String.class)
-    public RestResponse getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd) {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     *
-     * <b>URL: /invitedCustomer/getCustomerStatisticsDaily</b>
-     * <p>统计该管理公司指定园区下每月的客户数据</p>
-     */
-    @RequestMapping("getCustomerStatisticsDaily")
-    @RestReturn(value = String.class)
-    public RestResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd) {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     *
-     * <b>URL: /invitedCustomer/getCustomerStatisticsMonthly</b>
-     * <p>统计该管理公司指定园区下每月的客户数据</p>
-     */
-    @RequestMapping("getCustomerStatisticsMonthly")
-    @RestReturn(value = String.class)
-    public RestResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     *
-     * <b>URL: /invitedCustomer/getCustomerStatisticsNow</b>
-     * <p>统计该管理公司当前的客户数据</p>
-     */
-    @RequestMapping("getCustomerStatisticsNow")
-    @RestReturn(value = String.class)
-    public RestResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd) {
-        //String url = invitedCustomerService.signCustomerDataToThird(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
 
 
     /**
@@ -346,7 +271,7 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("queryCustomerStatisticDaily")
     @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsDailyCommand cmd) {
+    public RestResponse queryCustomerStatisticDaily(GetCustomerStatisticsCommand cmd) {
         GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDaily(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -361,7 +286,7 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("queryCustomerStatisticDailyTotal")
     @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+    public RestResponse queryCustomerStatisticDailyTotal(GetCustomerStatisticsCommand cmd) {
         GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDailyTotal(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -376,7 +301,7 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("queryCustomerStatisticMonthly")
     @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticMonthly(GetCustomerStatisticsMonthlyCommand cmd) {
+    public RestResponse queryCustomerStatisticMonthly(GetCustomerStatisticsCommand cmd) {
         GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthly(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -391,7 +316,7 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("queryCustomerStatisticMonthlyTotal")
     @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd) {
+    public RestResponse queryCustomerStatisticMonthlyTotal(GetCustomerStatisticsCommand cmd) {
         GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthlyTotal(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -406,9 +331,9 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某月的数据</p>
      */
     @RequestMapping("queryCustomerStatisticMonthlyNow")
-    @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticsMonthlyCommand cmd) {
-        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyNow(cmd);
+    @RestReturn(value = GetCustomerStatisticNowResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd) {
+        GetCustomerStatisticNowResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyNow(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -422,9 +347,9 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某月的数据，分管理公司获取</p>
      */
     @RequestMapping("queryCustomerStatisticMonthlyTotalNow")
-    @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsMonthlyCommand cmd) {
-        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyTotalNow(cmd);
+    @RestReturn(value = CustomerStatisticsDTO.class)
+    public RestResponse queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd) {
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticMonthlyTotalNow(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -438,9 +363,9 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某月的数据</p>
      */
     @RequestMapping("queryCustomerStatisticDailyNow")
-    @RestReturn(value = GetCustomerStatisticResponse.class)
-    public RestResponse queryCustomerStatisticDailyNow(GetCustomerStatisticsDailyCommand cmd) {
-        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticDailyNow(cmd);
+    @RestReturn(value = GetCustomerStatisticNowResponse.class)
+    public RestResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd) {
+        GetCustomerStatisticNowResponse dto = invitedCustomerService.queryCustomerStatisticDailyNow(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -454,14 +379,27 @@ public class InvitedCustomerController extends ControllerBase {
      * <p>获取某月的数据，分管理公司获取</p>
      */
     @RequestMapping("queryCustomerStatisticDailyTotalNow")
-    @RestReturn(value = GetCustomerStatisticResponse.class)
+    @RestReturn(value = CustomerStatisticsDTO.class)
     public RestResponse queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd) {
-        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticDailyTotalNow(cmd);
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticDailyTotalNow(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
+    /**
+     * <p>issue-41304 招商客户1.3（新增招商客户相关统计报表） (导出对接下载中心)</p>
+     * <b>URL: /invitedCustomer/exportCustomerStatistic</b>
+     */
+    @RequestMapping("exportCustomerStatistic")
+    @RestReturn(value = String.class)
+    public RestResponse exportCustomerStatistic(ExportCustomerStatisticsCommand cmd) {
+        invitedCustomerService.exportCustomerStatistic(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

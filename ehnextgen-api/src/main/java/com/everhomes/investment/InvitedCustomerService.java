@@ -52,13 +52,13 @@ public interface InvitedCustomerService {
 
     List<CustomerStatisticsDTO> getAllCommunityCustomerStatisticsMonthly(GetAllCommunityCustomerStatisticsMonthlyCommand cmd);
 
-    GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsDaily(GetCustomerStatisticsCommand cmd);
 
-    GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsDailyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsDailyTotal(GetCustomerStatisticsCommand cmd);
 
-    GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsMonthlyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsMonthly(GetCustomerStatisticsCommand cmd);
 
-    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd);
+    GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsCommand cmd);
 
     GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 
@@ -91,5 +91,15 @@ public interface InvitedCustomerService {
     void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd);
 
     java.sql.Date getDateByTimestamp(Timestamp time);
+
+    GetCustomerStatisticNowResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticNowCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsCommand cmd);
+
+    GetCustomerStatisticNowResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd);
+
+    void exportCustomerStatistic(ExportCustomerStatisticsCommand cmd);
 
 }

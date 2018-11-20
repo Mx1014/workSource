@@ -3,7 +3,7 @@ package com.everhomes.rest.investment;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class GetCustomerStatisticsMonthlyCommand {
+public class GetCustomerStatisticsCommand {
 
     private Long orgId;
 
