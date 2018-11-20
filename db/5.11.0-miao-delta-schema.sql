@@ -2,7 +2,7 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
   `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
   `owner_id` BIGINT COMMENT 'community id or organization id',
-  `resource_type_id` BIGINT COMMENT 'resource type id',
+  `space_id` BIGINT COMMENT '空间 id',
   `cubicle_start_time` BIGINT COMMENT '最多提前多少时间预定',
   `cubicle_end_time` BIGINT COMMENT '最少提前多少时间预定',
   `refund_flag` TINYINT COMMENT '是否支持退款: 1-是, 0-否',
@@ -63,7 +63,7 @@ CREATE TABLE `eh_office_cubicle_price_rules` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `user_price_type` TINYINT COMMENT '用户价格类型, 1:统一价格 2：用户类型价格',
-  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `space_id` BIGINT COMMENT '空间ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -72,13 +72,13 @@ CREATE TABLE `eh_office_cubicle_close_dates` (
   `owner_id` BIGINT,
   `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
   `close_date` DATE,
-  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `space_id` BIGINT COMMENT '空间ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_office_cubicle_order_rules` (
   `id` BIGINT NOT NULL DEFAULT 0,
-  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `space_id` BIGINT COMMENT '空间ID',
   `owner_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   `owner_id` BIGINT,
   `handle_type` TINYINT COMMENT '1: 退款, 2: 加收',
@@ -97,11 +97,9 @@ CREATE TABLE `eh_office_cubicle_order_rules` (
 CREATE TABLE `eh_office_cubicle_refund_tips` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL,
-  `source_type` VARCHAR(20),
-  `source_id` BIGINT,
   `refund_strategy` TINYINT,
   `tips` VARCHAR(255),
-  `resource_type` VARCHAR(20),
+  `space_id` BIGINT COMMENT '空间ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -122,7 +120,6 @@ CREATE TABLE `eh_office_cubicle_resource_types` (
 
 CREATE TABLE `eh_office_cubicle_stations` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
-  `parent_id` BIGINT,
   `station_id` BIGINT COMMENT '工位ID',
   `station_name` VARCHAR(127) COMMENT '名称：',
   `price` DECIMAL(10,2) COMMENT '价格',
@@ -139,7 +136,7 @@ CREATE TABLE `eh_office_cubicle_stations` (
   `resource_type_id` BIGINT COMMENT 'resource type id',
   `organization_id` BIGINT COMMENT '所属公司的ID',
   `community_id` BIGINT COMMENT '所属的社区ID（和可见范围的不一样）',
-  `resource_type` VARCHAR(64) COMMENT '资源类型',
+  `space_id` BIGINT COMMENT '空间ID',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
