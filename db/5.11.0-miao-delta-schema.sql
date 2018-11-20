@@ -1,7 +1,7 @@
 CREATE TABLE `eh_office_cubicle_default_rules` (
   `id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id',
-  `owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
-  `owner_id` BIGINT COMMENT 'community id or organization id',
+  `owner_type` VARCHAR(255) COMMENT 'owner type: community',
+  `owner_id` BIGINT COMMENT 'community id ',
   `space_id` BIGINT COMMENT '空间 id',
   `cubicle_start_time` BIGINT COMMENT '最多提前多少时间预定',
   `cubicle_end_time` BIGINT COMMENT '最少提前多少时间预定',
@@ -21,7 +21,6 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `cubicle_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
   `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   `source_id` BIGINT,
-  `resource_type` VARCHAR(64) COMMENT '资源类型',
   `holiday_open_flag` TINYINT COMMENT '节假日是否开放预约: 1-是, 0-否',
   `holiday_type` TINYINT COMMENT '1-普通双休, 2-同步中国节假日',
   `refund_strategy` TINYINT COMMENT '1-custom, 2-full',
@@ -46,6 +45,8 @@ CREATE TABLE `eh_office_cubicle_time_interval` (
   `begin_time` DOUBLE COMMENT '整天开始时间-24小时制',
   `end_time`  DOUBLE COMMENT '整天开始时间-24小时制',
   `cubicle_type` TINYINT COMMENT '0按半天，1按天，3按半天带晚上',
+  `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
+  `source_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -64,6 +65,8 @@ CREATE TABLE `eh_office_cubicle_price_rules` (
   `create_time` DATETIME,
   `user_price_type` TINYINT COMMENT '用户价格类型, 1:统一价格 2：用户类型价格',
   `space_id` BIGINT COMMENT '空间ID',
+  `source_id` BIGINT,
+  `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -72,13 +75,13 @@ CREATE TABLE `eh_office_cubicle_close_dates` (
   `owner_id` BIGINT,
   `owner_type` VARCHAR(255) COMMENT '"default_rule","resource_rule"',
   `close_date` DATE,
-  `space_id` BIGINT COMMENT '空间ID',
+  `source_id` BIGINT,
+  `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_office_cubicle_order_rules` (
   `id` BIGINT NOT NULL DEFAULT 0,
-  `space_id` BIGINT COMMENT '空间ID',
   `owner_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   `owner_id` BIGINT,
   `handle_type` TINYINT COMMENT '1: 退款, 2: 加收',
@@ -91,6 +94,8 @@ CREATE TABLE `eh_office_cubicle_order_rules` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `source_id` BIGINT,
+  `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -99,7 +104,8 @@ CREATE TABLE `eh_office_cubicle_refund_tips` (
   `namespace_id` INTEGER NOT NULL,
   `refund_strategy` TINYINT,
   `tips` VARCHAR(255),
-  `space_id` BIGINT COMMENT '空间ID',
+  `source_id` BIGINT,
+  `source_type` VARCHAR(255) COMMENT 'default_rule, resource_rule',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
