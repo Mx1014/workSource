@@ -1357,12 +1357,34 @@ public class AddressProviderImpl implements AddressProvider {
 	}
 
 	@Override
-	public List<AddressEvent> listAddressEvents(Long addressId) {
+	public List<AddressEvent> listAddressEvents(Long addressId,Integer pageSize,Long pageAnchor) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<Record> selectQuery = context.selectQuery();
+		selectQuery.addFrom(Tables.EH_ADDRESS_EVENTS);
+		selectQuery.addConditions(Tables.EH_ADDRESS_EVENTS.ADDRESS_ID.eq(addressId));
+		selectQuery.addConditions(Tables.EH_ADDRESS_EVENTS.STATUS.eq(AddressEventStatus.ACTIVE.getCode()));
+		if (pageSize != null && pageAnchor != null) {
+			selectQuery.addLimit(pageAnchor.intValue(), pageSize);
+		}
+		selectQuery.addOrderBy(Tables.EH_ADDRESS_EVENTS.OPERATE_TIME.desc());
+		return selectQuery.fetchInto(AddressEvent.class);
+	}
+
+	@Override
+	public AddressEvent findAddressEventByAddressIdAndOperateTime(Long addressId, Timestamp updateTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		return context.select()
 					  .from(Tables.EH_ADDRESS_EVENTS)
 			          .where(Tables.EH_ADDRESS_EVENTS.ADDRESS_ID.eq(addressId))
+			          .and(Tables.EH_ADDRESS_EVENTS.OPERATE_TIME.eq(updateTime))
 			          .and(Tables.EH_ADDRESS_EVENTS.STATUS.eq(AddressEventStatus.ACTIVE.getCode()))
-			          .fetchInto(AddressEvent.class);
+			          .fetchOneInto(AddressEvent.class);
+	}
+
+	@Override
+	public void updateAddressEvent(AddressEvent event) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhAddressEventsDao dao = new EhAddressEventsDao(context.configuration());
+		dao.update(event);
 	}
 }

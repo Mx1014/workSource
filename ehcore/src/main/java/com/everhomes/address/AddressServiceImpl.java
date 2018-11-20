@@ -50,6 +50,7 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.ImportFileService;
 import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.AddressEvent;
 import com.everhomes.organization.pm.AddressTrackingTemplateCode;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -3444,11 +3445,16 @@ if (StringUtils.isNotBlank(data.getApartmentFloor())) {
 				address.setRentArea(dto.getRentArea());
 				addressProvider.updateAddress(address);
 				//记录到房源日志中
+				String content = null;
 				if (arrangement.getOperationType().equals(AddressArrangementType.SPLIT.getCode())) {
-					propertyMgrService.saveAddressArrangementEventAboutAddress(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+					content = propertyMgrService.getAddressArrangementEventContent(AddressTrackingTemplateCode.ADDRESS_SPLIT_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
 				}else if (arrangement.getOperationType().equals(AddressArrangementType.MERGE.getCode())) {
-					propertyMgrService.saveAddressArrangementEventAboutAddress(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
+					content = propertyMgrService.getAddressArrangementEventContent(AddressTrackingTemplateCode.ADDRESS_MERGE_ARRANGEMENT_UPDATE, arrangement, address, oldAddress);
 				}
+				AddressEvent event = addressProvider.findAddressEventByAddressIdAndOperateTime(targetAddress.getId(),arrangement.getUpdateTime());
+				String newContent = event.getContent() + ";" + content;
+				event.setContent(newContent);
+				addressProvider.updateAddressEvent(event);
 			}
 		}
 	}

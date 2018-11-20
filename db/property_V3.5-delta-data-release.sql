@@ -165,3 +165,16 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 	VALUES ('address.tracking', '14', 'zh_CN', '房源预定事件', '删除房源预定计划', '0');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ('address.tracking', '15', 'zh_CN', '房源预定事件', '取消房源预定计划', '0');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('address.tracking', '16', 'zh_CN', '房源预定事件', '修改${display}:由${oldData}更改为${newData}', '0');	
+
+-- AUTHOR: tangcen 2018年11月20日
+-- REMARK: 添加房源日志tab
+INSERT INTO `eh_var_field_groups` (`id`, `module_name`, `parent_id`, `path`, `title`, `name`, `mandatory_flag`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`) 
+	VALUES (1010, 'asset_management', '0', '/1010', '房源日志', '', '0', NULL, '2', '1', NOW(), NULL, NULL);
+	
+-- AUTHOR: tangcen
+-- REMARK: 资产管理的管理配置页面添加默认的tab卡
+set @item_id = (select max(id) from `eh_var_field_group_scopes`);
+INSERT INTO `eh_var_field_group_scopes`(`id`, `namespace_id`, `module_name`, `group_id`, `group_display_name`, `default_order`, `status`, `creator_uid`, `create_time`, `operator_uid`, `update_time`, `community_id`, `group_parent_id`, `category_id`) 
+	VALUES (((@item_id:=@item_id+1)), 0, 'asset_management', 1010, '房源日志', 1, 2, 1, SYSDATE(), NULL, NULL, NULL, NULL, NULL);

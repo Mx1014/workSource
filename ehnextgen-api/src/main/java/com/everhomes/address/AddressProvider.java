@@ -188,5 +188,7 @@ public interface AddressProvider {
 	void updateAddressOfCityId(Long addressId, Long cityId);
 	void createAddressEvent(AddressEvent event);
 	void deleteAddressEventByAddressId(Long addressId);
-	List<AddressEvent> listAddressEvents(Long addressId);
+	List<AddressEvent> listAddressEvents(Long addressId, Integer pageSize, Long pageAnchor);
+	AddressEvent findAddressEventByAddressIdAndOperateTime(Long addressId, Timestamp updateTime);
+	void updateAddressEvent(AddressEvent event);
 }

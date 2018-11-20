@@ -17,6 +17,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentEventsResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -557,6 +558,11 @@ public interface PropertyMgrService {
 	void saveAddressAuthorizePriceEvent(int opearteType, Long addressId, AddressProperties newAddressProperties,AddressProperties oldAddressProperties);
 
 	void saveAddressReservationEvent(int opearteType, Long addressId, PmResourceReservation newResourceReservation,
-			PmResourceReservation oldResourceReservation); 	
+			PmResourceReservation oldResourceReservation);
+
+	String getAddressArrangementEventContent(int opearteType, AddressArrangement arrangement, Address newAddress,
+			Address oldAddress);
+
+	ListApartmentEventsResponse listApartmentEventsV2(ListApartmentEventsCommand cmd); 	
 
 }

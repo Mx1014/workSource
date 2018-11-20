@@ -20,6 +20,7 @@ import com.everhomes.rest.address.DeleteApartmentCommand;
 import com.everhomes.rest.address.GetApartmentDetailCommand;
 import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListApartmentEventsCommand;
+import com.everhomes.rest.address.ListApartmentEventsResponse;
 import com.everhomes.rest.address.ListApartmentsCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingCommand;
 import com.everhomes.rest.address.ListApartmentsInBuildingResponse;
@@ -2323,9 +2324,9 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/listApartmentEvents</b>
 	 */
 	@RequestMapping("listApartmentEvents")
-	@RestReturn(value = ApartmentEventDTO.class, collection = true)
+	@RestReturn(value = ListApartmentEventsResponse.class)
 	public RestResponse listApartmentEvents(ListApartmentEventsCommand cmd){
-	    List<ApartmentEventDTO> result = propertyMgrService.listApartmentEvents(cmd);
+		ListApartmentEventsResponse result = propertyMgrService.listApartmentEventsV2(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
