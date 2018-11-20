@@ -524,7 +524,7 @@ public class RemindProviderImpl implements RemindProvider {
     @Override
     public List<Remind> findRemindsByTrackRemindIds(List<Long> trackRemindIds) {
         if (CollectionUtils.isEmpty(trackRemindIds)) {
-            return Collections.emptyList();
+            return  new ArrayList<>();
         }
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectConditionStep<Record> query = context.select().from(Tables.EH_REMINDS).where(Tables.EH_REMINDS.TRACK_REMIND_ID.in(trackRemindIds));
@@ -534,7 +534,7 @@ public class RemindProviderImpl implements RemindProvider {
                 return ConvertHelper.convert(r, Remind.class);
             });
         }
-        return Collections.emptyList();
+        return  new ArrayList<>();
     }
 
     @Override
