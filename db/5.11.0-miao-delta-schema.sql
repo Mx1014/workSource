@@ -151,3 +151,21 @@ ALTER TABLE eh_office_cubicle_orders ADD COLUMN rent_count TINYINT COMMENT '预�
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN cubicle_type TINYINT COMMENT '工位性质';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN remark TEXT COMMENT '备注';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN order_status TINYINT COMMENT '订单状态';
+
+CREATE TABLE `eh_parking_business_payee_accounts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL COMMENT 'community 园区或者其他类型',
+  `owner_id` BIGINT NOT NULL COMMENT '园区id或者其他id',
+  `space_id` BIGINT NOT NULL COMMENT '空间id',
+  `space_name` VARCHAR(512) NOT NULL COMMENT '空间名称',
+  `payee_id` BIGINT NOT NULL COMMENT '支付帐号id',
+  `payee_user_type` VARCHAR(128) NOT NULL COMMENT '帐号类型，1-个人帐号、2-企业帐号',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  `merchant_id` BIGINT COMMENT '商户ID',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT='工位预定收款账户表';
