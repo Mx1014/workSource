@@ -1,49 +1,6 @@
 
 package com.everhomes.asset;
 
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.DSLContext;
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
@@ -63,7 +20,6 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contract.ContractServiceImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -71,12 +27,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.locale.LocaleTemplateProvider;
-import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.locale.*;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.naming.NameMapper;
@@ -106,14 +57,7 @@ import com.everhomes.rest.asset.calculate.NatualQuarterMonthDTO;
 import com.everhomes.rest.common.AssetModuleNotifyConstants;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.contract.CMBill;
-import com.everhomes.rest.contract.CMContractHeader;
-import com.everhomes.rest.contract.CMContractUnit;
-import com.everhomes.rest.contract.CMDataObject;
-import com.everhomes.rest.contract.CMSyncObject;
-import com.everhomes.rest.contract.ContractErrorCode;
-import com.everhomes.rest.contract.ContractTemplateStatus;
-import com.everhomes.rest.contract.NamespaceContractType;
+import com.everhomes.rest.contract.*;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.filedownload.TaskRepeatFlag;
 import com.everhomes.rest.filedownload.TaskType;
@@ -141,33 +85,39 @@ import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhAssetAppCategories;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillGroupsRules;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBillItems;
-import com.everhomes.server.schema.tables.pojos.EhPaymentBills;
-import com.everhomes.server.schema.tables.pojos.EhPaymentChargingStandards;
-import com.everhomes.server.schema.tables.pojos.EhPaymentContractReceiver;
-import com.everhomes.server.schema.tables.pojos.EhPaymentNoticeConfig;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.CalculatorUtil;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DecimalUtils;
-import com.everhomes.util.IntegerUtil;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.DSLContext;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 //import com.everhomes.contract.ContractService;
 
@@ -5000,7 +4950,32 @@ public class AssetServiceImpl implements AssetService {
 		taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AssetExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
 	}
 
-	//对接下载中心
+    //对接下载中心的导出交易明细
+	@Override
+    public void exportOrdersByParams(Object cmd) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("UserContext", UserContext.current().getUser());
+        Long communityId;
+        String moduleName = "";
+        if (cmd instanceof ListPaymentBillCmd){
+            ListPaymentBillCmd ListPaymentBillsCMD = (ListPaymentBillCmd)cmd;
+            params.put("ListPaymentBillsCMD", ListPaymentBillsCMD);
+            communityId = ListPaymentBillsCMD.getOwnerId();
+            moduleName="交易明细";
+        }else {
+            LOGGER.error("exportAssetListByParams is error.");
+            throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+        }
+        Community community = communityProvider.findCommunityById(communityId);
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
+        }
+        String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AssetExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+    }
+
+    //对接下载中心
 	@Override
     public OutputStream exportOutputStreamAssetListByContractList(Object cmd, Long taskId){
 		//公用字段
@@ -5134,7 +5109,7 @@ public class AssetServiceImpl implements AssetService {
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {
-            ListBillsDTO dto = dtos.get(i);
+            ListBillsDTO dto = (ListBillsDTO)dtos.get(i);
             Map<String, String> detail = new HashMap<String, String>();
             detail.put("dateStrBegin", dto.getDateStrBegin());
             detail.put("dateStrEnd", dto.getDateStrEnd());
@@ -5249,8 +5224,109 @@ public class AssetServiceImpl implements AssetService {
 			throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
 		}
 	}
-	
-	/**
+
+	//对接下载中心,下载交易明细。
+    @Override
+    public OutputStream exportOutputStreamOrders(Object cmd, Long taskId) {
+        //公用字段
+        Long communityId;
+        List<PaymentOrderBillDTO> dtos ;
+        ListFieldCommand command ;
+        String moduleName = "";
+        taskService.updateTaskProcess(taskId, 10);
+        if(cmd instanceof ListPaymentBillCmd){
+            //交易明细下载
+            ListPaymentBillCmd ListPaymentBillsCMD = (ListPaymentBillCmd) cmd;
+            communityId = ListPaymentBillsCMD.getCommunityId();
+            ListPaymentBillsCMD.setPageSize(100000l);
+            dtos = listPaymentBill(ListPaymentBillsCMD).getPaymentOrderBillDTOs();
+            command = ConvertHelper.convert(ListPaymentBillsCMD,ListFieldCommand.class);
+            command.setModuleName("asset");
+            command.setGroupPath(null);
+
+            moduleName="交易明细";
+        }else {
+            LOGGER.error("exportAssetListByParams is error.");
+            throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
+        }
+        taskService.updateTaskProcess(taskId, 25);
+        //初始化 字段信息
+        String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
+                "amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
+        String[] titleName ={"账单时间","账单组","收费项信息","客户名称","客户类型","订单状态","支付方式",
+                "实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
+        int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
+
+        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
+        taskService.updateTaskProcess(taskId, 65);
+        //组装datalist来确定propertyNames的值
+        for(int i = 0; i < dtos.size(); i++) {
+            PaymentOrderBillDTO dto = dtos.get(i);
+            if(dto != null) {
+                exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
+                detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+                detail.setBillGroupName(dto.getBillGroupName());
+                //组装所有的收费项信息
+                List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
+                String billItemListMsg = "";
+                if(billItemDTOList != null) {
+                    for(int k = 0; k < billItemDTOList.size();k++) {
+                        BillItemDTO billItemDTO = billItemDTOList.get(k);
+                        billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
+                    }
+                }
+                detail.setBillItemListMsg(billItemListMsg);
+                detail.setTargetName(dto.getTargetName());
+                detail.setTargetType(dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
+                //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
+                detail.setPaymentStatus("已完成");
+                if(dto.getPaymentType() != null) {
+                    switch (dto.getPaymentType()) {
+                        case 0:
+                            detail.setPaymentType("微信");
+                            break;
+                        case 1:
+                            detail.setPaymentType("支付宝");
+                            break;
+                        case 2:
+                            detail.setPaymentType("对公转账");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                detail.setAmountReceived(dto.getAmountReceived());
+                detail.setAmountReceivable(dto.getAmountReceivable());
+                detail.setAmoutExemption(dto.getAmountExemption());
+                detail.setAmountSupplement(dto.getAmountSupplement());
+                detail.setPaymentOrderNum(dto.getPaymentOrderNum());
+                detail.setPayTime(dto.getPayTime());
+                detail.setPayerTel(dto.getPayerTel());
+                detail.setPayerName(dto.getPayerName());
+                detail.setAddresses(dto.getAddresses());
+                dataList.add(detail);
+            }
+        }
+
+        Community community = communityProvider.findCommunityById(communityId);
+        taskService.updateTaskProcess(taskId, 90);
+        if (community == null) {
+            LOGGER.error("Community is not exist.");
+            throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST,
+                    "Community is not exist.");
+        }
+        if (dtos != null && dtos.size() > 0) {
+            String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH));
+            ExcelUtils excelUtils = new ExcelUtils(null, fileName, moduleName+"信息");
+            taskService.updateTaskProcess(taskId, 80);
+            return excelUtils.getOutputStream(propertyNames, titleName, titleSize, dataList);
+        } else {
+            throw errorWith(ContractErrorCode.SCOPE, ContractErrorCode.ERROR_NO_DATA, "no data");
+        }
+
+    }
+
+    /**
 	 * 个人直接获取手机号码，企业获取所有企业管理员的手机号码
 	 */
 	private List<String> getPhoneNumber(String targetType, Long targetId, Integer namespaceId){

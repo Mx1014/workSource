@@ -5,22 +5,21 @@ import com.everhomes.filedownload.FileDownloadTaskService;
 import com.everhomes.filedownload.TaskService;
 import com.everhomes.rest.asset.ListBillsCommand;
 import com.everhomes.rest.asset.ListBillsCommandForEnt;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.asset.ListPaymentBillCmd;
 import com.everhomes.rest.contentserver.CsFileLocationDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
 import java.io.OutputStream;
 import java.util.Map;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 /**
  * Created by djm on 2018/9/3.
  *
@@ -67,7 +66,14 @@ public class AssetExportHandler  implements FileDownloadTaskHandler {
             UserContext.setCurrentUser(user);
             
         	outputStream = assetService.exportOutputStreamAssetListByContractList(cmd, taskId);
-		}else {
+		}else if (params.get("ListPaymentBillsCMD") != null){
+            String ListBillsCMDStr =  String.valueOf(params.get("ListPaymentBillsCMD"));
+            ListPaymentBillCmd cmd = (ListPaymentBillCmd) StringHelper.fromJsonString(ListBillsCMDStr, ListPaymentBillCmd.class);
+            user.setNamespaceId(cmd.getNamespaceId());
+            UserContext.setCurrentUser(user);
+
+            outputStream = assetService.exportOutputStreamOrders(cmd, taskId);
+        }else {
 			LOGGER.error("exportAssetListByParams is error.");
 			throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
 		}
