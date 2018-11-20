@@ -1886,6 +1886,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 }
                 WorkPlatformApp workPlatformApp = this.workPlatformAppProvider.getWorkPlatformApp(app.getOriginId(), orgId);
                 if (workPlatformApp != null) {
+                    dto.setId(workPlatformApp.getId());
                     dto.setVisibleFlag(workPlatformApp.getVisibleFlag());
                     dto.setSortNum(workPlatformApp.getOrder());
                 }else {
