@@ -4887,7 +4887,7 @@ public class AssetProviderImpl implements AssetProvider {
         EhPaymentBills t = Tables.EH_PAYMENT_BILLS.as("t");
         com.everhomes.server.schema.tables.EhPaymentBillOrders t2 = Tables.EH_PAYMENT_BILL_ORDERS.as("t2");
         SelectQuery<Record> query = context.selectQuery();
-        query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, 
+        query.addSelect(t.ID, t.AMOUNT_RECEIVABLE, t.AMOUNT_RECEIVED, t.DATE_STR_BEGIN, t.DATE_STR_END, t.TARGET_NAME, t.TARGET_TYPE, t.BILL_GROUP_ID,
         		t2.BILL_ID, t2.ORDER_NUMBER, t2.PAYMENT_ORDER_ID, t2.GENERAL_ORDER_ID, t2.PAYMENT_TIME, t2.PAYMENT_TYPE, t2.PAYMENT_CHANNEL, t2.UID);
         query.addFrom(t);
         query.addJoin(t2, t.ID.eq(DSL.cast(t2.BILL_ID, Long.class)));
@@ -4946,24 +4946,15 @@ public class AssetProviderImpl implements AssetProvider {
         query.fetch().map(r -> {
         	PaymentOrderBillDTO dto = new PaymentOrderBillDTO();
         	dto.setBillId(r.getValue(t.ID));//账单ID
-        	dto.setPaymentOrderNum(r.getValue(t2.PAYMENT_ORDER_ID).toString());//支付订单ID
-        	ListBillDetailVO listBillDetailVO = listBillDetailForPaymentV2(dto.getBillId());
-        	dto.setDateStrBegin(listBillDetailVO.getDateStrBegin());
-        	dto.setDateStrEnd(listBillDetailVO.getDateStrEnd());
-        	dto.setTargetName(listBillDetailVO.getTargetName());
-        	dto.setTargetType(listBillDetailVO.getTargetType());
-        	dto.setAmountReceivable(listBillDetailVO.getAmountReceivable());
-        	dto.setAmountReceived(listBillDetailVO.getAmountReceived());
-        	dto.setAmountExemption(listBillDetailVO.getAmoutExemption());
-    		dto.setAmountSupplement(listBillDetailVO.getAmountSupplement());
-    		dto.setBuildingName(listBillDetailVO.getBuildingName());
-    		dto.setApartmentName(listBillDetailVO.getApartmentName());
-    		dto.setBillGroupName(listBillDetailVO.getBillGroupName());
-    		dto.setAddresses(listBillDetailVO.getAddresses());
-    		if(listBillDetailVO.getBillGroupDTO() != null) {
-    			dto.setBillItemDTOList(listBillDetailVO.getBillGroupDTO().getBillItemDTOList());
-    			dto.setExemptionItemDTOList(listBillDetailVO.getBillGroupDTO().getExemptionItemDTOList());
-    		}
+        	dto.setDateStrBegin(r.getValue(t.DATE_STR_BEGIN));
+        	dto.setDateStrEnd(r.getValue(t.DATE_STR_END));
+        	dto.setTargetName(r.getValue(t.TARGET_NAME));
+        	dto.setTargetType(r.getValue(t.TARGET_TYPE));
+        	dto.setAmountReceivable(r.getValue(t.AMOUNT_RECEIVABLE));
+        	dto.setAmountReceived(r.getValue(t.AMOUNT_RECEIVED));
+        	String billGroupNameFound = context.select(Tables.EH_PAYMENT_BILL_GROUPS.NAME).from(Tables.EH_PAYMENT_BILL_GROUPS)
+            		.where(Tables.EH_PAYMENT_BILL_GROUPS.ID.eq(r.getValue(t.BILL_GROUP_ID))).fetchOne(0,String.class);
+        	dto.setBillGroupName(billGroupNameFound);
             SimpleDateFormat yyyyMMddHHmm = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //缴费时间
             String payTime = r.getValue(t2.PAYMENT_TIME).toString();
@@ -4974,15 +4965,6 @@ public class AssetProviderImpl implements AssetProvider {
                 LOGGER.error(e.toString());
             }
             dto.setPayTime(payTime);
-            //获得付款人员（缴费人名称、缴费人电话）
-            User userById = userProvider.findUserById(r.getValue(t2.UID));
-            if(userById != null) {
-            	dto.setPayerName(userById.getNickName());
-                UserIdentifier userIdentifier = userProvider.findUserIdentifiersOfUser(userById.getId(), cmd.getNamespaceId());
-                if(userIdentifier != null) {
-                	dto.setPayerTel(userIdentifier.getIdentifierToken());
-                }
-            }
             try {
             	Integer queryPaymentType = r.getValue(t2.PAYMENT_TYPE);
                 dto.setPaymentType(convertPaymentType(queryPaymentType));//支付方式
