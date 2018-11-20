@@ -97,7 +97,7 @@ redis.store.master.port: 6380
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://root:123456@db-master:13302/ehcore?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://root:123456@db-master:13306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: false
@@ -106,14 +106,14 @@ db.tx.timeout: 600
 #
 # ElasticSearch configuration
 #
-elastic:    
-    index: everhomesv31x
-    nodes:
-        hosts: elasticsearch
-        cluster.name: elasticsearch10
-        ports: 9300
-        httpports: 9200
+elastic:
+  index: everhomesv3
+  nodes:
+    hosts: elasticsearch
+    ports: 9300
+    httpports: 9200
 
+cluster.name: elasticsearch06
 #
 # for API code generation
 #
