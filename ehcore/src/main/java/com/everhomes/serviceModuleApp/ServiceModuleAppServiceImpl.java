@@ -1849,7 +1849,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 	public ListWorkPlatformAppResponse listWorkPlatformApp(ListWorkPlatformAppCommand cmd) {
 
 		ListWorkPlatformAppResponse response = new ListWorkPlatformAppResponse();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
 		PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
 		Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
@@ -1867,9 +1867,17 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 			List<ServiceModuleApp> apps = new ArrayList<>();
 			//园区应用
-			apps.addAll(serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId()));
+            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(communityApp)) {
+                apps.addAll(communityApp);
+            }
 			//OA应用
-			apps.addAll(serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType, ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId()));
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(oaApp)) {
+                apps.addAll(oaApp);
+            }
 			if (CollectionUtils.isEmpty(apps)) {
 			    continue;
             }
