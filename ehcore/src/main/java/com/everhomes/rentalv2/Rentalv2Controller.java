@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.oauth2.RequireOAuth2Authentication;
 import com.everhomes.pay.order.CreateOrderCommand;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PreOrderDTO;
 import com.everhomes.rest.promotion.order.MerchantPaymentNotificationCommand;
@@ -102,16 +103,16 @@ public class Rentalv2Controller extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /rental/register</b>
+	 * <b>URL: /rental/registerUser</b>
 	 * <p>
-	 * 获取用户当前的用户类型
+	 * 注册用户到公司
 	 * </p>
 	 */
-	@RequestMapping("getSceneType")
-	@RestReturn(value = GetSceneTypeResponse.class)
+	@RequestMapping("registerUser")
+	@RestReturn(value = ArchivesContactDTO.class)
 	@RequireAuthentication()
-	public RestResponse getSceneType(@Valid GetSceneTypeCommand cmd) {
-		RestResponse response = new RestResponse(rentalService.getSceneType(cmd));
+	public RestResponse getSceneType(@Valid RegisterUserCommand cmd) {
+		RestResponse response = new RestResponse(rentalService.registerUser(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

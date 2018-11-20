@@ -8853,17 +8853,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		return null;
 	}
 
-	public void registerUser(){
+	@Override
+	public ArchivesContactDTO registerUser(RegisterUserCommand cmd){
 		AddArchivesContactCommand cmd2 = new AddArchivesContactCommand();
-		cmd2.setContactName(request.getDecoratorName());
+		cmd2.setContactName(cmd.getContactName());
 		cmd2.setGender((byte) 1);
 		cmd2.setRegionCode("86");
 		cmd2.setVisibleFlag((byte) 0);
-		cmd2.setContactToken(request.getDecoratorPhone());
-		cmd2.setOrganizationId(decorationCompany.getOrganizationId());
+		cmd2.setContactToken(cmd.getPhone());
+		cmd2.setOrganizationId(cmd.getOrganizationId());
 		cmd2.setDepartmentIds(new ArrayList<>());
-		cmd2.getDepartmentIds().add(decorationCompany.getOrganizationId());
+		cmd2.getDepartmentIds().add(cmd.getOrganizationId());
 		ArchivesContactDTO dto = archivesService.addArchivesContact(cmd2);
+
+		return dto;
 	}
 
 	@Override

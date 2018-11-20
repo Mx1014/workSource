@@ -1,5 +1,6 @@
 package com.everhomes.rentalv2;
 
+import com.everhomes.rest.archives.ArchivesContactDTO;
 import com.everhomes.rest.asset.ListPayeeAccountsCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.ListBizPayeeAccountDTO;
@@ -222,6 +223,8 @@ public interface Rentalv2Service {
 	String parseSceneToken(String sceneToken);
 
 	GetSceneTypeResponse getSceneType(GetSceneTypeCommand cmd);
+
+	ArchivesContactDTO registerUser(RegisterUserCommand cmd);
 
 	void test();
 
