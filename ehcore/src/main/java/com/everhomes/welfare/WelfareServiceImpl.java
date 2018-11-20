@@ -321,20 +321,22 @@ public class WelfareServiceImpl implements WelfareService {
             //校验在职离职
             response.setCheckStatus(WelfareCheckStatus.SUCESS.getCode());
             response.setDismissReceivers(new ArrayList<>());
-            OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(welfaresDTO.getSenderDetailId());
-            if (null != member) {
-                welfaresDTO.setSenderUid(member.getTargetId());
-            }
-            if (archivesService.checkDismiss(member)) {
-                response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
-                response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
-                response.setDismissSenderUid(welfaresDTO.getSenderUid());
+            if(welfaresDTO.getSenderDetailId() != null) {
+                OrganizationMemberDetails member = organizationProvider.findOrganizationMemberDetailsByDetailId(welfaresDTO.getSenderDetailId());
+                if (null != member) {
+                    welfaresDTO.setSenderUid(member.getTargetId());
+                }
+                if (archivesService.checkDismiss(member)) {
+                    response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
+                    response.setDismissSenderDetailId(welfaresDTO.getSenderDetailId());
+                    response.setDismissSenderUid(welfaresDTO.getSenderUid());
+                }
             }
             List<Long> targetUserIds = new ArrayList<>();
             //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :welfaresDTO.getReceivers()){
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
-                receiverDTO.setReceiverUid(member != null ? member.getTargetId() : null);
+                receiverDTO.setReceiverUid(receiverDetail != null ? receiverDetail.getTargetId() : null);
                 targetUserIds.add(receiverDetail.getTargetId());
                 if (archivesService.checkDismiss(receiverDetail)) {
                     response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
