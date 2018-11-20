@@ -356,6 +356,21 @@ public class InvitedCustomerController extends ControllerBase {
 
     /**
      *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyTotal</b>
+     * <p>获取某天的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyTotal")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticDailyTotal(GetCustomerStatisticsDailyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsDailyTotal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
      * <b>URL: /invitedCustomer/queryCustomerStatisticMonthly</b>
      * <p>获取某月的数据</p>
      */
@@ -369,7 +384,84 @@ public class InvitedCustomerController extends ControllerBase {
         return response;
     }
 
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyTotal</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyTotal")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyTotal(GetCustomerStatisticsMonthlyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.getCustomerStatisticsMonthlyTotal(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyNow</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyNow")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyNow(GetCustomerStatisticsMonthlyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticMonthlyTotalNow</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticMonthlyTotalNow")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticMonthlyTotalNow(GetCustomerStatisticsMonthlyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticMonthlyTotalNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyNow</b>
+     * <p>获取某月的数据</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyNow")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticDailyNow(GetCustomerStatisticsDailyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticDailyNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticDailyTotalNow</b>
+     * <p>获取某月的数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticDailyTotalNow")
+    @RestReturn(value = GetCustomerStatisticResponse.class)
+    public RestResponse queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd) {
+        GetCustomerStatisticResponse dto = invitedCustomerService.queryCustomerStatisticDailyTotalNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 }

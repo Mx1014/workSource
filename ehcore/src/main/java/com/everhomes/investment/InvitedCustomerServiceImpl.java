@@ -1050,7 +1050,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             monthlies.remove(monthlies.size() - 1);
         }
         GetCustomerStatisticResponse response = new GetCustomerStatisticResponse();
-        response.setDtos(monthlies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList()));
+        List<CustomerStatisticsDTO> dtos = monthlies.stream().map(r->ConvertHelper.convert(r, CustomerStatisticsDTO.class)).collect(Collectors.toList());
+        for(CustomerStatisticsDTO dto: dtos){
+            dto.setCommunityName(communityProvider.findCommunityById(dto.getCommunityId()).getName());
+        }
+        response.setDtos(dtos);
         response.setNextPageAnchor(nextPageAnchor);
         return response;
     }
@@ -1305,6 +1309,66 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     }
 
+    @Override
+    public StatisticTime getNowForStatistic(Date date, int type) {
+
+        /*
+         * 支持两种计算
+         * Calendar. DAY_OF_MONTH：获取当前传入时间的当天的一整天的时间
+         * Calendar. MONTH ： 获取当前传入时间的当月的一整月的时间
+         *
+         */
+        if(type == Calendar. DAY_OF_MONTH) {
+            //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        if(type == Calendar. MONTH){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar. HOUR_OF_DAY, 0);
+            calendar.set(Calendar. MINUTE, 0);
+            calendar.set(Calendar. SECOND, 0);
+            calendar.set(Calendar. MILLISECOND, 0);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+
+            Timestamp statisticStartTime = new Timestamp(date.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            calendar.set(Calendar. DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+            date = calendar.getTime();
+            Timestamp statisticEndTime = new Timestamp(date.getTime());
+
+            StatisticTime result = new StatisticTime();
+            result.setStatisticEndTime(statisticEndTime);
+            result.setStatisticStartTime(statisticStartTime);
+            return result;
+        }
+        return null;
+
+    }
+
 
     @Override
     public void statisticCustomerDailyTotal(Date date){
@@ -1361,8 +1425,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void statisticCustomerMonthlyTotal(Date date){
         LOGGER.info("the scheduleJob of customer monthly total by organization statistics is start!");
-        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. DAY_OF_MONTH);
-        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. MONTH);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
 
         invitedCustomerProvider.deleteCustomerStatisticMonthlyTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
         if(datas != null && datas.size() > 0) {
@@ -1387,8 +1451,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void statisticCustomerMonthly(Date date){
         LOGGER.info("the scheduleJob of customer monthly statistics is start!");
-        StatisticTime statisticTime = getBeforeForStatistic(new Date(), Calendar. MONTH);
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. MONTH);
         List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+
+        invitedCustomerProvider.deleteCustomerStatisticMonthly(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
         if(datas != null && datas.size() > 0) {
             for (StatisticDataDTO data : datas) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -1396,6 +1462,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 try {
                     data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
                     CustomerStatisticMonthly monthly = ConvertHelper.convert(data, CustomerStatisticMonthly.class);
+                    invitedCustomerProvider.createCustomerStatisticsMonthly(monthly);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -1418,11 +1485,10 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void testCustomerStatistic(TestCreateCustomerStatisticCommand cmd){
         CustomerStatisticType type = CustomerStatisticType.fromCode(cmd.getType());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
         switch (type) {
             case STATISTIC_DAILY:
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
                 try {
                     Date date = format.parse(cmd.getDate());
                     statisticCustomerDaily(date);
@@ -1433,6 +1499,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 break;
 
             case STATISTIC_MONTHLY:
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerMonthly(date);
+                    statisticCustomerMonthlyTotal(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 break;
 
             case STATISTIC_ALL:

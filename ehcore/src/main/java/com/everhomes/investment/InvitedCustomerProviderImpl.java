@@ -712,6 +712,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if(communityId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.eq(communityId));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.COMMUNITY_ID.isNull());
         }
         if(date != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY.DATE_STR.eq(date));
@@ -764,6 +766,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if(organizationId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ORGANIZATION_ID.eq(organizationId));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ORGANIZATION_ID.isNull());
         }
         if(startDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.DATE_STR.le(endDate));
@@ -792,6 +796,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if(organizationId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.ORGANIZATION_ID.eq(organizationId));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.ORGANIZATION_ID.isNull());
         }
         if(startDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.DATE_STR.le(endDate));
@@ -803,8 +809,8 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
             query.addLimit(pageSize + 1);
         }
 
-        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.DATE_STR.desc());
-        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_DAILY_TOTAL.ORGANIZATION_ID);
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.DATE_STR.desc());
+        query.addOrderBy(Tables.EH_CUSTOMER_STATISTICS_MONTHLY_TOTAL.ORGANIZATION_ID);
         return query.fetchInto(CustomerStatisticMonthlyTotal.class);
     }
 
@@ -971,7 +977,10 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         }
         if(communityId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.eq(communityId));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.isNull());
         }
+
         if(date != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.eq(date));
         }
@@ -989,15 +998,21 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
         if(namespaceId != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.NAMESPACE_ID.eq(namespaceId));
         }
+
         if(communityIds != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.in(communityIds));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.COMMUNITY_ID.isNull());
         }
+
         if(startDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.le(endDate));
         }
+
         if(endDate != null){
             query.addConditions(Tables.EH_CUSTOMER_STATISTICS_MONTHLY.DATE_STR.ge(startDate));
         }
+
         if(pageSize != null){
             query.addLimit(offset * pageSize,pageSize + 1);
         }

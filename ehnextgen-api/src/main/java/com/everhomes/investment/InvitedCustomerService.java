@@ -78,6 +78,8 @@ public interface InvitedCustomerService {
 
     void statisticCustomerAll(Date date);
 
+    StatisticTime getNowForStatistic(Date date, int type);
+
     void statisticCustomerDailyTotal(Date date);
 
     void statisticCustomerDaily(Date date);

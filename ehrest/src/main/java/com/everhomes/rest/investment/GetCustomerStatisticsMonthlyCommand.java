@@ -74,4 +74,5 @@ public class GetCustomerStatisticsMonthlyCommand {
     public void setCommunities(List<Long> communities) {
         this.communities = communities;
     }
+
 }
