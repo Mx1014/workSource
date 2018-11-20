@@ -1681,6 +1681,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
 					UserServiceErrorCode.ERROR_UNAUTHENTITICATION, "Authentication is required");
 		}
+		if (cmd.getContext() != null && cmd.getContext().getCommunityId() != null && cmd.getCommunityId() == null) {
+		    cmd.setCommunityId(cmd.getContext().getCommunityId());
+        }
 
 		//如果项目ID为空，则更新工作台app
 		if(cmd.getCommunityId() == null){
