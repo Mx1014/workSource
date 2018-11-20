@@ -33,7 +33,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.paySDK.api.PayService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.OfficialActionData;
 import com.everhomes.rest.common.Router;
@@ -85,8 +84,6 @@ public class WelfareServiceImpl implements WelfareService {
     @Autowired
     private ArchivesService archivesService;
     @Autowired
-    private PayService payService;
-    @Autowired
     private WelfareProvider welfareProvider;
     @Autowired
     private WelfareCouponProvider welfareCouponProvider;
@@ -128,7 +125,7 @@ public class WelfareServiceImpl implements WelfareService {
             nextPageOffSet = pageOffset+1;
         }
         response.setNextPageOffset(nextPageOffSet);
-        response.setWelfares(results.stream().map(r -> processWelfaresDTO(r)).collect(Collectors.toList()));
+        response.setWelfares(results.stream().map(this::processWelfaresDTO).collect(Collectors.toList()));
         return response;
     }
 
@@ -175,13 +172,7 @@ public class WelfareServiceImpl implements WelfareService {
         List<WelfareCoupon> coupons = welfareCouponProvider.listWelfareCoupon(r.getId());
         if (null != coupons) {
             for (WelfareCoupon coupon : coupons) {
-                WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
-                if (coupon.getValidDate() != null) {
-                    couponDTO.setValidDate(coupon.getValidDate().getTime());
-                }
-                if (coupon.getBeginDate() != null) {
-                    couponDTO.setBeginDate(coupon.getBeginDate().getTime());
-                }
+                WelfareCouponDTO couponDTO = getWelfareCouponDTO(coupon);
                 dto.getCoupons().add(couponDTO);
             }
         }
@@ -195,6 +186,17 @@ public class WelfareServiceImpl implements WelfareService {
 	        }
         }
         return dto;
+    }
+
+    private WelfareCouponDTO getWelfareCouponDTO(WelfareCoupon coupon) {
+        WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
+        if (coupon.getValidDate() != null) {
+            couponDTO.setValidDate(coupon.getValidDate().getTime());
+        }
+        if (coupon.getBeginDate() != null) {
+            couponDTO.setBeginDate(coupon.getBeginDate().getTime());
+        }
+        return couponDTO;
     }
 
     @Override
@@ -282,7 +284,7 @@ public class WelfareServiceImpl implements WelfareService {
 		return coupon;
 	}
 
-	String getWelfareZLUrl(Welfare welfare,HttpServletRequest request) {
+	private String getWelfareZLUrl(Welfare welfare, HttpServletRequest request) {
 
         String homeUrl = request.getHeader("Host");
         return "http://"+homeUrl+"/enterprise-welfare/build/index.html?organizationId="+welfare.getOrganizationId()+"&namespaceId="+UserContext.getCurrentNamespaceId()
@@ -332,7 +334,7 @@ public class WelfareServiceImpl implements WelfareService {
             //校验所有人是否离职
             for(WelfareReceiverDTO receiverDTO :welfaresDTO.getReceivers()){
                 OrganizationMemberDetails receiverDetail = organizationProvider.findOrganizationMemberDetailsByDetailId(receiverDTO.getReceiverDetailId());
-                receiverDTO.setReceiverUid(member.getTargetId());
+                receiverDTO.setReceiverUid(member != null ? member.getTargetId() : null);
                 targetUserIds.add(receiverDetail.getTargetId());
                 if (archivesService.checkDismiss(receiverDetail)) {
                     response.setCheckStatus(WelfareCheckStatus.EMPLOYEE_RESIGNED.getCode());
@@ -370,9 +372,7 @@ public class WelfareServiceImpl implements WelfareService {
                 return response;
             }
             //发消息
-            welfaresDTO.getReceivers().forEach(r -> {
-                sendPayslipMessage(welfare, r.getReceiverUid(), request);
-            });
+            welfaresDTO.getReceivers().forEach(r -> sendPayslipMessage(welfare, r.getReceiverUid(), request));
             return response;
         }).first();
 
@@ -409,7 +409,7 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     private void sendPayslipMessage(Welfare welfare, Long receiverId, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("subject", welfare.getSubject());
         String content = localeTemplateService.getLocaleTemplateString(0, WelfareConstants.SEND_NOTIFICATION_SCOPE, WelfareConstants.SEND_NOTIFICATION_CODE,
                 "zh_CN", map, "你收到了" + welfare.getSubject() + ",快去查看吧!");
@@ -479,7 +479,7 @@ public class WelfareServiceImpl implements WelfareService {
         List<WelfareCoupon> coupons = welfareCouponProvider.listWelfareCoupon(welfare.getId());
         if (null != coupons) {
             for (WelfareCoupon coupon : coupons) {
-                WelfareCouponDTO couponDTO = ConvertHelper.convert(coupon, WelfareCouponDTO.class);
+                WelfareCouponDTO couponDTO = getWelfareCouponDTO(coupon);
                 response.getCoupons().add(couponDTO);
             }
         }
@@ -514,10 +514,7 @@ public class WelfareServiceImpl implements WelfareService {
     }
 
     private boolean checkUserInReceivers(Long userId, Long welfareId) {
-        if (welfareReceiverProvider.findWelfareReceiverByUser(welfareId, userId) != null) {
-            return true;
-        }
-        return false;
+        return welfareReceiverProvider.findWelfareReceiverByUser(welfareId, userId) != null;
     }
 
 	@Override
