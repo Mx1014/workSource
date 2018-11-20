@@ -1633,9 +1633,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 //            moreOrAllStr = AllOrMoreType.ALL.getCode();
 //        }
         AppDTO allIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.ALL.getCode());
-        AppDTO moreIcon = getAllIconForWorkPlatform(orgId, AllOrMoreType.MORE.getCode());
         appDtos.add(allIcon);
-        appDtos.add(moreIcon);
         ListAllAppsResponse response = new ListAllAppsResponse();
 
         response.setCategoryDtos(categoryDtos);
