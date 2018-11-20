@@ -9,35 +9,10 @@ import com.everhomes.rest.common.TrueOrFalseFlag;
 import com.everhomes.rest.varField.VarFieldStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhCustomerApplyProjectsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCertificatesDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerCommercialsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerEconomicIndicatorsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerInvestmentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerPatentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTalentsDao;
-import com.everhomes.server.schema.tables.daos.EhCustomerTrademarksDao;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseCustomersDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldGroupScopesDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldItemScopesDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldItemsDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldScopesDao;
-import com.everhomes.server.schema.tables.daos.EhVarFieldsDao;
-import com.everhomes.server.schema.tables.pojos.EhCustomerApplyProjects;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCertificates;
-import com.everhomes.server.schema.tables.pojos.EhCustomerCommercials;
-import com.everhomes.server.schema.tables.pojos.EhCustomerEconomicIndicators;
-import com.everhomes.server.schema.tables.pojos.EhCustomerInvestments;
-import com.everhomes.server.schema.tables.pojos.EhCustomerPatents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTalents;
-import com.everhomes.server.schema.tables.pojos.EhCustomerTrademarks;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseCustomers;
-import com.everhomes.server.schema.tables.pojos.EhVarFieldGroupScopes;
-import com.everhomes.server.schema.tables.pojos.EhVarFieldItemScopes;
-import com.everhomes.server.schema.tables.pojos.EhVarFieldItems;
-import com.everhomes.server.schema.tables.pojos.EhVarFieldScopes;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -1017,4 +992,51 @@ public class FieldProviderImpl implements FieldProvider {
                 .where(Tables.EH_VAR_FIELD_ITEMS.ID.eq(itemId))
                 .fetchOneInto(FieldItem.class);
     }
+
+    @Override
+    public void changeFilterStatus(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_VAR_FIELD_SCOPE_FILTERS)
+                .set(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS, VarFieldStatus.INACTIVE.getCode())
+                .where(Tables.EH_VAR_FIELD_SCOPE_FILTERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.MODULE_NAME.eq(moduleName))
+                .and((Tables.EH_VAR_FIELD_SCOPE_FILTERS.USER_ID.eq(userId)))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.GROUP_PATH.eq(groupPath))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS.eq(VarFieldStatus.ACTIVE.getCode())).execute();
+    }
+
+
+    @Override
+    public void createFieldScopeFilter(VarFieldScopeFilter filter){
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVarFieldScopeFilters.class));
+        filter.setId(id);
+        filter.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        filter.setCreateUid(UserContext.currentUserId());
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhVarFieldScopeFiltersDao dao = new EhVarFieldScopeFiltersDao(context.configuration());
+        dao.insert(filter);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhVarFieldScopeFilters.class, filter.getId());
+    }
+
+    @Override
+    public List<VarFieldScopeFilter> listFieldScopeFilter(Integer namespaceId, Long communityId, String moduleName, Long userId, String groupPath){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<VarFieldScopeFilter> fieldFilters = context.select().from(Tables.EH_VAR_FIELD_SCOPE_FILTERS)
+                .where(Tables.EH_VAR_FIELD_SCOPE_FILTERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.MODULE_NAME.eq(moduleName))
+                .and((Tables.EH_VAR_FIELD_SCOPE_FILTERS.USER_ID.eq(userId)))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.GROUP_PATH.eq(groupPath))
+                .and(Tables.EH_VAR_FIELD_SCOPE_FILTERS.STATUS.eq(VarFieldStatus.ACTIVE.getCode()))
+                .fetch().map((record)-> {
+                    return ConvertHelper.convert(record, VarFieldScopeFilter.class);
+                });
+
+        return fieldFilters;
+    }
+
+
 }

@@ -123,6 +123,15 @@ public class SearchEnterpriseCustomerCommand {
 
     private String trackerName;
 
+    private Byte mobileFlag;
+
+    public Byte getMobileFlag() {
+        return mobileFlag;
+    }
+
+    public void setMobileFlag(Byte mobileFlag) {
+        this.mobileFlag = mobileFlag;
+    }
 
     public Long getMinTrackingPeriod() {
         return minTrackingPeriod;

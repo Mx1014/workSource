@@ -145,7 +145,7 @@ public class UserProviderImpl implements UserProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhUsers.class, null);
     }
 
-    // @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
+    @Caching(evict={@CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid")})
     @Override
     public void createIdentifierFromUnite(UserIdentifier userIdentifier) {
         assert(userIdentifier.getOwnerUid() != null);
@@ -175,8 +175,7 @@ public class UserProviderImpl implements UserProvider {
 
     }
 
-    // @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),
-    //         @CacheEvict(value="User-Acount", key="#user.accountName")})
+    @Caching(evict={@CacheEvict(value="User-Id", key="#user.id"),  @CacheEvict(value="User-Acount", key="#user.accountName")})
     @Override
     public void updateUserFromUnite(User user) {
         assert(user.getId() != null);
@@ -189,10 +188,10 @@ public class UserProviderImpl implements UserProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
     }
 
-    // @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
-    //         @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
-    //         @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
-    //         @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
+    @Caching(evict={@CacheEvict(value="UserIdentifier-Id", key="#userIdentifier.id"),
+            @CacheEvict(value="UserIdentifier-Claiming", key="#userIdentifier.identifierToken", condition = "#userIdentifier.identifierToken != null"),
+            @CacheEvict(value="UserIdentifier-List", key="#userIdentifier.ownerUid"),
+            @CacheEvict(value="UserIdentifier-OwnerAndType", key="{#userIdentifier.ownerUid, #userIdentifier.identifierType}")})
     @Override
     public void updateIdentifierFromUnite(UserIdentifier userIdentifier) {
         assert(userIdentifier.getId() != null);

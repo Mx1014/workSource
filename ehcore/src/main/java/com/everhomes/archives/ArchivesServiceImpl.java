@@ -658,7 +658,19 @@ public class ArchivesServiceImpl implements ArchivesService {
             return null;
         });
     }
-
+    
+    /**
+     * 给用户设置新的手机号
+     * @param namespaceId : 域空间id
+     * @param userId : 用户id
+     * @param newContactToken : 新手机号
+     * */
+    @Override
+    public void updateArchivesEmployeeContact(Integer namespaceId, Long userId, String newContactToken){
+    	organizationProvider.updateOrganizationMemberDetailsContactToken(namespaceId, userId, newContactToken);
+    	organizationProvider.updateOrganizationMembersContactToken(namespaceId, userId, newContactToken);
+    }
+    
     @Override
     public void updateArchivesEmployeeAvatar(UpdateArchivesEmployeeCommand cmd) {
         OrganizationMemberDetails employee = organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());

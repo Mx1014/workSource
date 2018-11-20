@@ -261,4 +261,6 @@ public interface AssetService {
 	List<AssetDooraccessParam> getDoorAccessParamList(byte status);
 	
 	void checkAssetPriviledgeForPropertyOrg(Long communityId, Long priviledgeId,Long currentOrgId);
+	
+	PaymentOrderBillDTO listPaymentBillDetail(ListPaymentBillDetailCmd cmd);
 }

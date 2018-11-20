@@ -584,7 +584,12 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                     if (customer != null) {
                         // zuolin base
                     customer.setOwnerId(cmd.getOrgId());
-                    EnterpriseCustomerDTO dto = convertToDTO(customer);
+                    EnterpriseCustomerDTO dto = null;
+                    if(cmd.getMobileFlag() == null || cmd.getMobileFlag() == 0){
+                        dto = convertToDTO(customer);
+                    }else{
+                        dto = mobileConvertToDTO(customer);
+                    }
                     dtos.add(dto);
                 }
             });}
@@ -963,6 +968,94 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             dto.setEntryInfos(entryInfos);
         }
 
+
+
+        CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());
+        if(requirementDTO != null){
+            dto.setRequirement(requirementDTO);
+
+        }
+
+
+
+        List<CustomerContact> customerContacts = invitedCustomerProvider.findContactByCustomerId(dto.getId());
+        List<CustomerContactDTO> contactDTOS = new ArrayList<>();
+        if(customerContacts != null && customerContacts.size() > 0){
+            customerContacts.forEach(r-> contactDTOS.add(ConvertHelper.convert(r, CustomerContactDTO.class)));
+            dto.setContacts(contactDTOS);
+        }
+
+
+
+        List<CustomerTracker> trackers = invitedCustomerProvider.findTrackerByCustomerId(dto.getId());
+        if(trackers != null && trackers.size() > 0){
+            List<CustomerTrackerDTO> trackerDTOS = new ArrayList<>();
+            trackers.forEach(r-> {
+                CustomerTrackerDTO trackerDTO = ConvertHelper.convert(r, CustomerTrackerDTO.class);
+                List<OrganizationMember> oMembers = organizationProvider.listOrganizationMembersByUId(trackerDTO.getTrackerUid());
+                if (oMembers != null && oMembers.size()>0) {
+                    trackerDTO.setTrackerPhone(oMembers.get(0).getContactToken());
+                    trackerDTO.setTrackerName(oMembers.get(0).getContactName());
+                }
+                trackerDTOS.add(trackerDTO);
+            });
+            dto.setTrackers(trackerDTOS);
+        }
+
+
+
+
+
+        LOGGER.debug("customer entry info list end time  :{}",System.currentTimeMillis());
+        return dto;
+    }
+
+
+    private EnterpriseCustomerDTO mobileConvertToDTO(EnterpriseCustomer customer) {
+        LOGGER.debug("convertToDTO start time :{}",System.currentTimeMillis());
+        EnterpriseCustomerDTO dto = ConvertHelper.convert(customer, EnterpriseCustomerDTO.class);
+        Integer result = 0;
+//        ScopeFieldItem categoryItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getCategoryItemId());
+
+//        ScopeFieldItem levelItem = fieldProvider.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getLevelItemId());
+
+
+        if (dto.getTrackingUid() != null && dto.getTrackingUid() != 0) {
+            dto.setTrackingName(dto.getTrackingName());
+        }
+
+
+        if (null != dto.getEntryStatusItemId()) {
+            ScopeFieldItem entryStatusItem = fieldService.findScopeFieldItemByFieldItemId(customer.getNamespaceId(), customer.getOwnerId(),customer.getCommunityId(), dto.getEntryStatusItemId());
+            if (null != entryStatusItem) {
+                dto.setEntryStatusItemName(entryStatusItem.getItemDisplayName());
+            } else {
+                dto.setEntryStatusItemName(null);
+            }
+        }
+
+
+        LOGGER.debug("switch items name end time :{}",System.currentTimeMillis());
+
+        //21002 企业管理1.4（来源于第三方数据，企业名称栏为灰色不可修改） add by xiongying20171219
+        if(!StringUtils.isEmpty(customer.getNamespaceCustomerType())) {
+            dto.setThirdPartFlag(true);
+        }
+
+        if (customer.getLastTrackingTime() != null) {
+            result = (int) ((System.currentTimeMillis() - customer.getLastTrackingTime().getTime()) / 86400000);
+            dto.setTrackingPeriod(result);
+        }
+        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+        command.setOrganizationId(customer.getOrganizationId());
+        command.setCustomerId(customer.getId());
+        command.setNamespaceId(UserContext.getCurrentNamespaceId());
+        command.setCommunityId(customer.getCommunityId());
+        /*
+        List<OrganizationContactDTO> admins = customerService.listOrganizationAdmin(command);
+        dto.setEnterpriseAdmins(admins);
+        LOGGER.debug("list organization admins  end time  :{}",System.currentTimeMillis());
+        */
 
 
         CustomerRequirementDTO requirementDTO = invitedCustomerService.getCustomerRequirementDTOByCustomerId(dto.getId());

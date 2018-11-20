@@ -834,11 +834,14 @@ public class ZuolinAssetVendorHandler extends DefaultAssetVendorHandler{
     @SuppressWarnings({ "unused", "unchecked" })
 	@Override
     public List<ShowBillForClientV2DTO> showBillForClientV2(ShowBillForClientV2Command cmd) {
-
-        checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
+    	if(cmd.getTargetType() != null && !cmd.getTargetType().equals(AssetPaymentConstants.EH_USER) && !cmd.getTargetType().equals(AssetPaymentConstants.EH_ORGANIZATION)){
+            LOGGER.error("target type is neither eh_user nor eh_organization");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"target type is neither eh_user nor eh_organization");
+        }
         List<ShowBillForClientV2DTO> tabBills = new ArrayList<>();
         List<PaymentBills> paymentBills = new ArrayList<PaymentBills>();
         if(cmd.getTargetType().equals(AssetPaymentStrings.EH_ORGANIZATION)){
+        	checkCustomerParameter(cmd.getTargetType(), cmd.getTargetId());
         	//企业客户是所有企业管理员可以查看和支付，校验企业管理员的权限
             paymentBills = assetProvider.findSettledBillsByCustomer(cmd.getTargetType(),cmd.getTargetId(),cmd.getOwnerType(),cmd.getOwnerId());
         }else {
