@@ -25,14 +25,21 @@ public class TicketProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
 
-    public void createTicket4User(Long userId) {
+    public String createTicket4User(Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
-        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTickets.class));
-        code.setId(id);
-        code.setCode(WebTokenGenerator.getInstance().toWebToken(new IdToken(id)));
-
-        EhTicketsDao dao = new EhTicketsDao(context.configuration());
-        dao.insert(code);
+//        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTickets.class));
+////        code.setId(id);
+////        code.setCode(WebTokenGenerator.getInstance().toWebToken(new IdToken(id)));
+//        String ticketStr = WebTokenGenerator.getInstance().toWebToken(new IdToken(id));
+//
+//        EhTicket ticket = new EhTicket();
+//        ticket.setId(id);
+//        ticket.setTicket(ticketStr);
+//
+//
+//        EhTicketsDao dao = new EhTicketsDao(context.configuration());
+//        dao.insert(code);
+        return null;
     }
 }
