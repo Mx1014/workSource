@@ -2453,16 +2453,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             //查询自定义表单
             List<AclinkFormValuesDTO> values = doorAccessProvider.findAclinkFormValuesByAuthId(auth.getId());
-            dto.setValues(values);
             List<AclinkFormTitlesDTO> titles = new ArrayList<AclinkFormTitlesDTO>();
             if(null != values && !values.isEmpty()){
                 for(AclinkFormValuesDTO value:values){
                     if(value.getTitleId() != null){
                         AclinkFormTitles title = doorAccessProvider.findAclinkFormTitlesById(value.getTitleId());
+                        value.setTitleName(title.getName());
                         titles.add(ConvertHelper.convert(title, AclinkFormTitlesDTO.class));
                     }
                 }
             }
+            dto.setValues(values);
+//            dto.setTitles(titles);
             dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
@@ -3461,7 +3463,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        DoorAuth auth = createZuolinQrAuth(user, doorAccess, cmd);
+        DoorAuth auth = new DoorAuth();
+        //门禁3.0区分门禁、门禁组
+        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
+            auth = createZuolinQrAuth(user, doorAccess, cmd);
+        }
+        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
+            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
+            auth = createZuolinGroupQrAuth(user,group, cmd);
+        }
         String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
@@ -5804,17 +5814,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	@Override
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
 		User user = UserContext.current().getUser();
-		//非门禁组按原方法查找
-        DoorAuth auth = new DoorAuth();
-        if(null == cmd.getGroupType() || cmd.getGroupType() != (byte)2) {
-            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-            auth = createZuolinQrAuth(user, doorAccess, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
-        }
-        if(null != cmd.getGroupType() && cmd.getGroupType() == (byte)2){
-            AclinkGroup group = doorAccessProvider.findAclinkGroupById(cmd.getDoorId());
-            auth = createZuolinGroupQrAuth(user,group, ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
-        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+        //非门禁组按原方法查找
+        DoorAuthDTO auth = new DoorAuthDTO();
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        auth = createZuolinDeviceQr(ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
         //创建自定义表单记录
         if(null != cmd.getList() && !cmd.getList().isEmpty()){
             for(CreateCustomFieldCommand itemCmd:cmd.getList()){
@@ -5833,8 +5837,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
         }
 
-        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
-        dto.setQrString(auth.getQrKey());
+//        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+//        dto.setQrString(auth.getQrKey());
         if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
             NotifySyncVistorsCommand cmd1 = new NotifySyncVistorsCommand();
             SetFacialRecognitionPhotoCommand createPhotoCmd = ConvertHelper.convert(cmd, SetFacialRecognitionPhotoCommand.class);
@@ -5847,7 +5851,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             cmd1.setDoorId(cmd.getDoorId());
             faceRecognitionPhotoService.notifySyncVistorsCommand(cmd1);
         }
-    	return dto;
+    	return auth;
 	}
 
 	/**
