@@ -4367,16 +4367,15 @@ long assetCategoryId = 0l;
 	
 	@Override
 	public TotalContractStaticsDTO getTotalContractStatics(GetTotalContractStaticsCommand cmd){
-	    String dateStr = cmd.getDateStr();
         String startTimeStr = cmd.getStartTimeStr();
         String endTimeStr = cmd.getEndTimeStr();
-        String formatDateStr = formatDateStr(dateStr);
+        String formatDateStr = cmd.getEndTimeStr();
         
-        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr())) {
+        if (!"".equals(cmd.getStartTimeStr()) && !"".equals(cmd.getEndTimeStr()) && cmd.getStartTimeStr() != null && cmd.getEndTimeStr() != null) {
         	startTimeStr = formatDateStr(startTimeStr);
         	endTimeStr = formatDateStr(endTimeStr);
 		}else {
-	        formatDateStr = formatDateStr(dateStr);
+			formatDateStr = cmd.getDateStr();
 		}
 	    
 	    List<Long> communityIds = cmd.getCommunityIds();

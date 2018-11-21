@@ -1788,22 +1788,24 @@ public class ContractProviderImpl implements ContractProvider {
 				DSL.sum(a.DEPOSIT_AMOUNT));
 		query.addFrom(a);
 		query.addConditions(a.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		if (communityIds != null) {
+			query.addConditions(a.COMMUNITY_ID.in(communityIds));
+		}
 		//处理时间问题
-		if (dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
-			if (!"".equals(endTimeStr) && !"".equals(startTimeStr)) {
+		if (dateType != null && dateType == ContractStatisticDateType.YEARMMSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
 				query.addConditions(a.DATE_STR.le(endTimeStr));
 				query.addConditions(a.DATE_STR.ge(startTimeStr));
 			}else {
 				query.addConditions(a.DATE_STR.eq(formatDateStr));
 			}
 		}
-		if (dateType == ContractStatisticDateType.YEARSTR.getCode()) {
-			if (!"".equals(endTimeStr) && !"".equals(startTimeStr)) {
+		if (dateType != null && dateType == ContractStatisticDateType.YEARSTR.getCode()) {
+			if (!"".equals(endTimeStr) && !"".equals(startTimeStr) && startTimeStr != null && endTimeStr != null) {
 				query.addConditions(DSL.left(a.DATE_STR, 4).le(endTimeStr));
 				query.addConditions(DSL.left(a.DATE_STR, 4).ge(startTimeStr));
 			}else {
-				query.addConditions(a.DATE_STR.like(formatDateStr));
+				query.addConditions(a.DATE_STR.like("%" + formatDateStr + "%"));
 			}
 		}
 		query.addConditions(a.STATUS.eq(PropertyReportFormStatus.ACTIVE.getCode()));
