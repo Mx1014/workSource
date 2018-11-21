@@ -104,6 +104,12 @@ CREATE TABLE `eh_office_cubicle_stations` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_office_cubicle_close_dates` (
+  `id` BIGINT NOT NULL DEFAULT 0,
+  `rule_id` BIGINT,
+  `close_date` DATE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN price DECIMAL(10,2) COMMENT '价格';
 ALTER TABLE eh_office_cubicle_orders ADD COLUMN begin_time DATETIME COMMENT '预定开始时间';
