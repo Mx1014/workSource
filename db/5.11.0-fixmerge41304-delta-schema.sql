@@ -93,6 +93,7 @@ CREATE TABLE `eh_customer_statistics_total` (
   `namespace_id` int COMMENT '域空间',
   `date_str` DATE COMMENT '统计的日期',
   `organization_id` BIGINT COMMENT '统计字段锁管理的园区ID',
+  `community_num` INT COMMENT '管理公司下的园区数量',
   `new_customer_num` INT COMMENT '新增客户 数',
   `registered_customer_num` INT COMMENT '成交客户总数',
   `loss_customer_num` INT COMMENT '流失客户总数',

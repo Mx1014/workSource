@@ -1103,6 +1103,13 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     }
 
     @Override
+    public StatisticDataDTO getCustomerStatisticsTotal(GetCustomerStatisticsCommand cmd) {
+        StatisticTime time = getBeforeForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        java.sql.Date startQueryTime = new java.sql.Date(getDateByTimestamp(time.getStatisticStartTime()).getTime());
+        CustomerStatisticTotal total = invitedCustomerProvider.getCustomerStatisticsTotal(cmd.getNamespaceId(), cmd.getOrgId(), startQueryTime);
+    }
+
+    @Override
     public GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd) {
         return null;
     }
@@ -1507,26 +1514,27 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     }
 
+    @Override
     public void statisticCustomerTotal(Date date){
         LOGGER.info("the scheduleJob of customer total statistics is start!");
         StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. LONG);
-        List<StatisticDataDTO> datas = startCustomerStatistic(statisticTime);
+        List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
 
-        invitedCustomerProvider.deleteCustomerStatisticMonthly(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        invitedCustomerProvider.deleteCustomerStatisticTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
         if(datas != null && datas.size() > 0) {
             for (StatisticDataDTO data : datas) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                String str = format.format(statisticTime.getStatisticStartTime());
+                String str = format.format(statisticTime.getStatisticEndTime());
                 try {
                     data.setDateStr(new java.sql.Date(format.parse(str).getTime()));
-                    CustomerStatisticMonthly monthly = ConvertHelper.convert(data, CustomerStatisticMonthly.class);
-                    invitedCustomerProvider.createCustomerStatisticsMonthly(monthly);
+                    CustomerStatisticTotal total = ConvertHelper.convert(data, CustomerStatisticTotal.class);
+                    invitedCustomerProvider.createCustomerStatisticTotal(total);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
         }
-        LOGGER.info("the scheduleJob of customer monthly statistics is end!, result = {}" , datas);
+        LOGGER.info("the scheduleJob of customer total statistics is end!, result = {}" , datas);
     }
 
     @Override
@@ -1566,6 +1574,12 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 break;
 
             case STATISTIC_ALL:
+                try {
+                    Date date = format.parse(cmd.getDate());
+                    statisticCustomerTotal(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 break;
 
             default:
@@ -1619,7 +1633,9 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     @Override
     public CustomerStatisticsDTO queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd){
-
+        StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
+        StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
+        StatisticDataDTO datas =
     }
 
     private GetCustomerStatisticNowResponse communityCustomerStatistic(StatisticTime time, Long orgId, Integer namespaceId, Integer pageSize, Long pageAnchor){

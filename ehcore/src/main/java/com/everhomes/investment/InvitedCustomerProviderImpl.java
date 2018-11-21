@@ -939,6 +939,28 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
+    public CustomerStatisticTotal getCustomerStatisticsTotal(Integer namespaceId, Long organizationId, Date date){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        SelectQuery<EhCustomerStatisticsTotalRecord> query = context.selectQuery(Tables.EH_CUSTOMER_STATISTICS_TOTAL);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(organizationId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.ORGANIZATION_ID.eq(organizationId));
+        }else{
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.ORGANIZATION_ID.isNull());
+        }
+
+        if(date != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.DATE_STR.eq(date));
+        }
+        return query.fetchAnyInto(CustomerStatisticTotal.class);
+    }
+
+
+    @Override
     public void deleteCustomerStatisticTotal(Integer namespaceId, Long organizationId, Date startDate) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec
                 .readWriteWith(EhCustomerStatisticsMonthlyTotal.class));

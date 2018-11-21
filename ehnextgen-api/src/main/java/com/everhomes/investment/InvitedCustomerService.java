@@ -61,6 +61,8 @@ public interface InvitedCustomerService {
 
     GetCustomerStatisticResponse getCustomerStatisticsMonthlyTotal(GetCustomerStatisticsCommand cmd);
 
+    StatisticDataDTO getCustomerStatisticsTotal(GetCustomerStatisticsCommand cmd);
+
     GetCustomerStatisticResponse getCustomerStatisticsNow(GetCustomerStatisticsNowCommand cmd);
 
     void initCustomerStatusToDB();
@@ -76,6 +78,8 @@ public interface InvitedCustomerService {
     List<StatisticDataDTO> startCustomerStatistic(StatisticTime time);
 
     StatisticTime getBeforeForStatistic(Date date, int type);
+
+    void statisticCustomerTotal(Date date);
 
     void statisticCustomerAll(Date date);
 
