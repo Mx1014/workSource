@@ -1963,6 +1963,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 
 	@Override
 	public void entryContract(EntryContractCommand cmd) {
+		// 仅用于多线程任务，用户登陆信息丢失，合同一键免批
+		if (!"".equals(cmd.getUser()) && cmd.getUser() != null) {
+			User user = (User) StringHelper.fromJsonString(cmd.getUser(), User.class);
+			user.setNamespaceId(cmd.getNamespaceId());
+			UserContext.setCurrentUser(user);
+		}
 		checkContractAuth(cmd.getNamespaceId(), PrivilegeConstants.CONTRACT_ENTRY, cmd.getOrgId(), cmd.getCommunityId());
 		Contract contract = checkContract(cmd.getId());
 		if(!ContractStatus.APPROVE_QUALITIED.equals(ContractStatus.fromStatus(contract.getStatus()))) {
@@ -4101,8 +4107,10 @@ long assetCategoryId = 0l;
 		// 用于记录审批失败的合同
 		StringBuffer noChargingItemsContract = new StringBuffer();
 		StringBuffer noApartmentsContract = new StringBuffer();
+		StringBuffer apartmentsNoRent = new StringBuffer();
 		String noChargingItemsContracts = "";
 		String noApartmentsContracts = "";
+		String apartmentsNoRents = "";
 		int processedNumber = 0;
 		for (Map.Entry<Long, Contract> entry : contractsMap.entrySet()) {
 			Long contractId = entry.getKey();
@@ -4124,15 +4132,13 @@ long assetCategoryId = 0l;
 			if (contractDetailDTO.getApartments() == null) {
 				// 合同没有绑定房源
 				noApartmentsContract.append(contractDetailDTO.getContractNumber() + ",");
-
-				continue;
+				break;
 			} else {
 
 				if (contractDetailDTO.getChargingItems() == null) {
 					// 合同没有绑定计价条款
 					noChargingItemsContract.append(contractDetailDTO.getContractNumber() + ",");
-
-					continue;
+					break;
 				}
 
 				// 校验房源是否可以入场
@@ -4140,13 +4146,19 @@ long assetCategoryId = 0l;
 
 				if (!possibleEnterContractStatus) {
 					// 房源状态在这个时间点是不允许签合同的，直接返回该合同，审批不通过，操作下一个合同
-					return;
+					//return;
+					apartmentsNoRent.append(contractDetailDTO.getContractNumber() + ",");
+					break;
 				}
 				
 				//生成正常合同清单
 				ExecutorUtil.submit(new Runnable() {
 					@Override
 					public void run() {
+						// 先把合同置为审批通过
+						contractProvider.updateContract(contract);
+						contractSearcher.feedDoc(contract);
+						
 						generatePaymentExpectancies(contract, contractDetailDTO.getChargingItems(), contractDetailDTO.getAdjusts(), contractDetailDTO.getFrees());
 						// 合同入场
 						EntryContractCommand entryContractCommand = new EntryContractCommand();
@@ -4156,6 +4168,8 @@ long assetCategoryId = 0l;
 						entryContractCommand.setNamespaceId(contract.getNamespaceId());
 						entryContractCommand.setOrgId(contract.getPartyAId());
 						entryContractCommand.setPartyAId(contract.getPartyAId());
+						// 增减权限校验，需要传入当前登陆用户
+						entryContractCommand.setUser(userStr);
 
 						entryContract(entryContractCommand);
 					}
@@ -4177,7 +4191,11 @@ long assetCategoryId = 0l;
 		}
 		if (noChargingItemsContract.length() > 0) {
 			noChargingItemsContracts = (noChargingItemsContract.toString()).substring(0,
-					(noChargingItemsContract.toString()).length() - 1) + "合同没有绑定计价条款";
+					(noChargingItemsContract.toString()).length() - 1) + "合同未关联计价条款，无法转为正常合同";
+		}
+		if (apartmentsNoRent.length() > 0) {
+			apartmentsNoRents = (apartmentsNoRent.toString()).substring(0,
+					(apartmentsNoRent.toString()).length() - 1) + "合同关联房源已出租";
 		}
 
 		Date FinishTime = new Date();
@@ -4191,6 +4209,8 @@ long assetCategoryId = 0l;
 			contractTaskOperateLog.setErrorDescription(noApartmentsContracts);
 		} else if (!"".equals(noChargingItemsContracts)) {
 			contractTaskOperateLog.setErrorDescription(noChargingItemsContracts);
+		} else if(!"".equals(apartmentsNoRents)){
+			contractTaskOperateLog.setErrorDescription(apartmentsNoRents);
 		} else {
 			contractTaskOperateLog.setErrorDescription("一键审批完成！");
 		}

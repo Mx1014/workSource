@@ -81,7 +81,16 @@ public class ContractDTO {
 	private Long sponsorUid;
 	private BigDecimal deposit;
 	private Byte depositStatus;
+	private Byte assetPaymentBillStatus;
 	
+	public Byte getAssetPaymentBillStatus() {
+		return assetPaymentBillStatus;
+	}
+
+	public void setAssetPaymentBillStatus(Byte assetPaymentBillStatus) {
+		this.assetPaymentBillStatus = assetPaymentBillStatus;
+	}
+
 	public BigDecimal getDeposit() {
 		return deposit;
 	}

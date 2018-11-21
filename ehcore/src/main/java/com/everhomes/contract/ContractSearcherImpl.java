@@ -551,7 +551,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			} else {
 
 			}
-			qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
+			//qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("status", statusList));
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("status", statusList));
 		}
 
         if(cmd.getCategoryItemId() != null)
@@ -597,8 +598,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize + 1);
-        //builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize);
+        //builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize + 1);
+        builder.setFrom((pageNumber.intValue()-1) * pageSize).setSize(pageSize);
         
         builder.setQuery(qb);
         if(cmd.getSortField() != null && cmd.getSortType() != null) {
@@ -617,27 +618,27 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
             LOGGER.info("ContractSearcherImpl query builder: {}, rsp: {}", builder, rsp);
 
         List<Long> ids = getIds(rsp);
+        List<Long> recodeOnePageids = getIds(rsp);
         ListContractsResponse response = new ListContractsResponse();
 
-        //response.setTotalNum(totalHits);
+        response.setTotalNum(totalHits);
         
-        //初始化判断是否存在判断已缴的的合同，不能初始化
-        if (cmd.getContractOperate() != null && cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
-        	CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
-    		checkContractIsProduceBillCmd.setContractIdList(ids);
-    		checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
-    		checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
-    		checkContractIsProduceBillCmd.setOwnerType("community");
-    		ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
-    		List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
-    		for (CheckContractIsProduceBillDTO entry : lists) {
-    			// 合同存在已缴账单
-    			if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
-    				ids.remove(entry.getContractId());
-    			}
-    		}
+		// 判断该合同是否存在已缴账单，存在则过滤掉
+		if (cmd.getContractOperate() != null && cmd.getContractOperate() == ContractOperateStatus.INITIALIZATION.getCode()) {
+			CheckContractIsProduceBillCmd checkContractIsProduceBillCmd = new CheckContractIsProduceBillCmd();
+			checkContractIsProduceBillCmd.setContractIdList(ids);
+			checkContractIsProduceBillCmd.setNamespaceId(cmd.getNamespaceId());
+			checkContractIsProduceBillCmd.setOwnerId(cmd.getCommunityId());
+			checkContractIsProduceBillCmd.setOwnerType("community");
+			ListCheckContractIsProduceBillResponse ListCheckContractIsProduceBillResponse = assetBillService.checkContractIsProduceBill(checkContractIsProduceBillCmd);
+			List<CheckContractIsProduceBillDTO> lists = ListCheckContractIsProduceBillResponse.getList();
+			for (CheckContractIsProduceBillDTO entry : lists) {
+				// 合同存在已缴账单
+				if (entry.getPaymentStatus() == AssetPaymentBillStatus.PAID.getCode()) {
+					recodeOnePageids.remove(entry.getContractId());
+				}
+			}
 		}
-        response.setTotalNum(new Long((long)ids.size()));
 
         List<ContractDTO> dtos = new ArrayList<ContractDTO>();
         Map<Long, Contract> contracts = contractProvider.listContractsByIds(ids);
@@ -691,6 +692,10 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 		        ContractCategory contractCategory = contractProvider.findContractCategoryById(contract.getCategoryId());
 		        if (contractCategory != null) {
 		        	dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
+				}
+		        //标记已缴账单
+		        if (!recodeOnePageids.contains(id)) {
+					dto.setAssetPaymentBillStatus(AssetPaymentBillStatus.PAID.getCode());
 				}
                 dtos.add(dto);
             });
