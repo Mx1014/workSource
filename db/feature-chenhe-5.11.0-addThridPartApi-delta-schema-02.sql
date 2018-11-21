@@ -17,3 +17,13 @@ CREATE TABLE `eh_var_field_scope_filters` (
   `status` tinyint,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '筛选显示的表单';
+
+-- AUTHOR: chenhe 2018-11-20
+-- REMARK: 圳智慧TICKET表
+CREATE TABLE `eh_tickets` (
+  `id` BIGINT NOT NULL,
+  `user_id` BIGINT COMMENT 'token所属用户id',
+  `ticket` VARCHAR(128) NOT NULL COMMENT '加密后的token',
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COMMENT '圳智慧TICKET表';
