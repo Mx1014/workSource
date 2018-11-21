@@ -673,9 +673,9 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
         List<ServiceModuleApp> tempApps = new ArrayList<>();
         List<ServiceModuleApp> communityApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),
-                ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
+                ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         List<ServiceModuleApp> oaApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
-                ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
+                ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         if (!CollectionUtils.isEmpty(communityApps)) {
             tempApps.addAll(communityApps);
         }
@@ -1580,7 +1580,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
         Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
         Long orgId = cmd.getContext().getOrganizationId();
-        Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+        Byte sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
 
         List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), 0L);
 
@@ -1855,7 +1855,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
 		Byte locationType = ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode();
 		Long orgId = cmd.getOrganizationId();
-		Byte sceneType = ServiceModuleSceneType.CLIENT.getCode();
+		Byte sceneType = ServiceModuleSceneType.MANAGEMENT.getCode();
 
 		List<AppCategory> appCategories = appCategoryProvider.listAppCategories(ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), 0L);
 
