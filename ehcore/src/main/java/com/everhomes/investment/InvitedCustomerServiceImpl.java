@@ -66,6 +66,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -1180,34 +1181,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
             List<StatisticDataDTO> tempResult = new ArrayList<>();
             for(CommunityDTO community : communities) {
-                /*LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
 
-                List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
-                Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
-                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, add customer num : {}", community.getId(), statisticStartTime, statisticEndTime, addCustomerNum);
-
-                List<CustomerLevelChangeRecord> listRegisteredCustomer =
-                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
-                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to registered num : {}", community.getId(), statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
-
-
-                List<CustomerLevelChangeRecord> listLossCustomer =
-                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
-                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to loss num : {}", community.getId(), statisticStartTime, statisticEndTime, listLossCustomer.size());
-
-                List<CustomerLevelChangeRecord> listHistoryCustomer =
-                        listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
-                LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to history num : {}", community.getId(), statisticStartTime, statisticEndTime, listHistoryCustomer.size());
-
-
-                StatisticDataDTO data = new StatisticDataDTO();
-                data.setCommunityId(community.getId());
-                data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
-                data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
-                data.setLossCustomerNum(listLossCustomer.size());
-                data.setHistoryCustomerNum(listHistoryCustomer.size());
-                data.setRegisteredCustomerNum(listRegisteredCustomer.size());
-                tempResult.add(data);*/
                 tempResult.add(statisticCustomerNum(org.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
             }
 
@@ -1238,36 +1212,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         List<StatisticDataDTO> result = new ArrayList<>();
 
         for(Community community : allCommunities){
-            /*LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}", community.getId(), statisticStartTime, statisticEndTime);
 
-            List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(null, community.getId(), statisticStartTime, statisticEndTime);
-            Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime);
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, add customer num : {}", community.getId(), statisticStartTime, statisticEndTime, addCustomerNum);
-
-            List<CustomerLevelChangeRecord> listRegisteredCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to registered num : {}", community.getId(), statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
-
-
-            List<CustomerLevelChangeRecord> listLossCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to loss num : {}", community.getId(), statisticStartTime, statisticEndTime, listLossCustomer.size());
-
-            List<CustomerLevelChangeRecord> listHistoryCustomer =
-                    listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
-            LOGGER.debug("the scheduleJob of customer statistics at community : {}, query start date : {}, end date : {}, change to history num : {}", community.getId(), statisticStartTime, statisticEndTime, listHistoryCustomer.size());
-
-
-            StatisticDataDTO data = new StatisticDataDTO();
-            data.setCommunityId(community.getId());
-            data.setNamespaceId(community.getNamespaceId());
-            data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
-            data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(community.getId(), statisticStartTime, statisticEndTime));
-            data.setLossCustomerNum(listLossCustomer.size());
-            data.setHistoryCustomerNum(listHistoryCustomer.size());
-            data.setRegisteredCustomerNum(listRegisteredCustomer.size());
-            result.add(data);
-*/
             result.add(statisticCustomerNum(community.getNamespaceId(), community.getId(), statisticStartTime, statisticEndTime));
 
         }
@@ -1744,7 +1689,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         Map<String, Object> params = new HashMap<>();
         params.put("ExportCustomerStatisticsCommand", cmd);
         String exportFileNamePrefix = cmd.getPrefixFileName();
-        String fileName = String.format(exportFileNamePrefix, com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+        String fileName = String.format(exportFileNamePrefix,"") + com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH) + ".xlsx";
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerStatisticExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
 
@@ -1776,6 +1721,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 dtos = response2.getDtos();
                 break;
             case 3:
+                GetCustomerStatisticNowCommand cmd4 = ConvertHelper.convert(cmd, GetCustomerStatisticNowCommand.class);
+                cmd4.setPageSize(pageSize);
+                GetCustomerStatisticNowResponse response3 = queryCustomerStatisticDailyNow(cmd4);
+                in = this.getClass().getResourceAsStream("/excels/customer/dailyNow.xlsx");
+                dtos = response3.getDtos();
                 break;
             case 4:
                 GetCustomerStatisticsCommand cmd5 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
@@ -1794,6 +1744,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                 dtos = response5.getDtos();
                 break;
             case 6:
+                GetCustomerStatisticNowCommand cmd7 = ConvertHelper.convert(cmd, GetCustomerStatisticNowCommand.class);
+                cmd7.setPageSize(pageSize);
+                GetCustomerStatisticNowResponse response6 = queryCustomerStatisticDailyNow(cmd7);
+                in = this.getClass().getResourceAsStream("/excels/customer/monthlyNow.xlsx");
+                dtos = response6.getDtos();
                 break;
             case 7:
                 break;
@@ -1855,18 +1810,20 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
                         fillRowCellCustomerStatistic(tempRow, style, isLastRow, orderNum, dto);
                     }else if(exportType == 2 || exportType == 5){
                         fillRowCellCustomerStatisticTotal(tempRow, style, isLastRow, orderNum, dto);
+                    }else if(exportType == 3 || exportType == 6){
+                        fillRowCellCustomerStatisticNowWithTotal(tempRow, style, isLastRow, orderNum, dto);
                     }
                 }
                 taskService.updateTaskProcess(taskId, 70);
                 //最后的一行总计
                 if(exportType == 3 || exportType == 6){
-                    GetCustomerStatisticsCommand cmd2 = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
+                    GetCustomerStatisticsCommand cmdLast = ConvertHelper.convert(cmd, GetCustomerStatisticsCommand.class);
                     CellStyle totalStyle = getTotalStyle(wb, style);
                     Row tempRow = sheet.createRow(dtos.size() + 2);
                     int orderNum = dtos.size() + 1;//序号
                     boolean isLastRow = true;
-                    CustomerStatisticsDTO totalDTO = queryCustomerStatisticDailyTotalNow(cmd2);
-                    fillRowCellCustomerStatistic(tempRow, totalStyle, isLastRow, orderNum, totalDTO );
+                    CustomerStatisticsDTO totalDTO = queryCustomerStatisticDailyTotalNow(cmdLast);
+                    fillRowCellCustomerStatisticNowWithTotal(tempRow, totalStyle, isLastRow, orderNum, totalDTO );
                 }
 
                 taskService.updateTaskProcess(taskId, 80);
@@ -1996,6 +1953,50 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
     }
 
+    private void fillRowCellCustomerStatisticNowWithTotal(Row tempRow, CellStyle style, boolean isLastRow, int orderNum, CustomerStatisticsDTO dto) {
+        SimpleDateFormat format  = new SimpleDateFormat("yyyy-MM-dd");
+
+        //序号
+        Cell cell1 = tempRow.createCell(0);
+        cell1.setCellStyle(style);
+        if(isLastRow) {
+            cell1.setCellValue("合计");
+        }else {
+            cell1.setCellValue(orderNum);
+        }
+        Cell cell2 = tempRow.createCell(1);
+        cell2.setCellStyle(style);
+        if(isLastRow) {
+            cell2.setCellValue(dto.getCommunityNum()!= null ? dto.getCommunityNum() : 0);
+        }else {
+            cell2.setCellValue(dto.getCommunityName()!= null ? dto.getCommunityName() : "");
+        }
+        //项目名称
+        Cell cell3 = tempRow.createCell(2);
+        cell3.setCellStyle(style);
+        cell3.setCellValue(dto.getNewCustomerNum()!= null ? dto.getNewCustomerNum() : 0);
+        //项目分类
+        Cell cell4 = tempRow.createCell(3);
+        cell4.setCellStyle(style);
+        cell4.setCellValue(dto.getLossCustomerNum() != null ? dto.getLossCustomerNum() : 0);
+        //楼宇总数
+        Cell cell5 = tempRow.createCell(4);
+        cell5.setCellStyle(style);
+        cell5.setCellValue(dto.getRegisteredCustomerNum() != null ? dto.getRegisteredCustomerNum() : 0);
+        //建筑面积
+        Cell cell6 = tempRow.createCell(5);
+        cell6.setCellStyle(style);
+        cell6.setCellValue(dto.getHistoryCustomerNum() != null ? dto.getHistoryCustomerNum() : 0);
+        //应收含税金额(元)
+        Cell cell7 = tempRow.createCell(6);
+        cell7.setCellStyle(style);
+        cell7.setCellValue(dto.getDeleteCustomerNum() != null ? dto.getDeleteCustomerNum() : 0);
+        //已收金额(元)
+        Cell cell8 = tempRow.createCell(7);
+        cell8.setCellStyle(style);
+        cell8.setCellValue(dto.getTrackingNum() != null ? dto.getTrackingNum() : 0);
+
+    }
 
     @SuppressWarnings("deprecation")
     private CellStyle getTotalStyle(Workbook wb, CellStyle style) {
@@ -2007,6 +2008,8 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         CellStyle totalStyle = wb.createCellStyle();
         totalStyle.cloneStyleFrom(style);
         totalStyle.setFont(font);
+        totalStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        totalStyle.setFillForegroundColor(HSSFColor.YELLOW.index);
         return totalStyle;
     }
 }
