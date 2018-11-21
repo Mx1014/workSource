@@ -1916,7 +1916,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             ServiceModuleApp app = apps.get(i);
             WorkPlatformAppDTO dto = new WorkPlatformAppDTO();
             dto.setAppEntryCategory(appCategory.getName());
-            dto.setAppName(app.getName());
+            ServiceModuleApp serviceModuleApp = this.serviceModuleAppProvider.findServiceModuleAppById(app.getId());
+            if (serviceModuleApp != null) {
+                dto.setAppName(serviceModuleApp.getName());
+            }else {
+                dto.setAppName(app.getName());
+            }
             dto.setAppOriginId(app.getOriginId());
             dto.setSceneType(sceneType);
             List<ServiceModuleEntry> entries = this.serviceModuleEntryProvider.listServiceModuleEntries(Arrays.asList(app.getModuleId()), locationType, sceneType);
