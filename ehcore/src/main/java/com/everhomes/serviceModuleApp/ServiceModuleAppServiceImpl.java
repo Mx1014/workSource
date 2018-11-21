@@ -1934,11 +1934,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 
     @Override
     public void saveWorkPlatformApp(SaveWorkPlatformAppCommand cmd) {
-        for (WorkPlatformAppDTO dto : cmd.getApps()) {
+        for (int i = 0;i<cmd.getApps().size();i++) {
+            WorkPlatformAppDTO dto = cmd.getApps().get(i);
             WorkPlatformApp app = this.workPlatformAppProvider.getWorkPlatformApp(dto.getAppOriginId(),cmd.getOrganizationId());
             if (app == null) {
                 WorkPlatformApp newApp = new WorkPlatformApp();
-                newApp.setOrder(dto.getSortNum());
+                newApp.setOrder(i+1);
                 newApp.setVisibleFlag(dto.getVisibleFlag());
                 newApp.setAppId(dto.getAppOriginId());
                 newApp.setScopeId(cmd.getOrganizationId());
