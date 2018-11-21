@@ -922,8 +922,42 @@ public class InvitedCustomerProviderImpl implements InvitedCustomerProvider {
     }
 
     @Override
-    public void createCustomerStatisticsAll(EhCustomerStatisticsTotal total) {
+    public void createCustomerStatisticTotal(CustomerStatisticTotal total) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper
+                .getSequenceDomainFromTablePojo(EhCustomerStatisticsTotal.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerStatisticsTotal.class));
+        total.setId(id);
 
+        if(total.getCreateDate() == null) {
+            Long l2 = DateHelper.currentGMTTime().getTime();
+            total.setCreateDate(new Timestamp(l2));
+        }
+
+        EhCustomerStatisticsTotalDao dao = new EhCustomerStatisticsTotalDao(context.configuration());
+        dao.insert(total);
+    }
+
+    @Override
+    public void deleteCustomerStatisticTotal(Integer namespaceId, Long organizationId, Date startDate) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec
+                .readWriteWith(EhCustomerStatisticsMonthlyTotal.class));
+        DeleteQuery<EhCustomerStatisticsTotalRecord> query = context.deleteQuery(Tables.EH_CUSTOMER_STATISTICS_TOTAL);
+
+        if(namespaceId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.NAMESPACE_ID.eq(namespaceId));
+        }
+        if(organizationId != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.ORGANIZATION_ID.eq(organizationId));
+        }
+        if(startDate != null){
+            query.addConditions(Tables.EH_CUSTOMER_STATISTICS_TOTAL.DATE_STR.eq(startDate));
+        }else{
+            LOGGER.error("delete date can not be null");
+            throw RuntimeErrorException.errorWith(CustomerErrorCode.SCOPE, CustomerErrorCode.ERROR_CUSTOMER_STATISTIC_DELETE_DATE,
+                    "delete date can not be null");
+        }
+        query.execute();
     }
 
     @Override

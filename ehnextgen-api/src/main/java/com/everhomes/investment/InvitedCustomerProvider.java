@@ -111,11 +111,11 @@ public interface InvitedCustomerProvider {
 
     void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate);
 
-    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long communityId, Date startDate);
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate);
 
     void deleteCustomerStatisticDaily(Integer namespaceId, Long communityId, Date startDate, Date endDate);
 
-    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+    void deleteCustomerStatisticDailyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate);
 
     void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate);
 
@@ -123,10 +123,13 @@ public interface InvitedCustomerProvider {
 
     void deleteCustomerStatisticMonthly(Integer namespaceId, Long communityId, Date startDate, Date endDate);
 
-    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long communityId, Date startDate, Date endDate);
+    void deleteCustomerStatisticMonthlyTotal(Integer namespaceId, Long organizationId, Date startDate, Date endDate);
 
 
-    void createCustomerStatisticsAll(EhCustomerStatisticsTotal total);
+    void createCustomerStatisticTotal(CustomerStatisticTotal total);
+
+    void deleteCustomerStatisticTotal(Integer namespaceId, Long organizationId, Date startDate);
+
 
     CustomerStatisticTotal getCustomerStatisticTotal(Integer namespaceId, Long communityId, Date date);
 

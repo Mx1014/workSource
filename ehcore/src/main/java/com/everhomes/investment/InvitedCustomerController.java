@@ -380,8 +380,23 @@ public class InvitedCustomerController extends ControllerBase {
      */
     @RequestMapping("queryCustomerStatisticDailyTotalNow")
     @RestReturn(value = CustomerStatisticsDTO.class)
-    public RestResponse queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd) {
+    public RestResponse queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsCommand cmd) {
         CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticDailyTotalNow(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     *
+     * <b>URL: /invitedCustomer/queryCustomerStatisticTotal</b>
+     * <p>获取当前系统的累计数据，分管理公司获取</p>
+     */
+    @RequestMapping("queryCustomerStatisticTotal")
+    @RestReturn(value = CustomerStatisticsDTO.class)
+    public RestResponse queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd) {
+        CustomerStatisticsDTO dto = invitedCustomerService.queryCustomerStatisticTotal(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

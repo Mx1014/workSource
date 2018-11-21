@@ -1,5 +1,7 @@
 package com.everhomes.rest.investment;
 
+import com.everhomes.util.StringHelper;
+
 import java.util.List;
 
 public class ExportCustomerStatisticsCommand {
@@ -15,6 +17,16 @@ public class ExportCustomerStatisticsCommand {
     private List<Long> communities;
 
     private Byte exportType;
+
+    private String prefixFileName;
+
+    public String getPrefixFileName() {
+        return prefixFileName;
+    }
+
+    public void setPrefixFileName(String prefixFileName) {
+        this.prefixFileName = prefixFileName;
+    }
 
     public Long getOrgId() {
         return orgId;
@@ -62,5 +74,10 @@ public class ExportCustomerStatisticsCommand {
 
     public void setExportType(Byte exportType) {
         this.exportType = exportType;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

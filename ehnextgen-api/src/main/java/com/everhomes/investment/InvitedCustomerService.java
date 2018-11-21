@@ -10,6 +10,7 @@ import com.everhomes.rest.varField.ListFieldGroupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -98,8 +99,12 @@ public interface InvitedCustomerService {
 
     GetCustomerStatisticNowResponse queryCustomerStatisticDailyNow(GetCustomerStatisticNowCommand cmd);
 
-    CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsDailyCommand cmd);
+    CustomerStatisticsDTO queryCustomerStatisticDailyTotalNow(GetCustomerStatisticsCommand cmd);
+
+    CustomerStatisticsDTO queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd);
 
     void exportCustomerStatistic(ExportCustomerStatisticsCommand cmd);
+
+    OutputStream exportOutputStreamCustomerStatistic(ExportCustomerStatisticsCommand cmd, Long taskId, Byte exportType);
 
 }
