@@ -11,6 +11,8 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RequireAuthentication;
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +27,10 @@ import java.util.Map;
  * @author chenhe
  */
 @RestController
-@RequestMapping("/openapi/shenzhihuig")
+@RequestMapping("/openapi/zhenzhihuig")
 public class ZHYQOpenController extends ControllerBase {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZHYQOpenController.class);
     static final String KEY = "A6465651FDDC5E4B";
 
     @Autowired
@@ -39,7 +42,7 @@ public class ZHYQOpenController extends ControllerBase {
 
     /**
      *
-     * <b>URL: /openapi/shenzhihuig/getUserInfo</b>
+     * <b>URL: /openapi/zhenzhihuig/getUserInfo</b>
      * <p>获取用户信息 </p>
      * @return
      */
@@ -48,10 +51,12 @@ public class ZHYQOpenController extends ControllerBase {
     public Map getUserInfo(TicketCommand cmd){
 
         String ticketStr = cmd.getTicket();
+        LOGGER.info("---------------------------------------------------------------- ticketStr: " + ticketStr);
         assert StringUtils.isNotEmpty(ticketStr);
 
         // 根据ticket获取用户信息
         EhTickets tickets = ticketProvider.getUserIdByTicket(ticketStr);
+        LOGGER.info("---------------------------------------------------------------- ticketsTableInfo: " + tickets);
         if (tickets != null ) {
             Long userId = tickets.getUserId();
             User user = userProvider.findUserById(userId);
@@ -69,15 +74,20 @@ public class ZHYQOpenController extends ControllerBase {
             userInfo.put("headimgurl", imgUrl);
             userInfo.put("code", "1301");
 
-            Map<String, String> wappedUserInfo = new HashMap<>();
             String userInfoJsonStr = JSON.toJSONString(userInfo);
+            LOGGER.info("*************************************************************** userInfoStr: " + userInfoJsonStr);
+
             String encryptedUserInfo = null;
             try {
                 // 加密信息
                 encryptedUserInfo = Base64.encodeBase64String(AESCoder.encrypt(userInfoJsonStr.getBytes("utf-8"), KEY.getBytes("utf-8")));
             } catch (Exception e) {
+                LOGGER.error("encountered an error in AESEncrypt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 e.printStackTrace();
             }
+            LOGGER.info("############################################################## encryptedUserInfo: " + encryptedUserInfo);
+
+            Map<String, String> wappedUserInfo = new HashMap<>();
             wappedUserInfo.put("parameter", encryptedUserInfo);
             return wappedUserInfo;
         }
