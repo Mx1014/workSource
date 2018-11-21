@@ -1,0 +1,182 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.everhomes</groupId>
+    <artifactId>ehcore-persist</artifactId>
+    <version>${ehapp.version}</version>
+
+    <name>ehcore-persist</name>
+    <url>http://www.everhomes.com</url>
+
+    <distributionManagement>
+        <repository>
+          <id>everhomes.repo</id>
+          <name>Internal Repository</name>
+          <url>http://mvn-mirror.lab.everhomes.com:8081/artifactory/libs-snapshot-local</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jooq.version>${jooq.version}</jooq.version>
+		<java.source.version>${java.source.version}</java.source.version>
+		<java.target.version>${java.target.version}</java.target.version>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-meta</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+			<version>${mysql-connector-java.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+			<version>${commons-dbcp.version}</version>
+        </dependency>
+        <dependency>  
+            <groupId>com.sun.xml.ws</groupId>  
+            <artifactId>jaxws-rt</artifactId>
+			<version>${jaxws-rt.version}</version>
+            <type>jar</type>  
+            <scope>compile</scope>  
+        </dependency>
+        
+        <!-- ��������ҵ�ɷѶԽ�����������axis 1.4 jar start -->
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-discovery</groupId>
+            <artifactId>commons-discovery</artifactId>
+            <version>0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-jaxrpc</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis</groupId>
+            <artifactId>axis-saaj</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!-- ��������ҵ�ɷѶԽ�����������axis 1.4 jar end -->
+    </dependencies>
+
+    <build>
+	        <plugins>
+	            <plugin> 
+	                <artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+	                <configuration>
+	                    <source>${java.source.version}</source>
+	                    <target>${java.target.version}</target>
+	                </configuration>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.springframework.boot</groupId>
+	                <artifactId>spring-boot-maven-plugin</artifactId>
+	            </plugin>
+	            <plugin>
+	                 <groupId>org.codehaus.mojo</groupId>
+	                 <artifactId>properties-maven-plugin</artifactId>
+					 <version>${properties-maven-plugin.version}</version>
+	                 <executions>
+	                     <execution>
+	                         <phase>initialize</phase>
+	                         <goals>
+	                             <goal>read-project-properties</goal>
+	                         </goals>
+	                         <configuration>
+	                             <files>
+	                                 <file>${basedir}/../pom.properties</file>
+	                             </files>
+	                         </configuration>
+	                     </execution>
+	                 </executions>
+	            </plugin>
+	            <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+	        </plugins>
+    </build>
+    
+    <profiles>
+        <profile>
+            <id>code-gen</id>
+            <activation>
+                <property>
+                    <name>codegen</name>
+                </property>
+            </activation>
+            
+            <build>
+                <plugins>
+                    <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-antrun-plugin</artifactId>
+                       <version>${maven-antrun-plugin.version}</version>
+                       <executions>
+                           <execution>
+                               <id>generate-schema-objects</id>
+                               <phase>generate-sources</phase>
+                               <goals>
+                                   <goal>run</goal>
+                               </goals>
+                               <configuration>
+                                  <tasks>
+                                        <property name="compile_classpath" refid="maven.compile.classpath" />
+                                        <java classpath="${compile_classpath}:${project.basedir}:./" classname="org.jooq.util.GenerationTool">
+                                            <arg value="/codegen-conf/ehcore-server-schema.xml"/>
+                                        </java>
+                                  </tasks>
+                               </configuration>
+                           </execution>
+                       </executions>
+                   </plugin>
+               </plugins>
+           </build>  
+       </profile> 
+    </profiles> 
+    
+</project>
