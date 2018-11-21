@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 附件ID</li>
  * <li>postId: 帖子或评论ID</li>
+ * <li>fileName: 文件名</li>
  * <li>contentType: 附件类型，{@link com.everhomes.rest.forum.PostContentType}</li>
  * <li>contentUri: 附件访问URI</li>
  * <li>size: 附件大小</li>
@@ -17,6 +18,8 @@ public class AttachmentDTO {
     private Long id;
     
     private Long postId;
+
+    private String fileName;
     
     private String contentType;
     
@@ -45,6 +48,14 @@ public class AttachmentDTO {
 
     public void setPostId(Long postId) {
         this.postId = postId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getContentType() {

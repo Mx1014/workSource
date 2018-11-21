@@ -47,7 +47,7 @@ import com.everhomes.discover.ItemType;
  * <li>state:前端触发事件使用，1是外层，2是内层(children代表内层)</li>
  *</ul>
  */
-public class PaymentOrderBillDTO implements Cloneable{
+public class PaymentOrderBillDTO {
     private Long userId;
     private String orderNo;
     private String paymentOrderNum;

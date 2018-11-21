@@ -3060,10 +3060,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 		//addressProvider.deleteAddressById(cmd.getId());
     }
 
+    //针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
+    //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
     private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
-        if (organizationId != null && community != null && address != null) {
-        	//针对标准版的兼容，因为在标准版中一个community可能被不同的organization管理，但同一时刻只能是一个organization管理。
-            //这里再以organizationId为条件来查可能就查不出来了。而且目前业务中，addressId和livingStatus应该是一一对应的。
+//        if (organizationId != null && community != null && address != null) {
+    	if (community != null && address != null) {
             //CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, address.getCommunityId(), address.getId());
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMappingByAddressId(address.getId());
         	if (communityAddressMapping == null) {
