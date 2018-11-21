@@ -224,7 +224,7 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 					Date startDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
 					punCalendar.setTime(request.getEndTime());
 					Date endDay = punchService.calculatePunchDate(punCalendar, request.getEnterpriseId(), request.getUserId());
-					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, endDay);
+					punchService.refreshPunchDayLog(request.getUserId(), request.getEnterpriseId(), startDay, plusDate(endDay, 1));
 				}
 			} else if (GeneralApprovalAttribute.fromCode(ga.getApprovalAttribute()) == GeneralApprovalAttribute.ABNORMAL_PUNCH) {
 				Calendar punCalendar = Calendar.getInstance();
@@ -235,6 +235,13 @@ public class EnterpriseApprovalPunchDefaultHandler extends EnterpriseApprovalDef
 		} catch (Exception e) {
 			LOGGER.error("flow case create refreshPunchDayLog error ", e);
 		}
+	}
+
+	private Date plusDate(Date date, int day) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(calendar.DATE, 1);
+		return calendar.getTime();
 	}
 
 	private void addVacationBalanceHistoryCount(Long userId, GeneralApproval ga, PunchExceptionRequest request, byte operation) {

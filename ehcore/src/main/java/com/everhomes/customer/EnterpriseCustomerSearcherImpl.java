@@ -306,6 +306,17 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
         return response;
     }
 
+
+    @Override
+    public SearchEnterpriseCustomerResponse queryEnterpriseCustomersForOpenAPI(SearchEnterpriseCustomerCommand cmd){
+        if(cmd.getPageSize() > 100){
+            cmd.setPageSize(100);
+        }
+        cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
+        return queryEnterpriseCustomers(cmd,true);
+    }
+
+
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomers(SearchEnterpriseCustomerCommand cmd,Boolean isAdmin) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
