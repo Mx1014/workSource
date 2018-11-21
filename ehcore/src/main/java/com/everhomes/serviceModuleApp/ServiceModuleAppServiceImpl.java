@@ -672,14 +672,10 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
         PortalVersion releaseVersion = portalVersionProvider.findReleaseVersion(namespaceId);
 
         List<ServiceModuleApp> tempApps = new ArrayList<>();
-        List<ServiceModuleApp> communityApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),
-                ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
+
         //OA应用 管理端
         List<ServiceModuleApp> oaApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(), ServiceModuleAppType.OA.getCode(),
                 ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
-        if (!CollectionUtils.isEmpty(communityApps)) {
-            tempApps.addAll(communityApps);
-        }
         if (!CollectionUtils.isEmpty(oaApps)) {
             tempApps.addAll(oaApps);
         }
@@ -688,6 +684,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                 ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
         if (!CollectionUtils.isEmpty(oaApps)) {
             tempApps.addAll(oaApps);
+        }
+        // 园区应用 管理端
+        List<ServiceModuleApp> communityApps = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), organizationId, ServiceModuleLocationType.MOBILE_WORKPLATFORM.getCode(),
+                ServiceModuleAppType.COMMUNITY.getCode(), ServiceModuleSceneType.MANAGEMENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), null);
+        if (!CollectionUtils.isEmpty(communityApps)) {
+            tempApps.addAll(communityApps);
         }
         if(tempApps != null && tempApps.size() > 0) {
 
@@ -1602,24 +1604,25 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
             LaunchPadCategoryDTO dto = ConvertHelper.convert(appCategory, LaunchPadCategoryDTO.class);
 
             List<ServiceModuleApp> apps = new ArrayList<>();
+            //OA应用 管理端
+            List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if(!CollectionUtils.isEmpty(oaApp)) {
+                apps.addAll(oaApp);
+            }
+            // OA应用 用户端
+            oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if(!CollectionUtils.isEmpty(oaApp)) {
+                apps.addAll(oaApp);
+            }
+
             //园区应用  管理端
 			List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
 					ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(communityApp)) {
 				apps.addAll(communityApp);
 			}
-            //OA应用 管理端
-			List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
-					ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
-            if(!CollectionUtils.isEmpty(oaApp)) {
-				apps.addAll(oaApp);
-			}
-			// OA应用 用户端
-            oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
-                    ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
-            if(!CollectionUtils.isEmpty(oaApp)) {
-                apps.addAll(oaApp);
-            }
             List<AppDTO> appDtos = toAppDtosForWorkPlatform(orgId, sceneType, apps);
 
             dto.setAppDtos(appDtos);
@@ -1880,13 +1883,7 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
 		for (AppCategory appCategory: appCategories) {
 
 			List<ServiceModuleApp> apps = new ArrayList<>();
-			//园区应用
-            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
-                    ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
-            if (!CollectionUtils.isEmpty(communityApp)) {
-                apps.addAll(communityApp);
-            }
-			//OA应用  管理端
+            //OA应用  管理端
             List<ServiceModuleApp> oaApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
                     ServiceModuleAppType.OA.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(oaApp)) {
@@ -1897,6 +1894,12 @@ public class ServiceModuleAppServiceImpl implements ServiceModuleAppService {
                     ServiceModuleAppType.OA.getCode(), ServiceModuleSceneType.CLIENT.getCode(), OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
             if (!CollectionUtils.isEmpty(oaApp)) {
                 apps.addAll(oaApp);
+            }
+			//园区应用
+            List<ServiceModuleApp> communityApp = serviceModuleAppProvider.listInstallServiceModuleApps(namespaceId, releaseVersion.getId(), orgId, locationType,
+                    ServiceModuleAppType.COMMUNITY.getCode(), sceneType, OrganizationAppStatus.ENABLE.getCode(), appCategory.getId());
+            if (!CollectionUtils.isEmpty(communityApp)) {
+                apps.addAll(communityApp);
             }
 			if (CollectionUtils.isEmpty(apps)) {
 			    continue;
