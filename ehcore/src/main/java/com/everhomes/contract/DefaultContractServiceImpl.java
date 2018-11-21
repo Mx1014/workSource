@@ -617,6 +617,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 		}
 	}
 
+	// issue-42515 合同变更提示合同编号已存在（HT-ZL-201811-9625）取后面4位太少，导致产生的合同编号有很大几率重复，先修改为取后6
 	@Override
 	public String generateContractNumber(GenerateContractNumberCommand cmd) {
 		/*生成合同编号不用校验权限，下面这个是校验参数的权限，权限也是不对的*/
@@ -635,12 +636,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			//收款
 			if (ContractPaymentType.RECEIVE.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
 				//HT-ZL-年月-流水号
-				return "HT-ZL-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+				return "HT-ZL-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(7, 13);
 			}
 			//付款
 			if (ContractPaymentType.PAY.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
 				//HT-FK-年月-流水号
-				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(7, 13);
 			}
 		}
 		//获取规则
@@ -651,12 +652,12 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			//收款
 			if (ContractPaymentType.RECEIVE.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
 				//HT-ZL-年月-流水号
-				return "HT-ZL-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+				return "HT-ZL-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(7, 13);
 			}
 			//付款
 			if (ContractPaymentType.PAY.equals(ContractPaymentType.fromStatus(cmd.getPayorreceiveContractType()))) {
 				//HT-FK-年月-流水号
-				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(9, 13);
+				return "HT-FK-"+ cal.get(Calendar.YEAR)+sdf.format(month)+ "-" +(System.currentTimeMillis()+"").substring(7, 13);
 			}
 		}
 		
@@ -677,7 +678,7 @@ public class DefaultContractServiceImpl implements ContractService, ApplicationL
 			contractNumber.append("-").append(Sparefield);
 		}
 		
-		String currentTime = (System.currentTimeMillis()+"").substring(9, 13);
+		String currentTime = (System.currentTimeMillis()+"").substring(7, 13);
 		return contractNumber.append("-").append(cal.get(Calendar.DATE))+currentTime;
 	}
 
