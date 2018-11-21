@@ -52,4 +52,9 @@ public interface ServiceModuleAppProvider {
 
 	List<ServiceModuleApp> listServiceModuleAppsForEnterprisePay(Long versionId, Byte enableEnterprisePayFlag);
 
+	void createServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile);
+
+	void updateServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile);
+
+	List<ServiceModuleAppEntryProfile> listServiceModuleAppEntryProfile(Long originId, Long entryId, Byte entryCategory, Byte entrySettingFlag);
 }

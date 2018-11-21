@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.portal;
 
+import com.everhomes.acl.ServiceModuleAppProfileProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -59,6 +60,7 @@ import com.everhomes.server.schema.tables.pojos.EhPortalItemGroups;
 import com.everhomes.server.schema.tables.pojos.EhPortalItems;
 import com.everhomes.server.schema.tables.pojos.EhPortalLayouts;
 import com.everhomes.serviceModuleApp.ServiceModuleApp;
+import com.everhomes.serviceModuleApp.ServiceModuleAppEntryProfile;
 import com.everhomes.serviceModuleApp.ServiceModuleAppProvider;
 import com.everhomes.serviceModuleApp.ServiceModuleAppService;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -74,6 +76,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -187,7 +191,9 @@ public class PortalServiceImpl implements PortalService {
 
 	@Autowired
 	private LaunchPadService launchPadService;
-	
+
+	@Autowired
+    private ServiceModuleAppProfileProvider serviceModuleAppProfileProvider;
 	@Override
 	public ListServiceModuleAppsResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd) {
 
@@ -342,11 +348,46 @@ public class PortalServiceImpl implements PortalService {
 			moduleApp.setEnableEnterprisePayFlag(cmd.getEnableEnterprisePayFlag());
 		}
 
-
 		moduleApp.setInstanceConfig(cmd.getInstanceConfig());
 		serviceModuleAppProvider.updateServiceModuleApp(moduleApp);
+        updateServiceModuleAppEntryProfile(cmd,moduleApp);
 		return processServiceModuleAppDTO(moduleApp);
 	}
+
+	//更新应用自定义配置应用入口信息
+	private void updateServiceModuleAppEntryProfile(UpdateServiceModuleAppCommand cmd, ServiceModuleApp moduleApp) {
+        if (TrueOrFalseFlag.FALSE.getCode().equals(cmd.getAppEntrySettingFlag())) {
+            List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+                    null,null,null);
+            if(!CollectionUtils.isEmpty(appEntryProfiles)) {
+                for (ServiceModuleAppEntryProfile serviceModuleAppEntryProfile : appEntryProfiles) {
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    this.serviceModuleAppProvider.updateServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }
+            }
+        }else if (!CollectionUtils.isEmpty(cmd.getAppEntryDtos())) {
+            for (AppEntryDTO appEntryDTO : cmd.getAppEntryDtos()) {
+                List<ServiceModuleAppEntryProfile> appEntryProfiles = this.serviceModuleAppProvider.listServiceModuleAppEntryProfile(moduleApp.getOriginId(),
+                        null,appEntryDTO.getEntryCategory(),null);
+                if(!CollectionUtils.isEmpty(appEntryProfiles)) {
+                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = appEntryProfiles.get(0);
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getEntryIconUri());
+                    this.serviceModuleAppProvider.updateServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }else {
+                    ServiceModuleAppEntryProfile serviceModuleAppEntryProfile = new ServiceModuleAppEntryProfile();
+                    serviceModuleAppEntryProfile.setOriginId(moduleApp.getOriginId());
+                    serviceModuleAppEntryProfile.setEntryCategory(appEntryDTO.getEntryCategory());
+                    serviceModuleAppEntryProfile.setEntryId(appEntryDTO.getEntryId());
+                    serviceModuleAppEntryProfile.setAppEntrySetting(cmd.getAppEntrySettingFlag());
+                    serviceModuleAppEntryProfile.setEntryName(appEntryDTO.getEntryName());
+                    serviceModuleAppEntryProfile.setEntryUri(appEntryDTO.getEntryIconUri());
+                    this.serviceModuleAppProvider.createServiceModuleAppEntryProfile(serviceModuleAppEntryProfile);
+                }
+            }
+        }
+    }
 
 
 	@Override

@@ -13,7 +13,9 @@ import com.everhomes.rest.portal.ServiceModuleAppStatus;
 import com.everhomes.rest.servicemoduleapp.OrganizationAppStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAppEntryProfilesDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAppsDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAppEntryProfiles;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleApps;
 import com.everhomes.server.schema.tables.records.EhOrganizationAppsRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModuleAppsRecord;
@@ -626,5 +628,40 @@ public class ServiceModuleAppProviderImpl implements ServiceModuleAppProvider {
 				.orderBy(Tables.EH_SERVICE_MODULE_APPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ServiceModuleApp.class));
 	}
+
+	@Override
+	public void createServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAppEntryProfiles.class));
+		serviceModuleAppEntryProfile.setId(id);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntryProfiles.class));
+        EhServiceModuleAppEntryProfilesDao dao = new EhServiceModuleAppEntryProfilesDao(context.configuration());
+		dao.insert(serviceModuleAppEntryProfile);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleApps.class, null);
+	}
+
+	@Override
+	public void updateServiceModuleAppEntryProfile(ServiceModuleAppEntryProfile serviceModuleAppEntryProfile) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAppEntryProfiles.class));
+        EhServiceModuleAppEntryProfilesDao dao = new EhServiceModuleAppEntryProfilesDao(context.configuration());
+        dao.update(serviceModuleAppEntryProfile);
+	}
+
+    @Override
+    public List<ServiceModuleAppEntryProfile> listServiceModuleAppEntryProfile(Long originId, Long entryId, Byte entryCategory, Byte entrySettingFlag) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<Record> query = context.select(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.fields()).from(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES).getQuery();
+        query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ORIGIN_ID.eq(originId));
+        if (entryId != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ENTRY_ID.eq(entryId));
+        }
+        if (entryCategory != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.ENTRY_CATEGORY.eq(entryCategory));
+        }
+        if (entrySettingFlag != null) {
+            query.addConditions(Tables.EH_SERVICE_MODULE_APP_ENTRY_PROFILES.APP_ENTRY_SETTING.eq(entrySettingFlag));
+        }
+        return query.fetch().map(r -> RecordHelper.convert(r, ServiceModuleAppEntryProfile.class));
+    }
 
 }
