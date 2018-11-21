@@ -2,6 +2,7 @@ package com.everhomes.rest.rentalv2.admin;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.RentalPriceClassificationDTO;
+import com.everhomes.rest.rentalv2.RentalPriceClassificationTitleDTO;
 import com.everhomes.rest.rentalv2.RentalV2ResourceType;
 import com.everhomes.rest.rentalv2.RuleSourceType;
 import com.everhomes.util.StringHelper;
@@ -44,7 +45,7 @@ public class ResourcePriceRuleDTO {
     private List<PriceRuleDTO> priceRules;
     @ItemType(PricePackageDTO.class)
     private List<PricePackageDTO> pricePackages;
-    private List<RentalPriceClassificationDTO> vipLevels;
+    private List<RentalPriceClassificationTitleDTO> classification;
 
     @Override
     public String toString() {
@@ -131,11 +132,11 @@ public class ResourcePriceRuleDTO {
         this.pricePackages = pricePackages;
     }
 
-    public List<RentalPriceClassificationDTO> getVipLevels() {
-        return vipLevels;
+    public List<RentalPriceClassificationTitleDTO> getClassification() {
+        return classification;
     }
 
-    public void setVipLevels(List<RentalPriceClassificationDTO> vipLevels) {
-        this.vipLevels = vipLevels;
+    public void setClassification(List<RentalPriceClassificationTitleDTO> classification) {
+        this.classification = classification;
     }
 }

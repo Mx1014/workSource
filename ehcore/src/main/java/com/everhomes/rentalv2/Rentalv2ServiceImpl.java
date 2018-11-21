@@ -1162,33 +1162,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (rsiSiteItems != null && rsiSiteItems.size() > 0)
 			for (RentalItem rsi : rsiSiteItems) {
 				SiteItemDTO dto = convertItem2DTO(rsi);
-				//对于租赁型的要计算当前时段该场所已经租赁的物品（购买型记录的库存不用计算）
-//				if(rsi.getItemType().equals(RentalItemType.RENTAL.getCode())){
-//					int maxOrder = 0;
-//					for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
-//						// 对于每一个物品，通过每一个siteRuleID找到它对应的BillIds
-//						int ruleOrderSum = 0;
-//						List<RentalResourceOrder> rsbs = rentalv2Provider
-//								.findRentalSiteBillBySiteRuleId(siteRuleId, cmd.getResourceType());
-//						// 通过每一个billID找已预订的数量
-//						if (null == rsbs || rsbs.size() == 0) {
-//							continue;
-//						}
-//						for (RentalResourceOrder rsb : rsbs) {
-//							RentalItemsOrder rib = rentalv2Provider.findRentalItemBill(
-//									rsb.getRentalOrderId(), rsi.getId(), cmd.getResourceType());
-//							if (null == rib || null == rib.getRentalCount()) {
-//								continue;
-//							}
-//							ruleOrderSum += rib.getRentalCount();
-//						}
-//						// 获取该物品的最大预订量
-//						if (ruleOrderSum > maxOrder)
-//							maxOrder = ruleOrderSum;
-//					}
-//					dto.setCounts(dto.getCounts() - maxOrder);
-//				}
-
 				response.getSiteItems().add(dto);
 			}
 
@@ -2108,9 +2081,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		billDTO.setSpecialCloseDate(new ArrayList<>(settingDateSet));
 		//退款提示
 		billDTO.setRefundTip(getRefundTipByRule(rule,rentalBill.getRentalResourceId()));
-		//备注设置
-		billDTO.setRemark(rule.getRemark());
-		billDTO.setRemarkFlag(rule.getRemarkFlag());
+		billDTO.setFileFlag(rule.getFileFlag() == null ? (byte) 0 :rule.getFileFlag());
+
 		return billDTO;
 	}
 
@@ -7870,17 +7842,35 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		List<Rentalv2PricePackage> pricePackages = rentalv2PricePackageProvider.listPricePackageByOwner(rule.getResourceType(),
 				priceRuleType, id, null, null);
 		dto.setPricePackages(pricePackages.stream().map(this::convert).collect(Collectors.toList()));
+		dto.setClassification(new ArrayList<>());
+		//按用户类型
+		RentalPriceClassificationTitleDTO titleDTO = new RentalPriceClassificationTitleDTO();
+		titleDTO.setUserPriceType(RentalUserPriceType.USER_TYPE.getCode());
+		titleDTO.setLevels(new ArrayList<>());
+		RentalPriceClassificationDTO classification = new RentalPriceClassificationDTO();
+		classification.setUserPriceType(RentalUserPriceType.USER_TYPE.getCode());
+		classification.setClassification(SceneType.ENTERPRISE.getCode());
+		titleDTO.getLevels().add(classification);
+		classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
+		classification.setClassification(SceneType.PM_ADMIN.getCode());
+		titleDTO.getLevels().add(classification);
+		classification = ConvertHelper.convert(classification,RentalPriceClassificationDTO.class);
+		classification.setClassification(SceneType.PARK_TOURIST.getCode());
+		titleDTO.getLevels().add(classification);
+		dto.getClassification().add(titleDTO);
 		//获取会员等级
 		List<VipPriority> vipPriorities = userActivityService.listVipPriorityByNamespaceId(UserContext.getCurrentNamespaceId());
 		if (vipPriorities != null){
-			List<RentalPriceClassificationDTO> vipLevels = new ArrayList<>();
+			titleDTO = new RentalPriceClassificationTitleDTO();
+			titleDTO.setUserPriceType(RentalUserPriceType.VIP_TYPE.getCode());
+			titleDTO.setLevels(new ArrayList<>());
 			for (VipPriority vipPriority : vipPriorities){
 				RentalPriceClassificationDTO dto1 = new RentalPriceClassificationDTO();
 				dto1.setUserPriceType(RentalUserPriceType.VIP_TYPE.getCode());
 				dto1.setClassification(vipPriority.getVipLevelText());
-				vipLevels.add(dto1);
+				titleDTO.getLevels().add(dto1);
 			}
-			dto.setVipLevels(vipLevels);
+			dto.getClassification().add(titleDTO);
 		}
 		return dto;
 	}

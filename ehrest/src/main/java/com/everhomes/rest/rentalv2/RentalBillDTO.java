@@ -131,9 +131,8 @@ public class RentalBillDTO {
 	private List<Long> specialCloseDate;
 	private String refundTip;
 	private String openTime;
-	private Byte remarkFlag;
-	private String remark;
 	private Long appId;
+	private Byte fileFlag;
 
 	@Override
 	public String toString() {
@@ -606,22 +605,6 @@ public class RentalBillDTO {
 		this.fileUris = fileUris;
 	}
 
-	public Byte getRemarkFlag() {
-		return remarkFlag;
-	}
-
-	public void setRemarkFlag(Byte remarkFlag) {
-		this.remarkFlag = remarkFlag;
-	}
-
-	public String getRemark() {
-		return remark;
-	}
-
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
-
 	public String getAccountName() {
 		return accountName;
 	}
@@ -644,5 +627,13 @@ public class RentalBillDTO {
 
 	public void setVipLevel(String vipLevel) {
 		this.vipLevel = vipLevel;
+	}
+
+	public Byte getFileFlag() {
+		return fileFlag;
+	}
+
+	public void setFileFlag(Byte fileFlag) {
+		this.fileFlag = fileFlag;
 	}
 }
