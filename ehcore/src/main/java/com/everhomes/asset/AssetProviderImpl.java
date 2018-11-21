@@ -684,6 +684,9 @@ public class AssetProviderImpl implements AssetProvider {
 	                    "This updateTime is error, updateTime={" + cmd.getUpdateTime() + "}");
 			}
         }
+        if(!org.springframework.util.StringUtils.isEmpty(cmd.getContractId())) {
+        	query.addConditions(t.CONTRACT_ID.eq(cmd.getContractId()));
+        }
         
         if(!org.springframework.util.StringUtils.isEmpty(billGroupId)) {
             query.addConditions(t.BILL_GROUP_ID.eq(billGroupId));
