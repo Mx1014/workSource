@@ -56,14 +56,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 	private Long beginDate;
 	private Long endDate;
 
-	private BigDecimal orgMemberOriginalPrice;
-	private BigDecimal orgMemberInitiatePrice;
-	private BigDecimal orgMemberPrice;
-
-	private BigDecimal approvingUserOriginalPrice;
-	private BigDecimal approvingUserInitiatePrice;
-	private BigDecimal approvingUserPrice;
-
 	private Byte rentalType;
 	private Byte userPriceType;
 	@ItemType(PricePackageDTO.class)
@@ -181,37 +173,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 		this.sitePackageId = sitePackageId;
 	}
 
-	public BigDecimal getOrgMemberOriginalPrice() {
-		return orgMemberOriginalPrice;
-	}
-
-	public void setOrgMemberOriginalPrice(BigDecimal orgMemberOriginalPrice) {
-		this.orgMemberOriginalPrice = orgMemberOriginalPrice;
-	}
-
-	public BigDecimal getOrgMemberPrice() {
-		return orgMemberPrice;
-	}
-
-	public void setOrgMemberPrice(BigDecimal orgMemberPrice) {
-		this.orgMemberPrice = orgMemberPrice;
-	}
-
-	public BigDecimal getApprovingUserOriginalPrice() {
-		return approvingUserOriginalPrice;
-	}
-
-	public void setApprovingUserOriginalPrice(BigDecimal approvingUserOriginalPrice) {
-		this.approvingUserOriginalPrice = approvingUserOriginalPrice;
-	}
-
-	public BigDecimal getApprovingUserPrice() {
-		return approvingUserPrice;
-	}
-
-	public void setApprovingUserPrice(BigDecimal approvingUserPrice) {
-		this.approvingUserPrice = approvingUserPrice;
-	}
 
 	public BigDecimal getInitiatePrice() {
 		return initiatePrice;
@@ -219,22 +180,6 @@ public class UpdateRentalSiteCellRuleAdminCommand {
 
 	public void setInitiatePrice(BigDecimal initiatePrice) {
 		this.initiatePrice = initiatePrice;
-	}
-
-	public BigDecimal getOrgMemberInitiatePrice() {
-		return orgMemberInitiatePrice;
-	}
-
-	public void setOrgMemberInitiatePrice(BigDecimal orgMemberInitiatePrice) {
-		this.orgMemberInitiatePrice = orgMemberInitiatePrice;
-	}
-
-	public BigDecimal getApprovingUserInitiatePrice() {
-		return approvingUserInitiatePrice;
-	}
-
-	public void setApprovingUserInitiatePrice(BigDecimal approvingUserInitiatePrice) {
-		this.approvingUserInitiatePrice = approvingUserInitiatePrice;
 	}
 
 	public Byte getUserPriceType() {
