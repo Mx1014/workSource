@@ -3,6 +3,7 @@ package com.everhomes.contract;
 import com.everhomes.asset.bill.AssetBillService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.customer.EnterpriseCustomer;
@@ -459,13 +460,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
         }
     }
     
+    //中天对接，根据域空间查询数据，园区id可以不传，获取全部园区数据
 	@Override
 	public ListContractsResponse openapiListContracts(OpenapiListContractsCommand cmd) {
 		// 合同跟着园区走
-		if (cmd.getCommunityId() == null) {
+		/*if (cmd.getCommunityId() == null) {
 			throw RuntimeErrorException.errorWith(ContractErrorCode.SCOPE,
 					ContractErrorCode.ERROR_ORGIDORCOMMUNITYID_IS_EMPTY, "openapiListContracts CommunityId is null");
-		}
+		}*/
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
 		if (cmd.getKeywords() == null || cmd.getKeywords().isEmpty()) {
@@ -521,7 +523,8 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 			}
 		}
 		if (rentalCategoryList.size() > 0) {
-			qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("categoryId", rentalCategoryList));
+			//qb = QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("categoryId", rentalCategoryList));
+			fb = FilterBuilders.andFilter(fb, FilterBuilders.termsFilter("categoryId", rentalCategoryList));
 		}
 		
 		// 传过来的时间进行格式化时间戳转化
@@ -627,6 +630,14 @@ public class ContractSearcherImpl extends AbstractElasticSearch implements Contr
 				if (contractCategory != null) {
 					dto.setContractApplicationScene(contractCategory.getContractApplicationScene());
 				}
+				//中天对接显示
+				if (dto.getCommunityId() != null) {
+					Community community = communityProvider.findCommunityById(dto.getCommunityId());
+					if (community != null) {
+						dto.setCommunityName(community.getName());
+					}
+				}
+				
 				dtos.add(dto);
 			});
 		}
