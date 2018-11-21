@@ -29,7 +29,7 @@ ADD COLUMN `cross_commu_flag`  tinyint(4) NULL COMMENT '是否支持跨项目' A
 ALTER TABLE `eh_rentalv2_resources`
 MODIFY COLUMN `charge_uid`  varchar(256) NULL DEFAULT NULL COMMENT '负责人id' AFTER `notice`;
 ALTER TABLE `eh_rentalv2_default_rules`
-ADD COLUMN `file_flag`  tinyint(4) NULL COMMENT '附件是否必传 0否 1是' AFTER `remark`,
+ADD COLUMN `file_flag`  tinyint(4) NULL COMMENT '附件是否必传 0否 1是' AFTER `remark`;
 
 CREATE TABLE `eh_vip_priority` (
   `id`  bigint(20) NOT NULL ,
