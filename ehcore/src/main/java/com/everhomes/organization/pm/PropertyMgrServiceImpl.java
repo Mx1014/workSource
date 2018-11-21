@@ -8095,8 +8095,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 	@Override
 	public ListAuthorizePricesResponse listAuthorizePrices(AuthorizePriceCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), cmd.getPageAnchor(), pageSize);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<AddressProperties> list = propertyMgrProvider.listAuthorizePrices(cmd.getNamespaceId(), cmd.getBuildingId(), cmd.getCommunityId(), locator, pageSize);
 		ListAuthorizePricesResponse response = new ListAuthorizePricesResponse();
+		Long nextPageAnchor = null;
+		if(list.size() > pageSize) {
+			list.remove(list.size() - 1);
+            response.setNextPageAnchor(list.get(list.size() - 1).getId());
+        }
 
 		if (list.size() > 0) {
 			List<AuthorizePriceDTO> resultList = list.stream().map((c) -> {
@@ -8120,11 +8127,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService, ApplicationLi
 				return dto;
 			}).collect(Collectors.toList());
 			response.setAuthorizePricesList(resultList);
-			if (list.size() != pageSize) {
-				response.setNextPageAnchor(null);
-			} else {
-				response.setNextPageAnchor(list.get(list.size() - 1).getId());
-			}
 		}
 		return response;
 	}
