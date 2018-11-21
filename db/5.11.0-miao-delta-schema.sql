@@ -12,9 +12,9 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `operate_time` DATETIME,
   `multi_time_interval` TINYINT COMMENT '是否允许预约多个时段: 1-是, 0-否',
   `need_pay` TINYINT COMMENT '是否需要支付: 1-是, 0-否',
-  `close_date` DATE,
+  `begin_date` DATE COMMENT '开始日期',
+  `end_date` DATE COMMENT '结束日期',
   `cubicle_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制',
-  `cubicle_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制',
   `holiday_open_flag` TINYINT COMMENT '节假日是否开放预约: 1-是, 0-否',
   `holiday_type` TINYINT COMMENT '1-普通双休, 2-同步中国节假日',
   `refund_strategy` TINYINT COMMENT '1-custom, 2-full',
@@ -23,7 +23,6 @@ CREATE TABLE `eh_office_cubicle_default_rules` (
   `remark` VARCHAR(255) COMMENT '备注显示文案',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 
 CREATE TABLE `eh_office_cubicle_time_interval` (
   `id` BIGINT NOT NULL DEFAULT 0,
@@ -42,7 +41,7 @@ CREATE TABLE `eh_office_cubicle_time_interval` (
 
 CREATE TABLE `eh_office_cubicle_price_rules` (
   `id` BIGINT NOT NULL,
-  `rule_id` BIGINT NOT NULL DEFAULT 0 
+  `rule_id` BIGINT NOT NULL DEFAULT 0,
   `cubicle_type` TINYINT COMMENT '0按半天，1按天，3按半天带晚上',
   `price_type` TINYINT,
   `workday_price` DECIMAL(10,2) COMMENT '工作日价格',
