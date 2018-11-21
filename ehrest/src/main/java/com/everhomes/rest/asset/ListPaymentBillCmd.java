@@ -2,6 +2,7 @@
 package com.everhomes.rest.asset;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -324,5 +325,10 @@ public class ListPaymentBillCmd {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

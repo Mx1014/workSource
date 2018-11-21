@@ -4952,15 +4952,16 @@ public class AssetServiceImpl implements AssetService {
 
     //对接下载中心的导出交易明细
 	@Override
-    public void exportOrdersByParams(Object cmd) {
+    public void exportOrdersListByParams(Object cmd) {
         Map<String, Object> params = new HashMap<>();
         params.put("UserContext", UserContext.current().getUser());
         Long communityId;
+
         String moduleName = "";
         if (cmd instanceof ListPaymentBillCmd){
             ListPaymentBillCmd ListPaymentBillsCMD = (ListPaymentBillCmd)cmd;
             params.put("ListPaymentBillsCMD", ListPaymentBillsCMD);
-            communityId = ListPaymentBillsCMD.getOwnerId();
+            communityId = ListPaymentBillsCMD.getCommunityId();
             moduleName="交易明细";
         }else {
             LOGGER.error("exportAssetListByParams is error.");
@@ -4971,8 +4972,9 @@ public class AssetServiceImpl implements AssetService {
             LOGGER.error("Community is not exist.");
             throw errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, "Community is not exist.");
         }
+
         String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
-        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), AssetExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), OrderExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
 
     //对接下载中心
@@ -5227,19 +5229,25 @@ public class AssetServiceImpl implements AssetService {
 
 	//对接下载中心,下载交易明细。
     @Override
-    public OutputStream exportOutputStreamOrders(Object cmd, Long taskId) {
+    public OutputStream exportOutputStreamOrdersList(Object cmd, Long taskId) {
         //公用字段
         Long communityId;
-        List<PaymentOrderBillDTO> dtos ;
+        List<PaymentOrderBillDTO> dtos = new ArrayList<>();
         ListFieldCommand command ;
         String moduleName = "";
+
         taskService.updateTaskProcess(taskId, 10);
         if(cmd instanceof ListPaymentBillCmd){
             //交易明细下载
             ListPaymentBillCmd ListPaymentBillsCMD = (ListPaymentBillCmd) cmd;
             communityId = ListPaymentBillsCMD.getCommunityId();
             ListPaymentBillsCMD.setPageSize(100000l);
-            dtos = listPaymentBill(ListPaymentBillsCMD).getPaymentOrderBillDTOs();
+            ListPaymentBillResp result = listPaymentBill(ListPaymentBillsCMD);
+            List<PaymentOrderBillDTO> paymentOrderBillDTOs = result.getPaymentOrderBillDTOs();
+            for(PaymentOrderBillDTO dto : paymentOrderBillDTOs) {
+                dto = assetProvider.listPaymentBillDetail(dto.getBillId());
+                dtos.add(dto);
+            }
             command = ConvertHelper.convert(ListPaymentBillsCMD,ListFieldCommand.class);
             command.setModuleName("asset");
             command.setGroupPath(null);
@@ -5250,6 +5258,7 @@ public class AssetServiceImpl implements AssetService {
             throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
         }
         taskService.updateTaskProcess(taskId, 25);
+
         //初始化 字段信息
         String[] propertyNames = {"dateStr","billGroupName","billItemListMsg","targetName","targetType","paymentStatus","paymentType",
                 "amountReceived","amountReceivable","amoutExemption","amountSupplement","paymentOrderNum","payTime","payerTel","payerName","addresses"};
@@ -5257,15 +5266,15 @@ public class AssetServiceImpl implements AssetService {
                 "实收金额","应收金额","减免","增收","订单编号","缴费时间","缴费人电话","缴费人","楼栋门牌"};
         int[] titleSize = {40,20,20,20,20,20,20,20,20,20,20,30,20,20,20,40};
 
-        List<exportPaymentOrdersDetail> dataList = new ArrayList<>();
+        List<Map<String, String>> dataList = new ArrayList<>();
         taskService.updateTaskProcess(taskId, 65);
         //组装datalist来确定propertyNames的值
         for(int i = 0; i < dtos.size(); i++) {
             PaymentOrderBillDTO dto = dtos.get(i);
             if(dto != null) {
-                exportPaymentOrdersDetail detail = new exportPaymentOrdersDetail();
-                detail.setDateStr(dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
-                detail.setBillGroupName(dto.getBillGroupName());
+                Map<String, String> detail = new HashMap<String, String>();
+                detail.put("dateStr",dto.getDateStrBegin() + "~" + dto.getDateStrEnd());
+                detail.put("billGroupName",dto.getBillGroupName());
                 //组装所有的收费项信息
                 List<BillItemDTO> billItemDTOList = dto.getBillItemDTOList();
                 String billItemListMsg = "";
@@ -5275,38 +5284,39 @@ public class AssetServiceImpl implements AssetService {
                         billItemListMsg += billItemDTO.getBillItemName() + " : " + billItemDTO.getAmountReceivable() + "\r\n";
                     }
                 }
-                detail.setBillItemListMsg(billItemListMsg);
-                detail.setTargetName(dto.getTargetName());
-                detail.setTargetType(dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
+                detail.put("billItemListMsg",billItemListMsg);
+                detail.put("targetName",dto.getTargetName());
+                detail.put("targetType",dto.getTargetType().equals("eh_user") ? "个人客户" : "企业客户");
                 //detail.setPaymentStatus(dto.getPaymentStatus()==1 ? "已完成":"订单异常");
-                detail.setPaymentStatus("已完成");
+                detail.put("paymentStatus","已完成");
                 if(dto.getPaymentType() != null) {
                     switch (dto.getPaymentType()) {
                         case 0:
-                            detail.setPaymentType("微信");
+                            detail.put("paymentType","微信");
                             break;
                         case 1:
-                            detail.setPaymentType("支付宝");
+                            detail.put("paymentType","支付宝");
                             break;
                         case 2:
-                            detail.setPaymentType("对公转账");
+                            detail.put("paymentType","对公转账");
                             break;
                         default:
                             break;
                     }
                 }
-                detail.setAmountReceived(dto.getAmountReceived());
-                detail.setAmountReceivable(dto.getAmountReceivable());
-                detail.setAmoutExemption(dto.getAmountExemption());
-                detail.setAmountSupplement(dto.getAmountSupplement());
-                detail.setPaymentOrderNum(dto.getPaymentOrderNum());
-                detail.setPayTime(dto.getPayTime());
-                detail.setPayerTel(dto.getPayerTel());
-                detail.setPayerName(dto.getPayerName());
-                detail.setAddresses(dto.getAddresses());
+                detail.put("amountReceived",dto.getAmountReceived()+"");
+                detail.put("amountReceivable",dto.getAmountReceivable()+"");
+                detail.put("amoutExemption",dto.getAmountExemption()+"");
+                detail.put("amountSupplement",dto.getAmountSupplement()+"");
+                detail.put("paymentOrderNum",dto.getPaymentOrderNum());
+                detail.put("payTime",dto.getPayTime());
+                detail.put("payerTel",dto.getPayerTel());
+                detail.put("payerName",dto.getPayerName());
+                detail.put("addresses",dto.getAddresses());
                 dataList.add(detail);
             }
         }
+
 
         Community community = communityProvider.findCommunityById(communityId);
         taskService.updateTaskProcess(taskId, 90);

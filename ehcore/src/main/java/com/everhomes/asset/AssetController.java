@@ -1247,13 +1247,13 @@ public class AssetController extends ControllerBase {
 	 * <b>URL: /asset/exportOrders</b>
 	 */
 	@RequestMapping("exportOrders")
-	public HttpServletResponse exportOrders(ListPaymentBillCmd cmd) {
+	public RestResponse exportOrders(ListPaymentBillCmd cmd) {
 		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		assetService.exportOrdersByParams(cmd);
-		RestResponse restResponse = new RestResponse();
-		restResponse.setErrorDescription("OK");
-		restResponse.setErrorCode(ErrorCodes.SUCCESS);
-		return null;
+		assetService.exportOrdersListByParams(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
