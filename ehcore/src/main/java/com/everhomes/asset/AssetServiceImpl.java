@@ -4952,7 +4952,7 @@ public class AssetServiceImpl implements AssetService {
 
     //对接下载中心的导出交易明细
 	@Override
-    public void exportOrdersListByParams(Object cmd) {
+    public void exportListPaymentBillByParams(Object cmd) {
         Map<String, Object> params = new HashMap<>();
         params.put("UserContext", UserContext.current().getUser());
         Long communityId;
@@ -4974,7 +4974,7 @@ public class AssetServiceImpl implements AssetService {
         }
 
         String fileName = String.format(moduleName+"信息_%s", community.getName(), com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
-        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), OrderExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
+        taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), ListPaymentBillExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
 
     //对接下载中心
@@ -5229,7 +5229,7 @@ public class AssetServiceImpl implements AssetService {
 
 	//对接下载中心,下载交易明细。
     @Override
-    public OutputStream exportOutputStreamOrdersList(Object cmd, Long taskId) {
+    public OutputStream exportOutputStreamListPaymentBill(Object cmd, Long taskId) {
         //公用字段
         Long communityId;
         List<PaymentOrderBillDTO> dtos = new ArrayList<>();

@@ -1244,12 +1244,12 @@ public class AssetController extends ControllerBase {
 
 	/**
 	 * <p>导出筛选过的所有交易明细</p>
-	 * <b>URL: /asset/exportOrders</b>
+	 * <b>URL: /asset/listPaymentBillExport</b>
 	 */
-	@RequestMapping("exportOrders")
-	public RestResponse exportOrders(ListPaymentBillCmd cmd) {
+	@RequestMapping("listPaymentBillExport")
+	public RestResponse listPaymentBillExport(ListPaymentBillCmd cmd) {
 		cmd.setModuleId(ServiceModuleConstants.ASSET_MODULE);
-		assetService.exportOrdersListByParams(cmd);
+		assetService.exportListPaymentBillByParams(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

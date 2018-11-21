@@ -19,9 +19,9 @@ import java.util.Map;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 @Component
-public class OrderExportHandler implements FileDownloadTaskHandler {
+public class ListPaymentBillExportHandler implements FileDownloadTaskHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderExportHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ListPaymentBillExportHandler.class);
 
     @Autowired
     private FileDownloadTaskService fileDownloadTaskService;
@@ -51,7 +51,7 @@ public class OrderExportHandler implements FileDownloadTaskHandler {
             user.setNamespaceId(cmd.getNamespaceId());
             UserContext.setCurrentUser(user);
 
-            outputStream = assetService.exportOutputStreamOrdersList(cmd, taskId);
+            outputStream = assetService.exportOutputStreamListPaymentBill(cmd, taskId);
         }else {
             LOGGER.error("exportAssetListByParams is error.");
             throw errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_DOWNLOAD, "exportAssetListByParams is error.");
