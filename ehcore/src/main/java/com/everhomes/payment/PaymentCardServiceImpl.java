@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pay.order.OrderPaymentNotificationCommand;
 import com.everhomes.pay.order.SourceType;
 import com.everhomes.paySDK.PayUtil;
@@ -102,6 +104,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	private PaymentCardPayService payService;
 	@Autowired
 	private PaymentCardOrderEmbeddedV2Handler paymentCardOrderEmbeddedV2Handler;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
@@ -153,20 +157,26 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		String userName = user.getNickName();
+		if (cmd.getOrganizationId() != null) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), cmd.getOrganizationId());
+			if (member != null)
+				userName = member.getContactName();
+		}
 
-    	PaymentCardRechargeOrder paymentCardRechargeOrder = new PaymentCardRechargeOrder();
+		PaymentCardRechargeOrder paymentCardRechargeOrder = new PaymentCardRechargeOrder();
     	paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
     	paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
     	paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
     	paymentCardRechargeOrder.setOrderNo(createOrderNo());
     	paymentCardRechargeOrder.setUserId(user.getId());
-    	paymentCardRechargeOrder.setUserName(user.getNickName());
+    	paymentCardRechargeOrder.setUserName(userName);
     	paymentCardRechargeOrder.setMobile(userIdentifier.getIdentifierToken());
     	paymentCardRechargeOrder.setCardNo(paymentCard.getCardNo());
     	paymentCardRechargeOrder.setCardId(paymentCard.getId());
     	paymentCardRechargeOrder.setAmount(cmd.getAmount());
     	paymentCardRechargeOrder.setPayerUid(user.getId());
-    	paymentCardRechargeOrder.setPayerName(user.getNickName());
+    	paymentCardRechargeOrder.setPayerName(userName);
     	paymentCardRechargeOrder.setPayStatus(CardOrderStatus.UNPAID.getCode());
     	paymentCardRechargeOrder.setRechargeStatus(CardRechargeStatus.UNRECHARGED.getCode());
     	paymentCardRechargeOrder.setCreatorUid(user.getId());
@@ -198,20 +208,25 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		checkPaymentCardIsNull(paymentCard,cmd.getCardId());
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-
+		String userName = user.getNickName();
+		if (cmd.getOrganizationId() != null) {
+			OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(user.getId(), cmd.getOrganizationId());
+			if (member != null)
+				userName = member.getContactName();
+		}
 		PaymentCardRechargeOrder paymentCardRechargeOrder = new PaymentCardRechargeOrder();
 		paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
 		paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
 		paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
 		paymentCardRechargeOrder.setOrderNo(createOrderNo());
 		paymentCardRechargeOrder.setUserId(user.getId());
-		paymentCardRechargeOrder.setUserName(user.getNickName());
+		paymentCardRechargeOrder.setUserName(userName);
 		paymentCardRechargeOrder.setMobile(userIdentifier.getIdentifierToken());
 		paymentCardRechargeOrder.setCardNo(paymentCard.getCardNo());
 		paymentCardRechargeOrder.setCardId(paymentCard.getId());
 		paymentCardRechargeOrder.setAmount(cmd.getAmount());
 		paymentCardRechargeOrder.setPayerUid(user.getId());
-		paymentCardRechargeOrder.setPayerName(user.getNickName());
+		paymentCardRechargeOrder.setPayerName(userName);
 		paymentCardRechargeOrder.setPayStatus(CardOrderStatus.UNPAID.getCode());
 		paymentCardRechargeOrder.setRechargeStatus(CardRechargeStatus.UNRECHARGED.getCode());
 		paymentCardRechargeOrder.setCreatorUid(user.getId());

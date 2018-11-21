@@ -331,12 +331,7 @@ public interface AssetProvider {
 
     void insertAssetCategory(EhAssetAppCategories c);
 
-    ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
- 
-    //ListBillDetailVO listBillDetailForPayment(Long billId, ListPaymentBillCmd cmd);
-
     boolean checkBillByCategory(Long billId, Long categoryId);
-    //void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds);
     
 	void changeBillStatusAndPaymentTypeOnPaiedOff(List<Long> billIds, Integer paymentType);
 	
@@ -509,6 +504,8 @@ public interface AssetProvider {
 	void deleteAllDoorAccessLog(AssetDooraccessLog assetDooraccessLog);
 	SettledBillRes getAssetDoorAccessBillsUNPAID(int pageSize, long pageAnchor, byte status, AssetDooraccessParam doorAccessParam);
 	List<AssetDooraccessLog> getDooraccessLogInStatus(AssetDooraccessParam doorAccessParamInStatus);
+	
+	PaymentOrderBillDTO listPaymentBillDetail(Long billId);
 
 	
 }
