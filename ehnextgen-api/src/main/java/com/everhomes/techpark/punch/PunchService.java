@@ -19,7 +19,6 @@ import com.everhomes.rest.techpark.punch.admin.GetPunchGroupCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountCommand;
 import com.everhomes.rest.techpark.punch.admin.GetPunchGroupsCountResponse;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoCommand;
 import com.everhomes.rest.techpark.punch.admin.GetUserPunchRuleInfoResponse;
 import com.everhomes.rest.techpark.punch.admin.ListApprovalCategoriesResponse;
@@ -53,7 +52,6 @@ import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
-import com.everhomes.uniongroup.UniongroupVersion;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -294,7 +292,7 @@ public interface PunchService {
 			String userName, String ownerType, Long ownerId, Long taskId, Long userId);
 
 	OutputStream getPunchStatisticsOutputStream(Long startDay, Long endDay, Byte exceptionStatus,
-			String userName, String ownerType, Long ownerId, Long taskId, Long monthReportId);
+												String userName, String ownerType, Long ownerId, List<Long> departmentIds, Long taskId, Long monthReportId);
 
 	ArrayList processImportExcel2ArrayList(MultipartFile[] files);
 	
