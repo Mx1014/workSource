@@ -899,7 +899,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	@Override
 	public List<RentalOrder> listRentalBills(Long resourceTypeId, Long organizationId,Long communityId, Long rentalSiteId,
 											 ListingLocator locator, Byte billStatus, String vendorType , Integer pageSize,
-											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel){
+											 Long startTime, Long endTime, Byte invoiceFlag,Long userId,String payChannel,Byte source){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_RENTALV2_ORDERS);
 
@@ -929,6 +929,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		if (null != userId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID.equal(userId));
+		if (null != source)
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.SOURCE.eq(source));
 		if (StringUtils.isNotEmpty(payChannel))
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_CHANNEL.like(payChannel+"%"));
 		if(null!=locator && locator.getAnchor() != null)

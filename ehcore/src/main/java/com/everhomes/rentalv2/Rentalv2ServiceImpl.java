@@ -40,9 +40,7 @@ import com.everhomes.pay.order.PaymentType;
 import com.everhomes.portal.PortalService;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rentalv2.job.RentalCancelOrderJob;
-import com.everhomes.rentalv2.job.RentalMessageJob;
-import com.everhomes.rentalv2.job.RentalMessageQuartzJob;
+import com.everhomes.rentalv2.job.*;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.activity.ActivityRosterPayVersionFlag;
@@ -2093,14 +2091,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 			List<RentalRefundTip> rentalRefundTips = rentalv2Provider.listRefundTips(rule.getResourceType(), RuleSourceType.RESOURCE.getCode(), rentalSiteId, rule.getRefundStrategy());
 			if (rentalRefundTips != null && rentalRefundTips.size() > 0)
 				return rentalRefundTips.get(0).getTips();
-//			if (rule.getRefundStrategy() == RentalOrderStrategy.CUSTOM.getCode()) {
-//				return(rentalCommonService.processResourceCustomRefundTip(rule));
-//			}else if (rule.getRefundStrategy() == RentalOrderStrategy.NONE.getCode()){
-//				String locale = UserContext.current().getUser().getLocale();
-//				String content = localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-//						String.valueOf(RentalNotificationTemplateCode.RENTAL_ORDER_NOT_REFUND_TIP2), locale, "");
-//				return (content);
-//			}
 		}
 		return null;
 	}
@@ -2952,60 +2942,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 					Long orderReminderEndTimeLong = order.getReminderEndTime()!=null?order.getReminderEndTime().getTime():0L;
 					//时间快到发推送
 					if(currTime<orderReminderTimeLong && currTime + 30*60*1000L >= orderReminderTimeLong){
-						Map<String, String> map = new HashMap<>();
-						map.put("resourceName", order.getResourceName());
-						map.put("startTime", order.getUseDetail());
-						String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
-								RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
-
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("userId",order.getRentalUid());
-						messageMap.put("content",notifyTextForOther);
+						messageMap.put("orderId",order.getId());
+						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
 								queueName,
 								new java.util.Date(orderReminderTimeLong),
-								RentalMessageJob.class,
+								RentalNearStartMessageJob.class,
 								messageMap
 						);
-						LOGGER.debug("rentalSchedule push reminderMessage uid:"+order.getRentalUid()+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderTimeLong);
-
 					}
 
 					//结束时间快到发推送
 					if(currTime<orderReminderEndTimeLong && currTime + 30*60*1000L >= orderReminderEndTimeLong){
-						Map<String, String> map = new HashMap<>();
-						map.put("resourceName", order.getResourceName());
-						Long uid = order.getCreatorUid();
-						if (order.getUserEnterpriseId()!=null) {
-							OrganizationMember member = organizationProvider.findOrganizationMemberByUIdAndOrgId(uid, order.getUserEnterpriseId());
-							map.put("requestorName", member.getContactName());
-							map.put("requestorPhone", member.getContactToken());
-						}else {
-							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-							map.put("requestorPhone",userIdentifier.getIdentifierToken());
-							User user = this.userProvider.findUserById(order.getRentalUid());
-							map.put("requestorName", user.getNickName());
-						}
-
-						RentalResource resource = rentalCommonService.getRentalResource(order.getResourceType(), order.getRentalResourceId());
-						String chargeUid = resource.getChargeUid();
-						String notifyTextForOther;
-						notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE,
-									RentalNotificationTemplateCode.RENTAL_END_NOTIFY_HOUR, RentalNotificationTemplateCode.locale, map, "");
-
 						Map<String, Object> messageMap = new HashMap<>();
-						messageMap.put("userIds",chargeUid);
-						messageMap.put("content",notifyTextForOther);
+						messageMap.put("orderId",order.getId());
+						messageMap.put("resourceType",order.getResourceType());
 						scheduleProvider.scheduleSimpleJob(
 								queueName,
 								queueName,
 								new java.util.Date(orderReminderEndTimeLong),
-								RentalMessageJob.class,
+								RentalNearEndMessageJob.class,
 								messageMap
 						);
-						LOGGER.debug("rentalSchedule push endReminderMessage id:"+chargeUid+"  orderId:"+order.getId()+"  message:"+notifyTextForOther+"  time:"+orderReminderEndTimeLong);
-
 					}
 					//使用中
 					if (currTime >= order.getStartTime().getTime() ) {
@@ -3181,23 +3141,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 		if (dto.getStatus().equals(SiteBillStatus.REFUNDED.getCode())) {
 			dto.setRefundAmount(bill.getRefundAmount());
 		}
-		dto.setSiteItems(new ArrayList<>());
-		List<RentalItemsOrder> rentalSiteItems = rentalv2Provider
-				.findRentalItemsBillBySiteBillId(dto.getRentalBillId(), bill.getResourceType());
-		if (null != rentalSiteItems)
-			for (RentalItemsOrder rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				RentalItem rsItem = rentalv2Provider
-						.findRentalSiteItemById(rib.getRentalResourceItemId());
-				if (rsItem != null) {
-					siDTO.setItemName(rsItem.getName());
-				}
-				siDTO.setItemPrice(rib.getTotalMoney());
 
-
-				dto.getSiteItems().add(siDTO);
-			}
 		if (bill.getDoorAuthId() != null) {
 			{
 				SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd HH:mm");
@@ -4704,7 +4648,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service, ApplicationListener
 
 		List<RentalOrder> bills = rentalv2Provider.listRentalBills(cmd.getResourceTypeId(), cmd.getOrganizationId(), cmd.getCommunityId(),
 				cmd.getRentalSiteId(), locator, cmd.getBillStatus(), cmd.getVendorType(), pageSize+1, cmd.getStartTime(), cmd.getEndTime(),
-				null, null,cmd.getPayChannel());
+				null, null,cmd.getPayChannel(),cmd.getSource());
 
 		if (bills == null) {
 			return response;
