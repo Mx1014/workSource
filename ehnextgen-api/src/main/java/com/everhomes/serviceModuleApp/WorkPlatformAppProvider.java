@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface WorkPlatformAppProvider {
 
-    WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId);
+    WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Byte sceneType);
 
     void deleteWorkPlatformApp(WorkPlatformApp workPlatformApp);
 

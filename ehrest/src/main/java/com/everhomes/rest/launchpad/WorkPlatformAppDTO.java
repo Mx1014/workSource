@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *     <li>appEntryCategory: 应用入口分类</li>
  *     <li>visibleFlag: 可见性，0：不可见，1：可见</li>
  *     <li>sortNum: 排序</li>
+ *     <li>sceneType: 1：管理端，2：用户端</li>
  * </ul>
  */
 public class WorkPlatformAppDTO {
@@ -29,6 +30,16 @@ public class WorkPlatformAppDTO {
     private Byte visibleFlag;
 
     private Integer sortNum;
+
+    private Byte sceneType;
+
+    public Byte getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(Byte sceneType) {
+        this.sceneType = sceneType;
+    }
 
     public Long getId() {
         return id;

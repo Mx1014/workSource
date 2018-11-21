@@ -33,12 +33,13 @@ public class WorkPlatformAppProviderImpl implements WorkPlatformAppProvider{
     private SequenceProvider sequenceProvider;
 
     @Override
-    public WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId) {
+    public WorkPlatformApp getWorkPlatformApp(Long appOriginId, Long scopeId, Byte sceneType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWorkPlatformApps.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_WORK_PLATFORM_APPS);
         Condition condition = Tables.EH_WORK_PLATFORM_APPS.APP_ID.eq(appOriginId)
                 .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_ID.eq(scopeId))
-                .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()));
+                .and(Tables.EH_WORK_PLATFORM_APPS.SCOPE_TYPE.eq(ScopeType.ORGANIZATION.getCode()))
+                .and(Tables.EH_WORK_PLATFORM_APPS.SCENE_TYPE.eq(sceneType));
 
         return ConvertHelper.convert(step.where(condition).fetchAny(), WorkPlatformApp.class);
     }
