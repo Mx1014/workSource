@@ -16,33 +16,22 @@ public class DoorAccessComparator implements Comparator<DoorAccessDTO> {
             if(door2 == null | door2.getId() == null) {
                 return -1;
             } else {
-                char[] name1 = door1.getDisplayName().toCharArray();
-                char[] name2 = door2.getDisplayName().toCharArray();
-                for(int i = 0; i < name2.length; i++){
-                    if(name1[i] == name2[i]){
-                        continue;
-                    }
-                    if(name1[i] < name2[i]){
-                        return -1;
-                    }
-                    if(name1[i] > name2[i]){
-                        return 1;
-                    }
-                }
-                return 0;
-            }
-//                long seq1 = post1.getModifySeq();
-//                long seq2 = post2.getModifySeq();
-//                if(seq1 == seq2) {
-//                    return 0;
-//                } else {
-//                    if(seq1 > seq2) {
+                return door1.getDisplayName().compareTo(door2.getDisplayName());
+//                char[] name1 = door1.getDisplayName().toCharArray();
+//                char[] name2 = door2.getDisplayName().toCharArray();
+//                for(int i = 0; i < name2.length; i++){
+//                    if(name1[i] == '\0' || name1[i] < name2[i]){
 //                        return -1;
-//                    } else {
+//                    }
+//                    if(name1[i] == name2[i]){
+//                        continue;
+//                    }
+//                    if(name1[i] > name2[i]){
 //                        return 1;
 //                    }
 //                }
-//            }
+//                return 0;
+            }
         }
     }
 }

@@ -1848,4 +1848,18 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/aclink/visitorComingNotice</b>
+     * <p>开关访客来访提示</p>
+     * @return
+     */
+    @RequestMapping("visitorComingNotice")
+    @RestReturn(value = VisitorComingNoticeResponse.class)
+    public RestResponse visitorComingNotice(@Valid VisitorComingNoticeCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.visitorComingNotice(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

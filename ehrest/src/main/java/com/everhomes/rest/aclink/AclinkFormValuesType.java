@@ -9,11 +9,12 @@ package com.everhomes.rest.aclink;
  * <li>DEFAULT_MAX_DURATION((byte)5): 临时授权默认允许最大时长</li>
  * <li>DEFAULT_MAX_COUNT((byte)6): 临时授权默认允许最大按次授权</li>
  * <li>HOTLINE((byte)7): 服务热线</li>
+ * <li>VISITOR_NOTICE((byte)8): 访客来访提示</li>
  * </ul>
  *
  */
 public enum AclinkFormValuesType {
-	CUSTOM_FIELD((byte)2), AUTH_PRIORITY_DOOR((byte)3), AUTH_PRIORITY_GROUP((byte)4), DEFAULT_MAX_DURATION((byte)5), DEFAULT_MAX_COUNT((byte)6), HOTLINE((byte)7);
+	CUSTOM_FIELD((byte)2), AUTH_PRIORITY_DOOR((byte)3), AUTH_PRIORITY_GROUP((byte)4), DEFAULT_MAX_DURATION((byte)5), DEFAULT_MAX_COUNT((byte)6), HOTLINE((byte)7), VISITOR_NOTICE((byte)8);
 
     private byte code;
 
@@ -46,6 +47,9 @@ public enum AclinkFormValuesType {
 
             case 7:
                 return HOTLINE;
+
+            case 8:
+                return VISITOR_NOTICE;
         }
         
         return null;

@@ -2440,8 +2440,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         long now = DateHelper.currentGMTTime().getTime();
         for(DoorAuth auth : auths) {
-            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            if(null == cmd.getGroupType()|| cmd.getGroupType()==(byte)1){
+                DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+                dto.setHardwareId(doorAccess.getHardwareId());
+                dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
+            }
+            if(null != cmd.getGroupType() && cmd.getGroupType()==(byte)2){
+                AclinkGroup group = doorAccessProvider.findAclinkGroupById(auth.getDoorId());
+                dto.setDoorName(group.getName());
+
+            }
             //查询人脸识别照片
             FaceRecognitionPhoto photo = faceRecognitionPhotoProvider.findPhotoByAuthId(auth.getId());
             if(photo != null) {
@@ -2466,8 +2475,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setValues(values);
 //            dto.setTitles(titles);
             dto.setGoFloor(auth.getCurrStorey());
-            dto.setHardwareId(doorAccess.getHardwareId());
-            dto.setDoorName(doorAccess.getDisplayNameNotEmpty());
             dto.setPhone(auth.getPhone());
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
@@ -4090,7 +4097,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 resp.setQr(AclinkUtils.createZlQrCodeForFlapDoor(qrArr, System.currentTimeMillis(), qrImageTimeout*1000l));
             }
         }
-        
+        //服务热线
+        AclinkFormValues hotline = new AclinkFormValues();
+        hotline = doorAccessProvider.findAclinkFormValues(auth.getOwnerId(),auth.getOwnerType(), AclinkFormValuesType.HOTLINE.getCode());
+        if(null != hotline && hotline.getStatus()==(byte)1){
+            resp.setHotline(hotline.getValue());
+        }
         return resp;
     }
     
@@ -5815,7 +5827,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	public DoorAuthDTO createLocalVisitorAuth(CreateLocalVistorCommand cmd) {
 		User user = UserContext.current().getUser();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        //非门禁组按原方法查找
         DoorAuthDTO auth = new DoorAuthDTO();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         auth = createZuolinDeviceQr(ConvertHelper.convert(cmd, CreateDoorVisitorCommand.class));
@@ -5836,7 +5847,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 doorAccessProvider.createAclinkFormValues(value);
             }
         }
-
+//TODO: 还需要吗
 //        DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
 //        dto.setQrString(auth.getQrKey());
         if(cmd.getHeadImgUri() != null && !cmd.getHeadImgUri().isEmpty()){
@@ -7799,6 +7810,43 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             doorAccessProvider.updateAclinkFormValues(hotline);
         }
 	}
+
+	@Override
+    public VisitorComingNoticeResponse visitorComingNotice (VisitorComingNoticeCommand cmd){
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        VisitorComingNoticeResponse resp = new VisitorComingNoticeResponse();
+	    AclinkFormValues notice = new AclinkFormValues();
+	    notice = doorAccessProvider.findAclinkFormValues(cmd.getOwnerId(),cmd.getOwnerType(),AclinkFormValuesType.VISITOR_NOTICE.getCode());
+	    if(null == cmd.getStatus()){
+	        resp.setNotice(ConvertHelper.convert(notice, AclinkFormValuesDTO.class));
+        }
+        else{
+            if(null == notice || null == notice.getId()){
+                AclinkFormValues newNotice = new AclinkFormValues();
+                newNotice.setNamespaceId(namespaceId);
+                newNotice.setTitleId(0L);
+                newNotice.setValue(cmd.getStatus()==(byte)0 ? cmd.getStatus()==(byte)1 ? "close":"open":"");
+                newNotice.setType(AclinkFormValuesType.VISITOR_NOTICE.getCode());
+                newNotice.setStatus(cmd.getStatus());
+                newNotice.setOwnerId(cmd.getOwnerId());
+                newNotice.setOwnerType(cmd.getOwnerType());
+                newNotice.setCreatorUid(user.getId());
+                newNotice.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.createAclinkFormValues(newNotice);
+                resp.setNotice(ConvertHelper.convert(newNotice, AclinkFormValuesDTO.class));
+            }
+            else if(null != notice && notice.getId() != null){
+                notice.setValue(cmd.getStatus()==(byte)0 ? "close":cmd.getStatus()==(byte)1 ? "open":"");
+                notice.setStatus(cmd.getStatus());
+                notice.setOperatorUid(user.getId());
+                notice.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                doorAccessProvider.updateAclinkFormValues(notice);
+                resp.setNotice(ConvertHelper.convert(notice, AclinkFormValuesDTO.class));
+            }
+        }
+        return resp;
+    }
 }
 
 
