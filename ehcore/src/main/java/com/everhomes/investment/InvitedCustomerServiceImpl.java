@@ -1107,6 +1107,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         StatisticTime time = getBeforeForStatistic(new Date(), Calendar.DAY_OF_MONTH);
         java.sql.Date startQueryTime = new java.sql.Date(getDateByTimestamp(time.getStatisticStartTime()).getTime());
         CustomerStatisticTotal total = invitedCustomerProvider.getCustomerStatisticsTotal(cmd.getNamespaceId(), cmd.getOrgId(), startQueryTime);
+        return ConvertHelper.convert(total, StatisticDataDTO.class);
     }
 
     @Override
@@ -1219,6 +1220,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             data.setLossCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getLossCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+            data.setDeleteCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getDeleteCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
             result.add(data);
 
         }
@@ -1330,7 +1332,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
             result.setStatisticStartTime(statisticStartTime);
             return result;
         }
-        if(type == Calendar.LONG){
+        if(type == Calendar. YEAR){
             //Timestamp nowTime = new Timestamp(System.currentTimeMillis());
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
@@ -1517,10 +1519,11 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     @Override
     public void statisticCustomerTotal(Date date){
         LOGGER.info("the scheduleJob of customer total statistics is start!");
-        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. LONG);
+        StatisticTime statisticTime = getBeforeForStatistic(date, Calendar. YEAR);
         List<StatisticDataDTO> datas = startCustomerStatisticTotal(statisticTime);
 
-        invitedCustomerProvider.deleteCustomerStatisticTotal(null, null, getDateByTimestamp(statisticTime.getStatisticStartTime()));
+        Timestamp endTime = statisticTime.getStatisticEndTime();
+        invitedCustomerProvider.deleteCustomerStatisticTotal(null, null, getDateByTimestamp(endTime));
         if(datas != null && datas.size() > 0) {
             for (StatisticDataDTO data : datas) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -1635,7 +1638,16 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
     public CustomerStatisticsDTO queryCustomerStatisticTotal(GetCustomerStatisticsCommand cmd){
         StatisticTime time = getNowForStatistic(new Date(), Calendar.DAY_OF_MONTH);
         StatisticDataDTO datas = organizationCustomerStatisticTotal(time, cmd.getOrgId(), cmd.getNamespaceId());
-        StatisticDataDTO datas =
+        StatisticDataDTO datas2 = getCustomerStatisticsTotal(cmd);
+
+        datas.setNewCustomerNum(datas.getNewCustomerNum() + datas2.getNewCustomerNum());
+        datas.setLossCustomerNum(datas.getLossCustomerNum() + datas2.getLossCustomerNum());
+        datas.setHistoryCustomerNum(datas.getHistoryCustomerNum() + datas2.getHistoryCustomerNum());
+        datas.setDeleteCustomerNum(datas.getDeleteCustomerNum() + datas2.getDeleteCustomerNum());
+        datas.setTrackingNum(datas.getTrackingNum() + datas2.getTrackingNum());
+
+        return ConvertHelper.convert(datas, CustomerStatisticsDTO.class);
+
     }
 
     private GetCustomerStatisticNowResponse communityCustomerStatistic(StatisticTime time, Long orgId, Integer namespaceId, Integer pageSize, Long pageAnchor){
@@ -1695,37 +1707,35 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         data.setLossCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getLossCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
         data.setHistoryCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getHistoryCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
         data.setRegisteredCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getRegisteredCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+        data.setDeleteCustomerNum(Integer.valueOf(String.valueOf(tempResult.stream().map(StatisticDataDTO::getDeleteCustomerNum).collect(Collectors.toList()).stream().mapToInt(x->x).summaryStatistics().getSum())));
+
         return data;
     }
 
     private StatisticDataDTO statisticCustomerNum(Integer namespaceId, Long communityId, Timestamp statisticStartTime, Timestamp statisticEndTime){
         LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}", communityId, statisticStartTime, statisticEndTime);
 
-        List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime);
+        /*List<CustomerLevelChangeRecord> listRecord = invitedCustomerProvider.listCustomerLevelChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime);
         Integer addCustomerNum = invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime);
         LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, add customer num : {}", communityId, statisticStartTime, statisticEndTime, addCustomerNum);
+*/
 
-        List<CustomerLevelChangeRecord> listRegisteredCustomer =
-                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.REGISTERED_CUSTOMER.getCode())).collect(Collectors.toList());
-        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to registered num : {}", communityId, statisticStartTime, statisticEndTime, listRegisteredCustomer.size());
+        Integer lossNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.LOSS_CUSTOMER.getCode());
 
+        Integer historyNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.HISTORY_CUSTOMER.getCode());
 
-        List<CustomerLevelChangeRecord> listLossCustomer =
-                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.LOSS_CUSTOMER.getCode())).collect(Collectors.toList());
-        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to loss num : {}", communityId, statisticStartTime, statisticEndTime, listLossCustomer.size());
+        Integer registeredNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.REGISTERED_CUSTOMER.getCode());
 
-        List<CustomerLevelChangeRecord> listHistoryCustomer =
-                listRecord.stream().filter(record -> record.getNewStatus().equals(CustomerLevelType.HISTORY_CUSTOMER.getCode())).collect(Collectors.toList());
-        LOGGER.debug("the scheduleJob of customer statistics at community by org : {}, query start date : {}, end date : {}, change to history num : {}", communityId, statisticStartTime, statisticEndTime, listHistoryCustomer.size());
-
+        Integer deleteNum = invitedCustomerProvider.countCustomerLevelLossChangeRecord(namespaceId, communityId, statisticStartTime, statisticEndTime, CustomerLevelType.DELETE_CUSTOMER.getCode());
 
         StatisticDataDTO data = new StatisticDataDTO();
         data.setCommunityId(communityId);
         data.setNewCustomerNum(invitedCustomerProvider.countCustomerNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
         data.setTrackingNum(invitedCustomerProvider.countTrackingNumByCreateDate(communityId, statisticStartTime, statisticEndTime));
-        data.setLossCustomerNum(listLossCustomer.size());
-        data.setHistoryCustomerNum(listHistoryCustomer.size());
-        data.setRegisteredCustomerNum(listRegisteredCustomer.size());
+        data.setLossCustomerNum(lossNum);
+        data.setHistoryCustomerNum(historyNum);
+        data.setRegisteredCustomerNum(registeredNum);
+        data.setDeleteCustomerNum(deleteNum);
         return data;
     }
 
@@ -1804,11 +1814,21 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
 
             if(exportType == 1 || exportType == 2 || exportType == 4 || exportType == 5 ) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                Date startDate = new Date(cmd.getStartQueryTime());
-                Date endDate = new Date(cmd.getEndQueryTime());
                 Row firstRow = sheet.getRow(0);
                 Cell title = firstRow.getCell(0);
-                title.setCellValue(title.getStringCellValue() + "（" + format.format(startDate) + "~" + format.format(endDate) + "）");
+                if(cmd.getStartQueryTime() != null && cmd.getEndQueryTime() != null) {
+                    Date startDate = new Date(cmd.getStartQueryTime());
+                    Date endDate = new Date(cmd.getEndQueryTime());
+                    title.setCellValue(title.getStringCellValue() + "（" + format.format(startDate) + "~" + format.format(endDate) + "）");
+                }else if(cmd.getStartQueryTime() != null && cmd.getEndQueryTime() == null){
+                    Date startDate = new Date(cmd.getStartQueryTime());
+                    Date endDate = new Date();
+                    title.setCellValue(title.getStringCellValue() + "（" + format.format(startDate) + "~" + format.format(endDate) + "）");
+                }else if(cmd.getStartQueryTime() == null && cmd.getEndQueryTime() != null){
+                    Date endDate = new Date(cmd.getEndQueryTime());
+                    title.setCellValue(title.getStringCellValue() + "（" + " " + "~" + format.format(endDate) + "）");
+                }
+
             }else{
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 Date nowDate = new Date();

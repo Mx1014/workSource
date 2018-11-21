@@ -1262,6 +1262,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         customer.setStatus(CommonStatus.INACTIVE.getCode());
+        invitedCustomerService.changeCustomerLevelByCustomerId(customer.getId(), CustomerLevelType.DELETE_CUSTOMER.getCode());
         enterpriseCustomerProvider.updateEnterpriseCustomer(customer);
         enterpriseCustomerSearcher.feedDoc(customer);
 

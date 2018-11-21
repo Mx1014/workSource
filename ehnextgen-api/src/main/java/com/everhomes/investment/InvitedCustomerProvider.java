@@ -84,6 +84,8 @@ public interface InvitedCustomerProvider {
 
     List<CustomerLevelChangeRecord> listCustomerLevelChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 
+    Integer countCustomerLevelLossChangeRecord(Integer namespaceId, Long communityId, Timestamp queryStartDate, Timestamp queryEndDate, Long levelItemId);
+
     Integer countCustomerNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);
 
     Integer countTrackingNumByCreateDate(Long communityId, Timestamp queryStartDate, Timestamp queryEndDate);

@@ -175,6 +175,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
             builder.field("trackingUid",customer.getTrackingUid());
             builder.field("trackingName",customer.getTrackingName() == null ? "" : customer.getTrackingName());
             builder.field("lastTrackingTime" , customer.getLastTrackingTime());
+            builder.field("createTime" , customer.getCreateTime());
             builder.field("propertyType" , customer.getPropertyType());
             builder.field("propertyUnitPrice" , customer.getPropertyUnitPrice());
             builder.field("propertyArea" , customer.getPropertyArea());
@@ -479,6 +480,27 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
                 fb = FilterBuilders.andFilter(fb, rf);
             }else{
                 RangeFilterBuilder rf = new RangeFilterBuilder("lastTrackingTime");
+                Long endTime = cmd.getMaxTrackingPeriod();
+                rf.lte(endTime);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }
+        }
+
+        if(null != cmd.getMinTrackingPeriod() || null != cmd.getMaxTrackingPeriod()){
+            if(null != cmd.getMinTrackingPeriod() && null != cmd.getMaxTrackingPeriod()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
+                Long startTime = cmd.getMinTrackingPeriod();
+                Long endTime = cmd.getMaxTrackingPeriod();
+                rf.gte(new Timestamp(startTime));
+                rf.lte(new Timestamp(endTime));
+                fb = FilterBuilders.andFilter(fb, rf);
+            }else if(null != cmd.getMinTrackingPeriod() && null == cmd.getMaxTrackingPeriod()){
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
+                Long startTime = cmd.getMinTrackingPeriod();
+                rf.gte(startTime);
+                fb = FilterBuilders.andFilter(fb, rf);
+            }else{
+                RangeFilterBuilder rf = new RangeFilterBuilder("createTime");
                 Long endTime = cmd.getMaxTrackingPeriod();
                 rf.lte(endTime);
                 fb = FilterBuilders.andFilter(fb, rf);
