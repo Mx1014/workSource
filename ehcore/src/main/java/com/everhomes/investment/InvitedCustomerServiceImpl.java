@@ -1744,7 +1744,7 @@ public class InvitedCustomerServiceImpl implements InvitedCustomerService , Appl
         Map<String, Object> params = new HashMap<>();
         params.put("ExportCustomerStatisticsCommand", cmd);
         String exportFileNamePrefix = cmd.getPrefixFileName();
-        String fileName = String.format(exportFileNamePrefix+"报表", com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
+        String fileName = String.format(exportFileNamePrefix, com.everhomes.sms.DateUtil.dateToStr(new Date(), com.everhomes.sms.DateUtil.NO_SLASH))+ ".xlsx";
         taskService.createTask(fileName, TaskType.FILEDOWNLOAD.getCode(), CustomerStatisticExportHandler.class, params, TaskRepeatFlag.REPEAT.getCode(), new java.util.Date());
     }
 
