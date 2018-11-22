@@ -318,6 +318,9 @@ public class WelfareServiceImpl implements WelfareService {
                     throw RuntimeErrorException.errorWith(WelfareConstants.SCOPE,
                             WelfareConstants.ERROR_WELFARE_SENDED, "已发送不能发送");
                 }
+                welfaresDTO.setCreateTime(welfare.getCreateTime() == null ? DateHelper.currentGMTTime().getTime() : welfare.getCreateTime().getTime());
+                welfaresDTO.setCreatorUid(welfare.getCreatorUid());
+                welfaresDTO.setCreatorName(welfare.getCreatorName());
             }
             Boolean isDarft = false;
             if (welfaresDTO.getId() != null) {
