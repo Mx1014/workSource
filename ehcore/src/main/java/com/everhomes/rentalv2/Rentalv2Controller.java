@@ -109,7 +109,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("registerUser")
 	@RestReturn(value = ArchivesContactDTO.class)
 	@RequireAuthentication()
-	public RestResponse getSceneType(@Valid RegisterUserCommand cmd) {
+	public RestResponse registerUser(@Valid RegisterUserCommand cmd) {
 		RestResponse response = new RestResponse(rentalService.registerUser(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
