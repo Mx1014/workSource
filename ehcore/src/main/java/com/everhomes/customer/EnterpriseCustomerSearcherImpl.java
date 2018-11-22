@@ -309,7 +309,7 @@ public class EnterpriseCustomerSearcherImpl extends AbstractElasticSearch implem
 
     @Override
     public SearchEnterpriseCustomerResponse queryEnterpriseCustomersForOpenAPI(SearchEnterpriseCustomerCommand cmd){
-        if(cmd.getPageSize() > 100){
+        if(cmd.getPageSize() != null && cmd.getPageSize() > 100){
             cmd.setPageSize(100);
         }
         cmd.setCustomerSource(InvitedCustomerType.ENTEPRIRSE_CUSTOMER.getCode());
